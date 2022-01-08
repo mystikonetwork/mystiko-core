@@ -10,7 +10,7 @@ interface IVerifier {
   function verifyProof(
     uint[2] memory a,
     uint[2][2] memory b,
-    uint[2] memory c, uint[5] memory input) external returns (bool);
+    uint[2] memory c, uint[3] memory input) external returns (bool);
 }
 
 abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
@@ -29,12 +29,8 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     _;
   }
 
-  event Deposit(
-    uint64 toChainId, uint256 amount,
-    bytes32 indexed commitmentHash, bytes encryptedNotes, uint256 timestamp);
-  event Withdraw(
-    address recipient, bytes32 indexed rootHash,
-    bytes32 indexed serialNumber);
+  event Deposit(uint256 amount, bytes32 indexed commitmentHash, bytes encryptedNotes, uint256 timestamp);
+  event Withdraw(address recipient, bytes32 indexed rootHash, bytes32 indexed serialNumber);
 
   constructor(
     address _verifier,
@@ -48,50 +44,48 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     operator = _operator;
   }
 
-  function deposit(
-    uint64 toChainId, uint256 amount,
-    bytes32 commitmentHash, bytes memory encryptedNotes) public payable {
+  function deposit(uint256 amount, bytes32 commitmentHash, bytes memory encryptedNotes)
+    public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
     require(amount > 0, "amount should be greater than 0");
     uint256 allownce  = token.allowance(msg.sender, address(this));
     require(allownce >= amount, "insufficient allowance for given token");
     token.safeTransferFrom(msg.sender, address(this), amount);
-    _processCrossChain(
-      toChainId, amount, commitmentHash, encryptedNotes);
-    emit Deposit(toChainId, amount,
-      commitmentHash, encryptedNotes, block.timestamp);
+    _processCrossChain(amount, commitmentHash);
+    emit Deposit(amount, commitmentHash, encryptedNotes, block.timestamp);
   }
 
   function withdraw(
-    uint[2] memory a,
-    uint[2][2] memory b,
-    uint[2] memory c,
+    uint256[2] memory a,
+    uint256[2][2] memory b,
+    uint256[2] memory c,
     bytes32 rootHash,
     bytes32 serialNumber,
-    bytes32 keySigHash,
-    bytes32 skWithSigHash,
     uint256 amount,
     address recipient) public payable nonReentrant {
     require(!withdrewSerialNumbers[serialNumber], "The note has been already spent");
     require(isKnownRoot(rootHash), "Cannot find your merkle root");
-    require(verifier.verifyProof(a, b, c, [
-      uint256(rootHash),
-      uint256(serialNumber),
-      uint256(keySigHash),
-      uint256(skWithSigHash),
-      amount]), "Invalid withdraw proof");
+    require(verifier.verifyProof(a, b, c,
+      [uint256(rootHash), uint256(serialNumber), amount]), "Invalid withdraw proof");
     withdrewSerialNumbers[serialNumber] = true;
     token.safeTransfer(recipient, amount);
     emit Withdraw(recipient, rootHash, serialNumber);
   }
 
   function _processCrossChain(
-    uint64 toChainId, uint256 amount,
-    bytes32 commitmentHash, bytes memory encryptedNotes) internal virtual;
+    uint256 amount, bytes32 commitmentHash) internal virtual;
 
   function isSpent(bytes32 serialNumber) public view returns(bool) {
     return withdrewSerialNumbers[serialNumber];
+  }
+
+  function getToken() public view returns(address) {
+    return address(token);
+  }
+
+  function getVerifierAddress() public view returns(address) {
+    return address(verifier);
   }
 
   function toggleDeposits(bool _state) external onlyOperator {

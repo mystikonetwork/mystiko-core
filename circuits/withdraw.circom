@@ -69,33 +69,10 @@ template SerialNumberHasher() {
     hash <== hasher.out[0];
 }
 
-template SigKeyHasher() {
-    signal input keySigHash;
-    signal input secretKey;
-    signal output hash;
-
-    component keySigHashBits = Num2Bits(256);
-    component secretKeyBits = Num2Bits(256);
-    component hasher = Pedersen(512);
-    component hashNum = Bits2Num(256);
-
-    keySigHashBits.in <== keySigHash;
-    secretKeyBits.in <== secretKey;
-
-    for (var i = 0; i < 256; i++) {
-        hasher.in[i] <== keySigHashBits.out[i];
-        hasher.in[i + 256] <== secretKeyBits.out[i];
-    }
-
-    hash <== hasher.out[0];
-}
-
 // Verifies that commitment that corresponds to given secret and nullifier is included in the merkle tree of deposits
 template Withdraw(levels) {
     signal input rootHash;
     signal input serialNumber;
-    signal input keySigHash;
-    signal input skWithSigHash;
     signal input amount;
     signal private input publicKey;
     signal private input secretKey;
@@ -108,7 +85,6 @@ template Withdraw(levels) {
 
     component commitmentHasher = CommitmentHasher();
     component snHasher = SerialNumberHasher();
-    component sigKeyHasher = SigKeyHasher();
     component ownershipChecker = BabyPbk();
     component treeChecker = MerkleTreeChecker(levels);
     commitmentHasher.publicKey <== publicKey;
@@ -118,8 +94,6 @@ template Withdraw(levels) {
     commitmentHasher.amount <== amount;
     snHasher.randomSecret <== randomSecret;
     snHasher.secretKey <== secretKey;
-    sigKeyHasher.keySigHash <== keySigHash;
-    sigKeyHasher.secretKey <== secretKey;
     ownershipChecker.in <== secretKey;
     treeChecker.root <== rootHash;
     treeChecker.leaf <== commitment;
@@ -130,7 +104,6 @@ template Withdraw(levels) {
 
     commitment === commitmentHasher.hash;
     serialNumber === snHasher.hash;
-    skWithSigHash === sigKeyHasher.hash;
     publicKey === ownershipChecker.Ax;
 }
 
