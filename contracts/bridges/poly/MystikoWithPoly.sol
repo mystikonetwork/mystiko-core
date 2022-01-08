@@ -18,8 +18,6 @@ contract MystikoWithPoly is Mystiko {
     bytes32 commitmentHash;
   }
 
-  event MerkleTreeInsert(bytes32 indexed leaf, uint32 leafIndex, uint256 amount);
-
   constructor(
     address _eccmp,
     uint64 _peerChainId,

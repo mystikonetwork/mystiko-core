@@ -30,6 +30,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
   }
 
   event Deposit(uint256 amount, bytes32 indexed commitmentHash, bytes encryptedNotes, uint256 timestamp);
+  event MerkleTreeInsert(bytes32 indexed leaf, uint32 leafIndex, uint256 amount);
   event Withdraw(address recipient, bytes32 indexed rootHash, bytes32 indexed serialNumber);
 
   constructor(
