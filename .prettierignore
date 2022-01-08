@@ -6,3 +6,4 @@ contracts/Verifier.sol
 yarn.lock
 truffle-config.js
 migrations
+scripts
