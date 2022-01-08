@@ -4,7 +4,7 @@ set -ex
 BASE=$(cd "$(dirname "$0")";pwd)
 ROOT="${BASE}/.."
 BUILD="${ROOT}/build/circuits"
-POWERS_OF_TAU=18
+POWERS_OF_TAU=16
 
 mkdir -p "${BUILD}"
 if [ ! -f "${BUILD}/ptau${POWERS_OF_TAU}" ]; then
