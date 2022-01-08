@@ -31,17 +31,19 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
 
   event Deposit(
     uint64 toChainId, uint256 amount,
-    bytes32 indexed commitmentHash, bytes encryptedNotes,
-    uint256 leafIndex, uint256 timestamp);
+    bytes32 indexed commitmentHash, bytes encryptedNotes, uint256 timestamp);
+  event Withdraw(
+    address recipient, bytes32 indexed rootHash,
+    bytes32 indexed serialNumber);
 
   constructor(
-    IVerifier _verifier,
+    address _verifier,
     address _token,
-    IHasher _hasher,
+    address _hasher,
     uint32 _merkleTreeHeight,
     address _operator
   ) MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
-    verifier = _verifier;
+    verifier = IVerifier(_verifier);
     token = IERC20(_token);
     operator = _operator;
   }
@@ -55,11 +57,33 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     uint256 allownce  = token.allowance(msg.sender, address(this));
     require(allownce >= amount, "insufficient allowance for given token");
     token.safeTransferFrom(msg.sender, address(this), amount);
-    uint256 insertedIndex = _insert(commitmentHash);
     _processCrossChain(
       toChainId, amount, commitmentHash, encryptedNotes);
     emit Deposit(toChainId, amount,
-      commitmentHash, encryptedNotes, insertedIndex, block.timestamp);
+      commitmentHash, encryptedNotes, block.timestamp);
+  }
+
+  function withdraw(
+    uint[2] memory a,
+    uint[2][2] memory b,
+    uint[2] memory c,
+    bytes32 rootHash,
+    bytes32 serialNumber,
+    bytes32 keySigHash,
+    bytes32 skWithSigHash,
+    uint256 amount,
+    address recipient) public payable nonReentrant {
+    require(!withdrewSerialNumbers[serialNumber], "The note has been already spent");
+    require(isKnownRoot(rootHash), "Cannot find your merkle root");
+    require(verifier.verifyProof(a, b, c, [
+      uint256(rootHash),
+      uint256(serialNumber),
+      uint256(keySigHash),
+      uint256(skWithSigHash),
+      amount]), "Invalid withdraw proof");
+    withdrewSerialNumbers[serialNumber] = true;
+    token.safeTransfer(recipient, amount);
+    emit Withdraw(recipient, rootHash, serialNumber);
   }
 
   function _processCrossChain(

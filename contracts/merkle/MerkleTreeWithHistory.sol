@@ -34,11 +34,11 @@ contract MerkleTreeWithHistory {
   uint32 public currentRootIndex = 0;
   uint32 public nextIndex = 0;
 
-  constructor(uint32 _levels, IHasher _hasher) {
+  constructor(uint32 _levels, address _hasher) {
     require(_levels > 0, "_levels should be greater than zero");
     require(_levels < 32, "_levels should be less than 32");
     levels = _levels;
-    hasher = _hasher;
+    hasher = IHasher(_hasher);
 
     for (uint32 i = 0; i < _levels; i++) {
       filledSubtrees[i] = zeros(i);
