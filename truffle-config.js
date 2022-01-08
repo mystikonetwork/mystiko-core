@@ -23,6 +23,10 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+require('dotenv').config()
+const HDWalletProvider = require('@truffle/hdwallet-provider')
+const utils = require('web3-utils')
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -41,11 +45,11 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
-    // development: {
-    //  host: "127.0.0.1",     // Localhost (default: none)
-    //  port: 8545,            // Standard Ethereum port (default: none)
-    //  network_id: "*",       // Any network (default: none)
-    // },
+    development: {
+      host: "127.0.0.1",     // Localhost (default: none)
+      port: 8545,            // Standard Ethereum port (default: none)
+      network_id: "*",       // Any network (default: none)
+     },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

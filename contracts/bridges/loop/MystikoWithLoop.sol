@@ -9,9 +9,8 @@ contract MystikoWithLoop is Mystiko {
     address _verifier,
     address _token,
     address _hasher,
-    uint32 _merkleTreeHeight,
-    address _operator
-  ) Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, _operator) {}
+    uint32 _merkleTreeHeight
+  ) Mystiko(_verifier, _token, _hasher, _merkleTreeHeight) {}
 
   function _processCrossChain(
     uint256 amount, bytes32 commitmentHash) internal override {

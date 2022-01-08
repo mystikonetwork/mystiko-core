@@ -37,13 +37,12 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     address _verifier,
     address _token,
     address _hasher,
-    uint32 _merkleTreeHeight,
-    address _operator
+    uint32 _merkleTreeHeight
   ) MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
     verifier = IVerifier(_verifier);
     token = IERC20(_token);
-    operator = _operator;
-  }
+    operator = msg.sender;
+  } 
 
   function deposit(uint256 amount, bytes32 commitmentHash, bytes memory encryptedNotes)
     public payable {

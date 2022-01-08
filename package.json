@@ -10,16 +10,20 @@
     "build:circuit": "./scripts/buildCircuit.sh",
     "build:contract": "npx truffle compile",
     "build": "yarn lint && yarn build:circuit && yarn build:contract",
+    "migrate": "yarn migrate:dev",
+    "migrate:dev": "npx truffle migrate --network development --reset",
     "eslint": "eslint --ext .js,.ts .",
     "prettier:check": "prettier --check \"./**/*.{ts,js}\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.{ts,js}\" --config .prettierrc",
     "lint": "yarn eslint && yarn prettier:check"
   },
   "devDependencies": {
+    "@truffle/hdwallet-provider": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
     "circom": "^0.5.46",
     "circomlib": "^0.5.5",
+    "dotenv": "^10.0.0",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^16.1.0",
@@ -40,6 +44,8 @@
     "@openzeppelin/contracts": "^4.4.1",
     "@truffle/contract": "^4.4.2",
     "circomlibjs": "^0.1.1",
-    "eciesjs": "^0.3.12"
+    "eciesjs": "^0.3.12",
+    "web3": "^1.6.1",
+    "web3-utils": "^1.6.1"
   }
 }
