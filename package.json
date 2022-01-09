@@ -43,11 +43,14 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.2",
+    "browser-or-node": "^2.0.0",
     "bs58": "^4.0.1",
     "circomlib": "^0.5.5",
     "crypto": "^1.0.1",
     "eciesjs": "^0.3.12",
+    "ethereumjs-wallet": "^1.0.2",
     "fixed-merkle-tree": "^0.6.0",
+    "lokijs": "^1.5.12",
     "web3": "^1.6.1"
   }
 }
