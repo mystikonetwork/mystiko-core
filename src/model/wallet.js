@@ -20,4 +20,12 @@ export class Wallet extends BaseModel {
   set hashedPassword(hashedPass) {
     this.data['hashedPassword'] = hashedPass;
   }
+
+  get accountNonce() {
+    return this.data['accountNonce'];
+  }
+
+  set accountNonce(nonce) {
+    this.data['accountNonce'] = nonce;
+  }
 }
