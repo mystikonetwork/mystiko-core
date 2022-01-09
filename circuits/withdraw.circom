@@ -37,10 +37,10 @@ template CommitmentHasher() {
     hasher1Bits.in <== hasher1.out[0];
 
     for (var i = 0; i < 128; i++) {
-        hasher2.in[i] <== hasher1Bits.out[i];
-        hasher2.in[i + 128] <== hasher1Bits.out[i + 128];
-        hasher2.in[i + 256] <== amountBits.out[i];
-        hasher2.in[i + 384] <== amountBits.out[i + 128];
+        hasher2.in[i] <== amountBits.out[i];
+        hasher2.in[i + 128] <== amountBits.out[i + 128];
+        hasher2.in[i + 256] <== hasher1Bits.out[i];
+        hasher2.in[i + 384] <== hasher1Bits.out[i + 128];
         hasher2.in[i + 512] <== randomTrapdoorSBits.out[i];
     }
 

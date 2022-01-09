@@ -16,12 +16,16 @@
     "prettier:check": "prettier --check \"./**/*.js\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.js\" --config .prettierrc",
     "lint": "yarn eslint && yarn prettier:check",
-    "test": "jest"
+    "test": "yarn test:js && yarn test:contract",
+    "test:js": "jest",
+    "test:contract": "npx truffle test"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",
     "@babel/eslint-parser": "^7.16.5",
     "@babel/preset-env": "^7.16.7",
+    "@openzeppelin/contracts": "^4.4.1",
+    "@truffle/contract": "^4.4.2",
     "@truffle/hdwallet-provider": "^2.0.0",
     "babel-jest": "^27.4.6",
     "circom": "^0.5.46",
@@ -38,12 +42,12 @@
     "truffle": "^5.4.27"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.4.1",
-    "@truffle/contract": "^4.4.2",
+    "bignumber.js": "^9.0.2",
+    "bs58": "^4.0.1",
     "circomlib": "^0.5.5",
     "crypto": "^1.0.1",
     "eciesjs": "^0.3.12",
-    "web3": "^1.6.1",
-    "web3-utils": "^1.6.1"
+    "fixed-merkle-tree": "^0.6.0",
+    "web3": "^1.6.1"
   }
 }
