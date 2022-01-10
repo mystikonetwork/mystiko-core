@@ -60,17 +60,23 @@ export class Account extends BaseModel {
   }
 
   get fullPublicKey() {
-    const verifyPublicKey = Buffer.from(this.verifyPublicKey, 'hex');
-    const encPublicKey = Buffer.from(this.encPublicKey, 'hex');
-    const fullPublicKey = Buffer.concat([verifyPublicKey, encPublicKey]);
-    return fullPublicKey.toString('hex');
+    if (this.verifyPublicKey && this.encPublicKey) {
+      const verifyPublicKey = Buffer.from(this.verifyPublicKey, 'hex');
+      const encPublicKey = Buffer.from(this.encPublicKey, 'hex');
+      const fullPublicKey = Buffer.concat([verifyPublicKey, encPublicKey]);
+      return fullPublicKey.toString('hex');
+    }
+    return undefined;
   }
 
   get shieldedAddress() {
-    const verifyPublicKey = Buffer.from(this.verifyPublicKey, 'hex');
-    const encPublicKey = Buffer.from(this.encPublicKey, 'hex');
-    const fullPublicKey = Buffer.concat([verifyPublicKey, encPublicKey]);
-    return bs58.encode(fullPublicKey);
+    if (this.verifyPublicKey && this.encPublicKey) {
+      const verifyPublicKey = Buffer.from(this.verifyPublicKey, 'hex');
+      const encPublicKey = Buffer.from(this.encPublicKey, 'hex');
+      const fullPublicKey = Buffer.concat([verifyPublicKey, encPublicKey]);
+      return bs58.encode(fullPublicKey);
+    }
+    return undefined;
   }
 
   static isValidShieldedAddress(shieldedAddress) {

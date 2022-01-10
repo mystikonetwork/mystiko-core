@@ -21,12 +21,12 @@ export class Withdraw extends BaseModel {
     this.data['token'] = t;
   }
 
-  get proof() {
-    return this.data['proof'];
+  get tokenAddress() {
+    return this.data['tokenAddress'];
   }
 
-  set proof(p) {
-    this.data['proof'] = p;
+  set tokenAddress(address) {
+    this.data['tokenAddress'] = address;
   }
 
   get merkleRootHash() {
@@ -83,6 +83,14 @@ export class Withdraw extends BaseModel {
 
   set shieldedAddress(address) {
     this.data['shieldedAddress'] = address;
+  }
+
+  get privateNoteId() {
+    return this.data['privateNoteId'];
+  }
+
+  set privateNoteId(id) {
+    this.data['privateNoteId'] = id;
   }
 
   get status() {

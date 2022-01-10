@@ -37,6 +37,14 @@ export class Deposit extends BaseModel {
     this.data['token'] = t;
   }
 
+  get tokenAddress() {
+    return this.data['tokenAddress'];
+  }
+
+  set tokenAddress(address) {
+    this.data['tokenAddress'] = address;
+  }
+
   get amount() {
     return this.data['amount'];
   }
