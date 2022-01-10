@@ -1,0 +1,68 @@
+{
+  "abi": {
+    "crossChainAbi": {
+      "path": "abc.json",
+      "md5sum": "abd851994cdb71897f46a9bcbe533bcb"
+    },
+    "sameChainAbi": {
+      "path": "def.json",
+      "md5sum": "8f6ae9f4127a917d7447244de32cc3f0"
+    }
+  },
+  "zkp": {
+    "withdraw": {
+      "wasmFile": {
+        "path": "abc.wasm",
+        "md5sum": "abd851994cdb71897f46a9bcbe533bcb"
+      },
+      "zkeyFile": {
+        "path": "def.zkey",
+        "md5sum": "8f6ae9f4127a917d7447244de32cc3f0"
+      }
+    }
+  },
+  "crossChains": {
+    "1-2": {
+      "srcChainId": 1,
+      "dstChainId": 2,
+      "bridges": {
+        "poly": {
+          "name": "poly",
+          "tokens": {
+            "USDT": {
+              "name": "USDT",
+              "srcTokenAddress": "0x412481ca1431988a9fa62c604bfa1af54cd11e66",
+              "dstTokenAddress": "0x3a8da27062e5c85ca271282a595cee91ff3250cd",
+              "srcProtocolAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+              "dstProtocolAddress": "0x9c3f0fc85ef9144412388e7e952eb505e2c4a10f",
+              "allowedAmounts": [
+                1,
+                10,
+                100
+              ],
+              "decimal": 18
+            }
+          }
+        }
+      }
+    }
+  },
+  "sameChains": {
+    "1": {
+      "chainId": 1,
+      "tokens": {
+        "USDT": {
+          "name": "USDT",
+          "tokenAddress": "0x412481ca1431988a9fa62c604bfa1af54cd11e66",
+          "protocolAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+          "allowedAmounts": [
+            1,
+            10,
+            100
+          ],
+          "decimal": 18
+        }
+      }
+    }
+  }
+}
