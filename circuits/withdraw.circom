@@ -54,8 +54,7 @@ template SerialNumberHasher() {
 
     component randomSecretBits = Num2Bits(128);
     component secretKeyBits = Num2Bits(256);
-    component hasher = Pedersen(384);
-    component hashNum = Bits2Num(256);
+    component hasher = Pedersen(384);   
 
     randomSecretBits.in <== randomSecret;
     secretKeyBits.in <== secretKey;

@@ -3,7 +3,9 @@
     "node": true,
     "browser": true,
     "es6": true,
-    "jest": true
+    "jest": true,
+    "mocha": true,
+    "truffle/globals": true
   },
   "extends": ["eslint:recommended", "plugin:prettier/recommended", "prettier"],
   "globals": {
@@ -23,5 +25,8 @@
     "comma-dangle": ["error", "always-multiline"],
     "require-await": "error",
     "prettier/prettier": ["error", { "printWidth": 110 }]
-  }
+  },
+  "plugins": [
+    "truffle"
+  ]
 }

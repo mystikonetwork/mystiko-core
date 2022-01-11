@@ -6066,6 +6066,11 @@ eslint-plugin-promise@^6.0.0:
   resolved "https://registry.npmmirror.com/eslint-plugin-promise/download/eslint-plugin-promise-6.0.0.tgz#017652c07c9816413a41e11c30adc42c3d55ff18"
   integrity sha512-7GPezalm5Bfi/E22PnQxDWH2iW9GTvAlUNTztemeHb6c1BniSyoeTrM87JkC0wYdi6aQrZX9p2qEiAno8aTcbw==
 
+eslint-plugin-truffle@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.npmmirror.com/eslint-plugin-truffle/download/eslint-plugin-truffle-0.3.1.tgz#78207a015c0ffa660794907748792b5f9301d3d9"
+  integrity sha1-eCB6AVwP+mYHlJB3SHkrX5MB09k=
+
 eslint-scope@^4.0.3:
   version "4.0.3"
   resolved "https://registry.npmmirror.com/eslint-scope/download/eslint-scope-4.0.3.tgz?cache=0&sync_timestamp=1637466831846&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Feslint-scope%2Fdownload%2Feslint-scope-4.0.3.tgz#ca03833310f6889a3264781aa82e63eb9cfe7848"
@@ -6582,7 +6587,7 @@ ethers@^4.0.32:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^5.0.13:
+ethers@^5.0.13, ethers@^5.5.3:
   version "5.5.3"
   resolved "https://registry.npmmirror.com/ethers/download/ethers-5.5.3.tgz#1e361516711c0c3244b6210e7e3ecabf0c75fca0"
   integrity sha512-fTT4WT8/hTe/BLwRUtl7I5zlpF3XC3P/Xwqxc5AIP2HGlH15qpmjs0Ou78az93b1rLITzXLFxoNX63B8ZbUd7g==

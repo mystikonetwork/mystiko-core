@@ -1,6 +1,5 @@
-/* global artifacts */
-const TestToken = artifacts.require('TestToken')
+const TestToken = artifacts.require('TestToken');
 
 module.exports = function (deployer) {
-  deployer.deploy(TestToken)
-}
+  deployer.deploy(TestToken);
+};

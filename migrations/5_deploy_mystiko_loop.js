@@ -6,7 +6,7 @@ const TestToken = artifacts.require('TestToken');
 
 module.exports = function (deployer) {
   return deployer.then(async () => {
-    const { MERKLE_TREE_HEIGHT} = process.env;
+    const { MERKLE_TREE_HEIGHT } = process.env;
     const verifier = await Verifier.deployed();
     const hasher = await Hasher.deployed();
     const token = await TestToken.deployed();
@@ -15,7 +15,7 @@ module.exports = function (deployer) {
       verifier.address,
       token.address,
       hasher.address,
-      MERKLE_TREE_HEIGHT
+      MERKLE_TREE_HEIGHT,
     );
     console.log('MystikoWithLoop address', mystiko.address);
   });

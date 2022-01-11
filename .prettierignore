@@ -4,7 +4,4 @@ circuits
 contracts/Verifier.sol
 *.log
 yarn.lock
-truffle-config.js
-migrations
-scripts
 coverage

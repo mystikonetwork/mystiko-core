@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./merkle/MerkleTreeWithHistory.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -14,16 +14,20 @@ interface IVerifier {
 }
 
 abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
-  using SafeERC20 for IERC20;
+  using SafeERC20 for IERC20Metadata;
+
+  enum ProtocolType { CROSS_CHAIN, SAME_CHAIN }
 
   IVerifier public verifier;
-  IERC20 public token;
+  IERC20Metadata public token;
   mapping(bytes32 => bool) public depositedCommitments;
   mapping(bytes32 => bool) public withdrewSerialNumbers;
 
   address public operator;
   bool public isDepositsDisabled;
   bool public isVerifierUpdateDisabled;
+  ProtocolType public protocolType;
+
   modifier onlyOperator {
     require(msg.sender == operator, "Only operator can call this function.");
     _;
@@ -37,12 +41,14 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     address _verifier,
     address _token,
     address _hasher,
-    uint32 _merkleTreeHeight
+    uint32 _merkleTreeHeight,
+    ProtocolType _protocolType
   ) MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
     verifier = IVerifier(_verifier);
-    token = IERC20(_token);
+    token = IERC20Metadata(_token);
     operator = msg.sender;
-  } 
+    protocolType = _protocolType;
+  }
 
   function deposit(uint256 amount, bytes32 commitmentHash, bytes memory encryptedNotes)
     public payable {
@@ -84,8 +90,28 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     return address(token);
   }
 
+  function getTokenName() public view returns(string memory) {
+    return token.name();
+  }
+
+  function getTokenSymbol() public view returns(string memory) {
+    return token.symbol();
+  }
+
+  function getTokenDecimals() public view returns(uint8) {
+    return token.decimals();
+  }
+
   function getVerifierAddress() public view returns(address) {
     return address(verifier);
+  }
+
+  function getProtocolType() public view returns(ProtocolType) {
+    return protocolType;
+  }
+
+  function getHasherAddress() public view returns(address) {
+    return address(hasher);
   }
 
   function toggleDeposits(bool _state) external onlyOperator {

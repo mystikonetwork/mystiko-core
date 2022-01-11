@@ -25,7 +25,7 @@ contract MystikoWithPoly is Mystiko {
     address _token,
     address _hasher,
     uint32 _merkleTreeHeight
-  ) Mystiko(_verifier, _token, _hasher, _merkleTreeHeight) {
+  ) Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.CROSS_CHAIN) {
     eccmp = IEthCrossChainManagerProxy(_eccmp);
     peerChainId = _peerChainId;
     peerChainContract = new bytes(0);
@@ -86,7 +86,7 @@ contract MystikoWithPoly is Mystiko {
     return peerChainId;
   }
 
-  function getPeerChainiContractAddress() public view returns(bytes memory) {
+  function getPeerChainContractAddress() public view returns(bytes memory) {
     return peerChainContract;
   }
 
