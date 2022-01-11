@@ -1,19 +1,13 @@
 import cryptojs from 'crypto-js';
 import hmacSHA512 from 'crypto-js/hmac-sha512';
 import aes from 'crypto-js/aes';
+import * as utils from '../utils.js';
 
 export class Handler {
   constructor(db, options) {
+    utils.checkDefinedAndNotNull(db, 'db cannot be null or undefined');
     this.db = db;
-    this.options = options;
-  }
-
-  get db() {
-    return this.db;
-  }
-
-  get options() {
-    return this.options;
+    this.options = options ? options : {};
   }
 
   saveDatabase() {
@@ -22,7 +16,7 @@ export class Handler {
       promiseResolve = resolve;
       promiseReject = reject;
     });
-    this.db.saveDatabase((err) => {
+    this.db.database.saveDatabase((err) => {
       if (err) {
         promiseReject(err);
       } else {
@@ -40,7 +34,7 @@ export class Handler {
     return aes.decrypt(cipherText, password).toString(cryptojs.enc.Utf8);
   }
 
-  static hmacSHA512(data, salt) {
+  static hmacSHA512(data, salt = '') {
     return hmacSHA512(data, salt).toString();
   }
 }

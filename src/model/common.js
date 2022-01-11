@@ -21,4 +21,8 @@ export class BaseModel {
     }
     return 0;
   }
+
+  toString() {
+    return JSON.stringify(this.data);
+  }
 }

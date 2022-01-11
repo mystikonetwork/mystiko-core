@@ -16,3 +16,22 @@ export function bnToFixedBytes(bn) {
   }
   return Buffer.from(paddingZeros + hexString, 'hex');
 }
+
+export function check(condition, message) {
+  if (!condition) {
+    throw message;
+  }
+}
+
+export function checkNotNull(arg, message) {
+  check(arg != null, message);
+}
+
+export function checkDefined(arg, message) {
+  check(arg != undefined, message);
+}
+
+export function checkDefinedAndNotNull(arg, message) {
+  checkNotNull(arg, message);
+  checkDefined(arg, message);
+}

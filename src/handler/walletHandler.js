@@ -5,18 +5,15 @@ import { Wallet } from '../model/wallet.js';
 export class WalletHandler extends Handler {
   constructor(db, options) {
     super(db, options);
-    if (!this.options['salt'] && this.options['salt'].length == 0) {
-      throw 'not include invalid salt';
-    }
   }
 
   async createWallet(masterSeed, walletPassword) {
     const encryptedMasterSeed = Handler.aesEncrypt(masterSeed, walletPassword);
-    const hashedPassword = this.hashPassword(walletPassword);
+    const hashedPassword = Handler.hmacSHA512(walletPassword);
     const data = {
       encryptedMasterSeed: encryptedMasterSeed,
       hashedPassword: hashedPassword,
-      accountNoncce: 0,
+      accountNonce: 0,
     };
     const wallet = new Wallet(this.db.wallets.insert(data));
     await this.saveDatabase();
@@ -24,42 +21,35 @@ export class WalletHandler extends Handler {
   }
 
   getCurrentWallet() {
-    return new Wallet(this.db.wallets.chain().find().simplesort(ID_KEY, { desc: true }).data()[0]);
+    const results = this.db.wallets.chain().find().simplesort(ID_KEY, { desc: true }).data();
+    if (results.length > 0) {
+      return new Wallet(results[0]);
+    }
+    return null;
   }
 
-  getWallet(id) {
-    return new Wallet(this.db.wallets.findOne({ ID_KEY: id }));
+  getWalletById(id) {
+    const rawWallet = this.db.wallets.findOne({ [ID_KEY]: id });
+    if (rawWallet) {
+      return new Wallet(rawWallet);
+    }
+    return null;
   }
 
   checkPassword(wallet, password) {
-    const hashedPassword = this.hashPassword(password);
+    const hashedPassword = Handler.hmacSHA512(password);
     return wallet.hashedPassword === hashedPassword;
   }
 
   async updatePassword(wallet, oldPassword, newPassword) {
     if (this.checkPassword(wallet, oldPassword)) {
       const decryptedMasterSeed = Handler.aesDecrypt(wallet.encryptedMasterSeed, oldPassword);
-      wallet.hashedPassword = this.hashPassword(newPassword);
+      wallet.hashedPassword = Handler.hmacSHA512(newPassword);
       wallet.encryptedMasterSeed = Handler.aesEncrypt(decryptedMasterSeed, newPassword);
       this.db.wallets.update(wallet.data);
-      this.db.accounts
-        .find({ walletId: wallet.id })
-        .forEach((account) => this.updateEncryptedAccountKeys(account, oldPassword, newPassword));
       await this.saveDatabase();
       return true;
     }
     return false;
-  }
-
-  hashPassword(password) {
-    return Handler.hmacSHA512(password, this.options['salt']);
-  }
-
-  updateEncryptedAccountKeys(account, oldPassword, newPassword) {
-    const verifySecretKey = Handler.aesDecrypt(account.encryptedVerifySecretKey, oldPassword);
-    const encSecretKey = Handler.aesDecrypt(account.encryptedEncSecretKey, oldPassword);
-    account.encryptedVerifySecretKey = Handler.aesEncrypt(verifySecretKey, newPassword);
-    account.encryptedEncSecretKey = Handler.aesEncrypt(encSecretKey, newPassword);
-    this.db.accounts.update(account.data);
   }
 }

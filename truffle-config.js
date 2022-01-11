@@ -78,7 +78,7 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    rootHooks: [ babelRegister ],
+    rootHooks: [babelRegister],
   },
 
   test_directory: 'contracts/tests',
