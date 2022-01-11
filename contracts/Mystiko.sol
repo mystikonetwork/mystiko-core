@@ -58,6 +58,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     uint256 allownce  = token.allowance(msg.sender, address(this));
     require(allownce >= amount, "insufficient allowance for given token");
     token.safeTransferFrom(msg.sender, address(this), amount);
+    depositedCommitments[commitmentHash] = true;
     _processCrossChain(amount, commitmentHash);
     emit Deposit(amount, commitmentHash, encryptedNotes, block.timestamp);
   }
