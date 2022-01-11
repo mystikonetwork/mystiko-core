@@ -24,6 +24,7 @@
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 require('dotenv').config();
+const babelRegister = require('@babel/register');
 
 module.exports = {
   /**
@@ -77,7 +78,7 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+    rootHooks: [ babelRegister ],
   },
 
   test_directory: 'contracts/tests',
