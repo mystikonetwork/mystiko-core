@@ -26,8 +26,18 @@ test('Test toDecimals', () => {
 
 test('Test toFixedLenHex', () => {
   expect(utils.toFixedLenHex('dead', 4)).toBe('0x0000dead');
+  expect(utils.toFixedLenHex('0Xdead', 4)).toBe('0x0000dead');
+  expect(utils.toFixedLenHex('0xdead', 4)).toBe('0x0000dead');
+  expect(utils.toFixedLenHex(new BN('dead', 16), 4)).toBe('0x0000dead');
+  expect(utils.toFixedLenHex(Buffer.from('dead', 'hex'), 4)).toBe('0x0000dead');
+  expect(() => utils.toFixedLenHex({})).toThrow();
 });
 
 test('Test toHex', () => {
   expect(utils.toHex('dead')).toBe('0xdead');
+  expect(utils.toHex('0xdead')).toBe('0xdead');
+  expect(utils.toHex('0Xdead')).toBe('0xdead');
+  expect(utils.toHex(new BN('dead', 16))).toBe('0xdead');
+  expect(utils.toHex(Buffer.from('dead', 'hex'))).toBe('0xdead');
+  expect(() => utils.toHex({})).toThrow();
 });

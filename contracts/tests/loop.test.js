@@ -1,6 +1,8 @@
+import { BN } from 'bn.js';
 import { toDecimals } from '../../src/utils.js';
 import { computeCommitment } from '../../src/protocol.js';
 import * as utils from '../../src/utils.js';
+import MerkleTree from 'fixed-merkle-tree';
 
 const MystikoWithLoop = artifacts.require('MystikoWithLoop');
 const TestToken = artifacts.require('TestToken');
@@ -58,11 +60,35 @@ contract('MystikoWithLoop', (accounts) => {
       const allowance = await tokenContract.allowance(accounts[1], loopContract.address);
       expect(allowance.eq(amount)).to.equal(true);
       const gasEstimated = await loopContract.deposit.estimateGas(
-        amount, utils.toFixedLenHex(commitment), utils.toHex(encryptedNote), { from: accounts[1] });
-      await loopContract.deposit(amount, utils.toFixedLenHex(commitment), utils.toHex(encryptedNote), {
-        from: accounts[1],
-        gas: gasEstimated
-      });
+        amount,
+        utils.toFixedLenHex(commitment),
+        utils.toHex(encryptedNote),
+        { from: accounts[1] },
+      );
+      const tx = await loopContract.deposit(
+        amount,
+        utils.toFixedLenHex(commitment),
+        utils.toHex(encryptedNote),
+        {
+          from: accounts[1],
+          gas: gasEstimated,
+        },
+      );
+      const depositEvent = tx.logs.find((e) => e['event'] === 'Deposit');
+      expect(depositEvent).to.not.equal(undefined);
+      expect(depositEvent.args.amount.eq(amount)).to.equal(true);
+      expect(depositEvent.args.commitmentHash).to.equal(utils.toFixedLenHex(commitment));
+      expect(depositEvent.args.encryptedNote).to.equal(utils.toHex(encryptedNote));
+      const merkleTreeInsertEvent = tx.logs.find((e) => e['event'] === 'MerkleTreeInsert');
+      expect(merkleTreeInsertEvent).to.not.equal(undefined);
+      expect(merkleTreeInsertEvent.args.amount.eq(amount)).to.equal(true);
+      expect(merkleTreeInsertEvent.args.leaf).to.equal(utils.toFixedLenHex(commitment));
+      expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
+      const levels = await loopContract.getLevels.call();
+      const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
+      const root = new BN(tree.root());
+      const isKnownRoot = await loopContract.isKnownRoot.call(utils.toFixedLenHex(root));
+      expect(isKnownRoot).to.equal(true);
     });
   });
 });

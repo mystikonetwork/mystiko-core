@@ -33,7 +33,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     _;
   }
 
-  event Deposit(uint256 amount, bytes32 indexed commitmentHash, bytes encryptedNotes);
+  event Deposit(uint256 amount, bytes32 indexed commitmentHash, bytes encryptedNote);
   event MerkleTreeInsert(bytes32 indexed leaf, uint32 leafIndex, uint256 amount);
   event Withdraw(address recipient, bytes32 indexed rootHash, bytes32 indexed serialNumber);
 
@@ -50,14 +50,14 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     protocolType = _protocolType;
   }
 
-  function deposit(uint256 amount, bytes32 commitmentHash, bytes memory encryptedNotes)
+  function deposit(uint256 amount, bytes32 commitmentHash, bytes memory encryptedNote)
     public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
     token.safeTransferFrom(msg.sender, address(this), amount);
     depositedCommitments[commitmentHash] = true;
     _processCrossChain(amount, commitmentHash);
-    emit Deposit(amount, commitmentHash, encryptedNotes);
+    emit Deposit(amount, commitmentHash, encryptedNote);
   }
 
   function withdraw(

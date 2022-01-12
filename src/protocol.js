@@ -6,7 +6,8 @@ import * as note from './model/note.js';
 export function computePedersenHash(data) {
   const packed = pedersenHash.hash(data);
   const unpacked = babyJub.unpackPoint(packed);
-  return Buffer.from(unpacked[0].toString(16), 'hex');
+  const unpackedFirstHex = unpacked[0].toString(16).padStart(64, '0');
+  return Buffer.from(unpackedFirstHex, 'hex');
 }
 
 export function computeCommitment(verifyPublicKey, encPublicKey, amount, decimals) {

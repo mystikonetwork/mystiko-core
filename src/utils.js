@@ -42,9 +42,32 @@ export function toDecimals(amount, decimals) {
 }
 
 export function toFixedLenHex(hex, length = 32) {
-  return '0x' + hex.padStart(length * 2, '0');
+  if (typeof hex === 'string') {
+    if (hex.slice(0, 2) === '0x' || hex.slice(0, 2) === '0X') {
+      return toHex(hex.slice(2).padStart(length * 2, '0'));
+    }
+    return toHex(hex.padStart(length * 2, '0'));
+  } else if (hex instanceof BN) {
+    return toFixedLenHex(hex.toString(16), length);
+  } else if (hex instanceof Buffer) {
+    return toFixedLenHex(hex.toString('hex'), length);
+  }
+  throw new Error('given type ' + (typeof hex) + ' is not supported');
+
 }
 
 export function toHex(hex) {
-  return '0x' + hex;
+  if (typeof hex === 'string') {
+    if (hex.slice(0, 2) === '0x') {
+      return hex;
+    } else if (hex.slice(0, 2) === '0X') {
+      return '0x' + hex.slice(2);
+    }
+    return '0x' + hex;
+  } else if (hex instanceof BN) {
+    return toHex(hex.toString(16));
+  } else if (hex instanceof Buffer) {
+    return toHex(hex.toString('hex'));
+  }
+  throw new Error('given type ' + (typeof hex) + ' is not supported');
 }

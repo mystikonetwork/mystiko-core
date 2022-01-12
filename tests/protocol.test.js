@@ -1,4 +1,5 @@
 import BN from 'bn.js';
+import { randomBytes } from 'crypto';
 import * as protocol from '../src/protocol.js';
 import { OnchainNote } from '../src/model/note.js';
 
@@ -15,4 +16,11 @@ test('Test computeCommitment', () => {
   expect(onchainNote.randomSecretP).not.toBe(undefined);
   expect(onchainNote.randomSecretR).not.toBe(undefined);
   expect(onchainNote.randomSecretS).not.toBe(undefined);
+});
+
+test('Test computePedersenHash', () => {
+  for (let i = 0; i < 10; i++) {
+    const hash = protocol.computePedersenHash(randomBytes(64));
+    expect(hash.length).toBe(32);
+  }
 });
