@@ -213,9 +213,7 @@ test('test checksum', () => {
 test('test commitment', () => {
   expect(() => DefaultProtocol.commitment('deadbeef', toBuff('baadbabe'), BigInt(1))).toThrow();
   expect(() => DefaultProtocol.commitment(toBuff('baadbabe'), 'deadbeef', BigInt(1))).toThrow();
-  expect(() =>
-    DefaultProtocol.commitment(toBuff('baadbabe'), toBuff('baadbabe'), 1),
-  ).toThrow();
+  expect(() => DefaultProtocol.commitment(toBuff('baadbabe'), toBuff('baadbabe'), 1)).toThrow();
   const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
   const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
@@ -249,10 +247,7 @@ test('test zkProve/zkVerify', async () => {
   const amount = toDecimals(100, 18);
   const commitment1 = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
   const commitment2 = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
-  const treeLeaves = [
-    commitment1.commitmentHash,
-    commitment2.commitmentHash
-   ];
+  const treeLeaves = [commitment1.commitmentHash, commitment2.commitmentHash];
   const treeIndex = 1;
   const wasmFile = 'build/circuits/withdraw.wasm';
   const zkeyFile = 'build/circuits/withdraw.zkey';

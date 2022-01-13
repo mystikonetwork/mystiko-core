@@ -30,7 +30,9 @@ test('Test Deposit getters/setters', () => {
   deposit.amount = BigInt('0xdeadbeef');
   expect(deposit.amount).toBe(BigInt('0xdeadbeef'));
   deposit.commitmentHash = toBuff('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
-  expect(toHexNoPrefix(deposit.commitmentHash)).toBe('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
+  expect(toHexNoPrefix(deposit.commitmentHash)).toBe(
+    '2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242',
+  );
   deposit.encryptedNote = toBuff('deaddead');
   expect(toHexNoPrefix(deposit.encryptedNote)).toBe('deaddead');
   deposit.transactionHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
 import "../../Mystiko.sol";
 
@@ -10,7 +10,7 @@ contract MystikoWithLoop is Mystiko {
     address _token,
     address _hasher,
     uint32 _merkleTreeHeight
-  ) Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.SAME_CHAIN) {}
+  ) public Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.SAME_CHAIN) {}
 
   function _processCrossChain(
     uint256 amount, bytes32 commitmentHash) internal override {

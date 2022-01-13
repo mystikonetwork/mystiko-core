@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
 import "./merkle/MerkleTreeWithHistory.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./libs/erc20/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 interface IVerifier {
   function verifyProof(
-    uint[2] memory a,
-    uint[2][2] memory b,
-    uint[2] memory c, uint[3] memory input) external returns (bool);
+    uint256[2] memory a,
+    uint256[2][2] memory b,
+    uint256[2] memory c, uint256[3] memory input) external returns (bool);
 }
 
 abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
@@ -21,7 +21,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
   IVerifier public verifier;
   IERC20Metadata public token;
   mapping(bytes32 => bool) public depositedCommitments;
-  mapping(bytes32 => bool) public withdrewSerialNumbers;
+  mapping(uint256 => bool) public withdrewSerialNumbers;
 
   address public operator;
   bool public isDepositsDisabled;
@@ -35,7 +35,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
 
   event Deposit(uint256 amount, bytes32 indexed commitmentHash, bytes encryptedNote);
   event MerkleTreeInsert(bytes32 indexed leaf, uint32 leafIndex, uint256 amount);
-  event Withdraw(address recipient, bytes32 indexed rootHash, bytes32 indexed serialNumber);
+  event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
 
   constructor(
     address _verifier,
@@ -43,7 +43,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     address _hasher,
     uint32 _merkleTreeHeight,
     ProtocolType _protocolType
-  ) MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
+  ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
     verifier = IVerifier(_verifier);
     token = IERC20Metadata(_token);
     operator = msg.sender;
@@ -64,14 +64,14 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     uint256[2] memory a,
     uint256[2][2] memory b,
     uint256[2] memory c,
-    bytes32 rootHash,
-    bytes32 serialNumber,
+    uint256 rootHash,
+    uint256 serialNumber,
     uint256 amount,
     address recipient) public payable nonReentrant {
     require(!withdrewSerialNumbers[serialNumber], "The note has been already spent");
-    require(isKnownRoot(rootHash), "Cannot find your merkle root");
+    require(isKnownRoot(bytes32(rootHash)), "Cannot find your merkle root");
     require(verifier.verifyProof(a, b, c,
-      [uint256(rootHash), uint256(serialNumber), amount]), "Invalid withdraw proof");
+      [rootHash, serialNumber, amount]), "Invalid withdraw proof");
     withdrewSerialNumbers[serialNumber] = true;
     token.safeTransfer(recipient, amount);
     emit Withdraw(recipient, rootHash, serialNumber);
@@ -80,7 +80,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
   function _processCrossChain(
     uint256 amount, bytes32 commitmentHash) internal virtual;
 
-  function isSpent(bytes32 serialNumber) public view returns(bool) {
+  function isSpent(uint256 serialNumber) public view returns(bool) {
     return withdrewSerialNumbers[serialNumber];
   }
 

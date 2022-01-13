@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
 /**
  * @dev Interface of the EthCrossChainManager contract for business contract like LockProxy to request cross chain transaction

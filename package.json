@@ -26,7 +26,7 @@
     "@babel/eslint-parser": "^7.16.5",
     "@babel/preset-env": "^7.16.7",
     "@babel/register": "^7.16.8",
-    "@openzeppelin/contracts": "^4.4.1",
+    "@openzeppelin/contracts": "^3.4.2",
     "@truffle/contract": "^4.4.2",
     "@truffle/hdwallet-provider": "^2.0.0",
     "babel-jest": "^27.4.6",

@@ -85,7 +85,7 @@ export default class DefaultProtocol {
     check(pkVerify.length == VERIFY_PK_SIZE, 'pkVerify length does not equal to ' + VERIFY_PK_SIZE);
     check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
     check(pkEnc.length == ENCRYPT_PK_SIZE, 'pkEnc length does not equal to ' + ENCRYPT_PK_SIZE);
-    return Buffer.concat([ pkVerify, pkEnc ]);
+    return Buffer.concat([pkVerify, pkEnc]);
   }
 
   static fullSecretKey(skVerify, skEnc) {
@@ -93,7 +93,7 @@ export default class DefaultProtocol {
     check(skVerify.length == VERIFY_SK_SIZE, 'skVerify length does not equal to ' + VERIFY_SK_SIZE);
     check(skEnc instanceof Buffer, 'unsupported skEnc type ' + typeof skEnc);
     check(skEnc.length == ENCRYPT_SK_SIZE, 'skEnc length does not equal to ' + ENCRYPT_SK_SIZE);
-    return Buffer.concat([ skVerify, skEnc ]);
+    return Buffer.concat([skVerify, skEnc]);
   }
 
   static separatedPublicKeys(fullPublicKey) {
@@ -203,9 +203,9 @@ export default class DefaultProtocol {
     check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
     check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
     check(typeof amount === 'bigint', 'unsupported amount type ' + typeof amount);
-    check(!randomS || (randomP instanceof Buffer), 'unsupported randomP type ' + typeof randomP);
-    check(!randomR || (randomR instanceof Buffer), 'unsupported randomR type ' + typeof randomR);
-    check(!randomS || (randomS instanceof Buffer), 'unsupported randomS type ' + typeof randomS);
+    check(!randomS || randomP instanceof Buffer, 'unsupported randomP type ' + typeof randomP);
+    check(!randomR || randomR instanceof Buffer, 'unsupported randomR type ' + typeof randomR);
+    check(!randomS || randomS instanceof Buffer, 'unsupported randomS type ' + typeof randomS);
     randomP = randomP ? randomP : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
     randomR = randomR ? randomR : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
     randomS = randomS ? randomS : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
@@ -282,7 +282,7 @@ export default class DefaultProtocol {
       randomS: DefaultProtocol.buffToBigInt(randomS),
       commitment: commitmentHash,
     };
-    const wtnsOptions = { type: "mem" };
+    const wtnsOptions = { type: 'mem' };
     await wtns.calculate(inputs, wasmFile, wtnsOptions);
     return await groth16.prove(zkeyFile, wtnsOptions);
   }

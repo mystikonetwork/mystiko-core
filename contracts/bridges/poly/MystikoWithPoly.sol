@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
 import "../../Mystiko.sol";
 import "./cross_chain_manager/interface/IEthCrossChainManager.sol";
@@ -25,7 +25,7 @@ contract MystikoWithPoly is Mystiko {
     address _token,
     address _hasher,
     uint32 _merkleTreeHeight
-  ) Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.CROSS_CHAIN) {
+  ) public Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.CROSS_CHAIN) {
     eccmp = IEthCrossChainManagerProxy(_eccmp);
     peerChainId = _peerChainId;
     peerChainContract = new bytes(0);

@@ -22,8 +22,12 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.token).toBe('USDT');
   withdraw.tokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(withdraw.tokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  withdraw.merkleRootHash = BigInt('19447354833770870638524875755086108986351532686253409466340778588798721438274');
-  expect(withdraw.merkleRootHash.toString()).toBe('19447354833770870638524875755086108986351532686253409466340778588798721438274');
+  withdraw.merkleRootHash = BigInt(
+    '19447354833770870638524875755086108986351532686253409466340778588798721438274',
+  );
+  expect(withdraw.merkleRootHash.toString()).toBe(
+    '19447354833770870638524875755086108986351532686253409466340778588798721438274',
+  );
   withdraw.serialNumber = toBuff('deadbeef');
   expect(toHexNoPrefix(withdraw.serialNumber)).toBe('deadbeef');
   withdraw.amount = BigInt('3131961357');

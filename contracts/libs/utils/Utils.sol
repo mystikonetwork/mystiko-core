@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.11;
 
 
 library Utils {
@@ -109,7 +109,7 @@ library Utils {
 
         assembly {
             // we know _preBytes_offset is 0
-            let fslot := sload(_preBytes.slot)
+            let fslot := sload(_preBytes_slot)
             // Arrays of 31 bytes or less have an even value in their slot,
             // while longer arrays have an odd value. The actual length is
             // the slot divided by two for odd values, and the lowest order
@@ -146,7 +146,7 @@ library Utils {
                         let cb := 1
 
                         // get the keccak hash to get the contents of the array
-                        mstore(0x0, _preBytes.slot)
+                        mstore(0x0, _preBytes_slot)
                         let sc := keccak256(0x0, 0x20)
 
                         let mc := add(_postBytes, 0x20)

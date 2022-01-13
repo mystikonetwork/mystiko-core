@@ -7,7 +7,7 @@ import DefaultProtocol, {
   RANDOM_SK_SIZE,
   HASH_SIZE,
   MERKLE_TREE_LEVELS,
-} from "./default.js";
+} from './default.js';
 
 export default {
   FIELD_SIZE,
@@ -42,5 +42,5 @@ export default {
   commitment: DefaultProtocol.commitment,
   serialNumber: DefaultProtocol.serialNumber,
   zkProve: DefaultProtocol.zkProve,
-  zkVerify: DefaultProtocol.zkVerify
+  zkVerify: DefaultProtocol.zkVerify,
 };

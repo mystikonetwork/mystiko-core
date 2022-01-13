@@ -1811,10 +1811,10 @@
   resolved "https://registry.npm.taobao.org/@nodefactory/filsnap-types/download/@nodefactory/filsnap-types-0.2.2.tgz#f95cbf93ce5815d8d151c60663940086b015cb8f"
   integrity sha1-+Vy/k85YFdjRUcYGY5QAhrAVy48=
 
-"@openzeppelin/contracts@^4.4.1":
-  version "4.4.1"
-  resolved "https://registry.npmmirror.com/@openzeppelin/contracts/download/@openzeppelin/contracts-4.4.1.tgz#3382db2cd83ab565ed9626765e7da92944b45de8"
-  integrity sha512-o+pHCf/yMLSlV5MkDQEzEQL402i6SoRnktru+0rdSxVEFZcTzzGhZCAtZjUFyKGazMSv1TilzMg+RbED1N8XHQ==
+"@openzeppelin/contracts@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.npmmirror.com/@openzeppelin/contracts/download/@openzeppelin/contracts-3.4.2.tgz#d81f786fda2871d1eb8a8c5a73e455753ba53527"
+  integrity sha512-z0zMCjyhhp4y7XKAcDAi3Vgms4T2PstwBdahiO0+9NaGICQKjynK3wduSRplTgk4LXmoO1yfDGO5RbjKYxtuxA==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"

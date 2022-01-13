@@ -23,7 +23,7 @@ export class AccountHandler extends Handler {
     return new Account(
       this.db.accounts.findOne({
         verifyPublicKey: toHexNoPrefix(publicKeys.pkVerify),
-        encPublicKey: toHexNoPrefix(publicKeys.pkEnc)
+        encPublicKey: toHexNoPrefix(publicKeys.pkEnc),
       }),
     );
   }
@@ -59,13 +59,7 @@ export class AccountHandler extends Handler {
       .deriveChild(wallet.accountNonce + 1)
       .getWallet()
       .getPrivateKey();
-    const account = this._createAccount(
-      wallet,
-      walletPassword,
-      accountName,
-      skVerify,
-      skEnc,
-    );
+    const account = this._createAccount(wallet, walletPassword, accountName, skVerify, skEnc);
     this.db.accounts.insert(account.data);
     wallet.accountNonce = wallet.accountNonce + 2;
     this.db.wallets.update(wallet.data);
@@ -84,13 +78,7 @@ export class AccountHandler extends Handler {
     const secretKeys = this.protocol.separatedSecretKeys(secretKey);
     const verifySecretKey = secretKeys.skVerify;
     const encSecretKey = secretKeys.skEnc;
-    const account = this._createAccount(
-      wallet,
-      walletPassword,
-      accountName,
-      verifySecretKey,
-      encSecretKey,
-    );
+    const account = this._createAccount(wallet, walletPassword, accountName, verifySecretKey, encSecretKey);
     this.db.accounts.insert(account.data);
     await this.saveDatabase();
     return account;
@@ -126,7 +114,10 @@ export class AccountHandler extends Handler {
     account.walletId = wallet.id;
     account.verifyPublicKey = this.protocol.publicKeyForVerification(skVerify);
     account.encPublicKey = this.protocol.publicKeyForEncryption(skEnc);
-    account.encryptedVerifySecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skVerify));
+    account.encryptedVerifySecretKey = this.protocol.encryptSymmetric(
+      walletPassword,
+      toHexNoPrefix(skVerify),
+    );
     account.encryptedEncSecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skEnc));
     return account;
   }

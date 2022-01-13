@@ -112,8 +112,12 @@ test('Test AccountHandler updateAccountKeys', async () => {
   await expect(accountHandler.updateAccountKeys(wallet, 'wrong password', 'new password')).rejects.toThrow();
   await accountHandler.updateAccountKeys(wallet, walletPassword, 'newP@ssw0rd');
   const [account3, account4] = accountHandler.getAccounts(wallet);
-  expect(account3.protocol.decryptSymmetric('newP@ssw0rd', account3.encryptedVerifySecretKey)).toBe(verifySK1);
+  expect(account3.protocol.decryptSymmetric('newP@ssw0rd', account3.encryptedVerifySecretKey)).toBe(
+    verifySK1,
+  );
   expect(account3.protocol.decryptSymmetric('newP@ssw0rd', account3.encryptedEncSecretKey)).toBe(encSK1);
-  expect(account4.protocol.decryptSymmetric('newP@ssw0rd', account4.encryptedVerifySecretKey)).toBe(verifySK2);
+  expect(account4.protocol.decryptSymmetric('newP@ssw0rd', account4.encryptedVerifySecretKey)).toBe(
+    verifySK2,
+  );
   expect(account4.protocol.decryptSymmetric('newP@ssw0rd', account4.encryptedEncSecretKey)).toBe(encSK2);
 });

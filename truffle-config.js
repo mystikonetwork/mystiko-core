@@ -46,7 +46,7 @@ module.exports = {
     //
     development: {
       host: '127.0.0.1', // Localhost (default: none)
-      port: 8545, // Standard Ethereum port (default: none)
+      port: 7545, // Standard Ethereum port (default: none)
       network_id: '*', // Any network (default: none)
     },
     // Another network with more advanced options...
@@ -86,7 +86,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: '0.8.11',
+      version: '0.6.11',
       settings: {
         optimizer: {
           enabled: true,
