@@ -126,8 +126,6 @@ contract('MystikoWithLoop', (accounts) => {
       expect(publicSignals.length).to.equal(3);
       const result = await protocol.zkVerify(proof, publicSignals, 'build/circuits/withdraw.vkey.json');
       expect(result).to.equal(true);
-      console.log(proof);
-      console.log(publicSignals);
     });
 
     it('should withdraw successfully', async () => {
@@ -136,8 +134,8 @@ contract('MystikoWithLoop', (accounts) => {
       const verifierContract = await Verifier.deployed();
       const proofA = [ new BN(proof.pi_a[0]), new BN(proof.pi_a[1]) ];
       const proofB = [
-        [ new BN(proof.pi_b[0][0]), new BN(proof.pi_b[0][1]) ],
-        [ new BN(proof.pi_b[1][0]), new BN(proof.pi_b[1][1]) ]
+        [ new BN(proof.pi_b[0][1]), new BN(proof.pi_b[0][0]) ],
+        [ new BN(proof.pi_b[1][1]), new BN(proof.pi_b[1][0]) ]
       ];
       const proofC = [ new BN(proof.pi_c[0]), new BN(proof.pi_c[1]) ];
       const rootHash = new BN(publicSignals[0]);
