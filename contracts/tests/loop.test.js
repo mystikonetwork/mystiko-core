@@ -101,7 +101,7 @@ contract('MystikoWithLoop', (accounts) => {
       const amount = BigInt(depositEvent.args.amount.toString());
       const commitmentHash = BigInt(depositEvent.args.commitmentHash);
       const privateNote = toBuff(toHexNoPrefix(depositEvent.args.encryptedNote));
-      const treeLeaves = [ commitmentHash ];
+      const treeLeaves = [commitmentHash];
       const treeIndex = Number(merkleTreeInsertEvent.args.leafIndex);
       const fullProof = await protocol.zkProve(
         pkVerify,
@@ -114,7 +114,7 @@ contract('MystikoWithLoop', (accounts) => {
         treeLeaves,
         treeIndex,
         'build/circuits/withdraw.wasm',
-        'build/circuits/withdraw.zkey'
+        'build/circuits/withdraw.zkey',
       );
       proof = fullProof.proof;
       publicSignals = fullProof.publicSignals;
@@ -132,26 +132,40 @@ contract('MystikoWithLoop', (accounts) => {
       const loopContract = await MystikoWithLoop.deployed();
       const tokenContract = await TestToken.deployed();
       const verifierContract = await Verifier.deployed();
-      const proofA = [ new BN(proof.pi_a[0]), new BN(proof.pi_a[1]) ];
+      const proofA = [new BN(proof.pi_a[0]), new BN(proof.pi_a[1])];
       const proofB = [
-        [ new BN(proof.pi_b[0][1]), new BN(proof.pi_b[0][0]) ],
-        [ new BN(proof.pi_b[1][1]), new BN(proof.pi_b[1][0]) ]
+        [new BN(proof.pi_b[0][1]), new BN(proof.pi_b[0][0])],
+        [new BN(proof.pi_b[1][1]), new BN(proof.pi_b[1][0])],
       ];
-      const proofC = [ new BN(proof.pi_c[0]), new BN(proof.pi_c[1]) ];
+      const proofC = [new BN(proof.pi_c[0]), new BN(proof.pi_c[1])];
       const rootHash = new BN(publicSignals[0]);
       const serialNumber = new BN(publicSignals[1]);
       const amount = new BN(toDecimals(1000, 18).toString());
-      const result = await verifierContract.verifyProof(
-        proofA, proofB, proofC, [ rootHash, serialNumber, amount ]
-      );
+      const result = await verifierContract.verifyProof(proofA, proofB, proofC, [
+        rootHash,
+        serialNumber,
+        amount,
+      ]);
       expect(result).to.equal(true);
       const recipient = accounts[2];
       const gasEstimated = await loopContract.withdraw.estimateGas(
-        proofA, proofB, proofC, rootHash, serialNumber, amount, recipient,
+        proofA,
+        proofB,
+        proofC,
+        rootHash,
+        serialNumber,
+        amount,
+        recipient,
         { from: accounts[1] },
       );
-      const withdrawTx = await loopContract.withdraw(
-        proofA, proofB, proofC, rootHash, serialNumber, amount, recipient,
+      await loopContract.withdraw(
+        proofA,
+        proofB,
+        proofC,
+        rootHash,
+        serialNumber,
+        amount,
+        recipient,
         { from: accounts[1], gas: gasEstimated },
       );
       const balanceOfAccount3 = await tokenContract.balanceOf.call(accounts[2]);
