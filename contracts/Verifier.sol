@@ -66,7 +66,7 @@ library Pairing {
         assembly {
             success := staticcall(sub(gas(), 2000), 6, input, 0xc0, r, 0x60)
             // Use "invalid" to make gas estimation work
-            //switch success case 0 { invalid() }
+            switch success case 0 { invalid() }
         }
         require(success,"pairing-add-failed");
     }
@@ -82,7 +82,7 @@ library Pairing {
         assembly {
             success := staticcall(sub(gas(), 2000), 7, input, 0x80, r, 0x60)
             // Use "invalid" to make gas estimation work
-            //switch success case 0 { invalid() }
+            switch success case 0 { invalid() }
         }
         require (success,"pairing-mul-failed");
     }
@@ -110,7 +110,7 @@ library Pairing {
         assembly {
             success := staticcall(sub(gas(), 2000), 8, add(input, 0x20), mul(inputSize, 0x20), out, 0x20)
             // Use "invalid" to make gas estimation work
-            //switch success case 0 { invalid() }
+            switch success case 0 { invalid() }
         }
         require(success,"pairing-opcode-failed");
         return out[0] != 0;
@@ -194,33 +194,33 @@ contract Verifier {
              8495653923123431417604973247489272438418190587263600148770280649306958101930]
         );
         vk.delta2 = Pairing.G2Point(
-            [12160766913622375616425846675678151321777626214402743242960262070470053335283,
-             3645697184696507164211048423199745205833159336384396453511330276259364687786],
-            [16628528592772494565096798873598717280499603753130887142709429896797125845376,
-             1958553866742306712472022843138545641139942083399152373600457665631322789723]
+            [16899317176535164783576605422264764839164371077929543893257134649128600520681,
+             885544756063897637291056832269909113770423833306579154835845186419224550726],
+            [14034951669791157624587350775868385940552877891826523132329820114217405657821,
+             15356793141897227711662949967612889575649559834777984743883213421322615038600]
         );
         vk.IC = new Pairing.G1Point[](4);
-
-        vk.IC[0] = Pairing.G1Point(
+        
+        vk.IC[0] = Pairing.G1Point( 
             12422199493260257541405211574284119017947981838209812446666588677569418453850,
             4067792558447743312175124445282340625976447533808706800486949501954894202716
-        );
-
-        vk.IC[1] = Pairing.G1Point(
+        );                                      
+        
+        vk.IC[1] = Pairing.G1Point( 
             10963429764276853112726140893992285109664826082568046043190798449705687452609,
             14551650942572076642385903259635190484440671959972006243418191996298131749787
-        );
-
-        vk.IC[2] = Pairing.G1Point(
+        );                                      
+        
+        vk.IC[2] = Pairing.G1Point( 
             18902804004285711004416047115973818702878517576159411001638222744470021153722,
             4650004163029082467640696743553552660117866716327788037982582555228411796146
-        );
-
-        vk.IC[3] = Pairing.G1Point(
+        );                                      
+        
+        vk.IC[3] = Pairing.G1Point( 
             7168376615013427686618775607915992758137519673456296633980967869262374207447,
             8449788227147183062560438725189748537766528039252720234741400014255863857020
-        );
-
+        );                                      
+        
     }
     function verify(uint[] memory input, Proof memory proof) internal view returns (uint) {
         uint256 snark_scalar_field = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
