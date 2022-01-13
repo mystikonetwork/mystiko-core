@@ -1,7 +1,10 @@
+import protocol from '../protocol/index.js';
+
 export const ID_KEY = '$loki';
 export class BaseModel {
   constructor(data = {}) {
     this.data = data;
+    this.protocol = protocol;
   }
 
   get id() {

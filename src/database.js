@@ -49,7 +49,8 @@ export async function createDatabase(dbFile, inMemory = false) {
     });
     await dbLoadPromise;
   } else {
-    lokidb = new loki(dbFile);
+    adapter = new loki.LokiMemoryAdapter();
+    lokidb = new loki(dbFile, { adapter });
     createCollectionsIfNotExist(lokidb);
   }
   const db = { database: lokidb };

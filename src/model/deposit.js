@@ -1,4 +1,5 @@
 import { BaseModel } from './common.js';
+import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
 export class Deposit extends BaseModel {
   constructor(data = {}) {
@@ -10,6 +11,7 @@ export class Deposit extends BaseModel {
   }
 
   set srcChainId(id) {
+    check(typeof id === 'number', 'srcChainId should be instance of number');
     this.data['srcChainId'] = id;
   }
 
@@ -18,6 +20,7 @@ export class Deposit extends BaseModel {
   }
 
   set dstChainId(id) {
+    check(typeof id === 'number', 'dstChainId should be instance of number');
     this.data['dstChainId'] = id;
   }
 
@@ -26,6 +29,7 @@ export class Deposit extends BaseModel {
   }
 
   set bridge(b) {
+    check(typeof b === 'string', 'b should be instance of string');
     this.data['bridge'] = b;
   }
 
@@ -34,6 +38,7 @@ export class Deposit extends BaseModel {
   }
 
   set token(t) {
+    check(typeof t === 'string', 't should be instance of string');
     this.data['token'] = t;
   }
 
@@ -42,31 +47,38 @@ export class Deposit extends BaseModel {
   }
 
   set tokenAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
     this.data['tokenAddress'] = address;
   }
 
   get amount() {
-    return this.data['amount'];
+    const raw = this.data['amount'];
+    return raw ? BigInt(raw) : undefined;
   }
 
   set amount(amnt) {
-    this.data['amount'] = amnt;
+    check(typeof amnt === 'bigint', 'amnt should be instance of BigInt');
+    this.data['amount'] = amnt.toString();
   }
 
   get commitmentHash() {
-    return this.data['commitmentHash'];
+    const raw = this.data['commitmentHash'];
+    return raw ? toBuff(raw) : undefined;
   }
 
   set commitmentHash(hash) {
-    this.data['commitmentHash'] = hash;
+    check(hash instanceof Buffer, 'hash should be instance of Buffer');
+    this.data['commitmentHash'] = toHexNoPrefix(hash);
   }
 
   get encryptedNote() {
-    return this.data['encryptedNote'];
+    const raw = this.data['encryptedNote'];
+    return raw ? toBuff(raw) : undefined;
   }
 
   set encryptedNote(note) {
-    this.data['encryptedNote'] = note;
+    check(note instanceof Buffer, 'note should be instance of Buffer');
+    this.data['encryptedNote'] = toHexNoPrefix(note);
   }
 
   get transactionHash() {
@@ -74,6 +86,7 @@ export class Deposit extends BaseModel {
   }
 
   set transactionHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
     this.data['transactionHash'] = hash;
   }
 
@@ -82,6 +95,7 @@ export class Deposit extends BaseModel {
   }
 
   set walletId(id) {
+    check(typeof id === 'number', 'id should be instance of string');
     this.data['walletId'] = id;
   }
 
@@ -90,6 +104,7 @@ export class Deposit extends BaseModel {
   }
 
   set srcAddress(address) {
+    check(typeof address === 'string', 'srcAddress should be instance of string');
     this.data['srcAddress'] = address;
   }
 
@@ -98,6 +113,7 @@ export class Deposit extends BaseModel {
   }
 
   set shieldedRecipientAddress(address) {
+    check(typeof address === 'string', 'shieldedRecipientAddress should be instance of string');
     this.data['shieldedRecipientAddress'] = address;
   }
 
@@ -106,11 +122,8 @@ export class Deposit extends BaseModel {
   }
 
   set status(s) {
-    if (isValidDepositStatus(s)) {
-      this.data['status'] = s;
-    } else {
-      throw 'invalid deposit status ' + s;
-    }
+    check(isValidDepositStatus(s), 'invalid deposit status ' + s);
+    this.data['status'] = s;
   }
 }
 export const DepositStatus = {

@@ -1,5 +1,4 @@
 import { WalletHandler } from '../../src/handler/walletHandler.js';
-import { Handler } from '../../src/handler/handler.js';
 import { createDatabase } from '../../src/database.js';
 
 let handler;
@@ -18,8 +17,8 @@ test('Test WalletHandler createWallet', async () => {
   const walletMasterSeed = 'awesomeMasterSeed';
   const walletPassword = 'P@ssw0rd';
   const wallet = await handler.createWallet(walletMasterSeed, walletPassword);
-  expect(Handler.aesDecrypt(wallet.encryptedMasterSeed, walletPassword)).toBe(walletMasterSeed);
-  expect(wallet.hashedPassword).toBe(Handler.hmacSHA512(walletPassword));
+  expect(wallet.protocol.decryptSymmetric(walletPassword, wallet.encryptedMasterSeed)).toBe(walletMasterSeed);
+  expect(wallet.hashedPassword).toBe(wallet.protocol.checkSum(walletPassword));
   expect(wallet.accountNonce).toBe(0);
   expect(handler.getCurrentWallet().toString()).toBe(wallet.toString());
   expect(handler.getWalletById(wallet.id).toString()).toBe(wallet.toString());
@@ -43,5 +42,5 @@ test('Test WalletHandler updatePassword', async () => {
   const newPassword = 'newP@ssw0rd';
   expect(await handler.updatePassword(wallet, walletPassword, newPassword)).toBe(true);
   expect(handler.checkPassword(wallet, newPassword)).toBe(true);
-  expect(Handler.aesDecrypt(wallet.encryptedMasterSeed, newPassword)).toBe(walletMasterSeed);
+  expect(wallet.protocol.decryptSymmetric(newPassword, wallet.encryptedMasterSeed)).toBe(walletMasterSeed);
 });

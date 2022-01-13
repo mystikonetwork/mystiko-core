@@ -1,3 +1,4 @@
+import { check } from '../utils.js';
 import { BaseModel } from './common.js';
 
 export class Wallet extends BaseModel {
@@ -10,6 +11,7 @@ export class Wallet extends BaseModel {
   }
 
   set encryptedMasterSeed(encSeed) {
+    check(typeof encSeed === 'string', 'encSeed should be instance of string');
     this.data['encryptedMasterSeed'] = encSeed;
   }
 
@@ -18,6 +20,7 @@ export class Wallet extends BaseModel {
   }
 
   set hashedPassword(hashedPass) {
+    check(typeof hashedPass === 'string', 'hashedPass should be instance of string');
     this.data['hashedPassword'] = hashedPass;
   }
 
@@ -26,6 +29,7 @@ export class Wallet extends BaseModel {
   }
 
   set accountNonce(nonce) {
+    check(typeof nonce === 'number', 'nonce should be instance of number');
     this.data['accountNonce'] = nonce;
   }
 }

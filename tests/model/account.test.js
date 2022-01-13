@@ -1,4 +1,5 @@
 import { Account } from '../../src/model/account';
+import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
 test('Test Account getters/setters', () => {
   const account = new Account();
@@ -13,37 +14,22 @@ test('Test Account getters/setters', () => {
   expect(account.shieldedAddress).toBe(undefined);
   account.name = 'Test Account #1';
   expect(account.name).toBe('Test Account #1');
-  account.verifyPublicKey = 'deadbeef';
-  expect(account.verifyPublicKey).toBe('deadbeef');
-  account.encPublicKey = 'baadf00d';
-  expect(account.encPublicKey).toBe('baadf00d');
+  expect(() => {
+    account.verifyPublicKey = 'deadbeef';
+  }).toThrow();
+  account.verifyPublicKey = account.protocol.randomBytes(account.protocol.VERIFY_PK_SIZE);
+  expect(toHexNoPrefix(account.verifyPublicKey)).not.toBe(undefined);
+  expect(() => {
+    account.encPublicKey = 'baadf00d';
+  }).toThrow();
+  account.encPublicKey = account.protocol.randomBytes(account.protocol.ENCRYPT_PK_SIZE);
+  expect(toHexNoPrefix(account.encPublicKey)).not.toBe(undefined);
   account.encryptedVerifySecretKey = 'deaddead';
   expect(account.encryptedVerifySecretKey).toBe('deaddead');
   account.encryptedEncSecretKey = 'baadbabe';
   expect(account.encryptedEncSecretKey).toBe('baadbabe');
   account.walletId = 1234;
   expect(account.walletId).toBe(1234);
-  expect(account.fullPublicKey).toBe('deadbeefbaadf00d');
-  expect(account.shieldedAddress).toBe('eFGDJTVwVLY');
-});
-
-test('Test Account parse public keys', () => {
-  expect(() => Account.getPublicKeys('eFGDJTVwVLY')).toThrow('cannot get public keys from invalid address');
-  expect(() => Account.getPublicKeys('eFGDJ==TVwVLY')).toThrow('cannot get public keys from invalid address');
-  const keys = Account.getPublicKeys(
-    'L9VrizoNHfBdtJsLT1Zp1iWAjqGXaWf9HvSJV9p2a7TszPWLnuTDq7rcLc4ykehRznJWFhvCTvCC1REWGUjR6B3C6',
-  );
-  expect(keys[0]).toBe('d8f7c0ef9b5bb47aa466c4b79b7dfac5327defa243ca815e907b854e3057478b');
-  expect(keys[1]).toBe('9c9151edf3472722601dc6cf0f5466b1e31665c864dcf2c3ba70243445776601ab');
-});
-
-test('Test Account parse secret keys', () => {
-  expect(() =>
-    Account.getSecretKeys('d8f7c0ef9b5bb47aa466c4b79b7dfac5327defa243ca815e907b854e3057478b'),
-  ).toThrow('invalid account secret key length, it should be 64');
-  const keys = Account.getSecretKeys(
-    'd8f7c0ef9b5bb47aa466c4b79b7dfac5327defa243ca815e907b854e3057478b9c9151edf3472722601dc6cf0f5466b1e31665c864dcf2c3ba70243445776601',
-  );
-  expect(keys[0]).toBe('d8f7c0ef9b5bb47aa466c4b79b7dfac5327defa243ca815e907b854e3057478b');
-  expect(keys[1]).toBe('9c9151edf3472722601dc6cf0f5466b1e31665c864dcf2c3ba70243445776601');
+  expect(account.fullPublicKey).not.toBe(undefined);
+  expect(account.shieldedAddress).not.toBe(undefined);
 });

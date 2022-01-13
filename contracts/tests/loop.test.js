@@ -1,7 +1,6 @@
 import { BN } from 'bn.js';
-import { toDecimals } from '../../src/utils.js';
-import { computeCommitment } from '../../src/protocol.js';
-import * as utils from '../../src/utils.js';
+import { toHex, toDecimals, toFixedLenHex } from '../../src/utils.js';
+import protocol from '../../src/protocol/index.js';
 import MerkleTree from 'fixed-merkle-tree';
 
 const MystikoWithLoop = artifacts.require('MystikoWithLoop');
@@ -36,8 +35,9 @@ contract('MystikoWithLoop', (accounts) => {
 
     it('should have enough tokens in account 0', async () => {
       const tokenContract = await TestToken.deployed();
+      console.log(tokenContract.address);
       const balanceOfAccount0 = await tokenContract.balanceOf.call(accounts[0]);
-      expect(balanceOfAccount0.eq(toDecimals(1000000000, 18))).to.equal(true);
+      expect(balanceOfAccount0.toString()).to.equal(toDecimals(1000000000, 18).toString());
     });
   });
 
@@ -46,29 +46,31 @@ contract('MystikoWithLoop', (accounts) => {
       const tokenContract = await TestToken.deployed();
       await tokenContract.transfer(accounts[1], toDecimals(1000, 18), { from: accounts[0] });
       const balanceOfAccount1 = await tokenContract.balanceOf.call(accounts[1]);
-      expect(balanceOfAccount1.eq(toDecimals(1000, 18))).to.equal(true);
+      expect(balanceOfAccount1.toString()).to.equal(toDecimals(1000, 18).toString());
     });
 
     it('should deposit successfully', async () => {
-      const verifyPk = '290bf80ac0b831e4401775abc4af18b437a9e39b167c6867d456ea60cc902900';
-      const encPk = '03d28c79e8f5b70e86403e8343acb054fcd9a9966168cb0789d892d29969bc18bb';
-      const { commitment, encryptedNote } = computeCommitment(verifyPk, encPk, 500, 18);
+      const rawSkVerify = protocol.randomBytes(protocol.VERIFY_SK_SIZE);
+      const rawSkEnc = protocol.randomBytes(protocol.ENCRYPT_SK_SIZE);
+      const pkVerify = protocol.publicKeyForVerification(rawSkVerify);
+      const pkEnc = protocol.publicKeyForEncryption(rawSkEnc);
+      const { commitmentHash, privateNote } = protocol.commitment(pkVerify, pkEnc, toDecimals(500, 18));
       const loopContract = await MystikoWithLoop.deployed();
       const tokenContract = await TestToken.deployed();
       const amount = toDecimals(1000, 18);
       await tokenContract.approve(loopContract.address, amount, { from: accounts[1] });
       const allowance = await tokenContract.allowance(accounts[1], loopContract.address);
-      expect(allowance.eq(amount)).to.equal(true);
+      expect(allowance.toString()).to.equal(amount.toString());
       const gasEstimated = await loopContract.deposit.estimateGas(
         amount,
-        utils.toFixedLenHex(commitment),
-        utils.toHex(encryptedNote),
+        toFixedLenHex(commitmentHash),
+        toHex(privateNote),
         { from: accounts[1] },
       );
       const tx = await loopContract.deposit(
         amount,
-        utils.toFixedLenHex(commitment),
-        utils.toHex(encryptedNote),
+        toFixedLenHex(commitmentHash),
+        toHex(privateNote),
         {
           from: accounts[1],
           gas: gasEstimated,
@@ -76,18 +78,18 @@ contract('MystikoWithLoop', (accounts) => {
       );
       const depositEvent = tx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
-      expect(depositEvent.args.amount.eq(amount)).to.equal(true);
-      expect(depositEvent.args.commitmentHash).to.equal(utils.toFixedLenHex(commitment));
-      expect(depositEvent.args.encryptedNote).to.equal(utils.toHex(encryptedNote));
+      expect(depositEvent.args.amount.toString()).to.equal(amount.toString());
+      expect(depositEvent.args.commitmentHash).to.equal(toFixedLenHex(commitmentHash));
+      expect(depositEvent.args.encryptedNote).to.equal(toHex(privateNote));
       const merkleTreeInsertEvent = tx.logs.find((e) => e['event'] === 'MerkleTreeInsert');
       expect(merkleTreeInsertEvent).to.not.equal(undefined);
-      expect(merkleTreeInsertEvent.args.amount.eq(amount)).to.equal(true);
-      expect(merkleTreeInsertEvent.args.leaf).to.equal(utils.toFixedLenHex(commitment));
+      expect(merkleTreeInsertEvent.args.amount.toString()).to.equal(amount.toString());
+      expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
       const levels = await loopContract.getLevels.call();
       const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
       const root = new BN(tree.root());
-      const isKnownRoot = await loopContract.isKnownRoot.call(utils.toFixedLenHex(root));
+      const isKnownRoot = await loopContract.isKnownRoot.call(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
     });
   });

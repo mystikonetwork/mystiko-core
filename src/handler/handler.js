@@ -1,13 +1,12 @@
-import cryptojs from 'crypto-js';
-import hmacSHA512 from 'crypto-js/hmac-sha512';
-import aes from 'crypto-js/aes';
-import * as utils from '../utils.js';
+import { checkDefinedAndNotNull } from '../utils.js';
+import protocol from '../protocol/index.js';
 
 export class Handler {
   constructor(db, options) {
-    utils.checkDefinedAndNotNull(db, 'db cannot be null or undefined');
+    checkDefinedAndNotNull(db, 'db cannot be null or undefined');
     this.db = db;
     this.options = options ? options : {};
+    this.protocol = protocol;
   }
 
   saveDatabase() {
@@ -24,17 +23,5 @@ export class Handler {
       }
     });
     return promise;
-  }
-
-  static aesEncrypt(data, password) {
-    return aes.encrypt(data, password).toString();
-  }
-
-  static aesDecrypt(cipherText, password) {
-    return aes.decrypt(cipherText, password).toString(cryptojs.enc.Utf8);
-  }
-
-  static hmacSHA512(data, salt = '') {
-    return hmacSHA512(data, salt).toString();
   }
 }

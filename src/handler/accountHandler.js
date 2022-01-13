@@ -1,61 +1,72 @@
 import { hdkey } from 'ethereumjs-wallet';
-import { babyJub, eddsa } from 'circomlib';
-import { PrivateKey as EciesPrivateKey } from 'eciesjs';
 import { Account } from '../model/account.js';
+import { Wallet } from '../model/wallet.js';
 import { Handler } from './handler.js';
+import { WalletHandler } from './walletHandler.js';
+import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
 export class AccountHandler extends Handler {
   constructor(walletHandler, db, options) {
     super(db, options);
+    check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     this.walletHandler = walletHandler;
   }
 
   getAccounts(wallet) {
+    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
     const rawAccounts = this.db.accounts.find({ walletId: wallet.id });
     return rawAccounts.map((account) => new Account(account));
   }
 
   getAccountByShieldedAddress(shieldedAddress) {
-    const publicKeys = Account.getPublicKeys(shieldedAddress);
+    const publicKeys = this.protocol.publicKeysFromShieldedAddress(shieldedAddress);
     return new Account(
-      this.db.accounts.findOne({ verifyPublicKey: publicKeys[0], encPublicKey: publicKeys[1] }),
+      this.db.accounts.findOne({
+        verifyPublicKey: toHexNoPrefix(publicKeys.pkVerify),
+        encPublicKey: toHexNoPrefix(publicKeys.pkEnc)
+      }),
     );
   }
 
   exportAccountSecretKey(wallet, walletPassword, account) {
+    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+    check(account instanceof Account, 'account should be instance of Account');
+    check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
-    const verifySecretKey = Handler.aesDecrypt(account.encryptedVerifySecretKey, walletPassword);
-    const encSecretKey = Handler.aesDecrypt(account.encryptedEncSecretKey, walletPassword);
-    const secretKey = Buffer.concat([Buffer.from(verifySecretKey, 'hex'), Buffer.from(encSecretKey, 'hex')]);
-    return secretKey.toString('hex');
+    const skVerify = this.protocol.decryptSymmetric(walletPassword, account.encryptedVerifySecretKey);
+    const skEnc = this.protocol.decryptSymmetric(walletPassword, account.encryptedEncSecretKey);
+    return toHexNoPrefix(this.protocol.fullSecretKey(toBuff(skVerify), toBuff(skEnc)));
   }
 
   async addAccount(wallet, walletPassword, accountName) {
+    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+    check(typeof accountName === 'string', 'accountName should be instance of string');
+    check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
-    const walletMasterSeed = Handler.aesDecrypt(wallet.encryptedMasterSeed, walletPassword);
+    const walletMasterSeed = this.protocol.decryptSymmetric(walletPassword, wallet.encryptedMasterSeed);
     const hdWallet = hdkey.fromMasterSeed(walletMasterSeed);
-    let verifySecretKey = null;
+    let skVerify = null;
     if (wallet.accountNonce === 0) {
-      verifySecretKey = hdWallet.getWallet().getPrivateKey();
+      skVerify = hdWallet.getWallet().getPrivateKey();
     } else {
-      verifySecretKey = hdWallet.deriveChild(wallet.accountNonce).getWallet().getPrivateKey();
+      skVerify = hdWallet.deriveChild(wallet.accountNonce).getWallet().getPrivateKey();
     }
-    const encSecretKey = hdWallet
+    const skEnc = hdWallet
       .deriveChild(wallet.accountNonce + 1)
       .getWallet()
       .getPrivateKey();
-    const accountData = this._createAccountData(
+    const account = this._createAccount(
       wallet,
       walletPassword,
       accountName,
-      verifySecretKey,
-      encSecretKey,
+      skVerify,
+      skEnc,
     );
-    const account = new Account(this.db.accounts.insert(accountData));
+    this.db.accounts.insert(account.data);
     wallet.accountNonce = wallet.accountNonce + 2;
     this.db.wallets.update(wallet.data);
     await this.saveDatabase();
@@ -63,59 +74,60 @@ export class AccountHandler extends Handler {
   }
 
   async importAccountFromSecretKey(wallet, walletPassword, accountName, secretKey) {
+    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+    check(typeof accountName === 'string', 'accountName should be instance of string');
+    check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
+    check(secretKey instanceof Buffer, 'secretKey should be instance of Buffer');
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
-    const secretKeys = Account.getSecretKeys(secretKey);
-    const verifySecretKey = secretKeys[0];
-    const encSecretKey = secretKeys[1];
-    const accountData = this._createAccountData(
+    const secretKeys = this.protocol.separatedSecretKeys(secretKey);
+    const verifySecretKey = secretKeys.skVerify;
+    const encSecretKey = secretKeys.skEnc;
+    const account = this._createAccount(
       wallet,
       walletPassword,
       accountName,
       verifySecretKey,
       encSecretKey,
     );
-    const account = new Account(this.db.accounts.insert(accountData));
+    this.db.accounts.insert(account.data);
     await this.saveDatabase();
     return account;
   }
 
   async removeAccount(account) {
+    check(account instanceof Account, 'account should be instance of Account');
     this.db.accounts.remove(account.data);
     await this.saveDatabase();
     return account;
   }
 
   async updateAccountKeys(wallet, oldPassword, newPassword) {
+    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+    check(typeof oldPassword === 'string', 'oldPassword should be instance of string');
+    check(typeof newPassword === 'string', 'newPassword should be instance of string');
     if (!this.walletHandler.checkPassword(wallet, oldPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
     this.getAccounts(wallet).forEach((account) => {
-      const verifySecretKey = Handler.aesDecrypt(account.encryptedVerifySecretKey, oldPassword);
-      const encSecretKey = Handler.aesDecrypt(account.encryptedEncSecretKey, oldPassword);
-      account.encryptedVerifySecretKey = Handler.aesEncrypt(verifySecretKey, newPassword);
-      account.encryptedEncSecretKey = Handler.aesEncrypt(encSecretKey, newPassword);
+      const verifySecretKey = this.protocol.decryptSymmetric(oldPassword, account.encryptedVerifySecretKey);
+      const encSecretKey = this.protocol.decryptSymmetric(oldPassword, account.encryptedEncSecretKey);
+      account.encryptedVerifySecretKey = this.protocol.encryptSymmetric(newPassword, verifySecretKey);
+      account.encryptedEncSecretKey = this.protocol.encryptSymmetric(newPassword, encSecretKey);
       this.db.accounts.update(account.data);
     });
     await this.saveDatabase();
   }
 
-  _createAccountData(wallet, walletPassword, accountName, verifySecretKey, encSecretKey) {
-    if (typeof verifySecretKey === 'string' || verifySecretKey instanceof String) {
-      verifySecretKey = Buffer.from(verifySecretKey, 'hex');
-      encSecretKey = Buffer.from(encSecretKey, 'hex');
-    }
-    const unpackedVerifyPublicKey = eddsa.prv2pub(verifySecretKey);
-    const verifyPublicKey = Buffer.from(babyJub.packPoint(unpackedVerifyPublicKey));
-    const encPublicKey = new EciesPrivateKey(encSecretKey).publicKey.compressed;
-    return {
-      walletId: wallet.id,
-      name: accountName,
-      verifyPublicKey: verifyPublicKey.toString('hex'),
-      encryptedVerifySecretKey: Handler.aesEncrypt(verifySecretKey.toString('hex'), walletPassword),
-      encPublicKey: encPublicKey.toString('hex'),
-      encryptedEncSecretKey: Handler.aesEncrypt(encSecretKey.toString('hex'), walletPassword),
-    };
+  _createAccount(wallet, walletPassword, accountName, skVerify, skEnc) {
+    const account = new Account();
+    account.name = accountName;
+    account.walletId = wallet.id;
+    account.verifyPublicKey = this.protocol.publicKeyForVerification(skVerify);
+    account.encPublicKey = this.protocol.publicKeyForEncryption(skEnc);
+    account.encryptedVerifySecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skVerify));
+    account.encryptedEncSecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skEnc));
+    return account;
   }
 }

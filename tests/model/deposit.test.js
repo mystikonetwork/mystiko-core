@@ -1,4 +1,5 @@
 import { Deposit, DepositStatus } from '../../src/model/deposit.js';
+import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
 test('Test Deposit getters/setters', () => {
   const deposit = new Deposit();
@@ -26,12 +27,12 @@ test('Test Deposit getters/setters', () => {
   expect(deposit.token).toBe('USDT');
   deposit.tokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(deposit.tokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  deposit.amount = 'deadbeef';
-  expect(deposit.amount).toBe('deadbeef');
-  deposit.commitmentHash = '2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242';
-  expect(deposit.commitmentHash).toBe('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
-  deposit.encryptedNote = 'deaddead';
-  expect(deposit.encryptedNote).toBe('deaddead');
+  deposit.amount = BigInt('0xdeadbeef');
+  expect(deposit.amount).toBe(BigInt('0xdeadbeef'));
+  deposit.commitmentHash = toBuff('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
+  expect(toHexNoPrefix(deposit.commitmentHash)).toBe('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
+  deposit.encryptedNote = toBuff('deaddead');
+  expect(toHexNoPrefix(deposit.encryptedNote)).toBe('deaddead');
   deposit.transactionHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
   expect(deposit.transactionHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
   deposit.walletId = 200;

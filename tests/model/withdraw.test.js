@@ -1,4 +1,5 @@
 import { Withdraw, WithdrawStatus } from '../../src/model/withdraw.js';
+import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
 test('Test Withdraw getters/setters', () => {
   const withdraw = new Withdraw();
@@ -21,12 +22,12 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.token).toBe('USDT');
   withdraw.tokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(withdraw.tokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  withdraw.merkleRootHash = '2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242';
-  expect(withdraw.merkleRootHash).toBe('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
-  withdraw.serialNumber = 'deadbeef';
-  expect(withdraw.serialNumber).toBe('deadbeef');
-  withdraw.amount = 'baadf00d';
-  expect(withdraw.amount).toBe('baadf00d');
+  withdraw.merkleRootHash = BigInt('19447354833770870638524875755086108986351532686253409466340778588798721438274');
+  expect(withdraw.merkleRootHash.toString()).toBe('19447354833770870638524875755086108986351532686253409466340778588798721438274');
+  withdraw.serialNumber = toBuff('deadbeef');
+  expect(toHexNoPrefix(withdraw.serialNumber)).toBe('deadbeef');
+  withdraw.amount = BigInt('3131961357');
+  expect(withdraw.amount.toString()).toBe('3131961357');
   withdraw.recipientAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(withdraw.recipientAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
   withdraw.transactionHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';

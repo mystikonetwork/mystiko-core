@@ -3754,7 +3754,7 @@ big-integer@1.6.36:
   resolved "https://registry.npmmirror.com/big-integer/download/big-integer-1.6.36.tgz#78631076265d4ae3555c04f85e7d9d2f3a071a36"
   integrity sha1-eGMQdiZdSuNVXAT4Xn2dLzoHGjY=
 
-big-integer@^1.6.42, big-integer@^1.6.43, big-integer@^1.6.48:
+big-integer@^1.6.42, big-integer@^1.6.43, big-integer@^1.6.48, big-integer@^1.6.51:
   version "1.6.51"
   resolved "https://registry.npmmirror.com/big-integer/download/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
   integrity sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==
@@ -3869,6 +3869,15 @@ blake-hash@^1.1.0:
     bindings "^1.2.1"
     inherits "^2.0.3"
     nan "^2.2.1"
+
+blake-hash@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmmirror.com/blake-hash/download/blake-hash-2.0.0.tgz#af184dce641951126d05b7d1c3de3224f538d66e"
+  integrity sha1-rxhNzmQZURJtBbfRw94yJPU41m4=
+  dependencies:
+    node-addon-api "^3.0.0"
+    node-gyp-build "^4.2.2"
+    readable-stream "^3.6.0"
 
 blake2b-wasm@^2.3.0, blake2b-wasm@^2.4.0:
   version "2.4.0"
@@ -7078,7 +7087,7 @@ ffjavascript@0.2.39:
     wasmcurves "0.0.14"
     web-worker "^1.0.0"
 
-ffjavascript@^0.2.30:
+ffjavascript@^0.2.30, ffjavascript@^0.2.46:
   version "0.2.46"
   resolved "https://registry.npmmirror.com/ffjavascript/download/ffjavascript-0.2.46.tgz#3c7a7c2885e8f44d0535749fe1c6190f39301020"
   integrity sha512-UUjkb2BMTrYGzD2jrurgLzOXZ2ZWQyRjj0GImiGp7wlOCJx4mZqIqSJbq6q5g2U9Jrmx26zjxiNQ/BsukPqS2Q==
@@ -11022,6 +11031,11 @@ node-addon-api@^2.0.0:
   resolved "https://registry.nlark.com/node-addon-api/download/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
   integrity sha1-Qyz6gpYs5JSxMunXKhWyn3H/XTI=
 
+node-addon-api@^3.0.0:
+  version "3.2.1"
+  resolved "https://registry.nlark.com/node-addon-api/download/node-addon-api-3.2.1.tgz#81325e0a2117789c0128dab65e7e38f07ceba161"
+  integrity sha1-gTJeCiEXeJwBKNq2Xn448HzroWE=
+
 node-fetch@2.4.1:
   version "2.4.1"
   resolved "https://registry.npmmirror.com/node-fetch/download/node-fetch-2.4.1.tgz#b2e38f1117b8acbedbe0524f041fb3177188255d"
@@ -11049,7 +11063,7 @@ node-forge@^0.10.0:
   resolved "https://registry.npmmirror.com/node-forge/download/node-forge-0.10.0.tgz#32dea2afb3e9926f02ee5ce8794902691a676bf3"
   integrity sha1-Mt6ir7Ppkm8C7lzoeUkCaRpna/M=
 
-node-gyp-build@^4.2.0, node-gyp-build@^4.3.0:
+node-gyp-build@^4.2.0, node-gyp-build@^4.2.2, node-gyp-build@^4.3.0:
   version "4.3.0"
   resolved "https://registry.nlark.com/node-gyp-build/download/node-gyp-build-4.3.0.tgz?cache=0&sync_timestamp=1631436711963&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fnode-gyp-build%2Fdownload%2Fnode-gyp-build-4.3.0.tgz#9f256b03e5826150be39c764bf51e993946d71a3"
   integrity sha1-nyVrA+WCYVC+Ocdkv1Hpk5RtcaM=
@@ -15382,7 +15396,7 @@ web3-utils@1.5.3:
     randombytes "^2.1.0"
     utf8 "3.0.0"
 
-web3-utils@1.6.1, web3-utils@^1.0.0-beta.31, web3-utils@^1.3.0, web3-utils@^1.6.1:
+web3-utils@1.6.1, web3-utils@^1.0.0-beta.31, web3-utils@^1.3.0:
   version "1.6.1"
   resolved "https://registry.npmmirror.com/web3-utils/download/web3-utils-1.6.1.tgz#befcb23922b00603ab56d8c5b4158468dc494aca"
   integrity sha512-RidGKv5kOkcerI6jQqDFDoTllQQqV+rPhTzZHhmbqtFObbYpU93uc+yG1LHivRTQhA6llIx67iudc/vzisgO+w==
@@ -15408,7 +15422,7 @@ web3@1.5.3:
     web3-shh "1.5.3"
     web3-utils "1.5.3"
 
-web3@^1.2.11, web3@^1.6.1:
+web3@^1.2.11:
   version "1.6.1"
   resolved "https://registry.npmmirror.com/web3/download/web3-1.6.1.tgz#c9e68fe7b3073adddf35393441f950ec69b92735"
   integrity sha512-c299lLiyb2/WOcxh7TinwvbATaMmrgNIeAzbLbmOKHI0LcwyfsB1eu2ReOIrfrCYDYRW2KAjYr7J7gHawqDNPQ==

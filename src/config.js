@@ -1,4 +1,4 @@
-import { isAddress } from 'web3-utils';
+import { ethers } from 'ethers';
 import * as fastfile from 'fastfile';
 
 function isKeyExists(config, key) {
@@ -19,7 +19,7 @@ function checkKeyExists(config, key) {
 
 function checkAddress(config, key) {
   checkKeyExists(config, key);
-  if (!isAddress(config[key])) {
+  if (!ethers.utils.isAddress(config[key])) {
     throw 'invalid address ' + config[key];
   }
 }

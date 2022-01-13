@@ -16,6 +16,7 @@ npx circom -v -r "${BUILD}/withdraw.r1cs" -w "${BUILD}/withdraw.wasm" -s "${BUIL
 npx snarkjs groth16 setup "${BUILD}/withdraw.r1cs" "${BUILD}/ptau${POWERS_OF_TAU}" "${BUILD}/tmp_withdraw.zkey"
 echo "qwe" | npx snarkjs zkey contribute "${BUILD}/tmp_withdraw.zkey" "${BUILD}/withdraw.zkey"
 npx snarkjs zkey verify "${BUILD}/withdraw.r1cs" "${BUILD}/ptau${POWERS_OF_TAU}" "${BUILD}/withdraw.zkey"
+npx snarkjs zkey export verificationkey "${BUILD}/withdraw.zkey" "${BUILD}/withdraw.vkey.json"
 npx snarkjs zkey export solidityverifier "${BUILD}/withdraw.zkey" "${ROOT}/contracts/Verifier.sol"
 sed -i "" "s/pragma solidity ^0.6.11/pragma solidity ^0.8.11/g" "${ROOT}/contracts/Verifier.sol"
 npx snarkjs info -r "${BUILD}/withdraw.r1cs"

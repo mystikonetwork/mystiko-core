@@ -19,7 +19,7 @@ export function bnToFixedBytes(bn) {
 
 export function check(condition, message) {
   if (!condition) {
-    throw message;
+    throw new Error(message);
   }
 }
 
@@ -36,9 +36,14 @@ export function checkDefinedAndNotNull(arg, message) {
   checkDefined(arg, message);
 }
 
+export function toBuff(strData) {
+  check(typeof strData === 'string', 'unsupported type ' + strData);
+  return Buffer.from(toHexNoPrefix(strData), 'hex');
+}
+
 export function toDecimals(amount, decimals) {
-  const base = new BN(10).pow(new BN(decimals));
-  return new BN(amount).mul(base);
+  const base = BigInt(10) ** BigInt(decimals);
+  return BigInt(amount) * base;
 }
 
 export function toFixedLenHex(hex, length = 32) {
@@ -47,13 +52,14 @@ export function toFixedLenHex(hex, length = 32) {
       return toHex(hex.slice(2).padStart(length * 2, '0'));
     }
     return toHex(hex.padStart(length * 2, '0'));
-  } else if (hex instanceof BN) {
+  } else if (hex instanceof BN || typeof hex === 'bigint') {
     return toFixedLenHex(hex.toString(16), length);
   } else if (hex instanceof Buffer) {
     return toFixedLenHex(hex.toString('hex'), length);
+  } else if (hex instanceof Uint8Array) {
+    return toFixedLenHex(Buffer.from(hex), length);
   }
-  throw new Error('given type ' + (typeof hex) + ' is not supported');
-
+  throw new Error('given type ' + typeof hex + ' is not supported');
 }
 
 export function toHex(hex) {
@@ -64,10 +70,44 @@ export function toHex(hex) {
       return '0x' + hex.slice(2);
     }
     return '0x' + hex;
-  } else if (hex instanceof BN) {
+  } else if (hex instanceof BN || typeof hex === 'bigint') {
     return toHex(hex.toString(16));
   } else if (hex instanceof Buffer) {
     return toHex(hex.toString('hex'));
+  } else if (hex instanceof Uint8Array) {
+    return toHex(Buffer.from(hex));
   }
-  throw new Error('given type ' + (typeof hex) + ' is not supported');
+  throw new Error('given type ' + typeof hex + ' is not supported');
+}
+
+export function toFixedLenHexNoPrefix(hex, length = 32) {
+  if (typeof hex === 'string') {
+    if (hex.slice(0, 2) === '0x' || hex.slice(0, 2) === '0X') {
+      return toHexNoPrefix(hex.slice(2).padStart(length * 2, '0'));
+    }
+    return toHexNoPrefix(hex.padStart(length * 2, '0'));
+  } else if (hex instanceof BN || typeof hex === 'bigint') {
+    return toFixedLenHexNoPrefix(hex.toString(16), length);
+  } else if (hex instanceof Buffer) {
+    return toFixedLenHexNoPrefix(hex.toString('hex'), length);
+  } else if (hex instanceof Uint8Array) {
+    return toFixedLenHexNoPrefix(Buffer.from(hex), length);
+  }
+  throw new Error('given type ' + typeof hex + ' is not supported');
+}
+
+export function toHexNoPrefix(hex) {
+  if (typeof hex === 'string') {
+    if (hex.slice(0, 2) === '0x' || hex.slice(0, 2) === '0X') {
+      return hex.slice(2);
+    }
+    return hex;
+  } else if (hex instanceof BN || typeof hex === 'bigint') {
+    return hex.toString(16);
+  } else if (hex instanceof Buffer) {
+    return hex.toString('hex');
+  } else if (hex instanceof Uint8Array) {
+    return toHexNoPrefix(Buffer.from(hex));
+  }
+  throw new Error('given type ' + typeof hex + ' is not supported');
 }

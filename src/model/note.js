@@ -1,100 +1,5 @@
-import { encrypt, decrypt } from 'eciesjs';
 import { BaseModel } from './common.js';
-
-export const RANDOM_SECRET_P_LEN = 16;
-export const RANDOM_SECRET_R_LEN = 16;
-export const RANDOM_SECRET_S_LEN = 16;
-export const ONCHAIN_NOTE_LEN = RANDOM_SECRET_P_LEN + RANDOM_SECRET_R_LEN + RANDOM_SECRET_S_LEN;
-export class OnchainNote extends BaseModel {
-  constructor(data = {}) {
-    super(data);
-    OnchainNote.checkRandomSecretP(this.randomSecretP);
-    OnchainNote.checkRandomSecretR(this.randomSecretR);
-    OnchainNote.checkRandomSecretS(this.randomSecretS);
-  }
-
-  get randomSecretP() {
-    return this.data['randomSecretP'];
-  }
-
-  set randomSecretP(secret) {
-    OnchainNote.checkRandomSecretP(secret);
-    this.data['randomSecretP'] = secret;
-  }
-
-  get randomSecretR() {
-    return this.data['randomSecretR'];
-  }
-
-  set randomSecretR(secret) {
-    OnchainNote.checkRandomSecretR(secret);
-    this.data['randomSecretR'] = secret;
-  }
-
-  get randomSecretS() {
-    return this.data['randomSecretS'];
-  }
-
-  set randomSecretS(secret) {
-    OnchainNote.checkRandomSecretS(secret);
-    this.data['randomSecretS'] = secret;
-  }
-
-  get bytes() {
-    if (this.randomSecretP && this.randomSecretR && this.randomSecretS) {
-      return Buffer.concat([
-        Buffer.from(this.randomSecretP, 'hex'),
-        Buffer.from(this.randomSecretR, 'hex'),
-        Buffer.from(this.randomSecretS, 'hex'),
-      ]);
-    }
-    return undefined;
-  }
-
-  getEncryptedNote(publicKeyHex) {
-    if (this.randomSecretP && this.randomSecretR && this.randomSecretS) {
-      const fullBytes = Buffer.concat([
-        Buffer.from(this.randomSecretP, 'hex'),
-        Buffer.from(this.randomSecretR, 'hex'),
-        Buffer.from(this.randomSecretS, 'hex'),
-      ]);
-      return encrypt(publicKeyHex, fullBytes).toString('hex');
-    }
-    return undefined;
-  }
-
-  static checkRandomSecretP(p) {
-    if (p && p.length !== RANDOM_SECRET_P_LEN * 2) {
-      throw 'invalid random secret p hex string';
-    }
-  }
-
-  static checkRandomSecretR(r) {
-    if (r && r.length !== RANDOM_SECRET_R_LEN * 2) {
-      throw 'invalid random secret r hex string';
-    }
-  }
-
-  static checkRandomSecretS(s) {
-    if (s && s.length !== RANDOM_SECRET_S_LEN * 2) {
-      throw 'invalid random secret s hex string';
-    }
-  }
-
-  static decryptNote(secretKeyHex, encryptedNote) {
-    const decrypted = decrypt(secretKeyHex, Buffer.from(encryptedNote, 'hex'));
-    const onchainNote = new OnchainNote({
-      randomSecretP: decrypted.slice(0, RANDOM_SECRET_P_LEN).toString('hex'),
-      randomSecretR: decrypted
-        .slice(RANDOM_SECRET_P_LEN, RANDOM_SECRET_P_LEN + RANDOM_SECRET_R_LEN)
-        .toString('hex'),
-      randomSecretS: decrypted
-        .slice(RANDOM_SECRET_P_LEN + RANDOM_SECRET_R_LEN, ONCHAIN_NOTE_LEN)
-        .toString('hex'),
-    });
-    return onchainNote;
-  }
-}
+import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
 export class OffchainNote extends BaseModel {
   constructor(data = {}) {
@@ -106,6 +11,7 @@ export class OffchainNote extends BaseModel {
   }
 
   set chainId(id) {
+    check(typeof id === 'number', 'id should be instance of number');
     this.data['chainId'] = id;
   }
 
@@ -114,21 +20,8 @@ export class OffchainNote extends BaseModel {
   }
 
   set transactionHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
     this.data['transactionHash'] = hash;
-  }
-
-  get bytes() {
-    return Buffer.from(JSON.stringify(this.data));
-  }
-
-  getEncryptedNote(publicKeyHex) {
-    return encrypt(publicKeyHex, this.bytes).toString('hex');
-  }
-
-  static decryptNote(secretKeyHex, encryptedNote) {
-    const decrypted = decrypt(secretKeyHex, Buffer.from(encryptedNote, 'hex'));
-    const data = JSON.parse(decrypted.toString());
-    return new OffchainNote(data);
   }
 }
 
@@ -142,6 +35,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set srcChainId(id) {
+    check(typeof id === 'number', 'srcChainId should be instance of number');
     this.data['srcChainId'] = id;
   }
 
@@ -150,6 +44,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set srcTransactionHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
     this.data['srcTransactionHash'] = hash;
   }
 
@@ -158,6 +53,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set srcToken(token) {
+    check(typeof token === 'string', 'token should be instance of string');
     this.data['srcToken'] = token;
   }
 
@@ -165,16 +61,19 @@ export class PrivateNote extends BaseModel {
     return this.data['srcTokenAddress'];
   }
 
-  set srcTokenAddress(token) {
-    this.data['srcTokenAddress'] = token;
+  set srcTokenAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
+    this.data['srcTokenAddress'] = address;
   }
 
   get srcAmount() {
-    return this.data['srcAmount'];
+    const raw = this.data['srcAmount'];
+    return raw ? BigInt(raw) : undefined;
   }
 
   set srcAmount(amnt) {
-    this.data['srcAmount'] = amnt;
+    check(typeof amnt === 'bigint', 'amnt should be instance of bigint');
+    this.data['srcAmount'] = amnt.toString();
   }
 
   get dstChainId() {
@@ -182,6 +81,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set dstChainId(id) {
+    check(typeof id === 'number', 'dstChainId should be instance of number');
     this.data['dstChainId'] = id;
   }
 
@@ -190,6 +90,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set dstTransactionHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
     this.data['dstTransactionHash'] = hash;
   }
 
@@ -198,6 +99,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set dstToken(token) {
+    check(typeof token === 'string', 'token should be instance of string');
     this.data['dstToken'] = token;
   }
 
@@ -205,24 +107,29 @@ export class PrivateNote extends BaseModel {
     return this.data['dstTokenAddress'];
   }
 
-  set dstTokenAddress(token) {
-    this.data['dstTokenAddress'] = token;
+  set dstTokenAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
+    this.data['dstTokenAddress'] = address;
   }
 
   get dstAmount() {
-    return this.data['dstAmount'];
+    const raw = this.data['dstAmount'];
+    return raw ? BigInt(raw) : undefined;
   }
 
   set dstAmount(amnt) {
-    this.data['dstAmount'] = amnt;
+    check(typeof amnt === 'bigint', 'amnt should be instance of bigint');
+    this.data['dstAmount'] = amnt.toString();
   }
 
   get encryptedOnchainNote() {
-    return this.data['encryptedOnchainNote'];
+    const raw = this.data['encryptedOnchainNote'];
+    return raw ? toBuff(raw) : undefined;
   }
 
   set encryptedOnchainNote(note) {
-    this.data['encryptedOnchainNote'] = note;
+    check(note instanceof Buffer, 'note should be instance of Buffer');
+    this.data['encryptedOnchainNote'] = toHexNoPrefix(note);
   }
 
   get walletId() {
@@ -230,6 +137,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set walletId(id) {
+    check(typeof id === 'number', 'dstChainId should be instance of number');
     this.data['walletId'] = id;
   }
 
@@ -238,6 +146,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set shieldedAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
     this.data['shieldedAddress'] = address;
   }
 
@@ -246,9 +155,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set status(s) {
-    if (!isValidPrivateNoteStatus(s)) {
-      throw 'invalid private note status ' + s;
-    }
+    check(isValidPrivateNoteStatus(s), 'invalid private note status ' + s);
     this.data['status'] = s;
   }
 }

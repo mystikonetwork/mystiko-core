@@ -1,3 +1,4 @@
+import { check, toBuff, toHexNoPrefix } from '../utils.js';
 import { BaseModel } from './common.js';
 
 export class Withdraw extends BaseModel {
@@ -10,6 +11,7 @@ export class Withdraw extends BaseModel {
   }
 
   set chainId(id) {
+    check(typeof id === 'number', 'id should be instance of number');
     this.data['chainId'] = id;
   }
 
@@ -18,6 +20,7 @@ export class Withdraw extends BaseModel {
   }
 
   set token(t) {
+    check(typeof t === 'string', 'token should be instance of string');
     this.data['token'] = t;
   }
 
@@ -26,31 +29,38 @@ export class Withdraw extends BaseModel {
   }
 
   set tokenAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
     this.data['tokenAddress'] = address;
   }
 
   get merkleRootHash() {
-    return this.data['merkleRootHash'];
+    const raw = this.data['merkleRootHash'];
+    return raw ? BigInt(raw) : undefined;
   }
 
   set merkleRootHash(hash) {
-    this.data['merkleRootHash'] = hash;
+    check(typeof hash === 'bigint', 'hash should be instance of bigint');
+    this.data['merkleRootHash'] = hash.toString();
   }
 
   get serialNumber() {
-    return this.data['serialNumber'];
+    const raw = this.data['serialNumber'];
+    return raw ? toBuff(raw) : undefined;
   }
 
   set serialNumber(sn) {
-    this.data['serialNumber'] = sn;
+    check(sn instanceof Buffer, 'sn should be instance of Buffer');
+    this.data['serialNumber'] = toHexNoPrefix(sn);
   }
 
   get amount() {
-    return this.data['amount'];
+    const raw = this.data['amount'];
+    return raw ? BigInt(raw) : undefined;
   }
 
   set amount(amnt) {
-    this.data['amount'] = amnt;
+    check(typeof amnt === 'bigint', 'amnt should be instance of bigint');
+    this.data['amount'] = amnt.toString();
   }
 
   get recipientAddress() {
@@ -58,6 +68,7 @@ export class Withdraw extends BaseModel {
   }
 
   set recipientAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
     this.data['recipientAddress'] = address;
   }
 
@@ -66,6 +77,7 @@ export class Withdraw extends BaseModel {
   }
 
   set transactionHash(hash) {
+    check(typeof hash === 'string', 'address should be instance of string');
     this.data['transactionHash'] = hash;
   }
 
@@ -74,6 +86,7 @@ export class Withdraw extends BaseModel {
   }
 
   set walletId(id) {
+    check(typeof id === 'number', 'id should be instance of number');
     this.data['walletId'] = id;
   }
 
@@ -82,6 +95,7 @@ export class Withdraw extends BaseModel {
   }
 
   set shieldedAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
     this.data['shieldedAddress'] = address;
   }
 
@@ -90,6 +104,7 @@ export class Withdraw extends BaseModel {
   }
 
   set privateNoteId(id) {
+    check(typeof id === 'number', 'id should be instance of number');
     this.data['privateNoteId'] = id;
   }
 
@@ -98,11 +113,8 @@ export class Withdraw extends BaseModel {
   }
 
   set status(s) {
-    if (isValidWithdrawStatus(s)) {
-      this.data['status'] = s;
-    } else {
-      throw 'invalid deposit status ' + s;
-    }
+    check(isValidWithdrawStatus(s), 'invalid deposit status ' + s);
+    this.data['status'] = s;
   }
 }
 
