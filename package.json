@@ -21,7 +21,7 @@
     "lint:js": "eslint --ext .js .",
     "lint:solidity": "npx solhint contracts/**/*.sol",
     "test": "yarn test:js && yarn test:contract",
-    "test:js": "jest",
+    "test:js": "jest --forceExit",
     "test:contract": "npx truffle test"
   },
   "devDependencies": {
