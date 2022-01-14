@@ -1,8 +1,9 @@
 {
-  "name": "@mystiko/core",
+  "name": "mystiko",
   "version": "0.1.0",
   "description": "Core Protocol of Mystiko.Network",
-  "main": "src/index.ts",
+  "main": "build/js/cjs/index.js",
+  "module": "build/js/esm/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
   "author": "Fitch",
   "license": "MIT",
@@ -27,6 +28,10 @@
     "@babel/preset-env": "^7.16.7",
     "@babel/register": "^7.16.8",
     "@openzeppelin/contracts": "^3.4.2",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
     "@truffle/contract": "^4.4.2",
     "@truffle/hdwallet-provider": "^2.0.0",
     "babel-jest": "^27.4.6",
@@ -41,6 +46,8 @@
     "ganache-cli": "^6.12.2",
     "jest": "^27.4.7",
     "prettier": "^2.5.1",
+    "rollup": "^2.63.0",
+    "rollup-plugin-terser": "^7.0.2",
     "snarkjs": "^0.4.10",
     "truffle": "^5.4.27"
   },
@@ -57,6 +64,7 @@
     "fastfile": "^0.0.19",
     "ffjavascript": "^0.2.46",
     "fixed-merkle-tree": "^0.6.0",
-    "lokijs": "^1.5.12"
+    "lokijs": "^1.5.12",
+    "randombytes": "^2.1.0"
   }
 }

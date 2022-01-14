@@ -1,4 +1,4 @@
-import { randomBytes as unsafeRandomBytes } from 'crypto';
+import unsafeRandomBytes from 'randombytes';
 import { Scalar } from 'ffjavascript';
 import createBlakeHash from 'blake-hash';
 import { pedersenHash, eddsa, babyJub } from 'circomlib';

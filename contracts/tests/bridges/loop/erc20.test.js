@@ -1,18 +1,18 @@
 import { BN } from 'bn.js';
-import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../src/utils.js';
-import protocol from '../../src/protocol/index.js';
+import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../../../src/utils.js';
+import protocol from '../../../../src/protocol/index.js';
 import MerkleTree from 'fixed-merkle-tree';
 
-const MystikoWithLoop = artifacts.require('MystikoWithLoop');
+const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
 const TestToken = artifacts.require('TestToken');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 
-contract('MystikoWithLoop', (accounts) => {
+contract('MystikoWithLoopERC20', (accounts) => {
   describe('Test basic read operations', () => {
     it('should set token correctly information correctly', async () => {
       const tokenContract = await TestToken.deployed();
-      const loopContract = await MystikoWithLoop.deployed();
+      const loopContract = await MystikoWithLoopERC20.deployed();
       expect(await loopContract.getToken.call()).to.equal(tokenContract.address);
       expect(await loopContract.getTokenName.call()).to.equal(await tokenContract.name.call());
       expect(await loopContract.getTokenSymbol.call()).to.equal(await tokenContract.symbol.call());
@@ -22,13 +22,13 @@ contract('MystikoWithLoop', (accounts) => {
     });
 
     it('should set verifier information correctly', async () => {
-      const loopContract = await MystikoWithLoop.deployed();
+      const loopContract = await MystikoWithLoopERC20.deployed();
       const verifierContract = await Verifier.deployed();
       expect(await loopContract.getVerifierAddress.call()).to.equal(verifierContract.address);
     });
 
     it('should set hasher information correctly', async () => {
-      const loopContract = await MystikoWithLoop.deployed();
+      const loopContract = await MystikoWithLoopERC20.deployed();
       const hasherContract = await Hasher.deployed();
       expect(await loopContract.getHasherAddress.call()).to.equal(hasherContract.address);
     });
@@ -60,7 +60,7 @@ contract('MystikoWithLoop', (accounts) => {
     it('should deposit successfully', async () => {
       const amount = toDecimals(1000, 18);
       const { commitmentHash, privateNote } = protocol.commitment(pkVerify, pkEnc, amount);
-      const loopContract = await MystikoWithLoop.deployed();
+      const loopContract = await MystikoWithLoopERC20.deployed();
       const tokenContract = await TestToken.deployed();
       await tokenContract.approve(loopContract.address, amount, { from: accounts[1] });
       const allowance = await tokenContract.allowance(accounts[1], loopContract.address);
@@ -129,7 +129,7 @@ contract('MystikoWithLoop', (accounts) => {
     });
 
     it('should withdraw successfully', async () => {
-      const loopContract = await MystikoWithLoop.deployed();
+      const loopContract = await MystikoWithLoopERC20.deployed();
       const tokenContract = await TestToken.deployed();
       const verifierContract = await Verifier.deployed();
       const proofA = [new BN(proof.pi_a[0]), new BN(proof.pi_a[1])];

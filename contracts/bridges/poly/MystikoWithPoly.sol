@@ -8,7 +8,7 @@ import "../../libs/common/ZeroCopySink.sol";
 import "../../libs/common/ZeroCopySource.sol";
 import "../../libs/utils/Utils.sol";
 
-contract MystikoWithPoly is Mystiko {
+abstract contract MystikoWithPoly is Mystiko {
   IEthCrossChainManagerProxy public eccmp;
   uint64 public peerChainId;
   bytes public peerChainContract;
@@ -22,10 +22,10 @@ contract MystikoWithPoly is Mystiko {
     address _eccmp,
     uint64 _peerChainId,
     address _verifier,
-    address _token,
     address _hasher,
-    uint32 _merkleTreeHeight
-  ) public Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.CROSS_CHAIN) {
+    uint32 _merkleTreeHeight,
+    TokenType _tokenType
+  ) public Mystiko(_verifier, _hasher, _merkleTreeHeight, ProtocolType.CROSS_CHAIN, _tokenType) {
     eccmp = IEthCrossChainManagerProxy(_eccmp);
     peerChainId = _peerChainId;
     peerChainContract = new bytes(0);

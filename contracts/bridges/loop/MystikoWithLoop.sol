@@ -3,14 +3,14 @@ pragma solidity ^0.6.11;
 
 import "../../Mystiko.sol";
 
-contract MystikoWithLoop is Mystiko {
+abstract contract MystikoWithLoop is Mystiko {
 
   constructor(
     address _verifier,
-    address _token,
     address _hasher,
-    uint32 _merkleTreeHeight
-  ) public Mystiko(_verifier, _token, _hasher, _merkleTreeHeight, ProtocolType.SAME_CHAIN) {}
+    uint32 _merkleTreeHeight,
+    TokenType _tokenType
+  ) public Mystiko(_verifier, _hasher, _merkleTreeHeight, ProtocolType.SAME_CHAIN, _tokenType) {}
 
   function _processCrossChain(
     uint256 amount, bytes32 commitmentHash) internal override {

@@ -2,8 +2,7 @@
 pragma solidity ^0.6.11;
 
 import "./merkle/MerkleTreeWithHistory.sol";
-import "./libs/erc20/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./pool/AssetPool.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 interface IVerifier {
@@ -13,13 +12,11 @@ interface IVerifier {
     uint256[2] memory c, uint256[3] memory input) external returns (bool);
 }
 
-abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
-  using SafeERC20 for IERC20Metadata;
-
+abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   enum ProtocolType { CROSS_CHAIN, SAME_CHAIN }
+  enum TokenType { ERC20, MAIN }
 
   IVerifier public verifier;
-  IERC20Metadata public token;
   mapping(bytes32 => bool) public depositedCommitments;
   mapping(uint256 => bool) public withdrewSerialNumbers;
 
@@ -27,6 +24,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
   bool public isDepositsDisabled;
   bool public isVerifierUpdateDisabled;
   ProtocolType public protocolType;
+  TokenType public tokenType;
 
   modifier onlyOperator {
     require(msg.sender == operator, "Only operator can call this function.");
@@ -39,22 +37,22 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
 
   constructor(
     address _verifier,
-    address _token,
     address _hasher,
     uint32 _merkleTreeHeight,
-    ProtocolType _protocolType
+    ProtocolType _protocolType,
+    TokenType _tokenType
   ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
     verifier = IVerifier(_verifier);
-    token = IERC20Metadata(_token);
     operator = msg.sender;
     protocolType = _protocolType;
+    tokenType = _tokenType;
   }
 
   function deposit(uint256 amount, bytes32 commitmentHash, bytes memory encryptedNote)
     public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
-    token.safeTransferFrom(msg.sender, address(this), amount);
+    _processDepositTransfer(amount);
     depositedCommitments[commitmentHash] = true;
     _processCrossChain(amount, commitmentHash);
     emit Deposit(amount, commitmentHash, encryptedNote);
@@ -73,7 +71,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     require(verifier.verifyProof(a, b, c,
       [rootHash, serialNumber, amount]), "Invalid withdraw proof");
     withdrewSerialNumbers[serialNumber] = true;
-    token.safeTransfer(recipient, amount);
+    _processWithdrawTransfer(recipient, amount);
     emit Withdraw(recipient, rootHash, serialNumber);
   }
 
@@ -84,28 +82,16 @@ abstract contract Mystiko is MerkleTreeWithHistory, ReentrancyGuard {
     return withdrewSerialNumbers[serialNumber];
   }
 
-  function getToken() public view returns(address) {
-    return address(token);
-  }
-
-  function getTokenName() public view returns(string memory) {
-    return token.name();
-  }
-
-  function getTokenSymbol() public view returns(string memory) {
-    return token.symbol();
-  }
-
-  function getTokenDecimals() public view returns(uint8) {
-    return token.decimals();
-  }
-
   function getVerifierAddress() public view returns(address) {
     return address(verifier);
   }
 
   function getProtocolType() public view returns(ProtocolType) {
     return protocolType;
+  }
+
+  function getTokenType() public view returns(TokenType) {
+    return tokenType;
   }
 
   function getHasherAddress() public view returns(address) {
