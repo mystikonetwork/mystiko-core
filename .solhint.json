@@ -1,4 +1,3 @@
-
 {
   "extends": "solhint:recommended",
   "rules": {
@@ -8,7 +7,8 @@
         "printWidth": 110
       }
     ],
-    "quotes": ["error", "double"]
+    "quotes": ["error", "double"],
+    "compiler-version": ["error", "^0.6.11"]
   },
   "plugins": ["prettier"]
 }

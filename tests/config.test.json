@@ -35,11 +35,7 @@
               "dstTokenAddress": "0x3a8da27062e5c85ca271282a595cee91ff3250cd",
               "srcProtocolAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
               "dstProtocolAddress": "0x9c3f0fc85ef9144412388e7e952eb505e2c4a10f",
-              "allowedAmounts": [
-                1,
-                10,
-                100
-              ],
+              "allowedAmounts": [1, 10, 100],
               "decimal": 18
             }
           }
@@ -55,11 +51,7 @@
           "name": "USDT",
           "tokenAddress": "0x412481ca1431988a9fa62c604bfa1af54cd11e66",
           "protocolAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
-          "allowedAmounts": [
-            1,
-            10,
-            100
-          ],
+          "allowedAmounts": [1, 10, 100],
           "decimal": 18
         }
       }

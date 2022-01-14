@@ -8,8 +8,12 @@
     {
       "files": "*.sol",
       "options": {
+        "printWidth": 110,
+        "tabWidth": 4,
+        "useTabs": false,
         "singleQuote": false,
-        "printWidth": 130
+        "bracketSpacing": false,
+        "explicitTypes": "always"
       }
     }
   ]
