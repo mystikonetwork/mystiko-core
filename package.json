@@ -10,7 +10,8 @@
   "scripts": {
     "build:circuit": "./scripts/buildCircuit.sh",
     "build:contract": "npx truffle compile",
-    "build": "yarn lint && yarn build:circuit && yarn build:contract",
+    "build:js": "rollup -c rollup.config.js",
+    "build": "yarn lint && yarn build:contract && yarn build:js",
     "migrate": "yarn migrate:dev",
     "migrate:dev": "npx truffle migrate --network development --reset",
     "eslint": "eslint --ext .js .",
