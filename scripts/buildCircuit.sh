@@ -4,6 +4,7 @@ set -ex
 BASE=$(cd "$(dirname "$0")";pwd)
 ROOT="${BASE}/.."
 BUILD="${ROOT}/build/circuits"
+DIST="${ROOT}/dist/circom/dev"
 POWERS_OF_TAU=16
 
 mkdir -p "${BUILD}"
@@ -19,3 +20,6 @@ npx snarkjs zkey verify "${BUILD}/withdraw.r1cs" "${BUILD}/ptau${POWERS_OF_TAU}"
 npx snarkjs zkey export verificationkey "${BUILD}/withdraw.zkey" "${BUILD}/withdraw.vkey.json"
 npx snarkjs zkey export solidityverifier "${BUILD}/withdraw.zkey" "${ROOT}/contracts/Verifier.sol"
 npx snarkjs info -r "${BUILD}/withdraw.r1cs"
+cp "${BUILD}/withdraw.wasm" "${DIST}/withdraw.wasm"
+cp "${BUILD}/withdraw.zkey" "${DIST}/withdraw.zkey"
+cp "${BUILD}/withdraw.vkey.json" "${DIST}/withdraw.vkey.json"
