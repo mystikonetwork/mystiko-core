@@ -59,7 +59,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
 
     it('should deposit successfully', async () => {
       const amount = toDecimals(1000, 18);
-      const { commitmentHash, privateNote } = protocol.commitment(pkVerify, pkEnc, amount);
+      const { commitmentHash, privateNote, k, randomS } = protocol.commitment(pkVerify, pkEnc, amount);
       const loopContract = await MystikoWithLoopERC20.deployed();
       const tokenContract = await TestToken.deployed();
       await tokenContract.approve(loopContract.address, amount, { from: accounts[1] });
@@ -68,13 +68,22 @@ contract('MystikoWithLoopERC20', (accounts) => {
       const gasEstimated = await loopContract.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
+        toFixedLenHex(k),
+        toFixedLenHex(randomS),
         toHex(privateNote),
         { from: accounts[1] },
       );
-      depositTx = await loopContract.deposit(amount, toFixedLenHex(commitmentHash), toHex(privateNote), {
-        from: accounts[1],
-        gas: gasEstimated,
-      });
+      depositTx = await loopContract.deposit(
+        amount,
+        toFixedLenHex(commitmentHash),
+        toFixedLenHex(k),
+        toFixedLenHex(randomS),
+        toHex(privateNote),
+        {
+          from: accounts[1],
+          gas: gasEstimated,
+        },
+      );
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
       expect(depositEvent.args.amount.toString()).to.equal(amount.toString());

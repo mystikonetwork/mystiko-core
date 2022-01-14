@@ -1926,10 +1926,10 @@
     "@babel/helper-module-imports" "^7.10.4"
     "@rollup/pluginutils" "^3.1.0"
 
-"@rollup/plugin-commonjs@^21.0.1":
-  version "21.0.1"
-  resolved "https://registry.npmmirror.com/@rollup/plugin-commonjs/download/@rollup/plugin-commonjs-21.0.1.tgz#1e57c81ae1518e4df0954d681c642e7d94588fee"
-  integrity sha1-HlfIGuFRjk3wlU1oHGQufZRYj+4=
+"@rollup/plugin-commonjs@^22.0.0-4":
+  version "22.0.0-4"
+  resolved "https://registry.npmmirror.com/@rollup/plugin-commonjs/download/@rollup/plugin-commonjs-22.0.0-4.tgz#416ec639221aec73244aec1a0c6dcfcb1662441d"
+  integrity sha512-fI6ELnNrVGT1bLvwv/bj4s7Sawtz+rVP4jpO8G3RoggKVQSEPiKNtIlNiDWtme9rXhYuuQK+zDeJ0CA0SvgTfQ==
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     commondir "^1.0.1"

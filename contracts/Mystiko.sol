@@ -59,10 +59,15 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     function deposit(
         uint256 amount,
         bytes32 commitmentHash,
+        bytes32 hashK,
+        bytes32 randomS,
         bytes memory encryptedNote
     ) public payable {
         require(!isDepositsDisabled, "deposits are disabled");
         require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
+        bytes32 cHash = hashLeftRight(hasher, hashK, bytes32(amount));
+        cHash = hashLeftRight(hasher, cHash, randomS);
+        require(cHash == commitmentHash, "commitment hash incorrect");
         _processDepositTransfer(amount);
         depositedCommitments[commitmentHash] = true;
         _processCrossChain(amount, commitmentHash);

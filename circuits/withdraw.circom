@@ -1,6 +1,7 @@
 include "../node_modules/circomlib/circuits/pedersen.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/babyjub.circom";
+include "../node_modules/circomlib/circuits/mimcsponge.circom";
 include "merkleTree.circom";
 
 template CommitmentHasher(nPkBits, nRandomBits) {
@@ -14,18 +15,15 @@ template CommitmentHasher(nPkBits, nRandomBits) {
     component publicKeyBits = Num2Bits(nPkBits);
     component randomPBits = Num2Bits(nRandomBits);
     component randomRBits = Num2Bits(nRandomBits);
-    component randomSBits = Num2Bits(nRandomBits);
-    component amountBits = Num2Bits(256);
     component hasher1Bits = Num2Bits(256);
     component hasher1 = Pedersen(nPkBits + nRandomBits + nRandomBits);
-    component hasher2 = Pedersen(512 + nRandomBits);
+    component hasher2 = MiMCSponge(2, 220, 1);
+    component hasher3 = MiMCSponge(2, 220, 1);
     component hashNum = Bits2Num(256);
 
     publicKeyBits.in <== publicKey;
     randomPBits.in <== randomP;
     randomRBits.in <== randomR;
-    randomSBits.in <== randomS;
-    amountBits.in <== amount;
 
     for (var i = 0; i < nPkBits; i++) {
         hasher1.in[i] <== publicKeyBits.out[i];
@@ -36,18 +34,14 @@ template CommitmentHasher(nPkBits, nRandomBits) {
         hasher1.in[i + nPkBits + nRandomBits] <== randomRBits.out[i];
     }
 
-    hasher1Bits.in <== hasher1.out[0];
+    hasher2.ins[0] <== hasher1.out[0];
+    hasher2.ins[1] <== amount;
+    hasher2.k <== 0;
+    hasher3.ins[0] <== hasher2.outs[0];
+    hasher3.ins[1] <== randomS;
+    hasher3.k <== 0;
 
-    for (var i = 0; i < 256; i++) {
-        hasher2.in[i] <== amountBits.out[i];
-        hasher2.in[i + 256] <== hasher1Bits.out[i];
-    }
-
-    for (var i = 0; i < nRandomBits; i++) {
-        hasher2.in[i + 512] <== randomSBits.out[i];
-    }
-
-    hash <== hasher2.out[0];
+    hash <== hasher3.outs[0];
 }
 
 template SerialNumberHasher(nSkBits, nRandomBits) {

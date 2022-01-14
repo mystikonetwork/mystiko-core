@@ -36,6 +36,7 @@ export default {
   encryptSymmetric: DefaultProtocol.encryptSymmetric,
   decryptSymmetric: DefaultProtocol.decryptSymmetric,
   hash: DefaultProtocol.hash,
+  hash2: DefaultProtocol.hash2,
   checkSum: DefaultProtocol.checkSum,
   buffToBigInt: DefaultProtocol.buffToBigInt,
   bigIntToBuff: DefaultProtocol.bigIntToBuff,

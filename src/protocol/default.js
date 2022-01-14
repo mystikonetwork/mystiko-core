@@ -1,7 +1,7 @@
 import unsafeRandomBytes from 'randombytes';
 import { Scalar } from 'ffjavascript';
 import createBlakeHash from 'blake-hash';
-import { pedersenHash, eddsa, babyJub } from 'circomlib';
+import { pedersenHash, eddsa, babyJub, mimcsponge } from 'circomlib';
 import cryptojs from 'crypto-js';
 import aes from 'crypto-js/aes';
 import hmacSHA512 from 'crypto-js/hmac-sha512';
@@ -165,6 +165,12 @@ export default class DefaultProtocol {
     return unpackedPoints[0];
   }
 
+  static hash2(left, right) {
+    check(typeof left === 'bigint' || typeof left === 'number', 'unsupported data type ' + typeof left);
+    check(typeof right === 'bigint' || typeof right === 'number', 'unsupported salt type ' + typeof right);
+    return mimcsponge.multiHash([left, right], 0, 1);
+  }
+
   static checkSum(data, salt = 'mystiko') {
     check(typeof data === 'string', 'unsupported data type ' + typeof data);
     check(typeof salt === 'string', 'unsupported salt type ' + typeof salt);
@@ -205,16 +211,17 @@ export default class DefaultProtocol {
     check(typeof amount === 'bigint', 'unsupported amount type ' + typeof amount);
     check(!randomS || randomP instanceof Buffer, 'unsupported randomP type ' + typeof randomP);
     check(!randomR || randomR instanceof Buffer, 'unsupported randomR type ' + typeof randomR);
-    check(!randomS || randomS instanceof Buffer, 'unsupported randomS type ' + typeof randomS);
+    check(!randomS || typeof randomS === 'bigint', 'unsupported randomS type ' + typeof randomS);
     randomP = randomP ? randomP : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
     randomR = randomR ? randomR : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
-    randomS = randomS ? randomS : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
-    const amountBuffer = DefaultProtocol.bigIntToBuff(amount);
+    randomS = randomS ? randomS : DefaultProtocol.randomBigInt(RANDOM_SK_SIZE);
     const k = DefaultProtocol.hash(Buffer.concat([pkVerify, randomP, randomR]));
-    const kBuff = DefaultProtocol.bigIntToBuff(k, HASH_SIZE);
-    const commitmentHash = DefaultProtocol.hash(Buffer.concat([amountBuffer, kBuff, randomS]));
-    const privateNote = DefaultProtocol.encryptAsymmetric(pkEnc, Buffer.concat([randomP, randomR, randomS]));
-    return { commitmentHash, privateNote };
+    const commitmentHash = DefaultProtocol.hash2(DefaultProtocol.hash2(k, amount), randomS);
+    const privateNote = DefaultProtocol.encryptAsymmetric(
+      pkEnc,
+      Buffer.concat([randomP, randomR, DefaultProtocol.bigIntToBuff(randomS, RANDOM_SK_SIZE)]),
+    );
+    return { commitmentHash, k, randomS, privateNote };
   }
 
   static serialNumber(skVerify, randomP) {
@@ -258,7 +265,7 @@ export default class DefaultProtocol {
       amount,
       randomP,
       randomR,
-      randomS,
+      DefaultProtocol.buffToBigInt(randomS),
     );
     check(
       toHex(commitmentHash) === toHex(computedCommitmentHash.commitmentHash),

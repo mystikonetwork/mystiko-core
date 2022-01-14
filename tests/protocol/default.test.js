@@ -187,6 +187,16 @@ test('test hash', () => {
   expect(toHex(hash1)).toBe(toHex(hash3));
 });
 
+test('test hash2', () => {
+  expect(() => DefaultProtocol.hash2('data to be hashed', BigInt(1))).toThrow();
+  expect(() => DefaultProtocol.hash2(BigInt(1), 'data to be hashed')).toThrow();
+  const h1 = DefaultProtocol.hash2(1, 2);
+  const h2 = DefaultProtocol.hash2(3, 4);
+  const h3 = DefaultProtocol.hash2(BigInt(1), BigInt(2));
+  expect(h1).toBe(h3);
+  expect(h2).not.toBe(h3);
+});
+
 test('test checksum', () => {
   expect(() => DefaultProtocol.checkSum(100, 'P@ssw0rd')).toThrow();
   expect(() => DefaultProtocol.checkSum('data to be hashed', 100)).toThrow();
@@ -219,9 +229,11 @@ test('test commitment', () => {
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   const amount = toDecimals(100, 18);
-  const { commitmentHash, privateNote } = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
+  const { commitmentHash, privateNote, k, randomS } = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
   expect(commitmentHash).not.toBe(undefined);
   expect(privateNote).not.toBe(undefined);
+  expect(k).not.toBe(undefined);
+  expect(randomS).not.toBe(undefined);
   const decryptedNote = DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
   expect(decryptedNote.length).toBe(RANDOM_SK_SIZE * 3);
 });

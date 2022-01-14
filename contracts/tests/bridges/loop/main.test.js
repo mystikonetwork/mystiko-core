@@ -31,19 +31,28 @@ contract('MystikoWithLoopMain', (accounts) => {
   describe('Test deposit operation', () => {
     it('should deposit successfully', async () => {
       const amount = toDecimals(1, 16);
-      const { commitmentHash, privateNote } = protocol.commitment(pkVerify, pkEnc, amount);
+      const { commitmentHash, privateNote, k, randomS } = protocol.commitment(pkVerify, pkEnc, amount);
       const loopContract = await MystikoWithLoopMain.deployed();
       const gasEstimated = await loopContract.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
+        toFixedLenHex(k),
+        toFixedLenHex(randomS),
         toHex(privateNote),
         { from: accounts[1], value: toHex(amount) },
       );
-      depositTx = await loopContract.deposit(amount, toFixedLenHex(commitmentHash), toHex(privateNote), {
-        from: accounts[1],
-        gas: gasEstimated,
-        value: toHex(amount),
-      });
+      depositTx = await loopContract.deposit(
+        amount,
+        toFixedLenHex(commitmentHash),
+        toFixedLenHex(k),
+        toFixedLenHex(randomS),
+        toHex(privateNote),
+        {
+          from: accounts[1],
+          gas: gasEstimated,
+          value: toHex(amount),
+        },
+      );
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
       expect(depositEvent.args.amount.toString()).to.equal(amount.toString());
