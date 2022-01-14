@@ -15,9 +15,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
+      - run: npm install --global ganache-cli
       - run: yarn install --network-timeout 100000
       - run: cp .env.example .env
-      - run: ganache-cli > /dev/null &
+      - run: ganache-cli --port 7545 > /dev/null &
       - run: yarn build:circuit
       - run: yarn build
       - run: yarn test
