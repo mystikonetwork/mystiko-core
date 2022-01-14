@@ -8,6 +8,10 @@ import DefaultProtocol, {
 } from '../../src/protocol/default.js';
 import { toHex, toBuff, toDecimals } from '../../src/utils.js';
 
+beforeEach(() => {
+  jest.setTimeout(60000);
+});
+
 test('test randomBigInt', () => {
   const int1 = DefaultProtocol.randomBigInt(8);
   expect(int1).toBeLessThan(FIELD_SIZE);
