@@ -1,5 +1,5 @@
 import { Account } from '../../src/model/account';
-import { toBuff, toHexNoPrefix } from '../../src/utils.js';
+import { toHexNoPrefix } from '../../src/utils.js';
 
 test('Test Account getters/setters', () => {
   const account = new Account();

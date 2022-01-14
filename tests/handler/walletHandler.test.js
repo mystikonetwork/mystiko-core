@@ -26,11 +26,11 @@ test('Test WalletHandler createWallet', async () => {
   expect(handler.checkPassword(wallet, 'wrong')).toBe(false);
 });
 
-test('Test WalletHandler getCurrentWallet', async () => {
+test('Test WalletHandler getCurrentWallet', () => {
   expect(handler.getCurrentWallet()).toBe(null);
 });
 
-test('Test WalletHandler getWallet by id', async () => {
+test('Test WalletHandler getWallet by id', () => {
   expect(handler.getWalletById(1)).toBe(null);
 });
 

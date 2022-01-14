@@ -5,7 +5,6 @@ import DefaultProtocol, {
   ENCRYPT_SK_SIZE,
   ENCRYPT_PK_SIZE,
   RANDOM_SK_SIZE,
-  HASH_SIZE,
 } from '../../src/protocol/default.js';
 import { toHex, toBuff, toDecimals } from '../../src/utils.js';
 

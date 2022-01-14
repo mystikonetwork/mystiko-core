@@ -3,42 +3,21 @@ import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../.
 import protocol from '../../../../src/protocol/index.js';
 import MerkleTree from 'fixed-merkle-tree';
 
-const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
-const TestToken = artifacts.require('TestToken');
+const MystikoWithLoopMain = artifacts.require('MystikoWithLoopMain');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 
-contract('MystikoWithLoopERC20', (accounts) => {
-  describe('Test basic read operations', () => {
-    it('should set token correctly information correctly', async () => {
-      const tokenContract = await TestToken.deployed();
-      const loopContract = await MystikoWithLoopERC20.deployed();
-      expect(await loopContract.getToken.call()).to.equal(tokenContract.address);
-      expect(await loopContract.getTokenName.call()).to.equal(await tokenContract.name.call());
-      expect(await loopContract.getTokenSymbol.call()).to.equal(await tokenContract.symbol.call());
-      const actualDecimals = (await loopContract.getTokenDecimals.call()).toString();
-      const expectedDecimals = (await tokenContract.decimals.call()).toString();
-      expect(actualDecimals).to.equal(expectedDecimals);
-    });
+contract('MystikoWithLoopMain', (accounts) => {
+  it('should set verifier information correctly', async () => {
+    const loopContract = await MystikoWithLoopMain.deployed();
+    const verifierContract = await Verifier.deployed();
+    expect(await loopContract.getVerifierAddress.call()).to.equal(verifierContract.address);
+  });
 
-    it('should set verifier information correctly', async () => {
-      const loopContract = await MystikoWithLoopERC20.deployed();
-      const verifierContract = await Verifier.deployed();
-      expect(await loopContract.getVerifierAddress.call()).to.equal(verifierContract.address);
-    });
-
-    it('should set hasher information correctly', async () => {
-      const loopContract = await MystikoWithLoopERC20.deployed();
-      const hasherContract = await Hasher.deployed();
-      expect(await loopContract.getHasherAddress.call()).to.equal(hasherContract.address);
-    });
-
-    it('should have enough tokens in account 0', async () => {
-      const tokenContract = await TestToken.deployed();
-      console.log(tokenContract.address);
-      const balanceOfAccount0 = await tokenContract.balanceOf.call(accounts[0]);
-      expect(balanceOfAccount0.toString()).to.equal(toDecimals(1000000000, 18).toString());
-    });
+  it('should set hasher information correctly', async () => {
+    const loopContract = await MystikoWithLoopMain.deployed();
+    const hasherContract = await Hasher.deployed();
+    expect(await loopContract.getHasherAddress.call()).to.equal(hasherContract.address);
   });
 
   const rawSkVerify = protocol.randomBytes(protocol.VERIFY_SK_SIZE);
@@ -50,30 +29,20 @@ contract('MystikoWithLoopERC20', (accounts) => {
   let depositTx;
 
   describe('Test deposit operation', () => {
-    it('should transfer token to account 1 correctly', async () => {
-      const tokenContract = await TestToken.deployed();
-      await tokenContract.transfer(accounts[1], toDecimals(1000, 18), { from: accounts[0] });
-      const balanceOfAccount1 = await tokenContract.balanceOf.call(accounts[1]);
-      expect(balanceOfAccount1.toString()).to.equal(toDecimals(1000, 18).toString());
-    });
-
     it('should deposit successfully', async () => {
-      const amount = toDecimals(1000, 18);
+      const amount = toDecimals(1, 16);
       const { commitmentHash, privateNote } = protocol.commitment(pkVerify, pkEnc, amount);
-      const loopContract = await MystikoWithLoopERC20.deployed();
-      const tokenContract = await TestToken.deployed();
-      await tokenContract.approve(loopContract.address, amount, { from: accounts[1] });
-      const allowance = await tokenContract.allowance(accounts[1], loopContract.address);
-      expect(allowance.toString()).to.equal(amount.toString());
+      const loopContract = await MystikoWithLoopMain.deployed();
       const gasEstimated = await loopContract.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
         toHex(privateNote),
-        { from: accounts[1] },
+        { from: accounts[1], value: toHex(amount) },
       );
       depositTx = await loopContract.deposit(amount, toFixedLenHex(commitmentHash), toHex(privateNote), {
         from: accounts[1],
         gas: gasEstimated,
+        value: toHex(amount),
       });
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
@@ -129,8 +98,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
     });
 
     it('should withdraw successfully', async () => {
-      const loopContract = await MystikoWithLoopERC20.deployed();
-      const tokenContract = await TestToken.deployed();
+      const loopContract = await MystikoWithLoopMain.deployed();
       const verifierContract = await Verifier.deployed();
       const proofA = [new BN(proof.pi_a[0]), new BN(proof.pi_a[1])];
       const proofB = [
@@ -140,7 +108,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
       const proofC = [new BN(proof.pi_c[0]), new BN(proof.pi_c[1])];
       const rootHash = new BN(publicSignals[0]);
       const serialNumber = new BN(publicSignals[1]);
-      const amount = new BN(toDecimals(1000, 18).toString());
+      const amount = new BN(toDecimals(1, 16).toString());
       const result = await verifierContract.verifyProof(proofA, proofB, proofC, [
         rootHash,
         serialNumber,
@@ -162,8 +130,6 @@ contract('MystikoWithLoopERC20', (accounts) => {
         from: accounts[1],
         gas: gasEstimated,
       });
-      const balanceOfAccount3 = await tokenContract.balanceOf.call(accounts[2]);
-      expect(balanceOfAccount3.toString()).to.equal(amount.toString());
       const isSpent = await loopContract.isSpent(serialNumber);
       expect(isSpent).to.equal(true);
     });
