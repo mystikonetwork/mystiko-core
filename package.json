@@ -55,7 +55,8 @@
     "snarkjs": "^0.4.10",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
-    "truffle": "^5.4.27"
+    "truffle": "^5.4.27",
+    "truffle-plugin-verify": "^0.5.20"
   },
   "dependencies": {
     "blake-hash": "^2.0.0",

@@ -54,12 +54,13 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           process.env.PRIVATE_KEY,
-          'https://ropsten.infura.io/v3/042d213dd3bc4f7e91cfde96345c587e',
+          'https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j',
         ),
       network_id: 3,
       gas: 5500000,
       gasPrice: '8000000000',
       skipDryRun: true,
+      confirmations: 10,
     },
     // Another network with more advanced options...
     // advanced: {
@@ -115,6 +116,14 @@ module.exports = {
       ],
     },
   },
+
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_API_KEY
+  }
 
   // Truffle DB is currently disabled by default; to enable it, change enabled:
   // false to enabled: true. The default storage location can also be
