@@ -4,3 +4,4 @@ circuits
 *.log
 yarn.lock
 coverage
+dist
