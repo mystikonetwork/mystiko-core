@@ -59,7 +59,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
 
     it('should deposit successfully', async () => {
       const amount = toDecimals(1000, 18);
-      const { commitmentHash, privateNote, k, randomS } = protocol.commitment(pkVerify, pkEnc, amount);
+      const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
       const loopContract = await MystikoWithLoopERC20.deployed();
       const tokenContract = await TestToken.deployed();
       await tokenContract.approve(loopContract.address, amount, { from: accounts[1] });
@@ -107,8 +107,8 @@ contract('MystikoWithLoopERC20', (accounts) => {
     it('should generate proof successfully', async () => {
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       const merkleTreeInsertEvent = depositTx.logs.find((e) => e['event'] === 'MerkleTreeInsert');
-      const amount = BigInt(depositEvent.args.amount.toString());
-      const commitmentHash = BigInt(depositEvent.args.commitmentHash);
+      const amount = new BN(depositEvent.args.amount.toString());
+      const commitmentHash = new BN(toHexNoPrefix(depositEvent.args.commitmentHash), 16);
       const privateNote = toBuff(toHexNoPrefix(depositEvent.args.encryptedNote));
       const treeLeaves = [commitmentHash];
       const treeIndex = Number(merkleTreeInsertEvent.args.leafIndex);

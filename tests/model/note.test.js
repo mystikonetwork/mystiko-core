@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { OffchainNote, PrivateNote, PrivateNoteStatus } from '../../src/model/note.js';
 import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
@@ -36,8 +37,8 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.srcToken).toBe('USDT');
   note.srcTokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(note.srcTokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  note.srcAmount = BigInt('0xdeadbeef');
-  expect(note.srcAmount).toBe(BigInt('0xdeadbeef'));
+  note.srcAmount = new BN('deadbeef', 16);
+  expect(toHexNoPrefix(note.srcAmount)).toBe('deadbeef');
   note.dstChainId = 2;
   expect(note.dstChainId).toBe(2);
   note.dstTransactionHash = '4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e';
@@ -46,8 +47,8 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.dstToken).toBe('USDT');
   note.dstTokenAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(note.dstTokenAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
-  note.dstAmount = BigInt('0xbaadf00d');
-  expect(note.dstAmount).toBe(BigInt('0xbaadf00d'));
+  note.dstAmount = new BN('baadf00d', 16);
+  expect(toHexNoPrefix(note.dstAmount)).toBe('baadf00d');
   note.encryptedOnchainNote = toBuff('deaddead');
   expect(toHexNoPrefix(note.encryptedOnchainNote)).toBe('deaddead');
   note.walletId = 100;

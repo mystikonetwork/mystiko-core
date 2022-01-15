@@ -5,14 +5,15 @@ import { pedersenHash, eddsa, babyJub, mimcsponge } from 'circomlib';
 import cryptojs from 'crypto-js';
 import aes from 'crypto-js/aes';
 import hmacSHA512 from 'crypto-js/hmac-sha512';
-import { PrivateKey as ECIESPrivateKey, encrypt as eciesEncrypt, decrypt as eciesDecrypt } from 'eciesjs';
+import eccrypto from 'eccrypto';
 import MerkleTree from 'fixed-merkle-tree';
 import { groth16, wtns } from 'snarkjs';
 import * as fastfile from 'fastfile';
 import bs58 from 'bs58';
-import { toHex, check } from '../utils.js';
+import BN from 'bn.js';
+import { toHex, check, toHexNoPrefix } from '../utils.js';
 
-export const FIELD_SIZE = BigInt(
+export const FIELD_SIZE = new BN(
   '21888242871839275222246405745257275088548364400416034343698204186575808495617',
 );
 export const VERIFY_PK_SIZE = 32;
@@ -22,11 +23,15 @@ export const ENCRYPT_SK_SIZE = 32;
 export const ENCRYPT_PK_SIZE = 33;
 export const HASH_SIZE = 32;
 export const MERKLE_TREE_LEVELS = 20;
+const ECIES_IV_LENGTH = 16;
+const ECIES_EPHEM_PK_LENGTH = 65;
+const ECIES_MAC_LENGTH = 32;
+const ECIES_META_LENGTH = ECIES_IV_LENGTH + ECIES_EPHEM_PK_LENGTH + ECIES_MAC_LENGTH;
 export default class DefaultProtocol {
   static randomBigInt(numBytes = 32) {
-    let bigInt = BigInt(toHex(unsafeRandomBytes(numBytes)));
-    if (bigInt >= FIELD_SIZE) {
-      bigInt = bigInt % FIELD_SIZE;
+    let bigInt = new BN(toHexNoPrefix(unsafeRandomBytes(numBytes)), 16);
+    if (bigInt.gte(FIELD_SIZE)) {
+      bigInt = bigInt.mod(FIELD_SIZE);
     }
     return bigInt;
   }
@@ -40,9 +45,9 @@ export default class DefaultProtocol {
     check(rawSecretKey.length == VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
     const keyHash = createBlakeHash('blake512').update(rawSecretKey).digest().slice(0, VERIFY_SK_SIZE);
     const sBuffer = eddsa.pruneBuffer(keyHash);
-    const skBigInt = Scalar.shr(DefaultProtocol.buffToBigInt(sBuffer), 3);
-    check(skBigInt < FIELD_SIZE, 'skBigInt should be less than FIELD_SIZE');
-    const sk = DefaultProtocol.bigIntToBuff(skBigInt, VERIFY_SK_SIZE);
+    const skBigInt = Scalar.shr(DefaultProtocol.buffToBigInt(sBuffer).toString(), 3);
+    check(FIELD_SIZE.gt(new BN(skBigInt.toString())), 'skBigInt should be less than FIELD_SIZE');
+    const sk = DefaultProtocol.bigIntToBuff(new BN(skBigInt.toString()), VERIFY_SK_SIZE);
     check(
       sk.length == VERIFY_SK_SIZE,
       'converted secret key length ' + sk.length + ' not equal to ' + FIELD_SIZE,
@@ -55,7 +60,7 @@ export default class DefaultProtocol {
     check(rawSecretKey.length == VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
     const unpackedPoints = eddsa.prv2pub(rawSecretKey);
     check(unpackedPoints[0] < FIELD_SIZE, 'first point should be less than FIELD_SIZE');
-    const pk = DefaultProtocol.bigIntToBuff(unpackedPoints[0], VERIFY_PK_SIZE);
+    const pk = DefaultProtocol.bigIntToBuff(new BN(unpackedPoints[0].toString()), VERIFY_PK_SIZE);
     check(
       pk.length == VERIFY_PK_SIZE,
       'converted public key length ' + pk.length + ' not equal to ' + FIELD_SIZE,
@@ -72,7 +77,7 @@ export default class DefaultProtocol {
   static publicKeyForEncryption(rawSecretKey) {
     check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
     check(rawSecretKey.length == ENCRYPT_SK_SIZE, 'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE);
-    const publicKey = new ECIESPrivateKey(rawSecretKey).publicKey.compressed;
+    const publicKey = eccrypto.getPublicCompressed(rawSecretKey);
     check(
       publicKey.length == ENCRYPT_PK_SIZE,
       'generate public key length does not equal to ' + ENCRYPT_PK_SIZE,
@@ -133,16 +138,25 @@ export default class DefaultProtocol {
     return DefaultProtocol.separatedPublicKeys(bs58.decode(address));
   }
 
-  static encryptAsymmetric(publicKey, plainData) {
+  static async encryptAsymmetric(publicKey, plainData) {
     check(publicKey instanceof Buffer, 'unsupported publicKey type ' + typeof publicKey);
     check(plainData instanceof Buffer, 'unsupported plainData type ' + typeof plainData);
-    return eciesEncrypt(publicKey, plainData);
+    return await eccrypto.encrypt(publicKey, plainData).then((r) => {
+      return Buffer.concat([r.iv, r.ephemPublicKey, r.mac, r.ciphertext]);
+    });
   }
 
-  static decryptAsymmetric(secretKey, cipherData) {
+  static async decryptAsymmetric(secretKey, cipherData) {
     check(secretKey instanceof Buffer, 'unsupported secretKey type ' + typeof secretKey);
     check(cipherData instanceof Buffer, 'unsupported cipherData type ' + typeof cipherData);
-    return eciesDecrypt(secretKey, cipherData);
+    check(cipherData.length > ECIES_META_LENGTH, 'incorrected cipherData length');
+
+    return await eccrypto.decrypt(secretKey, {
+      iv: cipherData.slice(0, ECIES_IV_LENGTH),
+      ephemPublicKey: cipherData.slice(ECIES_IV_LENGTH, ECIES_IV_LENGTH + ECIES_EPHEM_PK_LENGTH),
+      mac: cipherData.slice(ECIES_IV_LENGTH + ECIES_EPHEM_PK_LENGTH, ECIES_META_LENGTH),
+      ciphertext: cipherData.slice(ECIES_META_LENGTH),
+    });
   }
 
   static encryptSymmetric(password, plainText) {
@@ -162,13 +176,14 @@ export default class DefaultProtocol {
     const packedPoints = pedersenHash.hash(data);
     const unpackedPoints = babyJub.unpackPoint(packedPoints);
     check(unpackedPoints[0] < FIELD_SIZE, 'first point should be less than FIELD_SIZE');
-    return unpackedPoints[0];
+    return new BN(unpackedPoints[0].toString());
   }
 
   static hash2(left, right) {
-    check(typeof left === 'bigint' || typeof left === 'number', 'unsupported data type ' + typeof left);
-    check(typeof right === 'bigint' || typeof right === 'number', 'unsupported salt type ' + typeof right);
-    return mimcsponge.multiHash([left, right], 0, 1);
+    check(left instanceof BN, 'unsupported left instance, should be BN');
+    check(right instanceof BN, 'unsupported right instance, should be BN');
+    const result = mimcsponge.multiHash([left.toString(), right.toString()], 0, 1);
+    return new BN(result.toString());
   }
 
   static checkSum(data, salt = 'mystiko') {
@@ -180,44 +195,44 @@ export default class DefaultProtocol {
   // little endianness
   static buffToBigInt(buff) {
     check(buff instanceof Buffer, 'unsupported buff type ' + typeof buff);
-    let res = BigInt(0);
+    let res = new BN(0);
     for (let i = 0; i < buff.length; i++) {
-      const byteNumber = BigInt(buff[i]);
-      res = res + (byteNumber << BigInt(8 * i));
+      const byteNumber = new BN(buff[i]);
+      res = res.add(byteNumber.shln(8 * i));
     }
     return res;
   }
 
   // little endianness
   static bigIntToBuff(bigInt, numBytes = 32) {
-    check(typeof bigInt === 'bigint', 'unsupported bigInt type ' + typeof bigInt);
+    check(bigInt instanceof BN, 'bigInt should be instance of BN');
     let res = bigInt;
     let index = 0;
     const buff = new Uint8Array(numBytes);
-    while (res > BigInt(0) && index < numBytes) {
-      buff[index] = Number(res & BigInt(255));
+    while (res.gt(new BN(0)) && index < numBytes) {
+      buff[index] = Number(res.and(new BN(255)).toString());
       index = index + 1;
-      res = res >> BigInt(8);
+      res = res.shrn(8);
     }
-    if (res !== BigInt(0)) {
+    if (!res.isZero()) {
       throw new Error('Number does not fit in this length');
     }
     return Buffer.from(buff);
   }
 
-  static commitment(pkVerify, pkEnc, amount, randomP, randomR, randomS) {
+  static async commitment(pkVerify, pkEnc, amount, randomP, randomR, randomS) {
     check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
     check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
-    check(typeof amount === 'bigint', 'unsupported amount type ' + typeof amount);
+    check(amount instanceof BN, 'amount should be instance of BN');
     check(!randomS || randomP instanceof Buffer, 'unsupported randomP type ' + typeof randomP);
     check(!randomR || randomR instanceof Buffer, 'unsupported randomR type ' + typeof randomR);
-    check(!randomS || typeof randomS === 'bigint', 'unsupported randomS type ' + typeof randomS);
+    check(!randomS || randomS instanceof BN, 'randomS should be instance of BN');
     randomP = randomP ? randomP : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
     randomR = randomR ? randomR : DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
     randomS = randomS ? randomS : DefaultProtocol.randomBigInt(RANDOM_SK_SIZE);
     const k = DefaultProtocol.hash(Buffer.concat([pkVerify, randomP, randomR]));
     const commitmentHash = DefaultProtocol.hash2(DefaultProtocol.hash2(k, amount), randomS);
-    const privateNote = DefaultProtocol.encryptAsymmetric(
+    const privateNote = await DefaultProtocol.encryptAsymmetric(
       pkEnc,
       Buffer.concat([randomP, randomR, DefaultProtocol.bigIntToBuff(randomS, RANDOM_SK_SIZE)]),
     );
@@ -247,19 +262,19 @@ export default class DefaultProtocol {
     check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
     check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
     check(skEnc instanceof Buffer, 'unsupported skEnc type ' + typeof skEnc);
-    check(typeof amount === 'bigint', 'unsupported amount type ' + typeof amount);
-    check(typeof commitmentHash === 'bigint', 'unsupported commitmentHash type ' + typeof commitmentHash);
+    check(amount instanceof BN, 'amount should be instance of BN');
+    check(commitmentHash instanceof BN, 'commitmentHash should be instance of BN');
     check(privateNote instanceof Buffer, 'unsupported privateNote type ' + typeof privateNote);
     check(treeLeaves instanceof Array, 'unsupported treeLeaves type ' + typeof treeLeaves);
     check(typeof treeIndex === 'number', 'unsupported treeIndex type ' + typeof treeIndex);
     check(typeof wasmFile === 'string', 'unsupported wasmFile type ' + typeof wasmFile);
     check(typeof zkeyFile === 'string', 'unsupported zkeyFile type ' + typeof zkeyFile);
-    const decryptedNote = DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
+    const decryptedNote = await DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
     check(decryptedNote.length == RANDOM_SK_SIZE * 3, 'decrypted note length is incorrect');
     const randomP = decryptedNote.slice(0, RANDOM_SK_SIZE);
     const randomR = decryptedNote.slice(RANDOM_SK_SIZE, RANDOM_SK_SIZE * 2);
     const randomS = decryptedNote.slice(RANDOM_SK_SIZE * 2);
-    const computedCommitmentHash = DefaultProtocol.commitment(
+    const computedCommitmentHash = await DefaultProtocol.commitment(
       pkVerify,
       pkEnc,
       amount,
@@ -277,17 +292,17 @@ export default class DefaultProtocol {
     const inputs = {
       // public inputs
       rootHash: tree.root(),
-      serialNumber: sn,
-      amount,
+      serialNumber: sn.toString(),
+      amount: amount.toString(),
       // private inputs
       pathElements,
       pathIndices,
-      publicKey: DefaultProtocol.buffToBigInt(pkVerify),
-      secretKey: DefaultProtocol.buffToBigInt(skVerify),
-      randomP: DefaultProtocol.buffToBigInt(randomP),
-      randomR: DefaultProtocol.buffToBigInt(randomR),
-      randomS: DefaultProtocol.buffToBigInt(randomS),
-      commitment: commitmentHash,
+      publicKey: DefaultProtocol.buffToBigInt(pkVerify).toString(),
+      secretKey: DefaultProtocol.buffToBigInt(skVerify).toString(),
+      randomP: DefaultProtocol.buffToBigInt(randomP).toString(),
+      randomR: DefaultProtocol.buffToBigInt(randomR).toString(),
+      randomS: DefaultProtocol.buffToBigInt(randomS).toString(),
+      commitment: commitmentHash.toString(),
     };
     const wtnsOptions = { type: 'mem' };
     await wtns.calculate(inputs, wasmFile, wtnsOptions);

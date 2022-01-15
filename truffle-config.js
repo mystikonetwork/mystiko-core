@@ -60,7 +60,7 @@ module.exports = {
       gas: 5500000,
       gasPrice: '8000000000',
       skipDryRun: true,
-      confirmations: 10,
+      confirmations: 2,
     },
     // Another network with more advanced options...
     // advanced: {

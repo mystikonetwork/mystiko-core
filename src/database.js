@@ -1,5 +1,4 @@
 import loki from 'lokijs';
-import { isBrowser } from 'browser-or-node';
 
 const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
 
@@ -11,17 +10,17 @@ function createCollectionsIfNotExist(lokidb) {
   }
 }
 
-export async function createDatabase(dbFile, inMemory = false) {
-  let adapter;
+export async function createDatabase(dbFile, adapter) {
   let lokidb;
-  if (!inMemory) {
-    if (isBrowser) {
-      const IncrementalIndexedDBAdapter = await import('lokijs/src/incremental-indexeddb-adapter.js');
-      adapter = new IncrementalIndexedDBAdapter.default();
-    } else {
-      const LokiFsStructuredAdapter = await import('lokijs/src/loki-fs-structured-adapter.js');
-      adapter = new LokiFsStructuredAdapter.default();
-    }
+  if (!adapter) {
+    adapter = new loki.LokiMemoryAdapter();
+  }
+  if (adapter instanceof loki.LokiMemoryAdapter) {
+    lokidb = new loki(dbFile, {
+      adapter: adapter,
+    });
+    createCollectionsIfNotExist(lokidb);
+  } else {
     let dbLoadResolve;
     let dbLoadReject;
     const dbLoadPromise = new Promise((resolve, reject) => {
@@ -48,10 +47,6 @@ export async function createDatabase(dbFile, inMemory = false) {
       adapter: adapter,
     });
     await dbLoadPromise;
-  } else {
-    adapter = new loki.LokiMemoryAdapter();
-    lokidb = new loki(dbFile, { adapter });
-    createCollectionsIfNotExist(lokidb);
   }
   const db = { database: lokidb };
   for (let i = 0; i < collections.length; i++) {

@@ -5,7 +5,7 @@ let handler;
 let db;
 
 beforeEach(async () => {
-  db = await createDatabase('test.db', true);
+  db = await createDatabase('test.db');
   handler = new WalletHandler(db);
 });
 

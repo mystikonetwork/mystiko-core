@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
@@ -53,11 +54,11 @@ export class Deposit extends BaseModel {
 
   get amount() {
     const raw = this.data['amount'];
-    return raw ? BigInt(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set amount(amnt) {
-    check(typeof amnt === 'bigint', 'amnt should be instance of BigInt');
+    check(amnt instanceof BN, 'amnt should be instance of BN');
     this.data['amount'] = amnt.toString();
   }
 

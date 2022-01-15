@@ -5,7 +5,9 @@ import { createDatabase } from '../src/database.js';
 
 test('Test persist database', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dbtest'));
-  const db = await createDatabase(tmpDir + '/mystiko.db', false);
+  const LokiFsStructuredAdapter = await import('lokijs/src/loki-fs-structured-adapter.js');
+  const adapter = new LokiFsStructuredAdapter.default();
+  const db = await createDatabase(tmpDir + '/mystiko.db', adapter);
   expect(db.accounts).not.toBe(null);
   expect(db.wallets).not.toBe(null);
   expect(db.notes).not.toBe(null);
@@ -20,7 +22,7 @@ test('Test persist database', async () => {
 });
 
 test('Test in-memory database', async () => {
-  const db = await createDatabase('mystiko.db', true);
+  const db = await createDatabase('mystiko.db');
   expect(db.accounts).not.toBe(null);
   expect(db.wallets).not.toBe(null);
   expect(db.notes).not.toBe(null);

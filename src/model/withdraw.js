@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 import { BaseModel } from './common.js';
 
@@ -35,11 +36,11 @@ export class Withdraw extends BaseModel {
 
   get merkleRootHash() {
     const raw = this.data['merkleRootHash'];
-    return raw ? BigInt(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set merkleRootHash(hash) {
-    check(typeof hash === 'bigint', 'hash should be instance of bigint');
+    check(hash instanceof BN, 'hash should be instance of BN');
     this.data['merkleRootHash'] = hash.toString();
   }
 
@@ -55,11 +56,11 @@ export class Withdraw extends BaseModel {
 
   get amount() {
     const raw = this.data['amount'];
-    return raw ? BigInt(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set amount(amnt) {
-    check(typeof amnt === 'bigint', 'amnt should be instance of bigint');
+    check(amnt instanceof BN, 'amnt should be instance of BN');
     this.data['amount'] = amnt.toString();
   }
 

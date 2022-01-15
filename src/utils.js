@@ -42,8 +42,8 @@ export function toBuff(strData) {
 }
 
 export function toDecimals(amount, decimals) {
-  const base = BigInt(10) ** BigInt(decimals);
-  return BigInt(amount) * base;
+  const base = new BN(10).pow(new BN(decimals));
+  return new BN(amount).mul(base);
 }
 
 export function toFixedLenHex(hex, length = 32) {
@@ -52,7 +52,7 @@ export function toFixedLenHex(hex, length = 32) {
       return toHex(hex.slice(2).padStart(length * 2, '0'));
     }
     return toHex(hex.padStart(length * 2, '0'));
-  } else if (hex instanceof BN || typeof hex === 'bigint') {
+  } else if (hex instanceof BN) {
     return toFixedLenHex(hex.toString(16), length);
   } else if (hex instanceof Buffer) {
     return toFixedLenHex(hex.toString('hex'), length);
@@ -70,7 +70,7 @@ export function toHex(hex) {
       return '0x' + hex.slice(2);
     }
     return '0x' + hex;
-  } else if (hex instanceof BN || typeof hex === 'bigint') {
+  } else if (hex instanceof BN) {
     return toHex(hex.toString(16));
   } else if (hex instanceof Buffer) {
     return toHex(hex.toString('hex'));
@@ -86,7 +86,7 @@ export function toFixedLenHexNoPrefix(hex, length = 32) {
       return toHexNoPrefix(hex.slice(2).padStart(length * 2, '0'));
     }
     return toHexNoPrefix(hex.padStart(length * 2, '0'));
-  } else if (hex instanceof BN || typeof hex === 'bigint') {
+  } else if (hex instanceof BN) {
     return toFixedLenHexNoPrefix(hex.toString(16), length);
   } else if (hex instanceof Buffer) {
     return toFixedLenHexNoPrefix(hex.toString('hex'), length);
@@ -102,7 +102,7 @@ export function toHexNoPrefix(hex) {
       return hex.slice(2);
     }
     return hex;
-  } else if (hex instanceof BN || typeof hex === 'bigint') {
+  } else if (hex instanceof BN) {
     return hex.toString(16);
   } else if (hex instanceof Buffer) {
     return hex.toString('hex');

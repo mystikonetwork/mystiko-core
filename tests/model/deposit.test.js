@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { Deposit, DepositStatus } from '../../src/model/deposit.js';
 import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
@@ -27,8 +28,8 @@ test('Test Deposit getters/setters', () => {
   expect(deposit.token).toBe('USDT');
   deposit.tokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(deposit.tokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  deposit.amount = BigInt('0xdeadbeef');
-  expect(deposit.amount).toBe(BigInt('0xdeadbeef'));
+  deposit.amount = new BN('deadbeef', 16);
+  expect(toHexNoPrefix(deposit.amount)).toBe('deadbeef');
   deposit.commitmentHash = toBuff('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
   expect(toHexNoPrefix(deposit.commitmentHash)).toBe(
     '2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242',

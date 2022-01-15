@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import DefaultProtocol, {
   FIELD_SIZE,
   VERIFY_SK_SIZE,
@@ -10,14 +11,14 @@ import { toHex, toBuff, toDecimals } from '../../src/utils.js';
 
 test('test randomBigInt', () => {
   const int1 = DefaultProtocol.randomBigInt(8);
-  expect(int1).toBeLessThan(FIELD_SIZE);
+  expect(int1.lt(FIELD_SIZE)).toBe(true);
   const int2 = DefaultProtocol.randomBigInt(16);
-  expect(int2).toBeLessThan(FIELD_SIZE);
+  expect(int2.lt(FIELD_SIZE)).toBe(true);
   const int3 = DefaultProtocol.randomBigInt();
-  expect(int3).toBeLessThan(FIELD_SIZE);
+  expect(int3.lt(FIELD_SIZE)).toBe(true);
   for (let i = 0; i < 100; i++) {
     const bgInt = DefaultProtocol.randomBigInt();
-    expect(bgInt).toBeLessThan(FIELD_SIZE);
+    expect(bgInt.lt(FIELD_SIZE)).toBe(true);
   }
 });
 
@@ -33,14 +34,14 @@ test('test randomBytes', () => {
 test('test buffToBigInt', () => {
   expect(() => DefaultProtocol.buffToBigInt('baadbeef')).toThrow();
   const buff = toBuff('baadbeef');
-  expect(DefaultProtocol.buffToBigInt(buff)).toBe(BigInt(4022250938));
+  expect(DefaultProtocol.buffToBigInt(buff).toString()).toBe('4022250938');
 });
 
 test('test bigIntToBuff', () => {
   expect(() => DefaultProtocol.bigIntToBuff(1234)).toThrow();
-  expect(() => DefaultProtocol.bigIntToBuff(BigInt(4022250938), 1)).toThrow();
-  expect(DefaultProtocol.bigIntToBuff(BigInt(4022250938), 4).toString('hex')).toBe('baadbeef');
-  expect(DefaultProtocol.bigIntToBuff(BigInt(4022250938), 6).toString('hex')).toBe('baadbeef0000');
+  expect(() => DefaultProtocol.bigIntToBuff(new BN(4022250938), 1)).toThrow();
+  expect(DefaultProtocol.bigIntToBuff(new BN(4022250938), 4).toString('hex')).toBe('baadbeef');
+  expect(DefaultProtocol.bigIntToBuff(new BN(4022250938), 6).toString('hex')).toBe('baadbeef0000');
 });
 
 test('test secretKeyForVerification', () => {
@@ -151,17 +152,17 @@ test('test isShieldedAddress', () => {
   expect(DefaultProtocol.isShieldedAddress('axeddd#$')).toBe(false);
 });
 
-test('test asymmetric encryption/decryption', () => {
-  expect(() => DefaultProtocol.encryptAsymmetric('baad', toBuff('beef'))).toThrow();
-  expect(() => DefaultProtocol.encryptAsymmetric(toBuff('beef'), 'baad')).toThrow();
-  expect(() => DefaultProtocol.decryptAsymmetric('baad', toBuff('beef'))).toThrow();
-  expect(() => DefaultProtocol.decryptAsymmetric(toBuff('beef'), 'baad')).toThrow();
+test('test asymmetric encryption/decryption', async () => {
+  await expect(DefaultProtocol.encryptAsymmetric('baad', toBuff('beef'))).rejects.toThrow();
+  await expect(DefaultProtocol.encryptAsymmetric(toBuff('beef'), 'baad')).rejects.toThrow();
+  await expect(DefaultProtocol.decryptAsymmetric('baad', toBuff('beef'))).rejects.toThrow();
+  await expect(DefaultProtocol.decryptAsymmetric(toBuff('beef'), 'baad')).rejects.toThrow();
   const rawSecretKey = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
   const sk = DefaultProtocol.secretKeyForEncryption(rawSecretKey);
   const pk = DefaultProtocol.publicKeyForEncryption(rawSecretKey);
   const data = toBuff('baadbeefdeadbeef');
-  const encryptedData = DefaultProtocol.encryptAsymmetric(pk, data);
-  const decryptedData = DefaultProtocol.decryptAsymmetric(sk, encryptedData);
+  const encryptedData = await DefaultProtocol.encryptAsymmetric(pk, data);
+  const decryptedData = await DefaultProtocol.decryptAsymmetric(sk, encryptedData);
   expect(toHex(decryptedData)).toBe(toHex(data));
 });
 
@@ -188,13 +189,13 @@ test('test hash', () => {
 });
 
 test('test hash2', () => {
-  expect(() => DefaultProtocol.hash2('data to be hashed', BigInt(1))).toThrow();
-  expect(() => DefaultProtocol.hash2(BigInt(1), 'data to be hashed')).toThrow();
-  const h1 = DefaultProtocol.hash2(1, 2);
-  const h2 = DefaultProtocol.hash2(3, 4);
-  const h3 = DefaultProtocol.hash2(BigInt(1), BigInt(2));
-  expect(h1).toBe(h3);
-  expect(h2).not.toBe(h3);
+  expect(() => DefaultProtocol.hash2('data to be hashed', new BN(1))).toThrow();
+  expect(() => DefaultProtocol.hash2(new BN(1), 'data to be hashed')).toThrow();
+  const h1 = DefaultProtocol.hash2(new BN(1), new BN(2));
+  const h2 = DefaultProtocol.hash2(new BN(3), new BN(4));
+  const h3 = DefaultProtocol.hash2(new BN(1), new BN(2));
+  expect(h1.toString()).toBe(h3.toString());
+  expect(h2.toString()).not.toBe(h3.toString());
 });
 
 test('test checksum', () => {
@@ -219,22 +220,26 @@ test('test checksum', () => {
   );
 });
 
-test('test commitment', () => {
-  expect(() => DefaultProtocol.commitment('deadbeef', toBuff('baadbabe'), BigInt(1))).toThrow();
-  expect(() => DefaultProtocol.commitment(toBuff('baadbabe'), 'deadbeef', BigInt(1))).toThrow();
-  expect(() => DefaultProtocol.commitment(toBuff('baadbabe'), toBuff('baadbabe'), 1)).toThrow();
+test('test commitment', async () => {
+  await expect(DefaultProtocol.commitment('deadbeef', toBuff('baadbabe'), new BN(1))).rejects.toThrow();
+  await expect(DefaultProtocol.commitment(toBuff('baadbabe'), 'deadbeef', new BN(1))).rejects.toThrow();
+  await expect(DefaultProtocol.commitment(toBuff('baadbabe'), toBuff('baadbabe'), 1)).rejects.toThrow();
   const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
   const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   const amount = toDecimals(100, 18);
-  const { commitmentHash, privateNote, k, randomS } = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
+  const { commitmentHash, privateNote, k, randomS } = await DefaultProtocol.commitment(
+    pkVerify,
+    pkEnc,
+    amount,
+  );
   expect(commitmentHash).not.toBe(undefined);
   expect(privateNote).not.toBe(undefined);
   expect(k).not.toBe(undefined);
   expect(randomS).not.toBe(undefined);
-  const decryptedNote = DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
+  const decryptedNote = await DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
   expect(decryptedNote.length).toBe(RANDOM_SK_SIZE * 3);
 });
 
@@ -256,8 +261,8 @@ test('test zkProve/zkVerify', async () => {
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   const amount = toDecimals(100, 18);
-  const commitment1 = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
-  const commitment2 = DefaultProtocol.commitment(pkVerify, pkEnc, amount);
+  const commitment1 = await DefaultProtocol.commitment(pkVerify, pkEnc, amount);
+  const commitment2 = await DefaultProtocol.commitment(pkVerify, pkEnc, amount);
   const treeLeaves = [commitment1.commitmentHash, commitment2.commitmentHash];
   const treeIndex = 1;
   const wasmFile = 'build/circuits/withdraw.wasm';

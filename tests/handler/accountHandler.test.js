@@ -11,7 +11,7 @@ const walletMasterSeed = 'awesomeMasterSeed';
 const walletPassword = 'P@ssw0rd';
 
 beforeEach(async () => {
-  db = await createDatabase('test.db', true);
+  db = await createDatabase('test.db');
   walletHandler = new WalletHandler(db);
   accountHandler = new AccountHandler(walletHandler, db);
   wallet = await walletHandler.createWallet(walletMasterSeed, walletPassword);

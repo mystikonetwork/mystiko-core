@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
@@ -68,11 +69,11 @@ export class PrivateNote extends BaseModel {
 
   get srcAmount() {
     const raw = this.data['srcAmount'];
-    return raw ? BigInt(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set srcAmount(amnt) {
-    check(typeof amnt === 'bigint', 'amnt should be instance of bigint');
+    check(amnt instanceof BN, 'amnt should be instance of BN');
     this.data['srcAmount'] = amnt.toString();
   }
 
@@ -114,11 +115,11 @@ export class PrivateNote extends BaseModel {
 
   get dstAmount() {
     const raw = this.data['dstAmount'];
-    return raw ? BigInt(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set dstAmount(amnt) {
-    check(typeof amnt === 'bigint', 'amnt should be instance of bigint');
+    check(amnt instanceof BN, 'amnt should be instance of BN');
     this.data['dstAmount'] = amnt.toString();
   }
 

@@ -37,7 +37,6 @@ test('Test toFixedLenHex', () => {
   expect(utils.toFixedLenHex('0Xdead', 4)).toBe('0x0000dead');
   expect(utils.toFixedLenHex('0xdead', 4)).toBe('0x0000dead');
   expect(utils.toFixedLenHex(new BN('dead', 16), 4)).toBe('0x0000dead');
-  expect(utils.toFixedLenHex(BigInt(57005), 4)).toBe('0x0000dead');
   expect(utils.toFixedLenHex(Buffer.from('dead', 'hex'), 4)).toBe('0x0000dead');
   expect(utils.toFixedLenHex(Uint8Array.from([0xde, 0xad]), 4)).toBe('0x0000dead');
   expect(() => utils.toFixedLenHex({})).toThrow();
@@ -48,7 +47,6 @@ test('Test toHex', () => {
   expect(utils.toHex('0xdead')).toBe('0xdead');
   expect(utils.toHex('0Xdead')).toBe('0xdead');
   expect(utils.toHex(new BN('dead', 16))).toBe('0xdead');
-  expect(utils.toHex(BigInt(57005))).toBe('0xdead');
   expect(utils.toHex(Buffer.from('dead', 'hex'))).toBe('0xdead');
   expect(utils.toHex(Uint8Array.from([0xde, 0xad]))).toBe('0xdead');
   expect(() => utils.toHex({})).toThrow();
@@ -59,7 +57,6 @@ test('Test toHexNoPrefix', () => {
   expect(utils.toHexNoPrefix('0xdead')).toBe('dead');
   expect(utils.toHexNoPrefix('0Xdead')).toBe('dead');
   expect(utils.toHexNoPrefix(new BN('dead', 16))).toBe('dead');
-  expect(utils.toHexNoPrefix(BigInt(57005))).toBe('dead');
   expect(utils.toHexNoPrefix(Buffer.from('dead', 'hex'))).toBe('dead');
   expect(utils.toHexNoPrefix(Uint8Array.from([0xde, 0xad]))).toBe('dead');
   expect(() => utils.toHexNoPrefix({})).toThrow();
@@ -70,7 +67,6 @@ test('Test toFixedLenHexNoPrefix', () => {
   expect(utils.toFixedLenHexNoPrefix('0Xdead', 4)).toBe('0000dead');
   expect(utils.toFixedLenHexNoPrefix('0xdead', 4)).toBe('0000dead');
   expect(utils.toFixedLenHexNoPrefix(new BN('dead', 16), 4)).toBe('0000dead');
-  expect(utils.toFixedLenHexNoPrefix(BigInt(57005), 4)).toBe('0000dead');
   expect(utils.toFixedLenHexNoPrefix(Buffer.from('dead', 'hex'), 4)).toBe('0000dead');
   expect(utils.toFixedLenHexNoPrefix(Uint8Array.from([0xde, 0xad]), 4)).toBe('0000dead');
   expect(() => utils.toFixedLenHexNoPrefix({})).toThrow();
