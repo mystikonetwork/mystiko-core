@@ -54,13 +54,13 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           process.env.PRIVATE_KEY,
-          'https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j',
+          'wss://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j',
         ),
       network_id: 3,
       gas: 5500000,
-      gasPrice: '8000000000',
+      gasPrice: '15000000000',
       skipDryRun: true,
-      confirmations: 2,
+      confirmations: 4,
     },
     // Another network with more advanced options...
     // advanced: {

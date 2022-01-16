@@ -34,22 +34,13 @@ export class Deposit extends BaseModel {
     this.data['bridge'] = b;
   }
 
-  get token() {
-    return this.data['token'];
+  get asset() {
+    return this.data['asset'];
   }
 
-  set token(t) {
-    check(typeof t === 'string', 't should be instance of string');
-    this.data['token'] = t;
-  }
-
-  get tokenAddress() {
-    return this.data['tokenAddress'];
-  }
-
-  set tokenAddress(address) {
-    check(typeof address === 'string', 'address should be instance of string');
-    this.data['tokenAddress'] = address;
+  set asset(a) {
+    check(typeof a === 'string', 'a should be instance of string');
+    this.data['asset'] = a;
   }
 
   get amount() {
@@ -72,14 +63,14 @@ export class Deposit extends BaseModel {
     this.data['commitmentHash'] = toHexNoPrefix(hash);
   }
 
-  get encryptedNote() {
-    const raw = this.data['encryptedNote'];
+  get privateNote() {
+    const raw = this.data['privateNote'];
     return raw ? toBuff(raw) : undefined;
   }
 
-  set encryptedNote(note) {
+  set privateNote(note) {
     check(note instanceof Buffer, 'note should be instance of Buffer');
-    this.data['encryptedNote'] = toHexNoPrefix(note);
+    this.data['privateNote'] = toHexNoPrefix(note);
   }
 
   get transactionHash() {

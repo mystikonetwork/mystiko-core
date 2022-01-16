@@ -1,4 +1,5 @@
 import BN from 'bn.js';
+import * as fastfile from 'fastfile';
 
 export const BN_LEN = 32;
 export function bnToFixedBytes(bn) {
@@ -110,4 +111,17 @@ export function toHexNoPrefix(hex) {
     return toHexNoPrefix(Buffer.from(hex));
   }
   throw new Error('given type ' + typeof hex + ' is not supported');
+}
+
+export async function readFile(path) {
+  check(typeof path === 'string', 'path should be string');
+  const fd = await fastfile.readExisting(path);
+  const data = await fd.read(fd.totalSize);
+  await fd.close();
+  return Buffer.from(data);
+}
+
+export async function readJsonFile(path) {
+  const data = await readFile(path);
+  return JSON.parse(data);
 }

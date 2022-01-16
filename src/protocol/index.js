@@ -41,6 +41,7 @@ export default {
   buffToBigInt: DefaultProtocol.buffToBigInt,
   bigIntToBuff: DefaultProtocol.bigIntToBuff,
   commitment: DefaultProtocol.commitment,
+  commitmentWithShieldedAddress: DefaultProtocol.commitmentWithShieldedAddress,
   serialNumber: DefaultProtocol.serialNumber,
   zkProve: DefaultProtocol.zkProve,
   zkVerify: DefaultProtocol.zkVerify,

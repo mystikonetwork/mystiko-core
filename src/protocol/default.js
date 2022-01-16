@@ -8,10 +8,9 @@ import hmacSHA512 from 'crypto-js/hmac-sha512';
 import eccrypto from 'eccrypto';
 import MerkleTree from 'fixed-merkle-tree';
 import { groth16, wtns } from 'snarkjs';
-import * as fastfile from 'fastfile';
 import bs58 from 'bs58';
 import BN from 'bn.js';
-import { toHex, check, toHexNoPrefix } from '../utils.js';
+import { toHex, check, toHexNoPrefix, readJsonFile } from '../utils.js';
 
 export const FIELD_SIZE = new BN(
   '21888242871839275222246405745257275088548364400416034343698204186575808495617',
@@ -239,6 +238,18 @@ export default class DefaultProtocol {
     return { commitmentHash, k, randomS, privateNote };
   }
 
+  static async commitmentWithShieldedAddress(
+    shieldedAddress,
+    amount,
+    randomP = undefined,
+    randomR = undefined,
+    randomS = undefined,
+  ) {
+    check(typeof shieldedAddress === 'string', 'shieldedAddress should be string');
+    const { pkVerify, pkEnc } = DefaultProtocol.publicKeysFromShieldedAddress(shieldedAddress);
+    return await DefaultProtocol.commitment(pkVerify, pkEnc, amount, randomP, randomR, randomS);
+  }
+
   static serialNumber(skVerify, randomP) {
     check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
     check(randomP instanceof Buffer, 'unsupported skVerify type ' + typeof randomP);
@@ -310,10 +321,7 @@ export default class DefaultProtocol {
   }
 
   static async zkVerify(proof, publicSignals, verifyKeyFile) {
-    const vkeyFile = await fastfile.readExisting(verifyKeyFile);
-    const vkeyData = await vkeyFile.read(vkeyFile.totalSize);
-    await vkeyFile.close();
-    const vkey = JSON.parse(Buffer.from(vkeyData));
+    const vkey = await readJsonFile(verifyKeyFile);
     return await groth16.verify(vkey, publicSignals, proof);
   }
 }

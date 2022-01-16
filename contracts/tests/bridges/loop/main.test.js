@@ -8,16 +8,24 @@ const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 
 contract('MystikoWithLoopMain', (accounts) => {
+  it('should set type correctly', async () => {
+    const loopContract = await MystikoWithLoopMain.deployed();
+    const bridgeType = await loopContract.bridgeType();
+    const assetType = await loopContract.assetType();
+    expect(bridgeType).to.equal('loop');
+    expect(assetType).to.equal('main');
+  });
+
   it('should set verifier information correctly', async () => {
     const loopContract = await MystikoWithLoopMain.deployed();
     const verifierContract = await Verifier.deployed();
-    expect(await loopContract.getVerifierAddress.call()).to.equal(verifierContract.address);
+    expect(await loopContract.getVerifierAddress()).to.equal(verifierContract.address);
   });
 
   it('should set hasher information correctly', async () => {
     const loopContract = await MystikoWithLoopMain.deployed();
     const hasherContract = await Hasher.deployed();
-    expect(await loopContract.getHasherAddress.call()).to.equal(hasherContract.address);
+    expect(await loopContract.getHasherAddress()).to.equal(hasherContract.address);
   });
 
   const rawSkVerify = protocol.randomBytes(protocol.VERIFY_SK_SIZE);
@@ -63,10 +71,10 @@ contract('MystikoWithLoopMain', (accounts) => {
       expect(merkleTreeInsertEvent.args.amount.toString()).to.equal(amount.toString());
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
-      const levels = await loopContract.getLevels.call();
+      const levels = await loopContract.getLevels();
       const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
       const root = new BN(tree.root());
-      const isKnownRoot = await loopContract.isKnownRoot.call(toFixedLenHex(root));
+      const isKnownRoot = await loopContract.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
     });
   });

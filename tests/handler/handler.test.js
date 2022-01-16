@@ -6,8 +6,8 @@ test('Test Handler basic', async () => {
   const db = await createDatabase('test.db');
   const handler = new Handler(db);
   expect(handler.db).toBe(db);
-  expect(handler.options).not.toBe(undefined);
-  expect(handler.options).not.toBe(null);
+  expect(handler.config).not.toBe(undefined);
+  expect(handler.config).not.toBe(null);
   db.database.close();
 });
 

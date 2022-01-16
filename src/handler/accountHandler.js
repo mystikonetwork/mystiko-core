@@ -6,8 +6,8 @@ import { WalletHandler } from './walletHandler.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
 export class AccountHandler extends Handler {
-  constructor(walletHandler, db, options) {
-    super(db, options);
+  constructor(walletHandler, db, config) {
+    super(db, config);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     this.walletHandler = walletHandler;
   }

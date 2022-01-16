@@ -1,11 +1,17 @@
-import { checkDefinedAndNotNull } from '../utils.js';
+import { check, checkDefinedAndNotNull } from '../utils.js';
 import protocol from '../protocol/index.js';
+import { MystikoConfig } from '../config/index.js';
 
 export class Handler {
-  constructor(db, options) {
+  constructor(db, config) {
     checkDefinedAndNotNull(db, 'db cannot be null or undefined');
+    if (config) {
+      check(config instanceof MystikoConfig, 'wrong config instance');
+      this.config = config;
+    } else {
+      this.config = new MystikoConfig({});
+    }
     this.db = db;
-    this.options = options ? options : {};
     this.protocol = protocol;
   }
 

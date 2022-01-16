@@ -1,4 +1,3 @@
-import * as fastfile from 'fastfile';
 import { BaseConfig } from './common.js';
 import {
   ContractConfig,
@@ -8,9 +7,9 @@ import {
   isValidBridgeType,
 } from './contractConfig.js';
 import { ChainConfig } from './chainConfig.js';
-import { check } from '../utils.js';
+import { check, readJsonFile } from '../utils.js';
 
-class MystikoConfig extends BaseConfig {
+export class MystikoConfig extends BaseConfig {
   constructor(rawConfig) {
     super(rawConfig);
     this.chains = {};
@@ -44,14 +43,38 @@ class MystikoConfig extends BaseConfig {
     check(typeof chainId === 'number' || chainId instanceof Number, 'chainId should be number or Number');
     return this.chains[chainId];
   }
+
+  getContractConfig(srcChainId, dstChainId, assetSymbol, bridge) {
+    check(typeof srcChainId === 'number', 'type of srcChainId should be number');
+    check(typeof dstChainId === 'number', 'type of dstChainId should be number');
+    check(typeof assetSymbol === 'string', 'type of tokenSymbol should be string');
+    check(isValidBridgeType(bridge), bridge + ' is invalid bridge type');
+    if (bridge === BridgeType.LOOP) {
+      check(srcChainId === dstChainId, 'loop bridge should have equal chain ids');
+    } else {
+      check(srcChainId !== dstChainId, 'loop bridge should have non-equal chain ids');
+    }
+    const srcChainConfig = this.chains[srcChainId];
+    check(srcChainConfig, 'chain ' + srcChainId + ' does not exist in config');
+    for (let i = 0; i < srcChainConfig.contracts.length; i++) {
+      const contract = srcChainConfig.contracts[i];
+      if (contract.assetSymbol === assetSymbol && contract.bridgeType === bridge) {
+        if (bridge === BridgeType.LOOP) {
+          return contract;
+        }
+        if (contract.peerChainId === dstChainId) {
+          return contract;
+        }
+      }
+    }
+    throw new Error('cannot find contract information with given parameters');
+  }
 }
 
 async function readFromFile(configFile) {
   check(typeof configFile === 'string', 'configFile should be string');
-  const fd = await fastfile.readExisting(configFile);
-  const data = await fd.read(fd.totalSize);
-  await fd.close();
-  return new MystikoConfig(JSON.parse(Buffer.from(data)));
+  const rawConfig = await readJsonFile(configFile);
+  return new MystikoConfig(rawConfig);
 }
 
 export default {

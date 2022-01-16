@@ -71,3 +71,8 @@ test('Test toFixedLenHexNoPrefix', () => {
   expect(utils.toFixedLenHexNoPrefix(Uint8Array.from([0xde, 0xad]), 4)).toBe('0000dead');
   expect(() => utils.toFixedLenHexNoPrefix({})).toThrow();
 });
+
+test('Test readJsonFile', async () => {
+  const data = await utils.readJsonFile('tests/utils.test.json');
+  expect(data['test']).toBe(true);
+});

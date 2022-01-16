@@ -243,6 +243,21 @@ test('test commitment', async () => {
   expect(decryptedNote.length).toBe(RANDOM_SK_SIZE * 3);
 });
 
+test('test commitmentWithShieldedAddress', async () => {
+  await expect(DefaultProtocol.commitmentWithShieldedAddress(123, new BN(1))).rejects.toThrow();
+  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
+  const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
+  const shieldedAddress = DefaultProtocol.shieldedAddress(pkVerify, pkEnc);
+  const { commitmentHash, privateNote } = await DefaultProtocol.commitmentWithShieldedAddress(
+    shieldedAddress,
+    new BN(1),
+  );
+  expect(commitmentHash).not.toBe(undefined);
+  expect(privateNote).not.toBe(undefined);
+});
+
 test('test serialNumber', () => {
   expect(() => DefaultProtocol.serialNumber('deadbeef', toBuff('baadbabe'))).toThrow();
   expect(() => DefaultProtocol.serialNumber(toBuff('baadbabe'), 'deadbeef')).toThrow();

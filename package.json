@@ -19,9 +19,9 @@
     "migrate:ropsten": "npx truffle migrate --network ropsten --reset",
     "prettier:check": "prettier --check \"./**/*.{js,sol}\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.{js,sol}\" --config .prettierrc",
-    "lint": "yarn prettier:fix && yarn lint:js && yarn lint:solidity",
+    "lint": "yarn prettier:fix && yarn lint:js && yarn lint:sol",
     "lint:js": "eslint --ext .js .",
-    "lint:solidity": "npx solhint contracts/**/*.sol",
+    "lint:sol": "npx solhint contracts/**/*.sol",
     "test": "yarn test:js && yarn test:contract",
     "test:js": "jest --forceExit",
     "test:contract": "npx truffle test"

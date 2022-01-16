@@ -4,8 +4,8 @@ import { Wallet } from '../model/wallet.js';
 import { check } from '../utils.js';
 
 export class WalletHandler extends Handler {
-  constructor(db, options) {
-    super(db, options);
+  constructor(db, config) {
+    super(db, config);
   }
 
   async createWallet(masterSeed, walletPassword) {

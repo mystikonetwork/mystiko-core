@@ -6,35 +6,35 @@ import "../libs/erc20/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 abstract contract ERC20AssetPool is AssetPool {
-    using SafeERC20 for IERC20Metadata;
-    IERC20Metadata public token;
+  using SafeERC20 for IERC20Metadata;
+  IERC20Metadata public asset;
 
-    constructor(address _token) public {
-        token = IERC20Metadata(_token);
-    }
+  constructor(address _assetAddress) public {
+    asset = IERC20Metadata(_assetAddress);
+  }
 
-    function _processDepositTransfer(uint256 amount) internal override {
-        require(msg.value == 0, "no mainnet token allowed");
-        token.safeTransferFrom(msg.sender, address(this), amount);
-    }
+  function _processDepositTransfer(uint256 amount) internal override {
+    require(msg.value == 0, "no mainnet token allowed");
+    asset.safeTransferFrom(msg.sender, address(this), amount);
+  }
 
-    function _processWithdrawTransfer(address recipient, uint256 amount) internal override {
-        token.safeTransfer(recipient, amount);
-    }
+  function _processWithdrawTransfer(address recipient, uint256 amount) internal override {
+    asset.safeTransfer(recipient, amount);
+  }
 
-    function getToken() public view returns (address) {
-        return address(token);
-    }
+  function assetType() public view override returns (string memory) {
+    return "erc20";
+  }
 
-    function getTokenName() public view returns (string memory) {
-        return token.name();
-    }
+  function assetName() public view returns (string memory) {
+    return asset.name();
+  }
 
-    function getTokenSymbol() public view returns (string memory) {
-        return token.symbol();
-    }
+  function assetSymbol() public view returns (string memory) {
+    return asset.symbol();
+  }
 
-    function getTokenDecimals() public view returns (uint8) {
-        return token.decimals();
-    }
+  function assetDecimals() public view returns (uint8) {
+    return asset.decimals();
+  }
 }

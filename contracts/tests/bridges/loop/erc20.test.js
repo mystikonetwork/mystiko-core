@@ -13,30 +13,34 @@ contract('MystikoWithLoopERC20', (accounts) => {
     it('should set token correctly information correctly', async () => {
       const tokenContract = await TestToken.deployed();
       const loopContract = await MystikoWithLoopERC20.deployed();
-      expect(await loopContract.getToken.call()).to.equal(tokenContract.address);
-      expect(await loopContract.getTokenName.call()).to.equal(await tokenContract.name.call());
-      expect(await loopContract.getTokenSymbol.call()).to.equal(await tokenContract.symbol.call());
-      const actualDecimals = (await loopContract.getTokenDecimals.call()).toString();
-      const expectedDecimals = (await tokenContract.decimals.call()).toString();
+      expect(await loopContract.asset()).to.equal(tokenContract.address);
+      expect(await loopContract.assetName()).to.equal(await tokenContract.name());
+      expect(await loopContract.assetSymbol()).to.equal(await tokenContract.symbol());
+      const actualDecimals = (await loopContract.assetDecimals()).toString();
+      const expectedDecimals = (await tokenContract.decimals()).toString();
       expect(actualDecimals).to.equal(expectedDecimals);
+      const bridgeType = await loopContract.bridgeType();
+      const assetType = await loopContract.assetType();
+      expect(bridgeType).to.equal('loop');
+      expect(assetType).to.equal('erc20');
     });
 
     it('should set verifier information correctly', async () => {
       const loopContract = await MystikoWithLoopERC20.deployed();
       const verifierContract = await Verifier.deployed();
-      expect(await loopContract.getVerifierAddress.call()).to.equal(verifierContract.address);
+      expect(await loopContract.getVerifierAddress()).to.equal(verifierContract.address);
     });
 
     it('should set hasher information correctly', async () => {
       const loopContract = await MystikoWithLoopERC20.deployed();
       const hasherContract = await Hasher.deployed();
-      expect(await loopContract.getHasherAddress.call()).to.equal(hasherContract.address);
+      expect(await loopContract.getHasherAddress()).to.equal(hasherContract.address);
     });
 
     it('should have enough tokens in account 0', async () => {
       const tokenContract = await TestToken.deployed();
       console.log(tokenContract.address);
-      const balanceOfAccount0 = await tokenContract.balanceOf.call(accounts[0]);
+      const balanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
       expect(balanceOfAccount0.toString()).to.equal(toDecimals(1000000000, 18).toString());
     });
   });
@@ -53,7 +57,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
     it('should transfer token to account 1 correctly', async () => {
       const tokenContract = await TestToken.deployed();
       await tokenContract.transfer(accounts[1], toDecimals(1000, 18), { from: accounts[0] });
-      const balanceOfAccount1 = await tokenContract.balanceOf.call(accounts[1]);
+      const balanceOfAccount1 = await tokenContract.balanceOf(accounts[1]);
       expect(balanceOfAccount1.toString()).to.equal(toDecimals(1000, 18).toString());
     });
 
@@ -94,10 +98,10 @@ contract('MystikoWithLoopERC20', (accounts) => {
       expect(merkleTreeInsertEvent.args.amount.toString()).to.equal(amount.toString());
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
-      const levels = await loopContract.getLevels.call();
+      const levels = await loopContract.getLevels();
       const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
       const root = new BN(tree.root());
-      const isKnownRoot = await loopContract.isKnownRoot.call(toFixedLenHex(root));
+      const isKnownRoot = await loopContract.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
     });
   });
@@ -171,7 +175,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
         from: accounts[1],
         gas: gasEstimated,
       });
-      const balanceOfAccount3 = await tokenContract.balanceOf.call(accounts[2]);
+      const balanceOfAccount3 = await tokenContract.balanceOf(accounts[2]);
       expect(balanceOfAccount3.toString()).to.equal(amount.toString());
       const isSpent = await loopContract.isSpent(serialNumber);
       expect(isSpent).to.equal(true);
