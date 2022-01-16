@@ -57,7 +57,6 @@
     "process": "^0.11.10",
     "safe-buffer": "^5.2.1",
     "snarkjs": "^0.4.10",
-    "solc": "^0.6.11",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
     "stream-browserify": "^3.0.0",
