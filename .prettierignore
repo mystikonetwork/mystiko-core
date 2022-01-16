@@ -5,3 +5,4 @@ circuits
 yarn.lock
 coverage
 dist
+.idea

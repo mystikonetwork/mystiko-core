@@ -1,5 +1,5 @@
 require('dotenv').config({ path: '../.env' });
-const MystikoWithLoop = artifacts.require('MystikoWithLoopERC20');
+const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 const TestToken = artifacts.require('TestToken');
@@ -10,13 +10,12 @@ module.exports = function (deployer) {
     const verifier = await Verifier.deployed();
     const hasher = await Hasher.deployed();
     const token = await TestToken.deployed();
-    const mystiko = await deployer.deploy(
-      MystikoWithLoop,
+    await deployer.deploy(
+      MystikoWithLoopERC20,
       verifier.address,
       token.address,
       hasher.address,
       MERKLE_TREE_HEIGHT,
     );
-    console.log('MystikoWithLoopERC20 address', mystiko.address);
   });
 };

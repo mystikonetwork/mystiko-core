@@ -265,9 +265,9 @@ test('test zkProve/zkVerify', async () => {
   const commitment2 = await DefaultProtocol.commitment(pkVerify, pkEnc, amount);
   const treeLeaves = [commitment1.commitmentHash, commitment2.commitmentHash];
   const treeIndex = 1;
-  const wasmFile = 'build/circuits/withdraw.wasm';
-  const zkeyFile = 'build/circuits/withdraw.zkey';
-  const vkeyFile = 'build/circuits/withdraw.vkey.json';
+  const wasmFile = 'dist/circom/dev/withdraw.wasm';
+  const zkeyFile = 'dist/circom/dev/withdraw.zkey';
+  const vkeyFile = 'dist/circom/dev/withdraw.vkey.json';
   const { proof, publicSignals } = await DefaultProtocol.zkProve(
     pkVerify,
     skVerify,

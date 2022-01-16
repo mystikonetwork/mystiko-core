@@ -11,7 +11,7 @@
   "license": "MIT",
   "scripts": {
     "build:circuit": "./scripts/buildCircuit.sh",
-    "build:contract": "npx truffle compile",
+    "build:contract": "mkdir -p build && npx truffle compile",
     "build:js": "webpack -c webpack.config.js",
     "build": "yarn lint && yarn build:contract && yarn build:js",
     "migrate": "yarn migrate:dev",
@@ -57,6 +57,7 @@
     "process": "^0.11.10",
     "safe-buffer": "^5.2.1",
     "snarkjs": "^0.4.10",
+    "solc": "^0.6.11",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
     "stream-browserify": "^3.0.0",
