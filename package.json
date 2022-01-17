@@ -6,6 +6,7 @@
   "main": "dist/mystiko.cjs",
   "browser": "dist/mystiko.js",
   "module": "src/index.js",
+  "types": "dist/mystiko.d.ts",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
   "author": "Fitch",
   "license": "MIT",
