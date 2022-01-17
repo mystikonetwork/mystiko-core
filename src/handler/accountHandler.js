@@ -1,6 +1,5 @@
 import { hdkey } from 'ethereumjs-wallet';
 import { Account } from '../model/account.js';
-import { Wallet } from '../model/wallet.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
@@ -12,8 +11,8 @@ export class AccountHandler extends Handler {
     this.walletHandler = walletHandler;
   }
 
-  getAccounts(wallet) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  getAccounts() {
+    const wallet = this._checkCurrentWallet();
     const rawAccounts = this.db.accounts.find({ walletId: wallet.id });
     return rawAccounts.map((account) => new Account(account));
   }
@@ -28,10 +27,10 @@ export class AccountHandler extends Handler {
     );
   }
 
-  exportAccountSecretKey(wallet, walletPassword, account) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  exportAccountSecretKey(walletPassword, account) {
     check(account instanceof Account, 'account should be instance of Account');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
+    const wallet = this._checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -40,10 +39,10 @@ export class AccountHandler extends Handler {
     return toHexNoPrefix(this.protocol.fullSecretKey(toBuff(skVerify), toBuff(skEnc)));
   }
 
-  async addAccount(wallet, walletPassword, accountName) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  async addAccount(walletPassword, accountName) {
     check(typeof accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
+    const wallet = this._checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -67,11 +66,11 @@ export class AccountHandler extends Handler {
     return account;
   }
 
-  async importAccountFromSecretKey(wallet, walletPassword, accountName, secretKey) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  async importAccountFromSecretKey(walletPassword, accountName, secretKey) {
     check(typeof accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     check(secretKey instanceof Buffer, 'secretKey should be instance of Buffer');
+    const wallet = this._checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -91,10 +90,10 @@ export class AccountHandler extends Handler {
     return account;
   }
 
-  async updateAccountKeys(wallet, oldPassword, newPassword) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  async updateAccountKeys(oldPassword, newPassword) {
     check(typeof oldPassword === 'string', 'oldPassword should be instance of string');
     check(typeof newPassword === 'string', 'newPassword should be instance of string');
+    const wallet = this._checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, oldPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -120,5 +119,11 @@ export class AccountHandler extends Handler {
     );
     account.encryptedEncSecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skEnc));
     return account;
+  }
+
+  _checkCurrentWallet() {
+    const wallet = this.walletHandler.getCurrentWallet();
+    check(wallet, 'no existing wallet in database');
+    return wallet;
   }
 }

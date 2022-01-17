@@ -28,7 +28,7 @@ export class WalletHandler extends Handler {
     if (results.length > 0) {
       return new Wallet(results[0]);
     }
-    return null;
+    return undefined;
   }
 
   getWalletById(id) {
@@ -37,7 +37,7 @@ export class WalletHandler extends Handler {
     if (rawWallet) {
       return new Wallet(rawWallet);
     }
-    return null;
+    return undefined;
   }
 
   checkPassword(wallet, password) {
