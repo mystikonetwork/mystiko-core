@@ -3,11 +3,9 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 module.exports = [
   {
+    entry: './src/browser.js',
     output: {
-      path: path.resolve(__dirname, 'dist'),
-      library: 'mystiko',
-      libraryTarget: 'umd',
-      libraryExport: 'default',
+      path: path.resolve(__dirname, 'build/js'),
       filename: 'mystiko.js',
     },
     mode: 'production',
@@ -53,7 +51,7 @@ module.exports = [
   },
   {
     output: {
-      path: path.resolve(__dirname, 'dist'),
+      path: path.resolve(__dirname, 'build/js'),
       library: 'mystiko',
       libraryTarget: 'commonjs',
       libraryExport: 'default',
