@@ -27,11 +27,11 @@ test('Test WalletHandler createWallet', async () => {
 });
 
 test('Test WalletHandler getCurrentWallet', () => {
-  expect(handler.getCurrentWallet()).toBe(null);
+  expect(handler.getCurrentWallet()).toBe(undefined);
 });
 
 test('Test WalletHandler getWallet by id', () => {
-  expect(handler.getWalletById(1)).toBe(null);
+  expect(handler.getWalletById(1)).toBe(undefined);
 });
 
 test('Test WalletHandler updatePassword', async () => {
