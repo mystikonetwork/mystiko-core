@@ -5,6 +5,8 @@ import "./MystikoWithPoly.sol";
 import "../../pool/MainAssetPool.sol";
 
 contract MystikoWithPolyMain is MystikoWithPoly, MainAssetPool {
+  event Received(address, uint);
+
   constructor(
     address _eccmp,
     uint64 _peerChainId,
@@ -12,4 +14,8 @@ contract MystikoWithPolyMain is MystikoWithPoly, MainAssetPool {
     address _hasher,
     uint32 _merkleTreeHeight
   ) public MystikoWithPoly(_eccmp, _peerChainId, _verifier, _hasher, _merkleTreeHeight) {}
+
+  receive() external payable {
+    emit Received(msg.sender, msg.value);
+  }
 }
