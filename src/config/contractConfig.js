@@ -12,11 +12,11 @@ export const AssetType = {
 };
 
 export function isValidBridgeType(type) {
-  return Object.values(BridgeType).indexOf(type) != -1;
+  return Object.values(BridgeType).indexOf(type) !== -1;
 }
 
 export function isValidAssetType(type) {
-  return Object.values(AssetType).indexOf(type) != -1;
+  return Object.values(AssetType).indexOf(type) !== -1;
 }
 
 export class ContractConfig extends BaseConfig {
@@ -27,6 +27,9 @@ export class ContractConfig extends BaseConfig {
     BaseConfig.checkNumber(this.config, 'assetDecimals');
     BaseConfig.checkString(this.config, 'assetType');
     check(isValidAssetType(this.assetType), this.assetType + ' is invalid asset type');
+    if (this.assetType !== AssetType.MAIN) {
+      BaseConfig.checkEthAddress(this.config, 'assetAddress');
+    }
     BaseConfig.checkString(this.config, 'bridgeType');
     check(isValidBridgeType(this.bridgeType), this.bridgeType + ' is invalid bridge type');
     if (this.bridgeType !== BridgeType.LOOP) {
@@ -45,6 +48,10 @@ export class ContractConfig extends BaseConfig {
 
   get bridgeType() {
     return this.config['bridgeType'];
+  }
+
+  get assetAddress() {
+    return this.config['assetAddress'];
   }
 
   get assetType() {
