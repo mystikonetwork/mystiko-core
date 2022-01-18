@@ -9,7 +9,6 @@ const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 
 contract('MystikoWithPolyMain', (accounts) => {
-
   let mystikoWithPolySourceMain;
   let mystikoWithPolyDestinationMain;
   let crossChainManager;
@@ -48,13 +47,9 @@ contract('MystikoWithPolyMain', (accounts) => {
       mystikoWithPolyDestinationMain.address,
     );
 
-    await mystikoWithPolySourceMain.setPeerContractAddress(
-      mystikoWithPolyDestinationMain.address,
-    );
+    await mystikoWithPolySourceMain.setPeerContractAddress(mystikoWithPolyDestinationMain.address);
 
-    await mystikoWithPolyDestinationMain.setPeerContractAddress(
-      mystikoWithPolySourceMain.address,
-    );
+    await mystikoWithPolyDestinationMain.setPeerContractAddress(mystikoWithPolySourceMain.address);
 
     await web3.eth.sendTransaction({
       from: accounts[1],
@@ -137,7 +132,6 @@ contract('MystikoWithPolyMain', (accounts) => {
     });
   });
 
-
   describe('Test withdraw operation', () => {
     let proof, publicSignals;
     it('should generate proof successfully', async () => {
@@ -183,11 +177,7 @@ contract('MystikoWithPolyMain', (accounts) => {
       const rootHash = new BN(publicSignals[0]);
       const serialNumber = new BN(publicSignals[1]);
       const amount = new BN(toDecimals(1, 16).toString());
-      const result = await verifier.verifyProof(proofA, proofB, proofC, [
-        rootHash,
-        serialNumber,
-        amount,
-      ]);
+      const result = await verifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
       expect(result).to.equal(true);
       const recipient = accounts[2];
       const gasEstimated = await mystikoWithPolyDestinationMain.withdraw.estimateGas(
@@ -200,10 +190,19 @@ contract('MystikoWithPolyMain', (accounts) => {
         recipient,
         { from: accounts[1] },
       );
-      await mystikoWithPolyDestinationMain.withdraw(proofA, proofB, proofC, rootHash, serialNumber, amount, recipient, {
-        from: accounts[1],
-        gas: gasEstimated,
-      });
+      await mystikoWithPolyDestinationMain.withdraw(
+        proofA,
+        proofB,
+        proofC,
+        rootHash,
+        serialNumber,
+        amount,
+        recipient,
+        {
+          from: accounts[1],
+          gas: gasEstimated,
+        },
+      );
       const isSpent = await mystikoWithPolyDestinationMain.isSpent(serialNumber);
       expect(isSpent).to.equal(true);
     });

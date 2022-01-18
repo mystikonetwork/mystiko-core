@@ -5,7 +5,7 @@ import "./MystikoWithPoly.sol";
 import "../../pool/MainAssetPool.sol";
 
 contract MystikoWithPolyMain is MystikoWithPoly, MainAssetPool {
-  event Received(address, uint);
+  event Received(address, uint256);
 
   constructor(
     address _eccmp,

@@ -8,21 +8,21 @@ import "../libs/utils/Utils.sol";
 
 contract PolyCrossChainManagerMock is IEthCrossChainManager, IEthCrossChainManagerProxy {
   address public operator;
-  uint64 chainIdA;
-  address contractAddressA;
-  uint64 chainIdB;
-  address contractAddressB;
+  uint64 public chainIdA;
+  address public contractAddressA;
+  uint64 public chainIdB;
+  address public contractAddressB;
 
   constructor() public {
     operator = msg.sender;
   }
 
   modifier onlyOperator() {
-    require(msg.sender == operator, "Only operator can call this function.");
+    require(msg.sender == operator, "Only operator.");
     _;
   }
 
-    function setChainPair(
+  function setChainPair(
     uint64 _chainIdA,
     address _contractAddressA,
     uint64 _chainIdB,
