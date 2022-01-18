@@ -28,6 +28,7 @@ test('Test WalletHandler createWallet', async () => {
 
 test('Test WalletHandler getCurrentWallet', () => {
   expect(handler.getCurrentWallet()).toBe(undefined);
+  expect(() => handler.checkCurrentWallet()).toThrow();
 });
 
 test('Test WalletHandler getWallet by id', () => {

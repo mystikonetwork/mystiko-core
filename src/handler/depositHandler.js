@@ -1,72 +1,44 @@
-import { ethers } from 'ethers';
+import BN from 'bn.js';
+
 import { Handler } from './handler.js';
-import { check, toDecimals, toHex, toFixedLenHex } from '../utils.js';
-import { createContract, validContractConfig } from '../chain/contract.js';
-import { Deposit, DepositStatus } from '../model/deposit.js';
-import { Wallet } from '../model/wallet.js';
+import { check, toDecimals } from '../utils.js';
+import { ContractPool } from '../chain/contract.js';
+import { WalletHandler } from './walletHandler.js';
 
 export class DepositHandler extends Handler {
-  constructor(db, config) {
+  constructor(walletHandler, contractPool, db, config) {
     super(db, config);
+    check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
+    check(contractPool instanceof ContractPool, 'contractPool should be instance of ContractPool');
+    this.walletHandler = walletHandler;
+    this.contractPool = contractPool;
   }
 
-  async createDeposit(wallet, signer, srcChainId, dstChainId, tokenSymbol, bridge, amount, shieldedAddress) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
-    check(signer instanceof ethers.Signer, 'incorrect signer instance');
-    check(typeof amount === 'number', 'type of amount should be number');
-    check(this.protocol.isShieldedAddress(shieldedAddress), shieldedAddress + ' is invalid shielded address');
-    const contractConfig = this.config.getContractConfig(srcChainId, dstChainId, tokenSymbol, bridge);
-    check(contractConfig, 'contract config gives nothing');
-    const signerChainId = await signer.getChainId();
-    check(srcChainId === signerChainId, 'signer chain id does not match srcChainId');
-    const contract = await createContract(contractConfig, signer);
-    await validContractConfig(contractConfig, contract);
-    const amountDecimals = toDecimals(amount, contractConfig.assetDecimals);
-    const { commitmentHash, privateNote, k, randomS } = await this.protocol.commitmentWithShieldedAddress(
-      shieldedAddress,
-      amountDecimals,
+  async approveAsset(signer, srcChainId, dstChainId, assetSymbol, bridge, amount) {
+    check(typeof amount === 'number', 'amount is invalid number');
+    const depositContracts = this.contractPool.getDepositContracts(
+      srcChainId,
+      dstChainId,
+      assetSymbol,
+      bridge,
     );
-    const srcAddress = await signer.getAddress();
-    const deposit = new Deposit({});
-    deposit.srcChainId = srcChainId;
-    deposit.dstChainId = dstChainId;
-    deposit.bridge = bridge;
-    deposit.asset = contractConfig.assetSymbol;
-    deposit.amount = amountDecimals;
-    deposit.commitmentHash = this.protocol.bigIntToBuff(commitmentHash);
-    deposit.srcAddress = srcAddress;
-    deposit.walletId = wallet.id;
-    deposit.status = DepositStatus.INIT;
-    this.db.deposits.insert(deposit.data);
-    await this.saveDatabase();
-    contract
-      .deposit(
-        amountDecimals,
-        toFixedLenHex(commitmentHash),
-        toFixedLenHex(k),
-        toFixedLenHex(randomS),
-        toHex(privateNote),
-      )
-      .then((txResponse) => {
-        deposit.status = DepositStatus.SRC_PENDING;
-        deposit.transactionHash = txResponse.hash;
-        this.db.deposits.update(deposit.data);
-        return txResponse.wait();
-      })
-      .then((receipt) => {
-        deposit.transactionHash = receipt.transactionHash;
-        deposit.status = DepositStatus.SRC_SUCCEEDED;
-        this.db.deposits.update(deposit);
-        return this.saveDatabase();
-      })
-      .catch((error) => {
-        if (error && error.transactionHash) {
-          deposit.transactionHash = error.transactionHash;
-        }
-        deposit.status = DepositStatus.SRC_FAILED;
-        this.db.deposits.update(deposit);
-        return this.saveDatabase();
-      });
-    return deposit;
+    if (depositContracts.asset) {
+      const assetContract = depositContracts.asset.connect(signer);
+      const ownerAddress = await signer.getAddress();
+      const spenderAddress = depositContracts.protocol.address;
+      const allowance = await depositContracts.asset.allowance(ownerAddress, spenderAddress);
+      const allowanceBN = new BN(allowance);
+      const decimals = await assetContract.decimals();
+      let amountBN = toDecimals(amount, decimals);
+      if (allowanceBN.lt(amountBN)) {
+        amountBN = amountBN.sub(allowanceBN);
+        const txResp = await assetContract.approve(depositContracts.protocol.address, amountBN);
+        return txResp.wait().then(
+          () => true,
+          () => false,
+        );
+      }
+    }
+    return true;
   }
 }

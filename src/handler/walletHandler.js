@@ -31,6 +31,12 @@ export class WalletHandler extends Handler {
     return undefined;
   }
 
+  checkCurrentWallet() {
+    const wallet = this.getCurrentWallet();
+    check(wallet, 'no existing wallet in database');
+    return wallet;
+  }
+
   getWalletById(id) {
     check(typeof id === 'number', 'id should be instance of number');
     const rawWallet = this.db.wallets.findOne({ [ID_KEY]: id });

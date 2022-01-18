@@ -1,8 +1,10 @@
 import { ethers } from 'ethers';
-import { createContract, validContractConfig } from '../../src/chain/contract.js';
+import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { ContractConfig } from '../../src/config/contractConfig.js';
 import { readJsonFile } from '../../src/utils.js';
 import { AssetType, BridgeType } from '../../src/config/contractConfig.js';
+import config from '../../src/config';
+import erc20Abi from '../../src/chain/abi/ERC20.json';
 
 class MockContract extends ethers.Contract {
   constructor(
@@ -10,6 +12,7 @@ class MockContract extends ethers.Contract {
     abi,
     assetType,
     bridgeType,
+    assetAddress,
     assetSymbol,
     assetDecimals,
     peerChainId,
@@ -18,6 +21,7 @@ class MockContract extends ethers.Contract {
     super(address, abi);
     this._assetType = assetType;
     this._bridgeType = bridgeType;
+    this._assetAddress = assetAddress;
     this._assetSymbol = assetSymbol;
     this._assetDecimals = assetDecimals;
     this._peerChainId = peerChainId;
@@ -30,6 +34,10 @@ class MockContract extends ethers.Contract {
 
   bridgeType() {
     return new Promise((resolve) => resolve(this._bridgeType));
+  }
+
+  asset() {
+    return new Promise((resolve) => resolve(this._assetAddress));
   }
 
   assetSymbol() {
@@ -49,58 +57,48 @@ class MockContract extends ethers.Contract {
   }
 }
 
-test('test creatCreate', async () => {
-  await expect(createContract({})).rejects.toThrow();
+test('test MystikoContract constructor', async () => {
+  expect(() => new MystikoContract({})).toThrow();
   const contractConfig = new ContractConfig({
     address: '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1',
     assetSymbol: 'USDT',
     assetDecimals: 18,
     assetType: 'erc20',
+    assetAddress: '0xaE110b575E21949DEc823EfB81951355EB71E038',
     bridgeType: 'loop',
     abiFile: 'build/contracts/MystikoWithLoopERC20.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
   });
-  const contract = await createContract(contractConfig);
-  expect(contract.address).toBe(contractConfig.address);
-});
-
-test('test validContractConfig', async () => {
-  const address = '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1';
-  const peerAddress = '0x8fb1df17768e29c936edfbce1207ad13696268b7';
-  const abi1 = await readJsonFile('build/contracts/MystikoWithLoopERC20.json');
-  const abi2 = await readJsonFile('build/contracts/MystikoWithLoopMain.json');
-  const abi3 = await readJsonFile('build/contracts/MystikoWithPolyERC20.json');
-  const abi4 = await readJsonFile('build/contracts/MystikoWithPolyMain.json');
-  const contract1 = new MockContract(address, abi1.abi, AssetType.ERC20, BridgeType.LOOP, 'USDT', 18);
-  const contract2 = new MockContract(address, abi2.abi, AssetType.MAIN, BridgeType.LOOP);
-  const contract3 = new MockContract(
-    address,
-    abi3.abi,
+  const contract1 = new MystikoContract(contractConfig);
+  const mockContract = new MockContract(
+    '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1',
+    (await readJsonFile('build/contracts/MystikoWithLoopERC20.json')).abi,
     AssetType.ERC20,
-    BridgeType.POLY,
+    BridgeType.LOOP,
+    '0xaE110b575E21949DEc823EfB81951355EB71E038',
     'USDT',
     18,
-    56,
-    peerAddress,
   );
-  const contract4 = new MockContract(
-    address,
-    abi4.abi,
-    AssetType.MAIN,
-    BridgeType.POLY,
-    undefined,
-    undefined,
-    56,
-    peerAddress,
-  );
+  const contract2 = new MystikoContract(mockContract);
+  expect(contract1.contract).toBe(undefined);
+  expect(contract1.config).not.toBe(undefined);
+  expect(contract2.config).toBe(undefined);
+  expect(contract2.contract).not.toBe(undefined);
+});
+
+test('test MystikoContract connect', async () => {
+  const address = '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1';
+  const peerAddress = '0x8fb1df17768e29c936edfbce1207ad13696268b7';
+  const assetAddress = '0xaE110b575E21949DEc823EfB81951355EB71E038';
   const contractConfig1 = new ContractConfig({
     address: address,
     assetSymbol: 'USDT',
     assetDecimals: 18,
     assetType: 'erc20',
     bridgeType: 'loop',
+    assetAddress,
     abiFile: 'build/contracts/MystikoWithLoopERC20.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
@@ -119,6 +117,7 @@ test('test validContractConfig', async () => {
   });
   const contractConfig3 = new ContractConfig({
     address: address,
+    assetAddress,
     assetSymbol: 'USDT',
     assetDecimals: 18,
     assetType: 'erc20',
@@ -143,12 +142,99 @@ test('test validContractConfig', async () => {
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
   });
-  await validContractConfig(contractConfig1, contract1);
-  await validContractConfig(contractConfig2, contract2);
-  await validContractConfig(contractConfig3, contract3);
-  await validContractConfig(contractConfig4, contract4);
-  await expect(validContractConfig(contractConfig1, contract2)).rejects.toThrow();
-  await expect(validContractConfig(contractConfig2, contract3)).rejects.toThrow();
-  await expect(validContractConfig(contractConfig3, contract4)).rejects.toThrow();
-  await expect(validContractConfig(contractConfig1, contract4)).rejects.toThrow();
+  const contract1 = new MystikoContract(contractConfig1);
+  const contract2 = new MystikoContract(contractConfig2);
+  const contract3 = new MystikoContract(contractConfig3);
+  const contract4 = new MystikoContract(contractConfig4);
+  const contract1Connected = await contract1.connect(undefined, (address, abi, providerOrSinger) => {
+    expect(providerOrSinger).toBe(undefined);
+    return new MockContract(address, abi, AssetType.ERC20, BridgeType.LOOP, assetAddress, 'USDT', 18);
+  });
+  const contract2Connected = await contract2.connect(undefined, (address, abi, providerOrSinger) => {
+    expect(providerOrSinger).toBe(undefined);
+    return new MockContract(address, abi, AssetType.MAIN, BridgeType.LOOP);
+  });
+  const contract3Connected = await contract3.connect(undefined, (address, abi, providerOrSinger) => {
+    expect(providerOrSinger).toBe(undefined);
+    return new MockContract(
+      address,
+      abi,
+      AssetType.ERC20,
+      BridgeType.POLY,
+      assetAddress,
+      'USDT',
+      18,
+      56,
+      peerAddress,
+    );
+  });
+  const contract4Connected = await contract4.connect(undefined, (address, abi, providerOrSinger) => {
+    expect(providerOrSinger).toBe(undefined);
+    return new MockContract(
+      address,
+      abi,
+      AssetType.MAIN,
+      BridgeType.POLY,
+      undefined,
+      undefined,
+      undefined,
+      56,
+      peerAddress,
+    );
+  });
+  expect(contract1Connected instanceof ethers.Contract).toBe(true);
+  expect(contract2Connected instanceof ethers.Contract).toBe(true);
+  expect(contract3Connected instanceof ethers.Contract).toBe(true);
+  expect(contract4Connected instanceof ethers.Contract).toBe(true);
+  const abiData = await readJsonFile('build/contracts/MystikoWithLoopERC20.json');
+  const rawContract = new ethers.Contract('0x98ED94360CAd67A76a53d8Aa15905E52485B73d1', abiData.abi);
+  const contract5 = new MystikoContract(rawContract);
+  const contract5Connected = await contract5.connect();
+  expect(contract5Connected instanceof ethers.Contract).toBe(true);
+});
+
+test('test ContractPool connect', async () => {
+  expect(() => new ContractPool({})).toThrow();
+  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const pool = new ContractPool(conf);
+  const contractGenerator = (address, abi, providerOrSigner) => {
+    if (abi === erc20Abi) {
+      return new ethers.Contract(address, erc20Abi, providerOrSigner);
+    }
+    expect(providerOrSigner).not.toBe(undefined);
+    let mockContract = undefined;
+    conf.chainIds.forEach((chainId) => {
+      conf.getChainConfig(chainId).contracts.forEach((contract) => {
+        if (contract.address === address) {
+          mockContract = new MockContract(
+            address,
+            abi,
+            contract.assetType,
+            contract.bridgeType,
+            contract.assetAddress,
+            contract.assetSymbol,
+            contract.assetDecimals,
+            contract.peerChainId,
+            contract.peerContractAddress,
+          );
+        }
+      });
+    });
+    expect(mockContract).not.toBe(undefined);
+    return mockContract;
+  };
+  await pool.connect(contractGenerator);
+  expect(Object.keys(pool.pool).length).toBe(2);
+  expect(Object.keys(pool.pool['1']).length).toBe(3);
+  expect(Object.keys(pool.pool['56']).length).toBe(1);
+  let depositContracts = pool.getDepositContracts(1, 56, 'USDT', config.BridgeType.POLY);
+  expect(depositContracts.protocol.address).toBe('0x8fb1df17768e29c936edfbce1207ad13696268b7');
+  expect(depositContracts.asset.address).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
+  depositContracts = pool.getDepositContracts(1, 1, 'ETH', config.BridgeType.LOOP);
+  expect(depositContracts.asset).toBe(undefined);
+  expect(depositContracts.protocol.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
+  let withdrawContract = pool.getWithdrawContract(1, 56, 'USDT', config.BridgeType.POLY);
+  expect(withdrawContract.address).toBe('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
+  withdrawContract = pool.getWithdrawContract(1, 1, 'ETH', config.BridgeType.LOOP);
+  expect(withdrawContract.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
 });

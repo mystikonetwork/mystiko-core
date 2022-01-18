@@ -41,14 +41,14 @@ export default class DefaultProtocol {
 
   static secretKeyForVerification(rawSecretKey) {
     check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
-    check(rawSecretKey.length == VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
+    check(rawSecretKey.length === VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
     const keyHash = createBlakeHash('blake512').update(rawSecretKey).digest().slice(0, VERIFY_SK_SIZE);
     const sBuffer = eddsa.pruneBuffer(keyHash);
     const skBigInt = Scalar.shr(DefaultProtocol.buffToBigInt(sBuffer).toString(), 3);
     check(FIELD_SIZE.gt(new BN(skBigInt.toString())), 'skBigInt should be less than FIELD_SIZE');
     const sk = DefaultProtocol.bigIntToBuff(new BN(skBigInt.toString()), VERIFY_SK_SIZE);
     check(
-      sk.length == VERIFY_SK_SIZE,
+      sk.length === VERIFY_SK_SIZE,
       'converted secret key length ' + sk.length + ' not equal to ' + FIELD_SIZE,
     );
     return sk;
@@ -56,12 +56,12 @@ export default class DefaultProtocol {
 
   static publicKeyForVerification(rawSecretKey) {
     check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
-    check(rawSecretKey.length == VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
+    check(rawSecretKey.length === VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
     const unpackedPoints = eddsa.prv2pub(rawSecretKey);
     check(unpackedPoints[0] < FIELD_SIZE, 'first point should be less than FIELD_SIZE');
     const pk = DefaultProtocol.bigIntToBuff(new BN(unpackedPoints[0].toString()), VERIFY_PK_SIZE);
     check(
-      pk.length == VERIFY_PK_SIZE,
+      pk.length === VERIFY_PK_SIZE,
       'converted public key length ' + pk.length + ' not equal to ' + FIELD_SIZE,
     );
     return pk;
@@ -69,16 +69,22 @@ export default class DefaultProtocol {
 
   static secretKeyForEncryption(rawSecretKey) {
     check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
-    check(rawSecretKey.length == ENCRYPT_SK_SIZE, 'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE);
+    check(
+      rawSecretKey.length === ENCRYPT_SK_SIZE,
+      'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE,
+    );
     return rawSecretKey;
   }
 
   static publicKeyForEncryption(rawSecretKey) {
     check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
-    check(rawSecretKey.length == ENCRYPT_SK_SIZE, 'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE);
+    check(
+      rawSecretKey.length === ENCRYPT_SK_SIZE,
+      'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE,
+    );
     const publicKey = eccrypto.getPublicCompressed(rawSecretKey);
     check(
-      publicKey.length == ENCRYPT_PK_SIZE,
+      publicKey.length === ENCRYPT_PK_SIZE,
       'generate public key length does not equal to ' + ENCRYPT_PK_SIZE,
     );
     return publicKey;
@@ -86,31 +92,31 @@ export default class DefaultProtocol {
 
   static fullPublicKey(pkVerify, pkEnc) {
     check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
-    check(pkVerify.length == VERIFY_PK_SIZE, 'pkVerify length does not equal to ' + VERIFY_PK_SIZE);
+    check(pkVerify.length === VERIFY_PK_SIZE, 'pkVerify length does not equal to ' + VERIFY_PK_SIZE);
     check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
-    check(pkEnc.length == ENCRYPT_PK_SIZE, 'pkEnc length does not equal to ' + ENCRYPT_PK_SIZE);
+    check(pkEnc.length === ENCRYPT_PK_SIZE, 'pkEnc length does not equal to ' + ENCRYPT_PK_SIZE);
     return Buffer.concat([pkVerify, pkEnc]);
   }
 
   static fullSecretKey(skVerify, skEnc) {
     check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
-    check(skVerify.length == VERIFY_SK_SIZE, 'skVerify length does not equal to ' + VERIFY_SK_SIZE);
+    check(skVerify.length === VERIFY_SK_SIZE, 'skVerify length does not equal to ' + VERIFY_SK_SIZE);
     check(skEnc instanceof Buffer, 'unsupported skEnc type ' + typeof skEnc);
-    check(skEnc.length == ENCRYPT_SK_SIZE, 'skEnc length does not equal to ' + ENCRYPT_SK_SIZE);
+    check(skEnc.length === ENCRYPT_SK_SIZE, 'skEnc length does not equal to ' + ENCRYPT_SK_SIZE);
     return Buffer.concat([skVerify, skEnc]);
   }
 
   static separatedPublicKeys(fullPublicKey) {
     check(fullPublicKey instanceof Buffer, 'unsupported fullPublicKey type ' + typeof fullPublicKey);
     const expectedSize = VERIFY_PK_SIZE + ENCRYPT_PK_SIZE;
-    check(fullPublicKey.length == expectedSize, 'fullPublicKey length does not equal to ' + expectedSize);
+    check(fullPublicKey.length === expectedSize, 'fullPublicKey length does not equal to ' + expectedSize);
     return { pkVerify: fullPublicKey.slice(0, VERIFY_PK_SIZE), pkEnc: fullPublicKey.slice(VERIFY_PK_SIZE) };
   }
 
   static separatedSecretKeys(fullSecretKey) {
     check(fullSecretKey instanceof Buffer, 'unsupported fullSecretKey type ' + typeof fullSecretKey);
     const expectedSize = VERIFY_SK_SIZE + ENCRYPT_SK_SIZE;
-    check(fullSecretKey.length == expectedSize, 'fullSecretKey length does not equal to ' + expectedSize);
+    check(fullSecretKey.length === expectedSize, 'fullSecretKey length does not equal to ' + expectedSize);
     return { skVerify: fullSecretKey.slice(0, VERIFY_SK_SIZE), skEnc: fullSecretKey.slice(VERIFY_SK_SIZE) };
   }
 
@@ -122,7 +128,7 @@ export default class DefaultProtocol {
     if (typeof address === 'string') {
       try {
         const decoded = bs58.decode(address);
-        if (decoded.length == VERIFY_PK_SIZE + ENCRYPT_PK_SIZE) {
+        if (decoded.length === VERIFY_PK_SIZE + ENCRYPT_PK_SIZE) {
           return true;
         }
       } catch {
@@ -281,7 +287,7 @@ export default class DefaultProtocol {
     check(typeof wasmFile === 'string', 'unsupported wasmFile type ' + typeof wasmFile);
     check(typeof zkeyFile === 'string', 'unsupported zkeyFile type ' + typeof zkeyFile);
     const decryptedNote = await DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
-    check(decryptedNote.length == RANDOM_SK_SIZE * 3, 'decrypted note length is incorrect');
+    check(decryptedNote.length === RANDOM_SK_SIZE * 3, 'decrypted note length is incorrect');
     const randomP = decryptedNote.slice(0, RANDOM_SK_SIZE);
     const randomR = decryptedNote.slice(RANDOM_SK_SIZE, RANDOM_SK_SIZE * 2);
     const randomS = decryptedNote.slice(RANDOM_SK_SIZE * 2);

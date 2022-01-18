@@ -12,7 +12,7 @@ export class AccountHandler extends Handler {
   }
 
   getAccounts() {
-    const wallet = this._checkCurrentWallet();
+    const wallet = this.walletHandler.checkCurrentWallet();
     const rawAccounts = this.db.accounts.find({ walletId: wallet.id });
     return rawAccounts.map((account) => new Account(account));
   }
@@ -30,7 +30,7 @@ export class AccountHandler extends Handler {
   exportAccountSecretKey(walletPassword, account) {
     check(account instanceof Account, 'account should be instance of Account');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
-    const wallet = this._checkCurrentWallet();
+    const wallet = this.walletHandler.checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -42,7 +42,7 @@ export class AccountHandler extends Handler {
   async addAccount(walletPassword, accountName) {
     check(typeof accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
-    const wallet = this._checkCurrentWallet();
+    const wallet = this.walletHandler.checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -70,7 +70,7 @@ export class AccountHandler extends Handler {
     check(typeof accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     check(secretKey instanceof Buffer, 'secretKey should be instance of Buffer');
-    const wallet = this._checkCurrentWallet();
+    const wallet = this.walletHandler.checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -93,7 +93,7 @@ export class AccountHandler extends Handler {
   async updateAccountKeys(oldPassword, newPassword) {
     check(typeof oldPassword === 'string', 'oldPassword should be instance of string');
     check(typeof newPassword === 'string', 'newPassword should be instance of string');
-    const wallet = this._checkCurrentWallet();
+    const wallet = this.walletHandler.checkCurrentWallet();
     if (!this.walletHandler.checkPassword(wallet, oldPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -119,11 +119,5 @@ export class AccountHandler extends Handler {
     );
     account.encryptedEncSecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skEnc));
     return account;
-  }
-
-  _checkCurrentWallet() {
-    const wallet = this.walletHandler.getCurrentWallet();
-    check(wallet, 'no existing wallet in database');
-    return wallet;
   }
 }
