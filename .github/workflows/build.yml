@@ -25,10 +25,9 @@ jobs:
       - name: Jest test with coverage
         uses: ArtiomTr/jest-coverage-report-action@v1.3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           threshold: 90
-          package-manager: yarn
-          test-script: yarn test:js --silent --ci --coverage --coverageReporters="text" --coverageReporters="text-summary"
+          test_script: yarn test:js --silent --ci --coverage --coverageReporters="text" --coverageReporters="text-summary"
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()
