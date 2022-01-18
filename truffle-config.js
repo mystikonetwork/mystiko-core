@@ -26,6 +26,7 @@
 require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const babelRegister = require('@babel/register');
+const utils = require('./src/utils.js');
 
 module.exports = {
   /**
@@ -58,7 +59,9 @@ module.exports = {
         ),
       network_id: 3,
       gas: 5500000,
-      gasPrice: '15000000000',
+      gasPrice: process.env.GAS_PRICE_GWEI
+        ? utils.toDecimals(10, 9)
+        : utils.toDecimals(Number(process.env.GAS_PRICE_GWEI), 9),
       skipDryRun: true,
       confirmations: 4,
     },
