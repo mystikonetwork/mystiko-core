@@ -1,6 +1,6 @@
 import { check, checkDefinedAndNotNull } from '../utils.js';
 import protocol from '../protocol/index.js';
-import { MystikoConfig } from '../config/index.js';
+import { MystikoConfig } from '../config/mystikoConfig.js';
 
 export class Handler {
   constructor(db, config) {
@@ -9,7 +9,7 @@ export class Handler {
       check(config instanceof MystikoConfig, 'wrong config instance');
       this.config = config;
     } else {
-      this.config = new MystikoConfig({});
+      this.config = new MystikoConfig({ version: '1.0' });
     }
     this.db = db;
     this.protocol = protocol;

@@ -1,73 +1,88 @@
 {
-  "Ethereum Mainnet": {
-    "name": "Ethereum Mainnet",
-    "chainId": 1,
-    "providers": [
-      "http://localhost:8545",
-      "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
-    ],
-    "contracts": [
-      {
-        "address": "0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879",
-        "assetSymbol": "ETH",
-        "assetDecimals": 18,
-        "assetType": "main",
-        "bridgeType": "loop",
-        "abiFile": "abi.json",
-        "wasmFile": "withdraw.wasm",
-        "zkeyFile": "withdraw.zkey",
-        "vkeyFile": "withdraw.vkey.json"
-      },
-      {
-        "address": "0x98ed94360cad67a76a53d8aa15905e52485b73d1",
-        "assetSymbol": "USDT",
-        "assetDecimals": 18,
-        "assetType": "erc20",
-        "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
-        "bridgeType": "loop",
-        "abiFile": "abi.json",
-        "wasmFile": "withdraw.wasm",
-        "zkeyFile": "withdraw.zkey",
-        "vkeyFile": "withdraw.vkey.json"
-      },
-      {
-        "address": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
-        "assetSymbol": "USDT",
-        "assetDecimals": 18,
-        "assetType": "erc20",
-        "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
-        "bridgeType": "poly",
-        "peerChainId": 56,
-        "peerContractAddress": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
-        "abiFile": "abi.json",
-        "wasmFile": "withdraw.wasm",
-        "zkeyFile": "withdraw.zkey",
-        "vkeyFile": "withdraw.vkey.json"
-      }
-    ]
-  },
-  "BSC Mainnet": {
-    "name": "BSC Mainnet",
-    "chainId": 56,
-    "providers": [
-      "http://localhost:7545",
-      "https://bsc-dataseed.binance.org"
-    ],
-    "contracts": [
-      {
-        "address": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
-        "assetSymbol": "USDT",
-        "assetDecimals": 18,
-        "assetType": "erc20",
-        "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
-        "bridgeType": "poly",
-        "peerChainId": 1,
-        "peerContractAddress": "0xb1a10f818f40946f05b3aaca6c32837a1d3511bd",
-        "abiFile": "abi.json",
-        "wasmFile": "withdraw.wasm",
-        "zkeyFile": "withdraw.zkey",
-        "vkeyFile": "withdraw.vkey.json"
-      }
-    ]
-  }
+  "version": "1.0",
+  "chains": [
+    {
+      "name": "Ethereum Mainnet",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "providers": [
+        "http://localhost:8545",
+        "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+      ],
+      "contracts": [
+        {
+          "address": "0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "assetType": "main",
+          "bridgeType": "loop",
+          "abiFile": "abi.json",
+          "wasmFile": "withdraw.wasm",
+          "zkeyFile": "withdraw.zkey",
+          "vkeyFile": "withdraw.vkey.json"
+        },
+        {
+          "address": "0x98ed94360cad67a76a53d8aa15905e52485b73d1",
+          "assetSymbol": "USDT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+          "bridgeType": "loop",
+          "abiFile": "abi.json",
+          "wasmFile": "withdraw.wasm",
+          "zkeyFile": "withdraw.zkey",
+          "vkeyFile": "withdraw.vkey.json"
+        },
+        {
+          "address": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
+          "assetSymbol": "USDT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+          "bridgeType": "poly",
+          "peerChainId": 56,
+          "peerContractAddress": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
+          "abiFile": "abi.json",
+          "wasmFile": "withdraw.wasm",
+          "zkeyFile": "withdraw.zkey",
+          "vkeyFile": "withdraw.vkey.json"
+        }
+      ]
+    },
+    {
+      "name": "BSC Mainnet",
+      "chainId": 56,
+      "explorerUrl": "https://bscscan.io",
+      "providers": [
+        "http://localhost:7545",
+        "https://bsc-dataseed.binance.org"
+      ],
+      "contracts": [
+        {
+          "address": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
+          "assetSymbol": "USDT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+          "bridgeType": "poly",
+          "peerChainId": 1,
+          "peerContractAddress": "0xb1a10f818f40946f05b3aaca6c32837a1d3511bd",
+          "abiFile": "abi.json",
+          "wasmFile": "withdraw.wasm",
+          "zkeyFile": "withdraw.zkey",
+          "vkeyFile": "withdraw.vkey.json"
+        }
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "name": "Poly Bridge",
+      "type": "poly",
+      "explorerUrl": "https://explorer.poly.network",
+      "explorerPrefix": "/testnet/tx/%tx%",
+      "apiUrl": "https://explorer.poly.network",
+      "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+    }
+  ]
 }

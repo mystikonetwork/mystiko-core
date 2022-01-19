@@ -1,5 +1,9 @@
 import { AssetType, BridgeType, ContractConfig } from '../../src/config/contractConfig.js';
-import { ChainConfig } from '../../src/config/chainConfig.js';
+import {
+  ChainConfig,
+  EXPLORER_DEFAULT_PREFIX,
+  EXPLORER_TX_PLACEHOLDER,
+} from '../../src/config/chainConfig.js';
 
 const contractConfigs = [
   {
@@ -88,6 +92,8 @@ test('test ChainConfig constructor', () => {
   expect(() => new ChainConfig(rawConfig)).toThrow();
   rawConfig['name'] = 'Binance Smart Chain';
   expect(() => new ChainConfig(rawConfig)).toThrow();
+  rawConfig['explorerUrl'] = 'https://testnet.bscscan.com';
+  expect(() => new ChainConfig(rawConfig)).toThrow();
   rawConfig['providers'] = [];
   expect(() => new ChainConfig(rawConfig)).toThrow();
   rawConfig['providers'] = ['http://127.0.0.1:7545'];
@@ -96,6 +102,16 @@ test('test ChainConfig constructor', () => {
   const config = new ChainConfig(rawConfig);
   expect(config.chainId).toBe(123);
   expect(config.name).toBe('Binance Smart Chain');
+  expect(config.explorerUrl).toBe('https://testnet.bscscan.com');
+  expect(config.explorerPrefix).toBe(EXPLORER_DEFAULT_PREFIX);
+  expect(config.getTxUrl('0xa7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69')).toBe(
+    'https://testnet.bscscan.com/tx/0xa7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69',
+  );
+  const newPrefix = `/testnet/tx/${EXPLORER_TX_PLACEHOLDER}`;
+  rawConfig['explorerPrefix'] = newPrefix;
+  expect(new ChainConfig(rawConfig).explorerPrefix).toBe(newPrefix);
+  rawConfig['explorerPrefix'] = 'wrong string';
+  expect(() => new ChainConfig(rawConfig)).toThrow();
   expect(config.providers.length).toBe(1);
   expect(config.providers[0]).toBe('http://127.0.0.1:7545');
   expect(config.contracts.length).toBe(6);

@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { MystikoConfig } from '../config';
+import { MystikoConfig } from '../config/mystikoConfig.js';
 import { check, toHex } from '../utils.js';
 
 export class BaseSigner {

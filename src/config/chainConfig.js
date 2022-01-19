@@ -3,11 +3,21 @@ import { BaseConfig } from './common.js';
 import { ContractConfig, BridgeType } from './contractConfig.js';
 import { check } from '../utils.js';
 
+export const EXPLORER_TX_PLACEHOLDER = '%tx%';
+export const EXPLORER_DEFAULT_PREFIX = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
+
 export class ChainConfig extends BaseConfig {
   constructor(rawConfig) {
     super(rawConfig);
     BaseConfig.checkNumber(this.config, 'chainId');
     BaseConfig.checkString(this.config, 'name');
+    BaseConfig.checkString(this.config, 'explorerUrl');
+    BaseConfig.checkString(this.config, 'explorerPrefix', false);
+    if (!this.explorerPrefix) {
+      this.config['explorerPrefix'] = EXPLORER_DEFAULT_PREFIX;
+    } else {
+      check(this.explorerPrefix.indexOf(EXPLORER_TX_PLACEHOLDER) !== -1, 'not a valid prefix template');
+    }
     BaseConfig.checkStringArray(this.config, 'providers');
     check(this.config['providers'].length > 0, 'providers cannot be empty');
     BaseConfig.checkObjectArray(this.config, 'contracts');
@@ -25,6 +35,19 @@ export class ChainConfig extends BaseConfig {
 
   get name() {
     return this.config['name'];
+  }
+
+  get explorerUrl() {
+    return this.config['explorerUrl'];
+  }
+
+  get explorerPrefix() {
+    return this.config['explorerPrefix'];
+  }
+
+  getTxUrl(txHash) {
+    check(typeof txHash === 'string', 'txHash should be a valid string');
+    return `${this.explorerUrl}${this.explorerPrefix.replace(EXPLORER_TX_PLACEHOLDER, txHash)}`;
   }
 
   get providers() {
