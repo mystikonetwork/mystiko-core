@@ -66,3 +66,9 @@ export class MetaMaskSigner extends BaseSigner {
     return await super.connect(etherProvider);
   }
 }
+
+export async function checkSigner(signer, chainId) {
+  check(signer instanceof BaseSigner, 'signer should be instance of BaseSigner');
+  check(await signer.connected(), 'signer has not been connected');
+  check((await signer.chainId()) === chainId, 'signer chain id does not match');
+}
