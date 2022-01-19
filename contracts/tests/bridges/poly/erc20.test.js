@@ -3,82 +3,95 @@ import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../.
 import protocol from '../../../../src/protocol/index.js';
 import MerkleTree from 'fixed-merkle-tree';
 
-const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
+const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 const CrossChainManager = artifacts.require('PolyCrossChainManagerMock');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
+const TestToken = artifacts.require('TestToken');
 
-contract('MystikoWithPolyMain', (accounts) => {
-  let mystikoWithPolySourceMain;
-  let mystikoWithPolyDestinationMain;
+contract('MystikoWithPolyERC20', (accounts) => {
+  let mystikoWithPolySourceERC20;
+  let mystikoWithPolyDestinationERC20;
   let crossChainManager;
   let hasher;
   let verifier;
+  let testToken;
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
     const { SOURCE_CHAIN_ID } = process.env;
     const { DESTINATION_CHAIN_ID } = process.env;
 
+    testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();
     hasher = await Hasher.deployed();
+
     crossChainManager = await CrossChainManager.new();
 
-    mystikoWithPolySourceMain = await MystikoWithPolyMain.new(
+    mystikoWithPolySourceERC20 = await MystikoWithPolyERC20.new(
       crossChainManager.address,
       DESTINATION_CHAIN_ID,
       verifier.address,
+      testToken.address,
       hasher.address,
       MERKLE_TREE_HEIGHT,
     );
 
-    mystikoWithPolyDestinationMain = await MystikoWithPolyMain.new(
+    mystikoWithPolyDestinationERC20 = await MystikoWithPolyERC20.new(
       crossChainManager.address,
       SOURCE_CHAIN_ID,
       verifier.address,
+      testToken.address,
       hasher.address,
       MERKLE_TREE_HEIGHT,
     );
 
     await crossChainManager.setChainPair(
       SOURCE_CHAIN_ID,
-      mystikoWithPolySourceMain.address,
+      mystikoWithPolySourceERC20.address,
       DESTINATION_CHAIN_ID,
-      mystikoWithPolyDestinationMain.address,
+      mystikoWithPolyDestinationERC20.address,
     );
 
-    await mystikoWithPolySourceMain.setPeerContractAddress(mystikoWithPolyDestinationMain.address);
-
-    await mystikoWithPolyDestinationMain.setPeerContractAddress(mystikoWithPolySourceMain.address);
-
-    await web3.eth.sendTransaction({
-      from: accounts[1],
-      to: mystikoWithPolyDestinationMain.address,
-      value: toDecimals(1, 16),
-    });
+    await mystikoWithPolySourceERC20.setPeerContractAddress(mystikoWithPolyDestinationERC20.address);
+    await mystikoWithPolyDestinationERC20.setPeerContractAddress(mystikoWithPolySourceERC20.address);
   });
 
   describe('Test basic read operations', () => {
     it('should set token correctly information correctly', async () => {
-      const bridgeTypeSource = await mystikoWithPolySourceMain.bridgeType();
-      const assetTypeSource = await mystikoWithPolySourceMain.assetType();
-      expect(bridgeTypeSource).to.equal('poly');
-      expect(assetTypeSource).to.equal('main');
+      expect(await mystikoWithPolySourceERC20.asset()).to.equal(testToken.address);
+      expect(await mystikoWithPolySourceERC20.assetName()).to.equal(await testToken.name());
+      expect(await mystikoWithPolySourceERC20.assetSymbol()).to.equal(await testToken.symbol());
+      const actualDecimals = (await mystikoWithPolySourceERC20.assetDecimals()).toString();
+      const expectedDecimals = (await testToken.decimals()).toString();
+      expect(actualDecimals).to.equal(expectedDecimals);
 
-      const bridgeTypeDestination = await mystikoWithPolyDestinationMain.bridgeType();
-      const assetTypeDestination = await mystikoWithPolyDestinationMain.assetType();
+      const bridgeTypeSource = await mystikoWithPolySourceERC20.bridgeType();
+      const assetTypeSource = await mystikoWithPolySourceERC20.assetType();
+      expect(bridgeTypeSource).to.equal('poly');
+      expect(assetTypeSource).to.equal('erc20');
+
+      const bridgeTypeDestination = await mystikoWithPolyDestinationERC20.bridgeType();
+      const assetTypeDestination = await mystikoWithPolyDestinationERC20.assetType();
       expect(bridgeTypeDestination).to.equal('poly');
-      expect(assetTypeDestination).to.equal('main');
+      expect(assetTypeDestination).to.equal('erc20');
     });
 
     it('should set verifier information correctly', async () => {
-      expect(await mystikoWithPolySourceMain.getVerifierAddress()).to.equal(verifier.address);
-      expect(await mystikoWithPolyDestinationMain.getVerifierAddress()).to.equal(verifier.address);
+      expect(await mystikoWithPolySourceERC20.getVerifierAddress()).to.equal(verifier.address);
+      expect(await mystikoWithPolyDestinationERC20.getVerifierAddress()).to.equal(verifier.address);
     });
 
     it('should set hasher information correctly', async () => {
-      expect(await mystikoWithPolySourceMain.getHasherAddress()).to.equal(hasher.address);
-      expect(await mystikoWithPolyDestinationMain.getHasherAddress()).to.equal(hasher.address);
+      expect(await mystikoWithPolySourceERC20.getHasherAddress()).to.equal(hasher.address);
+      expect(await mystikoWithPolyDestinationERC20.getHasherAddress()).to.equal(hasher.address);
+    });
+
+    it('should have enough tokens in account 0', async () => {
+      const tokenContract = await TestToken.deployed();
+      console.log(tokenContract.address);
+      const balanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
+      expect(balanceOfAccount0.toString()).to.equal(toDecimals(1000000000, 18).toString());
     });
   });
 
@@ -91,20 +104,31 @@ contract('MystikoWithPolyMain', (accounts) => {
   let depositTx;
 
   describe('Test deposit operation', () => {
+    it('should transfer token to account 1 correctly', async () => {
+      const tokenContract = await TestToken.deployed();
+      await tokenContract.transfer(accounts[1], toDecimals(1000, 18), { from: accounts[0] });
+      const balanceOfAccount1 = await tokenContract.balanceOf(accounts[1]);
+      expect(balanceOfAccount1.toString()).to.equal(toDecimals(1000, 18).toString());
+    });
+
     it('should deposit successfully', async () => {
-      const amount = toDecimals(1, 16);
+      const amount = toDecimals(1000, 18);
       const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
 
-      const gasEstimated = await mystikoWithPolySourceMain.deposit.estimateGas(
+      await testToken.approve(mystikoWithPolySourceERC20.address, amount, { from: accounts[1] });
+      const allowance = await testToken.allowance(accounts[1], mystikoWithPolySourceERC20.address);
+      expect(allowance.toString()).to.equal(amount.toString());
+
+      const gasEstimated = await mystikoWithPolySourceERC20.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
         toFixedLenHex(randomS),
         toHex(privateNote),
-        { from: accounts[1], value: toHex(amount) },
+        { from: accounts[1] },
       );
 
-      depositTx = await mystikoWithPolySourceMain.deposit(
+      depositTx = await mystikoWithPolySourceERC20.deposit(
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
@@ -113,7 +137,6 @@ contract('MystikoWithPolyMain', (accounts) => {
         {
           from: accounts[1],
           gas: gasEstimated,
-          value: toHex(amount),
         },
       );
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
@@ -126,10 +149,10 @@ contract('MystikoWithPolyMain', (accounts) => {
       expect(merkleTreeInsertEvent.args.amount.toString()).to.equal(amount.toString());
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
-      const levels = await mystikoWithPolyDestinationMain.getLevels();
+      const levels = await mystikoWithPolyDestinationERC20.getLevels();
       const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
       const root = new BN(tree.root());
-      const isKnownRoot = await mystikoWithPolyDestinationMain.isKnownRoot(toFixedLenHex(root));
+      const isKnownRoot = await mystikoWithPolyDestinationERC20.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
     });
   });
@@ -170,6 +193,9 @@ contract('MystikoWithPolyMain', (accounts) => {
     });
 
     it('should withdraw successfully', async () => {
+      const amount = new BN(toDecimals(1000, 18).toString());
+      await testToken.transfer(mystikoWithPolyDestinationERC20.address, amount, { from: accounts[0] });
+
       const proofA = [new BN(proof.pi_a[0]), new BN(proof.pi_a[1])];
       const proofB = [
         [new BN(proof.pi_b[0][1]), new BN(proof.pi_b[0][0])],
@@ -178,11 +204,10 @@ contract('MystikoWithPolyMain', (accounts) => {
       const proofC = [new BN(proof.pi_c[0]), new BN(proof.pi_c[1])];
       const rootHash = new BN(publicSignals[0]);
       const serialNumber = new BN(publicSignals[1]);
-      const amount = new BN(toDecimals(1, 16).toString());
       const result = await verifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
       expect(result).to.equal(true);
       const recipient = accounts[2];
-      const gasEstimated = await mystikoWithPolyDestinationMain.withdraw.estimateGas(
+      const gasEstimated = await mystikoWithPolyDestinationERC20.withdraw.estimateGas(
         proofA,
         proofB,
         proofC,
@@ -192,7 +217,7 @@ contract('MystikoWithPolyMain', (accounts) => {
         recipient,
         { from: accounts[1] },
       );
-      await mystikoWithPolyDestinationMain.withdraw(
+      await mystikoWithPolyDestinationERC20.withdraw(
         proofA,
         proofB,
         proofC,
@@ -205,7 +230,7 @@ contract('MystikoWithPolyMain', (accounts) => {
           gas: gasEstimated,
         },
       );
-      const isSpent = await mystikoWithPolyDestinationMain.isSpent(serialNumber);
+      const isSpent = await mystikoWithPolyDestinationERC20.isSpent(serialNumber);
       expect(isSpent).to.equal(true);
     });
   });
