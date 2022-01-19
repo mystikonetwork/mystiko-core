@@ -121,6 +121,10 @@ export function toHexNoPrefix(hex) {
   throw new Error('given type ' + typeof hex + ' is not supported');
 }
 
+export function toString(object) {
+  return object ? object.toString() : '';
+}
+
 export async function readFile(path) {
   check(typeof path === 'string', 'path should be string');
   const fd = await fastfile.readExisting(path);

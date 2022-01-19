@@ -76,6 +76,13 @@ test('Test toFixedLenHexNoPrefix', () => {
   expect(() => utils.toFixedLenHexNoPrefix({})).toThrow();
 });
 
+test('Test toString', () => {
+  expect(utils.toString(undefined)).toBe('');
+  expect(utils.toString(null)).toBe('');
+  expect(utils.toString(1)).toBe('1');
+  expect(utils.toString(new Error('msg'))).toBe('Error: msg');
+});
+
 test('Test readJsonFile', async () => {
   const data = await utils.readJsonFile('tests/utils.test.json');
   expect(data['test']).toBe(true);
