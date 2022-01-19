@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { AssetType, BridgeType, ContractConfig } from '../config/contractConfig.js';
-import { MystikoConfig } from '../config';
+import { MystikoConfig } from '../config/mystikoConfig.js';
 import { check, readJsonFile } from '../utils.js';
 import erc20Abi from './abi/ERC20.json';
 
