@@ -16,11 +16,15 @@ export class BaseSigner {
   }
 
   async connected() {
-    return await new Promise((resolve) => resolve(true));
+    if (this.provider) {
+      const acc = await this.accounts();
+      return acc.length > 0;
+    }
+    return false;
   }
 
   async installed() {
-    return await new Promise((resolve) => resolve(true));
+    return await new Promise((resolve) => resolve(false));
   }
 
   async accounts() {
@@ -42,10 +46,6 @@ export class BaseSigner {
     }
     return acc;
   }
-
-  async disconnect() {
-    return await new Promise();
-  }
 }
 
 export class MetaMaskSigner extends BaseSigner {
@@ -53,16 +53,8 @@ export class MetaMaskSigner extends BaseSigner {
     super(config, provider);
   }
 
-  async connected() {
-    if (this.provider) {
-      const acc = await this.accounts();
-      return acc.length > 0;
-    }
-    return false;
-  }
-
   async installed() {
-    const provider = await detectEthereumProvider();
+    const provider = await detectEthereumProvider().catch(() => undefined);
     return !!provider;
   }
 
