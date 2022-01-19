@@ -25,11 +25,11 @@ export function check(condition, message) {
 }
 
 export function checkNotNull(arg, message) {
-  check(arg != null, message);
+  check(arg !== null, message);
 }
 
 export function checkDefined(arg, message) {
-  check(arg != undefined, message);
+  check(arg !== undefined, message);
 }
 
 export function checkDefinedAndNotNull(arg, message) {
@@ -59,6 +59,8 @@ export function toFixedLenHex(hex, length = 32) {
     return toFixedLenHex(hex.toString('hex'), length);
   } else if (hex instanceof Uint8Array) {
     return toFixedLenHex(Buffer.from(hex), length);
+  } else if (typeof hex === 'number') {
+    return toFixedLenHex(new BN(hex), length);
   }
   throw new Error('given type ' + typeof hex + ' is not supported');
 }
@@ -77,6 +79,8 @@ export function toHex(hex) {
     return toHex(hex.toString('hex'));
   } else if (hex instanceof Uint8Array) {
     return toHex(Buffer.from(hex));
+  } else if (typeof hex === 'number') {
+    return toHex(new BN(hex));
   }
   throw new Error('given type ' + typeof hex + ' is not supported');
 }
@@ -93,6 +97,8 @@ export function toFixedLenHexNoPrefix(hex, length = 32) {
     return toFixedLenHexNoPrefix(hex.toString('hex'), length);
   } else if (hex instanceof Uint8Array) {
     return toFixedLenHexNoPrefix(Buffer.from(hex), length);
+  } else if (typeof hex === 'number') {
+    return toFixedLenHexNoPrefix(new BN(hex), length);
   }
   throw new Error('given type ' + typeof hex + ' is not supported');
 }
@@ -109,6 +115,8 @@ export function toHexNoPrefix(hex) {
     return hex.toString('hex');
   } else if (hex instanceof Uint8Array) {
     return toHexNoPrefix(Buffer.from(hex));
+  } else if (typeof hex === 'number') {
+    return toHexNoPrefix(new BN(hex));
   }
   throw new Error('given type ' + typeof hex + ' is not supported');
 }

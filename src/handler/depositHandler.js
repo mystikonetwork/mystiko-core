@@ -4,6 +4,7 @@ import { Handler } from './handler.js';
 import { check, toDecimals } from '../utils.js';
 import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
+import { checkSigner } from '../chain/signer.js';
 
 export class DepositHandler extends Handler {
   constructor(walletHandler, contractPool, db, config) {
@@ -22,9 +23,10 @@ export class DepositHandler extends Handler {
       assetSymbol,
       bridge,
     );
+    await checkSigner(signer, srcChainId);
     if (depositContracts.asset) {
-      const assetContract = depositContracts.asset.connect(signer);
-      const ownerAddress = await signer.getAddress();
+      const assetContract = depositContracts.asset.connect(signer.signer);
+      const ownerAddress = await signer.signer.getAddress();
       const spenderAddress = depositContracts.protocol.address;
       const allowance = await depositContracts.asset.allowance(ownerAddress, spenderAddress);
       const allowanceBN = new BN(allowance.toString());

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MystikoConfig } from '../config';
-import { check } from '../utils.js';
+import { check, toHex } from '../utils.js';
 
 export class BaseSigner {
   constructor(config, provider = undefined) {
@@ -70,5 +70,7 @@ export class MetaMaskSigner extends BaseSigner {
 export async function checkSigner(signer, chainId) {
   check(signer instanceof BaseSigner, 'signer should be instance of BaseSigner');
   check(await signer.connected(), 'signer has not been connected');
-  check((await signer.chainId()) === chainId, 'signer chain id does not match');
+  const signerChainId = await signer.chainId();
+  const chainIdHex = toHex(chainId);
+  check(signerChainId === chainIdHex, `signer chain id does not match, ${signerChainId} vs ${chainIdHex}`);
 }

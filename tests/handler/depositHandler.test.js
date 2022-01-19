@@ -5,6 +5,8 @@ import config from '../../src/config';
 import { ContractPool } from '../../src/chain/contract.js';
 import { createDatabase } from '../../src/database';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
+import { BaseSigner } from '../../src/chain/signer.js';
+import { toHex } from '../../src/utils.js';
 import erc20Abi from '../../src/chain/abi/ERC20.json';
 
 class MockTransactionResponse {
@@ -103,6 +105,30 @@ class MockMystikoContract extends ethers.Contract {
   }
 }
 
+class MockSigner extends BaseSigner {
+  constructor(conf, expectedAddress, expectedChainId) {
+    super(conf);
+    this.expectedAddress = expectedAddress;
+    this.expectedChainId = expectedChainId;
+  }
+
+  async connected() {
+    return await new Promise((resolve) => resolve(true));
+  }
+
+  get signer() {
+    return {
+      getAddress: () => {
+        return new Promise((resolve) => resolve(this.expectedAddress));
+      },
+    };
+  }
+
+  async chainId() {
+    return await new Promise((resolve) => resolve(toHex(this.expectedChainId)));
+  }
+}
+
 let db;
 let conf;
 let contractPool;
@@ -142,11 +168,7 @@ test('test approveAsset', async () => {
       throw new Error('should not reach here');
     }
   });
-  const mockSigner = {
-    getAddress: () => {
-      return new Promise((resolve) => resolve('0x7dfb6962c9974bf6334ab587b77030515886e96f'));
-    },
-  };
+  const mockSigner = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
   let result = await depositHandler.approveAsset(mockSigner, 1, 56, 'USDT', config.BridgeType.POLY, 2000);
   expect(result).toBe(false);
   result = await depositHandler.approveAsset(mockSigner, 1, 56, 'USDT', config.BridgeType.POLY, 500);
