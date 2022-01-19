@@ -22,25 +22,26 @@ test('Test WalletHandler createWallet', async () => {
   expect(wallet.accountNonce).toBe(0);
   expect(handler.getCurrentWallet().toString()).toBe(wallet.toString());
   expect(handler.getWalletById(wallet.id).toString()).toBe(wallet.toString());
-  expect(handler.checkPassword(wallet, walletPassword)).toBe(true);
-  expect(handler.checkPassword(wallet, 'wrong')).toBe(false);
+  expect(handler.checkPassword(walletPassword)).toBe(true);
+  expect(handler.checkPassword('wrong')).toBe(false);
 });
 
 test('Test WalletHandler getCurrentWallet', () => {
-  expect(handler.getCurrentWallet()).toBe(null);
+  expect(handler.getCurrentWallet()).toBe(undefined);
+  expect(() => handler.checkCurrentWallet()).toThrow();
 });
 
 test('Test WalletHandler getWallet by id', () => {
-  expect(handler.getWalletById(1)).toBe(null);
+  expect(handler.getWalletById(1)).toBe(undefined);
 });
 
 test('Test WalletHandler updatePassword', async () => {
   const walletMasterSeed = 'awesomeMasterSeed';
   const walletPassword = 'P@ssw0rd';
   const wallet = await handler.createWallet(walletMasterSeed, walletPassword);
-  expect(await handler.updatePassword(wallet, 'wrong', 'new')).toBe(false);
+  expect(await handler.updatePassword('wrong', 'new')).toBe(false);
   const newPassword = 'newP@ssw0rd';
-  expect(await handler.updatePassword(wallet, walletPassword, newPassword)).toBe(true);
-  expect(handler.checkPassword(wallet, newPassword)).toBe(true);
+  expect(await handler.updatePassword(walletPassword, newPassword)).toBe(true);
+  expect(handler.checkPassword(newPassword)).toBe(true);
   expect(wallet.protocol.decryptSymmetric(newPassword, wallet.encryptedMasterSeed)).toBe(walletMasterSeed);
 });

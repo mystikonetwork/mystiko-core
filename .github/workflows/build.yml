@@ -21,7 +21,15 @@ jobs:
       - run: ganache-cli --port 7545 > /dev/null &
       - run: yarn build:circuit
       - run: yarn build
-      - run: yarn test
+      - run: yarn test:contract
+      - name: Jest test with coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: 90
+          test-script: yarn test:js --silent --ci --coverage --coverageReporters="text" --coverageReporters="text-summary"
+          package-manager: yarn
+          annotations: none
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()

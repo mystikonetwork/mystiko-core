@@ -1,0 +1,10 @@
+{
+  "Ethereum Ropsten": {
+    "name": "Ethereum Ropsten",
+    "chainId": 3,
+    "providers": [
+      "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+    ],
+    "contracts": []
+  }
+}

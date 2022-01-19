@@ -1,6 +1,8 @@
-import { createContract, validContractConfig } from './contract.js';
+import { MystikoContract, ContractPool } from './contract.js';
+import { MetaMaskSigner } from './signer.js';
 
 export default {
-  createContract,
-  validContractConfig,
+  MystikoContract,
+  ContractPool,
+  MetaMaskSigner,
 };

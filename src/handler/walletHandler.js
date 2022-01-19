@@ -28,7 +28,13 @@ export class WalletHandler extends Handler {
     if (results.length > 0) {
       return new Wallet(results[0]);
     }
-    return null;
+    return undefined;
+  }
+
+  checkCurrentWallet() {
+    const wallet = this.getCurrentWallet();
+    check(wallet, 'no existing wallet in database');
+    return wallet;
   }
 
   getWalletById(id) {
@@ -37,21 +43,21 @@ export class WalletHandler extends Handler {
     if (rawWallet) {
       return new Wallet(rawWallet);
     }
-    return null;
+    return undefined;
   }
 
-  checkPassword(wallet, password) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  checkPassword(password) {
     check(typeof password === 'string', 'password should be instance of string');
+    const wallet = this.checkCurrentWallet();
     const hashedPassword = this.protocol.checkSum(password);
     return wallet.hashedPassword === hashedPassword;
   }
 
-  async updatePassword(wallet, oldPassword, newPassword) {
-    check(wallet instanceof Wallet, 'wallet should be instance of Wallet');
+  async updatePassword(oldPassword, newPassword) {
     check(typeof oldPassword === 'string', 'oldPassword should be instance of string');
     check(typeof newPassword === 'string', 'newPassword should be instance of string');
-    if (this.checkPassword(wallet, oldPassword)) {
+    const wallet = this.checkCurrentWallet();
+    if (this.checkPassword(oldPassword)) {
       const decryptedMasterSeed = this.protocol.decryptSymmetric(oldPassword, wallet.encryptedMasterSeed);
       wallet.hashedPassword = this.protocol.checkSum(newPassword);
       wallet.encryptedMasterSeed = this.protocol.encryptSymmetric(newPassword, decryptedMasterSeed);

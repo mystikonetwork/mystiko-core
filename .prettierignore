@@ -6,3 +6,4 @@ yarn.lock
 coverage
 dist
 .idea
+contracts/Verifier.sol

@@ -9,6 +9,7 @@ export class ChainConfig extends BaseConfig {
     BaseConfig.checkNumber(this.config, 'chainId');
     BaseConfig.checkString(this.config, 'name');
     BaseConfig.checkStringArray(this.config, 'providers');
+    check(this.config['providers'].length > 0, 'providers cannot be empty');
     BaseConfig.checkObjectArray(this.config, 'contracts');
     this.contractByAddress = {};
     this.config['contracts'] = this.config['contracts'].map((contract) => {
