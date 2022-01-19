@@ -27,12 +27,12 @@ export class DepositHandler extends Handler {
       const ownerAddress = await signer.getAddress();
       const spenderAddress = depositContracts.protocol.address;
       const allowance = await depositContracts.asset.allowance(ownerAddress, spenderAddress);
-      const allowanceBN = new BN(allowance);
+      const allowanceBN = new BN(allowance.toString());
       const decimals = await assetContract.decimals();
       let amountBN = toDecimals(amount, decimals);
       if (allowanceBN.lt(amountBN)) {
         amountBN = amountBN.sub(allowanceBN);
-        const txResp = await assetContract.approve(depositContracts.protocol.address, amountBN);
+        const txResp = await assetContract.approve(depositContracts.protocol.address, amountBN.toString());
         return txResp.wait().then(
           () => true,
           () => false,

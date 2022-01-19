@@ -4,24 +4,23 @@ import { createDatabase } from './database.js';
 import handler from './handler';
 import * as utils from './utils.js';
 import models from './model';
-import { ContractPool } from './chain/contract';
+import { ContractPool } from './chain/contract.js';
+import { MetaMaskSigner } from './chain/signer.js';
 
-export class Mystiko {
-  constructor() {
-    this.utils = utils;
-    this.models = models;
-    this.ethers = ethers;
-  }
-
-  async initialize(configFile, dbFile, dbAdapter) {
-    this.config = await config.readFromFile(configFile);
-    this.db = await createDatabase(dbFile, dbAdapter);
-    this.wallets = new handler.WalletHandler(this.db, this.config);
-    this.accounts = new handler.AccountHandler(this.wallets, this.db, this.config);
-    this.contracts = new ContractPool(this.config);
-    await this.contracts.connect();
-    this.deposits = new handler.DepositHandler(this.wallets, this.contracts, this.db, this.config);
-  }
-}
-
-export default new Mystiko();
+const mystiko = { utils, models, ethers };
+mystiko.initialize = async (configFile, dbFile, dbAdapter) => {
+  utils.check(typeof configFile === 'string', 'configFile should be string');
+  utils.check(typeof dbFile === 'string', 'dbFile should be string');
+  mystiko.conf = await config.readFromFile(configFile);
+  mystiko.db = await createDatabase(dbFile, dbAdapter);
+  mystiko.db.adapter = dbAdapter;
+  mystiko.wallets = new handler.WalletHandler(mystiko.db, mystiko.conf);
+  mystiko.accounts = new handler.AccountHandler(mystiko.wallets, mystiko.db, mystiko.conf);
+  mystiko.contracts = new ContractPool(mystiko.conf);
+  await mystiko.contracts.connect();
+  mystiko.deposits = new handler.DepositHandler(mystiko.wallets, mystiko.contracts, mystiko.db, mystiko.conf);
+  mystiko.signers = {
+    metaMask: new MetaMaskSigner(mystiko.conf),
+  };
+};
+export default mystiko;

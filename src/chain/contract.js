@@ -28,39 +28,13 @@ export class MystikoContract {
       return this.contract.connect(providerOrSigner);
     } else {
       let abi = await readJsonFile(this.config.abiFile);
-      if (abi instanceof Object) {
+      if (!(abi instanceof Array)) {
         check(abi['abi'] && abi['abi'] instanceof Array, 'the json does not have abi array');
         abi = abi.abi;
       }
       check(abi, 'failed to get abi information from ' + this.config.abiFile);
-      const contract = contractGenerator(this.config.address, abi, providerOrSigner);
-      await this._validContract(contract);
-      this.contract = contract;
+      this.contract = contractGenerator(this.config.address, abi, providerOrSigner);
       return this.contract;
-    }
-  }
-
-  async _validContract(contract) {
-    if (this.config) {
-      check(contract.address === this.config.address, 'address does not match');
-      const assetType = await contract.assetType();
-      check(assetType === this.config.assetType, 'asset type does not match');
-      const bridgeType = await contract.bridgeType();
-      check(bridgeType === this.config.bridgeType, 'bridge type does not match');
-      if (assetType !== AssetType.MAIN) {
-        const asset = await contract.asset();
-        check(asset === this.config.assetAddress, 'asset address does not match');
-        const assetSymbol = await contract.assetSymbol();
-        check(assetSymbol === this.config.assetSymbol, 'asset symbol does not match');
-        const assetDecimals = await contract.assetDecimals();
-        check(assetDecimals === this.config.assetDecimals, 'asset decimals does not match');
-      }
-      if (bridgeType !== BridgeType.LOOP) {
-        const peerChainId = await contract.peerChainId();
-        check(peerChainId === this.config.peerChainId, 'peerChainId does not match');
-        const peerContractAddress = await contract.peerContractAddress();
-        check(peerContractAddress === this.config.peerContractAddress, 'peerContractAddress does not match');
-      }
     }
   }
 }
@@ -92,6 +66,9 @@ export class ContractPool {
         const provider = providerGenerator(chainConfig.providers);
         promises.push(this.pool[chainId][contractConfig.address].connect(provider, contractGenerator));
         if (contractConfig.assetType !== AssetType.MAIN) {
+          if (!contractGenerator) {
+            contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
+          }
           this.assetPool[chainId][contractConfig.assetAddress] = contractGenerator(
             contractConfig.assetAddress,
             erc20Abi,

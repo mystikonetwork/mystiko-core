@@ -1,14 +1,42 @@
 const path = require('path');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
+
+function isProduction() {
+  return process.env.NODE_ENV === 'production';
+}
+
+function getOptimization() {
+  if (isProduction()) {
+    return {
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          extractComments: false,
+        }),
+      ],
+    };
+  }
+  return {};
+}
+
+function getUMDFileName() {
+  return isProduction() ? 'mystiko.min.js' : 'mystiko.js';
+}
+
+function getCJSFileName() {
+  return isProduction() ? 'mystiko.min.cjs' : 'mystiko.cjs';
+}
+
 module.exports = [
   {
     entry: './src/browser.js',
     output: {
       path: path.resolve(__dirname, 'build/js'),
-      filename: 'mystiko.js',
+      filename: getUMDFileName(),
     },
-    mode: 'production',
+    devtool: isProduction() ? undefined : 'source-map',
+    mode: isProduction() ? 'production' : 'development',
     target: 'web',
     module: {
       rules: [
@@ -31,6 +59,11 @@ module.exports = [
         stream: require.resolve('stream-browserify'),
         os: require.resolve('os-browserify/browser'),
         path: require.resolve('path-browserify'),
+        url: require.resolve('url'),
+        https: require.resolve('https-browserify'),
+        http: require.resolve('stream-http'),
+        assert: require.resolve('assert-browserify'),
+        util: require.resolve('util'),
         fs: false,
       },
     },
@@ -40,14 +73,7 @@ module.exports = [
         process: 'process',
       }),
     ],
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          extractComments: false,
-        }),
-      ],
-    },
+    optimization: getOptimization(),
   },
   {
     output: {
@@ -55,12 +81,13 @@ module.exports = [
       library: 'mystiko',
       libraryTarget: 'commonjs',
       libraryExport: 'default',
-      filename: 'mystiko.cjs',
+      filename: getCJSFileName(),
     },
     resolve: {
       extensions: ['.node', '...'],
     },
-    mode: 'production',
+    devtool: isProduction() ? undefined : 'source-map',
+    mode: isProduction() ? 'production' : 'development',
     target: 'node',
     module: {
       rules: [
@@ -81,13 +108,6 @@ module.exports = [
         },
       ],
     },
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          extractComments: false,
-        }),
-      ],
-    },
+    optimization: getOptimization(),
   },
 ];

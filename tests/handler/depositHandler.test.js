@@ -39,9 +39,9 @@ class MockERC20Contract extends ethers.Contract {
   allowance(owner, spender) {
     return new Promise((resolve) => {
       if (this._allowance[owner] && this._allowance[owner][spender]) {
-        resolve(this._allowance[owner][spender].toString());
+        resolve(this._allowance[owner][spender]);
       } else {
-        resolve('0');
+        resolve(new BN(0));
       }
     });
   }
@@ -51,6 +51,7 @@ class MockERC20Contract extends ethers.Contract {
   }
 
   approve(spender, amount) {
+    amount = new BN(amount);
     return new Promise((resolve) => {
       if (!this.balance[this.defaultOwner]) {
         resolve(new MockTransactionResponse(false, true));
