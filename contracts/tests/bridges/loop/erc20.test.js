@@ -39,7 +39,6 @@ contract('MystikoWithLoopERC20', (accounts) => {
 
     it('should have enough tokens in account 0', async () => {
       const tokenContract = await TestToken.deployed();
-      console.log(tokenContract.address);
       const balanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
       expect(balanceOfAccount0.toString()).to.equal(toDecimals(1000000000, 18).toString());
     });

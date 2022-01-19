@@ -47,6 +47,7 @@ module.exports = {
     ropsten: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.ropsten),
       network_id: 3,
+      gas: 8000000,
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
