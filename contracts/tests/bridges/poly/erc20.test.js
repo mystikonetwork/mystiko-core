@@ -105,7 +105,13 @@ contract('MystikoWithPolyERC20', (accounts) => {
   describe('Test deposit operation', () => {
     it('should transfer token to account 1 correctly', async () => {
       const tokenContract = await TestToken.deployed();
+      const initialBalanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
       await tokenContract.transfer(accounts[1], toDecimals(1000, 18), { from: accounts[0] });
+      const finalBalanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
+      const differenceBalanceOfAccount0 = new BN(initialBalanceOfAccount0).sub(
+        new BN(finalBalanceOfAccount0),
+      );
+      expect(differenceBalanceOfAccount0.toString()).to.equal(toDecimals(1000, 18).toString());
       const balanceOfAccount1 = await tokenContract.balanceOf(accounts[1]);
       expect(balanceOfAccount1.toString()).to.equal(toDecimals(1000, 18).toString());
     });
@@ -113,6 +119,8 @@ contract('MystikoWithPolyERC20', (accounts) => {
     it('should deposit successfully', async () => {
       const amount = toDecimals(1000, 18);
       const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
+
+      const initialBalanceOfAccount1 = await testToken.balanceOf(accounts[1]);
 
       await testToken.approve(mystikoWithPolySourceERC20.address, amount, { from: accounts[1] });
       const allowance = await testToken.allowance(accounts[1], mystikoWithPolySourceERC20.address);
@@ -138,6 +146,12 @@ contract('MystikoWithPolyERC20', (accounts) => {
           gas: gasEstimated,
         },
       );
+
+      const finalBalanceOfAccount1 = await testToken.balanceOf(accounts[1]);
+      const differenceBalanceOfAccount1 = new BN(initialBalanceOfAccount1).sub(
+        new BN(finalBalanceOfAccount1),
+      );
+      expect(differenceBalanceOfAccount1.toString()).to.equal(amount.toString());
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
       expect(depositEvent.args.amount.toString()).to.equal(amount.toString());
@@ -206,6 +220,7 @@ contract('MystikoWithPolyERC20', (accounts) => {
       const result = await verifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
       expect(result).to.equal(true);
       const recipient = accounts[2];
+      const initialBalanceOfAccount2 = await testToken.balanceOf(accounts[2]);
       const gasEstimated = await mystikoWithPolyDestinationERC20.withdraw.estimateGas(
         proofA,
         proofB,
@@ -229,6 +244,11 @@ contract('MystikoWithPolyERC20', (accounts) => {
           gas: gasEstimated,
         },
       );
+      const finalBalanceOfAccount2 = await testToken.balanceOf(accounts[2]);
+      const differenceBalanceOfAccount2 = new BN(finalBalanceOfAccount2).sub(
+        new BN(initialBalanceOfAccount2),
+      );
+      expect(differenceBalanceOfAccount2.toString()).to.equal(amount.toString());
       const isSpent = await mystikoWithPolyDestinationERC20.isSpent(serialNumber);
       expect(isSpent).to.equal(true);
     });
