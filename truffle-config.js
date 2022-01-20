@@ -32,7 +32,7 @@ const providers = {
 function getGasPrice() {
   return process.env.GAS_PRICE_GWEI
     ? utils.toDecimals(Number(process.env.GAS_PRICE_GWEI), 9).toString()
-    : utils.toDecimals(10, 9).toString();
+    : utils.toDecimals(100, 9).toString();
 }
 
 function getConfirmation() {
