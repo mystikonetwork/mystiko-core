@@ -25,6 +25,8 @@ const utils = require('./src/utils.js');
 
 const providers = {
   ropsten: 'https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j',
+  bsctestnet: 'https://data-seed-prebsc-1-s2.binance.org:8545/',
+  bsc: 'https://bsc-dataseed1.binance.org'
 };
 
 function getGasPrice() {
@@ -51,6 +53,26 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+    },
+    bsctestnet: {
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, providers.bsctestnet),
+      network_id: 97,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      timeoutBlocks: 200,
+      networkCheckTimeout: 1000000000,
+    },
+    bsc: {
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, providers.bsc),
+      network_id: 56,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      timeoutBlocks: 200,
+      networkCheckTimeout: 1000000000,
     },
   },
 

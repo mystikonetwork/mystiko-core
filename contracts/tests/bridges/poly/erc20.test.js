@@ -19,8 +19,8 @@ contract('MystikoWithPolyERC20', (accounts) => {
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
-    const { SOURCE_CHAIN_ID } = process.env;
-    const { DESTINATION_CHAIN_ID } = process.env;
+    const SOURCE_CHAIN_ID = 1100;
+    const DESTINATION_CHAIN_ID = 1200;
 
     testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();

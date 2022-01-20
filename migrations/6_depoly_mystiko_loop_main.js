@@ -1,9 +1,10 @@
 require('dotenv').config({ path: '../.env' });
+
 const MystikoWithLoopMain = artifacts.require('MystikoWithLoopMain');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 
-module.exports = function (deployer) {
+module.exports = function(deployer, network) {
   return deployer.then(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
     const verifier = await Verifier.deployed();
