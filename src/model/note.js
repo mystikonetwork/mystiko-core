@@ -1,6 +1,7 @@
 import BN from 'bn.js';
 import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { isValidBridgeType } from '../config/contractConfig.js';
 
 export class OffchainNote extends BaseModel {
   constructor(data = {}) {
@@ -67,14 +68,23 @@ export class PrivateNote extends BaseModel {
     this.data['srcTokenAddress'] = address;
   }
 
-  get srcAmount() {
-    const raw = this.data['srcAmount'];
+  get amount() {
+    const raw = this.data['amount'];
     return raw ? new BN(raw) : undefined;
   }
 
-  set srcAmount(amnt) {
+  get bridge() {
+    return this.data['bridge'];
+  }
+
+  set bridge(b) {
+    check(isValidBridgeType(b), 'b is an invalid BridgeType');
+    this.data['bridge'] = b;
+  }
+
+  set amount(amnt) {
     check(amnt instanceof BN, 'amnt should be instance of BN');
-    this.data['srcAmount'] = amnt.toString();
+    this.data['amount'] = amnt.toString();
   }
 
   get dstChainId() {
@@ -113,24 +123,24 @@ export class PrivateNote extends BaseModel {
     this.data['dstTokenAddress'] = address;
   }
 
-  get dstAmount() {
-    const raw = this.data['dstAmount'];
+  get commitmentHash() {
+    const raw = this.data['commitmentHash'];
     return raw ? new BN(raw) : undefined;
   }
 
-  set dstAmount(amnt) {
-    check(amnt instanceof BN, 'amnt should be instance of BN');
-    this.data['dstAmount'] = amnt.toString();
+  set commitmentHash(hash) {
+    check(hash instanceof BN, 'hash should be instance of BN');
+    this.data['commitmentHash'] = hash.toString();
   }
 
-  get encryptedOnchainNote() {
-    const raw = this.data['encryptedOnchainNote'];
+  get encryptedOnChainNote() {
+    const raw = this.data['encryptedOnChainNote'];
     return raw ? toBuff(raw) : undefined;
   }
 
-  set encryptedOnchainNote(note) {
+  set encryptedOnChainNote(note) {
     check(note instanceof Buffer, 'note should be instance of Buffer');
-    this.data['encryptedOnchainNote'] = toHexNoPrefix(note);
+    this.data['encryptedOnChainNote'] = toHexNoPrefix(note);
   }
 
   get walletId() {
@@ -149,6 +159,15 @@ export class PrivateNote extends BaseModel {
   set shieldedAddress(address) {
     check(typeof address === 'string', 'address should be instance of string');
     this.data['shieldedAddress'] = address;
+  }
+
+  get withdrawTransactionHash() {
+    return this.data['withdrawTransactionHash'];
+  }
+
+  set withdrawTransactionHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
+    this.data['withdrawTransactionHash'] = hash;
   }
 
   get status() {

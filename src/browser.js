@@ -2,7 +2,7 @@ import mystiko from './index.js';
 
 if (window) {
   const mystikoInit = mystiko.initialize;
-  mystiko.initialize = async (isMainnet = true, configFile = undefined) => {
+  mystiko.initialize = async (configFile = undefined, isMainnet = true) => {
     const Adapter = (await import('lokijs/src/incremental-indexeddb-adapter.js')).default;
     if (!configFile) {
       if (isMainnet) {

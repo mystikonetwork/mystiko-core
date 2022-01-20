@@ -7,6 +7,8 @@ import { WalletHandler } from './walletHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus } from '../model/deposit.js';
 import { BridgeType } from '../config/contractConfig';
+import { ID_KEY } from '../model/common.js';
+import { OffchainNote } from '../model/note.js';
 
 export class DepositHandler extends Handler {
   constructor(walletHandler, contractPool, db, config) {
@@ -17,7 +19,11 @@ export class DepositHandler extends Handler {
     this.contractPool = contractPool;
   }
 
-  async createDeposit({ srcChainId, dstChainId, assetSymbol, bridge, amount, shieldedAddress }, signer) {
+  async createDeposit(
+    { srcChainId, dstChainId, assetSymbol, bridge, amount, shieldedAddress },
+    signer,
+    statusCallback = undefined,
+  ) {
     check(typeof amount === 'number', 'amount is invalid number');
     check(this.protocol.isShieldedAddress(shieldedAddress), 'invalid shielded address');
     const contractConfig = this.config.getContractConfig(srcChainId, dstChainId, assetSymbol, bridge);
@@ -50,19 +56,68 @@ export class DepositHandler extends Handler {
     deposit.status = DepositStatus.INIT;
     this.db.deposits.insert(deposit.data);
     await this.saveDatabase();
-    const depositPromise = this._approveAsset(signer, deposit, depositContracts)
+    const depositPromise = this._approveAsset(signer, deposit, depositContracts, statusCallback)
       .then(() => {
-        return this._sendDeposit(signer, deposit, depositContracts);
+        return this._sendDeposit(signer, deposit, depositContracts, statusCallback);
       })
       .catch((error) => {
         deposit.errorMessage = toString(error);
-        deposit.status = DepositStatus.FAILED;
-        return this._updateDeposit(deposit);
+        return this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
       });
     return { deposit, depositPromise };
   }
 
-  async _approveAsset(signer, deposit, { asset, protocol }) {
+  getDeposit(query) {
+    let deposit;
+    if (typeof query === 'number') {
+      deposit = this.db.deposits.findOne({ [ID_KEY]: query });
+    } else if (typeof query === 'string') {
+      deposit = this.db.deposits.findOne({ srcTxHash: query });
+      if (!deposit) {
+        deposit = this.db.deposits.findOne({ dstTxHash: query });
+      }
+      if (!deposit) {
+        deposit = this.db.deposits.findOne({ bridgeTxHash: query });
+      }
+    } else if (query instanceof Deposit) {
+      return query;
+    }
+    return deposit ? new Deposit(deposit) : undefined;
+  }
+
+  getDeposits({ filterFunc, sortBy, desc, offset, limit } = {}) {
+    const wallet = this.walletHandler.checkCurrentWallet();
+    const whereClause = (rawObject) => {
+      if (filterFunc && filterFunc instanceof Function) {
+        return rawObject.walletId === wallet.id && filterFunc(new Deposit(rawObject));
+      }
+      return rawObject.walletId === wallet.id;
+    };
+    let queryChain = this.db.deposits.chain().where(whereClause);
+    if (sortBy && typeof sortBy === 'string') {
+      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+    }
+    if (offset && typeof offset === 'number') {
+      queryChain = queryChain.offset(offset);
+    }
+    if (limit && typeof limit === 'number') {
+      queryChain = queryChain.limit(limit);
+    }
+    return queryChain.data().map((rawObject) => new Deposit(rawObject));
+  }
+
+  getDepositsCount(filterFunc) {
+    return this.getDeposits({ filterFunc }).length;
+  }
+
+  exportOffChainNote(depositQuery) {
+    const deposit = this.getDeposit(depositQuery);
+    check(deposit, `deposit ${depositQuery} does not exist`);
+    check(deposit.srcTxHash, 'deposit has not been ready for exporting off-chain note');
+    return new OffchainNote({ chainId: deposit.srcChainId, transactionHash: deposit.srcTxHash });
+  }
+
+  async _approveAsset(signer, deposit, { asset, protocol }, statusCallback) {
     if (asset) {
       const assetContract = asset.connect(signer.signer);
       const spenderAddress = protocol.address;
@@ -76,31 +131,30 @@ export class DepositHandler extends Handler {
             return undefined;
           });
         if (!txResponse) {
-          deposit.status = DepositStatus.FAILED;
-          await this._updateDeposit(deposit);
+          await this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
           return;
         }
-        deposit.status = DepositStatus.ASSET_APPROVING;
         deposit.assetApproveTxHash = txResponse.hash;
-        await this._updateDeposit(deposit);
+        await this._updateDepositStatus(deposit, DepositStatus.ASSET_APPROVING, statusCallback);
+        let newStatus = deposit.status;
         await txResponse
           .wait()
           .then((txReceipt) => {
-            deposit.status = DepositStatus.ASSET_APPROVED;
+            newStatus = DepositStatus.ASSET_APPROVED;
             deposit.assetApproveTxHash = txReceipt.transactionHash;
           })
           .catch((error) => {
             deposit.errorMessage = toString(error);
-            deposit.status = DepositStatus.FAILED;
+            newStatus = DepositStatus.FAILED;
           });
+        await this._updateDepositStatus(deposit, newStatus, statusCallback);
       }
     } else {
-      deposit.status = DepositStatus.ASSET_APPROVED;
+      await this._updateDepositStatus(deposit, DepositStatus.ASSET_APPROVED, undefined, statusCallback);
     }
-    await this._updateDeposit(deposit);
   }
 
-  async _sendDeposit(signer, deposit, depositContracts) {
+  async _sendDeposit(signer, deposit, depositContracts, statusCallback) {
     if (deposit.status === DepositStatus.ASSET_APPROVED) {
       const protocolContract = await depositContracts.protocol.connect(signer.signer);
       const depositTxResponse = await protocolContract
@@ -116,27 +170,26 @@ export class DepositHandler extends Handler {
           return undefined;
         });
       if (!depositTxResponse) {
-        deposit.status = DepositStatus.FAILED;
+        await this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
         return;
       }
-      deposit.status = DepositStatus.SRC_PENDING;
       deposit.srcTxHash = depositTxResponse.hash;
-      await this._updateDeposit(deposit);
+      await this._updateDepositStatus(deposit, DepositStatus.SRC_PENDING, statusCallback);
+      let newStatus = deposit.status;
       await depositTxResponse
         .wait()
         .then((txReceipt) => {
-          deposit.status = DepositStatus.SRC_CONFIRMED;
+          newStatus = DepositStatus.SRC_CONFIRMED;
           deposit.srcTxHash = txReceipt.transactionHash;
         })
         .catch((error) => {
           deposit.errorMessage = toString(error);
-          deposit.status = DepositStatus.FAILED;
+          newStatus = DepositStatus.FAILED;
         });
-      await this._updateDeposit(deposit);
+      await this._updateDepositStatus(deposit, newStatus, statusCallback);
       if (deposit.bridge === BridgeType.LOOP) {
         if (deposit.status === DepositStatus.SRC_CONFIRMED) {
-          deposit.status = DepositStatus.SUCCEEDED;
-          await this._updateDeposit(deposit);
+          await this._updateDepositStatus(deposit, DepositStatus.SUCCEEDED, statusCallback);
         }
       }
     }
@@ -145,6 +198,19 @@ export class DepositHandler extends Handler {
   async _updateDeposit(deposit) {
     this.db.deposits.update(deposit.data);
     await this.saveDatabase();
+    return deposit;
+  }
+
+  async _updateDepositStatus(deposit, newStatus, statusCallback) {
+    if (deposit.status === newStatus) {
+      return await this._updateDeposit(deposit);
+    }
+    const oldStatus = deposit.status;
+    deposit.status = newStatus;
+    await this._updateDeposit(deposit);
+    if (statusCallback && statusCallback instanceof Function) {
+      statusCallback(deposit, oldStatus, newStatus);
+    }
     return deposit;
   }
 }

@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { AssetType, BridgeType, ContractConfig } from '../config/contractConfig.js';
 import { MystikoConfig } from '../config/mystikoConfig.js';
+import { ProviderPool } from './provider.js';
 import { check, readJsonFile } from '../utils.js';
 import erc20Abi from './abi/ERC20.json';
 
@@ -40,20 +41,16 @@ export class MystikoContract {
 }
 
 export class ContractPool {
-  constructor(config) {
+  constructor(config, providerPool) {
     check(config instanceof MystikoConfig, 'config should be instance of MystikoConfig');
+    check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
     this.config = config;
+    this.providerPool = providerPool;
     this.pool = {};
     this.assetPool = {};
   }
 
   async connect(contractGenerator = undefined) {
-    const providerGenerator = (rpcEndpoints) => {
-      const jsonRpcProviders = rpcEndpoints.map((rpcEndpoint) => {
-        return new ethers.providers.JsonRpcProvider(rpcEndpoint);
-      });
-      return new ethers.providers.FallbackProvider(jsonRpcProviders);
-    };
     const promises = [];
     this.config.chainIds.forEach((chainId) => {
       if (!this.pool[chainId]) {
@@ -61,9 +58,9 @@ export class ContractPool {
         this.assetPool[chainId] = {};
       }
       const chainConfig = this.config.getChainConfig(chainId);
+      const provider = this.providerPool.getProvider(chainId);
       chainConfig.contracts.forEach((contractConfig) => {
         this.pool[chainId][contractConfig.address] = new MystikoContract(contractConfig);
-        const provider = providerGenerator(chainConfig.providers);
         promises.push(this.pool[chainId][contractConfig.address].connect(provider, contractGenerator));
         if (contractConfig.assetType !== AssetType.MAIN) {
           if (!contractGenerator) {

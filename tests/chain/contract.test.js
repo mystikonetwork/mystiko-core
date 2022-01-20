@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { ContractConfig } from '../../src/config/contractConfig.js';
+import { ProviderPool } from '../../src/chain/provider.js';
 import { readJsonFile } from '../../src/utils.js';
 import { AssetType, BridgeType } from '../../src/config/contractConfig.js';
 import config from '../../src/config';
@@ -196,7 +197,9 @@ test('test MystikoContract connect', async () => {
 test('test ContractPool connect', async () => {
   expect(() => new ContractPool({})).toThrow();
   const conf = await config.readFromFile('tests/config/files/config.test.json');
-  const pool = new ContractPool(conf);
+  const providerPool = new ProviderPool(conf);
+  providerPool.connect();
+  const pool = new ContractPool(conf, providerPool);
   const contractGenerator = (address, abi, providerOrSigner) => {
     if (abi === erc20Abi) {
       return new ethers.Contract(address, erc20Abi, providerOrSigner);
