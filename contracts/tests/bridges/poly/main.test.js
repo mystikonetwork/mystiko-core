@@ -95,6 +95,8 @@ contract('MystikoWithPolyMain', (accounts) => {
       const amount = toDecimals(1, 16);
       const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
 
+      const initialBalanceOfAccount1 = await web3.eth.getBalance(accounts[1]);
+
       const gasEstimated = await mystikoWithPolySourceMain.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
@@ -116,6 +118,12 @@ contract('MystikoWithPolyMain', (accounts) => {
           value: toHex(amount),
         },
       );
+
+      const finalBalanceOfAccount1 = await web3.eth.getBalance(accounts[1]);
+      const differenceBalanceOfAccount1 = new BN(initialBalanceOfAccount1).sub(
+        new BN(finalBalanceOfAccount1),
+      );
+      expect(Number(differenceBalanceOfAccount1)).to.be.above(Number(amount));
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
       expect(depositEvent.args.amount.toString()).to.equal(amount.toString());
@@ -182,6 +190,7 @@ contract('MystikoWithPolyMain', (accounts) => {
       const result = await verifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
       expect(result).to.equal(true);
       const recipient = accounts[2];
+      const initialBalanceOfAccount2 = await web3.eth.getBalance(accounts[2]);
       const gasEstimated = await mystikoWithPolyDestinationMain.withdraw.estimateGas(
         proofA,
         proofB,
@@ -207,6 +216,11 @@ contract('MystikoWithPolyMain', (accounts) => {
       );
       const isSpent = await mystikoWithPolyDestinationMain.isSpent(serialNumber);
       expect(isSpent).to.equal(true);
+      const finalBalanceOfAccount2 = await web3.eth.getBalance(accounts[2]);
+      const differenceBalanceOfAccount2 = new BN(finalBalanceOfAccount2).sub(
+        new BN(initialBalanceOfAccount2),
+      );
+      expect(differenceBalanceOfAccount2.toString()).to.equal(amount.toString());
     });
   });
 });
