@@ -68,6 +68,15 @@ export class PrivateNote extends BaseModel {
     this.data['srcTokenAddress'] = address;
   }
 
+  get srcProtocolAddress() {
+    return this.data['srcProtocolAddress'];
+  }
+
+  set srcProtocolAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
+    this.data['srcProtocolAddress'] = address;
+  }
+
   get amount() {
     const raw = this.data['amount'];
     return raw ? new BN(raw) : undefined;
@@ -121,6 +130,15 @@ export class PrivateNote extends BaseModel {
   set dstTokenAddress(address) {
     check(typeof address === 'string', 'address should be instance of string');
     this.data['dstTokenAddress'] = address;
+  }
+
+  get dstProtocolAddress() {
+    return this.data['dstProtocolAddress'];
+  }
+
+  set dstProtocolAddress(address) {
+    check(typeof address === 'string', 'address should be instance of string');
+    this.data['dstProtocolAddress'] = address;
   }
 
   get commitmentHash() {
@@ -182,7 +200,6 @@ export class PrivateNote extends BaseModel {
 
 export const PrivateNoteStatus = {
   IMPORTED: 'imported',
-  SPENDING: 'spending',
   SPENT: 'spent',
 };
 Object.freeze(PrivateNoteStatus);

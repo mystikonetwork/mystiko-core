@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { check } from '../utils.js';
 import { BaseModel } from './common.js';
 
 export class Withdraw extends BaseModel {
@@ -46,12 +46,12 @@ export class Withdraw extends BaseModel {
 
   get serialNumber() {
     const raw = this.data['serialNumber'];
-    return raw ? toBuff(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set serialNumber(sn) {
-    check(sn instanceof Buffer, 'sn should be instance of Buffer');
-    this.data['serialNumber'] = toHexNoPrefix(sn);
+    check(sn instanceof BN, 'sn should be instance of BN');
+    this.data['serialNumber'] = sn.toString();
   }
 
   get amount() {
@@ -117,10 +117,20 @@ export class Withdraw extends BaseModel {
     check(isValidWithdrawStatus(s), 'invalid deposit status ' + s);
     this.data['status'] = s;
   }
+
+  get errorMessage() {
+    return this.data['errorMessage'];
+  }
+
+  set errorMessage(msg) {
+    check(typeof msg === 'string', 'msg should be instance of string');
+    this.data['errorMessage'] = msg;
+  }
 }
 
 export const WithdrawStatus = {
   INIT: 'init',
+  GENERATING_PROOF: 'generatingProof',
   PENDING: 'pending',
   SUCCEEDED: 'succeeded',
   FAILED: 'failed',

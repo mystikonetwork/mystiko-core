@@ -236,8 +236,12 @@ test('test ContractPool connect', async () => {
   depositContracts = pool.getDepositContracts(1, 1, 'ETH', config.BridgeType.LOOP);
   expect(depositContracts.asset).toBe(undefined);
   expect(depositContracts.protocol.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
-  let withdrawContract = pool.getWithdrawContract(1, 56, 'USDT', config.BridgeType.POLY);
+  let withdrawContract = pool.getContract(56, '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
   expect(withdrawContract.address).toBe('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
-  withdrawContract = pool.getWithdrawContract(1, 1, 'ETH', config.BridgeType.LOOP);
+  withdrawContract = pool.getContract(1, '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
   expect(withdrawContract.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
+  withdrawContract = pool.getContract(1111, '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
+  expect(withdrawContract).toBe(undefined);
+  withdrawContract = pool.getContract(1, '0x7Acfe657cC3eA9066CD748fbCd241cfA138DC879');
+  expect(withdrawContract).toBe(undefined);
 });

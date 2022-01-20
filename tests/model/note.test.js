@@ -19,12 +19,14 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.srcTransactionHash).toBe(undefined);
   expect(note.srcToken).toBe(undefined);
   expect(note.srcTokenAddress).toBe(undefined);
+  expect(note.srcProtocolAddress).toBe(undefined);
   expect(note.amount).toBe(undefined);
   expect(note.bridge).toBe(undefined);
   expect(note.dstChainId).toBe(undefined);
   expect(note.dstTransactionHash).toBe(undefined);
   expect(note.dstToken).toBe(undefined);
   expect(note.dstTokenAddress).toBe(undefined);
+  expect(note.dstProtocolAddress).toBe(undefined);
   expect(note.commitmentHash).toBe(undefined);
   expect(note.encryptedOnChainNote).toBe(undefined);
   expect(note.walletId).toBe(undefined);
@@ -40,6 +42,8 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.srcToken).toBe('USDT');
   note.srcTokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(note.srcTokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
+  note.srcProtocolAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
+  expect(note.srcProtocolAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
   note.amount = new BN('deadbeef', 16);
   expect(toHexNoPrefix(note.amount)).toBe('deadbeef');
   expect(() => {
@@ -55,6 +59,8 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.dstToken).toBe('USDT');
   note.dstTokenAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(note.dstTokenAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
+  note.dstProtocolAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
+  expect(note.dstProtocolAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
   note.commitmentHash = new BN('baadf00d', 16);
   expect(toHexNoPrefix(note.commitmentHash)).toBe('baadf00d');
   note.encryptedOnChainNote = toBuff('deaddead');

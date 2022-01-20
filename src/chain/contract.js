@@ -87,12 +87,10 @@ export class ContractPool {
     return { protocol: protocolContract };
   }
 
-  getWithdrawContract(srcChainId, dstChainId, assetSymbol, bridge) {
-    const contractConfig = this.config.getContractConfig(srcChainId, dstChainId, assetSymbol, bridge);
-    if (contractConfig.bridgeType === BridgeType.LOOP) {
-      return this.pool[srcChainId][contractConfig.address].contract;
-    } else {
-      return this.pool[dstChainId][contractConfig.peerContractAddress].contract;
+  getContract(chainId, contractAddress) {
+    if (this.pool[chainId] && this.pool[chainId][contractAddress]) {
+      return this.pool[chainId][contractAddress].contract;
     }
+    return undefined;
   }
 }

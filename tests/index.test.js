@@ -14,6 +14,7 @@ test('test initialize', async () => {
   expect(mystiko.providers).not.toBe(undefined);
   expect(mystiko.contracts).not.toBe(undefined);
   expect(mystiko.notes).not.toBe(undefined);
+  expect(mystiko.withdraws).not.toBe(undefined);
   expect(mystiko.signers).not.toBe(undefined);
   expect(mystiko.signers.metaMask).not.toBe(undefined);
 });

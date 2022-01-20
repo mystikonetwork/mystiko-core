@@ -29,6 +29,15 @@ mystiko.initialize = async (configFile, dbFile, dbAdapter) => {
     mystiko.db,
     mystiko.conf,
   );
+  mystiko.withdraws = new handler.WithdrawHandler(
+    mystiko.wallets,
+    mystiko.accounts,
+    mystiko.notes,
+    mystiko.providers,
+    mystiko.contracts,
+    mystiko.db,
+    mystiko.conf,
+  );
   mystiko.signers = {
     metaMask: new MetaMaskSigner(mystiko.conf),
   };

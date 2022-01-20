@@ -16,6 +16,7 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.shieldedAddress).toBe(undefined);
   expect(withdraw.privateNoteId).toBe(undefined);
   expect(withdraw.status).toBe(undefined);
+  expect(withdraw.errorMessage).toBe(undefined);
 
   withdraw.chainId = 1;
   expect(withdraw.chainId).toBe(1);
@@ -29,8 +30,8 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.merkleRootHash.toString()).toBe(
     '19447354833770870638524875755086108986351532686253409466340778588798721438274',
   );
-  withdraw.serialNumber = toBuff('deadbeef');
-  expect(toHexNoPrefix(withdraw.serialNumber)).toBe('deadbeef');
+  withdraw.serialNumber = new BN('3131961357');
+  expect(withdraw.serialNumber.toString()).toBe('3131961357');
   withdraw.amount = new BN('3131961357');
   expect(withdraw.amount.toString()).toBe('3131961357');
   withdraw.recipientAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
@@ -51,4 +52,6 @@ test('Test Withdraw getters/setters', () => {
   }).toThrow();
   withdraw.status = WithdrawStatus.SUCCEEDED;
   expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
+  withdraw.errorMessage = 'error';
+  expect(withdraw.errorMessage).toBe('error');
 });

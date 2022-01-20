@@ -3,8 +3,8 @@ import BN from 'bn.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
-import { check, readJsonFile, toBuff } from '../utils.js';
-import { OffchainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
+import { check, readJsonFile, toBuff, toHexNoPrefix } from '../utils.js';
+import { isValidPrivateNoteStatus, OffchainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
 import { ProviderPool } from '../chain/provider.js';
 import { BridgeType } from '../config/contractConfig.js';
 import { ID_KEY } from '../model/common.js';
@@ -43,6 +43,7 @@ export class NoteHandler extends Handler {
     privateNote.srcTransactionHash = offChainNote.transactionHash;
     privateNote.srcToken = contractConfig.assetSymbol;
     privateNote.srcTokenAddress = contractConfig.assetAddress;
+    privateNote.srcProtocolAddress = txReceipt.to;
     privateNote.amount = new BN(amount.toString());
     privateNote.bridge = contractConfig.bridgeType;
     if (contractConfig.bridgeType !== BridgeType.LOOP) {
@@ -51,17 +52,24 @@ export class NoteHandler extends Handler {
       privateNote.dstChainId = contractConfig.peerChainId;
       privateNote.dstToken = peerContractConfig.assetSymbol;
       privateNote.dstTokenAddress = peerContractConfig.assetAddress;
+      privateNote.dstProtocolAddress = contractConfig.peerContractAddress;
     } else {
       privateNote.dstChainId = offChainNote.chainId;
       privateNote.dstTransactionHash = offChainNote.transactionHash;
       privateNote.dstToken = contractConfig.assetSymbol;
       privateNote.dstTokenAddress = contractConfig.assetAddress;
+      privateNote.dstProtocolAddress = txReceipt.to;
     }
-    privateNote.commitmentHash = this.protocol.buffToBigInt(toBuff(commitmentHash));
+    privateNote.commitmentHash = new BN(toHexNoPrefix(commitmentHash), 16);
     privateNote.encryptedOnChainNote = toBuff(encryptedNote);
     privateNote.walletId = wallet.id;
     privateNote.shieldedAddress = shieldedAddress;
     privateNote.status = PrivateNoteStatus.IMPORTED;
+    const existingOne = this.db.notes.findOne({
+      srcChainId: privateNote.srcChainId,
+      commitmentHash: privateNote.commitmentHash.toString(),
+    });
+    check(!existingOne, 'duplicate notes');
     this.db.notes.insert(privateNote.data);
     await this.saveDatabase();
     return privateNote;
@@ -96,7 +104,7 @@ export class NoteHandler extends Handler {
       }
       return rawObject.walletId === wallet.id;
     };
-    let queryChain = this.db.deposits.chain().where(whereClause);
+    let queryChain = this.db.notes.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
       queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
     }
@@ -141,5 +149,14 @@ export class NoteHandler extends Handler {
       }
     }
     return undefined;
+  }
+
+  async _updateStatus(privateNote, status) {
+    check(privateNote instanceof PrivateNote, 'privateNote should be instance of PrivateNote');
+    check(isValidPrivateNoteStatus(status), 'invalid private note status');
+    privateNote.status = status;
+    this.db.notes.update(privateNote.data);
+    await this.saveDatabase();
+    return privateNote;
   }
 }

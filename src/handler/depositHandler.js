@@ -124,29 +124,13 @@ export class DepositHandler extends Handler {
       const allowance = await asset.allowance(deposit.srcAddress, spenderAddress);
       const allowanceBN = new BN(allowance.toString());
       if (allowanceBN.lt(deposit.amount)) {
-        const txResponse = await assetContract
-          .approve(protocol.address, deposit.amount.toString())
-          .catch((error) => {
-            deposit.errorMessage = toString(error);
-            return undefined;
-          });
-        if (!txResponse) {
-          await this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
-          return;
-        }
+        const txResponse = await assetContract.approve(protocol.address, deposit.amount.toString());
         deposit.assetApproveTxHash = txResponse.hash;
         await this._updateDepositStatus(deposit, DepositStatus.ASSET_APPROVING, statusCallback);
         let newStatus = deposit.status;
-        await txResponse
-          .wait()
-          .then((txReceipt) => {
-            newStatus = DepositStatus.ASSET_APPROVED;
-            deposit.assetApproveTxHash = txReceipt.transactionHash;
-          })
-          .catch((error) => {
-            deposit.errorMessage = toString(error);
-            newStatus = DepositStatus.FAILED;
-          });
+        const txReceipt = await txResponse.wait();
+        newStatus = DepositStatus.ASSET_APPROVED;
+        deposit.assetApproveTxHash = txReceipt.transactionHash;
         await this._updateDepositStatus(deposit, newStatus, statusCallback);
       }
     } else {
@@ -157,35 +141,19 @@ export class DepositHandler extends Handler {
   async _sendDeposit(signer, deposit, depositContracts, statusCallback) {
     if (deposit.status === DepositStatus.ASSET_APPROVED) {
       const protocolContract = await depositContracts.protocol.connect(signer.signer);
-      const depositTxResponse = await protocolContract
-        .deposit(
-          deposit.amount.toString(),
-          toFixedLenHex(deposit.commitmentHash),
-          toFixedLenHex(deposit.hashK),
-          toFixedLenHex(deposit.randomS),
-          toHex(deposit.privateNote),
-        )
-        .catch((error) => {
-          deposit.errorMessage = toString(error);
-          return undefined;
-        });
-      if (!depositTxResponse) {
-        await this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
-        return;
-      }
+      const depositTxResponse = await protocolContract.deposit(
+        deposit.amount.toString(),
+        toFixedLenHex(deposit.commitmentHash),
+        toFixedLenHex(deposit.hashK),
+        toFixedLenHex(deposit.randomS),
+        toHex(deposit.privateNote),
+      );
       deposit.srcTxHash = depositTxResponse.hash;
       await this._updateDepositStatus(deposit, DepositStatus.SRC_PENDING, statusCallback);
       let newStatus = deposit.status;
-      await depositTxResponse
-        .wait()
-        .then((txReceipt) => {
-          newStatus = DepositStatus.SRC_CONFIRMED;
-          deposit.srcTxHash = txReceipt.transactionHash;
-        })
-        .catch((error) => {
-          deposit.errorMessage = toString(error);
-          newStatus = DepositStatus.FAILED;
-        });
+      const txReceipt = await depositTxResponse.wait();
+      newStatus = DepositStatus.SRC_CONFIRMED;
+      deposit.srcTxHash = txReceipt.transactionHash;
       await this._updateDepositStatus(deposit, newStatus, statusCallback);
       if (deposit.bridge === BridgeType.LOOP) {
         if (deposit.status === DepositStatus.SRC_CONFIRMED) {
