@@ -6,7 +6,7 @@ const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 const TestToken = artifacts.require('TestToken');
 
-module.exports = function(deployer, network) {
+module.exports = function (deployer, network) {
   if (!PUBLIC_CHAIN.includes(network)) {
     return;
   }

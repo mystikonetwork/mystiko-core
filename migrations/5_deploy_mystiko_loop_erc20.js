@@ -5,7 +5,7 @@ const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 const TestToken = artifacts.require('TestToken');
 
-module.exports = function(deployer, network) {
+module.exports = function (deployer, network) {
   return deployer.then(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
     const verifier = await Verifier.deployed();

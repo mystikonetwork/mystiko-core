@@ -26,7 +26,7 @@ const utils = require('./src/utils.js');
 const providers = {
   ropsten: 'https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j',
   bsctestnet: 'https://data-seed-prebsc-1-s2.binance.org:8545/',
-  bsc: 'https://bsc-dataseed1.binance.org'
+  bsc: 'https://bsc-dataseed1.binance.org',
 };
 
 function getGasPrice() {

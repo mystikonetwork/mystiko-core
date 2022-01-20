@@ -4,7 +4,7 @@ const PUBLIC_CHAIN = ['ropsten', 'bsctestnet', 'bsc', 'ethereum'];
 const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 
-module.exports = function(deployer, network) {
+module.exports = function (deployer, network) {
   if (!PUBLIC_CHAIN.includes(network)) {
     return;
   }

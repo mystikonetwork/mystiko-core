@@ -5,7 +5,7 @@ const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 
-module.exports = function(deployer, network) {
+module.exports = function (deployer, network) {
   if (!PUBLIC_CHAIN.includes(network)) {
     return;
   }
