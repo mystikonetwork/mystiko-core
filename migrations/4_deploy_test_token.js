@@ -1,5 +1,5 @@
 const TestToken = artifacts.require('TestToken');
 
-module.exports = function (deployer, network) {
+module.exports = function (deployer) {
   deployer.deploy(TestToken);
 };

@@ -31,8 +31,8 @@ const providers = {
 
 function getGasPrice() {
   return process.env.GAS_PRICE_GWEI
-    ? utils.toDecimals(10, 9).toString()
-    : utils.toDecimals(Number(process.env.GAS_PRICE_GWEI), 9).toString();
+    ? utils.toDecimals(Number(process.env.GAS_PRICE_GWEI), 9).toString()
+    : utils.toDecimals(10, 9).toString();
 }
 
 function getConfirmation() {
@@ -55,7 +55,7 @@ module.exports = {
       confirmations: getConfirmation(),
     },
     bsctestnet: {
-      provider: () => new HDWalletProvider(process.env.MNEMONIC, providers.bsctestnet),
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsctestnet),
       network_id: 97,
       gas: 8000000,
       gasPrice: getGasPrice(),
@@ -65,7 +65,7 @@ module.exports = {
       networkCheckTimeout: 1000000000,
     },
     bsc: {
-      provider: () => new HDWalletProvider(process.env.MNEMONIC, providers.bsc),
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsc),
       network_id: 56,
       gas: 8000000,
       gasPrice: getGasPrice(),
