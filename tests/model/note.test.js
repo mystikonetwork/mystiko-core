@@ -1,9 +1,10 @@
 import BN from 'bn.js';
-import { OffchainNote, PrivateNote, PrivateNoteStatus } from '../../src/model/note.js';
+import { OffChainNote, PrivateNote, PrivateNoteStatus } from '../../src/model/note.js';
 import { toBuff, toHexNoPrefix } from '../../src/utils.js';
+import { BridgeType } from '../../src/config/contractConfig.js';
 
-test('Test OffchainNote getters/setters', () => {
-  const note = new OffchainNote();
+test('Test OffChainNote getters/setters', () => {
+  const note = new OffChainNote();
   expect(note.chainId).toBe(undefined);
   expect(note.transactionHash).toBe(undefined);
   note.chainId = 1;
@@ -18,15 +19,19 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.srcTransactionHash).toBe(undefined);
   expect(note.srcToken).toBe(undefined);
   expect(note.srcTokenAddress).toBe(undefined);
-  expect(note.srcAmount).toBe(undefined);
+  expect(note.srcProtocolAddress).toBe(undefined);
+  expect(note.amount).toBe(undefined);
+  expect(note.bridge).toBe(undefined);
   expect(note.dstChainId).toBe(undefined);
   expect(note.dstTransactionHash).toBe(undefined);
   expect(note.dstToken).toBe(undefined);
   expect(note.dstTokenAddress).toBe(undefined);
-  expect(note.dstAmount).toBe(undefined);
-  expect(note.encryptedOnchainNote).toBe(undefined);
+  expect(note.dstProtocolAddress).toBe(undefined);
+  expect(note.commitmentHash).toBe(undefined);
+  expect(note.encryptedOnChainNote).toBe(undefined);
   expect(note.walletId).toBe(undefined);
   expect(note.shieldedAddress).toBe(undefined);
+  expect(note.withdrawTransactionHash).toBe(undefined);
   expect(note.status).toBe(undefined);
 
   note.srcChainId = 1;
@@ -37,8 +42,15 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.srcToken).toBe('USDT');
   note.srcTokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(note.srcTokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  note.srcAmount = new BN('deadbeef', 16);
-  expect(toHexNoPrefix(note.srcAmount)).toBe('deadbeef');
+  note.srcProtocolAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
+  expect(note.srcProtocolAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
+  note.amount = new BN('deadbeef', 16);
+  expect(toHexNoPrefix(note.amount)).toBe('deadbeef');
+  expect(() => {
+    note.bridge = 'wrong type';
+  }).toThrow();
+  note.bridge = BridgeType.LOOP;
+  expect(note.bridge).toBe(BridgeType.LOOP);
   note.dstChainId = 2;
   expect(note.dstChainId).toBe(2);
   note.dstTransactionHash = '4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e';
@@ -47,10 +59,12 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.dstToken).toBe('USDT');
   note.dstTokenAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(note.dstTokenAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
-  note.dstAmount = new BN('baadf00d', 16);
-  expect(toHexNoPrefix(note.dstAmount)).toBe('baadf00d');
-  note.encryptedOnchainNote = toBuff('deaddead');
-  expect(toHexNoPrefix(note.encryptedOnchainNote)).toBe('deaddead');
+  note.dstProtocolAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
+  expect(note.dstProtocolAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
+  note.commitmentHash = new BN('baadf00d', 16);
+  expect(toHexNoPrefix(note.commitmentHash)).toBe('baadf00d');
+  note.encryptedOnChainNote = toBuff('deaddead');
+  expect(toHexNoPrefix(note.encryptedOnChainNote)).toBe('deaddead');
   note.walletId = 100;
   expect(note.walletId).toBe(100);
   note.shieldedAddress =
@@ -58,9 +72,17 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.shieldedAddress).toBe(
     'L9VrizoNHfBdtJsLT1Zp1iWAjqGXaWf9HvSJV9p2a7TszPWLnuTDq7rcLc4ykehRznJWFhvCTvCC1REWGUjR6B3C6',
   );
+  note.withdrawTransactionHash = '0x4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e';
+  expect(note.withdrawTransactionHash).toBe(
+    '0x4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e',
+  );
   expect(() => {
     note.status = 'unknown status';
   }).toThrow();
-  note.status = PrivateNoteStatus.SPENDING;
-  expect(note.status).toBe(PrivateNoteStatus.SPENDING);
+  note.status = PrivateNoteStatus.SPENT;
+  expect(note.status).toBe(PrivateNoteStatus.SPENT);
+  note.srcTokenAddress = undefined;
+  expect(note.srcTokenAddress).toBe(undefined);
+  note.dstTokenAddress = undefined;
+  expect(note.dstTokenAddress).toBe(undefined);
 });

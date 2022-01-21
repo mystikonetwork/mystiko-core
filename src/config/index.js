@@ -1,22 +1,17 @@
-import { BaseConfig } from './common.js';
-import {
+import { MystikoConfig } from './mystikoConfig';
+import DefaultTestnetConfigJson from './default/testnet.json';
+import DefaultMainnetConfigJson from './default/mainnet.json';
+
+export { BaseConfig } from './common.js';
+export {
   ContractConfig,
   AssetType,
   BridgeType,
   isValidAssetType,
   isValidBridgeType,
 } from './contractConfig.js';
-import { ChainConfig } from './chainConfig.js';
-import { MystikoConfig, readFromFile } from './mystikoConfig';
+export { ChainConfig } from './chainConfig.js';
+export { MystikoConfig, readFromFile } from './mystikoConfig';
 
-export default {
-  AssetType,
-  BridgeType,
-  isValidAssetType,
-  isValidBridgeType,
-  BaseConfig,
-  ContractConfig,
-  ChainConfig,
-  MystikoConfig,
-  readFromFile,
-};
+export const DefaultTestnetConfig = new MystikoConfig(DefaultTestnetConfigJson);
+export const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);

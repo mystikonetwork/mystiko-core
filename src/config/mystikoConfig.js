@@ -3,6 +3,7 @@ import { BridgeType, isValidBridgeType } from './contractConfig.js';
 import { ChainConfig } from './chainConfig.js';
 import { check, readJsonFile } from '../utils.js';
 import { BaseBridgeConfig } from './bridgeConfig.js';
+import { CircuitConfig } from './circuitConfig.js';
 
 export class MystikoConfig extends BaseConfig {
   constructor(rawConfig) {
@@ -10,8 +11,10 @@ export class MystikoConfig extends BaseConfig {
     BaseConfig.checkString(this.config, 'version');
     BaseConfig.checkObjectArray(this.config, 'chains', false);
     BaseConfig.checkObjectArray(this.config, 'bridges', false);
+    BaseConfig.checkObjectArray(this.config, 'circuits', false);
     this._createChainConfigs();
     this._createBridgeConfigs();
+    this._createCircuitConfigs();
     this._validateConfig();
   }
 
@@ -20,38 +23,22 @@ export class MystikoConfig extends BaseConfig {
   }
 
   get chains() {
-    return this.config['chains'];
+    return Object.values(this.config['chains']);
   }
 
-  get chainIds() {
-    return Object.keys(this.chains).map((chainId) => parseInt(chainId));
-  }
-
-  get chainNames() {
-    return Object.keys(this.chains).map((chainId) => this.chains[chainId].name);
-  }
-
-  get bridges() {
-    return this.config['bridges'];
-  }
-
-  get bridgeTypes() {
-    return Object.keys(this.bridges);
-  }
-
-  get bridgeNames() {
-    return Object.keys(this.bridges).map((type) => this.bridges[type].name);
+  get circuits() {
+    return Object.values(this.config['circuits']);
   }
 
   getChainConfig(chainId) {
     check(typeof chainId === 'number' || chainId instanceof Number, 'chainId should be number or Number');
-    return this.chains[chainId];
+    return this.config['chains'][chainId];
   }
 
-  getPeerChainIds(chainId) {
+  getPeerChains(chainId) {
     const chainConfig = this.getChainConfig(chainId);
     if (chainConfig) {
-      return chainConfig.peerChainIds;
+      return chainConfig.peerChainIds.map((peerChainId) => this.getChainConfig(peerChainId));
     }
     return [];
   }
@@ -64,10 +51,28 @@ export class MystikoConfig extends BaseConfig {
     return [];
   }
 
+  getBridges(srcChainId, dstChainId, assetSymbol) {
+    check(typeof srcChainId === 'number', 'type of srcChainId should be number');
+    check(typeof dstChainId === 'number', 'type of dstChainId should be number');
+    check(typeof assetSymbol === 'string', 'type of tokenSymbol should be string');
+    const bridges = {};
+    if (srcChainId !== dstChainId) {
+      const chainConfig = this.getChainConfig(srcChainId);
+      if (chainConfig) {
+        chainConfig.contracts.forEach((contractConfig) => {
+          if (dstChainId === contractConfig.peerChainId && assetSymbol === contractConfig.assetSymbol) {
+            bridges[contractConfig.bridgeType] = this.getBridgeConfig(contractConfig.bridgeType);
+          }
+        });
+      }
+    }
+    return Object.values(bridges);
+  }
+
   getBridgeConfig(bridgeType) {
     check(typeof bridgeType === 'string', 'bridgeType should be string');
     check(isValidBridgeType(bridgeType), 'invalid bridge type');
-    return this.bridges[bridgeType];
+    return this.config['bridges'][bridgeType];
   }
 
   getContractConfig(srcChainId, dstChainId, assetSymbol, bridge) {
@@ -80,7 +85,7 @@ export class MystikoConfig extends BaseConfig {
     } else {
       check(srcChainId !== dstChainId, 'loop bridge should have non-equal chain ids');
     }
-    const srcChainConfig = this.chains[srcChainId];
+    const srcChainConfig = this.config['chains'][srcChainId];
     check(srcChainConfig, 'chain ' + srcChainId + ' does not exist in config');
     for (let i = 0; i < srcChainConfig.contracts.length; i++) {
       const contract = srcChainConfig.contracts[i];
@@ -94,6 +99,11 @@ export class MystikoConfig extends BaseConfig {
       }
     }
     throw new Error('cannot find contract information with given parameters');
+  }
+
+  getCircuitConfig(name) {
+    check(typeof name === 'string', 'name should be string');
+    return this.config['circuits'][name];
   }
 
   _createChainConfigs() {
@@ -118,21 +128,35 @@ export class MystikoConfig extends BaseConfig {
     }
   }
 
+  _createCircuitConfigs() {
+    this.config['circuits'] = {};
+    if (this.rawConfig['circuits']) {
+      this.rawConfig['circuits'].forEach((rawCircuitConfig) => {
+        const conf = new CircuitConfig(rawCircuitConfig);
+        check(!this.config['circuits'][conf.name], 'duplicate circuit config');
+        this.config['circuits'][conf.name] = conf;
+      });
+    }
+  }
+
   _validateConfig() {
-    this.chainIds.forEach((chainId) => {
-      const chainConfig = this.chains[chainId];
+    this.chains.forEach((chainConfig) => {
       chainConfig.contracts.forEach((contract) => {
         if (contract.bridgeType !== BridgeType.LOOP) {
-          check(this.bridges[contract.bridgeType], `no bridge ${contract.bridgeType} config`);
-          check(this.chains[contract.peerChainId], 'non-exist peerChainId');
-          const peerChain = this.chains[contract.peerChainId];
+          check(this.config['bridges'][contract.bridgeType], `no bridge ${contract.bridgeType} config`);
+          check(this.config['chains'][contract.peerChainId], 'non-exist peerChainId');
+          const peerChain = this.config['chains'][contract.peerChainId];
           check(peerChain.getContract(contract.peerContractAddress), 'non-exist peerChainContract');
           const peerContract = peerChain.getContract(contract.peerContractAddress);
           check(peerContract.bridgeType === contract.bridgeType, 'bridge type does not match');
           check(peerContract.assetDecimals === contract.assetDecimals, 'token decimals does not match');
-          check(peerContract.peerChainId === chainId, 'chain id does not match');
+          check(peerContract.peerChainId === chainConfig.chainId, 'chain id does not match');
           check(peerContract.peerContractAddress === contract.address, 'contract address does not match');
         }
+        check(
+          this.getCircuitConfig(contract.circuits),
+          `circuits version ${contract.circuits} is not configured`,
+        );
       });
     });
   }

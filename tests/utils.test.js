@@ -30,6 +30,9 @@ test('Test toBuff', () => {
 
 test('Test toDecimals', () => {
   expect(utils.toDecimals(2, 4).toString()).toBe('20000');
+  expect(utils.toDecimals(0.1, 2).toString()).toBe('10');
+  expect(utils.toDecimals(0.01, 4).toString()).toBe('100');
+  expect(utils.toDecimals(0.001, 2).toString()).toBe('0');
 });
 
 test('Test toFixedLenHex', () => {
@@ -74,6 +77,13 @@ test('Test toFixedLenHexNoPrefix', () => {
   expect(utils.toFixedLenHexNoPrefix(Uint8Array.from([0xde, 0xad]), 4)).toBe('0000dead');
   expect(utils.toFixedLenHexNoPrefix(57005, 4)).toBe('0000dead');
   expect(() => utils.toFixedLenHexNoPrefix({})).toThrow();
+});
+
+test('Test toString', () => {
+  expect(utils.toString(undefined)).toBe('');
+  expect(utils.toString(null)).toBe('');
+  expect(utils.toString(1)).toBe('1');
+  expect(utils.toString(new Error('msg'))).toBe('Error: msg');
 });
 
 test('Test readJsonFile', async () => {

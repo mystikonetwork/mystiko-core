@@ -10,12 +10,18 @@ test('Test Deposit getters/setters', () => {
   expect(deposit.asset).toBe(undefined);
   expect(deposit.amount).toBe(undefined);
   expect(deposit.commitmentHash).toBe(undefined);
+  expect(deposit.randomS).toBe(undefined);
+  expect(deposit.hashK).toBe(undefined);
   expect(deposit.privateNote).toBe(undefined);
-  expect(deposit.transactionHash).toBe(undefined);
+  expect(deposit.assetApproveTxHash).toBe(undefined);
+  expect(deposit.srcTxHash).toBe(undefined);
+  expect(deposit.dstTxHash).toBe(undefined);
+  expect(deposit.bridgeTxHash).toBe(undefined);
   expect(deposit.walletId).toBe(undefined);
   expect(deposit.srcAddress).toBe(undefined);
   expect(deposit.shieldedRecipientAddress).toBe(undefined);
   expect(deposit.status).toBe(undefined);
+  expect(deposit.errorMessage).toBe(undefined);
 
   deposit.srcChainId = 1;
   expect(deposit.srcChainId).toBe(1);
@@ -27,14 +33,22 @@ test('Test Deposit getters/setters', () => {
   expect(deposit.asset).toBe('USDT');
   deposit.amount = new BN('deadbeef', 16);
   expect(toHexNoPrefix(deposit.amount)).toBe('deadbeef');
-  deposit.commitmentHash = toBuff('2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242');
-  expect(toHexNoPrefix(deposit.commitmentHash)).toBe(
-    '2afed011a3e68d2f2885f4f41fbf917250a8985d18930535f2312173b6f3b242',
-  );
+  deposit.commitmentHash = new BN('1243253475345437234563145234523452345');
+  expect(deposit.commitmentHash.toString()).toBe('1243253475345437234563145234523452345');
+  deposit.randomS = new BN('1243253475345437234563145234523452345');
+  expect(deposit.randomS.toString()).toBe('1243253475345437234563145234523452345');
+  deposit.hashK = new BN('1243253475345437234563145234523452345');
+  expect(deposit.hashK.toString()).toBe('1243253475345437234563145234523452345');
   deposit.privateNote = toBuff('deaddead');
   expect(toHexNoPrefix(deposit.privateNote)).toBe('deaddead');
-  deposit.transactionHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
-  expect(deposit.transactionHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
+  deposit.assetApproveTxHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
+  expect(deposit.assetApproveTxHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
+  deposit.srcTxHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
+  expect(deposit.srcTxHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
+  deposit.dstTxHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
+  expect(deposit.dstTxHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
+  deposit.bridgeTxHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
+  expect(deposit.bridgeTxHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
   deposit.walletId = 200;
   expect(deposit.walletId).toBe(200);
   deposit.srcAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
@@ -49,4 +63,6 @@ test('Test Deposit getters/setters', () => {
   }).toThrow();
   deposit.status = DepositStatus.SRC_PENDING;
   expect(deposit.status).toBe(DepositStatus.SRC_PENDING);
+  deposit.errorMessage = 'error';
+  expect(deposit.errorMessage).toBe('error');
 });

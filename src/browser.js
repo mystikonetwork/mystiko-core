@@ -1,20 +1,10 @@
 import mystiko from './index.js';
+import Adapter from 'lokijs/src/incremental-indexeddb-adapter.js';
 
 if (window) {
-  const mystikoInit = mystiko.initialize;
-  mystiko.initialize = async (isMainnet = true, configFile = undefined) => {
-    const Adapter = (await import('lokijs/src/incremental-indexeddb-adapter.js')).default;
-    if (!configFile) {
-      if (isMainnet) {
-        configFile =
-          'https://raw.githubusercontent.com/mystikonetwork/mystiko-static/master/config/mainnet/config.json';
-      } else {
-        configFile =
-          'https://raw.githubusercontent.com/mystikonetwork/mystiko-static/master/config/testnet/config.json';
-      }
-    }
-    const dbFile = isMainnet ? 'mystiko_mainnet.db' : 'mystiko_testnet.db';
-    return await mystikoInit(configFile, dbFile, new Adapter());
+  const initialize = mystiko.initialize;
+  mystiko.initialize = ({ isTestnet = true, conf = undefined, dbFile = undefined } = {}) => {
+    return initialize({ isTestnet, conf, dbFile, dbAdapter: new Adapter() });
   };
   window.mystiko = mystiko;
 }

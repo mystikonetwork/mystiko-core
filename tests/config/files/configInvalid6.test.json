@@ -16,10 +16,7 @@
           "assetDecimals": 18,
           "assetType": "main",
           "bridgeType": "loop",
-          "abiFile": "build/contracts/MystikoWithLoopMain.json",
-          "wasmFile": "withdraw.wasm",
-          "zkeyFile": "withdraw.zkey",
-          "vkeyFile": "withdraw.vkey.json"
+          "circuits": "circom-1.0"
         },
         {
           "address": "0x98ed94360cad67a76a53d8aa15905e52485b73d1",
@@ -28,10 +25,7 @@
           "assetType": "erc20",
           "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
           "bridgeType": "loop",
-          "abiFile": "build/contracts/MystikoWithLoopERC20.json",
-          "wasmFile": "withdraw.wasm",
-          "zkeyFile": "withdraw.zkey",
-          "vkeyFile": "withdraw.vkey.json"
+          "circuits": "circom-1.0"
         },
         {
           "address": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
@@ -42,10 +36,7 @@
           "bridgeType": "poly",
           "peerChainId": 56,
           "peerContractAddress": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
-          "abiFile": "build/contracts/MystikoWithPolyERC20.json",
-          "wasmFile": "withdraw.wasm",
-          "zkeyFile": "withdraw.zkey",
-          "vkeyFile": "withdraw.vkey.json"
+          "circuits": "circom-1.0"
         }
       ]
     },
@@ -67,13 +58,18 @@
           "bridgeType": "poly",
           "peerChainId": 1,
           "peerContractAddress": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
-          "abiFile": "build/contracts/MystikoWithPolyERC20.json",
-          "wasmFile": "withdraw.wasm",
-          "zkeyFile": "withdraw.zkey",
-          "vkeyFile": "withdraw.vkey.json"
+          "circuits": "circom-1.0"
         }
       ]
     }
   ],
-  "bridges": []
+  "bridges": [],
+  "circuits": [
+    {
+      "name": "circom-1.0",
+      "wasmFile": "withdraw.wasm",
+      "zkeyFile": "withdraw.zkey",
+      "vkeyFile": "withdraw.vkey.json"
+    }
+  ]
 }

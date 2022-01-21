@@ -55,12 +55,32 @@ export class Deposit extends BaseModel {
 
   get commitmentHash() {
     const raw = this.data['commitmentHash'];
-    return raw ? toBuff(raw) : undefined;
+    return raw ? new BN(raw) : undefined;
   }
 
   set commitmentHash(hash) {
-    check(hash instanceof Buffer, 'hash should be instance of Buffer');
-    this.data['commitmentHash'] = toHexNoPrefix(hash);
+    check(hash instanceof BN, 'hash should be instance of Buffer');
+    this.data['commitmentHash'] = hash.toString();
+  }
+
+  get randomS() {
+    const raw = this.data['randomS'];
+    return raw ? new BN(raw) : undefined;
+  }
+
+  set randomS(s) {
+    check(s instanceof BN, 's should be instance of Buffer');
+    this.data['randomS'] = s.toString();
+  }
+
+  get hashK() {
+    const raw = this.data['hashK'];
+    return raw ? new BN(raw) : undefined;
+  }
+
+  set hashK(k) {
+    check(k instanceof BN, 'k should be instance of Buffer');
+    this.data['hashK'] = k.toString();
   }
 
   get privateNote() {
@@ -73,13 +93,40 @@ export class Deposit extends BaseModel {
     this.data['privateNote'] = toHexNoPrefix(note);
   }
 
-  get transactionHash() {
-    return this.data['transactionHash'];
+  get assetApproveTxHash() {
+    return this.data['assetApproveTxHash'];
   }
 
-  set transactionHash(hash) {
+  set assetApproveTxHash(hash) {
     check(typeof hash === 'string', 'hash should be instance of string');
-    this.data['transactionHash'] = hash;
+    this.data['assetApproveTxHash'] = hash;
+  }
+
+  get srcTxHash() {
+    return this.data['srcTxHash'];
+  }
+
+  set srcTxHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
+    this.data['srcTxHash'] = hash;
+  }
+
+  get bridgeTxHash() {
+    return this.data['bridgeTxHash'];
+  }
+
+  set bridgeTxHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
+    this.data['bridgeTxHash'] = hash;
+  }
+
+  get dstTxHash() {
+    return this.data['dstTxHash'];
+  }
+
+  set dstTxHash(hash) {
+    check(typeof hash === 'string', 'hash should be instance of string');
+    this.data['dstTxHash'] = hash;
   }
 
   get walletId() {
@@ -117,18 +164,27 @@ export class Deposit extends BaseModel {
     check(isValidDepositStatus(s), 'invalid deposit status ' + s);
     this.data['status'] = s;
   }
+
+  get errorMessage() {
+    return this.data['errorMessage'];
+  }
+
+  set errorMessage(msg) {
+    check(typeof msg === 'string', 'msg should be instance of string');
+    this.data['errorMessage'] = msg;
+  }
 }
 export const DepositStatus = {
   INIT: 'init',
+  ASSET_APPROVING: 'assetApproving',
+  ASSET_APPROVED: 'assetApproved',
   SRC_PENDING: 'srcPending',
-  SRC_SUCCEEDED: 'srcSucceeded',
-  SRC_FAILED: 'srcFailed',
+  SRC_CONFIRMED: 'srcSucceeded',
   BRIDGE_PENDING: 'bridgePending',
-  BRIDGE_SUCCEEDED: 'bridgeSucceeded',
-  BRIDGE_FAILED: 'bridgeFailed',
+  BRIDGE_CONFIRMED: 'bridgeSucceeded',
   DST_PENDING: 'dstPending',
-  DST_SUCCEEDED: 'dstSucceeded',
-  DST_FAILED: 'dstFailed',
+  SUCCEEDED: 'succeeded',
+  FAILED: 'failed',
 };
 Object.freeze(DepositStatus);
 export function isValidDepositStatus(status) {

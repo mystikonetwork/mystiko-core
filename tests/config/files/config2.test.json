@@ -8,7 +8,8 @@
       "providers": [
         "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
       ],
-      "contracts": []
+      "contracts": [],
+      "circuits": []
     }
   ]
 }

@@ -20,21 +20,31 @@ test('test getContractConfig', async () => {
 test('test readFromFile', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');
   expect(conf.version).toEqual('1.0');
-  expect(conf.chainIds.sort()).toEqual([1, 56].sort());
-  expect(conf.chainNames.sort()).toEqual(['Ethereum Mainnet', 'BSC Mainnet'].sort());
-  expect(conf.bridgeTypes).toEqual(['poly']);
-  expect(conf.bridgeNames).toEqual(['Poly Bridge']);
-  expect(conf.getPeerChainIds(100)).toEqual([]);
-  expect(conf.getPeerChainIds(1).sort()).toEqual([1, 56].sort());
+  expect(conf.chains.map((c) => c.chainId).sort()).toEqual([1, 56].sort());
+  expect(conf.chains.map((c) => c.name).sort()).toEqual(['Ethereum Mainnet', 'BSC Mainnet'].sort());
+  expect(conf.getPeerChains(100)).toEqual([]);
+  expect(
+    conf
+      .getPeerChains(1)
+      .map((c) => c.chainId)
+      .sort(),
+  ).toEqual([1, 56].sort());
   expect(conf.getAssetSymbols(1, 1).sort()).toEqual(['ETH', 'USDT'].sort());
   expect(conf.getAssetSymbols(1, 56).sort()).toEqual(['USDT'].sort());
   expect(conf.getAssetSymbols(1, 100)).toEqual([]);
   expect(conf.getAssetSymbols(100, 56)).toEqual([]);
+  expect(conf.getBridges(1, 1, 'USDT')).toEqual([]);
+  expect(conf.getBridges(1, 56, 'USDT').map((b) => b.type)).toEqual([BridgeType.POLY]);
+  expect(conf.getBridges(1, 56, 'ETH')).toEqual([]);
   expect(conf.getChainConfig(100)).toBe(undefined);
   expect(conf.getChainConfig(1).name).toBe('Ethereum Mainnet');
   expect(conf.getChainConfig(Number(56)).name).toBe('BSC Mainnet');
   expect(conf.getBridgeConfig(BridgeType.LOOP)).toBe(undefined);
   expect(conf.getBridgeConfig(BridgeType.POLY).type).toBe(BridgeType.POLY);
+  expect(conf.circuits.length).toBe(1);
+  expect(conf.circuits.map((c) => c.name)).toStrictEqual(['circom-1.0']);
+  expect(conf.getCircuitConfig('circom-1.0')).not.toBe(undefined);
+  expect(conf.getCircuitConfig('circom-1000.0')).toBe(undefined);
   await expect(readFromFile('tests/config/files/configInvalid0.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/config/files/configInvalid1.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/config/files/configInvalid2.test.json')).rejects.toThrow();
@@ -44,4 +54,6 @@ test('test readFromFile', async () => {
   await expect(readFromFile('tests/config/files/configInvalid6.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/config/files/configInvalid7.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/config/files/configInvalid8.test.json')).rejects.toThrow();
+  await expect(readFromFile('tests/config/files/configInvalid9.test.json')).rejects.toThrow();
+  await expect(readFromFile('tests/config/files/configInvalid10.test.json')).rejects.toThrow();
 });

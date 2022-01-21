@@ -1,18 +1,20 @@
 import { BaseSigner, MetaMaskSigner, checkSigner } from '../../src/chain/signer.js';
-import config from '../../src/config';
+import { readFromFile } from '../../src/config';
 import { toHex } from '../../src/utils.js';
 
 class MockProvider {
   constructor(accounts, chainId) {
     this.accounts = accounts;
-    this.chainId = chainId;
+    this.chainId = toHex(chainId);
+    this.chainIds = [toHex(chainId)];
+    this.addChainCount = 0;
     this.connected = false;
   }
 
-  async request({ method }) {
+  async request({ method, params }) {
     expect(method).not.toBe(undefined);
     if (method === 'eth_chainId') {
-      return await new Promise((resolve) => resolve(toHex(this.chainId)));
+      return await new Promise((resolve) => resolve(this.chainId));
     }
     if (method === 'eth_requestAccounts') {
       this.connected = true;
@@ -24,6 +26,30 @@ class MockProvider {
       } else {
         return await new Promise((resolve) => resolve([]));
       }
+    }
+    if (method === 'wallet_switchEthereumChain') {
+      expect(params.length).toBe(1);
+      expect(params[0].chainId).not.toBe(undefined);
+      if (params[0].chainId === '0xff') {
+        throw new Error('magic error');
+      }
+      if (this.chainIds.indexOf(params[0].chainId) === -1) {
+        throw { code: 4902 };
+      }
+      this.chainId = params[0].chainId;
+      return await new Promise((resolve) => resolve());
+    }
+    if (method === 'wallet_addEthereumChain') {
+      expect(params.length).toBe(1);
+      expect(params[0].chainId).not.toBe(undefined);
+      expect(params[0].chainName).not.toBe(undefined);
+      expect(params[0].rpcUrls.length > 0).toBe(true);
+      expect(params[0].blockExplorerUrls.length > 0).toBe(true);
+      expect(this.chainIds.indexOf(params[0].chainId)).toBe(-1);
+      this.chainIds.push(params[0].chainId);
+      this.chainId = params[0].chainId;
+      this.addChainCount = this.addChainCount + 1;
+      return await new Promise((resolve) => resolve());
     }
     throw new Error('unexpected method');
   }
@@ -48,22 +74,38 @@ async function testSigner(conf, signer) {
 }
 
 test('test base signer', async () => {
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/files/config.test.json');
   await testSigner(conf, new BaseSigner(conf));
 });
 
 test('test metamask signer', async () => {
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/files/config.test.json');
   await testSigner(conf, new MetaMaskSigner(conf));
 });
 
 test('test checkSigner', async () => {
-  await expect(checkSigner({}, 123)).rejects.toThrow();
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
-  const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 123);
+  const conf = await readFromFile('tests/config/files/config.test.json');
+  await expect(checkSigner({}, 123, conf)).rejects.toThrow();
+  const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 1);
   const signer = new MetaMaskSigner(conf, provider);
-  await expect(checkSigner(signer, 123)).rejects.toThrow();
+  await expect(checkSigner(signer, 1, conf)).rejects.toThrow();
   await signer.connect();
-  await expect(checkSigner(signer, 234)).rejects.toThrow();
-  await checkSigner(signer, 123);
+  await checkSigner(signer, 1, conf);
+  await checkSigner(signer, 56, conf);
+  expect(await signer.chainId()).toBe(toHex(56));
+});
+
+test('test switchChain', async () => {
+  const conf = await readFromFile('tests/config/files/config.test.json');
+  const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 1);
+  const signer = new MetaMaskSigner(conf, provider);
+  const chainConfig = conf.getChainConfig(56);
+  await signer.switchChain(56, chainConfig);
+  expect(await signer.chainId()).toBe(toHex(56));
+  expect(provider.addChainCount).toBe(1);
+  await signer.switchChain(1, conf.getChainConfig(1));
+  expect(provider.addChainCount).toBe(1);
+  await expect(signer.switchChain(1, chainConfig)).rejects.toThrow();
+  chainConfig.config['chainId'] = 255;
+  await expect(signer.switchChain(255, chainConfig)).rejects.toThrow();
 });

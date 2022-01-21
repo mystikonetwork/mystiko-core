@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
-import { AssetType, BridgeType, ContractConfig } from '../config/contractConfig.js';
-import { MystikoConfig } from '../config/mystikoConfig.js';
-import { check, readJsonFile } from '../utils.js';
-import erc20Abi from './abi/ERC20.json';
+import { AssetType, ContractConfig, MystikoConfig } from '../config';
+import { ProviderPool } from './provider.js';
+import { check } from '../utils.js';
+import { MystikoABI } from './abi.js';
 
 export class MystikoContract {
   constructor(contract) {
@@ -18,7 +18,7 @@ export class MystikoContract {
     }
   }
 
-  async connect(providerOrSigner, contractGenerator = undefined) {
+  connect(providerOrSigner, contractGenerator = undefined) {
     if (!contractGenerator) {
       contractGenerator = (address, abi, providerOrSigner) => {
         return new ethers.Contract(address, abi, providerOrSigner);
@@ -27,57 +27,45 @@ export class MystikoContract {
     if (this.contract) {
       return this.contract.connect(providerOrSigner);
     } else {
-      let abi = await readJsonFile(this.config.abiFile);
-      if (!(abi instanceof Array)) {
-        check(abi['abi'] && abi['abi'] instanceof Array, 'the json does not have abi array');
-        abi = abi.abi;
-      }
-      check(abi, 'failed to get abi information from ' + this.config.abiFile);
-      this.contract = contractGenerator(this.config.address, abi, providerOrSigner);
+      this.contract = contractGenerator(this.config.address, this.config.abi, providerOrSigner);
       return this.contract;
     }
   }
 }
 
 export class ContractPool {
-  constructor(config) {
+  constructor(config, providerPool) {
     check(config instanceof MystikoConfig, 'config should be instance of MystikoConfig');
+    check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
     this.config = config;
+    this.providerPool = providerPool;
     this.pool = {};
     this.assetPool = {};
   }
 
-  async connect(contractGenerator = undefined) {
-    const providerGenerator = (rpcEndpoints) => {
-      const jsonRpcProviders = rpcEndpoints.map((rpcEndpoint) => {
-        return new ethers.providers.JsonRpcProvider(rpcEndpoint);
-      });
-      return new ethers.providers.FallbackProvider(jsonRpcProviders);
-    };
-    const promises = [];
-    this.config.chainIds.forEach((chainId) => {
+  connect(contractGenerator = undefined) {
+    this.config.chains.forEach((chainConfig) => {
+      const chainId = chainConfig.chainId;
       if (!this.pool[chainId]) {
         this.pool[chainId] = {};
         this.assetPool[chainId] = {};
       }
-      const chainConfig = this.config.getChainConfig(chainId);
+      const provider = this.providerPool.getProvider(chainId);
       chainConfig.contracts.forEach((contractConfig) => {
         this.pool[chainId][contractConfig.address] = new MystikoContract(contractConfig);
-        const provider = providerGenerator(chainConfig.providers);
-        promises.push(this.pool[chainId][contractConfig.address].connect(provider, contractGenerator));
+        this.pool[chainId][contractConfig.address].connect(provider, contractGenerator);
         if (contractConfig.assetType !== AssetType.MAIN) {
           if (!contractGenerator) {
             contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
           }
           this.assetPool[chainId][contractConfig.assetAddress] = contractGenerator(
             contractConfig.assetAddress,
-            erc20Abi,
+            MystikoABI.ERC20,
             provider,
           );
         }
       });
     });
-    await Promise.all(promises);
   }
 
   getDepositContracts(srcChainId, dstChainId, assetSymbol, bridge) {
@@ -90,12 +78,10 @@ export class ContractPool {
     return { protocol: protocolContract };
   }
 
-  getWithdrawContract(srcChainId, dstChainId, assetSymbol, bridge) {
-    const contractConfig = this.config.getContractConfig(srcChainId, dstChainId, assetSymbol, bridge);
-    if (contractConfig.bridgeType === BridgeType.LOOP) {
-      return this.pool[srcChainId][contractConfig.address].contract;
-    } else {
-      return this.pool[dstChainId][contractConfig.peerContractAddress].contract;
+  getContract(chainId, contractAddress) {
+    if (this.pool[chainId] && this.pool[chainId][contractAddress]) {
+      return this.pool[chainId][contractAddress].contract;
     }
+    return undefined;
   }
 }

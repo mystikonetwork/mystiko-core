@@ -83,7 +83,10 @@ test('Test AccountHandler exportAccountSecretKey', async () => {
   expect(() => {
     accountHandler.exportAccountSecretKey('wrong password', account);
   }).toThrow();
-  const secretKey = accountHandler.exportAccountSecretKey(walletPassword, account);
+  expect(() => {
+    accountHandler.exportAccountSecretKey(walletPassword, 1000);
+  }).toThrow();
+  const secretKey = accountHandler.exportAccountSecretKey(walletPassword, account.id);
   const verifySK = account.protocol.decryptSymmetric(walletPassword, account.encryptedVerifySecretKey);
   const encSK = account.protocol.decryptSymmetric(walletPassword, account.encryptedEncSecretKey);
   const expected = account.protocol.fullSecretKey(toBuff(verifySK), toBuff(encSK));
@@ -123,4 +126,18 @@ test('Test AccountHandler updateAccountKeys', async () => {
     verifySK2,
   );
   expect(account4.protocol.decryptSymmetric('newP@ssw0rd', account4.encryptedEncSecretKey)).toBe(encSK2);
+});
+
+test('Test AccountHandler removeAccount', async () => {
+  const account = await accountHandler.addAccount(walletPassword, 'account 1');
+  await expect(accountHandler.removeAccount(12342324)).rejects.toThrow();
+  await accountHandler.removeAccount(account);
+  expect(accountHandler.getAccounts().length).toBe(0);
+});
+
+test('Test AccountHandler updateAccountName', async () => {
+  const account = await accountHandler.addAccount(walletPassword, 'account 1');
+  await expect(accountHandler.updateAccountName(12342324, 'account 1.1')).rejects.toThrow();
+  await accountHandler.updateAccountName(account.id, 'account 1.1');
+  expect(accountHandler.getAccount(account.id).name).toBe('account 1.1');
 });
