@@ -1,5 +1,6 @@
 import { BaseConfig } from './common.js';
 import { check } from '../utils.js';
+import { MystikoABI } from '../chain/abi.js';
 
 export const BridgeType = {
   LOOP: 'loop',
@@ -9,6 +10,17 @@ export const BridgeType = {
 export const AssetType = {
   ERC20: 'erc20',
   MAIN: 'main',
+};
+
+const AbiIndex = {
+  [AssetType.ERC20]: {
+    [BridgeType.LOOP]: MystikoABI.MystikoWithLoopERC20,
+    [BridgeType.POLY]: MystikoABI.MystikoWithPolyERC20,
+  },
+  [AssetType.MAIN]: {
+    [BridgeType.LOOP]: MystikoABI.MystikoWithLoopMain,
+    [BridgeType.POLY]: MystikoABI.MystikoWithPolyMain,
+  },
 };
 
 export function isValidBridgeType(type) {
@@ -36,7 +48,6 @@ export class ContractConfig extends BaseConfig {
       BaseConfig.checkNumber(this.config, 'peerChainId');
       BaseConfig.checkEthAddress(this.config, 'peerContractAddress');
     }
-    BaseConfig.checkString(this.config, 'abiFile');
     BaseConfig.checkString(this.config, 'wasmFile');
     BaseConfig.checkString(this.config, 'zkeyFile');
     BaseConfig.checkString(this.config, 'vkeyFile');
@@ -66,8 +77,8 @@ export class ContractConfig extends BaseConfig {
     return this.config['assetDecimals'];
   }
 
-  get abiFile() {
-    return this.config['abiFile'];
+  get abi() {
+    return AbiIndex[this.assetType][this.bridgeType];
   }
 
   get wasmFile() {

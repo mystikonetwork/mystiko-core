@@ -5,7 +5,7 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { readJsonFile } from '../../src/utils.js';
 import { AssetType, BridgeType } from '../../src/config/contractConfig.js';
 import config from '../../src/config';
-import erc20Abi from '../../src/chain/abi/ERC20.json';
+import { MystikoABI } from '../../src/chain/abi.js';
 
 class MockContract extends ethers.Contract {
   constructor(
@@ -67,7 +67,6 @@ test('test MystikoContract constructor', async () => {
     assetType: 'erc20',
     assetAddress: '0xaE110b575E21949DEc823EfB81951355EB71E038',
     bridgeType: 'loop',
-    abiFile: 'build/contracts/MystikoWithLoopERC20.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
@@ -100,7 +99,6 @@ test('test MystikoContract connect', async () => {
     assetType: 'erc20',
     bridgeType: 'loop',
     assetAddress,
-    abiFile: 'build/contracts/MystikoWithLoopERC20.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
@@ -111,7 +109,6 @@ test('test MystikoContract connect', async () => {
     assetDecimals: 18,
     assetType: 'main',
     bridgeType: 'loop',
-    abiFile: 'build/contracts/MystikoWithLoopMain.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
@@ -125,7 +122,6 @@ test('test MystikoContract connect', async () => {
     bridgeType: 'poly',
     peerContractAddress: peerAddress,
     peerChainId: 56,
-    abiFile: 'build/contracts/MystikoWithPolyERC20.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
@@ -138,7 +134,6 @@ test('test MystikoContract connect', async () => {
     bridgeType: 'poly',
     peerContractAddress: peerAddress,
     peerChainId: 56,
-    abiFile: 'build/contracts/MystikoWithPolyMain.json',
     wasmFile: 'withdraw.wasm',
     zkeyFile: 'withdraw.zkey',
     vkeyFile: 'withdraw.vkey.json',
@@ -201,8 +196,8 @@ test('test ContractPool connect', async () => {
   providerPool.connect();
   const pool = new ContractPool(conf, providerPool);
   const contractGenerator = (address, abi, providerOrSigner) => {
-    if (abi === erc20Abi) {
-      return new ethers.Contract(address, erc20Abi, providerOrSigner);
+    if (abi === MystikoABI.ERC20) {
+      return new ethers.Contract(address, MystikoABI.ERC20, providerOrSigner);
     }
     expect(providerOrSigner).not.toBe(undefined);
     let mockContract = undefined;

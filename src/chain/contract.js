@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
-import { AssetType, BridgeType, ContractConfig } from '../config/contractConfig.js';
+import { AssetType, ContractConfig } from '../config/contractConfig.js';
 import { MystikoConfig } from '../config/mystikoConfig.js';
 import { ProviderPool } from './provider.js';
 import { check, readJsonFile } from '../utils.js';
-import erc20Abi from './abi/ERC20.json';
+import { MystikoABI } from './abi.js';
 
 export class MystikoContract {
   constructor(contract) {
@@ -28,13 +28,7 @@ export class MystikoContract {
     if (this.contract) {
       return this.contract.connect(providerOrSigner);
     } else {
-      let abi = await readJsonFile(this.config.abiFile);
-      if (!(abi instanceof Array)) {
-        check(abi['abi'] && abi['abi'] instanceof Array, 'the json does not have abi array');
-        abi = abi.abi;
-      }
-      check(abi, 'failed to get abi information from ' + this.config.abiFile);
-      this.contract = contractGenerator(this.config.address, abi, providerOrSigner);
+      this.contract = contractGenerator(this.config.address, this.config.abi, providerOrSigner);
       return this.contract;
     }
   }
@@ -68,7 +62,7 @@ export class ContractPool {
           }
           this.assetPool[chainId][contractConfig.assetAddress] = contractGenerator(
             contractConfig.assetAddress,
-            erc20Abi,
+            MystikoABI.ERC20,
             provider,
           );
         }

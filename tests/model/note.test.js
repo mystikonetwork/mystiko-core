@@ -79,6 +79,6 @@ test('Test PrivateNote getters/setters', () => {
   expect(() => {
     note.status = 'unknown status';
   }).toThrow();
-  note.status = PrivateNoteStatus.SPENDING;
-  expect(note.status).toBe(PrivateNoteStatus.SPENDING);
+  note.status = PrivateNoteStatus.SPENT;
+  expect(note.status).toBe(PrivateNoteStatus.SPENT);
 });

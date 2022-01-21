@@ -1,4 +1,5 @@
 import { AssetType, BridgeType, ContractConfig } from '../../src/config/contractConfig.js';
+import { MystikoABI } from '../../src/chain/abi.js';
 
 test('test ContractConfig constructor', () => {
   const rawConfig = { address: '0xdeadbeef' };
@@ -21,8 +22,6 @@ test('test ContractConfig constructor', () => {
   expect(() => new ContractConfig(rawConfig)).toThrow();
   rawConfig['bridgeType'] = BridgeType.LOOP;
   expect(() => new ContractConfig(rawConfig)).toThrow();
-  rawConfig['abiFile'] = 'abi.json';
-  expect(() => new ContractConfig(rawConfig)).toThrow();
   rawConfig['wasmFile'] = 'withdraw.wasm';
   expect(() => new ContractConfig(rawConfig)).toThrow();
   rawConfig['zkeyFile'] = 'withdraw.zkey';
@@ -35,7 +34,7 @@ test('test ContractConfig constructor', () => {
   expect(conf1.assetType).toBe(AssetType.MAIN);
   expect(conf1.assetAddress).toBe('0x7826bfec2f7811f20feeb7f294e7f561233e2a2a');
   expect(conf1.bridgeType).toBe(BridgeType.LOOP);
-  expect(conf1.abiFile).toBe('abi.json');
+  expect(conf1.abi).toBe(MystikoABI.MystikoWithLoopMain);
   expect(conf1.wasmFile).toBe('withdraw.wasm');
   expect(conf1.zkeyFile).toBe('withdraw.zkey');
   expect(conf1.vkeyFile).toBe('withdraw.vkey.json');

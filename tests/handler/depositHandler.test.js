@@ -8,9 +8,9 @@ import { createDatabase } from '../../src/database';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
-import erc20Abi from '../../src/chain/abi/ERC20.json';
 import { BridgeType } from '../../src/config/contractConfig';
 import { DepositStatus } from '../../src/model/deposit';
+import { MystikoABI } from '../../src/chain/abi.js';
 
 class MockTransactionResponse {
   constructor(errorMessage = undefined) {
@@ -139,7 +139,7 @@ beforeEach(async () => {
   depositHandler = new DepositHandler(walletHandler, contractPool, db, conf);
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === erc20Abi) {
+    if (abi === MystikoABI.ERC20) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner);
     } else {

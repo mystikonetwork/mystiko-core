@@ -119,12 +119,7 @@ export class NoteHandler extends Handler {
 
   async _parseDepositLog(offChainNote, txReceipt, contractConfig) {
     check(contractConfig, `can't recognize contract address ${txReceipt.to}`);
-    let abiJson = await readJsonFile(contractConfig.abiFile);
-    if (abiJson && abiJson.abi) {
-      abiJson = abiJson.abi;
-    }
-    check(abiJson instanceof Array, 'invalid abi json file');
-    const contract = new ethers.utils.Interface(abiJson);
+    const contract = new ethers.utils.Interface(contractConfig.abi);
     const parsedEvents = {};
     for (let i = 0; i < txReceipt.logs.length; i++) {
       try {

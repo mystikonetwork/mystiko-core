@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "chains": [
+    {
+      "name": "Ethereum Ropsten",
+      "chainId": 1,
+      "explorerUrl": "https://ropsten.etherscan.io",
+      "providers": [
+        "https://ropsten.infura.io/v3/042d213dd3bc4f7e91cfde96345c587e",
+        "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+      ],
+      "contracts": [
+        {
+          "address": "0xF3Fb33A0c51d31060fF22f8b4ff529Db8A1eac4B",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x3162b6cE79df04608db04a8d609f83521c3CF9ae",
+          "bridgeType": "loop",
+          "circuits": "circom-1.0"
+        },
+        {
+          "address": "0x65A26CbaA4edE559E70eef2CDFc73C81574367C3",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "assetType": "main",
+          "bridgeType": "loop",
+          "circuits": "circom-1.0"
+        }
+      ]
+    },
+    {
+      "name": "BSC Testnet",
+      "chainId": 97,
+      "explorerUrl": "https://testnet.bscscan.com",
+      "providers": [
+        "https://data-seed-prebsc-1-s1.binance.org:8545",
+        "https://data-seed-prebsc-2-s1.binance.org:8545",
+        "https://data-seed-prebsc-1-s2.binance.org:8545",
+        "https://data-seed-prebsc-2-s2.binance.org:8545",
+        "https://data-seed-prebsc-1-s3.binance.org:8545",
+        "https://data-seed-prebsc-2-s3.binance.org:8545"
+
+      ],
+      "contracts": [
+        {
+          "address": "0x6FA4D41C76c5F937fC05685b0900B7e80A5eB3CC",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x3162b6cE79df04608db04a8d609f83521c3CF9ae",
+          "bridgeType": "loop",
+          "circuits": "circom-1.0"
+        },
+        {
+          "address": "0x76E093DBb23F91E0d03f72269CC83f1F8347D615",
+          "assetSymbol": "BNB",
+          "assetDecimals": 18,
+          "assetType": "main",
+          "bridgeType": "loop",
+          "circuits": "circom-1.0"
+        }
+      ]
+    }
+  ],
+  "bridges": [],
+  "circuits": [
+    {
+      "name": "circom-1.0",
+      "wasmFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/blob/master/circuits/circom/development/withdraw.wasm",
+      "zkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/blob/master/circuits/circom/development/withdraw.zkey",
+      "vkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/blob/master/circuits/circom/development/withdraw.vkey.json"
+    }
+  ]
+}
