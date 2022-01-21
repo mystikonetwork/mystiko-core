@@ -38,8 +38,9 @@ export class AccountHandler extends Handler {
   }
 
   exportAccountSecretKey(walletPassword, account) {
-    check(account instanceof Account, 'account should be instance of Account');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
+    account = this.getAccount(account);
+    check(account, `${account.toString()} does not exist`);
     if (!this.walletHandler.checkPassword(walletPassword)) {
       throw new Error('incorrect walletPassword is given');
     }
@@ -99,7 +100,8 @@ export class AccountHandler extends Handler {
   }
 
   async removeAccount(account) {
-    check(account instanceof Account, 'account should be instance of Account');
+    account = this.getAccount(account);
+    check(account, `${account.toString()} does not exist`);
     this.db.accounts.remove(account.data);
     await this.saveDatabase();
     return account;
@@ -118,6 +120,15 @@ export class AccountHandler extends Handler {
       account.encryptedEncSecretKey = this.protocol.encryptSymmetric(newPassword, encSecretKey);
       this.db.accounts.update(account.data);
     });
+    await this.saveDatabase();
+  }
+
+  async updateAccountName(account, newName) {
+    check(typeof newName === 'string', 'newName should be instance of string');
+    account = this.getAccount(account);
+    check(account, `${account.toString()} does not exist`);
+    account.name = newName;
+    this.db.accounts.update(account.data);
     await this.saveDatabase();
   }
 

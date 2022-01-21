@@ -34,7 +34,7 @@ export class WithdrawHandler extends Handler {
     privateNote = this.noteHandler.getPrivateNote(privateNote);
     check(privateNote, 'given privateNote does not exist');
     check(privateNote !== PrivateNoteStatus.SPENT, 'private note has been spent');
-    await checkSigner(signer, privateNote.dstChainId);
+    await checkSigner(signer, privateNote.dstChainId, this.config);
     const account = this.accountHandler.getAccount(privateNote.shieldedAddress);
     check(account, `account does not exist with ${privateNote.shieldedAddress}`);
     const chainConfig = this.config.getChainConfig(privateNote.dstChainId);

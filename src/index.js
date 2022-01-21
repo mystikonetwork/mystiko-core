@@ -9,12 +9,12 @@ import { ContractPool } from './chain/contract.js';
 import { MetaMaskSigner } from './chain/signer.js';
 
 const mystiko = { utils, models, ethers };
-mystiko.initialize = async (
+mystiko.initialize = async ({
   isTestnet = true,
   conf = undefined,
   dbFile = undefined,
   dbAdapter = undefined,
-) => {
+} = {}) => {
   utils.check(typeof isTestnet === 'boolean', 'isTestnet should be boolean type');
   if (typeof conf === 'string') {
     mystiko.conf = await readFromFile(conf);
@@ -37,7 +37,7 @@ mystiko.initialize = async (
   mystiko.providers = new ProviderPool(mystiko.conf);
   mystiko.providers.connect();
   mystiko.contracts = new ContractPool(mystiko.conf, mystiko.providers);
-  await mystiko.contracts.connect();
+  mystiko.contracts.connect();
   mystiko.deposits = new handler.DepositHandler(mystiko.wallets, mystiko.contracts, mystiko.db, mystiko.conf);
   mystiko.notes = new handler.NoteHandler(
     mystiko.wallets,

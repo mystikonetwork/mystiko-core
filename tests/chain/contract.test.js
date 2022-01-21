@@ -132,15 +132,15 @@ test('test MystikoContract connect', async () => {
   const contract2 = new MystikoContract(contractConfig2);
   const contract3 = new MystikoContract(contractConfig3);
   const contract4 = new MystikoContract(contractConfig4);
-  const contract1Connected = await contract1.connect(undefined, (address, abi, providerOrSinger) => {
+  const contract1Connected = contract1.connect(undefined, (address, abi, providerOrSinger) => {
     expect(providerOrSinger).toBe(undefined);
     return new MockContract(address, abi, AssetType.ERC20, BridgeType.LOOP, assetAddress, 'USDT', 18);
   });
-  const contract2Connected = await contract2.connect(undefined, (address, abi, providerOrSinger) => {
+  const contract2Connected = contract2.connect(undefined, (address, abi, providerOrSinger) => {
     expect(providerOrSinger).toBe(undefined);
     return new MockContract(address, abi, AssetType.MAIN, BridgeType.LOOP);
   });
-  const contract3Connected = await contract3.connect(undefined, (address, abi, providerOrSinger) => {
+  const contract3Connected = contract3.connect(undefined, (address, abi, providerOrSinger) => {
     expect(providerOrSinger).toBe(undefined);
     return new MockContract(
       address,
@@ -154,7 +154,7 @@ test('test MystikoContract connect', async () => {
       peerAddress,
     );
   });
-  const contract4Connected = await contract4.connect(undefined, (address, abi, providerOrSinger) => {
+  const contract4Connected = contract4.connect(undefined, (address, abi, providerOrSinger) => {
     expect(providerOrSinger).toBe(undefined);
     return new MockContract(
       address,
@@ -175,7 +175,7 @@ test('test MystikoContract connect', async () => {
   const abiData = await readJsonFile('build/contracts/MystikoWithLoopERC20.json');
   const rawContract = new ethers.Contract('0x98ED94360CAd67A76a53d8Aa15905E52485B73d1', abiData.abi);
   const contract5 = new MystikoContract(rawContract);
-  const contract5Connected = await contract5.connect();
+  const contract5Connected = contract5.connect();
   expect(contract5Connected instanceof ethers.Contract).toBe(true);
 });
 
@@ -212,7 +212,7 @@ test('test ContractPool connect', async () => {
     expect(mockContract).not.toBe(undefined);
     return mockContract;
   };
-  await pool.connect(contractGenerator);
+  pool.connect(contractGenerator);
   expect(Object.keys(pool.pool).length).toBe(2);
   expect(Object.keys(pool.pool['1']).length).toBe(3);
   expect(Object.keys(pool.pool['56']).length).toBe(1);

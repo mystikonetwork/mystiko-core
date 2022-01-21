@@ -6,7 +6,7 @@ import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus } from '../model/deposit.js';
-import { BridgeType } from '../config/contractConfig';
+import { BridgeType } from '../config';
 import { ID_KEY } from '../model/common.js';
 import { OffChainNote } from '../model/note.js';
 
@@ -33,7 +33,7 @@ export class DepositHandler extends Handler {
       assetSymbol,
       bridge,
     );
-    await checkSigner(signer, srcChainId);
+    await checkSigner(signer, srcChainId, this.config);
     const wallet = this.walletHandler.checkCurrentWallet();
     amount = toDecimals(amount, contractConfig.assetDecimals);
     const { commitmentHash, randomS, k, privateNote } = await this.protocol.commitmentWithShieldedAddress(

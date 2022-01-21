@@ -67,4 +67,10 @@ export class WalletHandler extends Handler {
     }
     return false;
   }
+
+  exportMasterSeed(walletPassword) {
+    check(this.checkPassword(walletPassword), 'incorrect wallet password');
+    const wallet = this.checkCurrentWallet();
+    return this.protocol.decryptSymmetric(walletPassword, wallet.encryptedMasterSeed);
+  }
 }

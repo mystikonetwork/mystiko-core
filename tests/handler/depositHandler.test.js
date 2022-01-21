@@ -7,10 +7,9 @@ import { createDatabase } from '../../src/database';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
-import { BridgeType } from '../../src/config/contractConfig';
+import { BridgeType, readFromFile } from '../../src/config';
 import { DepositStatus } from '../../src/model/deposit';
 import { MystikoABI } from '../../src/chain/abi.js';
-import { readFromFile } from '../../src/config/mystikoConfig.js';
 
 class MockTransactionResponse {
   constructor(errorMessage = undefined) {

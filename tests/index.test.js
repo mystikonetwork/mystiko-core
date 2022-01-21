@@ -2,7 +2,7 @@ import mystiko from '../src/index.js';
 import { DefaultTestnetConfig, DefaultMainnetConfig } from '../src/config';
 
 test('test initialize', async () => {
-  await mystiko.initialize(true, 'tests/config/files/config.test.json');
+  await mystiko.initialize({ isTestnet: true, conf: 'tests/config/files/config.test.json' });
   expect(mystiko.utils).not.toBe(undefined);
   expect(mystiko.models).not.toBe(undefined);
   expect(mystiko.ethers).not.toBe(undefined);
@@ -19,15 +19,15 @@ test('test initialize', async () => {
   expect(mystiko.signers).not.toBe(undefined);
   expect(mystiko.signers.metaMask).not.toBe(undefined);
 
-  await mystiko.initialize(false);
+  await mystiko.initialize({ isTestnet: false });
   expect(mystiko.conf).toBe(DefaultMainnetConfig);
-  await mystiko.initialize(true);
+  await mystiko.initialize();
   expect(mystiko.conf).toBe(DefaultTestnetConfig);
-  await mystiko.initialize(true, DefaultTestnetConfig);
+  await mystiko.initialize({ isTestnet: true, conf: DefaultTestnetConfig });
   expect(mystiko.conf).toBe(DefaultTestnetConfig);
-  await mystiko.initialize(true, undefined, 'test_file.db');
+  await mystiko.initialize({ isTestnet: true, dbFile: 'test_file.db' });
   expect(mystiko.db).not.toBe(undefined);
 
-  await expect(mystiko.initialize('random')).rejects.toThrow();
-  await expect(mystiko.initialize(false, {})).rejects.toThrow();
+  await expect(mystiko.initialize({ isTestnet: 'random' })).rejects.toThrow();
+  await expect(mystiko.initialize({ conf: {} })).rejects.toThrow();
 });

@@ -1,8 +1,7 @@
 import { ethers } from 'ethers';
-import { AssetType, ContractConfig } from '../config/contractConfig.js';
-import { MystikoConfig } from '../config/mystikoConfig.js';
+import { AssetType, ContractConfig, MystikoConfig } from '../config';
 import { ProviderPool } from './provider.js';
-import { check, readJsonFile } from '../utils.js';
+import { check } from '../utils.js';
 import { MystikoABI } from './abi.js';
 
 export class MystikoContract {
@@ -19,7 +18,7 @@ export class MystikoContract {
     }
   }
 
-  async connect(providerOrSigner, contractGenerator = undefined) {
+  connect(providerOrSigner, contractGenerator = undefined) {
     if (!contractGenerator) {
       contractGenerator = (address, abi, providerOrSigner) => {
         return new ethers.Contract(address, abi, providerOrSigner);
@@ -44,8 +43,7 @@ export class ContractPool {
     this.assetPool = {};
   }
 
-  async connect(contractGenerator = undefined) {
-    const promises = [];
+  connect(contractGenerator = undefined) {
     this.config.chains.forEach((chainConfig) => {
       const chainId = chainConfig.chainId;
       if (!this.pool[chainId]) {
@@ -55,7 +53,7 @@ export class ContractPool {
       const provider = this.providerPool.getProvider(chainId);
       chainConfig.contracts.forEach((contractConfig) => {
         this.pool[chainId][contractConfig.address] = new MystikoContract(contractConfig);
-        promises.push(this.pool[chainId][contractConfig.address].connect(provider, contractGenerator));
+        this.pool[chainId][contractConfig.address].connect(provider, contractGenerator);
         if (contractConfig.assetType !== AssetType.MAIN) {
           if (!contractGenerator) {
             contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
@@ -68,7 +66,6 @@ export class ContractPool {
         }
       });
     });
-    await Promise.all(promises);
   }
 
   getDepositContracts(srcChainId, dstChainId, assetSymbol, bridge) {

@@ -45,3 +45,11 @@ test('Test WalletHandler updatePassword', async () => {
   expect(handler.checkPassword(newPassword)).toBe(true);
   expect(wallet.protocol.decryptSymmetric(newPassword, wallet.encryptedMasterSeed)).toBe(walletMasterSeed);
 });
+
+test('Test WalletHandler exportMasterSeed', async () => {
+  const walletMasterSeed = 'awesomeMasterSeed';
+  const walletPassword = 'P@ssw0rd';
+  await handler.createWallet(walletMasterSeed, walletPassword);
+  expect(handler.exportMasterSeed(walletPassword)).toBe(walletMasterSeed);
+  expect(() => handler.exportMasterSeed('wrong password')).toThrow();
+});
