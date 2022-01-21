@@ -26,6 +26,17 @@
           "assetType": "main",
           "bridgeType": "loop",
           "circuits": "circom-1.0"
+        },
+        {
+          "address": "0xf7a6Ac8F176c3eCfb889F6b57EFca8094607BB00",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x3162b6cE79df04608db04a8d609f83521c3CF9ae",
+          "peerChainId": 97,
+          "peerContractAddress": "0x9caad1d9e96024b24e908a45399ec497291f17d6",
+          "bridgeType": "loop",
+          "circuits": "circom-1.0"
         }
       ]
     },
@@ -59,11 +70,31 @@
           "assetType": "main",
           "bridgeType": "loop",
           "circuits": "circom-1.0"
+        },
+        {
+          "address": "0x9caad1d9e96024b24e908a45399ec497291f17d6",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0xB02A15cbb70fAd81f74348434ea9F03Ea6F65F4d",
+          "peerChainId": 3,
+          "peerContractAddress": "0xf7a6Ac8F176c3eCfb889F6b57EFca8094607BB00",
+          "bridgeType": "loop",
+          "circuits": "circom-1.0"
         }
       ]
     }
   ],
-  "bridges": [],
+  "bridges": [
+    {
+      "name": "Poly Bridge",
+      "type": "poly",
+      "explorerUrl": "https://explorer.poly.network",
+      "explorerPrefix": "/testnet/tx/%tx%",
+      "apiUrl": "https://explorer.poly.network",
+      "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+    }
+  ],
   "circuits": [
     {
       "name": "circom-1.0",
