@@ -97,9 +97,9 @@
   "circuits": [
     {
       "name": "circom-1.0",
-      "wasmFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/blob/master/circuits/circom/development/withdraw.wasm",
-      "zkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/blob/master/circuits/circom/development/withdraw.zkey",
-      "vkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/blob/master/circuits/circom/development/withdraw.vkey.json"
+      "wasmFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/master/circuits/circom/development/withdraw.wasm",
+      "zkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/master/circuits/circom/development/withdraw.zkey",
+      "vkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/master/circuits/circom/development/withdraw.vkey.json"
     }
   ]
 }

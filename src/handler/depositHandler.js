@@ -146,6 +146,7 @@ export class DepositHandler extends Handler {
       toFixedLenHex(deposit.hashK),
       toFixedLenHex(deposit.randomS),
       toHex(deposit.privateNote),
+      { value: deposit.amount.toString() },
     );
     deposit.srcTxHash = depositTxResponse.hash;
     await this._updateDepositStatus(deposit, DepositStatus.SRC_PENDING, statusCallback);

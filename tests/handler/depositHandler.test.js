@@ -75,7 +75,7 @@ class MockMystikoContract extends ethers.Contract {
     return this;
   }
 
-  deposit(amount, commitmentHash, hashK, randomS, privateNote) {
+  deposit(amount, commitmentHash, hashK, randomS, privateNote, params) {
     const numberPattern = /^[0-9]*$/;
     expect(typeof amount === 'string' && amount.match(numberPattern)).not.toBe(null);
     expect(
@@ -84,6 +84,7 @@ class MockMystikoContract extends ethers.Contract {
     expect(typeof hashK === 'string' && hashK.startsWith('0x') && hashK.length === 66);
     expect(typeof randomS === 'string' && randomS.startsWith('0x') && randomS.length === 66);
     expect(typeof privateNote === 'string' && privateNote.startsWith('0x'));
+    expect(amount).toBe(params.value);
     return new Promise((resolve, reject) => {
       if (this.errorMessage) {
         reject(this.errorMessage);

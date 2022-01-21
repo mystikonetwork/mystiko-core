@@ -81,4 +81,8 @@ test('Test PrivateNote getters/setters', () => {
   }).toThrow();
   note.status = PrivateNoteStatus.SPENT;
   expect(note.status).toBe(PrivateNoteStatus.SPENT);
+  note.srcTokenAddress = undefined;
+  expect(note.srcTokenAddress).toBe(undefined);
+  note.dstTokenAddress = undefined;
+  expect(note.dstTokenAddress).toBe(undefined);
 });

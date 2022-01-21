@@ -30,7 +30,9 @@ export class Withdraw extends BaseModel {
   }
 
   set tokenAddress(address) {
-    check(typeof address === 'string', 'address should be instance of string');
+    if (address) {
+      check(typeof address === 'string', 'address should be instance of string');
+    }
     this.data['tokenAddress'] = address;
   }
 

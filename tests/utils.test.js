@@ -30,6 +30,9 @@ test('Test toBuff', () => {
 
 test('Test toDecimals', () => {
   expect(utils.toDecimals(2, 4).toString()).toBe('20000');
+  expect(utils.toDecimals(0.1, 2).toString()).toBe('10');
+  expect(utils.toDecimals(0.01, 4).toString()).toBe('100');
+  expect(utils.toDecimals(0.001, 2).toString()).toBe('0');
 });
 
 test('Test toFixedLenHex', () => {

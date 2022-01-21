@@ -53,4 +53,6 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
   withdraw.errorMessage = 'error';
   expect(withdraw.errorMessage).toBe('error');
+  withdraw.tokenAddress = undefined;
+  expect(withdraw.tokenAddress).toBe(undefined);
 });

@@ -64,7 +64,9 @@ export class PrivateNote extends BaseModel {
   }
 
   set srcTokenAddress(address) {
-    check(typeof address === 'string', 'address should be instance of string');
+    if (address) {
+      check(typeof address === 'string', 'address should be instance of string');
+    }
     this.data['srcTokenAddress'] = address;
   }
 
@@ -128,7 +130,9 @@ export class PrivateNote extends BaseModel {
   }
 
   set dstTokenAddress(address) {
-    check(typeof address === 'string', 'address should be instance of string');
+    if (address) {
+      check(typeof address === 'string', 'address should be instance of string');
+    }
     this.data['dstTokenAddress'] = address;
   }
 

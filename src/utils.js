@@ -43,6 +43,12 @@ export function toBuff(strData) {
 }
 
 export function toDecimals(amount, decimals) {
+  check(typeof amount === 'number', 'amount should be a number');
+  check(typeof decimals === 'number', 'decimals should be a number');
+  while (amount < 1 && decimals > 0) {
+    amount = amount * 10;
+    decimals = decimals - 1;
+  }
   const base = new BN(10).pow(new BN(decimals));
   return new BN(amount).mul(base);
 }
