@@ -35,7 +35,6 @@ beforeEach(async () => {
   db = await createDatabase('test.db');
   conf = await readFromFile('tests/config/files/config.test.json');
   providerPool = new ProviderPool(conf);
-  providerPool.connect();
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
   noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, conf);
@@ -46,6 +45,10 @@ beforeEach(async () => {
     '038e95e5d94292956a3476342c16346b4b7033fa7f6827560dab890cb6eca1' +
       'ab0aa2663250e332cbca03ff300dae0220ba029af87a2f1f166d29e9c4d102d87c',
   );
+});
+
+afterEach(() => {
+  db.database.close();
 });
 
 test('test importFromOffChainNote basic', async () => {

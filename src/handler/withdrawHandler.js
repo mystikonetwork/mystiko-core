@@ -27,13 +27,18 @@ export class WithdrawHandler extends Handler {
     this.contractPool = contractPool;
   }
 
-  async createWithdraw(walletPassword, { privateNote, recipientAddress }, signer, statusCallback) {
+  async createWithdraw(
+    walletPassword,
+    { privateNote, recipientAddress },
+    signer,
+    statusCallback = undefined,
+  ) {
     this.walletHandler.checkPassword(walletPassword);
     const wallet = this.walletHandler.getCurrentWallet();
     check(ethers.utils.isAddress(recipientAddress), `${recipientAddress} is invalid address`);
     privateNote = this.noteHandler.getPrivateNote(privateNote);
     check(privateNote, 'given privateNote does not exist');
-    check(privateNote !== PrivateNoteStatus.SPENT, 'private note has been spent');
+    check(privateNote.status !== PrivateNoteStatus.SPENT, 'private note has been spent');
     await checkSigner(signer, privateNote.dstChainId, this.config);
     const account = this.accountHandler.getAccount(privateNote.shieldedAddress);
     check(account, `account does not exist with ${privateNote.shieldedAddress}`);

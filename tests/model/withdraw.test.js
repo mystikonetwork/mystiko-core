@@ -1,6 +1,5 @@
 import BN from 'bn.js';
 import { Withdraw, WithdrawStatus } from '../../src/model/withdraw.js';
-import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
 test('Test Withdraw getters/setters', () => {
   const withdraw = new Withdraw();
