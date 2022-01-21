@@ -214,7 +214,7 @@ export class WithdrawHandler extends Handler {
     const txReceipt = await txResponse.wait();
     withdraw.transactionHash = txReceipt.transactionHash;
     await this._updateStatus(withdraw, WithdrawStatus.SUCCEEDED, statusCallback);
-    await this.noteHandler._updateStatus(privateNote, PrivateNoteStatus.SPENT);
+    await this.noteHandler.updateStatus(privateNote, PrivateNoteStatus.SPENT);
   }
 
   async _update(deposit) {

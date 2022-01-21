@@ -3,10 +3,10 @@ import BN from 'bn.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
-import { check, readJsonFile, toBuff, toHexNoPrefix } from '../utils.js';
+import { check, toBuff, toHexNoPrefix } from '../utils.js';
 import { isValidPrivateNoteStatus, OffChainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
 import { ProviderPool } from '../chain/provider.js';
-import { BridgeType } from '../config/contractConfig.js';
+import { BridgeType } from '../config';
 import { ID_KEY } from '../model/common.js';
 
 export class NoteHandler extends Handler {
@@ -33,7 +33,7 @@ export class NoteHandler extends Handler {
     const txReceipt = await provider.getTransactionReceipt(offChainNote.transactionHash);
     check(txReceipt, `${offChainNote.transactionHash} does not exist or not confirmed`);
     const contractConfig = chainConfig.getContract(txReceipt.to);
-    const parsedEvents = await this._parseDepositLog(offChainNote, txReceipt, contractConfig);
+    const parsedEvents = this._parseDepositLog(offChainNote, txReceipt, contractConfig);
     check(parsedEvents['Deposit'], 'no deposit event in transaction logs');
     const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
     const shieldedAddress = await this._tryDecryptOnChainNote(walletPassword, encryptedNote);
@@ -117,7 +117,17 @@ export class NoteHandler extends Handler {
     return queryChain.data().map((rawObject) => new PrivateNote(rawObject));
   }
 
-  async _parseDepositLog(offChainNote, txReceipt, contractConfig) {
+  async updateStatus(privateNote, status) {
+    check(isValidPrivateNoteStatus(status), 'invalid private note status');
+    privateNote = this.getPrivateNote(privateNote);
+    check(privateNote, 'no given privateNote found');
+    privateNote.status = status;
+    this.db.notes.update(privateNote.data);
+    await this.saveDatabase();
+    return privateNote;
+  }
+
+  _parseDepositLog(offChainNote, txReceipt, contractConfig) {
     check(contractConfig, `can't recognize contract address ${txReceipt.to}`);
     const contract = new ethers.utils.Interface(contractConfig.abi);
     const parsedEvents = {};
@@ -144,14 +154,5 @@ export class NoteHandler extends Handler {
       }
     }
     return undefined;
-  }
-
-  async _updateStatus(privateNote, status) {
-    check(privateNote instanceof PrivateNote, 'privateNote should be instance of PrivateNote');
-    check(isValidPrivateNoteStatus(status), 'invalid private note status');
-    privateNote.status = status;
-    this.db.notes.update(privateNote.data);
-    await this.saveDatabase();
-    return privateNote;
   }
 }

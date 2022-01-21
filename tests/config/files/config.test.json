@@ -54,7 +54,7 @@
           "assetSymbol": "USDT",
           "assetDecimals": 18,
           "assetType": "erc20",
-          "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+          "assetAddress": "0x3162b6ce79df04608db04a8d609f83521c3cf9ae",
           "bridgeType": "poly",
           "peerChainId": 1,
           "peerContractAddress": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
