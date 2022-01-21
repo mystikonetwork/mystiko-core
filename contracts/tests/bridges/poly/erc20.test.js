@@ -16,6 +16,7 @@ contract('MystikoWithPolyERC20', (accounts) => {
   let hasher;
   let verifier;
   let testToken;
+  let amount = new BN(toDecimals(1000, 18).toString());
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
@@ -86,12 +87,6 @@ contract('MystikoWithPolyERC20', (accounts) => {
       expect(await mystikoWithPolySourceERC20.getHasherAddress()).to.equal(hasher.address);
       expect(await mystikoWithPolyDestinationERC20.getHasherAddress()).to.equal(hasher.address);
     });
-
-    it('should have enough tokens in account 0', async () => {
-      const tokenContract = await TestToken.deployed();
-      const balanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
-      expect(balanceOfAccount0.toString()).to.equal(toDecimals(1000000000, 18).toString());
-    });
   });
 
   const rawSkVerify = protocol.randomBytes(protocol.VERIFY_SK_SIZE);
@@ -106,25 +101,23 @@ contract('MystikoWithPolyERC20', (accounts) => {
     it('should transfer token to account 1 correctly', async () => {
       const tokenContract = await TestToken.deployed();
       const initialBalanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
-      await tokenContract.transfer(accounts[1], toDecimals(1000, 18), { from: accounts[0] });
+      await tokenContract.transfer(accounts[1], amount.toString(), { from: accounts[0] });
       const finalBalanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
       const differenceBalanceOfAccount0 = new BN(initialBalanceOfAccount0).sub(
         new BN(finalBalanceOfAccount0),
       );
-      expect(differenceBalanceOfAccount0.toString()).to.equal(toDecimals(1000, 18).toString());
+      expect(differenceBalanceOfAccount0.toString()).to.equal(amount.toString());
       const balanceOfAccount1 = await tokenContract.balanceOf(accounts[1]);
-      expect(balanceOfAccount1.toString()).to.equal(toDecimals(1000, 18).toString());
+      expect(balanceOfAccount1.toString()).to.equal(amount.toString());
+
+      await testToken.approve(mystikoWithPolySourceERC20.address, amount.toString(), { from: accounts[1] });
+      const allowance = await testToken.allowance(accounts[1], mystikoWithPolySourceERC20.address);
+      expect(allowance.toString()).to.equal(amount.toString());
     });
 
     it('should deposit successfully', async () => {
-      const amount = toDecimals(1000, 18);
       const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
-
       const initialBalanceOfAccount1 = await testToken.balanceOf(accounts[1]);
-
-      await testToken.approve(mystikoWithPolySourceERC20.address, amount, { from: accounts[1] });
-      const allowance = await testToken.allowance(accounts[1], mystikoWithPolySourceERC20.address);
-      expect(allowance.toString()).to.equal(amount.toString());
 
       const gasEstimated = await mystikoWithPolySourceERC20.deposit.estimateGas(
         amount,
@@ -175,7 +168,7 @@ contract('MystikoWithPolyERC20', (accounts) => {
     it('should generate proof successfully', async () => {
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       const merkleTreeInsertEvent = depositTx.logs.find((e) => e['event'] === 'MerkleTreeInsert');
-      const amount = new BN(depositEvent.args.amount.toString());
+      const dAmount = new BN(depositEvent.args.amount.toString());
       const commitmentHash = new BN(toHexNoPrefix(depositEvent.args.commitmentHash), 16);
       const privateNote = toBuff(toHexNoPrefix(depositEvent.args.encryptedNote));
       const treeLeaves = [commitmentHash];
@@ -185,7 +178,7 @@ contract('MystikoWithPolyERC20', (accounts) => {
         skVerify,
         pkEnc,
         skEnc,
-        amount,
+        dAmount,
         commitmentHash,
         privateNote,
         treeLeaves,
@@ -206,8 +199,9 @@ contract('MystikoWithPolyERC20', (accounts) => {
     });
 
     it('should withdraw successfully', async () => {
-      const amount = new BN(toDecimals(1000, 18).toString());
-      await testToken.transfer(mystikoWithPolyDestinationERC20.address, amount, { from: accounts[0] });
+      await testToken.transfer(mystikoWithPolyDestinationERC20.address, amount.toString(), {
+        from: accounts[0],
+      });
 
       const proofA = [new BN(proof.pi_a[0]), new BN(proof.pi_a[1])];
       const proofB = [
