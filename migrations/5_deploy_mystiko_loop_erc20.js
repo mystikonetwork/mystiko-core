@@ -1,4 +1,5 @@
 require('dotenv').config({ path: '../.env' });
+
 const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');

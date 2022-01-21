@@ -17,8 +17,8 @@ contract('MystikoWithPolyMain', (accounts) => {
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
-    const { SOURCE_CHAIN_ID } = process.env;
-    const { DESTINATION_CHAIN_ID } = process.env;
+    const SOURCE_CHAIN_ID = 1100;
+    const DESTINATION_CHAIN_ID = 1200;
 
     verifier = await Verifier.deployed();
     hasher = await Hasher.deployed();
