@@ -3,7 +3,7 @@
   "chains": [
     {
       "name": "Ethereum Ropsten",
-      "chainId": 1,
+      "chainId": 3,
       "explorerUrl": "https://ropsten.etherscan.io",
       "providers": [
         "https://ropsten.infura.io/v3/042d213dd3bc4f7e91cfde96345c587e",
