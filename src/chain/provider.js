@@ -18,9 +18,8 @@ export class ProviderPool {
         return new ethers.providers.FallbackProvider(jsonRpcProviders);
       };
     }
-    this.config.chainIds.forEach((chainId) => {
-      const chainConfig = this.config.getChainConfig(chainId);
-      this.providers[chainId] = providerGenerator(chainConfig.providers);
+    this.config.chains.forEach((chain) => {
+      this.providers[chain.chainId] = providerGenerator(chain.providers);
     });
   }
 

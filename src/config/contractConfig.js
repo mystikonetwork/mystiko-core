@@ -48,9 +48,7 @@ export class ContractConfig extends BaseConfig {
       BaseConfig.checkNumber(this.config, 'peerChainId');
       BaseConfig.checkEthAddress(this.config, 'peerContractAddress');
     }
-    BaseConfig.checkString(this.config, 'wasmFile');
-    BaseConfig.checkString(this.config, 'zkeyFile');
-    BaseConfig.checkString(this.config, 'vkeyFile');
+    BaseConfig.checkString(this.config, 'circuits');
   }
 
   get address() {
@@ -81,18 +79,6 @@ export class ContractConfig extends BaseConfig {
     return AbiIndex[this.assetType][this.bridgeType];
   }
 
-  get wasmFile() {
-    return this.config['wasmFile'];
-  }
-
-  get zkeyFile() {
-    return this.config['zkeyFile'];
-  }
-
-  get vkeyFile() {
-    return this.config['vkeyFile'];
-  }
-
   get peerChainId() {
     if (this.bridgeType !== BridgeType.LOOP) {
       return this.config['peerChainId'];
@@ -105,5 +91,9 @@ export class ContractConfig extends BaseConfig {
       return this.config['peerContractAddress'];
     }
     return undefined;
+  }
+
+  get circuits() {
+    return this.config['circuits'];
   }
 }

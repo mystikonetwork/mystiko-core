@@ -4,7 +4,7 @@ import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { check, readJsonFile, toBuff, toHexNoPrefix } from '../utils.js';
-import { isValidPrivateNoteStatus, OffchainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
+import { isValidPrivateNoteStatus, OffChainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
 import { ProviderPool } from '../chain/provider.js';
 import { BridgeType } from '../config/contractConfig.js';
 import { ID_KEY } from '../model/common.js';
@@ -24,9 +24,9 @@ export class NoteHandler extends Handler {
     this.walletHandler.checkPassword(walletPassword);
     const wallet = this.walletHandler.getCurrentWallet();
     if (typeof offChainNote === 'string') {
-      offChainNote = new OffchainNote(JSON.parse(offChainNote));
+      offChainNote = new OffChainNote(JSON.parse(offChainNote));
     } else {
-      check(offChainNote instanceof OffchainNote, 'offChainNote should be instance of OffChainNote');
+      check(offChainNote instanceof OffChainNote, 'offChainNote should be instance of OffChainNote');
     }
     const chainConfig = this.config.getChainConfig(offChainNote.chainId);
     const provider = this.providerPool.getProvider(offChainNote.chainId);

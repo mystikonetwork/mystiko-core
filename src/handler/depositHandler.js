@@ -8,7 +8,7 @@ import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus } from '../model/deposit.js';
 import { BridgeType } from '../config/contractConfig';
 import { ID_KEY } from '../model/common.js';
-import { OffchainNote } from '../model/note.js';
+import { OffChainNote } from '../model/note.js';
 
 export class DepositHandler extends Handler {
   constructor(walletHandler, contractPool, db, config) {
@@ -114,7 +114,7 @@ export class DepositHandler extends Handler {
     const deposit = this.getDeposit(depositQuery);
     check(deposit, `deposit ${depositQuery} does not exist`);
     check(deposit.srcTxHash, 'deposit has not been ready for exporting off-chain note');
-    return new OffchainNote({ chainId: deposit.srcChainId, transactionHash: deposit.srcTxHash });
+    return new OffChainNote({ chainId: deposit.srcChainId, transactionHash: deposit.srcTxHash });
   }
 
   async _approveAsset(signer, deposit, { asset, protocol }, statusCallback) {

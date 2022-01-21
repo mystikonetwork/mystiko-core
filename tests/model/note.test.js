@@ -1,10 +1,10 @@
 import BN from 'bn.js';
-import { OffchainNote, PrivateNote, PrivateNoteStatus } from '../../src/model/note.js';
+import { OffChainNote, PrivateNote, PrivateNoteStatus } from '../../src/model/note.js';
 import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 import { BridgeType } from '../../src/config/contractConfig.js';
 
-test('Test OffchainNote getters/setters', () => {
-  const note = new OffchainNote();
+test('Test OffChainNote getters/setters', () => {
+  const note = new OffChainNote();
   expect(note.chainId).toBe(undefined);
   expect(note.transactionHash).toBe(undefined);
   note.chainId = 1;

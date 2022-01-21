@@ -1,5 +1,5 @@
 import { BaseSigner, MetaMaskSigner, checkSigner } from '../../src/chain/signer.js';
-import config from '../../src/config';
+import { readFromFile } from '../../src/config/mystikoConfig.js';
 import { toHex } from '../../src/utils.js';
 
 class MockProvider {
@@ -48,18 +48,18 @@ async function testSigner(conf, signer) {
 }
 
 test('test base signer', async () => {
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/files/config.test.json');
   await testSigner(conf, new BaseSigner(conf));
 });
 
 test('test metamask signer', async () => {
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/files/config.test.json');
   await testSigner(conf, new MetaMaskSigner(conf));
 });
 
 test('test checkSigner', async () => {
   await expect(checkSigner({}, 123)).rejects.toThrow();
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/files/config.test.json');
   const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 123);
   const signer = new MetaMaskSigner(conf, provider);
   await expect(checkSigner(signer, 123)).rejects.toThrow();

@@ -155,6 +155,7 @@ export class WithdrawHandler extends Handler {
     const skEnc = this.protocol.secretKeyForEncryption(
       toBuff(this.protocol.decryptSymmetric(walletPassword, account.encryptedEncSecretKey)),
     );
+    const circuitConfig = this.config.getCircuitConfig(contractConfig.circuits);
     const zkProof = await this.protocol.zkProve(
       pkVerify,
       skVerify,
@@ -165,13 +166,13 @@ export class WithdrawHandler extends Handler {
       privateNote.encryptedOnChainNote,
       leaves,
       leafIndex,
-      contractConfig.wasmFile,
-      contractConfig.zkeyFile,
+      circuitConfig.wasmFile,
+      circuitConfig.zkeyFile,
     );
     const validProof = await this.protocol.zkVerify(
       zkProof.proof,
       zkProof.publicSignals,
-      contractConfig.vkeyFile,
+      circuitConfig.vkeyFile,
     );
     check(validProof, 'generated an invalid proof');
     const { proof, publicSignals } = zkProof;

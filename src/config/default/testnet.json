@@ -48,7 +48,7 @@
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetType": "erc20",
-          "assetAddress": "0x3162b6cE79df04608db04a8d609f83521c3CF9ae",
+          "assetAddress": "0xB02A15cbb70fAd81f74348434ea9F03Ea6F65F4d",
           "bridgeType": "loop",
           "circuits": "circom-1.0"
         },

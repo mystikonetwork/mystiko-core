@@ -79,6 +79,12 @@
       "wasmFile": "withdraw.wasm",
       "zkeyFile": "withdraw.zkey",
       "vkeyFile": "withdraw.vkey.json"
+    },
+    {
+      "name": "circom-1.0",
+      "wasmFile": "withdraw.wasm",
+      "zkeyFile": "withdraw.zkey",
+      "vkeyFile": "withdraw.vkey.json"
     }
   ]
 }

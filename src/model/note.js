@@ -3,7 +3,7 @@ import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 import { isValidBridgeType } from '../config/contractConfig.js';
 
-export class OffchainNote extends BaseModel {
+export class OffChainNote extends BaseModel {
   constructor(data = {}) {
     super(data);
   }

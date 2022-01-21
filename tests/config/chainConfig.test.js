@@ -12,9 +12,7 @@ const contractConfigs = [
     assetDecimals: 18,
     assetType: AssetType.MAIN,
     bridgeType: BridgeType.LOOP,
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   },
   {
     address: '0x98ed94360cad67a76a53d8aa15905e52485b73d1',
@@ -23,9 +21,7 @@ const contractConfigs = [
     assetAddress: '0x26fc224b37952bd12c792425f242e0b0a55453a6',
     assetType: AssetType.ERC20,
     bridgeType: BridgeType.LOOP,
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   },
   {
     address: '0x26fc224b37952bd12c792425f242e0b0a55453a6',
@@ -35,9 +31,7 @@ const contractConfigs = [
     bridgeType: BridgeType.POLY,
     peerChainId: 10,
     peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   },
   {
     address: '0x8fb1df17768e29c936edfbce1207ad13696268b7',
@@ -48,9 +42,7 @@ const contractConfigs = [
     bridgeType: BridgeType.POLY,
     peerChainId: 10,
     peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   },
   {
     address: '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
@@ -61,9 +53,7 @@ const contractConfigs = [
     assetAddress: '0x26fc224b37952bd12c792425f242e0b0a55453a6',
     peerChainId: 20,
     peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   },
   {
     address: '0x110a13fc3efe6a245b50102d2d79b3e76125ae83',
@@ -73,9 +63,7 @@ const contractConfigs = [
     bridgeType: BridgeType.POLY,
     peerChainId: 20,
     peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   },
 ];
 

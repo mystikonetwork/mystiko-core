@@ -1,7 +1,6 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import { DepositHandler } from '../../src/handler/depositHandler.js';
-import config from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { ContractPool } from '../../src/chain/contract.js';
 import { createDatabase } from '../../src/database';
@@ -11,6 +10,7 @@ import { toDecimals, toHex } from '../../src/utils.js';
 import { BridgeType } from '../../src/config/contractConfig';
 import { DepositStatus } from '../../src/model/deposit';
 import { MystikoABI } from '../../src/chain/abi.js';
+import { readFromFile } from '../../src/config/mystikoConfig.js';
 
 class MockTransactionResponse {
   constructor(errorMessage = undefined) {
@@ -131,7 +131,7 @@ const walletPassword = 'P@ssw0rd';
 
 beforeEach(async () => {
   db = await createDatabase('test.db');
-  conf = await config.readFromFile('tests/config/files/config.test.json');
+  conf = await readFromFile('tests/config/files/config.test.json');
   providerPool = new ProviderPool(conf);
   providerPool.connect();
   contractPool = new ContractPool(conf, providerPool);

@@ -58,7 +58,7 @@
           "bridgeType": "poly",
           "peerChainId": 1,
           "peerContractAddress": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
-          "circuits": "circom-1.0"
+          "circuits": "circom-2.0"
         }
       ]
     }

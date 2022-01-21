@@ -4,7 +4,7 @@ import { ContractConfig } from '../../src/config/contractConfig.js';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { readJsonFile } from '../../src/utils.js';
 import { AssetType, BridgeType } from '../../src/config/contractConfig.js';
-import config from '../../src/config';
+import { readFromFile } from '../../src/config/mystikoConfig.js';
 import { MystikoABI } from '../../src/chain/abi.js';
 
 class MockContract extends ethers.Contract {
@@ -67,9 +67,7 @@ test('test MystikoContract constructor', async () => {
     assetType: 'erc20',
     assetAddress: '0xaE110b575E21949DEc823EfB81951355EB71E038',
     bridgeType: 'loop',
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   });
   const contract1 = new MystikoContract(contractConfig);
   const mockContract = new MockContract(
@@ -99,9 +97,7 @@ test('test MystikoContract connect', async () => {
     assetType: 'erc20',
     bridgeType: 'loop',
     assetAddress,
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   });
   const contractConfig2 = new ContractConfig({
     address: address,
@@ -109,9 +105,7 @@ test('test MystikoContract connect', async () => {
     assetDecimals: 18,
     assetType: 'main',
     bridgeType: 'loop',
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   });
   const contractConfig3 = new ContractConfig({
     address: address,
@@ -122,9 +116,7 @@ test('test MystikoContract connect', async () => {
     bridgeType: 'poly',
     peerContractAddress: peerAddress,
     peerChainId: 56,
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   });
   const contractConfig4 = new ContractConfig({
     address: '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1',
@@ -134,9 +126,7 @@ test('test MystikoContract connect', async () => {
     bridgeType: 'poly',
     peerContractAddress: peerAddress,
     peerChainId: 56,
-    wasmFile: 'withdraw.wasm',
-    zkeyFile: 'withdraw.zkey',
-    vkeyFile: 'withdraw.vkey.json',
+    circuits: 'circom-1.0',
   });
   const contract1 = new MystikoContract(contractConfig1);
   const contract2 = new MystikoContract(contractConfig2);
@@ -191,7 +181,7 @@ test('test MystikoContract connect', async () => {
 
 test('test ContractPool connect', async () => {
   expect(() => new ContractPool({})).toThrow();
-  const conf = await config.readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/files/config.test.json');
   const providerPool = new ProviderPool(conf);
   providerPool.connect();
   const pool = new ContractPool(conf, providerPool);
@@ -201,7 +191,8 @@ test('test ContractPool connect', async () => {
     }
     expect(providerOrSigner).not.toBe(undefined);
     let mockContract = undefined;
-    conf.chainIds.forEach((chainId) => {
+    conf.chains.forEach((chainConfig) => {
+      const chainId = chainConfig.chainId;
       conf.getChainConfig(chainId).contracts.forEach((contract) => {
         if (contract.address === address) {
           mockContract = new MockContract(
@@ -225,10 +216,10 @@ test('test ContractPool connect', async () => {
   expect(Object.keys(pool.pool).length).toBe(2);
   expect(Object.keys(pool.pool['1']).length).toBe(3);
   expect(Object.keys(pool.pool['56']).length).toBe(1);
-  let depositContracts = pool.getDepositContracts(1, 56, 'USDT', config.BridgeType.POLY);
+  let depositContracts = pool.getDepositContracts(1, 56, 'USDT', BridgeType.POLY);
   expect(depositContracts.protocol.address).toBe('0x8fb1df17768e29c936edfbce1207ad13696268b7');
   expect(depositContracts.asset.address).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
-  depositContracts = pool.getDepositContracts(1, 1, 'ETH', config.BridgeType.LOOP);
+  depositContracts = pool.getDepositContracts(1, 1, 'ETH', BridgeType.LOOP);
   expect(depositContracts.asset).toBe(undefined);
   expect(depositContracts.protocol.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
   let withdrawContract = pool.getContract(56, '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');

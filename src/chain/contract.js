@@ -46,12 +46,12 @@ export class ContractPool {
 
   async connect(contractGenerator = undefined) {
     const promises = [];
-    this.config.chainIds.forEach((chainId) => {
+    this.config.chains.forEach((chainConfig) => {
+      const chainId = chainConfig.chainId;
       if (!this.pool[chainId]) {
         this.pool[chainId] = {};
         this.assetPool[chainId] = {};
       }
-      const chainConfig = this.config.getChainConfig(chainId);
       const provider = this.providerPool.getProvider(chainId);
       chainConfig.contracts.forEach((contractConfig) => {
         this.pool[chainId][contractConfig.address] = new MystikoContract(contractConfig);
