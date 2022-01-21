@@ -6,7 +6,7 @@ test('test initialize', async () => {
   expect(mystiko.utils).not.toBe(undefined);
   expect(mystiko.models).not.toBe(undefined);
   expect(mystiko.ethers).not.toBe(undefined);
-  expect(mystiko.conf).not.toBe(undefined);
+  expect(mystiko.config).not.toBe(undefined);
   expect(mystiko.db).not.toBe(undefined);
   expect(mystiko.db.adapter).toBe(undefined);
   expect(mystiko.wallets).not.toBe(undefined);
@@ -20,11 +20,11 @@ test('test initialize', async () => {
   expect(mystiko.signers.metaMask).not.toBe(undefined);
 
   await mystiko.initialize({ isTestnet: false });
-  expect(mystiko.conf).toBe(DefaultMainnetConfig);
+  expect(mystiko.config).toBe(DefaultMainnetConfig);
   await mystiko.initialize();
-  expect(mystiko.conf).toBe(DefaultTestnetConfig);
+  expect(mystiko.config).toBe(DefaultTestnetConfig);
   await mystiko.initialize({ isTestnet: true, conf: DefaultTestnetConfig });
-  expect(mystiko.conf).toBe(DefaultTestnetConfig);
+  expect(mystiko.config).toBe(DefaultTestnetConfig);
   await mystiko.initialize({ isTestnet: true, dbFile: 'test_file.db' });
   expect(mystiko.db).not.toBe(undefined);
 

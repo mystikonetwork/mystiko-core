@@ -17,11 +17,11 @@ mystiko.initialize = async ({
 } = {}) => {
   utils.check(typeof isTestnet === 'boolean', 'isTestnet should be boolean type');
   if (typeof conf === 'string') {
-    mystiko.conf = await readFromFile(conf);
+    mystiko.config = await readFromFile(conf);
   } else if (conf instanceof MystikoConfig) {
-    mystiko.conf = conf;
+    mystiko.config = conf;
   } else if (!conf) {
-    mystiko.conf = isTestnet ? DefaultTestnetConfig : DefaultMainnetConfig;
+    mystiko.config = isTestnet ? DefaultTestnetConfig : DefaultMainnetConfig;
   } else {
     throw new Error(`unsupported config type ${typeof conf}`);
   }
@@ -32,19 +32,19 @@ mystiko.initialize = async ({
   }
   mystiko.db = await createDatabase(dbFile, dbAdapter);
   mystiko.db.adapter = dbAdapter;
-  mystiko.wallets = new handler.WalletHandler(mystiko.db, mystiko.conf);
-  mystiko.accounts = new handler.AccountHandler(mystiko.wallets, mystiko.db, mystiko.conf);
-  mystiko.providers = new ProviderPool(mystiko.conf);
+  mystiko.wallets = new handler.WalletHandler(mystiko.db, mystiko.config);
+  mystiko.accounts = new handler.AccountHandler(mystiko.wallets, mystiko.db, mystiko.config);
+  mystiko.providers = new ProviderPool(mystiko.config);
   mystiko.providers.connect();
-  mystiko.contracts = new ContractPool(mystiko.conf, mystiko.providers);
+  mystiko.contracts = new ContractPool(mystiko.config, mystiko.providers);
   mystiko.contracts.connect();
-  mystiko.deposits = new handler.DepositHandler(mystiko.wallets, mystiko.contracts, mystiko.db, mystiko.conf);
+  mystiko.deposits = new handler.DepositHandler(mystiko.wallets, mystiko.contracts, mystiko.db, mystiko.config);
   mystiko.notes = new handler.NoteHandler(
     mystiko.wallets,
     mystiko.accounts,
     mystiko.providers,
     mystiko.db,
-    mystiko.conf,
+    mystiko.config,
   );
   mystiko.withdraws = new handler.WithdrawHandler(
     mystiko.wallets,
@@ -53,10 +53,10 @@ mystiko.initialize = async ({
     mystiko.providers,
     mystiko.contracts,
     mystiko.db,
-    mystiko.conf,
+    mystiko.config,
   );
   mystiko.signers = {
-    metaMask: new MetaMaskSigner(mystiko.conf),
+    metaMask: new MetaMaskSigner(mystiko.config),
   };
 };
 export default mystiko;
