@@ -6,7 +6,7 @@ import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus } from '../model/deposit.js';
-import { BridgeType } from '../config';
+import { AssetType, BridgeType } from '../config';
 import { ID_KEY } from '../model/common.js';
 import { OffChainNote } from '../model/note.js';
 
@@ -58,7 +58,13 @@ export class DepositHandler extends Handler {
     await this.saveDatabase();
     const depositPromise = this._approveAsset(signer, deposit, depositContracts, statusCallback)
       .then(() => {
-        return this._sendDeposit(signer, deposit, depositContracts, statusCallback);
+        return this._sendDeposit(
+          signer,
+          deposit,
+          depositContracts,
+          contractConfig.assetType === AssetType.MAIN,
+          statusCallback,
+        );
       })
       .catch((error) => {
         deposit.errorMessage = toString(error);
@@ -137,7 +143,7 @@ export class DepositHandler extends Handler {
     return await this._updateDepositStatus(deposit, DepositStatus.ASSET_APPROVED, undefined, statusCallback);
   }
 
-  async _sendDeposit(signer, deposit, depositContracts, statusCallback) {
+  async _sendDeposit(signer, deposit, depositContracts, isMainAsset, statusCallback) {
     check(deposit.status === DepositStatus.ASSET_APPROVED, 'token not approved');
     const protocolContract = await depositContracts.protocol.connect(signer.signer);
     const depositTxResponse = await protocolContract.deposit(
@@ -146,7 +152,7 @@ export class DepositHandler extends Handler {
       toFixedLenHex(deposit.hashK),
       toFixedLenHex(deposit.randomS),
       toHex(deposit.privateNote),
-      { value: deposit.amount.toString() },
+      { value: isMainAsset ? deposit.amount.toString() : '0' },
     );
     deposit.srcTxHash = depositTxResponse.hash;
     await this._updateDepositStatus(deposit, DepositStatus.SRC_PENDING, statusCallback);
