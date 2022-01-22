@@ -21,58 +21,15 @@ export class NoteHandler extends Handler {
   }
 
   async importFromOffChainNote(walletPassword, offChainNote) {
-    this.walletHandler.checkPassword(walletPassword);
-    const wallet = this.walletHandler.getCurrentWallet();
     if (typeof offChainNote === 'string') {
       offChainNote = new OffChainNote(JSON.parse(offChainNote));
     } else {
       check(offChainNote instanceof OffChainNote, 'offChainNote should be instance of OffChainNote');
     }
-    const chainConfig = this.config.getChainConfig(offChainNote.chainId);
     const provider = this.providerPool.getProvider(offChainNote.chainId);
     const txReceipt = await provider.getTransactionReceipt(offChainNote.transactionHash);
     check(txReceipt, `${offChainNote.transactionHash} does not exist or not confirmed`);
-    const contractConfig = chainConfig.getContract(txReceipt.to);
-    const parsedEvents = this._parseDepositLog(offChainNote, txReceipt, contractConfig);
-    check(parsedEvents['Deposit'], 'no deposit event in transaction logs');
-    const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
-    const shieldedAddress = await this._tryDecryptOnChainNote(walletPassword, encryptedNote);
-    check(shieldedAddress, 'this deposit does not belong to your accounts');
-    const privateNote = new PrivateNote();
-    privateNote.srcChainId = offChainNote.chainId;
-    privateNote.srcTransactionHash = offChainNote.transactionHash;
-    privateNote.srcToken = contractConfig.assetSymbol;
-    privateNote.srcTokenAddress = contractConfig.assetAddress;
-    privateNote.srcProtocolAddress = txReceipt.to;
-    privateNote.amount = new BN(amount.toString());
-    privateNote.bridge = contractConfig.bridgeType;
-    if (contractConfig.bridgeType !== BridgeType.LOOP) {
-      const peerChainConfig = this.config.getChainConfig(contractConfig.peerChainId);
-      const peerContractConfig = peerChainConfig.getContract(contractConfig.peerContractAddress);
-      privateNote.dstChainId = contractConfig.peerChainId;
-      privateNote.dstToken = peerContractConfig.assetSymbol;
-      privateNote.dstTokenAddress = peerContractConfig.assetAddress;
-      privateNote.dstProtocolAddress = contractConfig.peerContractAddress;
-    } else {
-      privateNote.dstChainId = offChainNote.chainId;
-      privateNote.dstTransactionHash = offChainNote.transactionHash;
-      privateNote.dstToken = contractConfig.assetSymbol;
-      privateNote.dstTokenAddress = contractConfig.assetAddress;
-      privateNote.dstProtocolAddress = txReceipt.to;
-    }
-    privateNote.commitmentHash = new BN(toHexNoPrefix(commitmentHash), 16);
-    privateNote.encryptedOnChainNote = toBuff(encryptedNote);
-    privateNote.walletId = wallet.id;
-    privateNote.shieldedAddress = shieldedAddress;
-    privateNote.status = PrivateNoteStatus.IMPORTED;
-    const existingOne = this.db.notes.findOne({
-      srcChainId: privateNote.srcChainId,
-      commitmentHash: privateNote.commitmentHash.toString(),
-    });
-    check(!existingOne, 'duplicate notes');
-    this.db.notes.insert(privateNote.data);
-    await this.saveDatabase();
-    return privateNote;
+    return this._createPrivateNoteFromTxReceipt(offChainNote.chainId, txReceipt, true, walletPassword);
   }
 
   getPrivateNote(query) {
@@ -127,7 +84,65 @@ export class NoteHandler extends Handler {
     return privateNote;
   }
 
-  _parseDepositLog(offChainNote, txReceipt, contractConfig) {
+  async _createPrivateNoteFromTxReceipt(
+    chainId,
+    txReceipt,
+    requireCheck = true,
+    walletPassword = undefined,
+    shieldedAddress = undefined,
+  ) {
+    const chainConfig = this.config.getChainConfig(chainId);
+    const contractConfig = chainConfig.getContract(txReceipt.to);
+    const parsedEvents = this._parseDepositLog(txReceipt, contractConfig);
+    check(parsedEvents['Deposit'], 'no deposit event in transaction logs');
+    const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
+    let wallet;
+    if (requireCheck) {
+      this.walletHandler.checkPassword(walletPassword);
+      wallet = this.walletHandler.getCurrentWallet();
+      shieldedAddress = await this._tryDecryptOnChainNote(walletPassword, encryptedNote);
+      check(shieldedAddress, 'this deposit does not belong to your accounts');
+    } else {
+      wallet = this.walletHandler.checkCurrentWallet();
+    }
+    const privateNote = new PrivateNote();
+    privateNote.srcChainId = chainId;
+    privateNote.srcTransactionHash = txReceipt.transactionHash;
+    privateNote.srcToken = contractConfig.assetSymbol;
+    privateNote.srcTokenAddress = contractConfig.assetAddress;
+    privateNote.srcProtocolAddress = txReceipt.to;
+    privateNote.amount = new BN(amount.toString());
+    privateNote.bridge = contractConfig.bridgeType;
+    if (contractConfig.bridgeType !== BridgeType.LOOP) {
+      const peerChainConfig = this.config.getChainConfig(contractConfig.peerChainId);
+      const peerContractConfig = peerChainConfig.getContract(contractConfig.peerContractAddress);
+      privateNote.dstChainId = contractConfig.peerChainId;
+      privateNote.dstToken = peerContractConfig.assetSymbol;
+      privateNote.dstTokenAddress = peerContractConfig.assetAddress;
+      privateNote.dstProtocolAddress = contractConfig.peerContractAddress;
+    } else {
+      privateNote.dstChainId = chainId;
+      privateNote.dstTransactionHash = txReceipt.transactionHash;
+      privateNote.dstToken = contractConfig.assetSymbol;
+      privateNote.dstTokenAddress = contractConfig.assetAddress;
+      privateNote.dstProtocolAddress = txReceipt.to;
+    }
+    privateNote.commitmentHash = new BN(toHexNoPrefix(commitmentHash), 16);
+    privateNote.encryptedOnChainNote = toBuff(encryptedNote);
+    privateNote.walletId = wallet.id;
+    privateNote.shieldedAddress = shieldedAddress;
+    privateNote.status = PrivateNoteStatus.IMPORTED;
+    const existingOne = this.db.notes.findOne({
+      srcChainId: privateNote.srcChainId,
+      commitmentHash: privateNote.commitmentHash.toString(),
+    });
+    check(!existingOne, 'duplicate notes');
+    this.db.notes.insert(privateNote.data);
+    await this.saveDatabase();
+    return privateNote;
+  }
+
+  _parseDepositLog(txReceipt, contractConfig) {
     check(contractConfig, `can't recognize contract address ${txReceipt.to}`);
     const contract = new ethers.utils.Interface(contractConfig.abi);
     const parsedEvents = {};

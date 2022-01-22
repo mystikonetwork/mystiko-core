@@ -14,15 +14,15 @@ module.exports = function (deployer, network) {
   return deployer.then(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
 
-    var crosschainManagerAddress;
+    var crosschainManagerProxyAddress;
     var destinationChainId;
-    if (network == 'bsctestnet') {
-      const { POLY_ECCM_BSC_TESTNET, ROPSTEN_CHAINID } = process.env;
-      crosschainManagerAddress = POLY_ECCM_BSC_TESTNET;
+    if (network === 'bsctestnet') {
+      const { POLY_ECCMP_BSC_TESTNET, ROPSTEN_CHAINID } = process.env;
+      crosschainManagerProxyAddress = POLY_ECCMP_BSC_TESTNET;
       destinationChainId = ROPSTEN_CHAINID;
-    } else if (network == 'ropsten') {
-      const { POLY_ECCM_ROPSTEN, BSC_TESTNET_CHAINID } = process.env;
-      crosschainManagerAddress = POLY_ECCM_ROPSTEN;
+    } else if (network === 'ropsten') {
+      const { POLY_ECCMP_ROPSTEN, BSC_TESTNET_CHAINID } = process.env;
+      crosschainManagerProxyAddress = POLY_ECCMP_ROPSTEN;
       destinationChainId = BSC_TESTNET_CHAINID;
     } else {
       return;
@@ -34,7 +34,7 @@ module.exports = function (deployer, network) {
 
     await deployer.deploy(
       MystikoWithPolyERC20,
-      crosschainManagerAddress,
+      crosschainManagerProxyAddress,
       destinationChainId,
       verifier.address,
       token.address,
