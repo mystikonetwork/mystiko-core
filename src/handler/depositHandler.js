@@ -4,6 +4,8 @@ import { Handler } from './handler.js';
 import { check, toHex, toDecimals, toFixedLenHex, toString } from '../utils.js';
 import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
+import { AccountHandler } from './accountHandler.js';
+import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus } from '../model/deposit.js';
 import { AssetType, BridgeType } from '../config';
@@ -11,11 +13,15 @@ import { ID_KEY } from '../model/common.js';
 import { OffChainNote } from '../model/note.js';
 
 export class DepositHandler extends Handler {
-  constructor(walletHandler, contractPool, db, config) {
+  constructor(walletHandler, accountHandler, noteHandler, contractPool, db, config) {
     super(db, config);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
+    check(accountHandler instanceof AccountHandler, 'accountHandler should be instance of AccountHandler');
+    check(noteHandler instanceof NoteHandler, 'noteHandler should be instance of NoteHandler');
     check(contractPool instanceof ContractPool, 'contractPool should be instance of ContractPool');
     this.walletHandler = walletHandler;
+    this.accountHandler = accountHandler;
+    this.noteHandler = noteHandler;
     this.contractPool = contractPool;
   }
 
@@ -166,6 +172,7 @@ export class DepositHandler extends Handler {
         await this._updateDepositStatus(deposit, DepositStatus.SUCCEEDED, statusCallback);
       }
     }
+    await this._createPrivateNoteIfNecessary(deposit, txReceipt);
   }
 
   async _updateDeposit(deposit) {
@@ -185,5 +192,28 @@ export class DepositHandler extends Handler {
       statusCallback(deposit, oldStatus, newStatus);
     }
     return deposit;
+  }
+
+  async _createPrivateNoteIfNecessary(deposit, txReceipt) {
+    const account = this.accountHandler.getAccount(deposit.shieldedRecipientAddress);
+    if (account) {
+      const existingOne = this.noteHandler.getPrivateNotes({
+        filterFunc: (note) => {
+          return (
+            note.srcChainId === deposit.srcChainId &&
+            note.commitmentHash.toString() === deposit.commitmentHash.toString()
+          );
+        },
+      });
+      if (!existingOne || existingOne.length === 0) {
+        return await this.noteHandler._createPrivateNoteFromTxReceipt(
+          deposit.srcChainId,
+          txReceipt,
+          false,
+          undefined,
+          deposit.shieldedRecipientAddress,
+        );
+      }
+    }
   }
 }

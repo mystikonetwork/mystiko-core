@@ -38,16 +38,18 @@ mystiko.initialize = async ({
   mystiko.providers.connect();
   mystiko.contracts = new ContractPool(mystiko.config, mystiko.providers);
   mystiko.contracts.connect();
-  mystiko.deposits = new handler.DepositHandler(
-    mystiko.wallets,
-    mystiko.contracts,
-    mystiko.db,
-    mystiko.config,
-  );
   mystiko.notes = new handler.NoteHandler(
     mystiko.wallets,
     mystiko.accounts,
     mystiko.providers,
+    mystiko.db,
+    mystiko.config,
+  );
+  mystiko.deposits = new handler.DepositHandler(
+    mystiko.wallets,
+    mystiko.accounts,
+    mystiko.notes,
+    mystiko.contracts,
     mystiko.db,
     mystiko.config,
   );

@@ -5,21 +5,27 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { ContractPool } from '../../src/chain/contract.js';
 import { createDatabase } from '../../src/database';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
+import { AccountHandler } from '../../src/handler/accountHandler.js';
+import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { BridgeType, readFromFile } from '../../src/config';
 import { DepositStatus } from '../../src/model/deposit';
 import { MystikoABI } from '../../src/chain/abi.js';
+import txReceipt01 from './files/txReceipt01.json';
 
 class MockTransactionResponse {
-  constructor(errorMessage = undefined) {
+  constructor(errorMessage = undefined, expectedToAddress = undefined) {
     this.errorMessage = errorMessage;
     this.hash = toHex(ethers.utils.randomBytes(32));
+    this.expectedToAddress = expectedToAddress;
   }
   wait() {
     return new Promise((resolve, reject) => {
       if (!this.errorMessage) {
-        resolve({ transactionHash: this.hash });
+        txReceipt01.transactionHash = this.hash;
+        txReceipt01.to = this.expectedToAddress;
+        resolve(txReceipt01);
       } else {
         reject(this.errorMessage);
       }
@@ -94,7 +100,7 @@ class MockMystikoContract extends ethers.Contract {
       if (this.errorMessage) {
         reject(this.errorMessage);
       } else {
-        this.tx = new MockTransactionResponse();
+        this.tx = new MockTransactionResponse(undefined, this.address);
         resolve(this.tx);
       }
     });
@@ -130,6 +136,8 @@ let conf;
 let providerPool;
 let contractPool;
 let walletHandler;
+let accountHandler;
+let noteHandler;
 let depositHandler;
 const walletMasterSeed = 'awesomeMasterSeed';
 const walletPassword = 'P@ssw0rd';
@@ -140,8 +148,10 @@ beforeEach(async () => {
   providerPool = new ProviderPool(conf);
   providerPool.connect();
   contractPool = new ContractPool(conf, providerPool);
-  walletHandler = new WalletHandler(db);
-  depositHandler = new DepositHandler(walletHandler, contractPool, db, conf);
+  walletHandler = new WalletHandler(db, conf);
+  accountHandler = new AccountHandler(walletHandler, db, conf);
+  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, conf);
+  depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, conf);
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await contractPool.connect((address, abi, providerOrSigner) => {
     if (abi === MystikoABI.ERC20) {
@@ -286,6 +296,36 @@ test('test createDeposit loop error', async () => {
   await depositPromise;
   expect(deposit.errorMessage).toBe('error here');
   expect(deposit.status).toBe(DepositStatus.FAILED);
+});
+
+test('test auto import privateNote', async () => {
+  const account = await accountHandler.importAccountFromSecretKey(
+    walletPassword,
+    'account 1',
+    '038e95e5d94292956a3476342c16346b4b7033fa7f6827560dab890cb6eca1' +
+      'ab0aa2663250e332cbca03ff300dae0220ba029af87a2f1f166d29e9c4d102d87c',
+  );
+  const request = {
+    srcChainId: 1,
+    dstChainId: 1,
+    assetSymbol: 'USDT',
+    bridge: BridgeType.LOOP,
+    amount: 200,
+    shieldedAddress: account.shieldedAddress,
+  };
+  const contracts = contractPool.getDepositContracts(1, 1, 'USDT', BridgeType.LOOP);
+  contracts.asset._allowance['0x7dfb6962c9974bf6334ab587b77030515886e96f'][
+    '0x98ed94360cad67a76a53d8aa15905e52485b73d1'
+  ] = toDecimals(200, 18);
+  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
+  const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
+  await depositPromise;
+  const privateNote = noteHandler.getPrivateNote(1);
+  expect(deposit.errorMessage).toBe(undefined);
+  expect(privateNote).not.toBe(undefined);
+  deposit.commitmentHash = privateNote.commitmentHash;
+  await depositHandler._createPrivateNoteIfNecessary(deposit, txReceipt01);
+  expect(noteHandler.getPrivateNotes().length).toBe(1);
 });
 
 test('test query deposits', async () => {
