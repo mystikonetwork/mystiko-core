@@ -2,6 +2,10 @@ import BN from 'bn.js';
 import * as fastfile from 'fastfile';
 
 /**
+ * @external external:BN
+ * @see {@link https://github.com/indutny/bn.js/ BN}
+ */
+/**
  * @module module:mystiko/utils
  * @desc collection of utilization functions.
  */
@@ -15,7 +19,7 @@ export const BN_LEN = 32;
 /**
  * @memberOf module:mystiko/utils
  * @desc convert a BN instance to a bytes buffer.
- * @param {BN} bn an object of {@link https://github.com/indutny/bn.js/ bn.js}.
+ * @param {external:BN} bn an object of {@link external:BN}.
  * @returns {Buffer} @see {@link https://nodejs.org/api/buffer.html Node.js Buffer}
  */
 export function bnToFixedBytes(bn) {
@@ -93,7 +97,7 @@ export function toBuff(strData) {
  * @desc convert a number into big number with given decimals. This is useful for calling smart contract functions.
  * @param {number} amount number to be converted.
  * @param {number} decimals number of precision bits of converted big number.
- * @returns {BN} @see {@link https://github.com/indutny/bn.js/ bn.js}
+ * @returns {external:BN} a instance of {@link external:BN}
  */
 export function toDecimals(amount, decimals) {
   check(typeof amount === 'number', 'amount should be a number');
@@ -109,7 +113,7 @@ export function toDecimals(amount, decimals) {
 /**
  * @memberOf module:mystiko/utils
  * @desc convert an object into fixed length of hex string with padding start '0x'.
- * @param {string|number|Buffer|Uint8Array|BN} hex object to be converted.
+ * @param {string|number|Buffer|Uint8Array|external:BN} hex object to be converted.
  * @param {number} [length=32] length of the converted hex string (without leading '0x').
  * @returns {string} a hex string.
  * @throws Error if given type is not supported.
@@ -135,7 +139,7 @@ export function toFixedLenHex(hex, length = 32) {
 /**
  * @memberOf module:mystiko/utils
  * @desc convert an object into hex string with padding start '0x'.
- * @param {string|number|Buffer|Uint8Array|BN} hex object to be converted.
+ * @param {string|number|Buffer|Uint8Array|external:BN} hex object to be converted.
  * @returns {string} a hex string.
  * @throws Error if given type is not supported.
  */
@@ -162,7 +166,7 @@ export function toHex(hex) {
 /**
  * @memberOf module:mystiko/utils
  * @desc convert an object into fixed length of hex string *without* '0x'.
- * @param {string|number|Buffer|Uint8Array|BN} hex object to be converted.
+ * @param {string|number|Buffer|Uint8Array|external:BN} hex object to be converted.
  * @param {number} [length=32] length of the converted hex string.
  * @returns {string} a hex string.
  * @throws Error if given type is not supported.
@@ -188,7 +192,7 @@ export function toFixedLenHexNoPrefix(hex, length = 32) {
 /**
  * @memberOf module:mystiko/utils
  * @desc convert an object into hex string.
- * @param {string|number|Buffer|Uint8Array|BN} hex object to be converted.
+ * @param {string|number|Buffer|Uint8Array|external:BN} hex object to be converted.
  * @returns {string} a hex string.
  * @throws Error if given type is not supported.
  */

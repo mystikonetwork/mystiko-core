@@ -5,6 +5,11 @@ import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
+/**
+ * @class AccountHandler
+ * @extends Handler
+ * @desc handler class for Account related business logic
+ */
 export class AccountHandler extends Handler {
   constructor(walletHandler, db, config) {
     super(db, config);

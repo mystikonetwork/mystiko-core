@@ -12,6 +12,11 @@ import { AssetType, BridgeType } from '../config';
 import { ID_KEY } from '../model/common.js';
 import { OffChainNote } from '../model/note.js';
 
+/**
+ * @class DepositHandler
+ * @extends Handler
+ * @desc handler class for Deposit related business logic
+ */
 export class DepositHandler extends Handler {
   constructor(walletHandler, accountHandler, noteHandler, contractPool, db, config) {
     super(db, config);

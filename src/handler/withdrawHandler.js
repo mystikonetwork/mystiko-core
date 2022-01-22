@@ -12,6 +12,11 @@ import { Withdraw, WithdrawStatus } from '../model/withdraw.js';
 import { PrivateNoteStatus } from '../model/note.js';
 import { ID_KEY } from '../model/common';
 
+/**
+ * @class WithdrawHandler
+ * @extends Handler
+ * @desc handler class for Withdraw related business logic
+ */
 export class WithdrawHandler extends Handler {
   constructor(walletHandler, accountHandler, noteHandler, providerPool, contractPool, db, conf) {
     super(db, conf);

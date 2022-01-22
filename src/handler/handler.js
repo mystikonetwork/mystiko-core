@@ -1,7 +1,11 @@
 import { check, checkDefinedAndNotNull } from '../utils.js';
 import protocol from '../protocol/index.js';
-import { MystikoConfig } from '../config/mystikoConfig.js';
+import { MystikoConfig } from '../config';
 
+/**
+ * @class Handler
+ * @desc base Handler class for operating resources and implementing business logic.
+ */
 export class Handler {
   constructor(db, config) {
     checkDefinedAndNotNull(db, 'db cannot be null or undefined');
@@ -15,6 +19,10 @@ export class Handler {
     this.protocol = protocol;
   }
 
+  /**
+   * @desc save Loki database into persistent layer.
+   * @returns {Promise<?>} a promise object indicate the success or failure for this saving operation.
+   */
   saveDatabase() {
     let promiseResolve, promiseReject;
     const promise = new Promise((resolve, reject) => {

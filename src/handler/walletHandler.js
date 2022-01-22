@@ -3,6 +3,11 @@ import { ID_KEY } from '../model/common.js';
 import { Wallet } from '../model/wallet.js';
 import { check } from '../utils.js';
 
+/**
+ * @class WalletHandler
+ * @extends Handler
+ * @desc handler class for Wallet related business logic
+ */
 export class WalletHandler extends Handler {
   constructor(db, config) {
     super(db, config);

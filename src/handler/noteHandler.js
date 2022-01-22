@@ -9,6 +9,11 @@ import { ProviderPool } from '../chain/provider.js';
 import { BridgeType } from '../config';
 import { ID_KEY } from '../model/common.js';
 
+/**
+ * @class NoteHandler
+ * @extends Handler
+ * @desc handler class for PrivateNote related business logic
+ */
 export class NoteHandler extends Handler {
   constructor(walletHandler, accountHandler, providerPool, db, config) {
     super(db, config);

@@ -1,7 +1,20 @@
 import { ethers } from 'ethers';
-import { MystikoConfig } from '../config/mystikoConfig.js';
+import { MystikoConfig } from '../config';
 import { check } from '../utils.js';
 
+/**
+ * @external external:JsonRpcProvider
+ * @see {@link https://docs.ethers.io/v5/api/providers/jsonrpc-provider/ JsonRpcProvider}
+ */
+/**
+ * @external external:FallbackProvider
+ * @see {@link https://docs.ethers.io/v5/api/providers/jsonrpc-provider/ FallbackProvider}
+ */
+/**
+ * @class ProviderPool
+ * @desc a pool of JSON-RPC providers for different blockchains.
+ * @param {MystikoConfig} conf full configuration object of {@link MystikoConfig}.
+ */
 export class ProviderPool {
   constructor(conf) {
     check(conf instanceof MystikoConfig, 'conf should be MystikoConfig instance');
@@ -9,6 +22,12 @@ export class ProviderPool {
     this.providers = {};
   }
 
+  /**
+   * @desc setting up provider pool with given provider generator.
+   * If providerGenerator is not given, it will generate {@link external:JsonRpcProvider}
+   * wrapped with {@link external:FallbackProvider} to offer better availability.
+   * @param {Function} [providerGenerator] a function to generate JSON-RPC provider.
+   */
   connect(providerGenerator = undefined) {
     if (!providerGenerator) {
       providerGenerator = (rpcEndpoints) => {
@@ -23,6 +42,12 @@ export class ProviderPool {
     });
   }
 
+  /**
+   * @desc return the configured JSON-RPC provider for the given chain id.
+   * @param {number} chainId the requested blockchain chain id.
+   * @returns {external:Provider} a provider instance for querying the blockchain data.
+   * @throws {Error} if no provider was settled for the specified chain.
+   */
   getProvider(chainId) {
     check(typeof chainId === 'number', 'chainId should be a number');
     const provider = this.providers[chainId];
