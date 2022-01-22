@@ -74,6 +74,7 @@ export class BaseSigner {
       }
     }
     check(toHex(chainId) === (await this.chainId()), 'chain has not been switched');
+    await this.connect();
   }
 }
 
