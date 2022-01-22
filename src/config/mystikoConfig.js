@@ -5,6 +5,11 @@ import { check, readJsonFile } from '../utils.js';
 import { BaseBridgeConfig } from './bridgeConfig.js';
 import { CircuitConfig } from './circuitConfig.js';
 
+/**
+ * @class MystikoConfig
+ * @extends BaseConfig
+ * @desc configuration class for this library.
+ */
 export class MystikoConfig extends BaseConfig {
   constructor(rawConfig) {
     super(rawConfig);
@@ -18,23 +23,47 @@ export class MystikoConfig extends BaseConfig {
     this._validateConfig();
   }
 
+  /**
+   * @property {string} version
+   * @desc version of current configuration.
+   */
   get version() {
     return this.config['version'];
   }
 
+  /**
+   * @property {ChainConfig[]} chains
+   * @desc an array of current configured blockchain networks.
+   */
   get chains() {
     return Object.values(this.config['chains']);
   }
 
+  /**
+   * @property {CircuitConfig[]} circuits
+   * @desc an array of configured zero knowledge proof related resources.
+   */
   get circuits() {
     return Object.values(this.config['circuits']);
   }
 
+  /**
+   * @desc get the configuration of blockchain with given chainId.
+   * @param {number} chainId blockchain's chainId @see {@link https://chainlist.org/ ChainList}.
+   * @returns {ChainConfig} the config object of given blockchain. It returns undefined,
+   * if given chainId is not configured.
+   */
   getChainConfig(chainId) {
     check(typeof chainId === 'number' || chainId instanceof Number, 'chainId should be number or Number');
     return this.config['chains'][chainId];
   }
 
+  /**
+   * @desc get the supported peer chain configurations of the given chainId.
+   * @param {number} chainId blockchain's chainId @see {@link https://chainlist.org/ ChainList}.
+   * @returns {ChainConfig[]} an array of peer chain's configurations. It returns an empty array,
+   * if no peer chains are configured for given chainId.
+   */
   getPeerChains(chainId) {
     const chainConfig = this.getChainConfig(chainId);
     if (chainConfig) {
@@ -43,6 +72,13 @@ export class MystikoConfig extends BaseConfig {
     return [];
   }
 
+  /**
+   * @desc get the array of supported asset symbols with given source chain id and destination chain id.
+   * @param {number} srcChainId chain id of the source blockchain(from chain).
+   * @param {number} dstChainId chain id of the destination blockchain(to chain).
+   * @returns {string[]} an array of supported asset symbols. It returns an empty array,
+   * if no configured asset symbols are found for given srcChainId and dstChainId.
+   */
   getAssetSymbols(srcChainId, dstChainId) {
     const chainConfig = this.getChainConfig(srcChainId);
     if (chainConfig) {
@@ -51,6 +87,17 @@ export class MystikoConfig extends BaseConfig {
     return [];
   }
 
+  /**
+   * @desc get the array of supported cross-chain bridges with given source chain id, destination chain id and
+   * the symbol of asset.
+   * @param {number} srcChainId chain id of the source blockchain(from chain).
+   * @param {number} dstChainId chain id of the destination blockchain(to chain).
+   * @param {string} assetSymbol symbol of the asset. E.g. ETH/USDT/BNB
+   * @returns {BridgeType[]} an array of supported cross-chain bridges. It returns an empty array,
+   * if no configured cross-chain bridges are found for given srcChainId, dstChainId and assetSymbol.
+   * If srcChainId === dstChainId, it returns an empty array, because in this situation, it does not need a
+   * cross-chain bridge.
+   */
   getBridges(srcChainId, dstChainId, assetSymbol) {
     check(typeof srcChainId === 'number', 'type of srcChainId should be number');
     check(typeof dstChainId === 'number', 'type of dstChainId should be number');
@@ -69,12 +116,28 @@ export class MystikoConfig extends BaseConfig {
     return Object.values(bridges);
   }
 
+  /**
+   * @desc get the configuration of given cross-chain bridge.
+   * @param {BridgeType} bridgeType the type of cross-chain bridge.
+   * @returns {BaseBridgeConfig} configuration of the specified cross-chain bridge.
+   */
   getBridgeConfig(bridgeType) {
     check(typeof bridgeType === 'string', 'bridgeType should be string');
     check(isValidBridgeType(bridgeType), 'invalid bridge type');
     return this.config['bridges'][bridgeType];
   }
 
+  /**
+   * @desc get the configuration of the given combination of source chain id, destination chain id,
+   * asset symbol and cross-chain bridge. This method is useful for detecting the contract for the given
+   * user inputs.
+   * @param {number} srcChainId chain id of the source blockchain(from chain).
+   * @param {number} dstChainId chain id of the destination blockchain(to chain).
+   * @param {string} assetSymbol symbol of the asset. E.g. ETH/USDT/BNB
+   * @param {BridgeType} bridge the type of cross-chain bridge.
+   * @returns {ContractConfig} the found configuration of the contract.
+   * @throws {Error} if no configured contracts satisfy the given inputs.
+   */
   getContractConfig(srcChainId, dstChainId, assetSymbol, bridge) {
     check(typeof srcChainId === 'number', 'type of srcChainId should be number');
     check(typeof dstChainId === 'number', 'type of dstChainId should be number');
@@ -101,6 +164,11 @@ export class MystikoConfig extends BaseConfig {
     throw new Error('cannot find contract information with given parameters');
   }
 
+  /**
+   * @desc get the configuration of zero knowledge proof resources with given scheme name.
+   * @param {string} name name of supported zkp scheme.
+   * @returns {CircuitConfig} configuration of zkp scheme.
+   */
   getCircuitConfig(name) {
     check(typeof name === 'string', 'name should be string');
     return this.config['circuits'][name];
@@ -162,6 +230,11 @@ export class MystikoConfig extends BaseConfig {
   }
 }
 
+/**
+ * @memberOf module:mystiko/config
+ * @param {string} configFile file name of the configuration. It could be a URL or file system's path.
+ * @returns {Promise<MystikoConfig>}
+ */
 export async function readFromFile(configFile) {
   check(typeof configFile === 'string', 'configFile should be string');
   const rawConfig = await readJsonFile(configFile);
