@@ -35,7 +35,7 @@
           "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
           "peerChainId": 97,
           "peerContractAddress": "0x4489E7219df6aF8c5027121E04eAA60161926703",
-          "bridgeType": "loop",
+          "bridgeType": "poly",
           "circuits": "circom-1.0"
         }
       ]
@@ -77,7 +77,7 @@
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "peerChainId": 3,
           "peerContractAddress": "0xe90Da8A25C3dA881CE62429973268B3CB23Bf906",
-          "bridgeType": "loop",
+          "bridgeType": "poly",
           "circuits": "circom-1.0"
         }
       ]
