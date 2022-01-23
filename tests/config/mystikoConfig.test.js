@@ -1,5 +1,5 @@
-import { readFromFile } from '../../src/config/mystikoConfig.js';
-import { BridgeType } from '../../src/config/contractConfig.js';
+import { readFromFile } from '../../src/config';
+import { BridgeType } from '../../src/model';
 
 test('test getContractConfig', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');

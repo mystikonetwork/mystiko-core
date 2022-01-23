@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { Withdraw, WithdrawStatus } from '../../src/model/withdraw.js';
+import { Withdraw, WithdrawStatus } from '../../src/model';
 
 test('Test Withdraw getters/setters', () => {
   const withdraw = new Withdraw();

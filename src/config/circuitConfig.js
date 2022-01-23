@@ -3,6 +3,7 @@ import { BaseConfig } from './common.js';
 /**
  * @class CircuitConfig
  * @extends BaseConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc configuration class for the zero knowledge proof scheme resources.
  */
 export class CircuitConfig extends BaseConfig {

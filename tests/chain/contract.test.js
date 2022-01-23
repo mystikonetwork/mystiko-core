@@ -1,10 +1,10 @@
 import { ethers } from 'ethers';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
-import { ContractConfig } from '../../src/config/contractConfig.js';
+import { ContractConfig } from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { readJsonFile } from '../../src/utils.js';
-import { AssetType, BridgeType } from '../../src/config/contractConfig.js';
-import { readFromFile } from '../../src/config/mystikoConfig.js';
+import { AssetType, BridgeType } from '../../src/model';
+import { readFromFile } from '../../src/config';
 import { MystikoABI } from '../../src/chain/abi.js';
 
 class MockContract extends ethers.Contract {

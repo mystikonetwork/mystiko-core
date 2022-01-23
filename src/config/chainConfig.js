@@ -1,7 +1,8 @@
 import { ethers } from 'ethers';
 import { BaseConfig } from './common.js';
-import { ContractConfig, BridgeType } from './contractConfig.js';
+import { ContractConfig } from './contractConfig.js';
 import { check } from '../utils.js';
+import { BridgeType } from '../model';
 
 export const EXPLORER_TX_PLACEHOLDER = '%tx%';
 export const EXPLORER_DEFAULT_PREFIX = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
@@ -9,6 +10,7 @@ export const EXPLORER_DEFAULT_PREFIX = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
 /**
  * @class ChainConfig
  * @extends BaseConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc configuration class for blockchain network.
  */
 export class ChainConfig extends BaseConfig {

@@ -3,6 +3,7 @@ import { check } from '../utils.js';
 
 /**
  * @class BaseConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc common base class of configuration. It contains some useful helper functions.
  */
 export class BaseConfig {

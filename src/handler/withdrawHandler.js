@@ -55,8 +55,8 @@ export class WithdrawHandler extends Handler {
     check(contract, 'contract instance does not exist');
     const withdraw = new Withdraw();
     withdraw.chainId = privateNote.dstChainId;
-    withdraw.token = privateNote.dstToken;
-    withdraw.tokenAddress = privateNote.dstTokenAddress;
+    withdraw.token = privateNote.dstAsset;
+    withdraw.tokenAddress = privateNote.dstAssetAddress;
     withdraw.amount = privateNote.amount;
     withdraw.recipientAddress = recipientAddress;
     withdraw.walletId = wallet.id;
@@ -224,6 +224,7 @@ export class WithdrawHandler extends Handler {
     const txReceipt = await txResponse.wait();
     withdraw.transactionHash = txReceipt.transactionHash;
     await this._updateStatus(withdraw, WithdrawStatus.SUCCEEDED, statusCallback);
+    privateNote.withdrawTransactionHash = txReceipt.transactionHash;
     await this.noteHandler.updateStatus(privateNote, PrivateNoteStatus.SPENT);
   }
 

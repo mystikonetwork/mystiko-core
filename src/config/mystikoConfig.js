@@ -1,5 +1,5 @@
 import { BaseConfig } from './common.js';
-import { BridgeType, isValidBridgeType } from './contractConfig.js';
+import { BridgeType, isValidBridgeType } from '../model';
 import { ChainConfig } from './chainConfig.js';
 import { check, readJsonFile } from '../utils.js';
 import { BaseBridgeConfig } from './bridgeConfig.js';
@@ -8,6 +8,7 @@ import { CircuitConfig } from './circuitConfig.js';
 /**
  * @class MystikoConfig
  * @extends BaseConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc configuration class for this library.
  */
 export class MystikoConfig extends BaseConfig {
@@ -118,7 +119,7 @@ export class MystikoConfig extends BaseConfig {
 
   /**
    * @desc get the configuration of given cross-chain bridge.
-   * @param {BridgeType} bridgeType the type of cross-chain bridge.
+   * @param {module:mystiko/models.BridgeType} bridgeType the type of cross-chain bridge.
    * @returns {BaseBridgeConfig} configuration of the specified cross-chain bridge.
    */
   getBridgeConfig(bridgeType) {
@@ -134,7 +135,7 @@ export class MystikoConfig extends BaseConfig {
    * @param {number} srcChainId chain id of the source blockchain(from chain).
    * @param {number} dstChainId chain id of the destination blockchain(to chain).
    * @param {string} assetSymbol symbol of the asset. E.g. ETH/USDT/BNB
-   * @param {BridgeType} bridge the type of cross-chain bridge.
+   * @param {module:mystiko/models.BridgeType} bridge the type of cross-chain bridge.
    * @returns {ContractConfig} the found configuration of the contract.
    * @throws {Error} if no configured contracts satisfy the given inputs.
    */
@@ -231,7 +232,7 @@ export class MystikoConfig extends BaseConfig {
 }
 
 /**
- * @memberOf module:mystiko/config
+ * @function module:mystiko/config.readFromFile
  * @param {string} configFile file name of the configuration. It could be a URL or file system's path.
  * @returns {Promise<MystikoConfig>}
  */

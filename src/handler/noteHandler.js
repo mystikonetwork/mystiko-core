@@ -6,7 +6,7 @@ import { AccountHandler } from './accountHandler.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 import { isValidPrivateNoteStatus, OffChainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
 import { ProviderPool } from '../chain/provider.js';
-import { BridgeType } from '../config';
+import { BridgeType } from '../model';
 import { ID_KEY } from '../model/common.js';
 
 /**
@@ -113,8 +113,8 @@ export class NoteHandler extends Handler {
     const privateNote = new PrivateNote();
     privateNote.srcChainId = chainId;
     privateNote.srcTransactionHash = txReceipt.transactionHash;
-    privateNote.srcToken = contractConfig.assetSymbol;
-    privateNote.srcTokenAddress = contractConfig.assetAddress;
+    privateNote.srcAsset = contractConfig.assetSymbol;
+    privateNote.srcAssetAddress = contractConfig.assetAddress;
     privateNote.srcProtocolAddress = txReceipt.to;
     privateNote.amount = new BN(amount.toString());
     privateNote.bridge = contractConfig.bridgeType;
@@ -122,14 +122,14 @@ export class NoteHandler extends Handler {
       const peerChainConfig = this.config.getChainConfig(contractConfig.peerChainId);
       const peerContractConfig = peerChainConfig.getContract(contractConfig.peerContractAddress);
       privateNote.dstChainId = contractConfig.peerChainId;
-      privateNote.dstToken = peerContractConfig.assetSymbol;
-      privateNote.dstTokenAddress = peerContractConfig.assetAddress;
+      privateNote.dstAsset = peerContractConfig.assetSymbol;
+      privateNote.dstAssetAddress = peerContractConfig.assetAddress;
       privateNote.dstProtocolAddress = contractConfig.peerContractAddress;
     } else {
       privateNote.dstChainId = chainId;
       privateNote.dstTransactionHash = txReceipt.transactionHash;
-      privateNote.dstToken = contractConfig.assetSymbol;
-      privateNote.dstTokenAddress = contractConfig.assetAddress;
+      privateNote.dstAsset = contractConfig.assetSymbol;
+      privateNote.dstAssetAddress = contractConfig.assetAddress;
       privateNote.dstProtocolAddress = txReceipt.to;
     }
     privateNote.commitmentHash = new BN(toHexNoPrefix(commitmentHash), 16);

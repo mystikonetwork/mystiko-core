@@ -8,7 +8,7 @@ import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus } from '../model/deposit.js';
-import { AssetType, BridgeType } from '../config';
+import { AssetType, BridgeType } from '../model';
 import { ID_KEY } from '../model/common.js';
 import { OffChainNote } from '../model/note.js';
 

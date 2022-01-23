@@ -9,7 +9,7 @@ import { MystikoConfig, readFromFile, DefaultTestnetConfig, DefaultMainnetConfig
 import { createDatabase } from './database.js';
 import handler from './handler';
 import * as utils from './utils.js';
-import models from './model';
+import * as models from './model';
 import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';
 import { MetaMaskSigner } from './chain/signer.js';
@@ -21,10 +21,11 @@ import { MetaMaskSigner } from './chain/signer.js';
  * @property {AccountHandler} accounts handler of Account related business logic
  * @property {MystikoConfig} config loaded configuration instance
  * @property {ContractPool} contracts pool of wrapped smart contract instances.
- * @property {module:mystiko/db} db instance of wrapped database handlers.
+ * @property {module:mystiko/db.WrappedDb} db instance of wrapped database handlers.
  * @property {Object} db.adapter instance of the persistent database adapter.
  * @property {DepositHandler} deposits handler of Deposit related business logic.
  * @property {Object} ethers {@link https://docs.ethers.io/v5/ ethers.js} instance.
+ * @property {module:mystiko/models} models a collection Mystiko data models and helper functions.
  * @property {NoteHandler} notes handler of PrivateNote related business logic.
  * @property {ProviderPool} providers pool of configured JSON-RPC providers for different blockchains.
  * @property {Object} signers object including supported transaction signers.
@@ -37,7 +38,7 @@ const mystiko = { utils, models, ethers };
 /**
  * Initialize resources to make Mystiko wallet work.
  * Please call this function at the startup of your application.
- * @memberOf module:mystiko
+ * @function module:mystiko.initialize
  * @param {Object} [options={}] initialization options.
  * @param {boolean} [options.isTestnet=true] whether this application is running with Testnet environment.
  * @param {string|MystikoConfig} [options.conf] config object, it could be a string represents path

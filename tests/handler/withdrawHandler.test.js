@@ -10,9 +10,7 @@ import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { MystikoABI } from '../../src/chain/abi.js';
-import { WithdrawStatus } from '../../src/model/withdraw.js';
-import { PrivateNoteStatus } from '../../src/model/note.js';
-import { ID_KEY } from '../../src/model/common.js';
+import { WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../../src/model';
 import txReceipt02 from './files/txReceipt02.json';
 
 class MockTransactionResponse {
@@ -181,6 +179,7 @@ test('test withdraw basic', async () => {
   expect(withdraw.walletId).toBe(1);
   expect(withdraw.privateNoteId).toBe(privateNote.id);
   expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
+  expect(privateNote.withdrawTransactionHash).toBe(withdraw.transactionHash);
   expect(privateNote.status).toBe(PrivateNoteStatus.SPENT);
   await expect(withdrawHandler.createWithdraw(walletPassword, request, signer, cb)).rejects.toThrow();
   privateNote.status = PrivateNoteStatus.IMPORTED;

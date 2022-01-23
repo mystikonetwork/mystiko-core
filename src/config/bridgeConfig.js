@@ -1,11 +1,12 @@
 import { BaseConfig } from './common.js';
 import { EXPLORER_TX_PLACEHOLDER } from './chainConfig.js';
 import { check, toHexNoPrefix } from '../utils.js';
-import { isValidBridgeType, BridgeType } from './contractConfig.js';
+import { BridgeType, isValidBridgeType } from '../model';
 
 /**
  * @class BaseBridgeConfig
  * @extends BaseConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc base class of cross-chain bridge's configuration.
  */
 export class BaseBridgeConfig extends BaseConfig {
@@ -25,7 +26,7 @@ export class BaseBridgeConfig extends BaseConfig {
   }
 
   /**
-   * @property {BridgeType} type
+   * @property {module:mystiko/models.BridgeType} type
    * @desc the type of the configured cross-chain bridge.
    */
   get type() {
@@ -48,6 +49,7 @@ export class BaseBridgeConfig extends BaseConfig {
 /**
  * @class PolyBridgeConfig
  * @extends BaseBridgeConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc configuration class for Poly cross-chain bridge.
  */
 export class PolyBridgeConfig extends BaseBridgeConfig {

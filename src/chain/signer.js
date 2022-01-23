@@ -162,7 +162,7 @@ export class MetaMaskSigner extends BaseSigner {
 }
 
 /**
- * @memberOf module:mystiko/chain
+ * @function module:mystiko/chain.checkSigner
  * @desc check whether the given signer satisfy the given chain id, and switch to the given chain id if possible.
  * @param {BaseSigner} signer the {@link BaseSigner} instance for checking.
  * @param {number} chainId id of the blockchain to be sending transaction to.

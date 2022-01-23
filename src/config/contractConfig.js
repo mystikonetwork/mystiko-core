@@ -1,28 +1,7 @@
 import { BaseConfig } from './common.js';
 import { check } from '../utils.js';
 import { MystikoABI } from '../chain/abi.js';
-
-/**
- * @typedef BridgeType
- * @property {string} LOOP a loop bridge indicates no cross-chain needed.
- * The deposits and withdraws happens on the same blockchain.
- * @property {string} POLY the {@link https://poly.network Poly Bridge} cross-chain network.
- */
-export const BridgeType = {
-  LOOP: 'loop',
-  POLY: 'poly',
-};
-
-/**
- * @typedef AssetType
- * @property {string} ERC20 the {@link https://ethereum.org/en/developers/docs/standards/tokens/erc-20/ ERC20 Token}
- * standard.
- * @property {string} MAIN main asset type of the blockchains, e.g. ETH/BNB
- */
-export const AssetType = {
-  ERC20: 'erc20',
-  MAIN: 'main',
-};
+import { AssetType, BridgeType, isValidAssetType, isValidBridgeType } from '../model';
 
 const AbiIndex = {
   [AssetType.ERC20]: {
@@ -36,28 +15,9 @@ const AbiIndex = {
 };
 
 /**
- * @memberOf module:mystiko/config
- * @desc check whether given type is one of the supported bridge types.
- * @param {string} type bridge type to be checked.
- * @returns {boolean} true if the type is supported, otherwise returns false.
- */
-export function isValidBridgeType(type) {
-  return Object.values(BridgeType).indexOf(type) !== -1;
-}
-
-/**
- * @memberOf module:mystiko/config
- * @desc check whether given type is one of the supported asset types.
- * @param {string} type bridge type to be checked.
- * @returns {boolean} true if the type is supported, otherwise returns false.
- */
-export function isValidAssetType(type) {
-  return Object.values(AssetType).indexOf(type) !== -1;
-}
-
-/**
  * @class ContractConfig
  * @extends BaseConfig
+ * @param {Object} rawConfig raw configuration object.
  * @desc configuration class of the deployed smart contracts of the Mystiko core protocol.
  */
 export class ContractConfig extends BaseConfig {
@@ -89,7 +49,7 @@ export class ContractConfig extends BaseConfig {
   }
 
   /**
-   * @property {BridgeType} bridgeType
+   * @property {module:mystiko/models.BridgeType} bridgeType
    * @desc the supported cross-chain bridge type of this configured smart contract.
    */
   get bridgeType() {
@@ -105,7 +65,7 @@ export class ContractConfig extends BaseConfig {
   }
 
   /**
-   * @property {AssetType} assetType
+   * @property {module:mystiko/models.AssetType} assetType
    * @desc the type of the supported asset in this configured smart contract.
    */
   get assetType() {

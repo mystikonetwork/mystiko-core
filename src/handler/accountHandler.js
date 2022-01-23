@@ -8,6 +8,9 @@ import { check, toBuff, toHexNoPrefix } from '../utils.js';
 /**
  * @class AccountHandler
  * @extends Handler
+ * @param {WalletHandler} walletHandler instance of {@link WalletHandler}.
+ * @param {module:mystiko/db.WrappedDb} db instance of {@link WrappedDb}.
+ * @param {MystikoConfig} config instance of {@link MystikoConfig}.
  * @desc handler class for Account related business logic
  */
 export class AccountHandler extends Handler {
@@ -17,12 +20,23 @@ export class AccountHandler extends Handler {
     this.walletHandler = walletHandler;
   }
 
+  /**
+   * @desc get all current managed {@link Account} as an array from the database.
+   * @returns {Account[]} an array of {@link Account}.
+   */
   getAccounts() {
     const wallet = this.walletHandler.checkCurrentWallet();
     const rawAccounts = this.db.accounts.find({ walletId: wallet.id });
     return rawAccounts.map((account) => new Account(account));
   }
 
+  /**
+   * @desc get {@link Account} based on the given query.
+   * @param {number|string} query if query is a number, it searches the database by using the query as id.
+   * If query is a string, and it is a valid shielded address format, it searches the database by using the
+   * query as {@link Account#shieldedAddress}.
+   * @returns {Account|undefined}
+   */
   getAccount(query) {
     let account;
     if (typeof query === 'number') {
