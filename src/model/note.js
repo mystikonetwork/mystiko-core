@@ -255,7 +255,7 @@ export class PrivateNote extends BaseModel {
 
   /**
    * @property {number} walletId
-   * @desc the associated wallet id of the underlying deposit.
+   * @desc the associated {@link Wallet#id} of the underlying deposit.
    */
   get walletId() {
     return this.data['walletId'];

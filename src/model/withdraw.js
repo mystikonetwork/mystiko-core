@@ -2,11 +2,21 @@ import BN from 'bn.js';
 import { check } from '../utils.js';
 import { BaseModel } from './common.js';
 
+/**
+ * @class Withdraw
+ * @extends BaseModel
+ * @param {Object} [data={}] raw data of the Account model.
+ * @desc data model for storing withdrawal transaction data.
+ */
 export class Withdraw extends BaseModel {
   constructor(data = {}) {
     super(data);
   }
 
+  /**
+   * @property {number} chainId
+   * @desc the destination chain id where this withdrawal transaction was created.
+   */
   get chainId() {
     return this.data['chainId'];
   }
@@ -16,26 +26,39 @@ export class Withdraw extends BaseModel {
     this.data['chainId'] = id;
   }
 
-  get token() {
-    return this.data['token'];
+  /**
+   * @property {string} asset
+   * @desc the asset symbol of this withdrawal transaction.
+   */
+  get asset() {
+    return this.data['asset'];
   }
 
-  set token(t) {
+  set asset(t) {
     check(typeof t === 'string', 'token should be instance of string');
-    this.data['token'] = t;
+    this.data['asset'] = t;
   }
 
-  get tokenAddress() {
-    return this.data['tokenAddress'];
+  /**
+   * @property {string} assetAddress
+   * @desc the asset address of this withdrawal transaction.
+   */
+  get assetAddress() {
+    return this.data['assetAddress'];
   }
 
-  set tokenAddress(address) {
+  set assetAddress(address) {
     if (address) {
       check(typeof address === 'string', 'address should be instance of string');
     }
-    this.data['tokenAddress'] = address;
+    this.data['assetAddress'] = address;
   }
 
+  /**
+   * @property {external:BN} merkleRootHash
+   * @desc the calculated merkle root hash when this withdrawal transaction was created.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get merkleRootHash() {
     const raw = this.data['merkleRootHash'];
     return raw ? new BN(raw) : undefined;
@@ -46,6 +69,11 @@ export class Withdraw extends BaseModel {
     this.data['merkleRootHash'] = hash.toString();
   }
 
+  /**
+   * @property {external:BN} serialNumber
+   * @desc the calculated serial number for the deposit which this withdrawal transaction being spending.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get serialNumber() {
     const raw = this.data['serialNumber'];
     return raw ? new BN(raw) : undefined;
@@ -56,6 +84,11 @@ export class Withdraw extends BaseModel {
     this.data['serialNumber'] = sn.toString();
   }
 
+  /**
+   * @property {external:BN} amount
+   * @desc the amount of asset for this withdrawal transaction.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get amount() {
     const raw = this.data['amount'];
     return raw ? new BN(raw) : undefined;
@@ -66,6 +99,10 @@ export class Withdraw extends BaseModel {
     this.data['amount'] = amnt.toString();
   }
 
+  /**
+   * @property {string} recipientAddress
+   * @desc the recipient address of this withdrawal transaction.
+   */
   get recipientAddress() {
     return this.data['recipientAddress'];
   }
@@ -75,6 +112,10 @@ export class Withdraw extends BaseModel {
     this.data['recipientAddress'] = address;
   }
 
+  /**
+   * @property {string} transactionHash
+   * @desc the transaction hash of this withdrawal transaction after it is submitted.
+   */
   get transactionHash() {
     return this.data['transactionHash'];
   }
@@ -84,6 +125,10 @@ export class Withdraw extends BaseModel {
     this.data['transactionHash'] = hash;
   }
 
+  /**
+   * @property {number} walletId
+   * @desc the associated {@link Wallet#id} of this withdrawal transaction.
+   */
   get walletId() {
     return this.data['walletId'];
   }
@@ -93,6 +138,10 @@ export class Withdraw extends BaseModel {
     this.data['walletId'] = id;
   }
 
+  /**
+   * @property {string} shieldedAddress
+   * @desc the shielded address of this withdrawal transaction when it uses to calculate proofs.
+   */
   get shieldedAddress() {
     return this.data['shieldedAddress'];
   }
@@ -102,6 +151,10 @@ export class Withdraw extends BaseModel {
     this.data['shieldedAddress'] = address;
   }
 
+  /**
+   * @property {number} privateNoteId
+   * @desc the associated {@link PrivateNote#id} of this withdrawal transaction.
+   */
   get privateNoteId() {
     return this.data['privateNoteId'];
   }
@@ -111,6 +164,10 @@ export class Withdraw extends BaseModel {
     this.data['privateNoteId'] = id;
   }
 
+  /**
+   * @property {module:mystiko/models.WithdrawStatus} status
+   * @desc status of this withdrawal transaction.
+   */
   get status() {
     return this.data['status'];
   }
@@ -120,6 +177,11 @@ export class Withdraw extends BaseModel {
     this.data['status'] = s;
   }
 
+  /**
+   * @property {string|undefined} errorMessage
+   * @desc error message during the execution of this withdrawal transaction.
+   * If the status is SUCCEEDED, this field is undefined.
+   */
   get errorMessage() {
     return this.data['errorMessage'];
   }
@@ -130,6 +192,20 @@ export class Withdraw extends BaseModel {
   }
 }
 
+/**
+ * @typedef WithdrawStatus
+ * @name module:mystiko/models.WithdrawStatus
+ * @desc status enums of the withdrawal transactions.
+ * @property {string} INIT this status will be set immediately after the Withdraw object
+ * is created and saved to database.
+ * @property {string} GENERATING_PROOF this status will be set when zkSnark proofs are being generated.
+ * @property {string} PENDING this status will be set after the withdrawal transaction is successfully
+ * submitted to the destination blockchain.
+ * @property {string} SUCCEEDED this status will be set after the withdrawal transaction
+ * is successfully confirmed on the destination blockchain.
+ * @property {string} FAILED this status will be set after seeing any errors raised during the whole
+ * lifecycle of this withdrawal transaction.
+ */
 export const WithdrawStatus = {
   INIT: 'init',
   GENERATING_PROOF: 'generatingProof',
@@ -138,6 +214,13 @@ export const WithdrawStatus = {
   FAILED: 'failed',
 };
 Object.freeze(WithdrawStatus);
+
+/**
+ * @function module:mystiko/models.isValidWithdrawStatus
+ * @desc check whether given status string is a valid {@link module:mystiko/models.WithdrawStatus}.
+ * @param {string} status
+ * @returns {boolean} true if {@link module:mystiko/models.WithdrawStatus} contains it, otherwise it returns false.
+ */
 export function isValidWithdrawStatus(status) {
   return Object.values(WithdrawStatus).includes(status);
 }

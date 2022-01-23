@@ -1,5 +1,5 @@
 import { check, checkDefinedAndNotNull } from '../utils.js';
-import protocol from '../protocol/index.js';
+import * as protocol from '../protocol';
 import { MystikoConfig } from '../config';
 
 /**
@@ -16,6 +16,10 @@ export class Handler {
       this.config = new MystikoConfig({ version: '1.0' });
     }
     this.db = db;
+    /**
+     * @property {module:mystiko/protocol/default} protocol
+     * @desc default implementation of Mystiko protocol
+     */
     this.protocol = protocol;
   }
 

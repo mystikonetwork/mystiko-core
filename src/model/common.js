@@ -1,4 +1,4 @@
-import protocol from '../protocol/index.js';
+import * as protocol from '../protocol';
 
 /**
  * @memberOf module:mystiko/models
