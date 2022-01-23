@@ -1,11 +1,11 @@
 import BN from 'bn.js';
-import { Withdraw, WithdrawStatus } from '../../src/model/withdraw.js';
+import { Withdraw, WithdrawStatus } from '../../src/model';
 
 test('Test Withdraw getters/setters', () => {
   const withdraw = new Withdraw();
   expect(withdraw.chainId).toBe(undefined);
-  expect(withdraw.token).toBe(undefined);
-  expect(withdraw.tokenAddress).toBe(undefined);
+  expect(withdraw.asset).toBe(undefined);
+  expect(withdraw.assetAddress).toBe(undefined);
   expect(withdraw.merkleRootHash).toBe(undefined);
   expect(withdraw.serialNumber).toBe(undefined);
   expect(withdraw.amount).toBe(undefined);
@@ -19,10 +19,10 @@ test('Test Withdraw getters/setters', () => {
 
   withdraw.chainId = 1;
   expect(withdraw.chainId).toBe(1);
-  withdraw.token = 'USDT';
-  expect(withdraw.token).toBe('USDT');
-  withdraw.tokenAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
-  expect(withdraw.tokenAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
+  withdraw.asset = 'USDT';
+  expect(withdraw.asset).toBe('USDT');
+  withdraw.assetAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
+  expect(withdraw.assetAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
   withdraw.merkleRootHash = new BN(
     '19447354833770870638524875755086108986351532686253409466340778588798721438274',
   );
@@ -53,6 +53,6 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
   withdraw.errorMessage = 'error';
   expect(withdraw.errorMessage).toBe('error');
-  withdraw.tokenAddress = undefined;
-  expect(withdraw.tokenAddress).toBe(undefined);
+  withdraw.assetAddress = undefined;
+  expect(withdraw.assetAddress).toBe(undefined);
 });

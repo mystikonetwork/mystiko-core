@@ -1,13 +1,12 @@
 import { ethers } from 'ethers';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { createDatabase } from '../../src/database.js';
-import { BridgeType, readFromFile } from '../../src/config';
+import { readFromFile } from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { toDecimals, toHexNoPrefix } from '../../src/utils.js';
-import { OffChainNote, PrivateNoteStatus } from '../../src/model/note.js';
-import { ID_KEY } from '../../src/model/common.js';
+import { OffChainNote, ID_KEY, PrivateNoteStatus, BridgeType } from '../../src/model';
 import txReceipt01 from './files/txReceipt01.json';
 import txReceipt02 from './files/txReceipt02.json';
 
@@ -61,8 +60,8 @@ test('test importFromOffChainNote basic', async () => {
   expect(privateNote.srcTransactionHash).toBe(
     '0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac',
   );
-  expect(privateNote.srcToken).toBe('USDT');
-  expect(privateNote.srcTokenAddress).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
+  expect(privateNote.srcAsset).toBe('USDT');
+  expect(privateNote.srcAssetAddress).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
   expect(privateNote.srcProtocolAddress).toBe('0x98ed94360cad67a76a53d8aa15905e52485b73d1');
   expect(privateNote.amount.toString()).toBe(toDecimals(100, 18).toString());
   expect(privateNote.bridge).toBe(BridgeType.LOOP);
@@ -70,8 +69,8 @@ test('test importFromOffChainNote basic', async () => {
   expect(privateNote.dstTransactionHash).toBe(
     '0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac',
   );
-  expect(privateNote.dstToken).toBe('USDT');
-  expect(privateNote.dstTokenAddress).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
+  expect(privateNote.dstAsset).toBe('USDT');
+  expect(privateNote.dstAssetAddress).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
   expect(privateNote.dstProtocolAddress).toBe('0x98ed94360cad67a76a53d8aa15905e52485b73d1');
   expect(privateNote.commitmentHash.toString()).toBe(
     '6817961672086967550842806257390624158626823691800905067457884646190248540286',
@@ -98,14 +97,14 @@ test('test importFromOffChainNote duplicate', async () => {
   providerPool.connect(() => new MockProvider(txReceipt02));
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, offChainNote);
   expect(privateNote.dstChainId).toBe(56);
-  expect(privateNote.dstToken).toBe('USDT');
-  expect(privateNote.dstTokenAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
+  expect(privateNote.dstAsset).toBe('USDT');
+  expect(privateNote.dstAssetAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
   expect(privateNote.dstProtocolAddress).toBe('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
   await expect(noteHandler.importFromOffChainNote(walletPassword, offChainNote)).rejects.toThrow();
 });
 
 test('test importFromOffChainNote no authority', async () => {
-  await accountHandler.removeAccount(1);
+  await accountHandler.removeAccount(walletPassword, 1);
   await accountHandler.addAccount(walletPassword, 'account 2');
   const note =
     '{"chainId":1,"transactionHash":' +

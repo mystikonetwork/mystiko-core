@@ -1,23 +1,10 @@
-import { BaseModel, ID_KEY } from './common.js';
-import { Account } from './account.js';
-import { Deposit, DepositStatus, isValidDepositStatus } from './deposit.js';
-import { OffChainNote, PrivateNote, PrivateNoteStatus, isValidPrivateNoteStatus } from './note.js';
-import { Wallet } from './wallet.js';
-import { Withdraw, WithdrawStatus, isValidWithdrawStatus } from './withdraw.js';
-
-export default {
-  ID_KEY,
-  BaseModel,
-  Account,
-  Deposit,
-  DepositStatus,
-  OffChainNote,
-  PrivateNote,
-  PrivateNoteStatus,
-  Wallet,
-  Withdraw,
-  WithdrawStatus,
-  isValidDepositStatus,
-  isValidPrivateNoteStatus,
-  isValidWithdrawStatus,
-};
+/**
+ * @module mystiko/models
+ * @desc a collection of data models and helper functions.
+ */
+export { BaseModel, ID_KEY, AssetType, BridgeType, isValidAssetType, isValidBridgeType } from './common.js';
+export { Account } from './account.js';
+export { Deposit, DepositStatus, isValidDepositStatus } from './deposit.js';
+export { OffChainNote, PrivateNote, PrivateNoteStatus, isValidPrivateNoteStatus } from './note.js';
+export { Wallet } from './wallet.js';
+export { Withdraw, WithdrawStatus, isValidWithdrawStatus } from './withdraw.js';

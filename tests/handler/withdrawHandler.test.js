@@ -10,9 +10,7 @@ import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { MystikoABI } from '../../src/chain/abi.js';
-import { WithdrawStatus } from '../../src/model/withdraw.js';
-import { PrivateNoteStatus } from '../../src/model/note.js';
-import { ID_KEY } from '../../src/model/common.js';
+import { WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../../src/model';
 import txReceipt02 from './files/txReceipt02.json';
 
 class MockTransactionResponse {
@@ -174,13 +172,14 @@ test('test withdraw basic', async () => {
   expect(withdraw.errorMessage).toBe(undefined);
   expect(cbCount).toBe(3);
   expect(withdraw.chainId).toBe(56);
-  expect(withdraw.token).toBe('USDT');
-  expect(withdraw.tokenAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
+  expect(withdraw.asset).toBe('USDT');
+  expect(withdraw.assetAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
   expect(withdraw.amount.toString()).toBe(toDecimals(100, 18).toString());
   expect(withdraw.recipientAddress).toBe('0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065');
   expect(withdraw.walletId).toBe(1);
   expect(withdraw.privateNoteId).toBe(privateNote.id);
   expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
+  expect(privateNote.withdrawTransactionHash).toBe(withdraw.transactionHash);
   expect(privateNote.status).toBe(PrivateNoteStatus.SPENT);
   await expect(withdrawHandler.createWithdraw(walletPassword, request, signer, cb)).rejects.toThrow();
   privateNote.status = PrivateNoteStatus.IMPORTED;

@@ -2,11 +2,21 @@ import BN from 'bn.js';
 import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 
+/**
+ * @class Deposit
+ * @extends BaseModel
+ * @param {Object} [data={}] raw data of the Account model.
+ * @desc data model for storing deposit transaction data.
+ */
 export class Deposit extends BaseModel {
   constructor(data = {}) {
     super(data);
   }
 
+  /**
+   * @property {number} srcChainId
+   * @desc the source chain id where this deposit was created.
+   */
   get srcChainId() {
     return this.data['srcChainId'];
   }
@@ -16,6 +26,12 @@ export class Deposit extends BaseModel {
     this.data['srcChainId'] = id;
   }
 
+  /**
+   * @property {number} dstChainId
+   * @desc the destination chain id where this deposit was created.
+   * If the {@link PrivateNote#bridge} is loop, this field equals
+   * {@link PrivateNote#srcChainId}.
+   */
   get dstChainId() {
     return this.data['dstChainId'];
   }
@@ -25,6 +41,10 @@ export class Deposit extends BaseModel {
     this.data['dstChainId'] = id;
   }
 
+  /**
+   * @property {module:mystiko/models.BridgeType} bridge
+   * @desc the type of cross-chain for this deposit.
+   */
   get bridge() {
     return this.data['bridge'];
   }
@@ -34,6 +54,10 @@ export class Deposit extends BaseModel {
     this.data['bridge'] = b;
   }
 
+  /**
+   * @property {string} asset
+   * @desc the asset symbol of this deposit on the source chain.
+   */
   get asset() {
     return this.data['asset'];
   }
@@ -43,6 +67,11 @@ export class Deposit extends BaseModel {
     this.data['asset'] = a;
   }
 
+  /**
+   * @property {external:BN} amount
+   * @desc the amount of asset this deposit.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get amount() {
     const raw = this.data['amount'];
     return raw ? new BN(raw) : undefined;
@@ -53,6 +82,11 @@ export class Deposit extends BaseModel {
     this.data['amount'] = amnt.toString();
   }
 
+  /**
+   * @property {external:BN} commitmentHash
+   * @desc hash of the commitment of this deposit.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get commitmentHash() {
     const raw = this.data['commitmentHash'];
     return raw ? new BN(raw) : undefined;
@@ -63,6 +97,11 @@ export class Deposit extends BaseModel {
     this.data['commitmentHash'] = hash.toString();
   }
 
+  /**
+   * @property {external:BN} randomS
+   * @desc the random S parameter of this deposit for generating commitment.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get randomS() {
     const raw = this.data['randomS'];
     return raw ? new BN(raw) : undefined;
@@ -73,6 +112,11 @@ export class Deposit extends BaseModel {
     this.data['randomS'] = s.toString();
   }
 
+  /**
+   * @property {external:BN} hashK
+   * @desc the intermediate hash K of this deposit for generating commitment.
+   * Use {@link module:mystiko/utils.toString} to convert it to string.
+   */
   get hashK() {
     const raw = this.data['hashK'];
     return raw ? new BN(raw) : undefined;
@@ -83,6 +127,11 @@ export class Deposit extends BaseModel {
     this.data['hashK'] = k.toString();
   }
 
+  /**
+   * @property {Buffer} privateNote
+   * @desc encrypted on chain private note data of this deposit.
+   * Use {@link module:mystiko/utils.toHex} to convert it to hex string.
+   */
   get privateNote() {
     const raw = this.data['privateNote'];
     return raw ? toBuff(raw) : undefined;
@@ -93,6 +142,11 @@ export class Deposit extends BaseModel {
     this.data['privateNote'] = toHexNoPrefix(note);
   }
 
+  /**
+   * @property {string|undefined} assetApproveTxHash
+   * @desc the transaction hash of asset approving if the deposited asset type is not main asset.
+   * Otherwise, it is undefined.
+   */
   get assetApproveTxHash() {
     return this.data['assetApproveTxHash'];
   }
@@ -102,6 +156,10 @@ export class Deposit extends BaseModel {
     this.data['assetApproveTxHash'] = hash;
   }
 
+  /**
+   * @property {string} srcTxHash
+   * @desc the transaction hash of on the source chain.
+   */
   get srcTxHash() {
     return this.data['srcTxHash'];
   }
@@ -111,6 +169,11 @@ export class Deposit extends BaseModel {
     this.data['srcTxHash'] = hash;
   }
 
+  /**
+   * @property {string|undefined} bridgeTxHash
+   * @desc the transaction hash of on the cross-chain bridge if it is available.
+   * If the bridge type of this deposit is loop, then this field is undefined.
+   */
   get bridgeTxHash() {
     return this.data['bridgeTxHash'];
   }
@@ -120,6 +183,11 @@ export class Deposit extends BaseModel {
     this.data['bridgeTxHash'] = hash;
   }
 
+  /**
+   * @property {string} dstTxHash
+   * @desc the transaction hash of on the destination chain.
+   * If the bridge type of this deposit is loop, then this field is equal to {@link Deposit#srcTxHash}.
+   */
   get dstTxHash() {
     return this.data['dstTxHash'];
   }
@@ -129,6 +197,10 @@ export class Deposit extends BaseModel {
     this.data['dstTxHash'] = hash;
   }
 
+  /**
+   * @property {number} walletId
+   * @desc the associated {@link Wallet#id} of this deposit.
+   */
   get walletId() {
     return this.data['walletId'];
   }
@@ -138,6 +210,10 @@ export class Deposit extends BaseModel {
     this.data['walletId'] = id;
   }
 
+  /**
+   * @property {string} srcAddress
+   * @desc the account address on source chain which this deposit was sent from.
+   */
   get srcAddress() {
     return this.data['srcAddress'];
   }
@@ -147,6 +223,10 @@ export class Deposit extends BaseModel {
     this.data['srcAddress'] = address;
   }
 
+  /**
+   * @property {string} shieldedRecipientAddress
+   * @desc the shielded recipient address of which this deposit was sent to.
+   */
   get shieldedRecipientAddress() {
     return this.data['shieldedRecipientAddress'];
   }
@@ -156,6 +236,10 @@ export class Deposit extends BaseModel {
     this.data['shieldedRecipientAddress'] = address;
   }
 
+  /**
+   * @property {module:mystiko/models.DepositStatus} status
+   * @desc status of this deposit.
+   */
   get status() {
     return this.data['status'];
   }
@@ -165,6 +249,11 @@ export class Deposit extends BaseModel {
     this.data['status'] = s;
   }
 
+  /**
+   * @property {string|undefined} errorMessage
+   * @desc error message during the execution of this deposit transaction.
+   * If the status is SUCCEEDED, this field is undefined.
+   */
   get errorMessage() {
     return this.data['errorMessage'];
   }
@@ -174,6 +263,32 @@ export class Deposit extends BaseModel {
     this.data['errorMessage'] = msg;
   }
 }
+
+/**
+ * @typedef DepositStatus
+ * @name module:mystiko/models.DepositStatus
+ * @desc status enums of the deposit transactions.
+ * @property {string} INIT this status will be set immediately after the Deposit object
+ * is created and saved to database.
+ * @property {string} ASSET_APPROVING this status will be set after the asset approving transaction
+ * is successfully submitted to the transaction queue on the source blockchain.
+ * @property {string} ASSET_APPROVED this status will be set after the asset approving transaction
+ * is successfully confirmed on the source blockchain.
+ * @property {string} SRC_PENDING this status will be set after the asset depositing transaction
+ * is successfully submitted to the transaction queue on the source blockchain.
+ * @property {string} SRC_CONFIRMED this status will be set after the asset depositing transaction
+ * is successfully confirmed on the source blockchain.
+ * @property {string} BRIDGE_PENDING this status will be set after the asset depositing transaction
+ * is successfully submitted to the transaction queue on the cross-chain bridge.
+ * @property {string} BRIDGE_CONFIRMED this status will be set after the asset depositing transaction
+ * is successfully confirmed on the cross-chain bridge.
+ * @property {string} DST_PENDING this status will be set after the asset depositing transaction
+ * is successfully submitted to the transaction queue on the destination blockchain.
+ * @property {string} SUCCEEDED this status will be set after the asset depositing transaction
+ * is successfully confirmed on the destination blockchain.
+ * @property {string} FAILED this status will be set after seeing any errors raised during the whole
+ * lifecycle of this deposit.
+ */
 export const DepositStatus = {
   INIT: 'init',
   ASSET_APPROVING: 'assetApproving',
@@ -187,6 +302,13 @@ export const DepositStatus = {
   FAILED: 'failed',
 };
 Object.freeze(DepositStatus);
+
+/**
+ * @function module:mystiko/models.isValidDepositStatus
+ * @desc check whether given status string is a valid {@link module:mystiko/models.DepositStatus}.
+ * @param {string} status
+ * @returns {boolean} true if {@link module:mystiko/models.DepositStatus} contains it, otherwise it returns false.
+ */
 export function isValidDepositStatus(status) {
   return Object.values(DepositStatus).includes(status);
 }

@@ -1,24 +1,17 @@
 import BN from 'bn.js';
-import DefaultProtocol, {
-  FIELD_SIZE,
-  VERIFY_SK_SIZE,
-  VERIFY_PK_SIZE,
-  ENCRYPT_SK_SIZE,
-  ENCRYPT_PK_SIZE,
-  RANDOM_SK_SIZE,
-} from '../../src/protocol/default.js';
+import * as DefaultProtocol from '../../src/protocol/default.js';
 import { toHex, toBuff, toDecimals } from '../../src/utils.js';
 
 test('test randomBigInt', () => {
   const int1 = DefaultProtocol.randomBigInt(8);
-  expect(int1.lt(FIELD_SIZE)).toBe(true);
+  expect(int1.lt(DefaultProtocol.FIELD_SIZE)).toBe(true);
   const int2 = DefaultProtocol.randomBigInt(16);
-  expect(int2.lt(FIELD_SIZE)).toBe(true);
+  expect(int2.lt(DefaultProtocol.FIELD_SIZE)).toBe(true);
   const int3 = DefaultProtocol.randomBigInt();
-  expect(int3.lt(FIELD_SIZE)).toBe(true);
+  expect(int3.lt(DefaultProtocol.FIELD_SIZE)).toBe(true);
   for (let i = 0; i < 100; i++) {
     const bgInt = DefaultProtocol.randomBigInt();
-    expect(bgInt.lt(FIELD_SIZE)).toBe(true);
+    expect(bgInt.lt(DefaultProtocol.FIELD_SIZE)).toBe(true);
   }
 });
 
@@ -48,9 +41,9 @@ test('test secretKeyForVerification', () => {
   expect(() => DefaultProtocol.secretKeyForVerification('baadbeef')).toThrow();
   expect(() => DefaultProtocol.secretKeyForVerification(toBuff('baadbeef'))).toThrow();
   for (let i = 0; i < 10; i++) {
-    const rawSecretKey = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
+    const rawSecretKey = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
     const sk = DefaultProtocol.secretKeyForVerification(rawSecretKey);
-    expect(sk.length).toBe(VERIFY_SK_SIZE);
+    expect(sk.length).toBe(DefaultProtocol.VERIFY_SK_SIZE);
   }
 });
 
@@ -58,59 +51,59 @@ test('test publicKeyForVerification', () => {
   expect(() => DefaultProtocol.publicKeyForVerification('baadbeef')).toThrow();
   expect(() => DefaultProtocol.publicKeyForVerification(toBuff('baadbeef'))).toThrow();
   for (let i = 0; i < 10; i++) {
-    const rawSecretKey = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
+    const rawSecretKey = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
     const pk = DefaultProtocol.publicKeyForVerification(rawSecretKey);
-    expect(pk.length).toBe(VERIFY_PK_SIZE);
+    expect(pk.length).toBe(DefaultProtocol.VERIFY_PK_SIZE);
   }
 });
 
 test('test secretKeyForEncryption', () => {
   expect(() => DefaultProtocol.secretKeyForEncryption('baadbeef')).toThrow();
   expect(() => DefaultProtocol.secretKeyForEncryption(toBuff('baadbeef'))).toThrow();
-  const rawSecretKey = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSecretKey = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const sk = DefaultProtocol.secretKeyForVerification(rawSecretKey);
-  expect(sk.length).toBe(ENCRYPT_SK_SIZE);
+  expect(sk.length).toBe(DefaultProtocol.ENCRYPT_SK_SIZE);
 });
 
 test('test publicKeyForEncryption', () => {
   expect(() => DefaultProtocol.publicKeyForEncryption('baadbeef')).toThrow();
   expect(() => DefaultProtocol.publicKeyForEncryption(toBuff('baadbeef'))).toThrow();
-  const rawSecretKey = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSecretKey = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pk = DefaultProtocol.publicKeyForEncryption(rawSecretKey);
-  expect(pk.length).toBe(ENCRYPT_PK_SIZE);
+  expect(pk.length).toBe(DefaultProtocol.ENCRYPT_PK_SIZE);
 });
 
 test('test fullPublicKey', () => {
   expect(() => DefaultProtocol.fullPublicKey('baadbeef', toBuff('baadbeef'))).toThrow();
   expect(() => DefaultProtocol.fullPublicKey(toBuff('baadbeef'), 'baadbeef')).toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   expect(() => DefaultProtocol.fullPublicKey(pkVerify, toBuff('baadbeef'))).toThrow();
   expect(() => DefaultProtocol.fullPublicKey(toBuff('baadbeef'), pkEnc)).toThrow();
   const fullPublicKey = DefaultProtocol.fullPublicKey(pkVerify, pkEnc);
-  expect(fullPublicKey.length).toBe(VERIFY_PK_SIZE + ENCRYPT_PK_SIZE);
+  expect(fullPublicKey.length).toBe(DefaultProtocol.VERIFY_PK_SIZE + DefaultProtocol.ENCRYPT_PK_SIZE);
 });
 
 test('test fullSecretKey', () => {
   expect(() => DefaultProtocol.fullSecretKey('baadbeef', toBuff('baadbeef'))).toThrow();
   expect(() => DefaultProtocol.fullSecretKey(toBuff('baadbeef'), 'baadbeef')).toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const skVerify = DefaultProtocol.secretKeyForVerification(rawSkVerify);
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);
   expect(() => DefaultProtocol.fullSecretKey(skVerify, toBuff('baadbeef'))).toThrow();
   expect(() => DefaultProtocol.fullSecretKey(toBuff('baadbeef'), skEnc)).toThrow();
   const fullSecretKey = DefaultProtocol.fullSecretKey(skVerify, skEnc);
-  expect(fullSecretKey.length).toBe(VERIFY_SK_SIZE + ENCRYPT_SK_SIZE);
+  expect(fullSecretKey.length).toBe(DefaultProtocol.VERIFY_SK_SIZE + DefaultProtocol.ENCRYPT_SK_SIZE);
 });
 
 test('test separatedPublicKeys', () => {
   expect(() => DefaultProtocol.separatedPublicKeys('baadbeef')).toThrow();
   expect(() => DefaultProtocol.separatedPublicKeys(toBuff('baadbeef'))).toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   const fullPublicKey = DefaultProtocol.fullPublicKey(pkVerify, pkEnc);
@@ -122,8 +115,8 @@ test('test separatedPublicKeys', () => {
 test('test separatedSecretKeys', () => {
   expect(() => DefaultProtocol.separatedSecretKeys('baadbeef')).toThrow();
   expect(() => DefaultProtocol.separatedSecretKeys(toBuff('baadbeef'))).toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const skVerify = DefaultProtocol.secretKeyForVerification(rawSkVerify);
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);
   const fullSecretKey = DefaultProtocol.fullSecretKey(skVerify, skEnc);
@@ -135,8 +128,8 @@ test('test separatedSecretKeys', () => {
 test('test shieldedAddress', () => {
   expect(() => DefaultProtocol.shieldedAddress('baadbeef')).toThrow();
   expect(() => DefaultProtocol.shieldedAddress(toBuff('baadbeef'))).toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   const shieldedAddress = DefaultProtocol.shieldedAddress(pkVerify, pkEnc);
@@ -157,7 +150,7 @@ test('test asymmetric encryption/decryption', async () => {
   await expect(DefaultProtocol.encryptAsymmetric(toBuff('beef'), 'baad')).rejects.toThrow();
   await expect(DefaultProtocol.decryptAsymmetric('baad', toBuff('beef'))).rejects.toThrow();
   await expect(DefaultProtocol.decryptAsymmetric(toBuff('beef'), 'baad')).rejects.toThrow();
-  const rawSecretKey = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSecretKey = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const sk = DefaultProtocol.secretKeyForEncryption(rawSecretKey);
   const pk = DefaultProtocol.publicKeyForEncryption(rawSecretKey);
   const data = toBuff('baadbeefdeadbeef');
@@ -224,8 +217,8 @@ test('test commitment', async () => {
   await expect(DefaultProtocol.commitment('deadbeef', toBuff('baadbabe'), new BN(1))).rejects.toThrow();
   await expect(DefaultProtocol.commitment(toBuff('baadbabe'), 'deadbeef', new BN(1))).rejects.toThrow();
   await expect(DefaultProtocol.commitment(toBuff('baadbabe'), toBuff('baadbabe'), 1)).rejects.toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
@@ -240,13 +233,13 @@ test('test commitment', async () => {
   expect(k).not.toBe(undefined);
   expect(randomS).not.toBe(undefined);
   const decryptedNote = await DefaultProtocol.decryptAsymmetric(skEnc, privateNote);
-  expect(decryptedNote.length).toBe(RANDOM_SK_SIZE * 3);
+  expect(decryptedNote.length).toBe(DefaultProtocol.RANDOM_SK_SIZE * 3);
 });
 
 test('test commitmentWithShieldedAddress', async () => {
   await expect(DefaultProtocol.commitmentWithShieldedAddress(123, new BN(1))).rejects.toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const pkEnc = DefaultProtocol.publicKeyForEncryption(rawSkEnc);
   const shieldedAddress = DefaultProtocol.shieldedAddress(pkVerify, pkEnc);
@@ -261,16 +254,16 @@ test('test commitmentWithShieldedAddress', async () => {
 test('test serialNumber', () => {
   expect(() => DefaultProtocol.serialNumber('deadbeef', toBuff('baadbabe'))).toThrow();
   expect(() => DefaultProtocol.serialNumber(toBuff('baadbabe'), 'deadbeef')).toThrow();
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
   const skVerify = DefaultProtocol.secretKeyForVerification(rawSkVerify);
-  const randomP = DefaultProtocol.randomBytes(RANDOM_SK_SIZE);
+  const randomP = DefaultProtocol.randomBytes(DefaultProtocol.RANDOM_SK_SIZE);
   const serialNumber = DefaultProtocol.serialNumber(skVerify, randomP);
   expect(serialNumber).not.toBe(undefined);
 });
 
 test('test zkProve/zkVerify', async () => {
-  const rawSkVerify = DefaultProtocol.randomBytes(VERIFY_SK_SIZE);
-  const rawSkEnc = DefaultProtocol.randomBytes(ENCRYPT_SK_SIZE);
+  const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
+  const rawSkEnc = DefaultProtocol.randomBytes(DefaultProtocol.ENCRYPT_SK_SIZE);
   const pkVerify = DefaultProtocol.publicKeyForVerification(rawSkVerify);
   const skVerify = DefaultProtocol.secretKeyForVerification(rawSkVerify);
   const skEnc = DefaultProtocol.secretKeyForEncryption(rawSkEnc);

@@ -1,5 +1,5 @@
 import loki from 'lokijs';
-import { BaseModel } from '../../src/model/common.js';
+import { BaseModel } from '../../src/model';
 
 test('Test BaseModel', () => {
   const db = new loki('test.db');

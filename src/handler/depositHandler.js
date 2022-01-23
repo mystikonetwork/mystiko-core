@@ -7,11 +7,19 @@ import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
-import { Deposit, DepositStatus } from '../model/deposit.js';
-import { AssetType, BridgeType } from '../config';
-import { ID_KEY } from '../model/common.js';
-import { OffChainNote } from '../model/note.js';
+import { Deposit, DepositStatus, AssetType, BridgeType, ID_KEY, OffChainNote } from '../model';
 
+/**
+ * @class DepositHandler
+ * @extends Handler
+ * @desc handler class for Deposit related business logic.
+ * @param {WalletHandler} walletHandler instance of {@link WalletHandler}.
+ * @param {AccountHandler} accountHandler instance of {@link AccountHandler}.
+ * @param {NoteHandler} noteHandler instance of {@link NoteHandler}.
+ * @param {ContractPool} contractPool instance of {@link ContractPool}.
+ * @param {module:mystiko/db.WrappedDb} db instance of {@link module:mystiko/db.WrappedDb}.
+ * @param {MystikoConfig} config instance of {@link MystikoConfig}.
+ */
 export class DepositHandler extends Handler {
   constructor(walletHandler, accountHandler, noteHandler, contractPool, db, config) {
     super(db, config);
@@ -25,6 +33,27 @@ export class DepositHandler extends Handler {
     this.contractPool = contractPool;
   }
 
+  /**
+   * @desc create a deposit transaction based on the user's request.
+   * @param {Object} request the request object.
+   * @param {number} request.srcChainId the source chain id which this deposit will be sent from.
+   * @param {number} request.dstChainId the destination chain id which this deposit will be sent to.
+   * @param {string} request.assetSymbol the symbol of asset this deposit will operate.
+   * @param {module:mystiko/models.BridgeType} request.bridge the cross-chain bridge type which this deposit will
+   * use to do cross-chain. If this is same-chain deposit/withdraw, you should set 'loop' as value.
+   * @param {number} request.amount the amount of asset this deposit will operate.
+   * @param {string} request.shieldedAddress the recipient shielded address which is used to protect the privacy of
+   * this deposit transaction.
+   * @param {BaseSigner} signer the instance of {@link BaseSigner} to sign the deposit transaction.
+   * @param {Function} [statusCallback] a callback function that will be called when the status of
+   * the deposit transaction changes. It should be constructed like this:
+   * (deposit: {@link Deposit}, oldStatus: {@link module:mystiko/models.DepositStatus}, newStatus: {@link module:mystiko/models.DepositStatus}) => {}
+   * @returns {Promise<{depositPromise: Promise<void>, deposit: Deposit}>} a promise of an object which contains two
+   * fields: deposit and depositPromise. the depositPromise will be resolved after the deposit transaction is confirmed
+   * on the source chain. The deposit instance is immediately returned once the transaction is initialized.
+   * If any error occurs during the transaction, the {@link Deposit#errorMessage} will be set to be non-undefined.
+   * Please check the {@link Deposit#errorMessage} if you find {@link Deposit#status} is FAILED.
+   */
   async createDeposit(
     { srcChainId, dstChainId, assetSymbol, bridge, amount, shieldedAddress },
     signer,
@@ -79,6 +108,15 @@ export class DepositHandler extends Handler {
     return { deposit, depositPromise };
   }
 
+  /**
+   * @desc get a {@link Deposit} instance from the given query.
+   * @param {number|string|Deposit} query if the query is a number, it searches the database by using query as id.
+   * If the query is string, it searches the database by using query as {@link Deposit#srcTxHash} or
+   * {@link Deposit#dstTxHash} or {@link Deposit#bridgeTxHash}. If the query is an instance of
+   * {@link Deposit}, it just returns that instance.
+   * @returns {Deposit|undefined} the found instance of {@link Deposit}. If the given query does not fit
+   * any private note instance, it returns undefined.
+   */
   getDeposit(query) {
     let deposit;
     if (typeof query === 'number') {
@@ -97,6 +135,21 @@ export class DepositHandler extends Handler {
     return deposit ? new Deposit(deposit) : undefined;
   }
 
+  /**
+   * @desc get an array of {@link Deposit} with the given filtering/sorting/pagination criteria.
+   * @param {object} [options={}] an object contains the search criteria.
+   * @param {Function} [options.filterFunc] a filter function used as where clause. The filter function's
+   * input is an instance of {@link Deposit}, it should return a boolean value to indicate whether that
+   * record meets the criteria.
+   * @param {string} [options.sortBy] specifies the sorting field, the returned array will be sorted based
+   * that field.
+   * @param {boolean} [options.desc] whether the returned array should be sorted in descending order.
+   * @param {number} [options.offset] the starting offset for the returned array of instances. This is
+   * normally used for pagination.
+   * @param {number} [options.limit] the maximum number of instances this query should return. This is
+   * normally used for pagination.
+   * @returns {Deposit[]} an array of {@link Deposit} which meets the search criteria.
+   */
   getDeposits({ filterFunc, sortBy, desc, offset, limit } = {}) {
     const wallet = this.walletHandler.checkCurrentWallet();
     const whereClause = (rawObject) => {
@@ -118,10 +171,25 @@ export class DepositHandler extends Handler {
     return queryChain.data().map((rawObject) => new Deposit(rawObject));
   }
 
-  getDepositsCount(filterFunc) {
+  /**
+   * @desc get the count of matching {@link Deposit} in the database.
+   * @param {Function} [filterFunc] a filter function used as where clause. The filter function's
+   * input is an instance of {@link Deposit}, it should return a boolean value to indicate whether that
+   * record meets the criteria.
+   * @returns {number} the count of {@link Deposit} in the database.
+   */
+  getDepositsCount(filterFunc = undefined) {
     return this.getDeposits({ filterFunc }).length;
   }
 
+  /**
+   * @desc export an off-chain note based the deposit information.
+   * @param {number|string|Deposit} depositQuery if the query is a number, it searches the database by using query
+   * as id. If the query is string, it searches the database by using query as {@link Deposit#srcTxHash} or
+   * {@link Deposit#dstTxHash} or {@link Deposit#bridgeTxHash}. If the query is an instance of
+   * {@link Deposit}, it just returns that instance.
+   * @returns {OffChainNote} the instance of {@link OffChainNote}.s
+   */
   exportOffChainNote(depositQuery) {
     const deposit = this.getDeposit(depositQuery);
     check(deposit, `deposit ${depositQuery} does not exist`);

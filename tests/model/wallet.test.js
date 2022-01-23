@@ -1,4 +1,4 @@
-import { Wallet } from '../../src/model/wallet.js';
+import { Wallet } from '../../src/model';
 
 test('Test Wallet getters/setters', () => {
   const wallet = new Wallet();

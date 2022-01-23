@@ -1,11 +1,18 @@
 import { ethers } from 'ethers';
 import { BaseConfig } from './common.js';
-import { ContractConfig, BridgeType } from './contractConfig.js';
+import { ContractConfig } from './contractConfig.js';
 import { check } from '../utils.js';
+import { BridgeType } from '../model';
 
 export const EXPLORER_TX_PLACEHOLDER = '%tx%';
 export const EXPLORER_DEFAULT_PREFIX = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
 
+/**
+ * @class ChainConfig
+ * @extends BaseConfig
+ * @param {Object} rawConfig raw configuration object.
+ * @desc configuration class for blockchain network.
+ */
 export class ChainConfig extends BaseConfig {
   constructor(rawConfig) {
     super(rawConfig);
@@ -29,39 +36,76 @@ export class ChainConfig extends BaseConfig {
     });
   }
 
+  /**
+   * @property {number} chainId
+   * @desc the chain id of this configured blockchain network.
+   */
   get chainId() {
     return this.config['chainId'];
   }
 
+  /**
+   * @property {string} name
+   * @desc the name of this configured blockchain network.
+   */
   get name() {
     return this.config['name'];
   }
 
+  /**
+   * @property {string} explorerUrl
+   * @desc the base explorer URL of this configured blockchain network.
+   */
   get explorerUrl() {
     return this.config['explorerUrl'];
   }
 
+  /**
+   * @property {string} explorerPrefix
+   * @desc the explorer's transaction URI template of this configured blockchain network.
+   */
   get explorerPrefix() {
     return this.config['explorerPrefix'];
   }
 
+  /**
+   * @desc get full explorer URL with given transaction hash.
+   * @param {string} txHash hash of the querying transaction.
+   * @returns {string} full explorer URL.
+   */
   getTxUrl(txHash) {
     check(typeof txHash === 'string', 'txHash should be a valid string');
     return `${this.explorerUrl}${this.explorerPrefix.replace(EXPLORER_TX_PLACEHOLDER, txHash)}`;
   }
 
+  /**
+   * @property {string[]} providers
+   * @desc the array of this configured blockchain's JSON-RPC providers.
+   */
   get providers() {
     return this.config['providers'];
   }
 
+  /**
+   * @property {ContractConfig[]} contracts
+   * @desc the array of this configured blockchain's supported contract configurations.
+   */
   get contracts() {
     return this.config['contracts'];
   }
 
+  /**
+   * @property {string[]} contractAddresses
+   * @desc the array of this configured blockchain's supported contract addresses.
+   */
   get contractAddresses() {
     return Object.keys(this.contractByAddress);
   }
 
+  /**
+   * @property {number[]} peerChainIds
+   * @desc the array of this configured blockchain's supported peer chain ids.
+   */
   get peerChainIds() {
     const chainIds = {};
     this.contractAddresses.forEach((address) => {
@@ -75,6 +119,11 @@ export class ChainConfig extends BaseConfig {
     return Object.values(chainIds);
   }
 
+  /**
+   * @desc get the array of supported asset symbols for the given peer chain id.
+   * @param {number} peerChainId peer chain id
+   * @returns {string[]} the array of asset symbols.
+   */
   getAssetSymbols(peerChainId) {
     check(
       typeof peerChainId === 'number' || peerChainId instanceof Number,
@@ -92,6 +141,11 @@ export class ChainConfig extends BaseConfig {
     return Object.keys(symbols);
   }
 
+  /**
+   * @desc get the contract configuration with the given address.
+   * @param {string} address the address of contract.
+   * @returns {ContractConfig} the contract config instance.
+   */
   getContract(address) {
     check(ethers.utils.isAddress(address), address + ' is invalid address');
     return this.contractByAddress[address];

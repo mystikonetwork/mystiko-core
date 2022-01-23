@@ -9,8 +9,8 @@ import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
-import { BridgeType, readFromFile } from '../../src/config';
-import { DepositStatus } from '../../src/model/deposit';
+import { readFromFile } from '../../src/config';
+import { DepositStatus, BridgeType } from '../../src/model';
 import { MystikoABI } from '../../src/chain/abi.js';
 import txReceipt01 from './files/txReceipt01.json';
 

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { Deposit, DepositStatus } from '../../src/model/deposit.js';
+import { Deposit, DepositStatus } from '../../src/model';
 import { toBuff, toHexNoPrefix } from '../../src/utils.js';
 
 test('Test Deposit getters/setters', () => {

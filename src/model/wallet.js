@@ -1,11 +1,21 @@
 import { check } from '../utils.js';
 import { BaseModel } from './common.js';
 
+/**
+ * @class Wallet
+ * @extends BaseModel
+ * @param {Object} [data={}] raw data of the Account model.
+ * @desc data model for storing wallet related data.
+ */
 export class Wallet extends BaseModel {
   constructor(data = {}) {
     super(data);
   }
 
+  /**
+   * @property {string} encryptedMasterSeed
+   * @desc encrypted master seed of this wallet.
+   */
   get encryptedMasterSeed() {
     return this.data['encryptedMasterSeed'];
   }
@@ -15,6 +25,10 @@ export class Wallet extends BaseModel {
     this.data['encryptedMasterSeed'] = encSeed;
   }
 
+  /**
+   * @property {string} hashedPassword
+   * @desc hashed password of this wallet.
+   */
   get hashedPassword() {
     return this.data['hashedPassword'];
   }
@@ -24,6 +38,11 @@ export class Wallet extends BaseModel {
     this.data['hashedPassword'] = hashedPass;
   }
 
+  /**
+   * @property {number} accountNonce
+   * @desc nonce for account creation. This field is used store the number of account
+   * which this wallet has created.
+   */
   get accountNonce() {
     return this.data['accountNonce'];
   }

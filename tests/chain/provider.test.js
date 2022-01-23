@@ -1,5 +1,5 @@
 import { ProviderPool } from '../../src/chain/provider.js';
-import { readFromFile } from '../../src/config/mystikoConfig.js';
+import { readFromFile } from '../../src/config';
 
 test('test connect', async () => {
   expect(() => new ProviderPool({})).toThrow();

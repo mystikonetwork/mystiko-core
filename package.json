@@ -24,12 +24,14 @@
     "lint:sol": "npx solhint contracts/**/*.sol",
     "test": "yarn test:js && yarn test:contract",
     "test:js": "jest --forceExit",
-    "test:contract": "npx truffle test"
+    "test:contract": "npx truffle test",
+    "jsdoc": "jsdoc -c jsdoc.json"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
     "@babel/core": "^7.16.7",
     "@babel/eslint-parser": "^7.16.5",
+    "@babel/node": "^7.16.8",
     "@babel/plugin-transform-runtime": "^7.16.8",
     "@babel/preset-env": "^7.16.7",
     "@babel/register": "^7.16.8",
@@ -51,6 +53,7 @@
     "ganache-cli": "^6.12.2",
     "https-browserify": "^1.0.0",
     "jest": "^27.4.7",
+    "jsdoc": "^3.6.7",
     "node-loader": "^2.0.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",

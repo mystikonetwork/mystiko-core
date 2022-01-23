@@ -5,6 +5,16 @@ import MystikoWithPolyERC20 from '../../build/contracts/MystikoWithPolyERC20.jso
 import MystikoWithPolyMain from '../../build/contracts/MystikoWithPolyMain.json';
 import Verifier from '../../build/contracts/Verifier.json';
 
+/**
+ * @typedef MystikoABI
+ * @desc ABI definition of Mystiko's core smart contracts.
+ * @property {Object} ERC20 ABI for ERC20 asset's contract.
+ * @property {Object} Verifier ABI for the Verifier contract.
+ * @property {Object} MystikoWithLoopERC20 ABI for the Mystiko's loop pool with ERC20 token contract.
+ * @property {Object} MystikoWithLoopMain ABI for the Mystiko's loop pool with main asset contract
+ * @property {Object} MystikoWithPolyERC20 ABI for the Mystiko with Poly Bridge and ERC20 token contract.
+ * @property {Object} MystikoWithPolyMain ABI for the Mystiko with Poly Bridge and main asset contract.
+ */
 export const MystikoABI = {
   ERC20: ERC20.abi,
   Verifier: Verifier.abi,

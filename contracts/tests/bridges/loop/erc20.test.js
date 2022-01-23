@@ -1,6 +1,6 @@
 import { BN } from 'bn.js';
 import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../../../src/utils.js';
-import protocol from '../../../../src/protocol/index.js';
+import * as protocol from '../../../../src/protocol';
 import MerkleTree from 'fixed-merkle-tree';
 
 const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');

@@ -1,5 +1,5 @@
 import { BaseBridgeConfig, PolyBridgeConfig } from '../../src/config/bridgeConfig.js';
-import { BridgeType } from '../../src/config/contractConfig.js';
+import { BridgeType } from '../../src/model';
 
 test('test BaseBridgeConfig', () => {
   const rawConfig = {};

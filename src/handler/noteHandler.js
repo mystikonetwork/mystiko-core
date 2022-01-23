@@ -4,11 +4,25 @@ import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
-import { isValidPrivateNoteStatus, OffChainNote, PrivateNote, PrivateNoteStatus } from '../model/note.js';
+import {
+  isValidPrivateNoteStatus,
+  OffChainNote,
+  PrivateNote,
+  PrivateNoteStatus,
+  ID_KEY,
+  BridgeType,
+} from '../model';
 import { ProviderPool } from '../chain/provider.js';
-import { BridgeType } from '../config';
-import { ID_KEY } from '../model/common.js';
 
+/**
+ * @class NoteHandler
+ * @extends Handler
+ * @desc handler class for PrivateNote related business logic
+ * @param {WalletHandler} walletHandler instance of {@link WalletHandler}.
+ * @param {AccountHandler} accountHandler instance of {@link AccountHandler}.
+ * @param {module:mystiko/db.WrappedDb} db instance of {@link module:mystiko/db.WrappedDb}.
+ * @param {MystikoConfig} config instance of {@link MystikoConfig}.
+ */
 export class NoteHandler extends Handler {
   constructor(walletHandler, accountHandler, providerPool, db, config) {
     super(db, config);
@@ -20,6 +34,15 @@ export class NoteHandler extends Handler {
     this.providerPool = providerPool;
   }
 
+  /**
+   * @desc import a {@link PrivateNote} instance from {@link OffChainNote} instance of serialized JSON string.
+   * @param {string} walletPassword the password of the current running wallet.
+   * @param {string|OffChainNote} offChainNote off-chain private note as a serialized JSON string or an instance of
+   * {@link OffChainNote}.
+   * @returns {Promise<PrivateNote>} a promise of imported {@link PrivateNote}.
+   * @throws {Error} if the given wallet password is incorrect or the given off-chain note contains invalid
+   * transaction data.
+   */
   async importFromOffChainNote(walletPassword, offChainNote) {
     if (typeof offChainNote === 'string') {
       offChainNote = new OffChainNote(JSON.parse(offChainNote));
@@ -32,6 +55,15 @@ export class NoteHandler extends Handler {
     return this._createPrivateNoteFromTxReceipt(offChainNote.chainId, txReceipt, true, walletPassword);
   }
 
+  /**
+   * @desc get a {@link PrivateNote} instance from the given query.
+   * @param {number|string|PrivateNote} query if the query is a number, it searches the database by using query as id.
+   * If the query is string, it searches the database by using query as {@link PrivateNote#srcTransactionHash} or
+   * {@link PrivateNote#dstTransactionHash} or {@link PrivateNote#commitmentHash}. If the query is an instance of
+   * {@link PrivateNote}, it just returns that instance.
+   * @returns {PrivateNote|undefined} the found instance of {@link PrivateNote}. If the given query does not fit
+   * any private note instance, it returns undefined.
+   */
   getPrivateNote(query) {
     let privateNote;
     if (typeof query === 'number') {
@@ -53,6 +85,21 @@ export class NoteHandler extends Handler {
     return privateNote ? new PrivateNote(privateNote) : undefined;
   }
 
+  /**
+   * @desc get an array of {@link PrivateNote} with the given filtering/sorting/pagination criteria.
+   * @param {object} [options={}] an object contains the search criteria.
+   * @param {Function} [options.filterFunc] a filter function used as where clause. The filter function's
+   * input is an instance of {@link PrivateNote}, it should return a boolean value to indicate whether that
+   * record meets the criteria.
+   * @param {string} [options.sortBy] specifies the sorting field, the returned array will be sorted based
+   * that field.
+   * @param {boolean} [options.desc] whether the returned array should be sorted in descending order.
+   * @param {number} [options.offset] the starting offset for the returned array of instances. This is
+   * normally used for pagination.
+   * @param {number} [options.limit] the maximum number of instances this query should return. This is
+   * normally used for pagination.
+   * @returns {PrivateNote[]} an array of {@link PrivateNote} which meets the search criteria.
+   */
   getPrivateNotes({ filterFunc, sortBy, desc, offset, limit } = {}) {
     const wallet = this.walletHandler.checkCurrentWallet();
     const whereClause = (rawObject) => {
@@ -74,6 +121,13 @@ export class NoteHandler extends Handler {
     return queryChain.data().map((rawObject) => new PrivateNote(rawObject));
   }
 
+  /**
+   * @desc update the status of the given {@link PrivateNote}.
+   * @param {number|string|PrivateNote} privateNote id or transaction hash or commitment hash or
+   * instance of {@link PrivateNote}.
+   * @param {PrivateNoteStatus} status the status to be updated to.
+   * @returns {Promise<PrivateNote>} a promise of updated {@link PrivateNote} instance.
+   */
   async updateStatus(privateNote, status) {
     check(isValidPrivateNoteStatus(status), 'invalid private note status');
     privateNote = this.getPrivateNote(privateNote);
@@ -108,8 +162,8 @@ export class NoteHandler extends Handler {
     const privateNote = new PrivateNote();
     privateNote.srcChainId = chainId;
     privateNote.srcTransactionHash = txReceipt.transactionHash;
-    privateNote.srcToken = contractConfig.assetSymbol;
-    privateNote.srcTokenAddress = contractConfig.assetAddress;
+    privateNote.srcAsset = contractConfig.assetSymbol;
+    privateNote.srcAssetAddress = contractConfig.assetAddress;
     privateNote.srcProtocolAddress = txReceipt.to;
     privateNote.amount = new BN(amount.toString());
     privateNote.bridge = contractConfig.bridgeType;
@@ -117,14 +171,14 @@ export class NoteHandler extends Handler {
       const peerChainConfig = this.config.getChainConfig(contractConfig.peerChainId);
       const peerContractConfig = peerChainConfig.getContract(contractConfig.peerContractAddress);
       privateNote.dstChainId = contractConfig.peerChainId;
-      privateNote.dstToken = peerContractConfig.assetSymbol;
-      privateNote.dstTokenAddress = peerContractConfig.assetAddress;
+      privateNote.dstAsset = peerContractConfig.assetSymbol;
+      privateNote.dstAssetAddress = peerContractConfig.assetAddress;
       privateNote.dstProtocolAddress = contractConfig.peerContractAddress;
     } else {
       privateNote.dstChainId = chainId;
       privateNote.dstTransactionHash = txReceipt.transactionHash;
-      privateNote.dstToken = contractConfig.assetSymbol;
-      privateNote.dstTokenAddress = contractConfig.assetAddress;
+      privateNote.dstAsset = contractConfig.assetSymbol;
+      privateNote.dstAssetAddress = contractConfig.assetAddress;
       privateNote.dstProtocolAddress = txReceipt.to;
     }
     privateNote.commitmentHash = new BN(toHexNoPrefix(commitmentHash), 16);

@@ -7,3 +7,4 @@ coverage
 dist
 .idea
 contracts/Verifier.sol
+jsdoc

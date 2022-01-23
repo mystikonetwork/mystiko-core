@@ -1,0 +1,18 @@
+{
+  "opts": {
+    "readme": "./README.md",
+    "destination": "./jsdoc",
+    "tutorials": "./docs/tutorials"
+  },
+  "source": {
+    "include": [
+      "src",
+      "src/chain",
+      "src/config",
+      "src/handler",
+      "src/model",
+      "src/protocol"
+    ]
+  },
+  "plugins": ["plugins/markdown"]
+}

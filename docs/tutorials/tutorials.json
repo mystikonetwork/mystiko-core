@@ -1,0 +1,23 @@
+{
+  "tutorial01": {
+    "title": "Getting Started"
+  },
+  "tutorial02": {
+    "title": "How To Create A Wallet"
+  },
+  "tutorial03": {
+    "title": "How To Add An Account"
+  },
+  "tutorial04": {
+    "title": "How To Connect To MetaMask"
+  },
+  "tutorial05": {
+    "title": "How To Create A Deposit Transaction"
+  },
+  "tutorial06": {
+    "title": "How To Import A Private Note"
+  },
+  "tutorial07": {
+    "title": "How To Create A Withdraw Transaction"
+  }
+}
