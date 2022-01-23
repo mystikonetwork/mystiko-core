@@ -1,5 +1,5 @@
 ## Prerequisites
-Before you go through this tutorial, please make sure you have finished {@tutorial tutorial03}.
+Before you go through this tutorial, please make sure you have finished {@tutorial tutorial02}.
 
 ## Create a new account
 Once your wallet is created successfully, you could then add an account into the wallet, by calling this method:
@@ -62,11 +62,11 @@ You could update account name by calling this method:
 
 ```javascript
 // update by id
-mystiko.accounts.updateAccountName(123, 'new name')
+mystiko.accounts.updateAccountName('wallet password', 123, 'new name')
 // update by shielded address
-mystiko.accounts.updateAccountName('Aa9ABUws2WBSUd3WVWCkUAA13SFnyDdbPVazY2YpRUvLZuLfSAh3rtDHqXVRxWPw8pRGsPc2sQuY31J66he6a3sao', 'new name')
+mystiko.accounts.updateAccountName('wallet password', 'Aa9ABUws2WBSUd3WVWCkUAA13SFnyDdbPVazY2YpRUvLZuLfSAh3rtDHqXVRxWPw8pRGsPc2sQuY31J66he6a3sao', 'new name')
 // update by account instance
-mystiko.accounts.updateAccountName(account, 'new name')
+mystiko.accounts.updateAccountName('wallet password', account, 'new name')
 ```
 
 Check {@link AccountHandler#updateAccountName} for more information.
@@ -75,11 +75,14 @@ You could remove an account by calling this method:
 
 ```javascript
 // remove by id
-mystiko.accounts.removeAccount(123)
+mystiko.accounts.removeAccount('wallet password', 123)
 // remove by shielded address
-mystiko.accounts.removeAccount('Aa9ABUws2WBSUd3WVWCkUAA13SFnyDdbPVazY2YpRUvLZuLfSAh3rtDHqXVRxWPw8pRGsPc2sQuY31J66he6a3sao', 'new name')
+mystiko.accounts.removeAccount('wallet password', 'Aa9ABUws2WBSUd3WVWCkUAA13SFnyDdbPVazY2YpRUvLZuLfSAh3rtDHqXVRxWPw8pRGsPc2sQuY31J66he6a3sao', 'new name')
 // remove by account instance
-mystiko.accounts.removeAccount(account)
+mystiko.accounts.removeAccount('wallet password', account)
 ```
 
 Check {@link AccountHandler#removeAccount} for more information.
+
+Now you have finished this tutorial for adding an {@link Account}. In the next tutorial,
+you will learn {@tutorial tutorial04}

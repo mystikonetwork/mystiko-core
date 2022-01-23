@@ -143,11 +143,14 @@ export class AccountHandler extends Handler {
 
   /**
    * @desc remove account from wallet.
+   * @param {string} walletPassword the password of the current running wallet.
    * @param {number|string|Account} account account id or shielded address or instance of {@link Account}.
    * @returns {Promise<Account>} promise of the removed account.
-   * @throws {Error} if the given account does not exist.
+   * @throws {Error} if the given account does not exist or the given wallet password is incorrect.
    */
-  async removeAccount(account) {
+  async removeAccount(walletPassword, account) {
+    check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     account = this.getAccount(account);
     check(account, `${account.toString()} does not exist`);
     this.db.accounts.remove(account.data);
@@ -165,9 +168,7 @@ export class AccountHandler extends Handler {
   async updateAccountKeys(oldPassword, newPassword) {
     check(typeof oldPassword === 'string', 'oldPassword should be instance of string');
     check(typeof newPassword === 'string', 'newPassword should be instance of string');
-    if (!this.walletHandler.checkPassword(oldPassword)) {
-      throw new Error('incorrect walletPassword is given');
-    }
+    check(this.walletHandler.checkPassword(oldPassword), 'incorrect walletPassword is given');
     this.getAccounts().forEach((account) => {
       const verifySecretKey = this.protocol.decryptSymmetric(oldPassword, account.encryptedVerifySecretKey);
       const encSecretKey = this.protocol.decryptSymmetric(oldPassword, account.encryptedEncSecretKey);
@@ -180,12 +181,16 @@ export class AccountHandler extends Handler {
 
   /**
    * @desc update the name of the given account.
+   * @param {string} walletPassword the password of the current running wallet.
    * @param {number|string|Account} account account id or shielded address or instance of {@link Account}.
    * @param {string} newName new name of the account.
    * @returns {Promise<Account>} the updated instance of {@link Account}.
+   * @throws {Error} if the given wallet password is incorrect.
    */
-  async updateAccountName(account, newName) {
+  async updateAccountName(walletPassword, account, newName) {
+    check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     check(typeof newName === 'string', 'newName should be instance of string');
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     account = this.getAccount(account);
     check(account, `${account.toString()} does not exist`);
     account.name = newName;

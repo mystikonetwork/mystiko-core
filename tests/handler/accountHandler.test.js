@@ -96,7 +96,7 @@ test('Test AccountHandler exportAccountSecretKey', async () => {
 test('Test AccountHandler importAccountFromSecretKey', async () => {
   const account1 = await accountHandler.addAccount(walletPassword, 'account 1');
   const secretKey = accountHandler.exportAccountSecretKey(walletPassword, account1);
-  await accountHandler.removeAccount(account1);
+  await accountHandler.removeAccount(walletPassword, account1);
   await expect(
     accountHandler.importAccountFromSecretKey('wrong password', 'account 2', secretKey),
   ).rejects.toThrow();
@@ -130,14 +130,16 @@ test('Test AccountHandler updateAccountKeys', async () => {
 
 test('Test AccountHandler removeAccount', async () => {
   const account = await accountHandler.addAccount(walletPassword, 'account 1');
-  await expect(accountHandler.removeAccount(12342324)).rejects.toThrow();
-  await accountHandler.removeAccount(account);
+  await expect(accountHandler.removeAccount(walletPassword, 12342324)).rejects.toThrow();
+  await expect(accountHandler.removeAccount('wrong password', account)).rejects.toThrow();
+  await accountHandler.removeAccount(walletPassword, account);
   expect(accountHandler.getAccounts().length).toBe(0);
 });
 
 test('Test AccountHandler updateAccountName', async () => {
   const account = await accountHandler.addAccount(walletPassword, 'account 1');
-  await expect(accountHandler.updateAccountName(12342324, 'account 1.1')).rejects.toThrow();
-  await accountHandler.updateAccountName(account.id, 'account 1.1');
+  await expect(accountHandler.updateAccountName(walletPassword, 12342324, 'account 1.1')).rejects.toThrow();
+  await expect(accountHandler.updateAccountName('wrong password', account, 'account 1.1')).rejects.toThrow();
+  await accountHandler.updateAccountName(walletPassword, account.id, 'account 1.1');
   expect(accountHandler.getAccount(account.id).name).toBe('account 1.1');
 });

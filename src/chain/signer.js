@@ -70,7 +70,7 @@ export class BaseSigner {
 
   /**
    * @desc connect this signer by asking user permission from the browser.
-   * @param {external:Provider} [etherProvider] if provided it override this default {external:Provider} constructor.
+   * @param {external:Provider} [etherProvider] if provided it overrides this default {@link external:Provider} constructor.
    * @returns {Promise<string[]>} an array of account addresses, which this signer offers.
    * @throws {Error} if the signer is not properly initialized.
    */
@@ -148,7 +148,7 @@ export class MetaMaskSigner extends BaseSigner {
   /**
    * @desc connect MetaMask by asking user permission from the browser.
    * @override
-   * @param {external:Provider} [etherProvider] if provided it override this default {external:Provider} constructor.
+   * @param {external:Provider} [etherProvider] if provided it overrides this default {@link external:Provider} constructor.
    * @returns {Promise<string[]>} an array of account addresses, which this signer offers.
    * @throws {Error} if MetaMask is not installed in this browser as an extension.
    */

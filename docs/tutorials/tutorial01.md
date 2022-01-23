@@ -40,5 +40,5 @@ mystiko.initialize() // returns Promise<void>
 This function is `async` and it returns `Promise<void>`, therefore, you need to properly wait for it resolves correctly.
 Please check the {@link module:mystiko.initialize} for more information of this method.
 
-Now you have finished the first tutorial. In next tutorial, you will learn
+Now you have finished the first tutorial. In the next tutorial, you will learn
 {@tutorial tutorial02} with this library.

@@ -62,5 +62,5 @@ mystiko.wallets.exportMasterSeed('wallet password')
 This method will raise error if the given wallet password is incorrect.
 Please check {@link WalletHandler#exportMasterSeed} for more information about this method.
 
-Now you have finished this tutorial for creating a new {@link Wallet} instance. The next tutorial you will learn
-{@tutorial tutorial03}.
+Now you have finished this tutorial for creating a new {@link Wallet} instance. In the next tutorial,
+you will learn {@tutorial tutorial03}.

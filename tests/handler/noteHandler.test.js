@@ -104,7 +104,7 @@ test('test importFromOffChainNote duplicate', async () => {
 });
 
 test('test importFromOffChainNote no authority', async () => {
-  await accountHandler.removeAccount(1);
+  await accountHandler.removeAccount(walletPassword, 1);
   await accountHandler.addAccount(walletPassword, 'account 2');
   const note =
     '{"chainId":1,"transactionHash":' +
