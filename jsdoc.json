@@ -1,7 +1,8 @@
 {
   "opts": {
     "readme": "./README.md",
-    "destination": "./jsdoc"
+    "destination": "./jsdoc",
+    "tutorials": "./docs/tutorials"
   },
   "source": {
     "include": [

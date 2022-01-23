@@ -45,12 +45,12 @@ command, which sets the network timeout threshold in milliseconds.
 
 ### Build the repo
 This repo includes three parts:
-* [contracts](./contracts) it contains the smart contract written in Solidity.
-* [circom circuits](./circuits) it contains the zkSnark circuit written in Circom language.
-* [javascript library](./src) it contains the Javascript implementation of all off-chain computation and wallet related logic.
+* [contracts](/contracts) it contains the smart contract written in Solidity.
+* [circom circuits](/circuits) it contains the zkSnark circuit written in Circom language.
+* [javascript library](/src) it contains the Javascript implementation of all off-chain computation and wallet related logic.
 
 Normally you don't need to build circuits, because it is kinda stable and the build script will overwrite the generated
-public parameters of zkSnark in the [dist](./dist) folder. You could just run this command to build the other two parts:
+public parameters of zkSnark in the [dist](/dist) folder. You could just run this command to build the other two parts:
 
 ```bash
 yarn build
@@ -62,7 +62,7 @@ If you want to build the Solidity contract separately, you could run this comman
 yarn build:contract
 ```
 
-The final built outputs and intermediate outputs are stored in [build/contracts](./build/contracts).
+The final built outputs and intermediate outputs are stored in [build/contracts](/build/contracts).
 
 If you want to build the Javascript library into bundled UMD or CommandJS library separately, you could run this command:
 
@@ -70,11 +70,11 @@ If you want to build the Javascript library into bundled UMD or CommandJS librar
 yarn build:js
 ```
 
-The built outputs are stored in [build/js](./build/js). More precisely, [build/js/mystiko.js](./build/js/mystiko.js) is the UMD bundle,
-and [build/js/mystiko.cjs](./build/js/mystiko.cjs) is the CommonJS bundle.
+The built outputs are stored in [build/js](/build/js). More precisely, [build/js/mystiko.js](/build/js/mystiko.js) is the UMD bundle,
+and [build/js/mystiko.cjs](/build/js/mystiko.cjs) is the CommonJS bundle.
 
-If you do want to regenerate the [Verifier](./contracts/Verifier.sol) contract and regenerate zkSnark public
-parameters in [dist](./dist), you could run this command.
+If you do want to regenerate the [Verifier](/contracts/Verifier.sol) contract and regenerate zkSnark public
+parameters in [dist](/dist), you could run this command.
 
 ```bash
 yarn build:circuits
@@ -92,11 +92,11 @@ or by running this command:
 npx ganache-cli --port 7545
 ```
 
-Please make sure the Ganache client runs on port `7545`, which is configured in [truffle-config.js](./truffle-config.js).
+Please make sure the Ganache client runs on port `7545`, which is configured in [truffle-config.js](/truffle-config.js).
 You have to change it to other number before you run Ganache client on different port.
 
 The second step before running tests is: setting the correct environment variables. We have put some example settings
-in [.env.example](./.env.example), you use it by running this command:
+in [.env.example](/.env.example), you use it by running this command:
 
 ```bash
 cp .env.example .env
@@ -104,7 +104,7 @@ cp .env.example .env
 
 You could modify these environment variables to your preferred values before you start running the tests.
 
-All tests written for the Solidity are located in [contracts/tests](./contracts/tests), which are wrapped with
+All tests written for the Solidity are located in [contracts/tests](/contracts/tests), which are wrapped with
 Truffle's test suite. Please run the tests with this command:
 
 ```bash
@@ -113,7 +113,7 @@ yarn test:contract
 
 ### Test the Javascript library
 
-All Javascript unit test cases are located in [tests](./tests). The testing suite used by this project is
+All Javascript unit test cases are located in [tests](/tests). The testing suite used by this project is
 [Jest](https://jestjs.io). You could run the Javascript test with this command:
 
 ```bash
@@ -121,13 +121,13 @@ yarn test:js
 ```
 
 These will output the test results and the coverage summary. The coverage report will be generated into the
-[coverage](./coverage) folder, you could find more coverage information in there.
+[coverage](/coverage) folder, you could find more coverage information in there.
 
 ### Linting the repo
 
 We configured the linters for Javascript and Solidity, which are [ESLint](https://eslint.org/)
 and [solhint](https://github.com/protofire/solhint). You could check their configuration with
-[.eslintrc](./.eslintrc) and [.solhint.json](./.solhint.json). You could run the linters with this command:
+[.eslintrc](/.eslintrc) and [.solhint.json](/.solhint.json). You could run the linters with this command:
 
 ```bash
 yarn lint
@@ -153,7 +153,7 @@ If the above prettier command cannot solve it, you should modify the code violat
 ### Deploy the smart contracts
 
 This project relies on Truffle to deploy into different blockchain networks. The deploying scripts are
-located in [migrations](./migrations) folder. Therefore, you could deploy the smart contracts into different
+located in [migrations](/migrations) folder. Therefore, you could deploy the smart contracts into different
 network by running this command:
 
 ```bash
@@ -169,3 +169,13 @@ After successfully deployed, you could then verify the smart contracts by runnin
 npx truffle run verify [Contract Name]@[Contract Address] --network [Network]
 ```
 For more information about the verification process, please check [truffle-plugin-verify](https://github.com/rkalis/truffle-plugin-verify).
+
+### Generate jsdoc
+
+Please you this command to generate [jsdoc](https://jsdoc.app/) for the Mystiko Javascript library:
+
+```bash
+yarn jsdoc
+```
+
+The generated jsdoc will be located in [jsdoc](/jsdoc) folder. Use your browser to open the `index.html` in the folder.
