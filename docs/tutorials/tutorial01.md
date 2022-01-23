@@ -29,7 +29,7 @@ You could use the bundled javascript library by adding it into the `<script>` ta
 ```
 
 ## Initialize the library
-After imported the bundled javascript library, it inserts a global variable `mystiko` to let you visit all
+After imported the bundled javascript library, it inserts a global variable {@link module:mystiko} to let you visit all
 exported methods/classes/constants from single source. However, before you could use it, you need to initialize the
 library by calling this function:
 
