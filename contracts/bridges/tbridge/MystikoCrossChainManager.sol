@@ -24,21 +24,12 @@ contract MystikoCrossChainManager is CrossChainDataSerializable {
     bytes32 commitmentHash
   ) external returns (bool) {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
-    bytes memory txDataBytes = _serializeTxData(txData);
+    bytes memory txDataBytes = serializeTxData(txData);
     bytes memory fromContractAddressBytes = Utils.addressToBytes(_fromContractAddress);
     require(
       MystikoWithPoly(_toContractAddress).syncTx(txDataBytes, fromContractAddressBytes, _fromChainId),
       "call syncTx returns error"
     );
     return true;
-  }
-
-  function _serializeTxData(CrossChainData memory data) internal pure returns (bytes memory) {
-    bytes memory buff;
-    buff = abi.encodePacked(
-      ZeroCopySink.WriteUint255(data.amount),
-      ZeroCopySink.WriteVarBytes(abi.encodePacked(data.commitmentHash))
-    );
-    return buff;
   }
 }
