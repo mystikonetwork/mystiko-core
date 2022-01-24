@@ -18,7 +18,8 @@ be ignored. Please check {@link WalletHandler#getCurrentWallet} for more informa
 If above check indeed returns `undefined`. Then you should create a new `Wallet` instance, by using this method:
 
 ```javascript
-mystiko.wallets.createWallet('some master seed', 'wallet password') // returns Promise<Wallet>
+var wallet;
+mystiko.wallets.createWallet('some master seed', 'wallet password').then((w) => { wallet = w })
 ```
 The master seed is normally generated from mnemonic words. In Javascript, you could use the [bip39](https://github.com/bitcoinjs/bip39)
 library to generate master seed from mnemonic words. The above function is `async`, please await it properly to get the

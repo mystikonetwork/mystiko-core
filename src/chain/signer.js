@@ -1,7 +1,8 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MystikoConfig, ChainConfig } from '../config';
-import { check, toHex } from '../utils.js';
+import { check, toHex, toHexNoPrefix } from '../utils.js';
+import { ProviderPool } from './provider.js';
 
 /**
  * @class BaseSigner
@@ -148,7 +149,8 @@ export class MetaMaskSigner extends BaseSigner {
   /**
    * @desc connect MetaMask by asking user permission from the browser.
    * @override
-   * @param {external:Provider} [etherProvider] if provided it overrides this default {@link external:Provider} constructor.
+   * @param {external:Provider | external:Wallet} [etherProvider] if provided it overrides
+   * this default {@link external:Provider} constructor.
    * @returns {Promise<string[]>} an array of account addresses, which this signer offers.
    * @throws {Error} if MetaMask is not installed in this browser as an extension.
    */
@@ -158,6 +160,110 @@ export class MetaMaskSigner extends BaseSigner {
     }
     check(this.provider, 'MetaMask is not installed');
     return await super.connect(etherProvider);
+  }
+}
+
+/**
+ * @class PrivateKeySigner
+ * @extends BaseSigner
+ * @param {string} privateKey a Ethereum-based private key string in hex.
+ * @param {MystikoConfig} config full configuration of {@link MystikoConfig}
+ * @param {ProviderPool} providerPool a pool of JSON-RPC providers
+ * @desc a signer class which uses private key to sign transaction
+ */
+export class PrivateKeySigner extends BaseSigner {
+  constructor(config, providerPool) {
+    super(config);
+    check(providerPool instanceof ProviderPool, 'providerPool should be an instance of ProviderPool');
+    this.providerPool = providerPool;
+    this.currentChainId = undefined;
+  }
+
+  /**
+   * @desc update the signer's private key.
+   * @param {string} privateKey the private key to update.
+   */
+  setPrivateKey(privateKey) {
+    check(typeof privateKey === 'string', 'privateKey should be a string');
+    this.provider = new ethers.Wallet(toHexNoPrefix(privateKey));
+  }
+
+  /**
+   * @desc whether this signer is properly installed.
+   * @override
+   * @returns {Promise<boolean>} true if it is installed properly, otherwise it returns false.
+   */
+  installed() {
+    return Promise.resolve(true);
+  }
+
+  /**
+   * @desc get the connected list of accounts from this signer.
+   * Current effective account is the first element of the returned array.
+   * @override
+   * @returns {Promise<string[]>} an array of account addresses.
+   */
+  accounts() {
+    return Promise.resolve(this.provider ? [this.provider.address] : []);
+  }
+
+  /**
+   * @desc connect the signer to a JSON-RPC provider.
+   * @override
+   * @param {external:Provider | external:Wallet} [etherProvider] if provided it overrides
+   * this default {@link external:Provider} constructor.
+   * @returns {Promise<string[]>} an array of account addresses, which this signer offers.
+   * @throws {Error} if MetaMask is not installed in this browser as an extension.
+   */
+  async connect(etherProvider = undefined) {
+    check(
+      !etherProvider || etherProvider instanceof ethers.Wallet,
+      'etherProvider should be an instance of ethers.Wallet',
+    );
+    if (etherProvider) {
+      this.provider = etherProvider;
+    } else {
+      check(this.provider, 'you should call setPrivateKey before calling connect');
+    }
+    return await this.accounts();
+  }
+
+  /**
+   * @desc get current active chain id of the signer in hex string with prefix '0x'.
+   * @returns {Promise<string>} chain id
+   * @override
+   * @throws {Error} if this signer has not been connected.
+   */
+  chainId() {
+    return Promise.resolve(this.currentChainId ? toHex(this.currentChainId) : 'undefined');
+  }
+
+  /**
+   * @desc switch current connected signer to a different blockchain network.
+   * @override
+   * @param {number} chainId the chain id to switch to.
+   * @param {ChainConfig} chainConfig configuration of the chain to switch to.
+   * @returns {Promise<void>}
+   * @throws {Error} if the signer is not properly initialized, or failed to switch to the requested chain.
+   */
+  switchChain(chainId, chainConfig) {
+    check(typeof chainId === 'number', 'chainId should be a number');
+    check(chainConfig instanceof ChainConfig, 'chainConfig should be instance of ChainConfig');
+    check(this.provider, 'you should call setPrivateKey before calling switchChain');
+    const jsonRpcProvider = this.providerPool.getProvider(chainId);
+    this.provider = this.provider.connect(jsonRpcProvider);
+    this.currentChainId = chainId;
+    return Promise.resolve();
+  }
+
+  /**
+   * @property {external:Signer} signer
+   * @override
+   * @desc get the {@link external:Signer} instance of this wrapped signer instance.
+   * @throws {Error} if the signer has not been connected.
+   */
+  get signer() {
+    return this.provider;
   }
 }
 
@@ -179,4 +285,5 @@ export async function checkSigner(signer, chainId, config) {
   if (signerChainId !== chainIdHex) {
     await signer.switchChain(chainId, config.getChainConfig(chainId));
   }
+  check(signer.signer, 'raw signer is undefined or null');
 }

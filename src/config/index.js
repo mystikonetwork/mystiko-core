@@ -1,6 +1,6 @@
 import { MystikoConfig } from './mystikoConfig';
-import DefaultTestnetConfigJson from './default/testnet.json';
-import DefaultMainnetConfigJson from './default/mainnet.json';
+import DefaultTestnetConfigJson from '../../config/default/testnet.json';
+import DefaultMainnetConfigJson from '../../config/default/mainnet.json';
 
 /**
  * @module module:mystiko/config

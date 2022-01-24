@@ -19,6 +19,10 @@ import { AssetType } from '../model';
  * @see {@link https://docs.ethers.io/v5/api/signer Signer}
  */
 /**
+ * @external external:Wallet
+ * @see {@link https://docs.ethers.io/v5/api/signer/#Wallet Wallet}
+ */
+/**
  * @class MystikoContract
  * @param {ContractConfig} contract configuration of this contract.
  * @desc a wrapped contract object with {@link external:Contract} and

@@ -1,6 +1,8 @@
-import { BaseSigner, MetaMaskSigner, checkSigner } from '../../src/chain/signer.js';
+import { ethers } from 'ethers';
+import { BaseSigner, MetaMaskSigner, PrivateKeySigner, checkSigner } from '../../src/chain/signer.js';
 import { readFromFile } from '../../src/config';
 import { toHex } from '../../src/utils.js';
+import { ProviderPool } from '../../src/chain/provider.js';
 
 class MockProvider {
   constructor(accounts, chainId) {
@@ -55,16 +57,16 @@ class MockProvider {
   }
 }
 
-async function testSigner(conf, signer) {
+async function testSigner(conf, signer, defaultInstalled = false) {
   expect(await signer.connected()).toBe(false);
-  expect(await signer.installed()).toBe(false);
+  expect(await signer.installed()).toBe(defaultInstalled);
   await expect(signer.accounts()).rejects.toThrow();
   await expect(signer.chainId()).rejects.toThrow();
   await expect(signer.connect()).rejects.toThrow();
   const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 123);
   signer = new MetaMaskSigner(conf, provider);
   expect(await signer.connected()).toBe(false);
-  expect(await signer.installed()).toBe(false);
+  expect(await signer.installed()).toBe(defaultInstalled);
   expect((await signer.accounts()).length).toBe(0);
   expect(await signer.chainId()).toBe('0x7b');
   expect((await signer.connect()).length).toBe(1);
@@ -83,6 +85,28 @@ test('test metamask signer', async () => {
   await testSigner(conf, new MetaMaskSigner(conf));
 });
 
+test('test private key signer', async () => {
+  const conf = await readFromFile('tests/config/files/config.test.json');
+  const providerPool = new ProviderPool(conf);
+  providerPool.connect();
+  const signer = new PrivateKeySigner(conf, providerPool);
+  expect(await signer.installed()).toBe(true);
+  expect(await signer.connected()).toBe(false);
+  expect(await signer.chainId()).toBe('undefined');
+  expect(await signer.accounts()).toStrictEqual([]);
+  const etherWallet = ethers.Wallet.createRandom();
+  signer.setPrivateKey(etherWallet.privateKey);
+  expect(await signer.connect()).toStrictEqual([etherWallet.address]);
+  expect(await signer.connected()).toBe(true);
+  expect(await signer.accounts()).toStrictEqual([etherWallet.address]);
+  await signer.switchChain(1, conf.getChainConfig(1));
+  expect(signer.signer).not.toBe(undefined);
+  expect(signer.signer instanceof ethers.Signer).toBe(true);
+  expect(await signer.chainId()).toBe('0x1');
+  expect(await signer.accounts()).toStrictEqual([etherWallet.address]);
+  expect(await signer.connect(etherWallet)).toStrictEqual([etherWallet.address]);
+});
+
 test('test checkSigner', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');
   await expect(checkSigner({}, 123, conf)).rejects.toThrow();
@@ -95,7 +119,7 @@ test('test checkSigner', async () => {
   expect(await signer.chainId()).toBe(toHex(56));
 });
 
-test('test switchChain', async () => {
+test('test MetaMask switchChain', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');
   const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 1);
   const signer = new MetaMaskSigner(conf, provider);

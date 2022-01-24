@@ -5,15 +5,31 @@ Before you go through this tutorial, please make sure you have finished {@tutori
 After you import {@link PrivateNote} into your wallet, you could choose any {@link PrivateNote} to withdraw the asset.
 You can achieve that by calling this method.
 
+Construct the request body.
 ```javascript
 // 123 is the id of private note
 var request = { privateNote: 123, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' }
-// make sure MetaMask is connected
+```
+
+Choose a signer
+```javascript
+// signer should be connected - use this in browser
 var signer = mystiko.signers.metaMask;
-// callback function for listening on the status change.
+```
+```javascript
+// signer should be provided with private key - use this in Node.js console
+var signer = mystiko.signers.privateKey;
+```
+
+Define callback function for listening on the status change
+```javascript
 var statusCallback = (withdraw, oldStatus, newStatus) => {
   console.log(`withdraw status changes from ${oldStatus} to ${newStatus}`)
 }
+```
+
+Create the withdrawal transaction.
+```javascript
 mystiko.withdraws.createWithdraw('wallet password', request, signer, statusCallback)
   .then(({ withdraw, withdrawPromise })  => {
     return withdrawPromise.then(() => {
