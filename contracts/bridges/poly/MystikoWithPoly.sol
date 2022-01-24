@@ -4,19 +4,12 @@ pragma solidity ^0.6.11;
 import "../../Mystiko.sol";
 import "./cross_chain_manager/interface/IEthCrossChainManager.sol";
 import "./cross_chain_manager/interface/IEthCrossChainManagerProxy.sol";
-import "../../libs/common/ZeroCopySink.sol";
-import "../../libs/common/ZeroCopySource.sol";
-import "../../libs/utils/Utils.sol";
+import "../CrossChainDataSerializable.sol";
 
-abstract contract MystikoWithPoly is Mystiko {
+abstract contract MystikoWithPoly is Mystiko, CrossChainDataSerializable {
   IEthCrossChainManagerProxy public eccmp;
   uint64 public peerChainId;
   address public peerContractAddress;
-
-  struct CrossChainData {
-    uint256 amount;
-    bytes32 commitmentHash;
-  }
 
   constructor(
     address _eccmp,
@@ -40,7 +33,7 @@ abstract contract MystikoWithPoly is Mystiko {
     bytes memory fromContractAddr,
     uint64 fromChainId
   ) public onlyManagerContract returns (bool) {
-    CrossChainData memory txData = _deserializeTxData(txDataBytes);
+    CrossChainData memory txData = deserializeTxData(txDataBytes);
     require(fromContractAddr.length != 0, "from proxy contract address cannot be empty");
     require(Utils.bytesToAddress(fromContractAddr) == peerContractAddress, "from proxy address not matched");
     require(fromChainId == peerChainId, "from chain id not matched");
@@ -52,7 +45,7 @@ abstract contract MystikoWithPoly is Mystiko {
 
   function _processCrossChain(uint256 amount, bytes32 commitmentHash) internal override {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
-    bytes memory txDataBytes = _serializeTxData(txData);
+    bytes memory txDataBytes = serializeTxData(txData);
     IEthCrossChainManager eccm = IEthCrossChainManager(eccmp.getEthCrossChainManager());
     require(
       eccm.crossChain(peerChainId, Utils.addressToBytes(peerContractAddress), "syncTx", txDataBytes),
@@ -62,25 +55,6 @@ abstract contract MystikoWithPoly is Mystiko {
 
   function bridgeType() public view override returns (string memory) {
     return "poly";
-  }
-
-  function _serializeTxData(CrossChainData memory data) internal pure returns (bytes memory) {
-    bytes memory buff;
-    buff = abi.encodePacked(
-      ZeroCopySink.WriteUint255(data.amount),
-      ZeroCopySink.WriteVarBytes(abi.encodePacked(data.commitmentHash))
-    );
-    return buff;
-  }
-
-  function _deserializeTxData(bytes memory rawData) internal pure returns (CrossChainData memory) {
-    CrossChainData memory data;
-    uint256 off = 0;
-    (data.amount, off) = ZeroCopySource.NextUint255(rawData, off);
-    bytes memory tempBytes;
-    (tempBytes, off) = ZeroCopySource.NextVarBytes(rawData, off);
-    data.commitmentHash = Utils.bytesToBytes32(tempBytes);
-    return data;
   }
 
   function setECCMProxy(address _eccmp) external onlyOperator {
