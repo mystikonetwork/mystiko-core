@@ -5,7 +5,8 @@ Before you go through this tutorial, please make sure you have finished {@tutori
 Once your wallet is created successfully, you could then add an account into the wallet, by calling this method:
 
 ```javascript
-mystiko.accounts.addAccount('wallet password', 'name of account') // returns Promise<Account>
+var account
+mystiko.accounts.addAccount('wallet password', 'name of account').then((a) => { account = a })
 ```
 
 This method is `async`, you should await it properly to get the instance of the created {@link Account}.

@@ -63,6 +63,7 @@ After your user finish choosing a source chain, a destination chain, an asset sy
 a cross-chain bridge(if necessary), deposit amount and recipient shielded address, you could create a deposit
 based on these inputs. Below code is an example:
 
+Construct the request body.
 ```javascript
 var request = {
   srcChainId: 97,
@@ -72,12 +73,26 @@ var request = {
   amount: 100,
   shieldedAddress: 'Aa9ABUws2WBSUd3WVWCkUAA13SFnyDdbPVazY2YpRUvLZuLfSAh3rtDHqXVRxWPw8pRGsPc2sQuY31J66he6a3sao'
 }
-// signer should be connected.
+```
+Choose a signer.
+```javascript
+// signer should be connected - use this in browser
 var signer = mystiko.signers.metaMask;
-// callback function for listening on the status change.
+```
+```javascript
+// signer should be provided with private key - use this in Node.js console
+var signer = mystiko.signers.privateKey;
+```
+
+Define a callback for listening on the status change.
+```javascript
 var statusCallback = (deposit, oldStatus, newStatus) => {
   console.log(`deposit status changes from ${oldStatus} to ${newStatus}`)
 }
+```
+
+Create the deposit transaction.
+```javascript
 mystiko.deposits.createDeposit(request, signer, statusCallback).then(({ deposit, depositPromise }) => {
   return depositPromise.then(() => {
     if (deposit.status === mystiko.models.DepositStatus.SRC_CONFIRMED) {

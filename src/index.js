@@ -12,7 +12,7 @@ import * as utils from './utils.js';
 import * as models from './model';
 import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';
-import { MetaMaskSigner } from './chain/signer.js';
+import { MetaMaskSigner, PrivateKeySigner } from './chain/signer.js';
 
 /**
  * @module module:mystiko
@@ -30,6 +30,7 @@ import { MetaMaskSigner } from './chain/signer.js';
  * @property {ProviderPool} providers pool of configured JSON-RPC providers for different blockchains.
  * @property {Object} signers object including supported transaction signers.
  * @property {MetaMaskSigner} signers.metaMask transaction signer with MetaMask.
+ * @property {PrivateKeySigner} signers.privateKey transaction signer with private key.
  * @property {module:mystiko/utils} utils a collection of util functions.
  * @property {WalletHandler} wallets handler of Wallet related business logic.
  * @property {WithdrawHandler} withdraws handler of Withdraw related business logic.
@@ -104,6 +105,7 @@ mystiko.initialize = async ({
   );
   mystiko.signers = {
     metaMask: new MetaMaskSigner(mystiko.config),
+    privateKey: new PrivateKeySigner(mystiko.config, mystiko.providers),
   };
 };
 export default mystiko;
