@@ -71,7 +71,13 @@ var mystiko = require('./src/index.js').default
 You need to initialize the library before you do other things, you can achieve it by calling this function:
 
 ```javascript
-mystiko.initialize({ conf: 'config/cli/testnet.json' }).then(r => console.log('initialized'))
+var Adapter = require('lokijs/src/loki-fs-structured-adapter.js')
+var options = {
+  dbFile: '/tmp/mystiko.db',
+  dbAdapter: new Adapter(),
+  conf: 'config/cli/testnet.json'
+}
+mystiko.initialize(options).then(r => console.log('initialized'))
 ```
 
 Now you have finished the first tutorial. In the next tutorial, you will learn
