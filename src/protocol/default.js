@@ -10,7 +10,8 @@ import MerkleTree from 'fixed-merkle-tree';
 import { groth16, wtns } from 'snarkjs';
 import bs58 from 'bs58';
 import BN from 'bn.js';
-import { toHex, check, toHexNoPrefix, readJsonFile } from '../utils.js';
+import { toHex, toString, check, toHexNoPrefix, readJsonFile } from '../utils.js';
+import logger from '../logger.js';
 
 /**
  * @module module:mystiko/protocol/default
@@ -456,6 +457,12 @@ export async function commitment(
     pkEnc,
     Buffer.concat([randomP, randomR, bigIntToBuff(randomS, RANDOM_SK_SIZE)]),
   );
+  logger.debug(
+    'commitment generation is done:' +
+      `commitmentHash='${toString(commitmentHash)}', ` +
+      `randomS='${toString(randomS)}', ` +
+      `privateNote='${toHex(privateNote)}'`,
+  );
   return { commitmentHash, k, randomS, privateNote };
 }
 
@@ -539,6 +546,7 @@ export async function zkProve(
   check(typeof treeIndex === 'number', 'unsupported treeIndex type ' + typeof treeIndex);
   check(typeof wasmFile === 'string', 'unsupported wasmFile type ' + typeof wasmFile);
   check(typeof zkeyFile === 'string', 'unsupported zkeyFile type ' + typeof zkeyFile);
+  logger.debug('start generating zkSnark proofs...');
   const decryptedNote = await decryptAsymmetric(skEnc, privateNote);
   check(decryptedNote.length === RANDOM_SK_SIZE * 3, 'decrypted note length is incorrect');
   const randomP = decryptedNote.slice(0, RANDOM_SK_SIZE);
@@ -574,9 +582,18 @@ export async function zkProve(
     randomS: buffToBigInt(randomS).toString(),
     commitment: commitmentHash.toString(),
   };
+  logger.debug(
+    'calculating witness with public inputs:' +
+      `rootHash='${toString(tree.root())}', ` +
+      `serialNumber='${toString(serialNumber)}', ` +
+      `amount="${toString(amount)}"'`,
+  );
   const wtnsOptions = { type: 'mem' };
   await wtns.calculate(inputs, wasmFile, wtnsOptions);
-  return await groth16.prove(zkeyFile, wtnsOptions);
+  logger.debug('witness calculation is done, start proving...');
+  const proofs = await groth16.prove(zkeyFile, wtnsOptions);
+  logger.debug('zkSnark proof is generated successfully');
+  return proofs;
 }
 
 /**
@@ -589,5 +606,8 @@ export async function zkProve(
  */
 export async function zkVerify(proof, publicSignals, verifyKeyFile) {
   const vkey = await readJsonFile(verifyKeyFile);
-  return await groth16.verify(vkey, publicSignals, proof);
+  logger.debug('start verifying generated proofs...');
+  const result = await groth16.verify(vkey, publicSignals, proof);
+  logger.debug(`proof verification is done, result=${result}`);
+  return result;
 }

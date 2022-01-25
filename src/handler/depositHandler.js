@@ -8,6 +8,7 @@ import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus, AssetType, BridgeType, ID_KEY, OffChainNote } from '../model';
+import rootLogger from '../logger';
 
 /**
  * @class DepositHandler
@@ -31,6 +32,7 @@ export class DepositHandler extends Handler {
     this.accountHandler = accountHandler;
     this.noteHandler = noteHandler;
     this.contractPool = contractPool;
+    this.logger = rootLogger.getLogger('DepositHandler');
   }
 
   /**
@@ -103,8 +105,10 @@ export class DepositHandler extends Handler {
       })
       .catch((error) => {
         deposit.errorMessage = toString(error);
+        this.logger.error(`deposit(id=${deposit.id}) transaction raised error: ${deposit.errorMessage}`);
         return this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
       });
+    this.logger.info(`successfully created a deposit(id=${deposit.id}), waiting on the transaction(s)...`);
     return { deposit, depositPromise };
   }
 
@@ -204,11 +208,17 @@ export class DepositHandler extends Handler {
       const allowance = await asset.allowance(deposit.srcAddress, spenderAddress);
       const allowanceBN = new BN(allowance.toString());
       if (allowanceBN.lt(deposit.amount)) {
+        this.logger.info(`start submitting asset approving transaction for deposit(id=${deposit.id})`);
         const txResponse = await assetContract.approve(protocol.address, deposit.amount.toString());
+        this.logger.info(
+          `asset approving transaction for deposit(id=${deposit.id}) is submitted ` +
+            `with txHash='${txResponse.hash}', waiting for confirmation...`,
+        );
         deposit.assetApproveTxHash = txResponse.hash;
         await this._updateDepositStatus(deposit, DepositStatus.ASSET_APPROVING, statusCallback);
         let newStatus = deposit.status;
         const txReceipt = await txResponse.wait();
+        this.logger.info(`asset approving transaction for deposit(id=${deposit.id}) is confirmed on chain`);
         newStatus = DepositStatus.ASSET_APPROVED;
         deposit.assetApproveTxHash = txReceipt.transactionHash;
         return await this._updateDepositStatus(deposit, newStatus, statusCallback);
@@ -220,6 +230,7 @@ export class DepositHandler extends Handler {
   async _sendDeposit(signer, deposit, depositContracts, isMainAsset, statusCallback) {
     check(deposit.status === DepositStatus.ASSET_APPROVED, 'token not approved');
     const protocolContract = await depositContracts.protocol.connect(signer.signer);
+    this.logger.info(`start submitting deposit transaction for deposit(id=${deposit.id})`);
     const depositTxResponse = await protocolContract.deposit(
       deposit.amount.toString(),
       toFixedLenHex(deposit.commitmentHash),
@@ -228,15 +239,21 @@ export class DepositHandler extends Handler {
       toHex(deposit.privateNote),
       { value: isMainAsset ? deposit.amount.toString() : '0' },
     );
+    this.logger.info(
+      `deposit transaction for deposit(id=${deposit.id}) is submitted ` +
+        `with txHash='${depositTxResponse.hash}', waiting for confirmation...`,
+    );
     deposit.srcTxHash = depositTxResponse.hash;
     await this._updateDepositStatus(deposit, DepositStatus.SRC_PENDING, statusCallback);
     let newStatus = deposit.status;
     const txReceipt = await depositTxResponse.wait();
+    this.logger.info(`deposit transaction for deposit(id=${deposit.id}) is confirmed on source chain`);
     newStatus = DepositStatus.SRC_CONFIRMED;
     deposit.srcTxHash = txReceipt.transactionHash;
     await this._updateDepositStatus(deposit, newStatus, statusCallback);
     if (deposit.bridge === BridgeType.LOOP) {
       if (deposit.status === DepositStatus.SRC_CONFIRMED) {
+        this.logger.info(`deposit transaction for deposit(id=${deposit.id}) succeeded`);
         await this._updateDepositStatus(deposit, DepositStatus.SUCCEEDED, statusCallback);
       }
     }
@@ -259,6 +276,7 @@ export class DepositHandler extends Handler {
     if (statusCallback && statusCallback instanceof Function) {
       statusCallback(deposit, oldStatus, newStatus);
     }
+    this.logger.info(`successfully updated deposit(id=${deposit.id}) status from ${oldStatus} to ${newStatus}`);
     return deposit;
   }
 

@@ -21,16 +21,9 @@ var signer = mystiko.signers.metaMask;
 var signer = mystiko.signers.privateKey;
 ```
 
-Define callback function for listening on the status change
-```javascript
-var statusCallback = (withdraw, oldStatus, newStatus) => {
-  console.log(`withdraw status changes from ${oldStatus} to ${newStatus}`)
-}
-```
-
 Create the withdrawal transaction.
 ```javascript
-mystiko.withdraws.createWithdraw('wallet password', request, signer, statusCallback)
+mystiko.withdraws.createWithdraw('wallet password', request, signer)
   .then(({ withdraw, withdrawPromise })  => {
     return withdrawPromise.then(() => {
       if (withdraw.status == mystiko.models.WithdrawStatus.SUCCEEDED) {

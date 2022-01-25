@@ -9,6 +9,7 @@ import { ContractPool } from '../chain/contract.js';
 import { check, toBuff, toString, toHexNoPrefix } from '../utils.js';
 import { checkSigner } from '../chain/signer.js';
 import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../model';
+import rootLogger from '../logger';
 
 /**
  * @class WithdrawHandler
@@ -35,6 +36,7 @@ export class WithdrawHandler extends Handler {
     this.noteHandler = noteHandler;
     this.providerPool = providerPool;
     this.contractPool = contractPool;
+    this.logger = rootLogger.getLogger('WithdrawHandler');
   }
 
   /**
@@ -110,8 +112,10 @@ export class WithdrawHandler extends Handler {
       })
       .catch((error) => {
         withdraw.errorMessage = toString(error);
+        this.logger.error(`withdraw(id=${withdraw.id}) transaction raised error: ${withdraw.errorMessage}`);
         return this._updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);
       });
+    this.logger.info(`successfully created a withdraw(id=${withdraw.id}), waiting on the transaction...`);
     return { withdraw, withdrawPromise };
   }
 
@@ -203,6 +207,7 @@ export class WithdrawHandler extends Handler {
     statusCallback,
   ) {
     await this._updateStatus(withdraw, WithdrawStatus.GENERATING_PROOF, statusCallback);
+    this.logger.info(`generating zkSnark proofs for withdraw(id=${withdraw.id})...`);
     const { leaves, leafIndex } = await this._buildMerkleTree(contract, privateNote.commitmentHash);
     const pkVerify = account.verifyPublicKey;
     const pkEnc = account.encPublicKey;
@@ -232,6 +237,7 @@ export class WithdrawHandler extends Handler {
       circuitConfig.vkeyFile,
     );
     check(validProof, 'generated an invalid proof');
+    this.logger.info(`successfully generated zkSnark proofs for withdraw(id=${withdraw.id})`);
     const { proof, publicSignals } = zkProof;
     const proofA = [proof.pi_a[0], proof.pi_a[1]];
     const proofB = [
@@ -255,6 +261,7 @@ export class WithdrawHandler extends Handler {
     statusCallback,
   ) {
     contract = contract.connect(signer.signer);
+    this.logger.info(`start submitting withdrawal transaction for withdraw(id=${withdraw.id})`);
     const txResponse = await contract.withdraw(
       proofA,
       proofB,
@@ -264,11 +271,16 @@ export class WithdrawHandler extends Handler {
       amount,
       recipientAddress,
     );
+    this.logger.info(
+      `withdrawal transaction for withdraw(id=${withdraw.id}) is submitted ` +
+        `with txHash='${txResponse.hash}', waiting for confirmation...`,
+    );
     withdraw.merkleRootHash = new BN(rootHash);
     withdraw.serialNumber = new BN(serialNumber);
     withdraw.transactionHash = txResponse.hash;
     await this._updateStatus(withdraw, WithdrawStatus.PENDING, statusCallback);
     const txReceipt = await txResponse.wait();
+    this.logger.info(`withdrawal transaction for withdraw(id=${withdraw.id}) is confirmed on chain`);
     withdraw.transactionHash = txReceipt.transactionHash;
     await this._updateStatus(withdraw, WithdrawStatus.SUCCEEDED, statusCallback);
     privateNote.withdrawTransactionHash = txReceipt.transactionHash;
@@ -290,6 +302,7 @@ export class WithdrawHandler extends Handler {
     if (statusCallback && statusCallback instanceof Function) {
       statusCallback(withdraw, oldStatus, newStatus);
     }
+    this.logger.info(`successfully updated withdraw(id=${withdraw.id}) status from ${oldStatus} to ${newStatus}`);
     return withdraw;
   }
 }

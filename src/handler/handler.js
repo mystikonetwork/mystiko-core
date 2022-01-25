@@ -1,6 +1,7 @@
 import { check, checkDefinedAndNotNull } from '../utils.js';
 import * as protocol from '../protocol';
 import { MystikoConfig } from '../config';
+import rootLogger from '../logger';
 
 /**
  * @class Handler
@@ -21,6 +22,7 @@ export class Handler {
      * @desc default implementation of Mystiko protocol
      */
     this.protocol = protocol;
+    this.logger = rootLogger.getLogger('Handler');
   }
 
   /**

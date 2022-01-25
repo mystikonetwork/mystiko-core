@@ -84,16 +84,9 @@ var signer = mystiko.signers.metaMask;
 var signer = mystiko.signers.privateKey;
 ```
 
-Define a callback for listening on the status change.
-```javascript
-var statusCallback = (deposit, oldStatus, newStatus) => {
-  console.log(`deposit status changes from ${oldStatus} to ${newStatus}`)
-}
-```
-
 Create the deposit transaction.
 ```javascript
-mystiko.deposits.createDeposit(request, signer, statusCallback).then(({ deposit, depositPromise }) => {
+mystiko.deposits.createDeposit(request, signer).then(({ deposit, depositPromise }) => {
   return depositPromise.then(() => {
     if (deposit.status === mystiko.models.DepositStatus.SRC_CONFIRMED) {
       console.log(`Deposit #${deposit.id} is confirmed on the source chain`)

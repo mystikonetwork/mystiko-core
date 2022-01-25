@@ -1,6 +1,7 @@
 import { Handler } from './handler.js';
 import { ID_KEY, Wallet } from '../model/';
 import { check } from '../utils.js';
+import rootLogger from '../logger';
 
 /**
  * @class WalletHandler
@@ -12,6 +13,7 @@ import { check } from '../utils.js';
 export class WalletHandler extends Handler {
   constructor(db, config) {
     super(db, config);
+    this.logger = rootLogger.getLogger('WalletHandler');
   }
 
   /**
@@ -37,6 +39,7 @@ export class WalletHandler extends Handler {
     };
     const wallet = new Wallet(this.db.wallets.insert(data));
     await this.saveDatabase();
+    this.logger.info(`successfully created a wallet(id=${wallet.id})`);
     return wallet;
   }
 
@@ -109,6 +112,7 @@ export class WalletHandler extends Handler {
       wallet.encryptedMasterSeed = this.protocol.encryptSymmetric(newPassword, decryptedMasterSeed);
       this.db.wallets.update(wallet.data);
       await this.saveDatabase();
+      this.logger.info(`successfully updated wallet(id=${wallet.id}) password`);
       return true;
     }
     return false;

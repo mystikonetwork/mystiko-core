@@ -3,6 +3,7 @@ import { ID_KEY, Account } from '../model';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import rootLogger from '../logger.js';
 
 /**
  * @class AccountHandler
@@ -17,6 +18,7 @@ export class AccountHandler extends Handler {
     super(db, config);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     this.walletHandler = walletHandler;
+    this.logger = rootLogger.getLogger('AccountHandler');
   }
 
   /**
@@ -107,6 +109,7 @@ export class AccountHandler extends Handler {
     wallet.accountNonce = wallet.accountNonce + 2;
     this.db.wallets.update(wallet.data);
     await this.saveDatabase();
+    this.logger.info(`successfully added an account(id=${account.id})`);
     return account;
   }
 
@@ -131,12 +134,17 @@ export class AccountHandler extends Handler {
     const account = this._createAccount(walletPassword, accountName, verifySecretKey, encSecretKey);
     const existingAccount = this.getAccount(account.shieldedAddress);
     if (existingAccount) {
+      this.logger.info(
+        `there is an existing account(id=${existingAccount.id})` +
+          'matches this secret key, so updating the existing account',
+      );
       existingAccount.name = accountName;
       this.db.accounts.update(existingAccount.data);
       await this.saveDatabase();
     } else {
       this.db.accounts.insert(account.data);
       await this.saveDatabase();
+      this.logger.info(`successfully imported an new account(id=${account.id})`);
     }
     return account;
   }
@@ -155,6 +163,7 @@ export class AccountHandler extends Handler {
     check(account, `${account.toString()} does not exist`);
     this.db.accounts.remove(account.data);
     await this.saveDatabase();
+    this.logger.info(`successfully removed account(id=${account.id})`);
     return account;
   }
 
@@ -170,6 +179,7 @@ export class AccountHandler extends Handler {
     check(typeof newPassword === 'string', 'newPassword should be instance of string');
     check(this.walletHandler.checkPassword(oldPassword), 'incorrect walletPassword is given');
     this.getAccounts().forEach((account) => {
+      this.logger.info(`updating account(id=${account.id}) encrypted secret keys`);
       const verifySecretKey = this.protocol.decryptSymmetric(oldPassword, account.encryptedVerifySecretKey);
       const encSecretKey = this.protocol.decryptSymmetric(oldPassword, account.encryptedEncSecretKey);
       account.encryptedVerifySecretKey = this.protocol.encryptSymmetric(newPassword, verifySecretKey);
@@ -177,6 +187,7 @@ export class AccountHandler extends Handler {
       this.db.accounts.update(account.data);
     });
     await this.saveDatabase();
+    this.logger.info('successfully updated all accounts encrypted secret keys');
   }
 
   /**
@@ -196,6 +207,7 @@ export class AccountHandler extends Handler {
     account.name = newName;
     this.db.accounts.update(account.data);
     await this.saveDatabase();
+    this.logger.info(`successfully updated account(id=${account.id}) name to ${newName}`);
     return account;
   }
 
