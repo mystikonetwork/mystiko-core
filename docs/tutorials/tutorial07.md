@@ -24,15 +24,6 @@ var signer = mystiko.signers.privateKey;
 Create the withdrawal transaction.
 ```javascript
 mystiko.withdraws.createWithdraw('wallet password', request, signer)
-  .then(({ withdraw, withdrawPromise })  => {
-    return withdrawPromise.then(() => {
-      if (withdraw.status == mystiko.models.WithdrawStatus.SUCCEEDED) {
-        console.log(`Withdraw ${withdraw.id} succeeded`)
-      } else {
-        console.log(`Withdraw ${withdraw.id} failed with error ${withdraw.errorMessage}`)
-      }
-    });
-  })
 ```
 
 The {@link WithdrawHandler#createWithdraw} method resolves after the {@link Withdraw} instance has been initialized

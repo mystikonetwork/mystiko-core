@@ -205,6 +205,8 @@ export class DepositHandler extends Handler {
     if (asset) {
       const assetContract = asset.connect(signer.signer);
       const spenderAddress = protocol.address;
+      const balance = await asset.balanceOf(deposit.srcAddress);
+      check(deposit.amount.lte(new BN(toString(balance))), 'insufficient balance');
       const allowance = await asset.allowance(deposit.srcAddress, spenderAddress);
       const allowanceBN = new BN(allowance.toString());
       if (allowanceBN.lt(deposit.amount)) {
@@ -223,6 +225,9 @@ export class DepositHandler extends Handler {
         deposit.assetApproveTxHash = txReceipt.transactionHash;
         return await this._updateDepositStatus(deposit, newStatus, statusCallback);
       }
+    } else {
+      const balance = await signer.signer.getBalance();
+      check(deposit.amount.lte(new BN(toString(balance))), 'insufficient balance');
     }
     return await this._updateDepositStatus(deposit, DepositStatus.ASSET_APPROVED, undefined, statusCallback);
   }

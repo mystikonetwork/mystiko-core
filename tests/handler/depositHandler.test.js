@@ -34,16 +34,22 @@ class MockTransactionResponse {
 }
 
 class MockERC20Contract extends ethers.Contract {
-  constructor(address, abi, defaultOwner) {
+  constructor(address, abi, defaultOwner, balance) {
     super(address, abi);
     this._allowance = { [defaultOwner]: {} };
     this.defaultOwner = defaultOwner;
     this.approveCount = 0;
+    this.balance = balance;
   }
 
   connect(providerOrSigner) {
     expect(providerOrSigner).not.toBe(undefined);
     return this;
+  }
+
+  balanceOf(address) {
+    expect(address).toBe(this.defaultOwner);
+    return Promise.resolve(toDecimals(this.balance, 18));
   }
 
   allowance(owner, spender) {
@@ -108,10 +114,11 @@ class MockMystikoContract extends ethers.Contract {
 }
 
 class MockSigner extends BaseSigner {
-  constructor(conf, expectedAddress, expectedChainId) {
+  constructor(conf, expectedAddress, expectedChainId, expectedBalance) {
     super(conf);
     this.expectedAddress = expectedAddress;
     this.expectedChainId = expectedChainId;
+    this.expectedBalance = expectedBalance;
   }
 
   async connected() {
@@ -122,6 +129,9 @@ class MockSigner extends BaseSigner {
     return {
       getAddress: () => {
         return new Promise((resolve) => resolve(this.expectedAddress));
+      },
+      getBalance: () => {
+        return Promise.resolve(toDecimals(this.expectedBalance, 18));
       },
     };
   }
@@ -156,7 +166,7 @@ beforeEach(async () => {
   await contractPool.connect((address, abi, providerOrSigner) => {
     if (abi === MystikoABI.ERC20) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
-      return new MockERC20Contract(address, abi, defaultOwner);
+      return new MockERC20Contract(address, abi, defaultOwner, 500);
     } else {
       return new MockMystikoContract(address, abi, providerOrSigner);
     }
@@ -254,7 +264,7 @@ test('test createDeposit loop main', async () => {
     }
   });
   const contracts = contractPool.getDepositContracts(1, 1, 'ETH', BridgeType.LOOP);
-  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
+  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
   expect(deposit.srcChainId).toBe(1);
   expect(deposit.dstChainId).toBe(1);
@@ -289,7 +299,7 @@ test('test createDeposit loop error', async () => {
       return new MockMystikoContract(address, abi, providerOrSigner, undefined, true);
     }
   });
-  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
+  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   const contracts = contractPool.getDepositContracts(1, 1, 'ETH', BridgeType.LOOP);
   contracts.protocol.errorMessage = 'error here';
   const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
@@ -364,7 +374,7 @@ test('test query deposits', async () => {
       return new MockMystikoContract(address, abi, providerOrSigner, undefined, true);
     }
   });
-  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
+  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   const ret1 = await depositHandler.createDeposit(request1, signer);
   await ret1.depositPromise;
   expect(ret1.deposit.errorMessage).toBe(undefined);
@@ -372,7 +382,7 @@ test('test query deposits', async () => {
   await contractPool.connect((address, abi, providerOrSigner) => {
     if (abi === MystikoABI.ERC20) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
-      return new MockERC20Contract(address, abi, defaultOwner);
+      return new MockERC20Contract(address, abi, defaultOwner, 500);
     } else {
       return new MockMystikoContract(address, abi, providerOrSigner, undefined);
     }
@@ -425,7 +435,7 @@ test('test exportOffChainNote', async () => {
       return new MockMystikoContract(address, abi, providerOrSigner, undefined, true);
     }
   });
-  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
+  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   const ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
   expect(ret.deposit.errorMessage).toBe(undefined);
@@ -433,4 +443,48 @@ test('test exportOffChainNote', async () => {
   const offChainNote = depositHandler.exportOffChainNote(ret.deposit.id);
   expect(offChainNote.chainId).toBe(ret.deposit.srcChainId);
   expect(offChainNote.transactionHash).toBe(ret.deposit.srcTxHash);
+});
+
+test('test insufficient balance', async () => {
+  let request = {
+    srcChainId: 1,
+    dstChainId: 1,
+    assetSymbol: 'ETH',
+    bridge: BridgeType.LOOP,
+    amount: 600,
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+  };
+  await contractPool.connect((address, abi, providerOrSigner) => {
+    if (abi === MystikoABI.ERC20) {
+      const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
+      return new MockERC20Contract(address, abi, defaultOwner);
+    } else {
+      return new MockMystikoContract(address, abi, providerOrSigner, undefined, true);
+    }
+  });
+  const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
+  let ret = await depositHandler.createDeposit(request, signer);
+  await ret.depositPromise;
+  expect(ret.deposit.errorMessage).not.toBe(undefined);
+  request = {
+    srcChainId: 1,
+    dstChainId: 1,
+    assetSymbol: 'USDT',
+    bridge: BridgeType.LOOP,
+    amount: 600,
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+  };
+  await contractPool.connect((address, abi, providerOrSigner) => {
+    if (abi === MystikoABI.ERC20) {
+      const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
+      return new MockERC20Contract(address, abi, defaultOwner, 100);
+    } else {
+      return new MockMystikoContract(address, abi, providerOrSigner, undefined, true);
+    }
+  });
+  ret = await depositHandler.createDeposit(request, signer);
+  await ret.depositPromise;
+  expect(ret.deposit.errorMessage).not.toBe(undefined);
 });

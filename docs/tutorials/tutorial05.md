@@ -86,15 +86,7 @@ var signer = mystiko.signers.privateKey;
 
 Create the deposit transaction.
 ```javascript
-mystiko.deposits.createDeposit(request, signer).then(({ deposit, depositPromise }) => {
-  return depositPromise.then(() => {
-    if (deposit.status === mystiko.models.DepositStatus.SRC_CONFIRMED) {
-      console.log(`Deposit #${deposit.id} is confirmed on the source chain`)
-    } else {
-      console.log(`Deposit #${deposit.id} is failed, error: ${deposit.errorMessage}`)
-    }
-  })
-})
+mystiko.deposits.createDeposit(request, signer)
 ```
 
 The {@link DepositHandler#createDeposit} method resolves after the {@link Deposit} instance has been initialized
