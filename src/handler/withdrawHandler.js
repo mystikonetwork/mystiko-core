@@ -302,7 +302,9 @@ export class WithdrawHandler extends Handler {
     if (statusCallback && statusCallback instanceof Function) {
       statusCallback(withdraw, oldStatus, newStatus);
     }
-    this.logger.info(`successfully updated withdraw(id=${withdraw.id}) status from ${oldStatus} to ${newStatus}`);
+    this.logger.info(
+      `successfully updated withdraw(id=${withdraw.id}) status from ${oldStatus} to ${newStatus}`,
+    );
     return withdraw;
   }
 }

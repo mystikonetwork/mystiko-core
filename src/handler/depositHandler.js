@@ -276,7 +276,9 @@ export class DepositHandler extends Handler {
     if (statusCallback && statusCallback instanceof Function) {
       statusCallback(deposit, oldStatus, newStatus);
     }
-    this.logger.info(`successfully updated deposit(id=${deposit.id}) status from ${oldStatus} to ${newStatus}`);
+    this.logger.info(
+      `successfully updated deposit(id=${deposit.id}) status from ${oldStatus} to ${newStatus}`,
+    );
     return deposit;
   }
 
