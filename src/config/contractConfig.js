@@ -7,10 +7,12 @@ const AbiIndex = {
   [AssetType.ERC20]: {
     [BridgeType.LOOP]: MystikoABI.MystikoWithLoopERC20,
     [BridgeType.POLY]: MystikoABI.MystikoWithPolyERC20,
+    [BridgeType.TBRIDGE]: MystikoABI.MystikoWithPolyERC20,
   },
   [AssetType.MAIN]: {
     [BridgeType.LOOP]: MystikoABI.MystikoWithLoopMain,
     [BridgeType.POLY]: MystikoABI.MystikoWithPolyMain,
+    [BridgeType.TBRIDGE]: MystikoABI.MystikoWithPolyMain,
   },
 };
 
