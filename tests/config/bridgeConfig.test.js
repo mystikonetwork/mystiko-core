@@ -61,4 +61,7 @@ test('test createConfig', () => {
   expect(() => BaseBridgeConfig.createConfig(rawConfig)).toThrow();
   rawConfig['type'] = BridgeType.POLY;
   expect(BaseBridgeConfig.createConfig(rawConfig) instanceof PolyBridgeConfig).toBe(true);
+
+  rawConfig['type'] = BridgeType.TBRIDGE;
+  expect(BaseBridgeConfig.createConfig(rawConfig) instanceof BaseBridgeConfig).toBe(true);
 });

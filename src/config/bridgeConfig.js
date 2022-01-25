@@ -41,6 +41,8 @@ export class BaseBridgeConfig extends BaseConfig {
   static createConfig(rawConfig) {
     if (rawConfig['type'] === BridgeType.POLY) {
       return new PolyBridgeConfig(rawConfig);
+    } else if (rawConfig['type'] === BridgeType.TBRIDGE) {
+      return new BaseBridgeConfig(rawConfig);
     }
     throw new Error('unsupported bridge type');
   }

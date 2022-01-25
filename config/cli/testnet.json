@@ -113,6 +113,10 @@
       "explorerPrefix": "/testnet/tx/%tx%",
       "apiUrl": "https://explorer.poly.network",
       "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+    },
+    {
+      "name": "Mystiko Testnet Bridge",
+      "type": "tbridge"
     }
   ],
   "circuits": [
