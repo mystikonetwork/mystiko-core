@@ -356,13 +356,33 @@ test('test query deposits', async () => {
     shieldedAddress:
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
+  await contractPool.connect((address, abi, providerOrSigner) => {
+    if (abi === MystikoABI.ERC20) {
+      const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
+      return new MockERC20Contract(address, abi, defaultOwner);
+    } else {
+      return new MockMystikoContract(address, abi, providerOrSigner, undefined, true);
+    }
+  });
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
   const ret1 = await depositHandler.createDeposit(request1, signer);
-  const ret2 = await depositHandler.createDeposit(request2, signer);
-  const ret3 = await depositHandler.createDeposit(request3, signer);
   await ret1.depositPromise;
+  expect(ret1.deposit.errorMessage).toBe(undefined);
+
+  await contractPool.connect((address, abi, providerOrSigner) => {
+    if (abi === MystikoABI.ERC20) {
+      const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
+      return new MockERC20Contract(address, abi, defaultOwner);
+    } else {
+      return new MockMystikoContract(address, abi, providerOrSigner, undefined);
+    }
+  });
+  const ret2 = await depositHandler.createDeposit(request2, signer);
   await ret2.depositPromise;
+  expect(ret2.deposit.errorMessage).toBe(undefined);
+  const ret3 = await depositHandler.createDeposit(request3, signer);
   await ret3.depositPromise;
+  expect(ret3.deposit.errorMessage).toBe(undefined);
   expect(depositHandler.getDeposit(1).srcTxHash).toBe(ret1.deposit.srcTxHash);
   expect(depositHandler.getDeposit(10000)).toBe(undefined);
   expect(depositHandler.getDeposit('wrong tx hash')).toBe(undefined);
@@ -408,6 +428,7 @@ test('test exportOffChainNote', async () => {
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
   const ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
+  expect(ret.deposit.errorMessage).toBe(undefined);
   expect(() => depositHandler.exportOffChainNote(1000)).toThrow();
   const offChainNote = depositHandler.exportOffChainNote(ret.deposit.id);
   expect(offChainNote.chainId).toBe(ret.deposit.srcChainId);

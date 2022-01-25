@@ -13,6 +13,7 @@ import {
   BridgeType,
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';
+import rootLogger from '../logger';
 
 /**
  * @class NoteHandler
@@ -32,6 +33,7 @@ export class NoteHandler extends Handler {
     this.walletHandler = walletHandler;
     this.accountHandler = accountHandler;
     this.providerPool = providerPool;
+    this.logger = rootLogger.getLogger('NoteHandler');
   }
 
   /**
@@ -132,9 +134,13 @@ export class NoteHandler extends Handler {
     check(isValidPrivateNoteStatus(status), 'invalid private note status');
     privateNote = this.getPrivateNote(privateNote);
     check(privateNote, 'no given privateNote found');
+    const oldStatus = privateNote.status;
     privateNote.status = status;
     this.db.notes.update(privateNote.data);
     await this.saveDatabase();
+    this.logger.info(
+      `successfully updated private note(id=${privateNote.id}) status from ${oldStatus} to ${status}`,
+    );
     return privateNote;
   }
 
@@ -193,6 +199,7 @@ export class NoteHandler extends Handler {
     check(!existingOne, 'duplicate notes');
     this.db.notes.insert(privateNote.data);
     await this.saveDatabase();
+    this.logger.info(`successfully created a private note(id=${privateNote.id})`);
     return privateNote;
   }
 

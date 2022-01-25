@@ -8,7 +8,7 @@ We have to build the UMD format javascript bundle to let it runs smoothly in bro
 javascript bundle:
 
 ```bash
-yarn build:js
+yarn build
 ```
 
 The output file is located in [build/js/mystiko.js](/build/js/mystiko.js).
@@ -43,6 +43,13 @@ This function is `async` and it returns `Promise<void>`, therefore, you need to 
 Please check the {@link module:mystiko.initialize} for more information of this method.
 
 ## Run in Node.js console
+### Build the project
+Before you run, there are some resources need to be built. Run this command:
+
+```bash
+yarn build
+```
+
 ### Start babel-node
 Our javascript codebase is written in [ES6](https://www.w3schools.com/js/js_es6.asp),
 therefore, [babel-node](https://babeljs.io/docs/en/babel-node) is required to be able to run this tutorial
@@ -71,13 +78,7 @@ var mystiko = require('./src/index.js').default
 You need to initialize the library before you do other things, you can achieve it by calling this function:
 
 ```javascript
-var Adapter = require('lokijs/src/loki-fs-structured-adapter.js')
-var options = {
-  dbFile: '/tmp/mystiko.db',
-  dbAdapter: new Adapter(),
-  conf: 'config/cli/testnet.json'
-}
-mystiko.initialize(options).then(r => console.log('initialized'))
+mystiko.initialize()
 ```
 
 Now you have finished the first tutorial. In the next tutorial, you will learn

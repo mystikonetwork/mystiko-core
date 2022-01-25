@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MystikoConfig, ChainConfig } from '../config';
-import { check, toHex, toHexNoPrefix } from '../utils.js';
+import { check, toHex, toHexNoPrefix, toString } from '../utils.js';
 import { ProviderPool } from './provider.js';
+import rootLogger from '../logger.js';
 
 /**
  * @class BaseSigner
@@ -16,6 +17,7 @@ export class BaseSigner {
     check(config instanceof MystikoConfig, 'config should be instance of MystikoConfig');
     this.config = config;
     this.provider = provider;
+    this.logger = rootLogger.getLogger('BaseSigner');
   }
 
   /**
@@ -80,6 +82,9 @@ export class BaseSigner {
     const acc = await this.provider.request({ method: 'eth_requestAccounts' });
     if (acc.length > 0) {
       this.etherProvider = etherProvider ? etherProvider : new ethers.providers.Web3Provider(this.provider);
+      this.logger.info(`successfully connected to signer with account=${acc[0]}`);
+    } else {
+      this.logger.error('failed to connect to signer, no account connected');
     }
     return acc;
   }
@@ -116,11 +121,13 @@ export class BaseSigner {
           ],
         });
       } else {
+        this.logger.error(`failed to switch to chain ${chainId}: ${toString(error)}`);
         throw error;
       }
     }
     check(toHex(chainId) === (await this.chainId()), 'chain has not been switched');
     await this.connect();
+    this.logger.info(`successfully switch to chain ${chainId}`);
   }
 }
 
@@ -134,6 +141,7 @@ export class BaseSigner {
 export class MetaMaskSigner extends BaseSigner {
   constructor(config, provider = undefined) {
     super(config, provider);
+    this.logger = rootLogger.getLogger('MetaMaskSigner');
   }
 
   /**
@@ -176,7 +184,7 @@ export class PrivateKeySigner extends BaseSigner {
     super(config);
     check(providerPool instanceof ProviderPool, 'providerPool should be an instance of ProviderPool');
     this.providerPool = providerPool;
-    this.currentChainId = undefined;
+    this.logger = rootLogger.getLogger('PrivateKeySigner');
   }
 
   /**
@@ -234,8 +242,12 @@ export class PrivateKeySigner extends BaseSigner {
    * @override
    * @throws {Error} if this signer has not been connected.
    */
-  chainId() {
-    return Promise.resolve(this.currentChainId ? toHex(this.currentChainId) : 'undefined');
+  async chainId() {
+    if (this.provider && this.provider.provider) {
+      const { chainId } = await this.provider.provider.getNetwork();
+      return toHex(chainId);
+    }
+    return 'undefined';
   }
 
   /**
@@ -252,7 +264,7 @@ export class PrivateKeySigner extends BaseSigner {
     check(this.provider, 'you should call setPrivateKey before calling switchChain');
     const jsonRpcProvider = this.providerPool.getProvider(chainId);
     this.provider = this.provider.connect(jsonRpcProvider);
-    this.currentChainId = chainId;
+    this.logger.info(`successfully switched to chain ${chainId}`);
     return Promise.resolve();
   }
 

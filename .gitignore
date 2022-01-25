@@ -5,6 +5,9 @@ build
 .env
 .env.test
 coverage
+db
 *.db
+*.db.*
 .idea
 jsdoc
+

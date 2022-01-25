@@ -57,6 +57,16 @@ class MockProvider {
   }
 }
 
+class MockEtherProvider extends ethers.providers.Provider {
+  constructor(rpcEndpoint, expectedChainId) {
+    super(rpcEndpoint);
+    this.expectedChainId = expectedChainId;
+  }
+  getNetwork() {
+    return Promise.resolve({ chainId: this.expectedChainId });
+  }
+}
+
 async function testSigner(conf, signer, defaultInstalled = false) {
   expect(await signer.connected()).toBe(false);
   expect(await signer.installed()).toBe(defaultInstalled);
@@ -88,7 +98,9 @@ test('test metamask signer', async () => {
 test('test private key signer', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');
   const providerPool = new ProviderPool(conf);
-  providerPool.connect();
+  providerPool.connect((rpcEndpoints) => {
+    return new MockEtherProvider(rpcEndpoints[0], 1);
+  });
   const signer = new PrivateKeySigner(conf, providerPool);
   expect(await signer.installed()).toBe(true);
   expect(await signer.connected()).toBe(false);
