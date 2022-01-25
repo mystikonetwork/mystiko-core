@@ -92,6 +92,10 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     return address(hasher);
   }
 
+  function getIsDepositsDisabled() public view returns (bool) {
+    return isDepositsDisabled;
+  }
+
   function toggleDeposits(bool _state) external onlyOperator {
     isDepositsDisabled = _state;
   }

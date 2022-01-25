@@ -68,6 +68,7 @@ export class BaseModel {
 export const BridgeType = {
   LOOP: 'loop',
   POLY: 'poly',
+  TBRIDGE: 'tbridge',
 };
 
 /**

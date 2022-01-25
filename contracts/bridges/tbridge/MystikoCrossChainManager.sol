@@ -4,7 +4,11 @@ pragma solidity ^0.6.11;
 import "../CrossChainDataSerializable.sol";
 import "../poly/MystikoWithPoly.sol";
 
-contract MystikoCrossChainManager is CrossChainDataSerializable {
+contract MystikoCrossChainManager is
+  CrossChainDataSerializable,
+  IEthCrossChainManager,
+  IEthCrossChainManagerProxy
+{
   address public operator;
 
   constructor() public {
@@ -22,7 +26,7 @@ contract MystikoCrossChainManager is CrossChainDataSerializable {
     address _toContractAddress,
     uint256 amount,
     bytes32 commitmentHash
-  ) external returns (bool) {
+  ) external onlyOperator returns (bool) {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
     bytes memory txDataBytes = serializeTxData(txData);
     bytes memory fromContractAddressBytes = Utils.addressToBytes(_fromContractAddress);
@@ -31,5 +35,18 @@ contract MystikoCrossChainManager is CrossChainDataSerializable {
       "call syncTx returns error"
     );
     return true;
+  }
+
+  function crossChain(
+    uint64 _toChainId,
+    bytes calldata _toContract,
+    bytes calldata _method,
+    bytes calldata _txData
+  ) external override returns (bool) {
+    return true;
+  }
+
+  function getEthCrossChainManager() external view override returns (address) {
+    return address(this);
   }
 }

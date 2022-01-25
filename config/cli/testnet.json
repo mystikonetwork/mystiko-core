@@ -37,6 +37,17 @@
           "peerContractAddress": "0x4489E7219df6aF8c5027121E04eAA60161926703",
           "bridgeType": "poly",
           "circuits": "circom-1.0"
+        },
+        {
+          "address": "0xE5aAEe2fFb110234CF5ce4d8FedfEf50ceCC736e",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x4540b4137bd406ceeA8E32c5f65DaA00897f11E6",
+          "peerChainId": 97,
+          "peerContractAddress": "0x18f4Cffe5787adD112582538777A686277b09165",
+          "bridgeType": "tbridge",
+          "circuits": "circom-1.0"
         }
       ]
     },
@@ -79,6 +90,17 @@
           "peerContractAddress": "0xe90Da8A25C3dA881CE62429973268B3CB23Bf906",
           "bridgeType": "poly",
           "circuits": "circom-1.0"
+        },
+        {
+          "address": "0x18f4Cffe5787adD112582538777A686277b09165",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x276F5462D2f1fC113485e44F70B59c3AED89312c",
+          "peerChainId": 3,
+          "peerContractAddress": "0xE5aAEe2fFb110234CF5ce4d8FedfEf50ceCC736e",
+          "bridgeType": "tbridge",
+          "circuits": "circom-1.0"
         }
       ]
     }
@@ -91,6 +113,10 @@
       "explorerPrefix": "/testnet/tx/%tx%",
       "apiUrl": "https://explorer.poly.network",
       "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+    },
+    {
+      "name": "Mystiko Testnet Bridge",
+      "type": "tbridge"
     }
   ],
   "circuits": [
