@@ -143,11 +143,10 @@ export class MystikoConfig extends BaseConfig {
     check(typeof srcChainId === 'number', 'type of srcChainId should be number');
     check(typeof dstChainId === 'number', 'type of dstChainId should be number');
     check(typeof assetSymbol === 'string', 'type of tokenSymbol should be string');
-    check(isValidBridgeType(bridge), bridge + ' is invalid bridge type');
-    if (bridge === BridgeType.LOOP) {
-      check(srcChainId === dstChainId, 'loop bridge should have equal chain ids');
+    if (srcChainId === dstChainId) {
+      check(bridge === BridgeType.LOOP, 'equal chain ids should have loop bridge');
     } else {
-      check(srcChainId !== dstChainId, 'loop bridge should have non-equal chain ids');
+      check(isValidBridgeType(bridge) && bridge !== BridgeType.LOOP, bridge + ' is invalid bridge type');
     }
     const srcChainConfig = this.config['chains'][srcChainId];
     check(srcChainConfig, 'chain ' + srcChainId + ' does not exist in config');
