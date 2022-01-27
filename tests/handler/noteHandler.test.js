@@ -176,26 +176,57 @@ test('test updateStatus', async () => {
 });
 
 test('test groupBy', () => {
-  db.notes.insert({ walletId: 1, dstAsset: 'TokenA', amount: '1000000000000000000', dstAssetDecimals: 18 });
-  db.notes.insert({ walletId: 1, dstAsset: 'TokenA', amount: '1000000000000000000', dstAssetDecimals: 18 });
-  db.notes.insert({ walletId: 1, dstAsset: 'TokenB', amount: '8100000000000000000', dstAssetDecimals: 18 });
-  db.notes.insert({ walletId: 1, dstAsset: 'TokenC', amount: '4000000000000000000', dstAssetDecimals: 18 });
-  db.notes.insert({ walletId: 1, dstAsset: 'TokenC', amount: '5300000000000000000', dstAssetDecimals: 18 });
-  let groups = noteHandler.groupPrivateNoteByDstAsset().sort((a, b) => {
-    return a.groupName > b.groupName ? 1 : -1;
+  db.notes.insert({
+    walletId: 1,
+    dstAsset: 'TokenA',
+    amount: '1000000000000000000',
+    dstAssetDecimals: 18,
+    status: PrivateNoteStatus.IMPORTED,
   });
+  db.notes.insert({
+    walletId: 1,
+    dstAsset: 'TokenA',
+    amount: '1000000000000000000',
+    dstAssetDecimals: 18,
+    status: PrivateNoteStatus.SPENT,
+  });
+  db.notes.insert({
+    walletId: 1,
+    dstAsset: 'TokenA',
+    amount: '3000000000000000000',
+    dstAssetDecimals: 18,
+    status: PrivateNoteStatus.IMPORTED,
+  });
+  db.notes.insert({
+    walletId: 1,
+    dstAsset: 'TokenB',
+    amount: '8100000000000000000',
+    dstAssetDecimals: 18,
+    status: PrivateNoteStatus.SPENT,
+  });
+  db.notes.insert({
+    walletId: 1,
+    dstAsset: 'TokenC',
+    amount: '4000000000000000000',
+    dstAssetDecimals: 18,
+    status: PrivateNoteStatus.IMPORTED,
+  });
+  db.notes.insert({
+    walletId: 1,
+    dstAsset: 'TokenC',
+    amount: '5300000000000000000',
+    dstAssetDecimals: 18,
+    status: PrivateNoteStatus.IMPORTED,
+  });
+  let groups = noteHandler.groupPrivateNoteByDstAsset();
   expect(groups).toStrictEqual([
-    { groupName: 'TokenA', reducedValue: '2' },
-    { groupName: 'TokenB', reducedValue: '8.1' },
-    { groupName: 'TokenC', reducedValue: '9.3' },
+    { dstAsset: 'TokenA', count: 3, total: 5, unspent: 4 },
+    { dstAsset: 'TokenB', count: 1, total: 8.1, unspent: 0 },
+    { dstAsset: 'TokenC', count: 2, total: 9.3, unspent: 9.3 },
   ]);
-  groups = noteHandler
-    .groupPrivateNoteByDstAsset({ filterFunc: (note) => note.dstAsset !== 'TokenB' })
-    .sort((a, b) => {
-      return a.groupName > b.groupName ? 1 : -1;
-    });
+  groups = noteHandler.groupPrivateNoteByDstAsset({ filterFunc: (note) => note.dstAsset !== 'TokenB' });
   expect(groups).toStrictEqual([
-    { groupName: 'TokenA', reducedValue: '2' },
-    { groupName: 'TokenC', reducedValue: '9.3' },
+    { dstAsset: 'TokenA', count: 3, total: 5, unspent: 4 },
+    { dstAsset: 'TokenC', count: 2, total: 9.3, unspent: 9.3 },
   ]);
 });

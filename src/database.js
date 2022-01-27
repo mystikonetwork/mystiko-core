@@ -1,5 +1,6 @@
-import loki from 'lokijs';
+import Loki from 'lokijs';
 import { check, readFile } from './utils';
+import { ID_KEY } from './model';
 
 const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
 
@@ -36,10 +37,10 @@ const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
 export async function createDatabase(dbFile, adapter) {
   let lokidb;
   if (!adapter) {
-    adapter = new loki.LokiMemoryAdapter();
+    adapter = new Loki.LokiMemoryAdapter();
   }
-  if (adapter instanceof loki.LokiMemoryAdapter) {
-    lokidb = new loki(dbFile, {
+  if (adapter instanceof Loki.LokiMemoryAdapter) {
+    lokidb = new Loki(dbFile, {
       adapter: adapter,
     });
     _createCollectionsIfNotExist(lokidb);
@@ -62,11 +63,11 @@ export async function createDatabase(dbFile, adapter) {
         }
       }
     };
-    lokidb = new loki(dbFile, {
+    lokidb = new Loki(dbFile, {
       autoload: true,
       autoloadCallback: dbLoadCallback,
       autosave: true,
-      autosaveInterval: 5000,
+      autosaveInterval: 1000,
       adapter: adapter,
     });
     await dbLoadPromise;
@@ -85,7 +86,7 @@ export async function createDatabase(dbFile, adapter) {
  * @returns {string} an serialized Loki database as a String.
  */
 export function exportDataAsString({ database }) {
-  check(database instanceof loki, 'database should be an instance of Loki');
+  check(database instanceof Loki, 'database should be an instance of Loki');
   return database.serialize();
 }
 
@@ -95,12 +96,22 @@ export function exportDataAsString({ database }) {
  * @param {string} jsonString a serialized json object as string.
  */
 export function importDataFromJson(wrappedDb, jsonString) {
-  check(wrappedDb && wrappedDb.database instanceof loki, 'wrappedDb.database should be instance of Loki');
+  check(wrappedDb && wrappedDb.database instanceof Loki, 'wrappedDb.database should be instance of Loki');
   check(typeof jsonString === 'string', 'type of jsonString should be a string');
-  wrappedDb.database.loadJSON(jsonString);
+  const tempDb = new Loki('temp.db');
+  tempDb.loadJSON(jsonString);
   for (let i = 0; i < collections.length; i++) {
-    wrappedDb[collections[i]] = wrappedDb.database.getCollection(collections[i]);
+    const oldCollection = wrappedDb[collections[i]];
+    oldCollection.clear({ removeIndices: true });
+    const newCollection = tempDb.getCollection(collections[i]);
+    if (newCollection) {
+      newCollection.find().forEach((item) => {
+        delete item[ID_KEY];
+        oldCollection.insert(item);
+      });
+    }
   }
+  wrappedDb.database.saveDatabase();
 }
 
 /**

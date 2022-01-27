@@ -111,9 +111,9 @@ export class NoteHandler extends Handler {
   /**
    * @desc group {@link PrivateNote} by the given group by field, with the specific reducer and filterOptions.
    * @param {string} groupBy the field name of this group by query.
-   * @param {function} reducer a function which reduces two {@link PrivateNote} to a single value.
+   * @param {function} reducer a function which reduces an array of {@link PrivateNote} to a single value.
    * @param {Object} [filterOptions] options of filtering this group by, check {@link NoteHandler#getPrivateNotes}.
-   * @returns {Array.<{groupName: string, reducedValue: string}>} an array of groups, each group contains
+   * @returns {Array.<{groupName: string, reducedValue: *}>} an array of groups, each group contains
    * a group name and a reduced value.
    */
   groupPrivateNotes(groupBy, reducer, filterOptions = {}) {
@@ -135,15 +135,8 @@ export class NoteHandler extends Handler {
       };
       const newFilterOptions = { ...filterOptions, filterFunc };
       const groupValues = this._getPrivateNotes(newFilterOptions).data();
-      let reducedValue;
-      if (groupValues.length === 1) {
-        reducedValue = reducer(new PrivateNote(groupValues[0]));
-      } else if (groupValues.length > 1) {
-        reducedValue = groupValues.reduce((noteA, noteB) =>
-          reducer(new PrivateNote(noteA), new PrivateNote(noteB)),
-        );
-      }
-      groups.push({ groupName: toString(groupName), reducedValue: toString(reducedValue) });
+      const reducedValue = reducer(groupValues.map((note) => new PrivateNote(note)));
+      groups.push({ groupName: toString(groupName), reducedValue });
     });
     return groups;
   }
@@ -151,19 +144,49 @@ export class NoteHandler extends Handler {
   /**
    * @desc group private notes by destination asset symbols.
    * @param {Object} [filterOptions] options of filtering this group by, check {@link NoteHandler#getPrivateNotes}.
-   * @returns {Array.<{groupName: string, reducedValue: string}>} an array of groups, each group contains a group name
-   * and a reduced value.
+   * @returns {Array.<{dstAsset: string, count: number, total: number, unspent: number}>}
+   * an array of groups, each group contains a dstAsset as asset symbol, a count represents the number of
+   * private notes in this group, a total of all private notes amount, and the sum of unspent private notes amount.
    */
   groupPrivateNoteByDstAsset(filterOptions = {}) {
-    return this.groupPrivateNotes(
+    const groupWithCounts = this.groupPrivateNotes('dstAsset', (notes) => notes.length, filterOptions);
+    const groupWithTotals = this.groupPrivateNotes(
       'dstAsset',
-      (noteA, noteB) => {
-        const noteAmountA = noteA ? noteA.simpleAmount : 0;
-        const noteAmountB = noteB ? noteB.simpleAmount : 0;
-        return noteAmountA + noteAmountB;
+      (notes) => {
+        return notes.map((note) => note.simpleAmount).reduce((a, b) => a + b);
       },
       filterOptions,
     );
+    const filterFunc = (note) => {
+      if (filterOptions.filterFunc) {
+        return note.status === PrivateNoteStatus.IMPORTED && filterOptions.filterFunc(note);
+      } else {
+        return note.status === PrivateNoteStatus.IMPORTED;
+      }
+    };
+    const groupWithUnspent = this.groupPrivateNotes(
+      'dstAsset',
+      (notes) => {
+        return notes.map((note) => note.simpleAmount).reduce((a, b) => a + b);
+      },
+      { ...filterOptions, filterFunc },
+    );
+    const groups = {};
+    for (let i = 0; i < groupWithCounts.length; i++) {
+      groups[groupWithCounts[i].groupName] = {
+        dstAsset: groupWithCounts[i].groupName,
+        count: groupWithCounts[i].reducedValue,
+        total: 0,
+        unspent: 0,
+      };
+    }
+    for (let i = 0; i < groupWithTotals.length; i++) {
+      groups[groupWithTotals[i].groupName]['total'] = groupWithTotals[i].reducedValue;
+    }
+    for (let i = 0; i < groupWithUnspent.length; i++) {
+      groups[groupWithUnspent[i].groupName]['unspent'] = groupWithUnspent[i].reducedValue;
+    }
+    return Object.values(groups).sort((a, b) => (a.dstAsset >= b.dstAsset ? 1 : -1));
   }
 
   /**
