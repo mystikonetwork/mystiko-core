@@ -174,6 +174,7 @@ test('test withdraw basic', async () => {
   expect(withdraw.chainId).toBe(56);
   expect(withdraw.asset).toBe('USDT');
   expect(withdraw.assetAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
+  expect(withdraw.assetDecimals).toBe(18);
   expect(withdraw.amount.toString()).toBe(toDecimals(100, 18).toString());
   expect(withdraw.recipientAddress).toBe('0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065');
   expect(withdraw.walletId).toBe(1);

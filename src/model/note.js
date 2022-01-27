@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { BaseModel } from './common.js';
-import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix } from '../utils.js';
 import { isValidBridgeType } from './common.js';
 import { MystikoConfig } from '../config';
 
@@ -119,6 +119,19 @@ export class PrivateNote extends BaseModel {
   }
 
   /**
+   * @property {number} srcAssetDecimals
+   * @desc the asset number of decimals of the underlying deposit on the source chain.
+   */
+  get srcAssetDecimals() {
+    return this.data['srcAssetDecimals'];
+  }
+
+  set srcAssetDecimals(decimals) {
+    check(typeof decimals === 'number', 'decimals should be instance of string');
+    this.data['srcAssetDecimals'] = decimals;
+  }
+
+  /**
    * @property {string} srcProtocolAddress
    * @desc the Mystiko protocol contract address on the source chain of the underlying deposit was sent to.
    */
@@ -143,6 +156,14 @@ export class PrivateNote extends BaseModel {
   set amount(amnt) {
     check(amnt instanceof BN, 'amnt should be instance of BN');
     this.data['amount'] = amnt.toString();
+  }
+
+  /**
+   * @property {number} simpleAmount
+   * @desc the simple amount of asset this privateNote without decimals.
+   */
+  get simpleAmount() {
+    return fromDecimals(this.amount, this.dstAssetDecimals);
   }
 
   /**
@@ -229,6 +250,19 @@ export class PrivateNote extends BaseModel {
       check(typeof address === 'string', 'address should be instance of string');
     }
     this.data['dstAssetAddress'] = address;
+  }
+
+  /**
+   * @property {number} dstAssetDecimals
+   * @desc the asset number of decimals of the underlying deposit on the destination chain.
+   */
+  get dstAssetDecimals() {
+    return this.data['dstAssetDecimals'];
+  }
+
+  set dstAssetDecimals(decimals) {
+    check(typeof decimals === 'number', 'decimals should be instance of string');
+    this.data['dstAssetDecimals'] = decimals;
   }
 
   /**

@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { Deposit, DepositStatus } from '../../src/model';
-import { toBuff, toHexNoPrefix } from '../../src/utils.js';
+import { toBuff, toHexNoPrefix, toDecimals } from '../../src/utils.js';
 import { readFromFile } from '../../src/config';
 
 test('Test Deposit getters/setters', async () => {
@@ -10,6 +10,7 @@ test('Test Deposit getters/setters', async () => {
   expect(deposit.dstChainId).toBe(undefined);
   expect(deposit.bridge).toBe(undefined);
   expect(deposit.asset).toBe(undefined);
+  expect(deposit.assetDecimals).toBe(undefined);
   expect(deposit.amount).toBe(undefined);
   expect(deposit.commitmentHash).toBe(undefined);
   expect(deposit.randomS).toBe(undefined);
@@ -37,8 +38,11 @@ test('Test Deposit getters/setters', async () => {
   expect(deposit.bridge).toBe('poly');
   deposit.asset = 'USDT';
   expect(deposit.asset).toBe('USDT');
-  deposit.amount = new BN('deadbeef', 16);
-  expect(toHexNoPrefix(deposit.amount)).toBe('deadbeef');
+  deposit.amount = toDecimals(1.01);
+  expect(deposit.amount.toString()).toBe('1010000000000000000');
+  expect(deposit.simpleAmount).toBe(1.01);
+  deposit.assetDecimals = 17;
+  expect(deposit.simpleAmount).toBe(10.1);
   deposit.commitmentHash = new BN('1243253475345437234563145234523452345');
   expect(deposit.commitmentHash.toString()).toBe('1243253475345437234563145234523452345');
   deposit.randomS = new BN('1243253475345437234563145234523452345');

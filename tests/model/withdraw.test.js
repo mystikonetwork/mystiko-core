@@ -1,6 +1,7 @@
 import BN from 'bn.js';
 import { Withdraw, WithdrawStatus } from '../../src/model';
 import { readFromFile } from '../../src/config';
+import { toDecimals } from '../../src/utils';
 
 test('Test Withdraw getters/setters', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');
@@ -8,6 +9,7 @@ test('Test Withdraw getters/setters', async () => {
   expect(withdraw.chainId).toBe(undefined);
   expect(withdraw.asset).toBe(undefined);
   expect(withdraw.assetAddress).toBe(undefined);
+  expect(withdraw.assetDecimals).toBe(undefined);
   expect(withdraw.merkleRootHash).toBe(undefined);
   expect(withdraw.serialNumber).toBe(undefined);
   expect(withdraw.amount).toBe(undefined);
@@ -34,8 +36,11 @@ test('Test Withdraw getters/setters', async () => {
   );
   withdraw.serialNumber = new BN('3131961357');
   expect(withdraw.serialNumber.toString()).toBe('3131961357');
-  withdraw.amount = new BN('3131961357');
-  expect(withdraw.amount.toString()).toBe('3131961357');
+  withdraw.amount = toDecimals(1.001);
+  expect(withdraw.amount.toString()).toBe('1001000000000000000');
+  expect(withdraw.simpleAmount).toBe(1.001);
+  withdraw.assetDecimals = 17;
+  expect(withdraw.simpleAmount).toBe(10.01);
   withdraw.recipientAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(withdraw.recipientAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
   withdraw.transactionHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
