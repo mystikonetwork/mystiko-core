@@ -114,7 +114,7 @@ export class NoteHandler extends Handler {
    * @param {function} reducer a function which reduces two {@link PrivateNote} to a single value.
    * @param {Object} [filterOptions] options of filtering this group by, check {@link NoteHandler#getPrivateNotes}.
    * @returns {Array.<{groupName: string, reducedValue: string}>} an array of groups, each group contains
-   * a group name and a reduced value.
+   a group name and a reduced value.
    */
   groupPrivateNotes(groupBy, reducer, filterOptions = {}) {
     check(typeof groupBy === 'string', 'groupBy should a string');
@@ -152,7 +152,7 @@ export class NoteHandler extends Handler {
    * @desc group private notes by destination asset symbols.
    * @param {Object} [filterOptions] options of filtering this group by, check {@link NoteHandler#getPrivateNotes}.
    * @returns {Array.<{groupName: string, reducedValue: string}>} an array of groups, each group contains a group name
-   * and a reduced value.
+   and a reduced value.
    */
   groupPrivateNoteByDstAsset(filterOptions = {}) {
     return this.groupPrivateNotes(
