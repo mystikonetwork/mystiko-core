@@ -39,13 +39,13 @@
           "circuits": "circom-1.0"
         },
         {
-          "address": "0xE5aAEe2fFb110234CF5ce4d8FedfEf50ceCC736e",
+          "address": "0x0799e1B48b74782B2ab316dd3eEB2a18Cac4b8D5",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetType": "erc20",
-          "assetAddress": "0x4540b4137bd406ceeA8E32c5f65DaA00897f11E6",
+          "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
           "peerChainId": 97,
-          "peerContractAddress": "0x18f4Cffe5787adD112582538777A686277b09165",
+          "peerContractAddress": "0x6052Fb6Ec95024fc1d2d0488d0e62254665f3a05",
           "bridgeType": "tbridge",
           "circuits": "circom-1.0"
         }
@@ -92,13 +92,13 @@
           "circuits": "circom-1.0"
         },
         {
-          "address": "0x18f4Cffe5787adD112582538777A686277b09165",
+          "address": "0x6052Fb6Ec95024fc1d2d0488d0e62254665f3a05",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetType": "erc20",
-          "assetAddress": "0x276F5462D2f1fC113485e44F70B59c3AED89312c",
+          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "peerChainId": 3,
-          "peerContractAddress": "0xE5aAEe2fFb110234CF5ce4d8FedfEf50ceCC736e",
+          "peerContractAddress": "0x0799e1B48b74782B2ab316dd3eEB2a18Cac4b8D5",
           "bridgeType": "tbridge",
           "circuits": "circom-1.0"
         }
