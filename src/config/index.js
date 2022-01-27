@@ -1,7 +1,3 @@
-import { MystikoConfig } from './mystikoConfig';
-import DefaultTestnetConfigJson from '../../config/default/testnet.json';
-import DefaultMainnetConfigJson from '../../config/default/mainnet.json';
-
 /**
  * @module module:mystiko/config
  * @desc a collection of function for handling configuration related resources.
@@ -10,6 +6,3 @@ export { BaseConfig } from './common.js';
 export { ContractConfig } from './contractConfig.js';
 export { ChainConfig } from './chainConfig.js';
 export { MystikoConfig, readFromFile } from './mystikoConfig';
-
-export const DefaultTestnetConfig = new MystikoConfig(DefaultTestnetConfigJson);
-export const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);

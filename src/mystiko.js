@@ -5,7 +5,7 @@
  * Javascript library of Mystiko.Network's core protocol.
  */
 import { ethers } from 'ethers';
-import { MystikoConfig, readFromFile, DefaultTestnetConfig, DefaultMainnetConfig } from './config';
+import { MystikoConfig, readFromFile } from './config';
 import { createDatabase } from './database.js';
 import handler from './handler';
 import * as utils from './utils.js';
@@ -14,6 +14,11 @@ import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';
 import { MetaMaskSigner, PrivateKeySigner } from './chain/signer.js';
 import logger, { initLogger } from './logger.js';
+import DefaultTestnetConfigJson from '../config/default/testnet.json';
+import DefaultMainnetConfigJson from '../config/default/mainnet.json';
+
+const DefaultTestnetConfig = new MystikoConfig(DefaultTestnetConfigJson);
+const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
 
 /**
  * @external external:Logger
