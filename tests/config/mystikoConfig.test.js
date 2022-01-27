@@ -57,3 +57,36 @@ test('test readFromFile', async () => {
   await expect(readFromFile('tests/config/files/configInvalid9.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/config/files/configInvalid10.test.json')).rejects.toThrow();
 });
+
+test('test explorer url getters', async () => {
+  const conf = await readFromFile('tests/config/files/config.test.json');
+  expect(
+    conf.getChainTxExplorerUrl(1, '0x1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac'),
+  ).toBe('https://etherscan.io/tx/0x1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac');
+  expect(
+    conf.getChainTxExplorerUrl(100, '0x1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac'),
+  ).toBe(undefined);
+  expect(conf.getChainTxExplorerUrl(1, undefined)).toBe(undefined);
+  expect(
+    conf.getBridgeTxExplorerUrl(
+      BridgeType.LOOP,
+      '0x1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac',
+    ),
+  ).toBe(undefined);
+  expect(conf.getBridgeTxExplorerUrl(BridgeType.POLY, undefined)).toBe(undefined);
+  expect(
+    conf.getBridgeTxExplorerUrl(
+      BridgeType.TBRIDGE,
+      '0x1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac',
+    ),
+  ).toBe(undefined);
+  expect(
+    conf.getBridgeTxExplorerUrl(
+      BridgeType.POLY,
+      '0x1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac',
+    ),
+  ).toBe(
+    'https://explorer.poly.network/testnet/tx/' +
+      '1a52467a271ab51d0b913a8d6684f245e9cf5fc9a033b532aed6c46a79841fac',
+  );
+});

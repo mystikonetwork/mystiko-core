@@ -1,6 +1,7 @@
 import BN from 'bn.js';
 import { check } from '../utils.js';
 import { BaseModel } from './common.js';
+import { MystikoConfig } from '../config';
 
 /**
  * @class Withdraw
@@ -123,6 +124,16 @@ export class Withdraw extends BaseModel {
   set transactionHash(hash) {
     check(typeof hash === 'string', 'address should be instance of string');
     this.data['transactionHash'] = hash;
+  }
+
+  /**
+   * @desc get the full explorer URL of withdrawal transaction.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string|undefined} a full explorer URL of this withdrawal transaction.
+   */
+  getTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.chainId, this.transactionHash);
   }
 
   /**

@@ -1,6 +1,7 @@
 import BN from 'bn.js';
 import { OffChainNote, PrivateNote, PrivateNoteStatus, BridgeType } from '../../src/model';
 import { toBuff, toHexNoPrefix } from '../../src/utils.js';
+import { readFromFile } from '../../src/config';
 
 test('Test OffChainNote getters/setters', () => {
   const note = new OffChainNote();
@@ -12,10 +13,12 @@ test('Test OffChainNote getters/setters', () => {
   expect(note.transactionHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
 });
 
-test('Test PrivateNote getters/setters', () => {
+test('Test PrivateNote getters/setters', async () => {
+  const conf = await readFromFile('tests/config/files/config.test.json');
   const note = new PrivateNote();
   expect(note.srcChainId).toBe(undefined);
   expect(note.srcTransactionHash).toBe(undefined);
+  expect(note.getSrcTxExplorerUrl(conf)).toBe(undefined);
   expect(note.srcAsset).toBe(undefined);
   expect(note.srcAssetAddress).toBe(undefined);
   expect(note.srcProtocolAddress).toBe(undefined);
@@ -23,6 +26,7 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.bridge).toBe(undefined);
   expect(note.dstChainId).toBe(undefined);
   expect(note.dstTransactionHash).toBe(undefined);
+  expect(note.getDstTxExplorerUrl(conf)).toBe(undefined);
   expect(note.dstAsset).toBe(undefined);
   expect(note.dstAssetAddress).toBe(undefined);
   expect(note.dstProtocolAddress).toBe(undefined);
@@ -37,6 +41,9 @@ test('Test PrivateNote getters/setters', () => {
   expect(note.srcChainId).toBe(1);
   note.srcTransactionHash = '39739e36bb15becde05a21814eeebe17246e3003c8d5d903fb1b1be44eb2ff1a';
   expect(note.srcTransactionHash).toBe('39739e36bb15becde05a21814eeebe17246e3003c8d5d903fb1b1be44eb2ff1a');
+  expect(note.getSrcTxExplorerUrl(conf)).toBe(
+    'https://etherscan.io/tx/0x39739e36bb15becde05a21814eeebe17246e3003c8d5d903fb1b1be44eb2ff1a',
+  );
   note.srcAsset = 'USDT';
   expect(note.srcAsset).toBe('USDT');
   note.srcAssetAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
@@ -50,10 +57,13 @@ test('Test PrivateNote getters/setters', () => {
   }).toThrow();
   note.bridge = BridgeType.LOOP;
   expect(note.bridge).toBe(BridgeType.LOOP);
-  note.dstChainId = 2;
-  expect(note.dstChainId).toBe(2);
+  note.dstChainId = 56;
+  expect(note.dstChainId).toBe(56);
   note.dstTransactionHash = '4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e';
   expect(note.dstTransactionHash).toBe('4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e');
+  expect(note.getDstTxExplorerUrl(conf)).toBe(
+    'https://bscscan.io/tx/0x4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e',
+  );
   note.dstAsset = 'USDT';
   expect(note.dstAsset).toBe('USDT');
   note.dstAssetAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';

@@ -1,5 +1,9 @@
 import mystiko from '../src/mystiko.js';
-import { DefaultTestnetConfig, DefaultMainnetConfig } from '../src/config';
+import { MystikoConfig } from '../src/config';
+import DefaultTestnetConfigJson from '../config/default/testnet.json';
+import DefaultMainnetConfigJson from '../config/default/mainnet.json';
+const DefaultTestnetConfig = new MystikoConfig(DefaultTestnetConfigJson);
+const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
 
 test('test initialize', async () => {
   await mystiko.initialize({ isTestnet: true, conf: 'tests/config/files/config.test.json' });
@@ -21,11 +25,11 @@ test('test initialize', async () => {
   expect(mystiko.logger).not.toBe(undefined);
 
   await mystiko.initialize({ isTestnet: false });
-  expect(mystiko.config).toBe(DefaultMainnetConfig);
+  expect(mystiko.config).toStrictEqual(DefaultMainnetConfig);
   await mystiko.initialize();
-  expect(mystiko.config).toBe(DefaultTestnetConfig);
+  expect(mystiko.config).toStrictEqual(DefaultTestnetConfig);
   await mystiko.initialize({ isTestnet: true, conf: DefaultTestnetConfig });
-  expect(mystiko.config).toBe(DefaultTestnetConfig);
+  expect(mystiko.config).toStrictEqual(DefaultTestnetConfig);
   await mystiko.initialize({ isTestnet: true, dbFile: 'test_file.db' });
   expect(mystiko.db).not.toBe(undefined);
 

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { BaseConfig } from './common.js';
 import { ContractConfig } from './contractConfig.js';
-import { check } from '../utils.js';
+import { check, toHex } from '../utils.js';
 import { BridgeType } from '../model';
 
 export const EXPLORER_TX_PLACEHOLDER = '%tx%';
@@ -75,7 +75,7 @@ export class ChainConfig extends BaseConfig {
    */
   getTxUrl(txHash) {
     check(typeof txHash === 'string', 'txHash should be a valid string');
-    return `${this.explorerUrl}${this.explorerPrefix.replace(EXPLORER_TX_PLACEHOLDER, txHash)}`;
+    return `${this.explorerUrl}${this.explorerPrefix.replace(EXPLORER_TX_PLACEHOLDER, toHex(txHash))}`;
   }
 
   /**
