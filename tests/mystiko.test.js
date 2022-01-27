@@ -13,6 +13,9 @@ test('test initialize', async () => {
   expect(mystiko.config).not.toBe(undefined);
   expect(mystiko.db).not.toBe(undefined);
   expect(mystiko.db.adapter).toBe(undefined);
+  expect(mystiko.db.exportDataAsString).not.toBe(undefined);
+  expect(mystiko.db.importDataFromJson).not.toBe(undefined);
+  expect(mystiko.db.importDataFromJsonFile).not.toBe(undefined);
   expect(mystiko.wallets).not.toBe(undefined);
   expect(mystiko.accounts).not.toBe(undefined);
   expect(mystiko.deposits).not.toBe(undefined);
