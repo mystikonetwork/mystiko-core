@@ -6,7 +6,12 @@
  */
 import { ethers } from 'ethers';
 import { MystikoConfig, readFromFile } from './config';
-import { createDatabase } from './database.js';
+import {
+  createDatabase,
+  exportDataAsString,
+  importDataFromJson,
+  importDataFromJsonFile,
+} from './database.js';
 import handler from './handler';
 import * as utils from './utils.js';
 import * as models from './model';
@@ -33,6 +38,12 @@ const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
  * @property {ContractPool} contracts pool of wrapped smart contract instances.
  * @property {module:mystiko/db.WrappedDb} db instance of wrapped database handlers.
  * @property {Object} db.adapter instance of the persistent database adapter.
+ * @property {Function} db.exportDataAsString export data in database as a JSON string,
+ * check {@link module:mystiko/db.exportDataAsString}.
+ * @property {Function} db.importDataFromJson import data into database from a JSON string,
+ * check {@link module:mystiko/db.importDataFromJson}.
+ * @property {Function} db.importDataFromJsonFile import data into database from a JSON file,
+ * check {@link module:mystiko/db.importDataFromJsonFile}.
  * @property {DepositHandler} deposits handler of Deposit related business logic.
  * @property {Object} ethers {@link https://docs.ethers.io/v5/ ethers.js} instance.
  * @property {module:mystiko/models} models a collection Mystiko data models and helper functions.
@@ -97,6 +108,9 @@ mystiko.initialize = async ({
   mystiko.logger = logger;
   mystiko.db = await createDatabase(dbFile, dbAdapter);
   mystiko.db.adapter = dbAdapter;
+  mystiko.db.exportDataAsString = exportDataAsString;
+  mystiko.db.importDataFromJson = importDataFromJson;
+  mystiko.db.importDataFromJsonFile = importDataFromJsonFile;
   mystiko.wallets = new handler.WalletHandler(mystiko.db, mystiko.config);
   mystiko.accounts = new handler.AccountHandler(mystiko.wallets, mystiko.db, mystiko.config);
   mystiko.providers = new ProviderPool(mystiko.config);
