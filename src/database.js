@@ -1,4 +1,5 @@
 import loki from 'lokijs';
+import { check, readFile } from './utils';
 
 const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
 
@@ -75,6 +76,42 @@ export async function createDatabase(dbFile, adapter) {
     db[collections[i]] = lokidb.getCollection(collections[i]);
   }
   return db;
+}
+
+/**
+ * @function module:mystiko/db.exportDataAsString
+ * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
+ * @property {external:Loki} wrappedDb.database instance of Loki's raw database object.
+ * @returns {string} an serialized Loki database as a String.
+ */
+export function exportDataAsString({ database }) {
+  check(database instanceof loki, 'database should be an instance of Loki');
+  return database.serialize();
+}
+
+/**
+ * @function module:mystiko/db.importDataFromJson
+ * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
+ * @param {string} jsonString a serialized json object as string.
+ */
+export function importDataFromJson(wrappedDb, jsonString) {
+  check(wrappedDb && wrappedDb.database instanceof loki, 'wrappedDb.database should be instance of Loki');
+  check(typeof jsonString === 'string', 'type of jsonString should be a string');
+  wrappedDb.database.loadJSON(jsonString);
+  for (let i = 0; i < collections.length; i++) {
+    wrappedDb[collections[i]] = wrappedDb.database.getCollection(collections[i]);
+  }
+}
+
+/**
+ * @function module:mystiko/db.importDataFromJsonFile
+ * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
+ * @param {string} jsonFile the file path of serialized JSON data.
+ */
+export async function importDataFromJsonFile(wrappedDb, jsonFile) {
+  check(typeof jsonFile === 'string', 'type of jsonFile should be a string');
+  const jsonString = await readFile(jsonFile);
+  importDataFromJson(wrappedDb, jsonString.toString());
 }
 
 function _createCollectionsIfNotExist(lokidb) {

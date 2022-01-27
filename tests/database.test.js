@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { createDatabase } from '../src/database.js';
+import { createDatabase, exportDataAsString, importDataFromJsonFile } from '../src/database.js';
 
 test('Test persist database', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dbtest'));
@@ -32,4 +32,31 @@ test('Test in-memory database', async () => {
   db.accounts.insert({ address: '783323' });
   expect(db.accounts.find().length).toBe(1);
   db.database.close();
+});
+
+test('Test export/import data', async () => {
+  const db = await createDatabase('mystiko.db');
+  db.accounts.insert({ name: 'test account 1' });
+  db.wallets.insert({ accountNonce: 1 });
+  db.notes.insert({ srcChainId: 1 });
+  db.deposits.insert({ srcChainId: 10 });
+  db.withdraws.insert({ chainId: 100 });
+  const json = exportDataAsString(db);
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dbtest'));
+  fs.writeFileSync(tmpDir + '/export.json', json);
+  db.accounts.clear();
+  db.wallets.clear();
+  db.notes.clear();
+  db.deposits.clear();
+  db.withdraws.clear();
+  db.database.saveDatabase();
+  await importDataFromJsonFile(db, tmpDir + '/export.json');
+  expect(db.wallets.findOne().accountNonce).toBe(1);
+  expect(db.accounts.findOne().name).toBe('test account 1');
+  expect(db.notes.findOne().srcChainId).toBe(1);
+  expect(db.deposits.findOne().srcChainId).toBe(10);
+  expect(db.withdraws.findOne().chainId).toBe(100);
+  db.database.close(() => {
+    fs.rmSync(tmpDir, { recursive: true });
+  });
 });
