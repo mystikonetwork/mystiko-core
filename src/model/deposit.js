@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { BaseModel } from './common.js';
-import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix } from '../utils.js';
 import { MystikoConfig } from '../config';
 
 /**
@@ -69,6 +69,19 @@ export class Deposit extends BaseModel {
   }
 
   /**
+   * @property {number} assetDecimals
+   * @desc the asset decimals of this deposit on the source chain.
+   */
+  get assetDecimals() {
+    return this.data['assetDecimals'];
+  }
+
+  set assetDecimals(decimals) {
+    check(typeof decimals === 'number', 'decimals should be a number');
+    this.data['assetDecimals'] = decimals;
+  }
+
+  /**
    * @property {external:BN} amount
    * @desc the amount of asset this deposit.
    * Use {@link module:mystiko/utils.toString} to convert it to string.
@@ -81,6 +94,14 @@ export class Deposit extends BaseModel {
   set amount(amnt) {
     check(amnt instanceof BN, 'amnt should be instance of BN');
     this.data['amount'] = amnt.toString();
+  }
+
+  /**
+   * @property {number} simpleAmount
+   * @desc the simple amount of asset this deposit without decimals.
+   */
+  get simpleAmount() {
+    return fromDecimals(this.amount, this.assetDecimals);
   }
 
   /**

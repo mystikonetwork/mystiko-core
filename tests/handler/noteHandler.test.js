@@ -62,6 +62,7 @@ test('test importFromOffChainNote basic', async () => {
   );
   expect(privateNote.srcAsset).toBe('USDT');
   expect(privateNote.srcAssetAddress).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
+  expect(privateNote.srcAssetDecimals).toBe(18);
   expect(privateNote.srcProtocolAddress).toBe('0x98ed94360cad67a76a53d8aa15905e52485b73d1');
   expect(privateNote.amount.toString()).toBe(toDecimals(100, 18).toString());
   expect(privateNote.bridge).toBe(BridgeType.LOOP);
@@ -71,6 +72,7 @@ test('test importFromOffChainNote basic', async () => {
   );
   expect(privateNote.dstAsset).toBe('USDT');
   expect(privateNote.dstAssetAddress).toBe('0x26fc224b37952bd12c792425f242e0b0a55453a6');
+  expect(privateNote.dstAssetDecimals).toBe(18);
   expect(privateNote.dstProtocolAddress).toBe('0x98ed94360cad67a76a53d8aa15905e52485b73d1');
   expect(privateNote.commitmentHash.toString()).toBe(
     '6817961672086967550842806257390624158626823691800905067457884646190248540286',
@@ -99,6 +101,7 @@ test('test importFromOffChainNote duplicate', async () => {
   expect(privateNote.dstChainId).toBe(56);
   expect(privateNote.dstAsset).toBe('USDT');
   expect(privateNote.dstAssetAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
+  expect(privateNote.dstAssetDecimals).toBe(18);
   expect(privateNote.dstProtocolAddress).toBe('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
   await expect(noteHandler.importFromOffChainNote(walletPassword, offChainNote)).rejects.toThrow();
 });
@@ -170,4 +173,29 @@ test('test updateStatus', async () => {
   expect(privateNote.status).toBe(PrivateNoteStatus.IMPORTED);
   await noteHandler.updateStatus(1, PrivateNoteStatus.SPENT);
   expect(noteHandler.getPrivateNote(1).status).toBe(PrivateNoteStatus.SPENT);
+});
+
+test('test groupBy', () => {
+  db.notes.insert({ walletId: 1, dstAsset: 'TokenA', amount: '1000000000000000000', dstAssetDecimals: 18 });
+  db.notes.insert({ walletId: 1, dstAsset: 'TokenA', amount: '1000000000000000000', dstAssetDecimals: 18 });
+  db.notes.insert({ walletId: 1, dstAsset: 'TokenB', amount: '8100000000000000000', dstAssetDecimals: 18 });
+  db.notes.insert({ walletId: 1, dstAsset: 'TokenC', amount: '4000000000000000000', dstAssetDecimals: 18 });
+  db.notes.insert({ walletId: 1, dstAsset: 'TokenC', amount: '5300000000000000000', dstAssetDecimals: 18 });
+  let groups = noteHandler.groupPrivateNoteByDstAsset().sort((a, b) => {
+    return a.groupName > b.groupName ? 1 : -1;
+  });
+  expect(groups).toStrictEqual([
+    { groupName: 'TokenA', reducedValue: '2' },
+    { groupName: 'TokenB', reducedValue: '8.1' },
+    { groupName: 'TokenC', reducedValue: '9.3' },
+  ]);
+  groups = noteHandler
+    .groupPrivateNoteByDstAsset({ filterFunc: (note) => note.dstAsset !== 'TokenB' })
+    .sort((a, b) => {
+      return a.groupName > b.groupName ? 1 : -1;
+    });
+  expect(groups).toStrictEqual([
+    { groupName: 'TokenA', reducedValue: '2' },
+    { groupName: 'TokenC', reducedValue: '9.3' },
+  ]);
 });

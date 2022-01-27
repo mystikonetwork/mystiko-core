@@ -82,6 +82,7 @@ export class WithdrawHandler extends Handler {
     withdraw.chainId = privateNote.dstChainId;
     withdraw.asset = privateNote.dstAsset;
     withdraw.assetAddress = privateNote.dstAssetAddress;
+    withdraw.assetDecimals = privateNote.dstAssetDecimals;
     withdraw.amount = privateNote.amount;
     withdraw.recipientAddress = recipientAddress;
     withdraw.walletId = wallet.id;

@@ -32,7 +32,11 @@ test('Test toDecimals', () => {
   expect(utils.toDecimals(2, 4).toString()).toBe('20000');
   expect(utils.toDecimals(0.1, 2).toString()).toBe('10');
   expect(utils.toDecimals(0.01, 4).toString()).toBe('100');
-  expect(utils.toDecimals(0.001, 2).toString()).toBe('0');
+});
+
+test('Test fromDecimals', () => {
+  expect(utils.fromDecimals(new BN('1'), 4)).toBe(0.0001);
+  expect(utils.fromDecimals(new BN('1000000000000000000'))).toBe(1);
 });
 
 test('Test toFixedLenHex', () => {

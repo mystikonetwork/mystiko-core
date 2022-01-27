@@ -3,7 +3,7 @@ import BN from 'bn.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
-import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { check, toBuff, toHexNoPrefix, toString } from '../utils.js';
 import {
   isValidPrivateNoteStatus,
   OffChainNote,
@@ -103,24 +103,67 @@ export class NoteHandler extends Handler {
    * @returns {PrivateNote[]} an array of {@link PrivateNote} which meets the search criteria.
    */
   getPrivateNotes({ filterFunc, sortBy, desc, offset, limit } = {}) {
-    const wallet = this.walletHandler.checkCurrentWallet();
-    const whereClause = (rawObject) => {
-      if (filterFunc && filterFunc instanceof Function) {
-        return rawObject.walletId === wallet.id && filterFunc(new PrivateNote(rawObject));
+    return this._getPrivateNotes({ filterFunc, sortBy, desc, offset, limit })
+      .data()
+      .map((rawObject) => new PrivateNote(rawObject));
+  }
+
+  /**
+   * @desc group {@link PrivateNote} by the given group by field, with the specific reducer and filterOptions.
+   * @param {string} groupBy the field name of this group by query.
+   * @param {function} reducer a function which reduces two {@link PrivateNote} to a single value.
+   * @param {Object} [filterOptions] options of filtering this group by, check {@link NoteHandler#getPrivateNotes}.
+   * @returns {{groupName: string, reducedValue: string}[]} an array of groups, each group contains a group name and a
+   * reduced value.
+   */
+  groupPrivateNotes(groupBy, reducer, filterOptions = {}) {
+    check(typeof groupBy === 'string', 'groupBy should a string');
+    check(typeof reducer === 'function', 'reducer should be a function');
+    const distinctValues = new Set(
+      this._getPrivateNotes(filterOptions)
+        .data()
+        .map((note) => note[groupBy]),
+    );
+    const groups = [];
+    distinctValues.forEach((groupName) => {
+      const filterFunc = (note) => {
+        if (filterOptions.filterFunc) {
+          return note[groupBy] === groupName && filterOptions.filterFunc(note);
+        } else {
+          return note[groupBy] === groupName;
+        }
+      };
+      const newFilterOptions = { ...filterOptions, filterFunc };
+      const groupValues = this._getPrivateNotes(newFilterOptions).data();
+      let reducedValue;
+      if (groupValues.length === 1) {
+        reducedValue = reducer(new PrivateNote(groupValues[0]));
+      } else if (groupValues.length > 1) {
+        reducedValue = groupValues.reduce((noteA, noteB) =>
+          reducer(new PrivateNote(noteA), new PrivateNote(noteB)),
+        );
       }
-      return rawObject.walletId === wallet.id;
-    };
-    let queryChain = this.db.notes.chain().where(whereClause);
-    if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
-    }
-    if (offset && typeof offset === 'number') {
-      queryChain = queryChain.offset(offset);
-    }
-    if (limit && typeof limit === 'number') {
-      queryChain = queryChain.limit(limit);
-    }
-    return queryChain.data().map((rawObject) => new PrivateNote(rawObject));
+      groups.push({ groupName: toString(groupName), reducedValue: toString(reducedValue) });
+    });
+    return groups;
+  }
+
+  /**
+   * @desc group private notes by destination asset symbols.
+   * @param {Object} [filterOptions] options of filtering this group by, check {@link NoteHandler#getPrivateNotes}.
+   * @returns {{groupName: string, reducedValue: string}[]} an array of groups, each group contains a group name and a
+   * reduced value.
+   */
+  groupPrivateNoteByDstAsset(filterOptions = {}) {
+    return this.groupPrivateNotes(
+      'dstAsset',
+      (noteA, noteB) => {
+        const noteAmountA = noteA ? noteA.simpleAmount : 0;
+        const noteAmountB = noteB ? noteB.simpleAmount : 0;
+        return noteAmountA + noteAmountB;
+      },
+      filterOptions,
+    );
   }
 
   /**
@@ -170,6 +213,7 @@ export class NoteHandler extends Handler {
     privateNote.srcTransactionHash = txReceipt.transactionHash;
     privateNote.srcAsset = contractConfig.assetSymbol;
     privateNote.srcAssetAddress = contractConfig.assetAddress;
+    privateNote.srcAssetDecimals = contractConfig.assetDecimals;
     privateNote.srcProtocolAddress = txReceipt.to;
     privateNote.amount = new BN(amount.toString());
     privateNote.bridge = contractConfig.bridgeType;
@@ -179,12 +223,14 @@ export class NoteHandler extends Handler {
       privateNote.dstChainId = contractConfig.peerChainId;
       privateNote.dstAsset = peerContractConfig.assetSymbol;
       privateNote.dstAssetAddress = peerContractConfig.assetAddress;
+      privateNote.dstAssetDecimals = peerContractConfig.assetDecimals;
       privateNote.dstProtocolAddress = contractConfig.peerContractAddress;
     } else {
       privateNote.dstChainId = chainId;
       privateNote.dstTransactionHash = txReceipt.transactionHash;
       privateNote.dstAsset = contractConfig.assetSymbol;
       privateNote.dstAssetAddress = contractConfig.assetAddress;
+      privateNote.dstAssetDecimals = contractConfig.assetDecimals;
       privateNote.dstProtocolAddress = txReceipt.to;
     }
     privateNote.commitmentHash = new BN(toHexNoPrefix(commitmentHash), 16);
@@ -230,5 +276,26 @@ export class NoteHandler extends Handler {
       }
     }
     return undefined;
+  }
+
+  _getPrivateNotes({ filterFunc, sortBy, desc, offset, limit } = {}) {
+    const wallet = this.walletHandler.checkCurrentWallet();
+    const whereClause = (rawObject) => {
+      if (filterFunc && filterFunc instanceof Function) {
+        return rawObject.walletId === wallet.id && filterFunc(new PrivateNote(rawObject));
+      }
+      return rawObject.walletId === wallet.id;
+    };
+    let queryChain = this.db.notes.chain().where(whereClause);
+    if (sortBy && typeof sortBy === 'string') {
+      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+    }
+    if (offset && typeof offset === 'number') {
+      queryChain = queryChain.offset(offset);
+    }
+    if (limit && typeof limit === 'number') {
+      queryChain = queryChain.limit(limit);
+    }
+    return queryChain;
   }
 }

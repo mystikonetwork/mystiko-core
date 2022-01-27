@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { OffChainNote, PrivateNote, PrivateNoteStatus, BridgeType } from '../../src/model';
-import { toBuff, toHexNoPrefix } from '../../src/utils.js';
+import { toBuff, toDecimals, toHexNoPrefix } from '../../src/utils.js';
 import { readFromFile } from '../../src/config';
 
 test('Test OffChainNote getters/setters', () => {
@@ -21,6 +21,7 @@ test('Test PrivateNote getters/setters', async () => {
   expect(note.getSrcTxExplorerUrl(conf)).toBe(undefined);
   expect(note.srcAsset).toBe(undefined);
   expect(note.srcAssetAddress).toBe(undefined);
+  expect(note.srcAssetDecimals).toBe(undefined);
   expect(note.srcProtocolAddress).toBe(undefined);
   expect(note.amount).toBe(undefined);
   expect(note.bridge).toBe(undefined);
@@ -29,6 +30,7 @@ test('Test PrivateNote getters/setters', async () => {
   expect(note.getDstTxExplorerUrl(conf)).toBe(undefined);
   expect(note.dstAsset).toBe(undefined);
   expect(note.dstAssetAddress).toBe(undefined);
+  expect(note.dstAssetDecimals).toBe(undefined);
   expect(note.dstProtocolAddress).toBe(undefined);
   expect(note.commitmentHash).toBe(undefined);
   expect(note.encryptedOnChainNote).toBe(undefined);
@@ -48,10 +50,13 @@ test('Test PrivateNote getters/setters', async () => {
   expect(note.srcAsset).toBe('USDT');
   note.srcAssetAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(note.srcAssetAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
+  note.srcAssetDecimals = 17;
+  expect(note.srcAssetDecimals).toBe(17);
   note.srcProtocolAddress = '81b7e08f65bdf5648606c89998a9cc8164397647';
   expect(note.srcProtocolAddress).toBe('81b7e08f65bdf5648606c89998a9cc8164397647');
-  note.amount = new BN('deadbeef', 16);
-  expect(toHexNoPrefix(note.amount)).toBe('deadbeef');
+  note.amount = toDecimals(2.0001);
+  expect(note.amount.toString()).toBe('2000100000000000000');
+  expect(note.simpleAmount).toBe(2.0001);
   expect(() => {
     note.bridge = 'wrong type';
   }).toThrow();
@@ -68,6 +73,9 @@ test('Test PrivateNote getters/setters', async () => {
   expect(note.dstAsset).toBe('USDT');
   note.dstAssetAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(note.dstAssetAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
+  note.dstAssetDecimals = 16;
+  expect(note.dstAssetDecimals).toBe(16);
+  expect(note.simpleAmount).toBe(200.01);
   note.dstProtocolAddress = 'd774e153442cb09f5c0d8d1b7bf7fe1bdd86c332';
   expect(note.dstProtocolAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
   note.commitmentHash = new BN('baadf00d', 16);

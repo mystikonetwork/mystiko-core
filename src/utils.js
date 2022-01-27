@@ -1,4 +1,5 @@
 import BN from 'bn.js';
+import { ethers } from 'ethers';
 import * as fastfile from 'fastfile';
 
 /**
@@ -97,18 +98,27 @@ export function toBuff(strData) {
  * @function module:mystiko/utils.toDecimals
  * @desc convert a number into big number with given decimals. This is useful for calling smart contract functions.
  * @param {number} amount number to be converted.
- * @param {number} decimals number of precision bits of converted big number.
+ * @param {number} [decimals=18] number of precision bits of converted big number.
  * @returns {external:BN} a instance of {@link external:BN}
  */
-export function toDecimals(amount, decimals) {
+export function toDecimals(amount, decimals = 18) {
   check(typeof amount === 'number', 'amount should be a number');
   check(typeof decimals === 'number', 'decimals should be a number');
-  while (amount < 1 && decimals > 0) {
-    amount = amount * 10;
-    decimals = decimals - 1;
-  }
-  const base = new BN(10).pow(new BN(decimals));
-  return new BN(amount).mul(base);
+  const converted = ethers.utils.parseUnits(toString(amount), decimals);
+  return new BN(toString(converted));
+}
+
+/**
+ * @function module:mystiko/utils.fromDecimals
+ * @desc convert a number into big number with given decimals. This is useful for calling smart contract functions.
+ * @param {external:BN} bn a big number.
+ * @param {number} [decimals=18] number of precision bits of converted big number.
+ * @returns {amount} converted simple amount.
+ */
+export function fromDecimals(bn, decimals = 18) {
+  check(bn instanceof BN, 'bn should be an instance of BN');
+  check(typeof decimals === 'number', 'decimals should be a number');
+  return parseFloat(ethers.utils.formatUnits(toString(bn), decimals));
 }
 
 /**
