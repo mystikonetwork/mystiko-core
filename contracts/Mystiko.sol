@@ -20,6 +20,10 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   mapping(uint256 => bool) public withdrewSerialNumbers;
 
   address public operator;
+  address public relayProxyAddress;
+  uint64 public peerChainId;
+  address public peerContractAddress;
+
   bool public isDepositsDisabled;
   bool public isVerifierUpdateDisabled;
 
@@ -33,12 +37,17 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
 
   constructor(
+    address _relayProxyAddress,
+    uint64 _peerChainId,
     address _verifier,
     address _hasher,
     uint32 _merkleTreeHeight
   ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
+    relayProxyAddress = _relayProxyAddress;
+    peerChainId = _peerChainId;
     verifier = IVerifier(_verifier);
     operator = msg.sender;
+    peerContractAddress = address(0);
   }
 
   function deposit(
@@ -55,7 +64,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     require(cHash == commitmentHash, "commitment hash incorrect");
     _processDepositTransfer(amount);
     depositedCommitments[commitmentHash] = true;
-    _processCrossChain(amount, commitmentHash);
+    _sendCrossChainTx(amount, commitmentHash);
     emit Deposit(amount, commitmentHash, encryptedNote);
   }
 
@@ -76,7 +85,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     emit Withdraw(recipient, rootHash, serialNumber);
   }
 
-  function _processCrossChain(uint256 amount, bytes32 commitmentHash) internal virtual;
+  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal virtual;
 
   function bridgeType() public view virtual returns (string memory);
 
@@ -111,5 +120,13 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
 
   function changeOperator(address _newOperator) external onlyOperator {
     operator = _newOperator;
+  }
+
+  function setRelayProxyAddress(address _relayProxyAddress) external onlyOperator {
+    relayProxyAddress = _relayProxyAddress;
+  }
+
+  function setPeerContractAddress(address _peerContractAddress) external onlyOperator {
+    peerContractAddress = _peerContractAddress;
   }
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
 
-import "../bridges/poly/cross_chain_manager/interface/IEthCrossChainManager.sol";
-import "../bridges/poly/cross_chain_manager/interface/IEthCrossChainManagerProxy.sol";
+import "../bridges/poly/relay/interface/IEthCrossChainManager.sol";
+import "../bridges/poly/relay/interface/IEthCrossChainManagerProxy.sol";
 import "../bridges/poly/MystikoWithPoly.sol";
 import "../libs/utils/Utils.sol";
 

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
 
-import "./MystikoWithPoly.sol";
+import "./MystikoWithCeler.sol";
 import "../../pool/MainAssetPool.sol";
 
-contract MystikoWithPolyMain is MystikoWithPoly, MainAssetPool {
+contract MystikoWithCelerMain is MystikoWithCeler, MainAssetPool {
   event Received(address, uint256);
 
   constructor(
@@ -13,7 +13,7 @@ contract MystikoWithPolyMain is MystikoWithPoly, MainAssetPool {
     address _verifier,
     address _hasher,
     uint32 _merkleTreeHeight
-  ) public MystikoWithPoly(_relayProxyAddress, _peerChainId, _verifier, _hasher, _merkleTreeHeight) {}
+  ) public MystikoWithCeler(_relayProxyAddress, _peerChainId, _verifier, _hasher, _merkleTreeHeight) {}
 
   receive() external payable {
     emit Received(msg.sender, msg.value);
