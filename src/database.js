@@ -67,7 +67,7 @@ export async function createDatabase(dbFile, adapter) {
       autoload: true,
       autoloadCallback: dbLoadCallback,
       autosave: true,
-      autosaveInterval: 5000,
+      autosaveInterval: 1000,
       adapter: adapter,
     });
     await dbLoadPromise;
