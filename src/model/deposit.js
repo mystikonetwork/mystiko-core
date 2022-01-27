@@ -1,6 +1,7 @@
 import BN from 'bn.js';
 import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { MystikoConfig } from '../config';
 
 /**
  * @class Deposit
@@ -157,6 +158,16 @@ export class Deposit extends BaseModel {
   }
 
   /**
+   * @desc get the full explorer URL of asset approving transaction submitted to the source chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string|undefined} a full explorer URL of asset approving transaction.
+   */
+  getAssetApproveTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.srcChainId, this.assetApproveTxHash);
+  }
+
+  /**
    * @property {string} srcTxHash
    * @desc the transaction hash of on the source chain.
    */
@@ -167,6 +178,16 @@ export class Deposit extends BaseModel {
   set srcTxHash(hash) {
     check(typeof hash === 'string', 'hash should be instance of string');
     this.data['srcTxHash'] = hash;
+  }
+
+  /**
+   * @desc get the full explorer URL of depositing transaction submitted to the source chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string|undefined} a full explorer URL of this depositing transaction.
+   */
+  getSrcTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.srcChainId, this.srcTxHash);
   }
 
   /**
@@ -184,6 +205,16 @@ export class Deposit extends BaseModel {
   }
 
   /**
+   * @desc get the full explorer URL of bridge syncing transaction submitted to the bridge chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string|undefined} a full explorer URL of this bridge syncing transaction.
+   */
+  getBridgeTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getBridgeTxExplorerUrl(this.bridge, this.bridgeTxHash);
+  }
+
+  /**
    * @property {string} dstTxHash
    * @desc the transaction hash of on the destination chain.
    * If the bridge type of this deposit is loop, then this field is equal to {@link Deposit#srcTxHash}.
@@ -195,6 +226,16 @@ export class Deposit extends BaseModel {
   set dstTxHash(hash) {
     check(typeof hash === 'string', 'hash should be instance of string');
     this.data['dstTxHash'] = hash;
+  }
+
+  /**
+   * @desc get the full explorer URL of syncing transaction submitted to the destination chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string|undefined} a full explorer URL of this syncing transaction on the destination chain.
+   */
+  getDstTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.dstChainId, this.dstTxHash);
   }
 
   /**

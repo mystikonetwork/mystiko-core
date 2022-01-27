@@ -87,7 +87,7 @@ test('test ChainConfig constructor', () => {
   expect(config.name).toBe('Binance Smart Chain');
   expect(config.explorerUrl).toBe('https://testnet.bscscan.com');
   expect(config.explorerPrefix).toBe(EXPLORER_DEFAULT_PREFIX);
-  expect(config.getTxUrl('0xa7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69')).toBe(
+  expect(config.getTxUrl('a7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69')).toBe(
     'https://testnet.bscscan.com/tx/0xa7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69',
   );
   const newPrefix = `/testnet/tx/${EXPLORER_TX_PLACEHOLDER}`;

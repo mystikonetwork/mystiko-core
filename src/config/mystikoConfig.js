@@ -174,6 +174,44 @@ export class MystikoConfig extends BaseConfig {
     return this.config['circuits'][name];
   }
 
+  /**
+   * Get transaction's explorer URL based on chainId.
+   * @param {number} chainId the chain id of where this transaction was confirmed.
+   * @param {string|undefined} transactionHash the hash of the transaction, if it is undefined,
+   * this method returns undefined.
+   * @returns {string|undefined} a full explorer URL if all information is available, otherwise it returns undefined.
+   */
+  getChainTxExplorerUrl(chainId, transactionHash) {
+    if (transactionHash) {
+      check(typeof chainId === 'number', 'chainId should a number');
+      check(typeof transactionHash === 'string', 'transactionHash should be string');
+      const chainConfig = this.getChainConfig(chainId);
+      if (chainConfig) {
+        return chainConfig.getTxUrl(transactionHash);
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * @desc get the explorer URL of transaction in cross-chain bridges, if it is available.
+   * @param {module:mystiko/models.BridgeType} bridgeType type of the cross-chain bridge.
+   * @param {string|undefined} transactionHash hash of the transaction confirmed on the cross-chain bridge. if none,
+   * this method returns undefined.
+   * @returns {string|undefined} a full explorer URL if all information is available, otherwise it returns undefined.
+   */
+  getBridgeTxExplorerUrl(bridgeType, transactionHash) {
+    if (transactionHash) {
+      check(isValidBridgeType(bridgeType), `${bridgeType} is an invalid bridge type`);
+      check(typeof transactionHash === 'string', 'transactionHash should be string');
+      const bridgeConfig = this.getBridgeConfig(bridgeType);
+      if (bridgeConfig && bridgeConfig.getTxUrl) {
+        return bridgeConfig.getTxUrl(transactionHash);
+      }
+    }
+    return undefined;
+  }
+
   _createChainConfigs() {
     this.config['chains'] = {};
     if (this.rawConfig['chains']) {

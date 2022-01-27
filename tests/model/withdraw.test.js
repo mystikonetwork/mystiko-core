@@ -1,7 +1,9 @@
 import BN from 'bn.js';
 import { Withdraw, WithdrawStatus } from '../../src/model';
+import { readFromFile } from '../../src/config';
 
-test('Test Withdraw getters/setters', () => {
+test('Test Withdraw getters/setters', async () => {
+  const conf = await readFromFile('tests/config/files/config.test.json');
   const withdraw = new Withdraw();
   expect(withdraw.chainId).toBe(undefined);
   expect(withdraw.asset).toBe(undefined);
@@ -11,6 +13,7 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.amount).toBe(undefined);
   expect(withdraw.recipientAddress).toBe(undefined);
   expect(withdraw.transactionHash).toBe(undefined);
+  expect(withdraw.getTxExplorerUrl(conf)).toBe(undefined);
   expect(withdraw.walletId).toBe(undefined);
   expect(withdraw.shieldedAddress).toBe(undefined);
   expect(withdraw.privateNoteId).toBe(undefined);
@@ -37,6 +40,9 @@ test('Test Withdraw getters/setters', () => {
   expect(withdraw.recipientAddress).toBe('d774e153442cb09f5c0d8d1b7bf7fe1bdd86c332');
   withdraw.transactionHash = '0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad';
   expect(withdraw.transactionHash).toBe('0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad');
+  expect(withdraw.getTxExplorerUrl(conf)).toBe(
+    'https://etherscan.io/tx/0x0d9d73e2d8cbd052f713e7aaff9d6ae78bb3139006c5e790d2089f9691b860ad',
+  );
   withdraw.walletId = 4500;
   expect(withdraw.walletId).toBe(4500);
   withdraw.shieldedAddress =

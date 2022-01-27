@@ -2,6 +2,7 @@ import BN from 'bn.js';
 import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '../utils.js';
 import { isValidBridgeType } from './common.js';
+import { MystikoConfig } from '../config';
 
 /**
  * @class OffChainNote
@@ -76,6 +77,17 @@ export class PrivateNote extends BaseModel {
   set srcTransactionHash(hash) {
     check(typeof hash === 'string', 'hash should be instance of string');
     this.data['srcTransactionHash'] = hash;
+  }
+
+  /**
+   * @desc get the explorer URL for transaction in source chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string} a full URL of source chain transaction. It returns undefined if source chain config
+   * is not provided or the transaction hash of source chain is not set.
+   */
+  getSrcTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.srcChainId, this.srcTransactionHash);
   }
 
   /**
@@ -174,6 +186,17 @@ export class PrivateNote extends BaseModel {
   set dstTransactionHash(hash) {
     check(typeof hash === 'string', 'hash should be instance of string');
     this.data['dstTransactionHash'] = hash;
+  }
+
+  /**
+   * @desc get the explorer URL for transaction in destination chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string} a full URL of destination chain transaction. It returns undefined if destination chain config
+   * is not provided or the transaction hash of destination chain is not set.
+   */
+  getDstTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.dstChainId, this.dstTransactionHash);
   }
 
   /**
