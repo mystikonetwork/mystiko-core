@@ -1,6 +1,6 @@
 import fs from 'fs';
 import mystiko from '../src/index.js';
-import { BridgeType } from '../src/model';
+import { BridgeType, DepositStatus, PrivateNoteStatus } from '../src/model';
 
 require('dotenv').config();
 
@@ -9,9 +9,9 @@ async function createDeposit() {
   const accounts = mystiko.accounts.getAccounts();
   for (let i = 0; i < accounts.length; i++) {
     const account = accounts[i];
-    const depositCount = mystiko.deposits.getDepositsCount({
-      filterFunc: (deposit) => account.shieldedAddress === deposit.shieldedAddress,
-    });
+    const depositCount = mystiko.deposits.getDepositsCount(
+      (deposit) => account.shieldedAddress === deposit.shieldedRecipientAddress,
+    );
     for (let j = 0; j < 4 - Math.floor(depositCount / 4); j++) {
       let request = {
         srcChainId: 3,
@@ -57,6 +57,32 @@ async function createDeposit() {
   }
 }
 
+async function createWithdraw() {
+  mystiko.signers.privateKey.setPrivateKey(process.env.PRIVATE_KEY);
+  const address = (await mystiko.signers.privateKey.accounts())[0];
+  const accounts = mystiko.accounts.getAccounts();
+  for (let i = 0; i < accounts.length; i++) {
+    const account = accounts[i];
+    const privateNotes = mystiko.notes.getPrivateNotes({
+      filterFunc: (note) => note.shieldedAddress === account.shieldedAddress,
+    });
+    for (let j = 0; j < privateNotes.length; j++) {
+      const privateNote = privateNotes[j];
+      if (privateNote.status === PrivateNoteStatus.IMPORTED) {
+        const deposit = mystiko.deposits.getDeposit(privateNote.srcTransactionHash);
+        if (deposit.status === DepositStatus.SUCCEEDED) {
+          const { withdrawPromise } = await mystiko.withdraws.createWithdraw(
+            process.env.WALLET_PASSWORD,
+            { privateNote, recipientAddress: address },
+            mystiko.signers.privateKey,
+          );
+          await withdrawPromise;
+        }
+      }
+    }
+  }
+}
+
 async function main() {
   if (process.argv.length <= 2) {
     throw new Error('Usage dataGenerator.js [OUTPUT_FILE_PATH]');
@@ -79,8 +105,15 @@ async function main() {
   for (let i = 0; i < 10 - accountCount; i++) {
     await mystiko.accounts.addAccount(process.env.WALLET_PASSWORD, `Account #${i}`);
   }
-  await createDeposit();
+  //await createDeposit();
+  await createWithdraw();
   fs.writeFileSync(outPutFile, mystiko.db.exportDataAsString(mystiko.db));
 }
 
-main();
+main()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch(() => {
+    process.exit(1);
+  });
