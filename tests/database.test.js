@@ -44,12 +44,6 @@ test('Test export/import data', async () => {
   const json = exportDataAsString(db);
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dbtest'));
   fs.writeFileSync(tmpDir + '/export.json', json);
-  db.accounts.clear();
-  db.wallets.clear();
-  db.notes.clear();
-  db.deposits.clear();
-  db.withdraws.clear();
-  db.database.saveDatabase();
   await importDataFromJsonFile(db, tmpDir + '/export.json');
   expect(db.wallets.findOne().accountNonce).toBe(1);
   expect(db.accounts.findOne().name).toBe('test account 1');
