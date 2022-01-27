@@ -105,7 +105,7 @@ async function main() {
   for (let i = 0; i < 10 - accountCount; i++) {
     await mystiko.accounts.addAccount(process.env.WALLET_PASSWORD, `Account #${i}`);
   }
-  //await createDeposit();
+  await createDeposit();
   await createWithdraw();
   fs.writeFileSync(outPutFile, mystiko.db.exportDataAsString(mystiko.db));
 }
