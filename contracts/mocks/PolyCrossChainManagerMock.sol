@@ -42,6 +42,7 @@ contract PolyCrossChainManagerMock is IEthCrossChainManager, IEthCrossChainManag
   ) external override returns (bool) {
     uint64 fromChainId;
     address fromContractAddress;
+    _method;
 
     if (_toChainId == chainIdA) {
       fromChainId = chainIdB;
