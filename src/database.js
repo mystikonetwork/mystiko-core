@@ -83,8 +83,9 @@ export async function createDatabase(dbFile, adapter) {
 
 /**
  * @function module:mystiko/db.exportDataAsString
+ * @desc export database as a serialized JSON string.
  * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
- * @property {external:Loki} wrappedDb.database instance of Loki's raw database object.
+ * @param {external:Loki} wrappedDb.database instance of Loki's raw database object.
  * @returns {string} an serialized Loki database as a String.
  */
 export function exportDataAsString({ database }) {
@@ -94,6 +95,7 @@ export function exportDataAsString({ database }) {
 
 /**
  * @function module:mystiko/db.importDataFromJson
+ * @desc import the serialized JSON string into database.
  * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
  * @param {string} jsonString a serialized json object as string.
  */
@@ -118,6 +120,7 @@ export function importDataFromJson(wrappedDb, jsonString) {
 
 /**
  * @function module:mystiko/db.importDataFromJsonFile
+ * @desc import the file contains the serialized JSON into database.
  * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
  * @param {string} jsonFile the file path of serialized JSON data.
  */

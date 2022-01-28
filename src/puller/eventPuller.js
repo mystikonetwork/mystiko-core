@@ -17,6 +17,15 @@ Object.freeze(TopicType);
 
 /**
  * @class EventPuller
+ * @desc a puller class which implements the logic of regularly pulling event data from on-chain source.
+ * @param {Object} options options of this puller.
+ * @param {MystikoConfig} options.config current effective config.
+ * @param {ContractHandler} options.contractHandler handler instance for operating {@link Contract} instances.
+ * @param {DepositHandler} options.depositHandler handler instance for operating {@link Deposit} instances.
+ * @param {ContractPool} options.contractPool pool of initialized and connected {@link external:Contract} instances.
+ * @param {boolean} [options.isStoreEvent=false] whether to store the pulled {@link Event} into database.
+ * @param {EventHandler} [options.eventHandler] handler instance for operating {@link Event} instances.
+ * @param {number} [options.pullIntervalMs=60000] the time interval in milliseconds how often this puller pulls data.
  */
 export class EventPuller {
   constructor({
@@ -54,6 +63,10 @@ export class EventPuller {
     this.logger = rootLogger.getLogger('EventPuller');
   }
 
+  /**
+   * @desc start this puller immediately with the given time interval.
+   * @returns {Promise<void>}
+   */
   start() {
     const promise = this._pullAllContractEvents();
     this.timer = setInterval(async () => {
@@ -62,10 +75,17 @@ export class EventPuller {
     return promise;
   }
 
+  /**
+   * @desc whether this puller has been started.
+   * @returns {boolean} true if it is running, otherwise it returns false.
+   */
   isStarted() {
     return !!this.timer;
   }
 
+  /**
+   * @desc stop this running puller if necessary. This is for graceful shutdown.
+   */
   stop() {
     if (this.timer) {
       this.logger.debug('stopping event puller...');

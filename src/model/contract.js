@@ -5,6 +5,9 @@ import { check } from '../utils.js';
 
 /**
  * @class Contract
+ * @extends BaseModel
+ * @param {Object} [data={}] raw data of the Account model.
+ * @desc data model for storing smart contract related information.
  */
 export class Contract extends BaseModel {
   constructor(data) {
@@ -24,6 +27,10 @@ export class Contract extends BaseModel {
     this.data['chainId'] = id;
   }
 
+  /**
+   * @property {string} address
+   * @desc the deployed address of this smart contract.
+   */
   get address() {
     return this.data['address'];
   }
@@ -33,6 +40,10 @@ export class Contract extends BaseModel {
     this.data['address'] = addr;
   }
 
+  /**
+   * @property {string} assetSymbol
+   * @desc the asset symbol which this smart contract associates with.
+   */
   get assetSymbol() {
     return this.data['assetSymbol'];
   }
@@ -42,6 +53,11 @@ export class Contract extends BaseModel {
     this.data['assetSymbol'] = symbol;
   }
 
+  /**
+   * @property {module:mystiko/models.AssetType} assetType
+   * @desc the asset type which this smart contract associates with,
+   * check {@link module:mystiko/models.AssetType AssetType}.
+   */
   get assetType() {
     return this.data['assetType'];
   }
@@ -51,6 +67,10 @@ export class Contract extends BaseModel {
     this.data['assetType'] = type;
   }
 
+  /**
+   * @property {string} assetAddress
+   * @desc the asset address which this smart contract associates with.
+   */
   get assetAddress() {
     return this.data['assetAddress'];
   }
@@ -73,6 +93,11 @@ export class Contract extends BaseModel {
     this.data['assetDecimals'] = decimals;
   }
 
+  /**
+   * @property {module:mystiko/models.BridgeType} bridgeType
+   * @desc the cross-chain bridge type which this smart contract associates with,
+   * check {@link module:mystiko/models.BridgeType BridgeType}.
+   */
   get bridgeType() {
     return this.data['bridgeType'];
   }
@@ -82,6 +107,11 @@ export class Contract extends BaseModel {
     this.data['bridgeType'] = type;
   }
 
+  /**
+   * @property {number} peerChainId
+   * @desc the peer chain id of this smart contract.
+   * It is undefined if the bridge type is loop.
+   */
   get peerChainId() {
     return this.data['peerChainId'];
   }
@@ -91,6 +121,11 @@ export class Contract extends BaseModel {
     this.data['peerChainId'] = id;
   }
 
+  /**
+   * @property {string} peerContractAddress
+   * @desc the peer chain smart contract address of this smart contract.
+   * It is undefined if the bridge type is loop.
+   */
   get peerContractAddress() {
     return this.data['peerContractAddress'];
   }
@@ -100,6 +135,10 @@ export class Contract extends BaseModel {
     this.data['peerContractAddress'] = addr;
   }
 
+  /**
+   * @property {string} circuits
+   * @desc the scheme name of zkp circuits of this smart contract.
+   */
   get circuits() {
     return this.data['circuits'];
   }
@@ -109,6 +148,10 @@ export class Contract extends BaseModel {
     this.data['circuits'] = scheme;
   }
 
+  /**
+   * @property {number} syncedBlock
+   * @desc the block number of the last synchronized block.
+   */
   get syncedBlock() {
     return this.data['syncedBlock'];
   }

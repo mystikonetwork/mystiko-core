@@ -11,7 +11,8 @@
       "src/config",
       "src/handler",
       "src/model",
-      "src/protocol"
+      "src/protocol",
+      "src/puller"
     ]
   },
   "plugins": ["plugins/markdown"]

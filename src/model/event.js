@@ -5,6 +5,9 @@ import { check } from '../utils.js';
 
 /**
  * @class Event
+ * @extends BaseModel
+ * @param {Object} [data={}] raw data of the Account model.
+ * @desc data model of storing smart contract event related data.
  */
 export class Event extends BaseModel {
   constructor(data) {
@@ -24,6 +27,10 @@ export class Event extends BaseModel {
     this.data['chainId'] = id;
   }
 
+  /**
+   * @property {string} contractAddress
+   * @desc the smart contract address from where this event was emitted.
+   */
   get contractAddress() {
     return this.data['contractAddress'];
   }
@@ -33,6 +40,10 @@ export class Event extends BaseModel {
     this.data['contractAddress'] = addr;
   }
 
+  /**
+   * @property {string} topic
+   * @desc the topic name of this emitted event.
+   */
   get topic() {
     return this.data['topic'];
   }
@@ -55,6 +66,10 @@ export class Event extends BaseModel {
     this.data['transactionHash'] = hash;
   }
 
+  /**
+   * @property {Object} argumentData
+   * @desc the arguments of this emitted event.
+   */
   get argumentData() {
     return this.data['argumentData'];
   }
