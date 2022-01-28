@@ -269,6 +269,7 @@ export class DepositHandler extends Handler {
   async _updateDeposit(deposit) {
     this.db.deposits.update(deposit.data);
     await this.saveDatabase();
+    this.logger.info(`deposit(id=${deposit.id}) has been updated`);
     return deposit;
   }
 

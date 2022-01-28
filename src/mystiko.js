@@ -162,7 +162,9 @@ mystiko.initialize = async ({
     eventPuller: new EventPuller({
       config: mystiko.config,
       contractHandler: mystiko.contracts,
+      noteHandler: mystiko.notes,
       depositHandler: mystiko.deposits,
+      withdrawHandler: mystiko.withdraws,
       eventHandler: mystiko.events,
       contractPool: mystiko.contractPool,
       isStoreEvent: isStoreEvent,
