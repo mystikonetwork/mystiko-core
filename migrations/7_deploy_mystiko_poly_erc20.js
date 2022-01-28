@@ -4,7 +4,7 @@ const PUBLIC_CHAIN = ['ropsten', 'bsctestnet', 'bsc', 'ethereum'];
 const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
-const TestToken = artifacts.require('TestToken');
+// const TestToken = artifacts.require('TestToken');
 
 module.exports = function (deployer, network) {
   if (!PUBLIC_CHAIN.includes(network)) {
@@ -33,7 +33,6 @@ module.exports = function (deployer, network) {
 
     const verifier = await Verifier.deployed();
     const hasher = await Hasher.deployed();
-    //const token = await TestToken.deployed();
 
     await deployer.deploy(
       MystikoWithPolyERC20,
