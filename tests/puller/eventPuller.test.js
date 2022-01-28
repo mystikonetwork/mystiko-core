@@ -14,7 +14,7 @@ import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { EventHandler } from '../../src/handler/eventHandler.js';
 import { EventPuller } from '../../src/puller';
 import { toFixedLenHex } from '../../src/utils.js';
-import { DepositStatus, WithdrawStatus } from '../../src/model';
+import { DepositStatus, PrivateNoteStatus, WithdrawStatus } from '../../src/model';
 
 class MockProvider extends ethers.providers.JsonRpcProvider {
   constructor(url, raiseError = false) {
@@ -106,7 +106,10 @@ class MockContract extends ethers.Contract {
           },
         },
         {
-          transactionHash: toFixedLenHex(randomBytes(32)),
+          transactionHash:
+            this.address === '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'
+              ? '0x3f51321e83e5d2c9e8dc9236e48c98e95b471122350fa174f997c4f441a690a1'
+              : toFixedLenHex(randomBytes(32)),
           args: {
             rootHash: new BN(Math.floor(Math.random() * 1000)),
             serialNumber: new BN(Math.floor(Math.random() * 1000)),
@@ -198,6 +201,13 @@ test('test pulling behaviour', async () => {
     dstChainId: 1,
     walletId: wallet.id,
   });
+  const note3 = db.notes.insert({
+    withdrawTransactionHash: '0x3f51321e83e5d2c9e8dc9236e48c98e95b471122350fa174f997c4f441a690a1',
+    dstChainId: 56,
+    commitmentHash: new BN(Math.floor(Math.random() * 1000)),
+    status: PrivateNoteStatus.IMPORTED,
+    walletId: wallet.id,
+  });
   const withdraw = db.withdraws.insert({
     merkleRootHash: new BN(123456789).toString(),
     serialNumber: new BN(987654321).toString(),
@@ -208,6 +218,7 @@ test('test pulling behaviour', async () => {
   const eventPuller = new EventPuller({
     config,
     contractHandler,
+    walletHandler,
     noteHandler,
     depositHandler,
     contractPool,
@@ -230,6 +241,7 @@ test('test pulling behaviour', async () => {
   expect(deposit4['dstTxHash']).not.toBe(undefined);
   expect(note1['dstTransactionHash']).not.toBe(undefined);
   expect(note2['dstTransactionHash']).not.toBe(undefined);
+  expect(note3['status']).toBe(PrivateNoteStatus.SPENT);
   expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
   expect(eventPuller.isStarted()).toBe(false);
   expect(eventHandler.getEvents().length > 0).toBe(true);
@@ -240,6 +252,7 @@ test('test skip storing events', async () => {
   const eventPuller = new EventPuller({
     config,
     contractHandler,
+    walletHandler,
     noteHandler,
     depositHandler,
     withdrawHandler,
@@ -264,6 +277,7 @@ test('test raise errors', async () => {
   const eventPuller = new EventPuller({
     config,
     contractHandler,
+    walletHandler,
     noteHandler,
     depositHandler,
     withdrawHandler,
@@ -277,4 +291,25 @@ test('test raise errors', async () => {
   await promise;
   eventPuller.stop();
   expect(eventPuller.errorMessage).not.toBe(undefined);
+});
+
+test('test no wallet', async () => {
+  const eventPuller = new EventPuller({
+    config,
+    contractHandler,
+    walletHandler,
+    noteHandler,
+    depositHandler,
+    withdrawHandler,
+    contractPool,
+    eventHandler,
+    isStoreEvent: false,
+    pullIntervalMs: 1000,
+  });
+  db.wallets.clear();
+  const promise = eventPuller.start();
+  expect(eventPuller.isStarted()).toBe(true);
+  await promise;
+  eventPuller.stop();
+  expect(eventPuller.errorMessage).toBe(undefined);
 });

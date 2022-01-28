@@ -1,13 +1,14 @@
 import BN from 'bn.js';
 import { MystikoConfig } from '../config';
 import { ContractHandler } from '../handler/contractHandler.js';
+import { WalletHandler } from '../handler/walletHandler.js';
 import { NoteHandler } from '../handler/noteHandler.js';
 import { DepositHandler } from '../handler/depositHandler.js';
 import { WithdrawHandler } from '../handler/withdrawHandler.js';
 import { EventHandler } from '../handler/eventHandler.js';
 import { ContractPool } from '../chain/contract.js';
 import { check, toHexNoPrefix, toString } from '../utils.js';
-import { BridgeType, DepositStatus, WithdrawStatus } from '../model';
+import { BridgeType, DepositStatus, PrivateNoteStatus, WithdrawStatus } from '../model';
 import rootLogger from '../logger';
 
 const TopicType = {
@@ -23,6 +24,7 @@ Object.freeze(TopicType);
  * @param {Object} options options of this puller.
  * @param {MystikoConfig} options.config current effective config.
  * @param {ContractHandler} options.contractHandler handler instance for operating {@link Contract} instances.
+ * @param {WalletHandler} options.walletHandler handler instance for operating {@link Wallet} instances.
  * @param {NoteHandler} options.noteHandler handler instance for operating {@link PrivateNote} instances.
  * @param {DepositHandler} options.depositHandler handler instance for operating {@link Deposit} instances.
  * @param {WithdrawHandler} options.withdrawHandler handler instance for operating {@link Withdraw} instances.
@@ -35,6 +37,7 @@ export class EventPuller {
   constructor({
     config,
     contractHandler,
+    walletHandler,
     noteHandler,
     depositHandler,
     withdrawHandler,
@@ -48,6 +51,7 @@ export class EventPuller {
       contractHandler instanceof ContractHandler,
       'contractHandler should be an instance ContractHandler',
     );
+    check(walletHandler instanceof WalletHandler, 'walletHandler should be an instance of WalletHandler');
     check(noteHandler instanceof NoteHandler, 'noteHandler should be an instance of NoteHandler');
     check(depositHandler instanceof DepositHandler, 'depositHandler should be an instance of DepositHandler');
     check(
@@ -63,6 +67,7 @@ export class EventPuller {
     check(typeof pullIntervalMs === 'number', 'pullIntervalMs should be a number type');
     this.config = config;
     this.contractHandler = contractHandler;
+    this.walletHandler = walletHandler;
     this.noteHandler = noteHandler;
     this.depositHandler = depositHandler;
     this.withdrawHandler = withdrawHandler;
@@ -109,6 +114,10 @@ export class EventPuller {
 
   _pullAllContractEvents() {
     if (!this.hasPendingPull) {
+      if (!this.walletHandler.getCurrentWallet()) {
+        this.logger.info('no existing wallet has been created, skipping pulling...');
+        return;
+      }
       this.logger.debug('start event pulling...');
       this.hasPendingPull = true;
       const promises = [];
@@ -274,12 +283,23 @@ export class EventPuller {
           );
         },
       });
+      const notes = this.noteHandler.getPrivateNotes({
+        filterFunc: (note) =>
+          note.dstChainId === rawEvent.chainId && note.withdrawTransactionHash === rawEvent.transactionHash,
+      });
       for (let j = 0; j < withdraws.length; j++) {
         const withdraw = withdraws[j];
         if (withdraw.status !== WithdrawStatus.SUCCEEDED) {
           withdraw.status = WithdrawStatus.SUCCEEDED;
           withdraw.transactionHash = rawEvent.transactionHash;
           promises.push(this.withdrawHandler._updateWithdraw(withdraw));
+        }
+      }
+      for (let j = 0; j < notes.length; j++) {
+        const note = notes[j];
+        if (note.status !== PrivateNoteStatus.SPENT) {
+          note.status = PrivateNoteStatus.SPENT;
+          promises.push(this.noteHandler._updatePrivateNote(note));
         }
       }
     }
