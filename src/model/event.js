@@ -52,12 +52,12 @@ export class Event extends BaseModel {
     this.data['transactionHash'] = hash;
   }
 
-  get arguments() {
-    return this.data['arguments'];
+  get argumentData() {
+    return this.data['argumentData'];
   }
 
-  set arguments(args) {
+  set argumentData(args) {
     check(args, 'args cannot be null or undefined');
-    this.data['arguments'] = args;
+    this.data['argumentData'] = args;
   }
 }

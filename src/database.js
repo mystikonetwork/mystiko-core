@@ -2,7 +2,7 @@ import Loki from 'lokijs';
 import { check, readFile } from './utils';
 import { ID_KEY } from './model';
 
-const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
+const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws', 'contracts', 'events'];
 
 /**
  * @external external:Loki

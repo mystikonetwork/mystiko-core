@@ -53,7 +53,7 @@ export class Contract extends BaseModel {
   }
 
   set assetAddress(addr) {
-    check(ethers.utils.isAddress(addr), `addr ${addr} is invalid address`);
+    check(!addr || ethers.utils.isAddress(addr), `addr ${addr} is invalid address`);
     this.data['assetAddress'] = addr;
   }
 
@@ -84,7 +84,7 @@ export class Contract extends BaseModel {
   }
 
   set peerChainId(id) {
-    check(typeof id === 'number', 'id should be a number type');
+    check(!id || typeof id === 'number', 'id should be a number type');
     this.data['peerChainId'] = id;
   }
 
@@ -93,7 +93,7 @@ export class Contract extends BaseModel {
   }
 
   set peerContractAddress(addr) {
-    check(ethers.utils.isAddress(addr), `addr ${addr} is invalid address`);
+    check(!addr || ethers.utils.isAddress(addr), `addr ${addr} is invalid address`);
     this.data['peerContractAddress'] = addr;
   }
 

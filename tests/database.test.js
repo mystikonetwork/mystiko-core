@@ -14,6 +14,8 @@ test('Test persist database', async () => {
   expect(db.deposits).not.toBe(null);
   expect(db.withdraws).not.toBe(null);
   expect(db.database).not.toBe(null);
+  expect(db.contracts).not.toBe(null);
+  expect(db.events).not.toBe(null);
   db.accounts.insert({ address: '783323' });
   expect(db.accounts.find().length).toBe(1);
   db.database.close(() => {
@@ -29,6 +31,8 @@ test('Test in-memory database', async () => {
   expect(db.deposits).not.toBe(null);
   expect(db.withdraws).not.toBe(null);
   expect(db.database).not.toBe(null);
+  expect(db.contracts).not.toBe(null);
+  expect(db.events).not.toBe(null);
   db.accounts.insert({ address: '783323' });
   expect(db.accounts.find().length).toBe(1);
   db.database.close();
