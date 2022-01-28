@@ -29,6 +29,8 @@ abstract contract MystikoWithCeler is Mystiko, IMessageReceiverApp, CrossChainDa
     require(_sender == peerContractAddress, "from contract address not matched");
     require(_srcChainId == peerChainId, "from chain id not matched");
     require(txData.amount > 0, "amount shouuld be greater than 0");
+    require(!relayCommitments[txData.commitmentHash], "The commitment has been submitted");
+    relayCommitments[txData.commitmentHash] = true;
     uint32 leafIndex = _insert(txData.commitmentHash);
     emit MerkleTreeInsert(txData.commitmentHash, leafIndex, txData.amount);
     return true;
