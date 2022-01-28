@@ -1,11 +1,13 @@
 import BN from 'bn.js';
 import { MystikoConfig } from '../config';
 import { ContractHandler } from '../handler/contractHandler.js';
+import { NoteHandler } from '../handler/noteHandler.js';
 import { DepositHandler } from '../handler/depositHandler.js';
+import { WithdrawHandler } from '../handler/withdrawHandler.js';
 import { EventHandler } from '../handler/eventHandler.js';
 import { ContractPool } from '../chain/contract.js';
 import { check, toHexNoPrefix, toString } from '../utils.js';
-import { DepositStatus } from '../model';
+import { BridgeType, DepositStatus, WithdrawStatus } from '../model';
 import rootLogger from '../logger';
 
 const TopicType = {
@@ -21,7 +23,9 @@ Object.freeze(TopicType);
  * @param {Object} options options of this puller.
  * @param {MystikoConfig} options.config current effective config.
  * @param {ContractHandler} options.contractHandler handler instance for operating {@link Contract} instances.
+ * @param {NoteHandler} options.noteHandler handler instance for operating {@link PrivateNote} instances.
  * @param {DepositHandler} options.depositHandler handler instance for operating {@link Deposit} instances.
+ * @param {WithdrawHandler} options.withdrawHandler handler instance for operating {@link Withdraw} instances.
  * @param {ContractPool} options.contractPool pool of initialized and connected {@link external:Contract} instances.
  * @param {boolean} [options.isStoreEvent=false] whether to store the pulled {@link Event} into database.
  * @param {EventHandler} [options.eventHandler] handler instance for operating {@link Event} instances.
@@ -31,7 +35,9 @@ export class EventPuller {
   constructor({
     config,
     contractHandler,
+    noteHandler,
     depositHandler,
+    withdrawHandler,
     contractPool,
     isStoreEvent = false,
     eventHandler = undefined,
@@ -42,7 +48,12 @@ export class EventPuller {
       contractHandler instanceof ContractHandler,
       'contractHandler should be an instance ContractHandler',
     );
+    check(noteHandler instanceof NoteHandler, 'noteHandler should be an instance of NoteHandler');
     check(depositHandler instanceof DepositHandler, 'depositHandler should be an instance of DepositHandler');
+    check(
+      withdrawHandler instanceof WithdrawHandler,
+      'withdrawHandler should be an instance of WithdrawHandler',
+    );
     check(contractPool instanceof ContractPool, 'providerPool should be an instance of ProviderPool');
     check(typeof isStoreEvent === 'boolean', 'isStoreEvent should be a boolean type');
     check(
@@ -52,7 +63,9 @@ export class EventPuller {
     check(typeof pullIntervalMs === 'number', 'pullIntervalMs should be a number type');
     this.config = config;
     this.contractHandler = contractHandler;
+    this.noteHandler = noteHandler;
     this.depositHandler = depositHandler;
+    this.withdrawHandler = withdrawHandler;
     this.contractPool = contractPool;
     this.isStoreEvent = isStoreEvent;
     this.eventHandler = eventHandler;
@@ -94,7 +107,7 @@ export class EventPuller {
     }
   }
 
-  async _pullAllContractEvents() {
+  _pullAllContractEvents() {
     if (!this.hasPendingPull) {
       this.logger.debug('start event pulling...');
       this.hasPendingPull = true;
@@ -107,7 +120,7 @@ export class EventPuller {
           }
         });
       });
-      await Promise.all(promises)
+      return Promise.all(promises)
         .then(() => {
           this.logger.debug(`one event pulling is done, resume in ${this.pullIntervalMs / 1000} seconds`);
           this.hasPendingPull = false;
@@ -136,7 +149,7 @@ export class EventPuller {
       });
       allPromises.push(promise);
     }
-    await Promise.all(allPromises).then(() => {
+    return Promise.all(allPromises).then(() => {
       return this.contractHandler.updateSyncedBlock(
         contract.chainId,
         contract.address,
@@ -180,24 +193,96 @@ export class EventPuller {
       eventsPromise = Promise.resolve([]);
     }
     const promises = [eventsPromise];
-    if (topic === TopicType.MERKLE_TREE_INSERT) {
-      for (let i = 0; i < rawEvents.length; i++) {
-        const rawEvent = rawEvents[i];
-        const commitmentHash = new BN(toHexNoPrefix(rawEvent.argumentData.leaf), 16).toString();
-        const deposits = this.depositHandler.getDeposits({
-          filterFunc: (deposit) =>
-            deposit.dstChainId === rawEvent.chainId && deposit.commitmentHash.toString() === commitmentHash,
-        });
-        for (let j = 0; j < deposits.length; j++) {
-          if (deposits[j].status !== DepositStatus.SUCCEEDED) {
-            this.logger.info(
-              `updating deposit(id=${deposits[j].id}) from ${rawEvent.chainId} status to ${DepositStatus.SUCCEEDED}`,
-            );
-            promises.push(this.depositHandler._updateDepositStatus(deposits[j], DepositStatus.SUCCEEDED));
-          }
+    if (topic === TopicType.DEPOSIT) {
+      promises.push(this._handleDepositEvents(contract, rawEvents));
+    } else if (topic === TopicType.MERKLE_TREE_INSERT) {
+      promises.push(this._handleMerkleTreeInsertEvents(contract, rawEvents));
+    } else if (topic === TopicType.WITHDRAW) {
+      promises.push(this._handleWithdrawEvents(contract, rawEvents));
+    }
+    await Promise.all(promises);
+  }
+
+  _handleDepositEvents(contract, rawEvents) {
+    const promises = [];
+    for (let i = 0; i < rawEvents.length; i++) {
+      const rawEvent = rawEvents[i];
+      const commitmentHash = new BN(toHexNoPrefix(rawEvent.argumentData.commitmentHash), 16).toString();
+      const deposits = this.depositHandler.getDeposits({
+        filterFunc: (deposit) =>
+          deposit.srcChainId === rawEvent.chainId && deposit.commitmentHash.toString() === commitmentHash,
+      });
+      for (let j = 0; j < deposits.length; j++) {
+        const deposit = deposits[j];
+        if (contract.bridgeType === BridgeType.LOOP && deposit.status !== DepositStatus.SUCCEEDED) {
+          deposit.status = DepositStatus.SUCCEEDED;
+          promises.push(this.depositHandler._updateDeposit(deposit));
+        } else if (
+          contract.bridgeType !== BridgeType.LOOP &&
+          deposit.status !== DepositStatus.SRC_CONFIRMED
+        ) {
+          deposit.status = DepositStatus.SRC_CONFIRMED;
+          promises.push(this.depositHandler._updateDeposit(deposit));
         }
       }
     }
-    await Promise.all(promises);
+    return Promise.all(promises);
+  }
+
+  _handleMerkleTreeInsertEvents(contract, rawEvents) {
+    const promises = [];
+    for (let i = 0; i < rawEvents.length; i++) {
+      const rawEvent = rawEvents[i];
+      const commitmentHash = new BN(toHexNoPrefix(rawEvent.argumentData.leaf), 16).toString();
+      const deposits = this.depositHandler.getDeposits({
+        filterFunc: (deposit) =>
+          deposit.dstChainId === rawEvent.chainId && deposit.commitmentHash.toString() === commitmentHash,
+      });
+      const notes = this.noteHandler.getPrivateNotes({
+        filterFunc: (note) =>
+          note.dstChainId === rawEvent.chainId && note.commitmentHash.toString() === commitmentHash,
+      });
+      for (let j = 0; j < deposits.length; j++) {
+        const deposit = deposits[j];
+        if (deposit.status !== DepositStatus.SUCCEEDED) {
+          deposit.status = DepositStatus.SUCCEEDED;
+          deposit.dstTxHash = rawEvent.transactionHash;
+          promises.push(this.depositHandler._updateDeposit(deposit));
+        }
+      }
+      for (let j = 0; j < notes.length; j++) {
+        const note = notes[j];
+        note.dstTransactionHash = rawEvent.transactionHash;
+        promises.push(this.noteHandler._updatePrivateNote(note));
+      }
+    }
+    return Promise.all(promises);
+  }
+
+  _handleWithdrawEvents(contract, rawEvents) {
+    const promises = [];
+    for (let i = 0; i < rawEvents.length; i++) {
+      const rawEvent = rawEvents[i];
+      const rootHash = rawEvent.argumentData.rootHash.toString();
+      const serialNumber = rawEvent.argumentData.serialNumber.toString();
+      const withdraws = this.withdrawHandler.getWithdraws({
+        filterFunc: (withdraw) => {
+          return (
+            withdraw.merkleRootHash.toString() === rootHash &&
+            withdraw.serialNumber.toString() === serialNumber &&
+            withdraw.chainId === rawEvent.chainId
+          );
+        },
+      });
+      for (let j = 0; j < withdraws.length; j++) {
+        const withdraw = withdraws[j];
+        if (withdraw.status !== WithdrawStatus.SUCCEEDED) {
+          withdraw.status = WithdrawStatus.SUCCEEDED;
+          withdraw.transactionHash = rawEvent.transactionHash;
+          promises.push(this.withdrawHandler._updateWithdraw(withdraw));
+        }
+      }
+    }
+    return Promise.all(promises);
   }
 }

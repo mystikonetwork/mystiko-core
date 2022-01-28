@@ -321,4 +321,11 @@ export class NoteHandler extends Handler {
     }
     return queryChain;
   }
+
+  async _updatePrivateNote(note) {
+    this.db.notes.update(note.data);
+    await this.saveDatabase();
+    this.logger.info(`privateNote(id=${note.id}) has been updated`);
+    return note;
+  }
 }

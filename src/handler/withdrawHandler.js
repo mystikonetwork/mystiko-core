@@ -288,18 +288,20 @@ export class WithdrawHandler extends Handler {
     await this.noteHandler.updateStatus(privateNote, PrivateNoteStatus.SPENT);
   }
 
-  async _update(deposit) {
-    this.db.withdraws.update(deposit.data);
-    return await this.saveDatabase();
+  async _updateWithdraw(withdraw) {
+    this.db.withdraws.update(withdraw.data);
+    await this.saveDatabase();
+    this.logger.info(`withdraw(id=${withdraw.id}) has been updated`);
+    return withdraw;
   }
 
   async _updateStatus(withdraw, newStatus, statusCallback) {
     if (withdraw.status === newStatus) {
-      return await this._update(withdraw);
+      return await this._updateWithdraw(withdraw);
     }
     const oldStatus = withdraw.status;
     withdraw.status = newStatus;
-    await this._update(withdraw);
+    await this._updateWithdraw(withdraw);
     if (statusCallback && statusCallback instanceof Function) {
       statusCallback(withdraw, oldStatus, newStatus);
     }

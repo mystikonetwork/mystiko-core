@@ -7,13 +7,14 @@ import { readFromFile } from '../../src/config';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { createDatabase } from '../../src/database.js';
 import { DepositHandler } from '../../src/handler/depositHandler.js';
+import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { EventHandler } from '../../src/handler/eventHandler.js';
 import { EventPuller } from '../../src/puller';
 import { toFixedLenHex } from '../../src/utils.js';
-import { DepositStatus } from '../../src/model';
+import { DepositStatus, WithdrawStatus } from '../../src/model';
 
 class MockProvider extends ethers.providers.JsonRpcProvider {
   constructor(url, raiseError = false) {
@@ -44,7 +45,10 @@ class MockContract extends ethers.Contract {
           transactionHash: toFixedLenHex(randomBytes(32)),
           args: {
             amount: new BN(Math.floor(Math.random() * 1000)),
-            commitmentHash: toFixedLenHex('0xdeadbeef'),
+            commitmentHash:
+              this.address === '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'
+                ? toFixedLenHex('0xdeadbeef')
+                : toFixedLenHex(randomBytes(32)),
             encryptedNote: toFixedLenHex(randomBytes(32)),
           },
         },
@@ -52,7 +56,10 @@ class MockContract extends ethers.Contract {
           transactionHash: toFixedLenHex(randomBytes(32)),
           args: {
             amount: new BN(Math.floor(Math.random() * 1000)),
-            commitmentHash: toFixedLenHex('0xbaadbeef'),
+            commitmentHash:
+              this.address === '0x98ed94360cad67a76a53d8aa15905e52485b73d1'
+                ? toFixedLenHex('0xbeefdead')
+                : toFixedLenHex(randomBytes(32)),
             encryptedNote: toFixedLenHex(randomBytes(32)),
           },
         },
@@ -63,7 +70,10 @@ class MockContract extends ethers.Contract {
           transactionHash: toFixedLenHex(randomBytes(32)),
           args: {
             amount: new BN(Math.floor(Math.random() * 1000)),
-            leaf: toFixedLenHex('0xdeadbeef'),
+            leaf:
+              this.address === '0x8fb1df17768e29c936edfbce1207ad13696268b7'
+                ? toFixedLenHex('0xbaadbabe')
+                : toFixedLenHex(randomBytes(32)),
             leafIndex: Math.floor(Math.random() * 10),
           },
         },
@@ -71,7 +81,10 @@ class MockContract extends ethers.Contract {
           transactionHash: toFixedLenHex(randomBytes(32)),
           args: {
             amount: new BN(Math.floor(Math.random() * 1000)),
-            leaf: toFixedLenHex('0xbaadbeef'),
+            leaf:
+              this.address === '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879'
+                ? toFixedLenHex('0xbabebaad')
+                : toFixedLenHex(randomBytes(32)),
             leafIndex: Math.floor(Math.random() * 10),
           },
         },
@@ -81,8 +94,14 @@ class MockContract extends ethers.Contract {
         {
           transactionHash: toFixedLenHex(randomBytes(32)),
           args: {
-            rootHash: new BN(Math.floor(Math.random() * 1000)),
-            serialNumber: new BN(Math.floor(Math.random() * 1000)),
+            rootHash:
+              this.address === '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'
+                ? new BN(123456789)
+                : new BN(Math.floor(Math.random() * 1000)),
+            serialNumber:
+              this.address === '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'
+                ? new BN(987654321)
+                : new BN(Math.floor(Math.random() * 1000)),
             recipient: toFixedLenHex(randomBytes(20), 20),
           },
         },
@@ -112,6 +131,7 @@ let walletHandler;
 let accountHandler;
 let noteHandler;
 let depositHandler;
+let withdrawHandler;
 const walletMasterSeed = 'awesomeMasterSeed';
 const walletPassword = 'P@ssw0rd';
 
@@ -132,21 +152,67 @@ beforeEach(async () => {
   accountHandler = new AccountHandler(walletHandler, db, config);
   noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, config);
   depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, config);
+  withdrawHandler = new WithdrawHandler(
+    walletHandler,
+    accountHandler,
+    noteHandler,
+    providerPool,
+    contractPool,
+    db,
+    config,
+  );
 });
 
 test('test pulling behaviour', async () => {
-  const deposit = db.deposits.insert({
+  const deposit1 = db.deposits.insert({
     commitmentHash: new BN('deadbeef', 16).toString(),
+    srcChainId: 56,
+    status: DepositStatus.SRC_PENDING,
+    walletId: wallet.id,
+  });
+  const deposit2 = db.deposits.insert({
+    commitmentHash: new BN('beefdead', 16).toString(),
+    srcChainId: 1,
+    status: DepositStatus.SRC_PENDING,
+    walletId: wallet.id,
+  });
+  const deposit3 = db.deposits.insert({
+    commitmentHash: new BN('baadbabe', 16).toString(),
     dstChainId: 1,
-    status: DepositStatus.SRC_CONFIRMED,
+    status: DepositStatus.SRC_PENDING,
+    walletId: wallet.id,
+  });
+  const deposit4 = db.deposits.insert({
+    commitmentHash: new BN('babebaad', 16).toString(),
+    dstChainId: 1,
+    status: DepositStatus.SRC_PENDING,
+    walletId: wallet.id,
+  });
+  const note1 = db.notes.insert({
+    commitmentHash: new BN('baadbabe', 16).toString(),
+    dstChainId: 1,
+    walletId: wallet.id,
+  });
+  const note2 = db.notes.insert({
+    commitmentHash: new BN('babebaad', 16).toString(),
+    dstChainId: 1,
+    walletId: wallet.id,
+  });
+  const withdraw = db.withdraws.insert({
+    merkleRootHash: new BN(123456789).toString(),
+    serialNumber: new BN(987654321).toString(),
+    chainId: 56,
+    status: WithdrawStatus.PENDING,
     walletId: wallet.id,
   });
   const eventPuller = new EventPuller({
     config,
     contractHandler,
+    noteHandler,
     depositHandler,
     contractPool,
     eventHandler,
+    withdrawHandler,
     isStoreEvent: true,
     pullIntervalMs: 1000,
   });
@@ -156,7 +222,15 @@ test('test pulling behaviour', async () => {
   const sleepPromise = new Promise((resolve) => setTimeout(resolve, 2000));
   await sleepPromise;
   eventPuller.stop();
-  expect(deposit['status']).toBe(DepositStatus.SUCCEEDED);
+  expect(deposit1['status']).toBe(DepositStatus.SRC_CONFIRMED);
+  expect(deposit2['status']).toBe(DepositStatus.SUCCEEDED);
+  expect(deposit3['status']).toBe(DepositStatus.SUCCEEDED);
+  expect(deposit4['status']).toBe(DepositStatus.SUCCEEDED);
+  expect(deposit3['dstTxHash']).not.toBe(undefined);
+  expect(deposit4['dstTxHash']).not.toBe(undefined);
+  expect(note1['dstTransactionHash']).not.toBe(undefined);
+  expect(note2['dstTransactionHash']).not.toBe(undefined);
+  expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
   expect(eventPuller.isStarted()).toBe(false);
   expect(eventHandler.getEvents().length > 0).toBe(true);
   expect(eventPuller.errorMessage).toBe(undefined);
@@ -166,7 +240,9 @@ test('test skip storing events', async () => {
   const eventPuller = new EventPuller({
     config,
     contractHandler,
+    noteHandler,
     depositHandler,
+    withdrawHandler,
     contractPool,
     eventHandler,
     isStoreEvent: false,
@@ -188,7 +264,9 @@ test('test raise errors', async () => {
   const eventPuller = new EventPuller({
     config,
     contractHandler,
+    noteHandler,
     depositHandler,
+    withdrawHandler,
     contractPool,
     eventHandler,
     isStoreEvent: false,
