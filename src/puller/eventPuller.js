@@ -50,14 +50,16 @@ export class EventPuller {
     this.pullIntervalMs = pullIntervalMs;
     this.topics = Object.values(TopicType);
     this.hasPendingPull = false;
+    this.errorMessage = undefined;
     this.logger = rootLogger.getLogger('EventPuller');
   }
 
   start() {
-    this._pullAllContractEvents();
+    const promise = this._pullAllContractEvents();
     this.timer = setInterval(async () => {
       await this._pullAllContractEvents();
     }, this.pullIntervalMs);
+    return promise;
   }
 
   isStarted() {
@@ -89,10 +91,12 @@ export class EventPuller {
         .then(() => {
           this.logger.debug(`one event pulling is done, resume in ${this.pullIntervalMs / 1000} seconds`);
           this.hasPendingPull = false;
+          this.errorMessage = undefined;
         })
         .catch((error) => {
           this.logger.warn(`something wrong during pulling contract events: ${toString(error)}`);
           this.hasPendingPull = false;
+          this.errorMessage = error;
         });
     } else {
       this.logger.warn('there is one pulling which is still running, skipping this one');
@@ -128,23 +132,23 @@ export class EventPuller {
       rawData.contractAddress = contract.address;
       rawData.topic = topic;
       rawData.transactionHash = event.transactionHash;
-      if (topic === TopicType.DEPOSIT && event.args.length > 0) {
+      if (topic === TopicType.DEPOSIT) {
         rawData.argumentData = {
           amount: event.args['amount'].toString(),
           commitmentHash: event.args['commitmentHash'],
           encryptedNote: event.args['encryptedNote'],
         };
-      } else if (topic === TopicType.MERKLE_TREE_INSERT && event.args.length > 0) {
+      } else if (topic === TopicType.MERKLE_TREE_INSERT) {
         rawData.argumentData = {
           leaf: event.args['leaf'],
           leafIndex: event.args['leafIndex'],
-          amount: event.args['amount'].toString(),
+          amount: toString(event.args['amount']),
         };
-      } else if (topic === TopicType.WITHDRAW && event.args.length > 0) {
+      } else if (topic === TopicType.WITHDRAW) {
         rawData.argumentData = {
           recipient: event.args['recipient'],
-          rootHash: event.args['rootHash'].toString(),
-          serialNumber: event.args['serialNumber'].toString(),
+          rootHash: toString(event.args['rootHash']),
+          serialNumber: toString(event.args['serialNumber']),
         };
       }
       return rawData;
