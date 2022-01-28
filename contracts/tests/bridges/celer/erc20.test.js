@@ -3,13 +3,13 @@ import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../.
 import * as protocol from '../../../../src/protocol';
 import MerkleTree from 'fixed-merkle-tree';
 
-const MystikoCoreERC20 = artifacts.require('MystikoWithPolyERC20');
-const RelayProxy = artifacts.require('PolyCrossChainManagerMock');
+const MystikoCoreERC20 = artifacts.require('MystikoWithCelerERC20');
+const RelayProxy = artifacts.require('CelerMessageBusMock');
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 const TestToken = artifacts.require('TestToken');
 
-contract('MystikoWithPolyERC20', (accounts) => {
+contract('MystikoWithCelerERC20', (accounts) => {
   let mystikoCoreSourceERC20;
   let mystikoCoreDestinationERC20;
   let relayProxy;
@@ -69,12 +69,12 @@ contract('MystikoWithPolyERC20', (accounts) => {
 
       const bridgeTypeSource = await mystikoCoreSourceERC20.bridgeType();
       const assetTypeSource = await mystikoCoreSourceERC20.assetType();
-      expect(bridgeTypeSource).to.equal('poly');
+      expect(bridgeTypeSource).to.equal('celer');
       expect(assetTypeSource).to.equal('erc20');
 
       const bridgeTypeDestination = await mystikoCoreDestinationERC20.bridgeType();
       const assetTypeDestination = await mystikoCoreDestinationERC20.assetType();
-      expect(bridgeTypeDestination).to.equal('poly');
+      expect(bridgeTypeDestination).to.equal('celer');
       expect(assetTypeDestination).to.equal('erc20');
     });
 

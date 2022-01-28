@@ -12,18 +12,21 @@ module.exports = function (deployer, network) {
   }
 
   return deployer.then(async () => {
-    const { MERKLE_TREE_HEIGHT } = process.env;
+    const { MERKLE_TREE_HEIGHT, ROPSTEN_ERC20_ADDRESS, BSC_TESTNET_ERC20_ADDRESS } = process.env;
 
     var crosschainManagerProxyAddress;
     var destinationChainId;
+    var tokneAddress;
     if (network === 'bsctestnet') {
       const { POLY_ECCMP_BSC_TESTNET, ROPSTEN_CHAINID } = process.env;
       crosschainManagerProxyAddress = POLY_ECCMP_BSC_TESTNET;
       destinationChainId = ROPSTEN_CHAINID;
+      tokneAddress = BSC_TESTNET_ERC20_ADDRESS;
     } else if (network === 'ropsten') {
       const { POLY_ECCMP_ROPSTEN, BSC_TESTNET_CHAINID } = process.env;
       crosschainManagerProxyAddress = POLY_ECCMP_ROPSTEN;
       destinationChainId = BSC_TESTNET_CHAINID;
+      tokneAddress = ROPSTEN_ERC20_ADDRESS;
     } else {
       return;
     }
@@ -37,7 +40,7 @@ module.exports = function (deployer, network) {
       crosschainManagerProxyAddress,
       destinationChainId,
       verifier.address,
-      token.address,
+      tokneAddress,
       hasher.address,
       MERKLE_TREE_HEIGHT,
     );
