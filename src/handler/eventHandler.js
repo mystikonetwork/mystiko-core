@@ -65,7 +65,7 @@ export class EventHandler extends Handler {
     } else {
       this.db.events.insert(event.data);
     }
-    this.logger.info(
+    this.logger.debug(
       `added Event(id=${event.id}, chainId=${event.chainId}, ` +
         `transactionHash=${event.transactionHash}, topic=${event.topic}) into database`,
     );

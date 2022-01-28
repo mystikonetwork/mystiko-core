@@ -54,7 +54,7 @@ export class ContractHandler extends Handler {
       contract.syncedBlock = syncedBlock;
       this.db.contracts.update(contract.data);
       await this.saveDatabase();
-      this.logger.info(
+      this.logger.debug(
         `updated contract(id=${contract.id}, chainId=${contract.chainId}, ` +
           `address=${contract.address}) syncedBlock to ${syncedBlock}`,
       );
@@ -78,13 +78,13 @@ export class ContractHandler extends Handler {
     contract.circuits = contractConfig.circuits;
     if (contract.id) {
       this.db.contracts.update(contract.data);
-      this.logger.info(
+      this.logger.debug(
         `updated contract(id=${contract.id}, chainId=${contract.chainId}, ` +
           `address=${contract.address}) information in database`,
       );
     } else {
       this.db.contracts.insert(contract.data);
-      this.logger.info(
+      this.logger.debug(
         `added contract(id=${contract.id}, chainId=${contract.chainId}, ` +
           `address=${contract.address}) information in database`,
       );

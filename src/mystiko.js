@@ -76,7 +76,7 @@ const mystiko = { utils, models, ethers };
  *        You could choose different adapter instance based on Lokijs's
  *        {@link https://techfort.github.io/LokiJS/ document}.
  * @param {boolean} [options.isStoreEvent=false] whether to store the pulled events from blockchains.
- * @param {number} [options.eventPullingIntervalMs=300000] how frequent to pull events from blockchain, this number is
+ * @param {number} [options.eventPullingIntervalMs=60000] how frequent to pull events from blockchain, this number is
  * in milliseconds.
  * @param {string} [options.loggingLevel='error'] the logging level of Mystiko's logger.
  * @param {string} [options.loggingOptions] the logging format options, please refer to
@@ -89,7 +89,7 @@ mystiko.initialize = async ({
   dbFile = undefined,
   dbAdapter = undefined,
   isStoreEvent = false,
-  eventPullingIntervalMs = 300000,
+  eventPullingIntervalMs = 60000,
   loggingLevel = 'error',
   loggingOptions = undefined,
 } = {}) => {

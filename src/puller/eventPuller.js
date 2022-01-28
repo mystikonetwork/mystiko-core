@@ -26,7 +26,7 @@ export class EventPuller {
     contractPool,
     isStoreEvent = false,
     eventHandler = undefined,
-    pullIntervalMs = 300000,
+    pullIntervalMs = 60000,
   }) {
     check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
     check(
@@ -54,6 +54,7 @@ export class EventPuller {
   }
 
   start() {
+    this._pullAllContractEvents();
     this.timer = setInterval(async () => {
       await this._pullAllContractEvents();
     }, this.pullIntervalMs);
@@ -65,7 +66,7 @@ export class EventPuller {
 
   stop() {
     if (this.timer) {
-      this.logger.info('stopping event puller...');
+      this.logger.debug('stopping event puller...');
       clearInterval(this.timer);
       this.timer = undefined;
     }
@@ -73,7 +74,7 @@ export class EventPuller {
 
   async _pullAllContractEvents() {
     if (!this.hasPendingPull) {
-      this.logger.info('start event pulling...');
+      this.logger.debug('start event pulling...');
       this.hasPendingPull = true;
       const promises = [];
       this.config.chains.forEach((chainConfig) => {
@@ -86,11 +87,11 @@ export class EventPuller {
       });
       await Promise.all(promises)
         .then(() => {
-          this.logger.info(`one event pulling is done, resume in ${this.pullIntervalMs / 1000} seconds`);
+          this.logger.debug(`one event pulling is done, resume in ${this.pullIntervalMs / 1000} seconds`);
           this.hasPendingPull = false;
         })
         .catch((error) => {
-          this.logger.error(`something wrong during pulling contract events: ${toString(error)}`);
+          this.logger.warn(`something wrong during pulling contract events: ${toString(error)}`);
           this.hasPendingPull = false;
         });
     } else {
@@ -124,7 +125,7 @@ export class EventPuller {
     const rawEvents = events.map((event) => {
       const rawData = {};
       rawData.chainId = contract.chainId;
-      rawData.contractAddress = contract.contractAddress;
+      rawData.contractAddress = contract.address;
       rawData.topic = topic;
       rawData.transactionHash = event.transactionHash;
       if (topic === TopicType.DEPOSIT && event.args.length > 0) {
