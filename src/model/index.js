@@ -8,3 +8,5 @@ export { Deposit, DepositStatus, isValidDepositStatus } from './deposit.js';
 export { OffChainNote, PrivateNote, PrivateNoteStatus, isValidPrivateNoteStatus } from './note.js';
 export { Wallet } from './wallet.js';
 export { Withdraw, WithdrawStatus, isValidWithdrawStatus } from './withdraw.js';
+export { Contract } from './contract.js';
+export { Event } from './event.js';
