@@ -33,7 +33,7 @@ module.exports = function (deployer, network) {
 
     const verifier = await Verifier.deployed();
     const hasher = await Hasher.deployed();
-    const token = await TestToken.deployed();
+    //const token = await TestToken.deployed();
 
     await deployer.deploy(
       MystikoWithPolyERC20,
