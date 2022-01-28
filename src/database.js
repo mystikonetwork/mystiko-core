@@ -2,7 +2,7 @@ import Loki from 'lokijs';
 import { check, readFile } from './utils';
 import { ID_KEY } from './model';
 
-const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
+const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws', 'contracts', 'events'];
 
 /**
  * @external external:Loki
@@ -25,6 +25,8 @@ const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws'];
  * @property {external:Collection} notes Loki Collection of private note data.
  * @property {external:Collection} deposits Loki Collection of deposit transaction data.
  * @property {external:Collection} withdraws Loki Collection of withdrawal transaction data.
+ * @property {external:Collection} contracts Loki Collection of contract data.
+ * @property {external:Collection} events Loki Collection of contract event data.
  */
 
 /**
@@ -81,8 +83,9 @@ export async function createDatabase(dbFile, adapter) {
 
 /**
  * @function module:mystiko/db.exportDataAsString
+ * @desc export database as a serialized JSON string.
  * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
- * @property {external:Loki} wrappedDb.database instance of Loki's raw database object.
+ * @param {external:Loki} wrappedDb.database instance of Loki's raw database object.
  * @returns {string} an serialized Loki database as a String.
  */
 export function exportDataAsString({ database }) {
@@ -92,6 +95,7 @@ export function exportDataAsString({ database }) {
 
 /**
  * @function module:mystiko/db.importDataFromJson
+ * @desc import the serialized JSON string into database.
  * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
  * @param {string} jsonString a serialized json object as string.
  */
@@ -116,6 +120,7 @@ export function importDataFromJson(wrappedDb, jsonString) {
 
 /**
  * @function module:mystiko/db.importDataFromJsonFile
+ * @desc import the file contains the serialized JSON into database.
  * @param {module:mystiko/db.WrappedDb} wrappedDb wrapped database object.
  * @param {string} jsonFile the file path of serialized JSON data.
  */

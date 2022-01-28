@@ -19,6 +19,7 @@ import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';
 import { MetaMaskSigner, PrivateKeySigner } from './chain/signer.js';
 import logger, { initLogger } from './logger.js';
+import { EventPuller } from './puller';
 import DefaultTestnetConfigJson from '../config/default/testnet.json';
 import DefaultMainnetConfigJson from '../config/default/mainnet.json';
 
@@ -35,7 +36,7 @@ const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
  * Check {@link https://mystiko.network/whitepaper.pdf Whitepaper} for more information.
  * @property {AccountHandler} accounts handler of Account related business logic
  * @property {MystikoConfig} config loaded configuration instance
- * @property {ContractPool} contracts pool of wrapped smart contract instances.
+ * @property {ContractPool} contractPool pool of wrapped smart contract instances.
  * @property {module:mystiko/db.WrappedDb} db instance of wrapped database handlers.
  * @property {Object} db.adapter instance of the persistent database adapter.
  * @property {Function} db.exportDataAsString export data in database as a JSON string,
@@ -55,6 +56,10 @@ const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
  * @property {module:mystiko/utils} utils a collection of util functions.
  * @property {WalletHandler} wallets handler of Wallet related business logic.
  * @property {WithdrawHandler} withdraws handler of Withdraw related business logic.
+ * @property {ContractHandler} contracts handler of Contract related business logic.
+ * @property {EventHandler} events handler of Contract events related business logic.
+ * @property {Object} pullers object including supported pullers.
+ * @property {EventPuller} pullers.eventPuller puller that pulling events in fixed time frame.
  * @property {external:Logger} logger log handler for logging useful information.
  */
 const mystiko = { utils, models, ethers };
@@ -70,6 +75,9 @@ const mystiko = { utils, models, ethers };
  * @param {Object} [options.dbAdapter] instance to persist data in your application.
  *        You could choose different adapter instance based on Lokijs's
  *        {@link https://techfort.github.io/LokiJS/ document}.
+ * @param {boolean} [options.isStoreEvent=false] whether to store the pulled events from blockchains.
+ * @param {number} [options.eventPullingIntervalMs=60000] how frequent to pull events from blockchain, this number is
+ * in milliseconds.
  * @param {string} [options.loggingLevel='error'] the logging level of Mystiko's logger.
  * @param {string} [options.loggingOptions] the logging format options, please refer to
  * {@link https://github.com/kutuluk/loglevel-plugin-prefix loglevel-plugin-prefix}.
@@ -80,6 +88,8 @@ mystiko.initialize = async ({
   conf = undefined,
   dbFile = undefined,
   dbAdapter = undefined,
+  isStoreEvent = false,
+  eventPullingIntervalMs = 60000,
   loggingLevel = 'error',
   loggingOptions = undefined,
 } = {}) => {
@@ -115,8 +125,8 @@ mystiko.initialize = async ({
   mystiko.accounts = new handler.AccountHandler(mystiko.wallets, mystiko.db, mystiko.config);
   mystiko.providers = new ProviderPool(mystiko.config);
   mystiko.providers.connect();
-  mystiko.contracts = new ContractPool(mystiko.config, mystiko.providers);
-  mystiko.contracts.connect();
+  mystiko.contractPool = new ContractPool(mystiko.config, mystiko.providers);
+  mystiko.contractPool.connect();
   mystiko.notes = new handler.NoteHandler(
     mystiko.wallets,
     mystiko.accounts,
@@ -128,7 +138,7 @@ mystiko.initialize = async ({
     mystiko.wallets,
     mystiko.accounts,
     mystiko.notes,
-    mystiko.contracts,
+    mystiko.contractPool,
     mystiko.db,
     mystiko.config,
   );
@@ -137,13 +147,27 @@ mystiko.initialize = async ({
     mystiko.accounts,
     mystiko.notes,
     mystiko.providers,
-    mystiko.contracts,
+    mystiko.contractPool,
     mystiko.db,
     mystiko.config,
   );
+  mystiko.contracts = new handler.ContractHandler(mystiko.db, mystiko.config);
+  await mystiko.contracts.importFromConfig();
+  mystiko.events = new handler.EventHandler(mystiko.db, mystiko.config);
   mystiko.signers = {
     metaMask: new MetaMaskSigner(mystiko.config),
     privateKey: new PrivateKeySigner(mystiko.config, mystiko.providers),
+  };
+  mystiko.pullers = {
+    eventPuller: new EventPuller({
+      config: mystiko.config,
+      contractHandler: mystiko.contracts,
+      depositHandler: mystiko.deposits,
+      eventHandler: mystiko.events,
+      contractPool: mystiko.contractPool,
+      isStoreEvent: isStoreEvent,
+      pullIntervalMs: eventPullingIntervalMs,
+    }),
   };
   mystiko.logger.info('mystiko.js has been successfully initialized, enjoy!');
 };
