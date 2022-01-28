@@ -3,6 +3,9 @@ import { ethers } from 'ethers';
 import { BaseModel, isValidAssetType, isValidBridgeType } from './common.js';
 import { check } from '../utils.js';
 
+/**
+ * @class Contract
+ */
 export class Contract extends BaseModel {
   constructor(data) {
     super(data);

@@ -19,12 +19,15 @@ test('test initialize', async () => {
   expect(mystiko.wallets).not.toBe(undefined);
   expect(mystiko.accounts).not.toBe(undefined);
   expect(mystiko.deposits).not.toBe(undefined);
-  expect(mystiko.providers).not.toBe(undefined);
   expect(mystiko.contracts).not.toBe(undefined);
+  expect(mystiko.events).not.toBe(undefined);
+  expect(mystiko.providers).not.toBe(undefined);
+  expect(mystiko.contractPool).not.toBe(undefined);
   expect(mystiko.notes).not.toBe(undefined);
   expect(mystiko.withdraws).not.toBe(undefined);
   expect(mystiko.signers).not.toBe(undefined);
   expect(mystiko.signers.metaMask).not.toBe(undefined);
+  expect(mystiko.pullers.eventPuller).not.toBe(undefined);
   expect(mystiko.logger).not.toBe(undefined);
 
   await mystiko.initialize({ isTestnet: false });

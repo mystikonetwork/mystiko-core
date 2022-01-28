@@ -25,6 +25,8 @@ const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws', 'c
  * @property {external:Collection} notes Loki Collection of private note data.
  * @property {external:Collection} deposits Loki Collection of deposit transaction data.
  * @property {external:Collection} withdraws Loki Collection of withdrawal transaction data.
+ * @property {external:Collection} contracts Loki Collection of contract data.
+ * @property {external:Collection} events Loki Collection of contract event data.
  */
 
 /**

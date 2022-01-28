@@ -3,6 +3,9 @@ import { ethers } from 'ethers';
 import { BaseModel } from './common.js';
 import { check } from '../utils.js';
 
+/**
+ * @class Event
+ */
 export class Event extends BaseModel {
   constructor(data) {
     super(data);

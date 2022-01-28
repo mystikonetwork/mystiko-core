@@ -3,10 +3,15 @@ import { ethers } from 'ethers';
 import { Handler } from './handler.js';
 import { Contract } from '../model';
 import { check } from '../utils.js';
+import rootLogger from '../logger.js';
 
+/**
+ * @class ContractHandler
+ */
 export class ContractHandler extends Handler {
   constructor(db, config) {
     super(db, config);
+    this.logger = rootLogger.getLogger('ContractHandler');
   }
 
   async importFromConfig() {
@@ -49,6 +54,10 @@ export class ContractHandler extends Handler {
       contract.syncedBlock = syncedBlock;
       this.db.contracts.update(contract.data);
       await this.saveDatabase();
+      this.logger.info(
+        `updated contract(id=${contract.id}, chainId=${contract.chainId}, ` +
+          `address=${contract.address}) syncedBlock to ${syncedBlock}`,
+      );
     }
   }
 
@@ -69,8 +78,16 @@ export class ContractHandler extends Handler {
     contract.circuits = contractConfig.circuits;
     if (contract.id) {
       this.db.contracts.update(contract.data);
+      this.logger.info(
+        `updated contract(id=${contract.id}, chainId=${contract.chainId}, ` +
+          `address=${contract.address}) information in database`,
+      );
     } else {
       this.db.contracts.insert(contract.data);
+      this.logger.info(
+        `added contract(id=${contract.id}, chainId=${contract.chainId}, ` +
+          `address=${contract.address}) information in database`,
+      );
     }
   }
 }

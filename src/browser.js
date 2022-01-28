@@ -5,7 +5,10 @@ if (window) {
   const initialize = mystiko.initialize;
   mystiko.initialize = (options = {}) => {
     const wrappedOptions = { dbAdapter: new Adapter(), ...options };
-    return initialize(wrappedOptions);
+    return initialize(wrappedOptions).then((ret) => {
+      mystiko.pullers.eventPuller.start();
+      return ret;
+    });
   };
   window.mystiko = mystiko;
 }
