@@ -17,6 +17,7 @@ interface IVerifier {
 abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   IVerifier public verifier;
   mapping(bytes32 => bool) public depositedCommitments;
+  mapping(bytes32 => bool) public relayCommitments;
   mapping(uint256 => bool) public withdrewSerialNumbers;
 
   address public operator;
