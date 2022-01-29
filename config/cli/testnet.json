@@ -28,13 +28,23 @@
           "circuits": "circom-1.0"
         },
         {
-          "address": "0x11C6987657bb4aC060fAfcf74fEb2cE3eecA0168",
+          "address": "0x690c4CdC48E482bb1E455403ebD008968CE3f2c2",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "assetType": "main",
+          "peerChainId": 97,
+          "peerContractAddress": "0xA83c0973f57E9c6DeE97C296B3FA3bA68DC54825",
+          "bridgeType": "tbridge",
+          "circuits": "circom-1.0"
+        },
+        {
+          "address": "0xE11982FD5d976bFf702BB68A4289aE89e713e7F8",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetType": "erc20",
           "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
           "peerChainId": 97,
-          "peerContractAddress": "0xAe643ACfe35c65D4b2A9c3b5eCC80298C093dC38",
+          "peerContractAddress": "0xb9619aFb5934F018d6fc61106dFF65F50D13E7f4",
           "bridgeType": "tbridge",
           "circuits": "circom-1.0"
         },
@@ -48,13 +58,24 @@
           "circuits": "circom-1.0"
         },
         {
-          "address": "0x7Ed171f8230bA136778C2cc2EB9a99AF55Bb2cC0",
+          "address": "0xE09A7ab1010F796C5358438B17bDEFF132e80C9e",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetType": "erc20",
           "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
           "peerChainId": 97,
-          "peerContractAddress": "0xD1a69D3da1eb1fc762fa51a940d43D57741A28Bb",
+          "peerContractAddress": "0xb67040788647c5A05c64e764B8dD1438631A51D8",
+          "bridgeType": "tbridge",
+          "circuits": "circom-1.0"
+        },
+        {
+          "address": "0xA16eFb7EfeeD08214033348167D2E82D892874bA",
+          "assetSymbol": "mBNB",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0x2f1306362422e341e08e656d656719d5e8facdc7",
+          "peerChainId": 97,
+          "peerContractAddress": "0x1aBebA22fd8a6F531f304957F373d4912ab8532D",
           "bridgeType": "tbridge",
           "circuits": "circom-1.0"
         }
@@ -90,13 +111,23 @@
           "circuits": "circom-1.0"
         },
         {
-          "address": "0xAe643ACfe35c65D4b2A9c3b5eCC80298C093dC38",
+          "address": "0x1aBebA22fd8a6F531f304957F373d4912ab8532D",
+          "assetSymbol": "BNB",
+          "assetDecimals": 18,
+          "assetType": "main",
+          "peerChainId": 3,
+          "peerContractAddress": "0xA16eFb7EfeeD08214033348167D2E82D892874bA",
+          "bridgeType": "tbridge",
+          "circuits": "circom-1.0"
+        },
+        {
+          "address": "0xb9619aFb5934F018d6fc61106dFF65F50D13E7f4",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetType": "erc20",
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "peerChainId": 3,
-          "peerContractAddress": "0x11C6987657bb4aC060fAfcf74fEb2cE3eecA0168",
+          "peerContractAddress": "0xE11982FD5d976bFf702BB68A4289aE89e713e7F8",
           "bridgeType": "tbridge",
           "circuits": "circom-1.0"
         },
@@ -110,13 +141,24 @@
           "circuits": "circom-1.0"
         },
         {
-          "address": "0xD1a69D3da1eb1fc762fa51a940d43D57741A28Bb",
+          "address": "0xb67040788647c5A05c64e764B8dD1438631A51D8",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetType": "erc20",
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
           "peerChainId": 3,
-          "peerContractAddress": "0x7Ed171f8230bA136778C2cc2EB9a99AF55Bb2cC0",
+          "peerContractAddress": "0xE09A7ab1010F796C5358438B17bDEFF132e80C9e",
+          "bridgeType": "tbridge",
+          "circuits": "circom-1.0"
+        },
+        {
+          "address": "0xA83c0973f57E9c6DeE97C296B3FA3bA68DC54825",
+          "assetSymbol": "mETH",
+          "assetDecimals": 18,
+          "assetType": "erc20",
+          "assetAddress": "0xc714b6884d66a7D2618c820D86f58A01b789f613",
+          "peerChainId": 3,
+          "peerContractAddress": "0x690c4CdC48E482bb1E455403ebD008968CE3f2c2",
           "bridgeType": "tbridge",
           "circuits": "circom-1.0"
         }
