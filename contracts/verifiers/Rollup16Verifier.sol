@@ -13,7 +13,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.6.11;
 
-library WithdrawPairing {
+library Rollup16Pairing {
   struct G1Point {
     uint256 X;
     uint256 Y;
@@ -196,28 +196,28 @@ library WithdrawPairing {
   }
 }
 
-contract WithdrawVerifier {
-  using WithdrawPairing for *;
+contract Rollup16Verifier {
+  using Rollup16Pairing for *;
   struct VerifyingKey {
-    WithdrawPairing.G1Point alfa1;
-    WithdrawPairing.G2Point beta2;
-    WithdrawPairing.G2Point gamma2;
-    WithdrawPairing.G2Point delta2;
-    WithdrawPairing.G1Point[] IC;
+    Rollup16Pairing.G1Point alfa1;
+    Rollup16Pairing.G2Point beta2;
+    Rollup16Pairing.G2Point gamma2;
+    Rollup16Pairing.G2Point delta2;
+    Rollup16Pairing.G1Point[] IC;
   }
   struct Proof {
-    WithdrawPairing.G1Point A;
-    WithdrawPairing.G2Point B;
-    WithdrawPairing.G1Point C;
+    Rollup16Pairing.G1Point A;
+    Rollup16Pairing.G2Point B;
+    Rollup16Pairing.G1Point C;
   }
 
   function verifyingKey() internal pure returns (VerifyingKey memory vk) {
-    vk.alfa1 = WithdrawPairing.G1Point(
+    vk.alfa1 = Rollup16Pairing.G1Point(
       20491192805390485299153009773594534940189261866228447918068658471970481763042,
       9383485363053290200918347156157836566562967994039712273449902621266178545958
     );
 
-    vk.beta2 = WithdrawPairing.G2Point(
+    vk.beta2 = Rollup16Pairing.G2Point(
       [
         4252822878758300859123897981450591353533073413197771768651442665752259397132,
         6375614351688725206403948262868962793625744043794305715222011528459656738731
@@ -227,7 +227,7 @@ contract WithdrawVerifier {
         10505242626370262277552901082094356697409835680220590971873171140371331206856
       ]
     );
-    vk.gamma2 = WithdrawPairing.G2Point(
+    vk.gamma2 = Rollup16Pairing.G2Point(
       [
         11559732032986387107991004021392285783925812861821192530917403151452391805634,
         10857046999023057135944570762232829481370756359578518086990519993285655852781
@@ -237,36 +237,41 @@ contract WithdrawVerifier {
         8495653923123431417604973247489272438418190587263600148770280649306958101930
       ]
     );
-    vk.delta2 = WithdrawPairing.G2Point(
+    vk.delta2 = Rollup16Pairing.G2Point(
       [
-        10989953608028819496098755251600156247962159795940395117580312022362095918107,
-        1852810822238453282838151864533727554366127099091333876620366982229162066935
+        17795573322188817304324504022348184903428108923621447562884843585128700261432,
+        14240225408392816242097816143432795623822021627879515019793929266221598896754
       ],
       [
-        14776335746780443478059483459770951600373895688519713408307156192880660495751,
-        8272049135476194628942587417884398123396730770117167606560457673464121941605
+        8173924623517749923486008717004434642716502434597841706158897956921828146823,
+        2310290066369536493767422957301778372758086208205717317592966724405268132507
       ]
     );
-    vk.IC = new WithdrawPairing.G1Point[](4);
+    vk.IC = new Rollup16Pairing.G1Point[](5);
 
-    vk.IC[0] = WithdrawPairing.G1Point(
-      4096707899255683644437432744493972458051328850511019141834644898546257968481,
-      17629173630880876708463949845445466070119956289412340953906323950921787430863
+    vk.IC[0] = Rollup16Pairing.G1Point(
+      18332264690856070292604170936685529445345424162223898831381677149049849677380,
+      6437703284099331540902411882696648562072184826398030373209184584843618902713
     );
 
-    vk.IC[1] = WithdrawPairing.G1Point(
-      14646695771355517939129911282860699795339343264227857953464527165320882435967,
-      355505851703475187333619659796490896901642218400797295828135749834009399703
+    vk.IC[1] = Rollup16Pairing.G1Point(
+      1456724058500512265030837474986275965492551377783828697604842617756676834660,
+      18658514148990532273517518832744011794885725415856648505889980485597445564738
     );
 
-    vk.IC[2] = WithdrawPairing.G1Point(
-      8526151159161357049132432121817403054687081312413828962149817007131143820338,
-      19825854317318678878749866126108579951984376447168367776465765463331325897488
+    vk.IC[2] = Rollup16Pairing.G1Point(
+      15837650212061195415070938439978624908149573466728309055560903425886449758186,
+      9825145204844853031824750843005816833985316908122171740157629538993494058564
     );
 
-    vk.IC[3] = WithdrawPairing.G1Point(
-      20184323846515059001543730318482554892570689639284440791141270341462847874431,
-      11758379095575341302211105449622855088975448231787699234682678348310982414816
+    vk.IC[3] = Rollup16Pairing.G1Point(
+      2824591112427789227564658033350397519157427767888386411242120250540533737320,
+      20867732629248580473152267412782610793909181432568153991617791470390413989787
+    );
+
+    vk.IC[4] = Rollup16Pairing.G1Point(
+      17835399364234116861851985691370377117958263581453134853416740473855510848859,
+      21008778581800989915204908428732285660462099738332233248455300215242755691144
     );
   }
 
@@ -275,15 +280,15 @@ contract WithdrawVerifier {
     VerifyingKey memory vk = verifyingKey();
     require(input.length + 1 == vk.IC.length, "verifier-bad-input");
     // Compute the linear combination vk_x
-    WithdrawPairing.G1Point memory vk_x = WithdrawPairing.G1Point(0, 0);
+    Rollup16Pairing.G1Point memory vk_x = Rollup16Pairing.G1Point(0, 0);
     for (uint256 i = 0; i < input.length; i++) {
       require(input[i] < snark_scalar_field, "verifier-gte-snark-scalar-field");
-      vk_x = WithdrawPairing.addition(vk_x, WithdrawPairing.scalar_mul(vk.IC[i + 1], input[i]));
+      vk_x = Rollup16Pairing.addition(vk_x, Rollup16Pairing.scalar_mul(vk.IC[i + 1], input[i]));
     }
-    vk_x = WithdrawPairing.addition(vk_x, vk.IC[0]);
+    vk_x = Rollup16Pairing.addition(vk_x, vk.IC[0]);
     if (
-      !WithdrawPairing.pairingProd4(
-        WithdrawPairing.negate(proof.A),
+      !Rollup16Pairing.pairingProd4(
+        Rollup16Pairing.negate(proof.A),
         proof.B,
         vk.alfa1,
         vk.beta2,
@@ -301,12 +306,12 @@ contract WithdrawVerifier {
     uint256[2] memory a,
     uint256[2][2] memory b,
     uint256[2] memory c,
-    uint256[3] memory input
+    uint256[4] memory input
   ) public view returns (bool r) {
     Proof memory proof;
-    proof.A = WithdrawPairing.G1Point(a[0], a[1]);
-    proof.B = WithdrawPairing.G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
-    proof.C = WithdrawPairing.G1Point(c[0], c[1]);
+    proof.A = Rollup16Pairing.G1Point(a[0], a[1]);
+    proof.B = Rollup16Pairing.G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
+    proof.C = Rollup16Pairing.G1Point(c[0], c[1]);
     uint256[] memory inputValues = new uint256[](input.length);
     for (uint256 i = 0; i < input.length; i++) {
       inputValues[i] = input[i];

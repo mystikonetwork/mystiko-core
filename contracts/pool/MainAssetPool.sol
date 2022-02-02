@@ -8,6 +8,11 @@ abstract contract MainAssetPool is AssetPool {
     require(msg.value == amount, "insufficient token");
   }
 
+  function _processRollupFeeTransfer(uint256 amount) internal override {
+    (bool success, ) = msg.sender.call{value: amount}("");
+    require(success, "rollup fee transfer failed");
+  }
+
   function _processWithdrawTransfer(address recipient, uint256 amount) internal override {
     require(msg.value == 0, "no mainnet token allowed");
     (bool success, ) = recipient.call{value: amount}("");

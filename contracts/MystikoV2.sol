@@ -124,10 +124,12 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     require(rollupSize <= depositQueueSize, "rollupSize too big");
     require(rollupVerifiers[rollupSize] != IRollupVerifier(0), "invalid rollupSize");
     bytes memory leavesData = new bytes(32 * rollupSize);
+    uint256 totalRollupFee = 0;
     for (uint256 index = depositQueueIndex; index < depositQueueIndex + rollupSize; index++) {
       require(depositQueue[index].commitment != 0, "index out of bound");
       DepositLeaf memory leaf = depositQueue[index];
       uint256 commitment = leaf.commitment;
+      totalRollupFee = totalRollupFee + leaf.rollupFee;
       assembly {
         let itemOffset := add(leavesData, mul(32, index))
         mstore(add(itemOffset, 0x20), commitment)
@@ -146,6 +148,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
       [currentRoot, newRoot, uint256(pathIndices), leafHash]
     );
     require(verified, "invalid proof");
+    _processRollupFeeTransfer(totalRollupFee);
     depositQueueIndex = depositQueueIndex + rollupSize;
     currentRoot = newRoot;
     currentRootIndex = (currentRootIndex + 1) % rootHistoryLength;
