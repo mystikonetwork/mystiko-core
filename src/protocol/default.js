@@ -1,16 +1,17 @@
 import unsafeRandomBytes from 'randombytes';
 import { Scalar } from 'ffjavascript';
 import createBlakeHash from 'blake-hash';
-import { pedersenHash, eddsa, babyJub, mimcsponge } from 'circomlib';
+import { pedersenHash, eddsa, babyjub, poseidon } from 'circomlibjs';
 import cryptojs from 'crypto-js';
 import aes from 'crypto-js/aes';
 import hmacSHA512 from 'crypto-js/hmac-sha512';
 import eccrypto from 'eccrypto';
-import MerkleTree from 'fixed-merkle-tree';
-import { groth16, wtns } from 'snarkjs';
+import { groth16 } from 'snarkjs';
 import bs58 from 'bs58';
 import BN from 'bn.js';
-import { toHex, toString, check, toHexNoPrefix, readJsonFile } from '../utils.js';
+import { MerkleTree } from '../lib/merkleTree.js';
+import wc from './generated/withdraw_witness_calculator.js';
+import { toHex, toString, check, toHexNoPrefix, readJsonFile, readFile } from '../utils.js';
 import logger from '../logger.js';
 
 /**
@@ -137,8 +138,9 @@ export function publicKeyForVerification(rawSecretKey) {
   check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
   check(rawSecretKey.length === VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
   const unpackedPoints = eddsa.prv2pub(rawSecretKey);
-  check(unpackedPoints[0] < FIELD_SIZE, 'first point should be less than FIELD_SIZE');
-  const pk = bigIntToBuff(new BN(unpackedPoints[0].toString()), VERIFY_PK_SIZE);
+  const pkInt = new BN(unpackedPoints[0].toString());
+  check(pkInt.lt(FIELD_SIZE), 'first point should be less than FIELD_SIZE');
+  const pk = bigIntToBuff(pkInt, VERIFY_PK_SIZE);
   check(
     pk.length === VERIFY_PK_SIZE,
     'converted public key length ' + pk.length + ' not equal to ' + FIELD_SIZE,
@@ -350,9 +352,10 @@ export function decryptSymmetric(password, cipherText) {
 export function hash(data) {
   check(data instanceof Buffer, 'unsupported data type ' + typeof data);
   const packedPoints = pedersenHash.hash(data);
-  const unpackedPoints = babyJub.unpackPoint(packedPoints);
-  check(unpackedPoints[0] < FIELD_SIZE, 'first point should be less than FIELD_SIZE');
-  return new BN(unpackedPoints[0].toString());
+  const unpackedPoints = babyjub.unpackPoint(packedPoints);
+  const result = new BN(unpackedPoints[0].toString());
+  check(result.lt(FIELD_SIZE), 'first point should be less than FIELD_SIZE');
+  return result;
 }
 
 /**
@@ -365,7 +368,7 @@ export function hash(data) {
 export function hash2(left, right) {
   check(left instanceof BN, 'unsupported left instance, should be BN');
   check(right instanceof BN, 'unsupported right instance, should be BN');
-  const result = mimcsponge.multiHash([left.toString(), right.toString()], 0, 1);
+  const result = poseidon([left.toString(), right.toString()]);
   return new BN(result.toString());
 }
 
@@ -588,10 +591,11 @@ export async function zkProve(
       `serialNumber='${toString(serialNumber)}', ` +
       `amount="${toString(amount)}"'`,
   );
-  const wtnsOptions = { type: 'mem' };
-  await wtns.calculate(inputs, wasmFile, wtnsOptions);
+  const wasm = await readFile(wasmFile);
+  const witnessCalculator = await wc(wasm);
+  const buff = await witnessCalculator.calculateWTNSBin(inputs, 0);
   logger.debug('witness calculation is done, start proving...');
-  const proofs = await groth16.prove(zkeyFile, wtnsOptions);
+  const proofs = await groth16.prove(zkeyFile, buff);
   logger.debug('zkSnark proof is generated successfully');
   return proofs;
 }

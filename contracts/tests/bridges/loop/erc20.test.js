@@ -1,7 +1,7 @@
 import { BN } from 'bn.js';
 import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../../../src/utils.js';
 import * as protocol from '../../../../src/protocol';
-import MerkleTree from 'fixed-merkle-tree';
+import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 
 const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
 const TestToken = artifacts.require('TestToken');
@@ -98,7 +98,9 @@ contract('MystikoWithLoopERC20', (accounts) => {
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
       const levels = await loopContract.getLevels();
-      const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
+      const tree = new MerkleTree(parseInt(levels), [
+        new BN(toHexNoPrefix(merkleTreeInsertEvent.args.leaf), 16),
+      ]);
       const root = new BN(tree.root());
       const isKnownRoot = await loopContract.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);

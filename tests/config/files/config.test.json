@@ -76,9 +76,9 @@
   "circuits": [
     {
       "name": "circom-1.0",
-      "wasmFile": "build/circuits/withdraw.wasm",
-      "zkeyFile": "build/circuits/withdraw.zkey",
-      "vkeyFile": "build/circuits/withdraw.vkey.json"
+      "wasmFile": "dist/circom/dev/withdraw.wasm",
+      "zkeyFile": "dist/circom/dev/withdraw.zkey",
+      "vkeyFile": "dist/circom/dev/withdraw.vkey.json"
     }
   ]
 }

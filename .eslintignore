@@ -4,3 +4,4 @@ coverage/*
 dist/*
 .idea
 jsdoc
+src/protocol/generated/*

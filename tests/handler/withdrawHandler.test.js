@@ -62,7 +62,7 @@ class MockMystikoContract extends ethers.Contract {
     return Promise.resolve([
       {
         args: {
-          leaf: '0x06e24ba159592dddda135365dad0b24529fe6aec153aa0b976bd27a004681c74',
+          leaf: '0x20c55b4884f77d18d1a1f378aa9608fc349c07e77a49d2e983393b6665114ae4',
           leafIndex: 0,
         },
       },

@@ -73,7 +73,7 @@ yarn build:js
 The built outputs are stored in [build/js](/build/js). More precisely, [build/js/mystiko.js](/build/js/mystiko.js) is the UMD bundle,
 and [build/js/mystiko.cjs](/build/js/mystiko.cjs) is the CommonJS bundle.
 
-If you do want to regenerate the [Verifier](/contracts/Verifier.sol) contract and regenerate zkSnark public
+If you do want to regenerate the [WithdrawVerifier](/contracts/WithdrawVerifier.sol) contract and regenerate zkSnark public
 parameters in [dist](/dist), you could run this command.
 
 ```bash

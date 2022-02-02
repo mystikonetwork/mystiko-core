@@ -1,30 +1,13 @@
-// https://tornado.cash
-/*
- * d888888P                                           dP              a88888b.                   dP
- *    88                                              88             d8'   `88                   88
- *    88    .d8888b. 88d888b. 88d888b. .d8888b. .d888b88 .d8888b.    88        .d8888b. .d8888b. 88d888b.
- *    88    88'  `88 88'  `88 88'  `88 88'  `88 88'  `88 88'  `88    88        88'  `88 Y8ooooo. 88'  `88
- *    88    88.  .88 88       88    88 88.  .88 88.  .88 88.  .88 dP Y8.   .88 88.  .88       88 88    88
- *    dP    `88888P' dP       dP    dP `88888P8 `88888P8 `88888P' 88  Y88888P' `88888P8 `88888P' dP    dP
- * ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
- */
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
 
 interface IHasher {
-  function MiMCSponge(
-    uint256 in_xL,
-    uint256 in_xR,
-    uint256 k
-  ) external pure returns (uint256 xL, uint256 xR);
+  function poseidon(bytes32[2] memory input) external pure returns (bytes32 output);
 }
 
 contract MerkleTreeWithHistory {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
-  uint256 public constant ZERO_VALUE =
-    21663839004416932945382355908790599225266501822907911457504978515578255421292; // = keccak256("tornado") % FIELD_SIZE
   IHasher public immutable hasher;
 
   uint32 public levels;
@@ -54,7 +37,7 @@ contract MerkleTreeWithHistory {
   }
 
   /**
-    @dev Hash 2 tree leaves, returns MiMC(_left, _right)
+    @dev Hash 2 tree leaves, returns Poseidon([_left, _right])
   */
   function hashLeftRight(
     IHasher _hasher,
@@ -63,12 +46,9 @@ contract MerkleTreeWithHistory {
   ) public pure returns (bytes32) {
     require(uint256(_left) < FIELD_SIZE, "_left should be inside the field");
     require(uint256(_right) < FIELD_SIZE, "_right should be inside the field");
-    uint256 R = uint256(_left);
-    uint256 C = 0;
-    (R, C) = _hasher.MiMCSponge(R, C, 0);
-    R = addmod(R, uint256(_right), FIELD_SIZE);
-    (R, C) = _hasher.MiMCSponge(R, C, 0);
-    return bytes32(R);
+    bytes32 hash = _hasher.poseidon([_left, _right]);
+    require(uint256(hash) < FIELD_SIZE, "hash should be inside the field");
+    return hash;
   }
 
   function getLevels() public view returns (uint32) {
@@ -131,40 +111,40 @@ contract MerkleTreeWithHistory {
     return roots[currentRootIndex];
   }
 
-  /// @dev provides Zero (Empty) elements for a MiMC MerkleTree. Up to 32 levels
+  /// @dev provides Zero (Empty) elements for a Poseidon MerkleTree. Up to 32 levels
   function zeros(uint256 i) public pure returns (bytes32) {
-    if (i == 0) return bytes32(0x2fe54c60d3acabf3343a35b6eba15db4821b340f76e741e2249685ed4899af6c);
-    else if (i == 1) return bytes32(0x256a6135777eee2fd26f54b8b7037a25439d5235caee224154186d2b8a52e31d);
-    else if (i == 2) return bytes32(0x1151949895e82ab19924de92c40a3d6f7bcb60d92b00504b8199613683f0c200);
-    else if (i == 3) return bytes32(0x20121ee811489ff8d61f09fb89e313f14959a0f28bb428a20dba6b0b068b3bdb);
-    else if (i == 4) return bytes32(0x0a89ca6ffa14cc462cfedb842c30ed221a50a3d6bf022a6a57dc82ab24c157c9);
-    else if (i == 5) return bytes32(0x24ca05c2b5cd42e890d6be94c68d0689f4f21c9cec9c0f13fe41d566dfb54959);
-    else if (i == 6) return bytes32(0x1ccb97c932565a92c60156bdba2d08f3bf1377464e025cee765679e604a7315c);
-    else if (i == 7) return bytes32(0x19156fbd7d1a8bf5cba8909367de1b624534ebab4f0f79e003bccdd1b182bdb4);
-    else if (i == 8) return bytes32(0x261af8c1f0912e465744641409f622d466c3920ac6e5ff37e36604cb11dfff80);
-    else if (i == 9) return bytes32(0x0058459724ff6ca5a1652fcbc3e82b93895cf08e975b19beab3f54c217d1c007);
-    else if (i == 10) return bytes32(0x1f04ef20dee48d39984d8eabe768a70eafa6310ad20849d4573c3c40c2ad1e30);
-    else if (i == 11) return bytes32(0x1bea3dec5dab51567ce7e200a30f7ba6d4276aeaa53e2686f962a46c66d511e5);
-    else if (i == 12) return bytes32(0x0ee0f941e2da4b9e31c3ca97a40d8fa9ce68d97c084177071b3cb46cd3372f0f);
-    else if (i == 13) return bytes32(0x1ca9503e8935884501bbaf20be14eb4c46b89772c97b96e3b2ebf3a36a948bbd);
-    else if (i == 14) return bytes32(0x133a80e30697cd55d8f7d4b0965b7be24057ba5dc3da898ee2187232446cb108);
-    else if (i == 15) return bytes32(0x13e6d8fc88839ed76e182c2a779af5b2c0da9dd18c90427a644f7e148a6253b6);
-    else if (i == 16) return bytes32(0x1eb16b057a477f4bc8f572ea6bee39561098f78f15bfb3699dcbb7bd8db61854);
-    else if (i == 17) return bytes32(0x0da2cb16a1ceaabf1c16b838f7a9e3f2a3a3088d9e0a6debaa748114620696ea);
-    else if (i == 18) return bytes32(0x24a3b3d822420b14b5d8cb6c28a574f01e98ea9e940551d2ebd75cee12649f9d);
-    else if (i == 19) return bytes32(0x198622acbd783d1b0d9064105b1fc8e4d8889de95c4c519b3f635809fe6afc05);
-    else if (i == 20) return bytes32(0x29d7ed391256ccc3ea596c86e933b89ff339d25ea8ddced975ae2fe30b5296d4);
-    else if (i == 21) return bytes32(0x19be59f2f0413ce78c0c3703a3a5451b1d7f39629fa33abd11548a76065b2967);
-    else if (i == 22) return bytes32(0x1ff3f61797e538b70e619310d33f2a063e7eb59104e112e95738da1254dc3453);
-    else if (i == 23) return bytes32(0x10c16ae9959cf8358980d9dd9616e48228737310a10e2b6b731c1a548f036c48);
-    else if (i == 24) return bytes32(0x0ba433a63174a90ac20992e75e3095496812b652685b5e1a2eae0b1bf4e8fcd1);
-    else if (i == 25) return bytes32(0x019ddb9df2bc98d987d0dfeca9d2b643deafab8f7036562e627c3667266a044c);
-    else if (i == 26) return bytes32(0x2d3c88b23175c5a5565db928414c66d1912b11acf974b2e644caaac04739ce99);
-    else if (i == 27) return bytes32(0x2eab55f6ae4e66e32c5189eed5c470840863445760f5ed7e7b69b2a62600f354);
-    else if (i == 28) return bytes32(0x002df37a2642621802383cf952bf4dd1f32e05433beeb1fd41031fb7eace979d);
-    else if (i == 29) return bytes32(0x104aeb41435db66c3e62feccc1d6f5d98d0a0ed75d1374db457cf462e3a1f427);
-    else if (i == 30) return bytes32(0x1f3c6fd858e9a7d4b0d1f38e256a09d81d5a5e3c963987e2d4b814cfab7c6ebb);
-    else if (i == 31) return bytes32(0x2c7a07d20dff79d01fecedc1134284a8d08436606c93693b67e333f671bf69cc);
+    if (i == 0) return bytes32(0x09f658457775074ff4c842032a5ec2f1134c32784cca59d594caac8c503b7923);
+    else if (i == 1) return bytes32(0x1a77569b79cb7c2eaf9368de9e3b1efc0a606561e5ab299c2337340f3cdd576a);
+    else if (i == 2) return bytes32(0x111bd0002b1e3b8f1978c932b5ccb2fab87fdb0acab2ddb266f9a346dcb11ee1);
+    else if (i == 3) return bytes32(0x040868ea2a363e05d7ae44280f69b49e429ab096ca2844efe91f8d6b3dad57dd);
+    else if (i == 4) return bytes32(0x00f8f605c92c8502c8fe83be1b83b24e3f67312a388f30cbadb5dee8974137c3);
+    else if (i == 5) return bytes32(0x1adc043c99adbc0c86a60a36db0f661e2dd96f36ede322f954386d8935a0c5d9);
+    else if (i == 6) return bytes32(0x2a1fedfa71da723ac3e9b35cef752fa1b647b2b737a23e91241cb7bdc419e3f4);
+    else if (i == 7) return bytes32(0x17fe1974543c4c4b228e1292f7e3200d31435fc910ee5a8c5cafd329cc4b256b);
+    else if (i == 8) return bytes32(0x0e84a586eb63a0eec0f1fe5785022441f0e29e4ae859c7ce1f5fc88a42ad2e6b);
+    else if (i == 9) return bytes32(0x193deb901f6eeb032e02e093280db17e373d4ff52bafda9215b46bb9b0a86f3e);
+    else if (i == 10) return bytes32(0x1d10ca7b985697cb519565a5006c3f44b020b2edab9b7422ed15dc34532f9406);
+    else if (i == 11) return bytes32(0x1dc200763555467a4e583e00badfdc1fb4d3d3f8f1cc81f31fd2f8b387776081);
+    else if (i == 12) return bytes32(0x203dd11fdba0ed13b20ca2d6952f3feb7461836a03512e0cccce8467b320b2f6);
+    else if (i == 13) return bytes32(0x0591af64e64a3e69caf23eee2bdea90885343a49f547ee9464e95d8d6267e4f7);
+    else if (i == 14) return bytes32(0x2af572f1077a32f46dc8e307d43c0fa6753b400b2107325976b8df7380545ff6);
+    else if (i == 15) return bytes32(0x043227ae4b70b1aacd04e35e6aaed7b56d91220c31e97aaf52e12a6a56984e52);
+    else if (i == 16) return bytes32(0x2976f1f6a91d83d4c528dad69ece6d3d91934b0e5657e915b360c8c4c2fb54e6);
+    else if (i == 17) return bytes32(0x00e5c251c9e093658be0cd1b0df55b6f70f3d09146c1c8b4212a4ddcde700dbc);
+    else if (i == 18) return bytes32(0x0267cbbc1bc2f1c3e3073d2ee60df8cc0bfef39fe3cee735c9ad5c8ad30064d2);
+    else if (i == 19) return bytes32(0x2f356057bc56f67dbf159a0e8935022acd5e982dce9f4071adc43e4d57ce27e6);
+    else if (i == 20) return bytes32(0x273db68f52f12a9d8022ae524050064e42d4d1661c9bcce958acf89b5e8b127b);
+    else if (i == 21) return bytes32(0x0496a18ad4cca81b7c98ceb197439ad925e0f7f62d69dfa42cf9574be77fe30f);
+    else if (i == 22) return bytes32(0x24f89a3f943d421b2f3a554b65459f42b820ac09d6fd9d693df5f8ba732ab596);
+    else if (i == 23) return bytes32(0x1b55bfd751c6807df36876cdce68034ab43210be2bc8afa8043c7f428604e7a7);
+    else if (i == 24) return bytes32(0x16d6595a398cf20f2489b90e958166f1e19c537c0c46e9b8ea5462391ee8f143);
+    else if (i == 25) return bytes32(0x0f01447ef8f621592474b678ed2fc404ebaf22a6fce15364bb4152a88c113613);
+    else if (i == 26) return bytes32(0x026c2dffee48bacbc9d21cf90aa7c6e525ab01db6966a9e7e53b3d3f4d1f5a4d);
+    else if (i == 27) return bytes32(0x234fe90732795745b2c504c791242a2bb193baa1cbeab57db9324b6bb9134817);
+    else if (i == 28) return bytes32(0x23a8e0a7e60981c52ebb498c260d5bef4d7c65145d17128996a77c33a3262a7e);
+    else if (i == 29) return bytes32(0x24ee69d2565210c7027ff6fc2657ed029278bc79f41077fe3281ea5d5d8e80f9);
+    else if (i == 30) return bytes32(0x1de402fa32463bb2917b733aeef0197a49cacacd1fe860c3acc8cd3b65a30a68);
+    else if (i == 31) return bytes32(0x1d3015a0f6a7b3f754171d0540628107e50e25debceb16e0e33ae4205501896d);
     else revert("Index out of bounds");
   }
 }

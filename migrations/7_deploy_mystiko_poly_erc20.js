@@ -2,8 +2,8 @@ require('dotenv').config({ path: '../.env' });
 const PUBLIC_CHAIN = ['ropsten', 'bsctestnet', 'bsc', 'ethereum'];
 
 const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const WithdrawVerifier = artifacts.require('WithdrawVerifier');
+const Hasher = artifacts.require('Hasher2');
 // const TestToken = artifacts.require('TestToken');
 
 module.exports = function (deployer, network) {
@@ -31,7 +31,7 @@ module.exports = function (deployer, network) {
       return;
     }
 
-    const verifier = await Verifier.deployed();
+    const verifier = await WithdrawVerifier.deployed();
     const hasher = await Hasher.deployed();
 
     await deployer.deploy(
