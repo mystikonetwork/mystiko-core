@@ -11,9 +11,10 @@ abstract contract MystikoWithPoly is Mystiko, CrossChainDataSerializable {
     address _relayProxyAddress,
     uint64 _peerChainId,
     address _verifier,
-    address _hasher,
+    address _hasher2,
+    address _hasher3,
     uint32 _merkleTreeHeight
-  ) public Mystiko(_relayProxyAddress, _peerChainId, _verifier, _hasher, _merkleTreeHeight) {}
+  ) public Mystiko(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _hasher3, _merkleTreeHeight) {}
 
   modifier onlyRelayProxyContract() {
     IEthCrossChainManagerProxy relayProxy = IEthCrossChainManagerProxy(relayProxyAddress);

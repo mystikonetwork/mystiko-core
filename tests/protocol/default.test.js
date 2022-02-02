@@ -191,6 +191,17 @@ test('test hash2', () => {
   expect(h2.toString()).not.toBe(h3.toString());
 });
 
+test('test hash3', () => {
+  expect(() => DefaultProtocol.hash3('data to be hashed', new BN(1), new BN(1))).toThrow();
+  expect(() => DefaultProtocol.hash3(new BN(1), new BN(1), 'data to be hashed')).toThrow();
+  expect(() => DefaultProtocol.hash3(new BN(1), 'data to be hashed', new BN(1))).toThrow();
+  const h1 = DefaultProtocol.hash3(new BN(1), new BN(2), new BN(3));
+  const h2 = DefaultProtocol.hash3(new BN(3), new BN(4), new BN(5));
+  const h3 = DefaultProtocol.hash3(new BN(1), new BN(2), new BN(3));
+  expect(h1.toString()).toBe(h3.toString());
+  expect(h2.toString()).not.toBe(h3.toString());
+});
+
 test('test checksum', () => {
   expect(() => DefaultProtocol.checkSum(100, 'P@ssw0rd')).toThrow();
   expect(() => DefaultProtocol.checkSum('data to be hashed', 100)).toThrow();

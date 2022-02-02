@@ -6,15 +6,17 @@ import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 const RelayProxy = artifacts.require('PolyCrossChainManagerMock');
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const Verifier = artifacts.require('WithdrawVerifier');
+const Hasher2 = artifacts.require('Hasher2');
+const Hasher3 = artifacts.require('Hasher3');
 const TestToken = artifacts.require('TestToken');
 
-contract('MystikoWithPolyERC20ToMain', (accounts) => {
+contract('MystikoWithPolyMainToERC20', (accounts) => {
   let mystikoCoreSourceMain;
   let mystikoCoreDestinationERC20;
   let relayProxy;
-  let hasher;
+  let hasher2;
+  let hasher3;
   let verifier;
   let testToken;
   let amount = new BN(toDecimals(1, 16).toString());
@@ -26,14 +28,16 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
 
     testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();
-    hasher = await Hasher.deployed();
+    hasher2 = await Hasher2.deployed();
+    hasher3 = await Hasher3.deployed();
     relayProxy = await RelayProxy.new();
 
     mystikoCoreSourceMain = await MystikoWithPolyMain.new(
       relayProxy.address,
       DESTINATION_CHAIN_ID,
       verifier.address,
-      hasher.address,
+      hasher2.address,
+      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -42,7 +46,8 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       SOURCE_CHAIN_ID,
       verifier.address,
       testToken.address,
-      hasher.address,
+      hasher2.address,
+      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -76,8 +81,8 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
     });
 
     it('should set hasher information correctly', async () => {
-      expect(await mystikoCoreSourceMain.getHasherAddress()).to.equal(hasher.address);
-      expect(await mystikoCoreDestinationERC20.getHasherAddress()).to.equal(hasher.address);
+      expect(await mystikoCoreSourceMain.getHasherAddress()).to.equal(hasher2.address);
+      expect(await mystikoCoreDestinationERC20.getHasherAddress()).to.equal(hasher2.address);
     });
   });
 

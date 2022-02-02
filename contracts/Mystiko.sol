@@ -14,8 +14,13 @@ interface IVerifier {
   ) external returns (bool);
 }
 
+interface IHasher3 {
+  function poseidon(bytes32[3] memory input) external pure returns (bytes32 output);
+}
+
 abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   IVerifier public verifier;
+  IHasher3 public hasher3;
   mapping(bytes32 => bool) public depositedCommitments;
   mapping(bytes32 => bool) public relayCommitments;
   mapping(uint256 => bool) public withdrewSerialNumbers;
@@ -41,12 +46,14 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     address _relayProxyAddress,
     uint64 _peerChainId,
     address _verifier,
-    address _hasher,
+    address _hasher2,
+    address _hasher3,
     uint32 _merkleTreeHeight
-  ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
+  ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher2) {
     relayProxyAddress = _relayProxyAddress;
     peerChainId = _peerChainId;
     verifier = IVerifier(_verifier);
+    hasher3 = IHasher3(_hasher3);
     operator = msg.sender;
     peerContractAddress = address(0);
   }
@@ -60,8 +67,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
-    bytes32 cHash = hashLeftRight(hasher, hashK, bytes32(amount));
-    cHash = hashLeftRight(hasher, cHash, randomS);
+    bytes32 cHash = hasher3.poseidon([hashK, bytes32(amount), randomS]);
     require(cHash == commitmentHash, "commitment hash incorrect");
     _processDepositTransfer(amount);
     depositedCommitments[commitmentHash] = true;

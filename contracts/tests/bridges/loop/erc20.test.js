@@ -5,8 +5,9 @@ import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 
 const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
 const TestToken = artifacts.require('TestToken');
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const Verifier = artifacts.require('WithdrawVerifier');
+const Hasher2 = artifacts.require('Hasher2');
+const Hasher3 = artifacts.require('Hasher3');
 
 contract('MystikoWithLoopERC20', (accounts) => {
   describe('Test basic read operations', () => {
@@ -33,8 +34,9 @@ contract('MystikoWithLoopERC20', (accounts) => {
 
     it('should set hasher information correctly', async () => {
       const loopContract = await MystikoWithLoopERC20.deployed();
-      const hasherContract = await Hasher.deployed();
-      expect(await loopContract.getHasherAddress()).to.equal(hasherContract.address);
+      const hasher2Contract = await Hasher2.deployed();
+      await Hasher3.deployed();
+      expect(await loopContract.getHasherAddress()).to.equal(hasher2Contract.address);
     });
 
     it('should have enough tokens in account 0', async () => {

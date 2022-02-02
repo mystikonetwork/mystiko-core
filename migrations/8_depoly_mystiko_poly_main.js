@@ -3,7 +3,8 @@ const PUBLIC_CHAIN = ['ropsten', 'bsctestnet', 'bsc', 'ethereum'];
 
 const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const WithdrawVerifier = artifacts.require('WithdrawVerifier');
-const Hasher = artifacts.require('Hasher2');
+const Hasher2 = artifacts.require('Hasher2');
+const Hasher3 = artifacts.require('Hasher3');
 
 module.exports = function (deployer, network) {
   if (!PUBLIC_CHAIN.includes(network)) {
@@ -28,14 +29,16 @@ module.exports = function (deployer, network) {
     }
 
     const verifier = await WithdrawVerifier.deployed();
-    const hasher = await Hasher.deployed();
+    const hasher2 = await Hasher2.deployed();
+    const hasher3 = await Hasher3.deployed();
 
     await deployer.deploy(
       MystikoWithPolyMain,
       crosschainManagerProxyAddress,
       destinationChainId,
       verifier.address,
-      hasher.address,
+      hasher2.address,
+      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
   });

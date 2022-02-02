@@ -26,6 +26,7 @@ export {
   decryptSymmetric,
   hash,
   hash2,
+  hash3,
   checkSum,
   buffToBigInt,
   bigIntToBuff,

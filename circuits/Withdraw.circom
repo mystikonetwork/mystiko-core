@@ -19,8 +19,7 @@ template CommitmentHasher(nPkBits, nRandomBits) {
     component randomRBits = Num2Bits(nRandomBits);
     component hasher1Bits = Num2Bits(256);
     component hasher1 = Pedersen(nPkBits + nRandomBits + nRandomBits);
-    component hasher2 = Poseidon(2);
-    component hasher3 = Poseidon(2);
+    component hasher2 = Poseidon(3);
     component hashNum = Bits2Num(256);
 
     publicKeyBits.in <== publicKey;
@@ -38,10 +37,9 @@ template CommitmentHasher(nPkBits, nRandomBits) {
 
     hasher2.inputs[0] <== hasher1.out[0];
     hasher2.inputs[1] <== amount;
-    hasher3.inputs[0] <== hasher2.out;
-    hasher3.inputs[1] <== randomS;
+    hasher2.inputs[2] <== randomS;
 
-    hash <== hasher3.out;
+    hash <== hasher2.out;
 }
 
 template SerialNumberHasher(nSkBits, nRandomBits) {

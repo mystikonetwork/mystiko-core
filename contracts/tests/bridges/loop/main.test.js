@@ -4,8 +4,9 @@ import * as protocol from '../../../../src/protocol';
 import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 
 const MystikoWithLoopMain = artifacts.require('MystikoWithLoopMain');
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const Verifier = artifacts.require('WithdrawVerifier');
+const Hasher2 = artifacts.require('Hasher2');
+const Hasher3 = artifacts.require('Hasher3');
 
 contract('MystikoWithLoopMain', (accounts) => {
   it('should set type correctly', async () => {
@@ -24,8 +25,9 @@ contract('MystikoWithLoopMain', (accounts) => {
 
   it('should set hasher information correctly', async () => {
     const loopContract = await MystikoWithLoopMain.deployed();
-    const hasherContract = await Hasher.deployed();
-    expect(await loopContract.getHasherAddress()).to.equal(hasherContract.address);
+    const hasher2Contract = await Hasher2.deployed();
+    await Hasher3.deployed();
+    expect(await loopContract.getHasherAddress()).to.equal(hasher2Contract.address);
   });
 
   const rawSkVerify = protocol.randomBytes(protocol.VERIFY_SK_SIZE);

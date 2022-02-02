@@ -102,7 +102,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitment], "the commitment has been submitted");
-    uint256 calculatedCommitment = _commitmentHash(commitmentHasher, amount, hashK, randomS);
+    uint256 calculatedCommitment = _commitmentHash(commitmentHasher, hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
     require(rollupFee >= minRollupFee, "rollup fee too few");
     depositedCommitments[commitment] = true;
@@ -208,15 +208,20 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     operator = _newOperator;
   }
 
+  function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
+    require(_minRollupFee > 0, "invalid _minRollupFee");
+    minRollupFee = _minRollupFee;
+  }
+
   function _commitmentHash(
     ICommitmentHasher hasher,
-    uint256 amount,
     uint256 hashK,
+    uint256 amount,
     uint256 randomS
   ) internal pure returns (uint256) {
     require(hashK < FIELD_SIZE, "hashK should be less than FIELD_SIZE");
     require(randomS < FIELD_SIZE, "randomS should be less than FIELD_SIZE");
-    uint256 hash = hasher.poseidon([amount, hashK, randomS]);
+    uint256 hash = hasher.poseidon([hashK, amount, randomS]);
     require(hash < FIELD_SIZE, "hash should be less than FIELD_SIZE");
     return hash;
   }

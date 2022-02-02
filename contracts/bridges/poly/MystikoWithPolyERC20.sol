@@ -10,11 +10,12 @@ contract MystikoWithPolyERC20 is MystikoWithPoly, ERC20AssetPool {
     uint64 _peerChainId,
     address _verifier,
     address _token,
-    address _hasher,
+    address _hasher2,
+    address _hasher3,
     uint32 _merkleTreeHeight
   )
     public
-    MystikoWithPoly(_relayProxyAddress, _peerChainId, _verifier, _hasher, _merkleTreeHeight)
+    MystikoWithPoly(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _hasher3, _merkleTreeHeight)
     ERC20AssetPool(_token)
   {}
 }

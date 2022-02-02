@@ -360,7 +360,7 @@ export function hash(data) {
 
 /**
  * @function module:mystiko/protocol/default.hash2
- * @desc calculate the hash of two big numbers with MiMC Sponge hash algorithm.
+ * @desc calculate the hash of two big numbers with Poseidon hash algorithm.
  * @param {external:BN} left left item to be hashed.
  * @param {external:BN} right right item to be hashed.
  * @returns {external:BN} a big number as the hash.
@@ -369,6 +369,22 @@ export function hash2(left, right) {
   check(left instanceof BN, 'unsupported left instance, should be BN');
   check(right instanceof BN, 'unsupported right instance, should be BN');
   const result = poseidon([left.toString(), right.toString()]);
+  return new BN(result.toString());
+}
+
+/**
+ * @function module:mystiko/protocol/default.hash3
+ * @desc calculate the hash of three big numbers with Poseidon hash algorithm.
+ * @param {external:BN} first left item to be hashed.
+ * @param {external:BN} second second item to be hashed.
+ * @param {external:BN} third third item to be hashed.
+ * @returns {external:BN} a big number as the hash.
+ */
+export function hash3(first, second, third) {
+  check(first instanceof BN, 'unsupported first instance, should be BN');
+  check(second instanceof BN, 'unsupported second instance, should be BN');
+  check(third instanceof BN, 'unsupported third instance, should be BN');
+  const result = poseidon([first.toString(), second.toString(), third.toString()]);
   return new BN(result.toString());
 }
 
@@ -455,7 +471,7 @@ export async function commitment(
   randomR = randomR ? randomR : randomBytes(RANDOM_SK_SIZE);
   randomS = randomS ? randomS : randomBigInt(RANDOM_SK_SIZE);
   const k = hash(Buffer.concat([pkVerify, randomP, randomR]));
-  const commitmentHash = hash2(hash2(k, amount), randomS);
+  const commitmentHash = hash3(k, amount, randomS);
   const privateNote = await encryptAsymmetric(
     pkEnc,
     Buffer.concat([randomP, randomR, bigIntToBuff(randomS, RANDOM_SK_SIZE)]),
