@@ -37,6 +37,7 @@ test('Test PrivateNote getters/setters', async () => {
   expect(note.walletId).toBe(undefined);
   expect(note.shieldedAddress).toBe(undefined);
   expect(note.withdrawTransactionHash).toBe(undefined);
+  expect(note.getWithdrawTxExplorerUrl(conf)).toBe(undefined);
   expect(note.status).toBe(undefined);
 
   note.srcChainId = 1;
@@ -89,9 +90,12 @@ test('Test PrivateNote getters/setters', async () => {
   expect(note.shieldedAddress).toBe(
     'L9VrizoNHfBdtJsLT1Zp1iWAjqGXaWf9HvSJV9p2a7TszPWLnuTDq7rcLc4ykehRznJWFhvCTvCC1REWGUjR6B3C6',
   );
-  note.withdrawTransactionHash = '0x4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e';
+  note.withdrawTransactionHash = '0x8c1ccc2e621fe548218c6ec884b113e892addfdd1d4ea7bf178542ce51c67e70';
   expect(note.withdrawTransactionHash).toBe(
-    '0x4eae1daf0632a8d540efc9308c1a9d5245b41d0c80527449d190fdb95e1b9c4e',
+    '0x8c1ccc2e621fe548218c6ec884b113e892addfdd1d4ea7bf178542ce51c67e70',
+  );
+  expect(note.getWithdrawTxExplorerUrl(conf)).toBe(
+    'https://bscscan.io/tx/0x8c1ccc2e621fe548218c6ec884b113e892addfdd1d4ea7bf178542ce51c67e70',
   );
   expect(() => {
     note.status = 'unknown status';
