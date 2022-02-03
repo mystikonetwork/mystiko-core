@@ -241,7 +241,7 @@ export class DepositHandler extends Handler {
       deposit.amount.toString(),
       toFixedLenHex(deposit.commitmentHash),
       toFixedLenHex(deposit.hashK),
-      toFixedLenHex(deposit.randomS),
+      toFixedLenHex(deposit.randomS, this.protocol.RANDOM_SK_SIZE),
       toHex(deposit.privateNote),
       { value: isMainAsset ? deposit.amount.toString() : '0' },
     );

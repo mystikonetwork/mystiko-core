@@ -12,11 +12,10 @@ contract MystikoWithCelerERC20 is MystikoWithCeler, ERC20AssetPool {
     address _verifier,
     address _token,
     address _hasher2,
-    address _hasher3,
     uint32 _merkleTreeHeight
   )
     public
-    MystikoWithCeler(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _hasher3, _merkleTreeHeight)
+    MystikoWithCeler(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _merkleTreeHeight)
     ERC20AssetPool(_token)
   {}
 }

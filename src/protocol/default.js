@@ -1,7 +1,7 @@
 import unsafeRandomBytes from 'randombytes';
 import { Scalar } from 'ffjavascript';
 import createBlakeHash from 'blake-hash';
-import { pedersenHash, eddsa, babyjub, poseidon } from 'circomlibjs';
+import { eddsa, poseidon } from 'circomlibjs';
 import cryptojs from 'crypto-js';
 import aes from 'crypto-js/aes';
 import hmacSHA512 from 'crypto-js/hmac-sha512';
@@ -9,9 +9,19 @@ import eccrypto from 'eccrypto';
 import { groth16 } from 'snarkjs';
 import bs58 from 'bs58';
 import BN from 'bn.js';
+import { ethers } from 'ethers';
 import { MerkleTree } from '../lib/merkleTree.js';
 import wc from './generated/withdraw_witness_calculator.js';
-import { toHex, toString, check, toHexNoPrefix, readJsonFile, readFile } from '../utils.js';
+import {
+  toHex,
+  toString,
+  check,
+  toHexNoPrefix,
+  readJsonFile,
+  readFile,
+  toBuff,
+  toFixedLenHexNoPrefix,
+} from '../utils.js';
 import logger from '../logger.js';
 
 /**
@@ -344,48 +354,33 @@ export function decryptSymmetric(password, cipherText) {
 }
 
 /**
- * @function module:mystiko/protocol/default.hash
- * @desc calculate the hash of given data with Pedersen Hash algorithm.
- * @param {Buffer} data input data to calculate the hash.
+ * @function module:mystiko/protocol/default.sha256
+ * @desc calculate the SHA256 hash of an array of inputs.
+ * @param {Array.<external:BN>} inputs an array of Buffer.
  * @returns {external:BN} a big number as the hash.
  */
-export function hash(data) {
-  check(data instanceof Buffer, 'unsupported data type ' + typeof data);
-  const packedPoints = pedersenHash.hash(data);
-  const unpackedPoints = babyjub.unpackPoint(packedPoints);
-  const result = new BN(unpackedPoints[0].toString());
-  check(result.lt(FIELD_SIZE), 'first point should be less than FIELD_SIZE');
-  return result;
+export function sha256(inputs) {
+  check(inputs instanceof Array, 'inputs should be an array of Buffer');
+  inputs.forEach((input) => check(input instanceof Buffer, 'input should be instance of Buffer'));
+  const merged = Buffer.concat(inputs);
+  const result = ethers.utils.sha256(toHex(merged));
+  return new BN(toHexNoPrefix(result), 16).mod(FIELD_SIZE);
 }
 
 /**
- * @function module:mystiko/protocol/default.hash2
- * @desc calculate the hash of two big numbers with Poseidon hash algorithm.
- * @param {external:BN} left left item to be hashed.
- * @param {external:BN} right right item to be hashed.
+ * @function module:mystiko/protocol/default.poseidonHash
+ * @desc calculate the Poseidon hash of an array of inputs.
+ * @param {Array.<external:BN>} inputs an array of BN.
  * @returns {external:BN} a big number as the hash.
  */
-export function hash2(left, right) {
-  check(left instanceof BN, 'unsupported left instance, should be BN');
-  check(right instanceof BN, 'unsupported right instance, should be BN');
-  const result = poseidon([left.toString(), right.toString()]);
-  return new BN(result.toString());
-}
-
-/**
- * @function module:mystiko/protocol/default.hash3
- * @desc calculate the hash of three big numbers with Poseidon hash algorithm.
- * @param {external:BN} first left item to be hashed.
- * @param {external:BN} second second item to be hashed.
- * @param {external:BN} third third item to be hashed.
- * @returns {external:BN} a big number as the hash.
- */
-export function hash3(first, second, third) {
-  check(first instanceof BN, 'unsupported first instance, should be BN');
-  check(second instanceof BN, 'unsupported second instance, should be BN');
-  check(third instanceof BN, 'unsupported third instance, should be BN');
-  const result = poseidon([first.toString(), second.toString(), third.toString()]);
-  return new BN(result.toString());
+export function poseidonHash(inputs) {
+  check(inputs instanceof Array, 'inputs should be an array of BN');
+  check(inputs.length < 7, 'inputs length should be not greater than 6');
+  inputs.forEach((input) => check(input instanceof BN, 'input should be instance of BN'));
+  const result = poseidon(inputs);
+  const resultNum = new BN(result.toString());
+  check(resultNum.lt(FIELD_SIZE), 'resultNum should be less than FIELD_SIZE');
+  return resultNum;
 }
 
 /**
@@ -447,8 +442,8 @@ export function bigIntToBuff(bigInt, numBytes = 32) {
  * @param {Buffer} pkVerify public key for zkp verification.
  * @param {Buffer} pkEnc public key for asymmetric encryption.
  * @param {external:BN} amount asset amount to be deposited.
- * @param {Buffer} [randomP] random secret P. If not given, this function will generate a random one.
- * @param {Buffer} [randomR] random secret R. If not given, this function will generate a random one.
+ * @param {external:BN} [randomP] random secret P. If not given, this function will generate a random one.
+ * @param {external:BN} [randomR] random secret R. If not given, this function will generate a random one.
  * @param {external:BN} [randomS] random secret S. If not given, this function will generate a random one.
  * @returns {Promise<{privateNote: Buffer, randomS: external:BN, commitmentHash: external:BN, k: external:BN}>}
  * the encrypted private note, random secret S, intermediate hash k and the commitment hash.
@@ -464,17 +459,25 @@ export async function commitment(
   check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
   check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
   check(amount instanceof BN, 'amount should be instance of BN');
-  check(!randomS || randomP instanceof Buffer, 'unsupported randomP type ' + typeof randomP);
-  check(!randomR || randomR instanceof Buffer, 'unsupported randomR type ' + typeof randomR);
+  check(!randomS || randomP instanceof BN, 'randomP should be instance of BN');
+  check(!randomR || randomR instanceof BN, 'randomR should be instance of BN');
   check(!randomS || randomS instanceof BN, 'randomS should be instance of BN');
-  randomP = randomP ? randomP : randomBytes(RANDOM_SK_SIZE);
-  randomR = randomR ? randomR : randomBytes(RANDOM_SK_SIZE);
+  randomP = randomP ? randomP : randomBigInt(RANDOM_SK_SIZE);
+  randomR = randomR ? randomR : randomBigInt(RANDOM_SK_SIZE);
   randomS = randomS ? randomS : randomBigInt(RANDOM_SK_SIZE);
-  const k = hash(Buffer.concat([pkVerify, randomP, randomR]));
-  const commitmentHash = hash3(k, amount, randomS);
+  const k = poseidonHash([buffToBigInt(pkVerify), randomP, randomR]);
+  const commitmentHash = sha256([
+    toBuff(toFixedLenHexNoPrefix(k)),
+    toBuff(toFixedLenHexNoPrefix(amount)),
+    toBuff(toFixedLenHexNoPrefix(randomS, RANDOM_SK_SIZE)),
+  ]);
   const privateNote = await encryptAsymmetric(
     pkEnc,
-    Buffer.concat([randomP, randomR, bigIntToBuff(randomS, RANDOM_SK_SIZE)]),
+    Buffer.concat([
+      bigIntToBuff(randomP, RANDOM_SK_SIZE),
+      bigIntToBuff(randomR, RANDOM_SK_SIZE),
+      bigIntToBuff(randomS, RANDOM_SK_SIZE),
+    ]),
   );
   logger.debug(
     'commitment generation is done:' +
@@ -490,8 +493,8 @@ export async function commitment(
  * @desc calculate the commitment for the deposit transaction with the recipient shielded address.
  * @param {string} shieldedAddress the shielded address for this deposit goes to.
  * @param {external:BN} amount asset amount to be deposited.
- * @param {Buffer} [randomP] random secret P. If not given, this function will generate a random one.
- * @param {Buffer} [randomR] random secret R. If not given, this function will generate a random one.
+ * @param {external:BN} [randomP] random secret P. If not given, this function will generate a random one.
+ * @param {external:BN} [randomR] random secret R. If not given, this function will generate a random one.
  * @param {external:BN} [randomS] random secret S. If not given, this function will generate a random one.
  * @returns {Promise<{privateNote: Buffer, randomS: external:BN, commitmentHash: external:BN, k: external:BN}>}
  * the encrypted private note, random secret S, intermediate hash k and the commitment hash.
@@ -512,13 +515,13 @@ export async function commitmentWithShieldedAddress(
  * @function module:mystiko/protocol/default.serialNumber
  * @desc calculate serial number for withdrawal transaction.
  * @param {Buffer} skVerify secret key for zkp verification.
- * @param {Buffer} randomP random secret P.
+ * @param {external:BN} randomP random secret P.
  * @returns {external:BN} the calculated serial number.
  */
 export function serialNumber(skVerify, randomP) {
   check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
-  check(randomP instanceof Buffer, 'unsupported skVerify type ' + typeof randomP);
-  return hash(Buffer.concat([randomP, skVerify]));
+  check(randomP instanceof BN, 'unsupported skVerify type ' + typeof randomP);
+  return poseidonHash([randomP, buffToBigInt(skVerify)]);
 }
 
 /**
@@ -575,15 +578,15 @@ export async function zkProve(
     pkVerify,
     pkEnc,
     amount,
-    randomP,
-    randomR,
+    buffToBigInt(randomP),
+    buffToBigInt(randomR),
     buffToBigInt(randomS),
   );
   check(
     toHex(commitmentHash) === toHex(computedCommitmentHash.commitmentHash),
     'given commitmentHash does not match with other parameters',
   );
-  const sn = serialNumber(skVerify, randomP);
+  const sn = serialNumber(skVerify, buffToBigInt(randomP));
   const tree = new MerkleTree(MERKLE_TREE_LEVELS, treeLeaves);
   const { pathElements, pathIndices } = tree.path(treeIndex);
   const inputs = {

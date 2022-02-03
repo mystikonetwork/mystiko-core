@@ -22,10 +22,6 @@ interface IRollupVerifier {
   ) external returns (bool);
 }
 
-interface ICommitmentHasher {
-  function poseidon(uint256[3] memory input) external pure returns (uint256 output);
-}
-
 struct DepositLeaf {
   uint256 commitment;
   uint256 amount;
@@ -35,9 +31,6 @@ struct DepositLeaf {
 abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
-
-  // Hasher related.
-  ICommitmentHasher public commitmentHasher;
 
   // Verifier related.
   IWithdrawVerifier public withdrawVerifier;
@@ -77,14 +70,12 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
 
   constructor(
-    address _commitmentHasher,
     address _withdrawVerifier,
     uint32 _rootHistoryLength,
     uint256 _minRollupFee
   ) public {
     require(_rootHistoryLength > 0, "_rootHistoryLength should be greater than 0");
     require(_minRollupFee > 0, "_minRollupFee should be greater than 0");
-    commitmentHasher = ICommitmentHasher(_commitmentHasher);
     withdrawVerifier = IWithdrawVerifier(_withdrawVerifier);
     operator = msg.sender;
     rootHistoryLength = _rootHistoryLength;
@@ -96,13 +87,13 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 amount,
     uint256 commitment,
     uint256 hashK,
-    uint256 randomS,
+    uint128 randomS,
     bytes memory encryptedNote,
     uint256 rollupFee
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitment], "the commitment has been submitted");
-    uint256 calculatedCommitment = _commitmentHash(commitmentHasher, hashK, amount, randomS);
+    uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
     require(rollupFee >= minRollupFee, "rollup fee too few");
     depositedCommitments[commitment] = true;
@@ -214,16 +205,13 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   }
 
   function _commitmentHash(
-    ICommitmentHasher hasher,
     uint256 hashK,
     uint256 amount,
-    uint256 randomS
+    uint128 randomS
   ) internal pure returns (uint256) {
     require(hashK < FIELD_SIZE, "hashK should be less than FIELD_SIZE");
     require(randomS < FIELD_SIZE, "randomS should be less than FIELD_SIZE");
-    uint256 hash = hasher.poseidon([hashK, amount, randomS]);
-    require(hash < FIELD_SIZE, "hash should be less than FIELD_SIZE");
-    return hash;
+    return uint256(sha256(abi.encodePacked(bytes32(hashK), bytes32(amount), bytes16(randomS)))) % FIELD_SIZE;
   }
 
   function _enqueueDeposit(

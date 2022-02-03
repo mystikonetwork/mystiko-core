@@ -7,9 +7,8 @@ abstract contract MystikoWithLoop is Mystiko {
   constructor(
     address _verifier,
     address _hasher2,
-    address _hasher3,
     uint32 _merkleTreeHeight
-  ) public Mystiko(address(0), 0, _verifier, _hasher2, _hasher3, _merkleTreeHeight) {}
+  ) public Mystiko(address(0), 0, _verifier, _hasher2, _merkleTreeHeight) {}
 
   function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
     uint32 leafIndex = _insert(commitmentHash);

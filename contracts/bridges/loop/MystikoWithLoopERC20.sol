@@ -9,7 +9,6 @@ contract MystikoWithLoopERC20 is MystikoWithLoop, ERC20AssetPool {
     address _verifier,
     address _token,
     address _hasher2,
-    address _hasher3,
     uint32 _merkleTreeHeight
-  ) public MystikoWithLoop(_verifier, _hasher2, _hasher3, _merkleTreeHeight) ERC20AssetPool(_token) {}
+  ) public MystikoWithLoop(_verifier, _hasher2, _merkleTreeHeight) ERC20AssetPool(_token) {}
 }

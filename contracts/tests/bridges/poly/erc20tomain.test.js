@@ -8,7 +8,6 @@ const MystikoCoreERC20 = artifacts.require('MystikoWithPolyERC20');
 const RelayProxy = artifacts.require('PolyCrossChainManagerMock');
 const Verifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
-const Hasher3 = artifacts.require('Hasher3');
 const TestToken = artifacts.require('TestToken');
 
 contract('MystikoWithPolyERC20ToMain', (accounts) => {
@@ -16,7 +15,6 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
   let mystikoCoreDestinationMain;
   let relayProxy;
   let hasher2;
-  let hasher3;
   let verifier;
   let testToken;
   let amount = new BN(toDecimals(2, 16).toString());
@@ -29,7 +27,6 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
     testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();
     hasher2 = await Hasher2.deployed();
-    hasher3 = await Hasher3.deployed();
     relayProxy = await RelayProxy.new();
 
     mystikoCoreSourceERC20 = await MystikoCoreERC20.new(
@@ -38,7 +35,6 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       verifier.address,
       testToken.address,
       hasher2.address,
-      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -47,7 +43,6 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       SOURCE_CHAIN_ID,
       verifier.address,
       hasher2.address,
-      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -131,7 +126,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1] },
       );
@@ -140,7 +135,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],

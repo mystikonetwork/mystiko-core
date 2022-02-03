@@ -7,7 +7,6 @@ const MystikoCoreERC20 = artifacts.require('MystikoWithCelerERC20');
 const RelayProxy = artifacts.require('CelerMessageBusMock');
 const Verifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
-const Hasher3 = artifacts.require('Hasher3');
 const TestToken = artifacts.require('TestToken');
 
 contract('MystikoWithCelerERC20', (accounts) => {
@@ -15,7 +14,6 @@ contract('MystikoWithCelerERC20', (accounts) => {
   let mystikoCoreDestinationERC20;
   let relayProxy;
   let hasher2;
-  let hasher3;
   let verifier;
   let testToken;
   let amount = new BN(toDecimals(1000, 18).toString());
@@ -28,7 +26,6 @@ contract('MystikoWithCelerERC20', (accounts) => {
     testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();
     hasher2 = await Hasher2.deployed();
-    hasher3 = await Hasher3.deployed();
 
     relayProxy = await RelayProxy.new();
 
@@ -38,7 +35,6 @@ contract('MystikoWithCelerERC20', (accounts) => {
       verifier.address,
       testToken.address,
       hasher2.address,
-      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -48,7 +44,6 @@ contract('MystikoWithCelerERC20', (accounts) => {
       verifier.address,
       testToken.address,
       hasher2.address,
-      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -128,7 +123,7 @@ contract('MystikoWithCelerERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1] },
       );
@@ -137,7 +132,7 @@ contract('MystikoWithCelerERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],

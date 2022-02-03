@@ -7,7 +7,6 @@ const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
 const TestToken = artifacts.require('TestToken');
 const Verifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
-const Hasher3 = artifacts.require('Hasher3');
 
 contract('MystikoWithLoopERC20', (accounts) => {
   describe('Test basic read operations', () => {
@@ -35,7 +34,6 @@ contract('MystikoWithLoopERC20', (accounts) => {
     it('should set hasher information correctly', async () => {
       const loopContract = await MystikoWithLoopERC20.deployed();
       const hasher2Contract = await Hasher2.deployed();
-      await Hasher3.deployed();
       expect(await loopContract.getHasherAddress()).to.equal(hasher2Contract.address);
     });
 
@@ -74,7 +72,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1] },
       );
@@ -82,7 +80,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],

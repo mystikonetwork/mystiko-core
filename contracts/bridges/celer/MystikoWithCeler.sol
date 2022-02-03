@@ -12,9 +12,8 @@ abstract contract MystikoWithCeler is Mystiko, IMessageReceiverApp, CrossChainDa
     uint64 _peerChainId,
     address _verifier,
     address _hasher2,
-    address _hasher3,
     uint32 _merkleTreeHeight
-  ) public Mystiko(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _hasher3, _merkleTreeHeight) {}
+  ) public Mystiko(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _merkleTreeHeight) {}
 
   modifier onlyRelayProxyContract() {
     require(msg.sender == relayProxyAddress, "msgSender is not relay proxy");

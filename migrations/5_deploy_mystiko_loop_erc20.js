@@ -1,9 +1,9 @@
 require('dotenv').config({ path: '../.env' });
 
 const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
+const MystikoV2WithLoopERC20 = artifacts.require('MystikoV2WithLoopERC20');
 const WithdrawVerifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
-const Hasher3 = artifacts.require('Hasher3');
 const TestToken = artifacts.require('TestToken');
 
 module.exports = function (deployer, network) {
@@ -12,25 +12,24 @@ module.exports = function (deployer, network) {
 
     const verifier = await WithdrawVerifier.deployed();
     const hasher2 = await Hasher2.deployed();
-    const hasher3 = await Hasher3.deployed();
     const testToken = await TestToken.deployed();
 
-    var tokneAddress;
+    var tokenAddress;
     if (network === 'bsctestnet') {
-      tokneAddress = BSC_TESTNET_ERC20_ADDRESS;
+      tokenAddress = BSC_TESTNET_ERC20_ADDRESS;
     } else if (network === 'ropsten') {
-      tokneAddress = ROPSTEN_ERC20_ADDRESS;
+      tokenAddress = ROPSTEN_ERC20_ADDRESS;
     } else {
-      tokneAddress = testToken.address;
+      tokenAddress = testToken.address;
     }
 
     await deployer.deploy(
       MystikoWithLoopERC20,
       verifier.address,
-      tokneAddress,
+      tokenAddress,
       hasher2.address,
-      hasher3.address,
       MERKLE_TREE_HEIGHT,
     );
+    await deployer.deploy(MystikoV2WithLoopERC20, verifier.address, 30, '1000000000000000000', tokenAddress);
   });
 };

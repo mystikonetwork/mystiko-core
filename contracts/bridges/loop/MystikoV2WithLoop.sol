@@ -5,11 +5,10 @@ import "../../MystikoV2.sol";
 
 abstract contract MystikoV2WithLoop is MystikoV2 {
   constructor(
-    address _commitmentHasher,
     address _withdrawVerifier,
     uint32 _rootHistoryLength,
     uint256 _minRollupFee
-  ) public MystikoV2(_commitmentHasher, _withdrawVerifier, _rootHistoryLength, _minRollupFee) {}
+  ) public MystikoV2(_withdrawVerifier, _rootHistoryLength, _minRollupFee) {}
 
   function _processDeposit(
     uint256 commitmentHash,

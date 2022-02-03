@@ -6,7 +6,6 @@ import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 const MystikoWithLoopMain = artifacts.require('MystikoWithLoopMain');
 const Verifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
-const Hasher3 = artifacts.require('Hasher3');
 
 contract('MystikoWithLoopMain', (accounts) => {
   it('should set type correctly', async () => {
@@ -26,7 +25,6 @@ contract('MystikoWithLoopMain', (accounts) => {
   it('should set hasher information correctly', async () => {
     const loopContract = await MystikoWithLoopMain.deployed();
     const hasher2Contract = await Hasher2.deployed();
-    await Hasher3.deployed();
     expect(await loopContract.getHasherAddress()).to.equal(hasher2Contract.address);
   });
 
@@ -47,7 +45,7 @@ contract('MystikoWithLoopMain', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1], value: toHex(amount) },
       );
@@ -55,7 +53,7 @@ contract('MystikoWithLoopMain', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],

@@ -12,12 +12,8 @@ contract MystikoWithPolyMain is MystikoWithPoly, MainAssetPool {
     uint64 _peerChainId,
     address _verifier,
     address _hasher2,
-    address _hasher3,
     uint32 _merkleTreeHeight
-  )
-    public
-    MystikoWithPoly(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _hasher3, _merkleTreeHeight)
-  {}
+  ) public MystikoWithPoly(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _merkleTreeHeight) {}
 
   receive() external payable {
     emit Received(msg.sender, msg.value);
