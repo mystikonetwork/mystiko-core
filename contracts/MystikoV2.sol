@@ -24,7 +24,6 @@ interface IRollupVerifier {
 
 struct DepositLeaf {
   uint256 commitment;
-  uint256 amount;
   uint256 rollupFee;
 }
 
@@ -64,9 +63,9 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     _;
   }
 
-  event EncryptedNote(uint256 indexed commitment, uint256 amount, bytes encryptedNote);
-  event DepositQueued(uint256 indexed commitment, uint256 amount, uint256 rollupFee, uint256 leafIndex);
-  event DepositIncluded(uint256 indexed commitment, uint256 amount, uint256 leafIndex);
+  event EncryptedNote(uint256 indexed commitment, bytes encryptedNote);
+  event DepositQueued(uint256 indexed commitment, uint256 amount, uint256 rollupFee);
+  event DepositIncluded(uint256 indexed commitment, uint256 leafIndex);
   event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
 
   constructor(
@@ -99,7 +98,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     depositedCommitments[commitment] = true;
     _processDepositTransfer(amount + rollupFee);
     _processDeposit(amount, commitment, rollupFee);
-    emit EncryptedNote(commitment, amount, encryptedNote);
+    emit EncryptedNote(commitment, encryptedNote);
   }
 
   function rollup(
@@ -127,7 +126,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
       }
       delete depositQueue[index];
       depositQueueSize = depositQueueSize - 1;
-      emit DepositIncluded(commitment, leaf.amount, index);
+      emit DepositIncluded(commitment, index);
     }
     uint256 expectedLeafHash = uint256(sha256(leavesData)) % FIELD_SIZE;
     require(leafHash == expectedLeafHash, "invalid leafHash");
@@ -219,10 +218,9 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 amount,
     uint256 rollupFee
   ) internal {
-    depositQueue[depositQueueSize] = DepositLeaf(commitment, amount, rollupFee);
-    uint256 leafIndex = depositQueueIndex + depositQueueSize;
+    depositQueue[depositQueueSize] = DepositLeaf(commitment, rollupFee);
     depositQueueSize = depositQueueSize + 1;
-    emit DepositQueued(commitment, amount, rollupFee, leafIndex);
+    emit DepositQueued(commitment, amount, rollupFee);
   }
 
   function _processDeposit(

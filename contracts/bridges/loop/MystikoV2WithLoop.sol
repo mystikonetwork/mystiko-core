@@ -11,8 +11,8 @@ abstract contract MystikoV2WithLoop is MystikoV2 {
   ) public MystikoV2(_withdrawVerifier, _rootHistoryLength, _minRollupFee) {}
 
   function _processDeposit(
-    uint256 commitmentHash,
     uint256 amount,
+    uint256 commitmentHash,
     uint256 rollupFee
   ) internal override {
     _enqueueDeposit(commitmentHash, amount, rollupFee);
