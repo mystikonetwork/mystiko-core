@@ -350,6 +350,17 @@ export class PrivateNote extends BaseModel {
   }
 
   /**
+   * @desc get the explorer URL for withdrawal transaction in destination chain.
+   * @param {MystikoConfig} config current effective config.
+   * @returns {string} a full URL of destination chain withdrawal transaction. It returns undefined if destination chain config
+   * is not provided or the transaction hash of destination chain is not set.
+   */
+  getWithdrawTxExplorerUrl(config) {
+    check(config instanceof MystikoConfig, 'config should be an instance of MystikoConfig');
+    return config.getChainTxExplorerUrl(this.dstChainId, this.withdrawTransactionHash);
+  }
+
+  /**
    * @property {module:mystiko/models.PrivateNoteStatus} status
    * @desc status of this private note.
    */
