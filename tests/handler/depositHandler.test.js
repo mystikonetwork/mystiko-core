@@ -10,7 +10,7 @@ import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { readFromFile } from '../../src/config';
-import { DepositStatus, BridgeType } from '../../src/model';
+import { DepositStatus, BridgeType, AssetType } from '../../src/model';
 import { MystikoABI } from '../../src/chain/abi.js';
 import txReceipt01 from './files/txReceipt01.json';
 
@@ -200,6 +200,7 @@ test('test createDeposit poly erc20', async () => {
   expect(deposit.dstChainId).toBe(56);
   expect(deposit.bridge).toBe(BridgeType.POLY);
   expect(deposit.asset).toBe('USDT');
+  expect(deposit.assetType).toBe(AssetType.ERC20);
   expect(deposit.assetDecimals).toBe(18);
   expect(deposit.amount.toString()).toBe(toDecimals(100, 18).toString());
   expect(deposit.shieldedRecipientAddress).toBe(request.shieldedAddress);
@@ -235,6 +236,7 @@ test('test createDeposit loop erc20', async () => {
   expect(deposit.dstChainId).toBe(1);
   expect(deposit.bridge).toBe(BridgeType.LOOP);
   expect(deposit.asset).toBe('USDT');
+  expect(deposit.assetType).toBe(AssetType.ERC20);
   expect(deposit.assetDecimals).toBe(18);
   expect(deposit.amount.toString()).toBe(toDecimals(200, 18).toString());
   expect(deposit.shieldedRecipientAddress).toBe(request.shieldedAddress);
@@ -274,6 +276,7 @@ test('test createDeposit loop main', async () => {
   expect(deposit.dstChainId).toBe(1);
   expect(deposit.bridge).toBe(BridgeType.LOOP);
   expect(deposit.asset).toBe('ETH');
+  expect(deposit.assetType).toBe(AssetType.MAIN);
   expect(deposit.assetDecimals).toBe(18);
   expect(deposit.amount.toString()).toBe(toDecimals(500, 18).toString());
   expect(deposit.shieldedRecipientAddress).toBe(request.shieldedAddress);

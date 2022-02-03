@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { Deposit, DepositStatus } from '../../src/model';
+import { AssetType, Deposit, DepositStatus } from '../../src/model';
 import { toBuff, toHexNoPrefix, toDecimals } from '../../src/utils.js';
 import { readFromFile } from '../../src/config';
 
@@ -10,6 +10,7 @@ test('Test Deposit getters/setters', async () => {
   expect(deposit.dstChainId).toBe(undefined);
   expect(deposit.bridge).toBe(undefined);
   expect(deposit.asset).toBe(undefined);
+  expect(deposit.assetType).toBe(undefined);
   expect(deposit.assetDecimals).toBe(undefined);
   expect(deposit.amount).toBe(undefined);
   expect(deposit.commitmentHash).toBe(undefined);
@@ -38,6 +39,11 @@ test('Test Deposit getters/setters', async () => {
   expect(deposit.bridge).toBe('poly');
   deposit.asset = 'USDT';
   expect(deposit.asset).toBe('USDT');
+  expect(() => {
+    deposit.assetType = 'wrong';
+  }).toThrow();
+  deposit.assetType = AssetType.MAIN;
+  expect(deposit.assetType).toBe(AssetType.MAIN);
   deposit.amount = toDecimals(1.01);
   expect(deposit.amount.toString()).toBe('1010000000000000000');
   expect(deposit.simpleAmount).toBe(1.01);
