@@ -82,6 +82,7 @@ export class DepositHandler extends Handler {
     deposit.dstChainId = dstChainId;
     deposit.bridge = bridge;
     deposit.asset = assetSymbol;
+    deposit.assetType = contractConfig.assetType;
     deposit.assetDecimals = contractConfig.assetDecimals;
     deposit.amount = amount;
     deposit.commitmentHash = commitmentHash;

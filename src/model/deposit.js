@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { BaseModel } from './common.js';
+import { BaseModel, isValidAssetType } from './common.js';
 import { check, fromDecimals, toBuff, toHexNoPrefix } from '../utils.js';
 import { MystikoConfig } from '../config';
 
@@ -66,6 +66,19 @@ export class Deposit extends BaseModel {
   set asset(a) {
     check(typeof a === 'string', 'a should be instance of string');
     this.data['asset'] = a;
+  }
+
+  /**
+   * @property {module:mystiko/models.AssetType} assetType
+   * @desc the type of the supported asset of this deposit on the source chain.
+   */
+  get assetType() {
+    return this.data['assetType'];
+  }
+
+  set assetType(type) {
+    check(isValidAssetType(type), 'type should be instance of AssetType');
+    this.data['assetType'] = type;
   }
 
   /**
