@@ -121,7 +121,7 @@ beforeEach(async () => {
   contractPool = new ContractPool(conf, providerPool);
   contract = new MockMystikoContract(
     '0x98ed94360cad67a76a53d8aa15905e52485b73d1',
-    MystikoABI.MystikoWithLoopERC20,
+    MystikoABI.MystikoWithLoopERC20.abi,
   );
   contractPool.connect(() => contract);
   walletHandler = new WalletHandler(db, conf);

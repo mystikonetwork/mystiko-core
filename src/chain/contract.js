@@ -103,7 +103,7 @@ export class ContractPool {
           }
           this.assetPool[chainId][contractConfig.assetAddress] = contractGenerator(
             contractConfig.assetAddress,
-            MystikoABI.ERC20,
+            MystikoABI.ERC20.abi,
             provider,
           );
         }
