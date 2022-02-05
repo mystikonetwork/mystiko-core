@@ -13,12 +13,10 @@ template MerkleTreeLeafHasher(numOfLeaves) {
   component leavesBits[numOfLeaves];
   var index = 0;
   for (var i = 0; i < numOfLeaves; i++) {
-    hasher.in[index] <== 0;
-    hasher.in[index + 1] <== 0;
-    leavesBits[i] = Num2Bits_strict();
+    leavesBits[i] = Num2Bits(256);
     leavesBits[i].in <== leaves[i];
-    for (var j = 0; j < 254; j++) {
-      hasher.in[index + j + 2] <== leavesBits[i].out[253 - j];
+    for (var j = 0; j < 256; j++) {
+      hasher.in[index + j] <== leavesBits[i].out[255 - j];
     }
     index = index + 256;
   }

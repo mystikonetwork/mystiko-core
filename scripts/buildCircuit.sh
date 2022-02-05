@@ -2,10 +2,10 @@
 set -ex
 
 if [ "$#" -lt 1 ]; then
-  echo "Wrong number of arguments, usage: buildCircuit.sh [CIRCUIT_NAME] <POWERS_OF_TAU=14>"
+  echo "Wrong number of arguments, usage: buildCircuit.sh [CIRCUIT_NAME] <POWERS_OF_TAU=16>"
   exit 1
 fi
-POWERS_OF_TAU=14
+POWERS_OF_TAU=16
 if [ "$#" -gt 1 ]; then
   POWERS_OF_TAU="$2"
 fi

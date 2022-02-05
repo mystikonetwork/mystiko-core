@@ -18,7 +18,7 @@ interface IRollupVerifier {
     uint256[2] memory a,
     uint256[2][2] memory b,
     uint256[2] memory c,
-    uint256[4] memory input
+    uint256[3] memory input
   ) external returns (bool);
 }
 
@@ -27,13 +27,18 @@ struct DepositLeaf {
   uint256 rollupFee;
 }
 
+struct RollupVerifier {
+  IRollupVerifier verifier;
+  bool enabled;
+}
+
 abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
   // Verifier related.
   IWithdrawVerifier public withdrawVerifier;
-  mapping(uint32 => IRollupVerifier) public rollupVerifiers;
+  mapping(uint32 => RollupVerifier) public rollupVerifiers;
 
   // For checking duplicates.
   mapping(uint256 => bool) public depositedCommitments;
@@ -107,12 +112,12 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256[2] memory proofC,
     uint32 rollupSize,
     uint256 newRoot,
-    uint32 pathIndices,
     uint256 leafHash
   ) public payable {
     require(!isKnownRoot(newRoot), "newRoot is duplicated");
     require(rollupSize <= depositQueueSize, "rollupSize too big");
-    require(rollupVerifiers[rollupSize] != IRollupVerifier(0), "invalid rollupSize");
+    require(rollupVerifiers[rollupSize].enabled, "invalid rollupSize");
+    require(depositQueueIndex % rollupSize == 0, "invalid rollupSize at this index");
     bytes memory leavesData = new bytes(32 * rollupSize);
     uint256 totalRollupFee = 0;
     for (uint256 index = depositQueueIndex; index < depositQueueIndex + rollupSize; index++) {
@@ -130,12 +135,11 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     }
     uint256 expectedLeafHash = uint256(sha256(leavesData)) % FIELD_SIZE;
     require(leafHash == expectedLeafHash, "invalid leafHash");
-    IRollupVerifier verifier = rollupVerifiers[rollupSize];
-    bool verified = verifier.verifyProof(
+    bool verified = rollupVerifiers[rollupSize].verifier.verifyProof(
       proofA,
       proofB,
       proofC,
-      [currentRoot, newRoot, uint256(pathIndices), leafHash]
+      [currentRoot, newRoot, leafHash]
     );
     require(verified, "invalid proof");
     _processRollupFeeTransfer(totalRollupFee);
@@ -190,8 +194,14 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     withdrawVerifier = IWithdrawVerifier(_withdrawVerifier);
   }
 
-  function setRollupVerifier(uint32 rollupSize, address _rollupVerifier) external onlyOperator {
-    rollupVerifiers[rollupSize] = IRollupVerifier(_rollupVerifier);
+  function enableRollupVerifier(uint32 rollupSize, address _rollupVerifier) external onlyOperator {
+    rollupVerifiers[rollupSize] = RollupVerifier(IRollupVerifier(_rollupVerifier), true);
+  }
+
+  function disableRollupVerifier(uint32 rollupSize) external onlyOperator {
+    if (rollupVerifiers[rollupSize].enabled) {
+      rollupVerifiers[rollupSize].enabled = false;
+    }
   }
 
   function changeOperator(address _newOperator) external onlyOperator {
