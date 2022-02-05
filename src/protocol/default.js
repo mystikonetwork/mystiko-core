@@ -11,7 +11,6 @@ import bs58 from 'bs58';
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import { MerkleTree } from '../lib/merkleTree.js';
-import wc from './generated/withdraw_witness_calculator.js';
 import {
   toHex,
   toString,
@@ -23,6 +22,8 @@ import {
   toFixedLenHexNoPrefix,
 } from '../utils.js';
 import logger from '../logger.js';
+
+const WithdrawWitnessCalculator = require('./generated/withdraw_witness_calculator.js');
 
 /**
  * @module module:mystiko/protocol/default
@@ -611,7 +612,7 @@ export async function zkProve(
       `amount="${toString(amount)}"'`,
   );
   const wasm = await readFile(wasmFile);
-  const witnessCalculator = await wc(wasm);
+  const witnessCalculator = await WithdrawWitnessCalculator(wasm);
   const buff = await witnessCalculator.calculateWTNSBin(inputs, 0);
   logger.debug('witness calculation is done, start proving...');
   const proofs = await groth16.prove(zkeyFile, buff);

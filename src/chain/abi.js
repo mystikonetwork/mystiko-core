@@ -3,6 +3,8 @@ import MystikoWithLoopERC20 from './abis/MystikoWithLoopERC20.json';
 import MystikoWithLoopMain from './abis/MystikoWithLoopMain.json';
 import MystikoWithPolyERC20 from './abis/MystikoWithPolyERC20.json';
 import MystikoWithPolyMain from './abis/MystikoWithPolyMain.json';
+import MystikoV2WithLoopERC20 from './abis/MystikoV2WithLoopERC20.json';
+import MystikoV2WithLoopMain from './abis/MystikoV2WithLoopMain.json';
 import { AssetType, BridgeType } from '../model';
 
 /**
@@ -57,6 +59,18 @@ export const MystikoABI = {
     abi: MystikoWithPolyMain,
     isMystiko: true,
     bridgeType: BridgeType.TBRIDGE,
+    assetType: AssetType.MAIN,
+  },
+  MystikoV2WithLoopERC20: {
+    abi: MystikoV2WithLoopERC20,
+    isMystiko: true,
+    bridgeType: BridgeType.LOOP,
+    assetType: AssetType.ERC20,
+  },
+  MystikoV2WithLoopMain: {
+    abi: MystikoV2WithLoopMain,
+    isMystiko: true,
+    bridgeType: BridgeType.LOOP,
     assetType: AssetType.MAIN,
   },
 };

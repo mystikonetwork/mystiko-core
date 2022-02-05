@@ -188,8 +188,8 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         privateNote,
         treeLeaves,
         treeIndex,
-        'dist/circom/dev/withdraw.wasm',
-        'dist/circom/dev/withdraw.zkey',
+        'dist/circom/dev/Withdraw.wasm',
+        'dist/circom/dev/Withdraw.zkey',
       );
       proof = fullProof.proof;
       publicSignals = fullProof.publicSignals;
@@ -199,7 +199,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       expect(proof['pi_b'][1].length).to.equal(2);
       expect(proof['pi_c'].length).to.be.gte(2);
       expect(publicSignals.length).to.equal(3);
-      const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/withdraw.vkey.json');
+      const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/Withdraw.vkey.json');
       expect(result).to.equal(true);
     });
 
