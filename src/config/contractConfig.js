@@ -1,20 +1,7 @@
 import { BaseConfig } from './common.js';
 import { check } from '../utils.js';
 import { MystikoABI } from '../chain/abi.js';
-import { AssetType, BridgeType, isValidAssetType, isValidBridgeType } from '../model';
-
-const AbiIndex = {
-  [AssetType.ERC20]: {
-    [BridgeType.LOOP]: MystikoABI.MystikoWithLoopERC20,
-    [BridgeType.POLY]: MystikoABI.MystikoWithPolyERC20,
-    [BridgeType.TBRIDGE]: MystikoABI.MystikoWithPolyERC20,
-  },
-  [AssetType.MAIN]: {
-    [BridgeType.LOOP]: MystikoABI.MystikoWithLoopMain,
-    [BridgeType.POLY]: MystikoABI.MystikoWithPolyMain,
-    [BridgeType.TBRIDGE]: MystikoABI.MystikoWithPolyMain,
-  },
-};
+import { AssetType, BridgeType } from '../model';
 
 /**
  * @class ContractConfig
@@ -25,21 +12,27 @@ const AbiIndex = {
 export class ContractConfig extends BaseConfig {
   constructor(rawConfig) {
     super(rawConfig);
+    BaseConfig.checkString(this.config, 'name');
+    this._checkContractName();
     BaseConfig.checkEthAddress(this.config, 'address');
     BaseConfig.checkString(this.config, 'assetSymbol');
     BaseConfig.checkNumber(this.config, 'assetDecimals');
-    BaseConfig.checkString(this.config, 'assetType');
-    check(isValidAssetType(this.assetType), this.assetType + ' is invalid asset type');
     if (this.assetType !== AssetType.MAIN) {
       BaseConfig.checkEthAddress(this.config, 'assetAddress');
     }
-    BaseConfig.checkString(this.config, 'bridgeType');
-    check(isValidBridgeType(this.bridgeType), this.bridgeType + ' is invalid bridge type');
     if (this.bridgeType !== BridgeType.LOOP) {
       BaseConfig.checkNumber(this.config, 'peerChainId');
       BaseConfig.checkEthAddress(this.config, 'peerContractAddress');
     }
     BaseConfig.checkString(this.config, 'circuits');
+  }
+
+  /**
+   * @property {string} name
+   * @desc the name of this configured smart contract.
+   */
+  get name() {
+    return this.config['name'];
   }
 
   /**
@@ -55,7 +48,7 @@ export class ContractConfig extends BaseConfig {
    * @desc the supported cross-chain bridge type of this configured smart contract.
    */
   get bridgeType() {
-    return this.config['bridgeType'];
+    return MystikoABI[this.name].bridgeType;
   }
 
   /**
@@ -71,7 +64,7 @@ export class ContractConfig extends BaseConfig {
    * @desc the type of the supported asset in this configured smart contract.
    */
   get assetType() {
-    return this.config['assetType'];
+    return MystikoABI[this.name].assetType;
   }
 
   /**
@@ -95,7 +88,7 @@ export class ContractConfig extends BaseConfig {
    * @desc the compiled ABI encoding information of this configured smart contract.
    */
   get abi() {
-    return AbiIndex[this.assetType][this.bridgeType];
+    return MystikoABI[this.name].abi;
   }
 
   /**
@@ -128,5 +121,10 @@ export class ContractConfig extends BaseConfig {
    */
   get circuits() {
     return this.config['circuits'];
+  }
+
+  _checkContractName() {
+    check(MystikoABI[this.name], `${this.name} is an invalid contract name`);
+    check(MystikoABI[this.name].isMystiko, 'not a Mystiko contract');
   }
 }
