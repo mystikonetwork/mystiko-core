@@ -164,7 +164,7 @@ beforeEach(async () => {
   depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, conf);
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner, 500);
     } else {
@@ -262,7 +262,7 @@ test('test createDeposit loop main', async () => {
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner);
     } else {
@@ -301,7 +301,7 @@ test('test createDeposit loop error', async () => {
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner);
     } else {
@@ -376,7 +376,7 @@ test('test query deposits', async () => {
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner);
     } else {
@@ -389,7 +389,7 @@ test('test query deposits', async () => {
   expect(ret1.deposit.errorMessage).toBe(undefined);
 
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner, 500);
     } else {
@@ -437,7 +437,7 @@ test('test exportOffChainNote', async () => {
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner);
     } else {
@@ -465,7 +465,7 @@ test('test insufficient balance', async () => {
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner);
     } else {
@@ -486,7 +486,7 @@ test('test insufficient balance', async () => {
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
   };
   await contractPool.connect((address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
+    if (abi === MystikoABI.ERC20.abi) {
       const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
       return new MockERC20Contract(address, abi, defaultOwner, 100);
     } else {

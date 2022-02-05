@@ -61,12 +61,11 @@ class MockContract extends ethers.Contract {
 test('test MystikoContract constructor', async () => {
   expect(() => new MystikoContract({})).toThrow();
   const contractConfig = new ContractConfig({
+    name: 'MystikoWithLoopERC20',
     address: '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1',
     assetSymbol: 'USDT',
     assetDecimals: 18,
-    assetType: 'erc20',
     assetAddress: '0xaE110b575E21949DEc823EfB81951355EB71E038',
-    bridgeType: 'loop',
     circuits: 'circom-1.0',
   });
   const contract1 = new MystikoContract(contractConfig);
@@ -91,39 +90,35 @@ test('test MystikoContract connect', async () => {
   const peerAddress = '0x8fb1df17768e29c936edfbce1207ad13696268b7';
   const assetAddress = '0xaE110b575E21949DEc823EfB81951355EB71E038';
   const contractConfig1 = new ContractConfig({
+    name: 'MystikoWithLoopERC20',
     address: address,
     assetSymbol: 'USDT',
     assetDecimals: 18,
-    assetType: 'erc20',
-    bridgeType: 'loop',
     assetAddress,
     circuits: 'circom-1.0',
   });
   const contractConfig2 = new ContractConfig({
+    name: 'MystikoWithLoopMain',
     address: address,
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    assetType: 'main',
-    bridgeType: 'loop',
     circuits: 'circom-1.0',
   });
   const contractConfig3 = new ContractConfig({
+    name: 'MystikoWithPolyERC20',
     address: address,
     assetAddress,
     assetSymbol: 'USDT',
     assetDecimals: 18,
-    assetType: 'erc20',
-    bridgeType: 'poly',
     peerContractAddress: peerAddress,
     peerChainId: 56,
     circuits: 'circom-1.0',
   });
   const contractConfig4 = new ContractConfig({
+    name: 'MystikoWithPolyMain',
     address: '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    assetType: 'main',
-    bridgeType: 'poly',
     peerContractAddress: peerAddress,
     peerChainId: 56,
     circuits: 'circom-1.0',
@@ -186,8 +181,8 @@ test('test ContractPool connect', async () => {
   providerPool.connect();
   const pool = new ContractPool(conf, providerPool);
   const contractGenerator = (address, abi, providerOrSigner) => {
-    if (abi === MystikoABI.ERC20) {
-      return new ethers.Contract(address, MystikoABI.ERC20, providerOrSigner);
+    if (abi === MystikoABI.ERC20.abi) {
+      return new ethers.Contract(address, MystikoABI.ERC20.abi, providerOrSigner);
     }
     expect(providerOrSigner).not.toBe(undefined);
     let mockContract = undefined;
