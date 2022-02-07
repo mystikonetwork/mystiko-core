@@ -2,7 +2,7 @@ import { hdkey } from 'ethereumjs-wallet';
 import { ID_KEY, Account } from '../model';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
-import { check, toBuff, toHexNoPrefix } from '../utils.js';
+import { check, toBuff, toHexNoPrefix, toString } from '../utils.js';
 import rootLogger from '../logger.js';
 
 /**
@@ -202,13 +202,13 @@ export class AccountHandler extends Handler {
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     check(typeof newName === 'string', 'newName should be instance of string');
     check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
-    account = this.getAccount(account);
-    check(account, `${account.toString()} does not exist`);
-    account.name = newName;
-    this.db.accounts.update(account.data);
+    const existingAccount = this.getAccount(account);
+    check(existingAccount, `${toString(account)} does not exist`);
+    existingAccount.name = newName;
+    this.db.accounts.update(existingAccount.data);
     await this.saveDatabase();
-    this.logger.info(`successfully updated account(id=${account.id}) name to ${newName}`);
-    return account;
+    this.logger.info(`successfully updated account(id=${existingAccount.id}) name to ${newName}`);
+    return existingAccount;
   }
 
   _createAccount(walletPassword, accountName, skVerify, skEnc) {
