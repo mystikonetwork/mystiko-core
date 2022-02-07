@@ -2,9 +2,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_withdrawVerifier",
-        "type": "address"
+        "internalType": "uint32",
+        "name": "_treeHeight",
+        "type": "uint32"
       },
       {
         "internalType": "uint32",
@@ -15,6 +15,11 @@
         "internalType": "uint256",
         "name": "_minRollupFee",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_withdrawVerifier",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -27,12 +32,6 @@
         "indexed": true,
         "internalType": "uint256",
         "name": "commitment",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "leafIndex",
         "type": "uint256"
       }
     ],
@@ -58,6 +57,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "rollupFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "leafIndex",
         "type": "uint256"
       }
     ],
@@ -119,6 +124,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "roller",
+        "type": "address"
+      }
+    ],
+    "name": "addRollupWhiteList",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -365,6 +383,19 @@
   },
   {
     "inputs": [],
+    "name": "isRollupWhitelisted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "isVerifierUpdateDisabled",
     "outputs": [
       {
@@ -437,7 +468,7 @@
     ],
     "name": "rollup",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -458,6 +489,25 @@
       {
         "internalType": "bool",
         "name": "enabled",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "rollupWhitelist",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
         "type": "bool"
       }
     ],
@@ -552,6 +602,32 @@
     "name": "toggleDeposits",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "_state",
+        "type": "bool"
+      }
+    ],
+    "name": "toggleRollupWhitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treeCapacity",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

@@ -11,5 +11,9 @@ contract MystikoV2WithLoopERC20 is MystikoV2WithLoop, ERC20AssetPool {
     uint256 _minRollupFee,
     address _withdrawVerifier,
     address _token
-  ) public MystikoV2WithLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier) ERC20AssetPool(_token) {}
+  )
+    public
+    MystikoV2WithLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier)
+    ERC20AssetPool(_token)
+  {}
 }
