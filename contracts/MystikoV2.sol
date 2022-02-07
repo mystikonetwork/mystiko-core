@@ -110,11 +110,11 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 rollupFee
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
+    require(rollupFee >= minRollupFee, "rollup fee too few");
     require(currentRootIndex + 1 <= treeCapacity, "tree is full");
     require(!depositedCommitments[commitment], "the commitment has been submitted");
     uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
-    require(rollupFee >= minRollupFee, "rollup fee too few");
     depositedCommitments[commitment] = true;
     _processDepositTransfer(amount + rollupFee);
     _processDeposit(amount, commitment, rollupFee);
@@ -201,16 +201,8 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     isRollupWhitelistDisabled = _state;
   }
 
-  function addRollupWhiteList(address roller) external onlyOperator {
-    rollupWhitelist[roller] = true;
-  }
-
-  function removeRollupWhiteList(address roller) external onlyOperator {
-    rollupWhitelist[roller] = false;
-  }
-
-  function disableVerifierUpdate() external onlyOperator {
-    isVerifierUpdateDisabled = true;
+  function toggleVerifierUpdate(bool _state) external onlyOperator {
+    isVerifierUpdateDisabled = _state;
   }
 
   function setWithdrawVerifier(address _withdrawVerifier) external onlyOperator {
@@ -219,22 +211,34 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   }
 
   function enableRollupVerifier(uint32 rollupSize, address _rollupVerifier) external onlyOperator {
+    require(rollupSize > 0, "invalid rollupSize");
+    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
     rollupVerifiers[rollupSize] = RollupVerifier(IRollupVerifier(_rollupVerifier), true);
   }
 
   function disableRollupVerifier(uint32 rollupSize) external onlyOperator {
+    require(rollupSize > 0, "invalid rollupSize");
+    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
     if (rollupVerifiers[rollupSize].enabled) {
       rollupVerifiers[rollupSize].enabled = false;
     }
   }
 
-  function changeOperator(address _newOperator) external onlyOperator {
-    operator = _newOperator;
+  function addRollupWhitelist(address roller) external onlyOperator {
+    rollupWhitelist[roller] = true;
+  }
+
+  function removeRollupWhitelist(address roller) external onlyOperator {
+    rollupWhitelist[roller] = false;
   }
 
   function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
     require(_minRollupFee > 0, "invalid _minRollupFee");
     minRollupFee = _minRollupFee;
+  }
+
+  function changeOperator(address _newOperator) external onlyOperator {
+    operator = _newOperator;
   }
 
   function _commitmentHash(
@@ -253,7 +257,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 rollupFee
   ) internal {
     depositQueue[depositQueueSize] = DepositLeaf(commitment, rollupFee);
-    uint256 leafIndex = depositQueueSize + depositIncludedCount - 1;
+    uint256 leafIndex = depositQueueSize + depositIncludedCount;
     depositQueueSize = depositQueueSize + 1;
     emit DepositQueued(commitment, amount, rollupFee, leafIndex);
   }
