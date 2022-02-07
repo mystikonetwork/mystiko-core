@@ -138,7 +138,9 @@ test('Test AccountHandler removeAccount', async () => {
 
 test('Test AccountHandler updateAccountName', async () => {
   const account = await accountHandler.addAccount(walletPassword, 'account 1');
-  await expect(accountHandler.updateAccountName(walletPassword, 12342324, 'account 1.1')).rejects.toThrow();
+  await expect(accountHandler.updateAccountName(walletPassword, 12342324, 'account 1.1')).rejects.toThrow(
+    new Error('12342324 does not exist'),
+  );
   await expect(accountHandler.updateAccountName('wrong password', account, 'account 1.1')).rejects.toThrow();
   await accountHandler.updateAccountName(walletPassword, account.id, 'account 1.1');
   expect(accountHandler.getAccount(account.id).name).toBe('account 1.1');

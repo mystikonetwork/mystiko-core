@@ -30,8 +30,8 @@ export function testConstructor({
       const zeros = MerkleTree.calcZeros(defaultZero, treeHeight);
       expect((await mystikoContract.treeCapacity()).toNumber()).to.equal(2 ** treeHeight);
       expect((await mystikoContract.currentRoot()).toString()).to.equal(zeros[treeHeight].toString());
-      expect((await mystikoContract.rootHistory(0)).toString()).to.equal(zeros[treeHeight].toString());
       expect((await mystikoContract.currentRootIndex()).toNumber()).to.equal(0);
+      expect((await mystikoContract.rootHistory(0)).toString()).to.equal(zeros[treeHeight].toString());
       expect((await mystikoContract.rootHistoryLength()).toNumber()).to.equal(rootHistoryLength);
     });
   });
