@@ -11,6 +11,12 @@ module.exports = function (deployer) {
     const verifier = await WithdrawVerifier.deployed();
     const hasher2 = await Hasher2.deployed();
     await deployer.deploy(MystikoWithLoopMain, verifier.address, hasher2.address, MERKLE_TREE_HEIGHT);
-    await deployer.deploy(MystikoV2WithLoopMain, verifier.address, 30, '1000000000000000');
+    await deployer.deploy(
+      MystikoV2WithLoopMain,
+      MERKLE_TREE_HEIGHT,
+      30,
+      '1000000000000000',
+      verifier.address,
+    );
   });
 };

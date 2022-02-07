@@ -30,7 +30,7 @@ export class MerkleTree {
 
   insert(element) {
     check(element instanceof BN, 'element should be an instance of BN');
-    check(this.layers[0].length >= this.capacity, 'the tree is full');
+    check(this.layers[0].length + 1 <= this.capacity, 'the tree is full');
     this.update(this.layers[0].length, element);
   }
 
@@ -39,7 +39,7 @@ export class MerkleTree {
     elements.forEach((element) => {
       check(element instanceof BN, 'element should be an instance of BN');
     });
-    check(this.layers[0].length + elements.length > this.capacity, 'the tree is full');
+    check(this.layers[0].length + elements.length <= this.capacity, 'the tree is full');
     for (let i = 0; i < elements.length - 1; i++) {
       this.layers[0].push(elements[i]);
       let level = 0;
@@ -122,7 +122,7 @@ export class MerkleTree {
     check(firstZero instanceof BN, 'firstZero must be an instance of BN');
     check(typeof levels === 'number', 'levels should be a number');
     const zeros = [firstZero];
-    for (let i = 1; i < levels; i++) {
+    for (let i = 1; i <= levels; i++) {
       zeros.push(MerkleTree.hash2(zeros[i - 1], zeros[i - 1]));
     }
     return zeros;

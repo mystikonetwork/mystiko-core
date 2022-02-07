@@ -6,8 +6,9 @@ import "../../pool/MainAssetPool.sol";
 
 contract MystikoV2WithLoopMain is MystikoV2WithLoop, MainAssetPool {
   constructor(
-    address _withdrawVerifier,
+    uint32 _treeHeight,
     uint32 _rootHistoryLength,
-    uint256 _minRollupFee
-  ) public MystikoV2WithLoop(_withdrawVerifier, _rootHistoryLength, _minRollupFee) {}
+    uint256 _minRollupFee,
+    address _withdrawVerifier
+  ) public MystikoV2WithLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier) {}
 }

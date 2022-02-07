@@ -30,6 +30,13 @@ module.exports = function (deployer, network) {
       hasher2.address,
       MERKLE_TREE_HEIGHT,
     );
-    await deployer.deploy(MystikoV2WithLoopERC20, verifier.address, 30, '1000000000000000000', tokenAddress);
+    await deployer.deploy(
+      MystikoV2WithLoopERC20,
+      MERKLE_TREE_HEIGHT,
+      30,
+      '1000000000000000000',
+      verifier.address,
+      tokenAddress,
+    );
   });
 };
