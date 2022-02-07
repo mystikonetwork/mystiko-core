@@ -130,8 +130,10 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 leafHash
   ) public onlyWhitelisted {
     require(!isKnownRoot(newRoot), "newRoot is duplicated");
-    require(rollupSize <= depositQueueSize, "rollupSize too big");
-    require(rollupVerifiers[rollupSize].enabled, "invalid rollupSize");
+    require(
+      rollupSize > 0 && rollupSize <= depositQueueSize && rollupVerifiers[rollupSize].enabled,
+      "invalid rollupSize"
+    );
     require(depositIncludedCount % rollupSize == 0, "invalid rollupSize at current state");
     uint256[] memory leaves = new uint256[](rollupSize);
     uint256 totalRollupFee = 0;
