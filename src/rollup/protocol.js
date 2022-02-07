@@ -44,7 +44,9 @@ export function zkProveRollup16(tree, newLeaves, wasmFile, zkeyFile) {
 async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile, WitnessCalculator }) {
   check(tree instanceof MerkleTree, 'tree should be instance of MerkleTree');
   check(newLeaves instanceof Array, 'newLeaves should be an array');
-  newLeaves.forEach((newLeave) => check(newLeave instanceof BN, 'newLeave should be instance of BN'));
+  newLeaves.forEach((newLeave) => {
+    check(newLeave instanceof BN, 'newLeave should be instance of BN');
+  });
   check(_isPowerOfTwo(newLeaves.length), 'newLeaves length should be power of 2');
   check(typeof wasmFile === 'string', 'wasmFile should be a string');
   check(typeof zkeyFile === 'string', 'zkeyFile should be a string');

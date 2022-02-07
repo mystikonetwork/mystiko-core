@@ -1,8 +1,9 @@
-import { testConstructor, testAdminOperations, testDeposit } from '../../common/mystikov2.js';
+import { testConstructor, testAdminOperations, testDeposit, testRollup } from '../../common/mystikov2.js';
 import { toDecimals } from '../../../../src/utils.js';
 
 const MystikoContract = artifacts.require('MystikoV2WithLoopMain');
 const WithdrawVerifierContract = artifacts.require('WithdrawVerifier');
+const Rollup16VerifierContract = artifacts.require('Rollup16Verifier');
 
 contract('MystikoV2WithLoopMain', (accounts) => {
   describe('Test common cases', () => {
@@ -16,6 +17,13 @@ contract('MystikoV2WithLoopMain', (accounts) => {
       MystikoContract,
       accounts,
       depositAmount: toDecimals(0.001).toString(),
+      numOfCommitments: 16,
+    });
+    testRollup({
+      MystikoContract,
+      RollupVerifierContract: Rollup16VerifierContract,
+      accounts,
+      rollupSize: 16,
     });
   });
 });
