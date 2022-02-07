@@ -13,7 +13,7 @@
       },
       {
         "internalType": "address",
-        "name": "_hasher2",
+        "name": "_hasher",
         "type": "address"
       },
       {
@@ -121,6 +121,19 @@
         "internalType": "uint32",
         "name": "",
         "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ZERO_VALUE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -248,9 +261,9 @@
         "type": "bytes32"
       },
       {
-        "internalType": "bytes16",
+        "internalType": "bytes32",
         "name": "randomS",
-        "type": "bytes16"
+        "type": "bytes32"
       },
       {
         "internalType": "bytes",
