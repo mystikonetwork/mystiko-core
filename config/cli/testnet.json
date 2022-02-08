@@ -80,7 +80,9 @@
       "explorerUrl": "https://testnet.bscscan.com",
       "providers": [
         "https://data-seed-prebsc-1-s3.binance.org:8545",
-        "https://data-seed-prebsc-2-s3.binance.org:8545"
+        "https://data-seed-prebsc-2-s3.binance.org:8545",
+        "https://apis.ankr.com/93b31afb5ca4462a8ad33f748bae9496/4489eb2f81889dbdadb35a7136a70f34/binance/full/test",
+        "https://apis.ankr.com/15797319f9574f75a7d8dc12d6d33b49/4489eb2f81889dbdadb35a7136a70f34/binance/full/test"
 
       ],
       "contracts": [
