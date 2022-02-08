@@ -259,3 +259,13 @@ export async function readJsonFile(path) {
   const data = await readFile(path);
   return JSON.parse(data);
 }
+
+/**
+ * @function module:mystiko/utils.deepCopy
+ * @desc deep copy an object by using JSON serialize/deserialize.
+ * @param {any} object the object to be deeply copied.
+ * @returns {any} deeply copied object.
+ */
+export function deepCopy(object) {
+  return JSON.parse(JSON.stringify(object));
+}

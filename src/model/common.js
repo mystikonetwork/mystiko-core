@@ -1,4 +1,5 @@
 import * as protocol from '../protocol';
+import { deepCopy } from '../utils.js';
 
 /**
  * @memberOf module:mystiko/models
@@ -15,7 +16,7 @@ export const ID_KEY = '$loki';
  */
 export class BaseModel {
   constructor(data = {}) {
-    this.data = data;
+    this.data = deepCopy(data);
     this.protocol = protocol;
   }
 
