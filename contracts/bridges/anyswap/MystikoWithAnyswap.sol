@@ -7,7 +7,7 @@ import "../CrossChainDataSerializable.sol";
 import "./relay/interface/IBillManager.sol";
 
 abstract contract MystikoWithAnySwap is Mystiko, CrossChainDataSerializable {
-  uint256 public txId;
+  uint32 txId = 0;
 
   constructor(
     address _relayProxyAddress,
@@ -50,6 +50,8 @@ abstract contract MystikoWithAnySwap is Mystiko, CrossChainDataSerializable {
     require(from == peerContractAddress, "from proxy address not matched");
     require(fromChainID == peerChainId, "from chain id not matched");
     require(txData.amount > 0, "amount should be greater than 0");
+    require(!relayCommitments[txData.commitmentHash], "The commitment has been submitted");
+    relayCommitments[txData.commitmentHash] = true;
     uint32 leafIndex = _insert(txData.commitmentHash);
     emit MerkleTreeInsert(txData.commitmentHash, leafIndex, txData.amount);
     return true;
