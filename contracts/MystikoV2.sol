@@ -18,7 +18,7 @@ interface IRollupVerifier {
     uint256[2] memory a,
     uint256[2][2] memory b,
     uint256[2] memory c,
-    uint256[3] memory input
+    uint256[4] memory input
   ) external returns (bool);
 }
 
@@ -135,6 +135,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
       "invalid rollupSize"
     );
     require(depositIncludedCount % rollupSize == 0, "invalid rollupSize at current state");
+    uint256 pathIndices = _pathIndices(depositIncludedCount, rollupSize);
     uint256[] memory leaves = new uint256[](rollupSize);
     uint256 totalRollupFee = 0;
     for (uint256 index = depositIncludedCount; index < depositIncludedCount + rollupSize; index++) {
@@ -151,7 +152,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
       proofA,
       proofB,
       proofC,
-      [currentRoot, newRoot, leafHash]
+      [currentRoot, newRoot, pathIndices, leafHash]
     );
     require(verified, "invalid proof");
     _processRollupFeeTransfer(totalRollupFee);
@@ -241,6 +242,8 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     operator = _newOperator;
   }
 
+  function bridgeType() public view virtual returns (string memory);
+
   function _commitmentHash(
     uint256 hashK,
     uint256 amount,
@@ -267,8 +270,6 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 commitment,
     uint256 rollupFee
   ) internal virtual;
-
-  function bridgeType() public view virtual returns (string memory);
 
   function _zeros(uint32 nth) internal pure returns (uint256) {
     if (nth == 0) {
@@ -339,5 +340,14 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
       return 17318897336142888270342651912033539049925356757640177789706671990424346301218;
     }
     return 0;
+  }
+
+  function _pathIndices(uint256 fullPath, uint32 rollupSize) internal pure returns (uint256) {
+    rollupSize >>= 1;
+    while (rollupSize != 0) {
+      fullPath >>= 1;
+      rollupSize >>= 1;
+    }
+    return fullPath;
   }
 }

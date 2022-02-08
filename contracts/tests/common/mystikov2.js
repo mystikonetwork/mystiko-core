@@ -482,7 +482,7 @@ export function testRollup({
       ];
       proofC = [proof.proof.pi_c[0], proof.proof.pi_c[1]];
       newRoot = proof.publicSignals[1];
-      leafHash = proof.publicSignals[2];
+      leafHash = proof.publicSignals[3];
     });
     it('should rollup successfully', async () => {
       let estimateGas = await mystikoContract.rollup.estimateGas(
