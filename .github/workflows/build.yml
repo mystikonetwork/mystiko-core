@@ -19,7 +19,6 @@ jobs:
       - run: yarn install --network-timeout 100000
       - run: cp .env.example .env
       - run: ganache-cli --port 7545 > /dev/null &
-      - run: yarn build:circuit
       - run: yarn build
       - run: yarn test:contract
       - name: Jest test with coverage

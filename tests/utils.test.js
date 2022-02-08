@@ -94,3 +94,14 @@ test('Test readJsonFile', async () => {
   const data = await utils.readJsonFile('tests/utils.test.json');
   expect(data['test']).toBe(true);
 });
+
+test('Test deepCopy', () => {
+  expect(utils.deepCopy(1)).toBe(1);
+  expect(utils.deepCopy('1')).toBe('1');
+  expect(utils.deepCopy(['1'])).toStrictEqual(['1']);
+  const original = { a: 1, b: 2 };
+  const copied = utils.deepCopy(original);
+  expect(copied).toStrictEqual(original);
+  original.a = 2;
+  expect(copied.a).toBe(1);
+});

@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check } from '../utils.js';
+import { check, deepCopy } from '../utils.js';
 
 /**
  * @class BaseConfig
@@ -10,7 +10,7 @@ export class BaseConfig {
   constructor(rawConfig) {
     check(rawConfig && rawConfig instanceof Object, 'rawConfig invalid');
     this.rawConfig = rawConfig;
-    this.config = JSON.parse(JSON.stringify(rawConfig)); // deep copy
+    this.config = deepCopy(rawConfig); // deep copy
   }
 
   /**
