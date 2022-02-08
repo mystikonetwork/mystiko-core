@@ -231,6 +231,7 @@ export class Withdraw extends BaseModel {
  * @property {string} INIT this status will be set immediately after the Withdraw object
  * is created and saved to database.
  * @property {string} GENERATING_PROOF this status will be set when zkSnark proofs are being generated.
+ * @property {string} PROOF_GENERATED this status will be set when zkSnark proofs are generated successfully.
  * @property {string} PENDING this status will be set after the withdrawal transaction is successfully
  * submitted to the destination blockchain.
  * @property {string} SUCCEEDED this status will be set after the withdrawal transaction
@@ -241,6 +242,7 @@ export class Withdraw extends BaseModel {
 export const WithdrawStatus = {
   INIT: 'init',
   GENERATING_PROOF: 'generatingProof',
+  PROOF_GENERATED: 'proofGenerated',
   PENDING: 'pending',
   SUCCEEDED: 'succeeded',
   FAILED: 'failed',

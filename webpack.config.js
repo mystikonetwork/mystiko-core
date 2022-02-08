@@ -20,10 +20,6 @@ function getOptimization() {
   return {};
 }
 
-function getUMDFileName() {
-  return isProduction() ? 'mystiko.min.js' : 'mystiko.js';
-}
-
 function getCJSFileName() {
   return isProduction() ? 'mystiko.min.cjs' : 'mystiko.cjs';
 }
@@ -33,7 +29,7 @@ module.exports = [
     entry: './src/browser.js',
     output: {
       path: path.resolve(__dirname, 'build/js'),
-      filename: getUMDFileName(),
+      filename: 'mystiko.[contenthash].js',
     },
     devtool: isProduction() ? undefined : 'source-map',
     mode: isProduction() ? 'production' : 'development',

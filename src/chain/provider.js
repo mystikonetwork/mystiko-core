@@ -34,7 +34,7 @@ export class ProviderPool {
         const jsonRpcProviders = rpcEndpoints.map((rpcEndpoint) => {
           return new ethers.providers.JsonRpcProvider(rpcEndpoint);
         });
-        return new ethers.providers.FallbackProvider(jsonRpcProviders);
+        return new ethers.providers.FallbackProvider(jsonRpcProviders, 1);
       };
     }
     this.config.chains.forEach((chain) => {
