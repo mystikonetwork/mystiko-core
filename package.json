@@ -10,7 +10,7 @@
   "scripts": {
     "build:circuit": "./scripts/buildCircuit.sh",
     "build:contract": "mkdir -p build && npx truffle compile",
-    "build:js": "webpack -c webpack.config.js",
+    "build:js": "rm -rf build/js/* && webpack -c webpack.config.js",
     "build": "yarn lint && yarn build:contract && yarn build:js && yarn jsdoc",
     "migrate": "yarn migrate:dev",
     "migrate:dev": "npx truffle migrate --network development --reset",
