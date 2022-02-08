@@ -33,7 +33,7 @@ test('Test AccountHandler addAccount', async () => {
   const expectedEncPK1 = account1.protocol.publicKeyForEncryption(toBuff(encSK1));
   expect(toHexNoPrefix(account1.encPublicKey)).toBe(toHexNoPrefix(expectedEncPK1));
   expect(account1.toString()).toBe(accountHandler.getAccount(account1.id).toString());
-  expect(wallet.accountNonce).toBe(2);
+  expect(walletHandler.getCurrentWallet().accountNonce).toBe(2);
   const account2 = await accountHandler.addAccount(walletPassword, 'account 2');
   expect(account2.toString()).toBe(accountHandler.getAccount(account2.shieldedAddress).toString());
   expect(account2.toString()).toBe(accountHandler.getAccount(account2).toString());
@@ -41,7 +41,7 @@ test('Test AccountHandler addAccount', async () => {
   expect(toHexNoPrefix(account2.encPublicKey)).not.toBe(toHexNoPrefix(account1.encPublicKey));
   expect(account2.encryptedVerifySecretKey).not.toBe(account1.encryptedVerifySecretKey);
   expect(account2.encryptedEncSecretKey).not.toBe(account1.encryptedEncSecretKey);
-  expect(wallet.accountNonce).toBe(4);
+  expect(walletHandler.getCurrentWallet().accountNonce).toBe(4);
 });
 
 test('Test AccountHandler with same seed', async () => {

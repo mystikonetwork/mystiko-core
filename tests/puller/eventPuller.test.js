@@ -167,48 +167,48 @@ beforeEach(async () => {
 });
 
 test('test pulling behaviour', async () => {
-  const deposit1 = db.deposits.insert({
+  db.deposits.insert({
     commitmentHash: new BN('deadbeef', 16).toString(),
     srcChainId: 56,
     status: DepositStatus.SRC_PENDING,
     walletId: wallet.id,
   });
-  const deposit2 = db.deposits.insert({
+  db.deposits.insert({
     commitmentHash: new BN('beefdead', 16).toString(),
     srcChainId: 1,
     status: DepositStatus.SRC_PENDING,
     walletId: wallet.id,
   });
-  const deposit3 = db.deposits.insert({
+  db.deposits.insert({
     commitmentHash: new BN('baadbabe', 16).toString(),
     dstChainId: 1,
     status: DepositStatus.SRC_PENDING,
     walletId: wallet.id,
   });
-  const deposit4 = db.deposits.insert({
+  db.deposits.insert({
     commitmentHash: new BN('babebaad', 16).toString(),
     dstChainId: 1,
     status: DepositStatus.SRC_PENDING,
     walletId: wallet.id,
   });
-  const note1 = db.notes.insert({
+  db.notes.insert({
     commitmentHash: new BN('baadbabe', 16).toString(),
     dstChainId: 1,
     walletId: wallet.id,
   });
-  const note2 = db.notes.insert({
+  db.notes.insert({
     commitmentHash: new BN('babebaad', 16).toString(),
     dstChainId: 1,
     walletId: wallet.id,
   });
-  const note3 = db.notes.insert({
+  db.notes.insert({
     withdrawTransactionHash: '0x3f51321e83e5d2c9e8dc9236e48c98e95b471122350fa174f997c4f441a690a1',
     dstChainId: 56,
     commitmentHash: new BN(Math.floor(Math.random() * 1000)),
     status: PrivateNoteStatus.IMPORTED,
     walletId: wallet.id,
   });
-  const withdraw = db.withdraws.insert({
+  db.withdraws.insert({
     merkleRootHash: new BN(123456789).toString(),
     serialNumber: new BN(987654321).toString(),
     chainId: 56,
@@ -233,16 +233,16 @@ test('test pulling behaviour', async () => {
   const sleepPromise = new Promise((resolve) => setTimeout(resolve, 2000));
   await sleepPromise;
   eventPuller.stop();
-  expect(deposit1['status']).toBe(DepositStatus.SRC_CONFIRMED);
-  expect(deposit2['status']).toBe(DepositStatus.SUCCEEDED);
-  expect(deposit3['status']).toBe(DepositStatus.SUCCEEDED);
-  expect(deposit4['status']).toBe(DepositStatus.SUCCEEDED);
-  expect(deposit3['dstTxHash']).not.toBe(undefined);
-  expect(deposit4['dstTxHash']).not.toBe(undefined);
-  expect(note1['dstTransactionHash']).not.toBe(undefined);
-  expect(note2['dstTransactionHash']).not.toBe(undefined);
-  expect(note3['status']).toBe(PrivateNoteStatus.SPENT);
-  expect(withdraw.status).toBe(WithdrawStatus.SUCCEEDED);
+  expect(depositHandler.getDeposit(1).status).toBe(DepositStatus.SRC_CONFIRMED);
+  expect(depositHandler.getDeposit(2).status).toBe(DepositStatus.SUCCEEDED);
+  expect(depositHandler.getDeposit(3).status).toBe(DepositStatus.SUCCEEDED);
+  expect(depositHandler.getDeposit(4).status).toBe(DepositStatus.SUCCEEDED);
+  expect(depositHandler.getDeposit(3).dstTxHash).not.toBe(undefined);
+  expect(depositHandler.getDeposit(4).dstTxHash).not.toBe(undefined);
+  expect(noteHandler.getPrivateNote(1).dstTransactionHash).not.toBe(undefined);
+  expect(noteHandler.getPrivateNote(2).dstTransactionHash).not.toBe(undefined);
+  expect(noteHandler.getPrivateNote(3).status).toBe(PrivateNoteStatus.SPENT);
+  expect(withdrawHandler.getWithdraw(1).status).toBe(WithdrawStatus.SUCCEEDED);
   expect(eventPuller.isStarted()).toBe(false);
   expect(eventHandler.getEvents().length > 0).toBe(true);
   expect(eventPuller.errorMessage).toBe(undefined);
