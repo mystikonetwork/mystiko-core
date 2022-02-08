@@ -204,7 +204,7 @@ test('test pulling behaviour', async () => {
   db.notes.insert({
     withdrawTransactionHash: '0x3f51321e83e5d2c9e8dc9236e48c98e95b471122350fa174f997c4f441a690a1',
     dstChainId: 56,
-    commitmentHash: new BN(Math.floor(Math.random() * 1000)),
+    commitmentHash: new BN(Math.floor(Math.random() * 1000)).toString(),
     status: PrivateNoteStatus.IMPORTED,
     walletId: wallet.id,
   });
