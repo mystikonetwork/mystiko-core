@@ -249,6 +249,7 @@ export class WithdrawHandler extends Handler {
     const rootHash = publicSignals[0];
     const serialNumber = publicSignals[1];
     const amount = publicSignals[2];
+    await this._updateStatus(withdraw, WithdrawStatus.PROOF_GENERATED, statusCallback);
     return { proofA, proofB, proofC, rootHash, serialNumber, amount };
   }
 

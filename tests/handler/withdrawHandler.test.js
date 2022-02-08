@@ -170,7 +170,7 @@ test('test withdraw basic', async () => {
   );
   await withdrawPromise;
   expect(withdraw.errorMessage).toBe(undefined);
-  expect(cbCount).toBe(3);
+  expect(cbCount).toBe(4);
   expect(withdraw.chainId).toBe(56);
   expect(withdraw.asset).toBe('USDT');
   expect(withdraw.assetAddress).toBe('0x3162b6ce79df04608db04a8d609f83521c3cf9ae');
