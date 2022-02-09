@@ -105,3 +105,11 @@ test('Test deepCopy', () => {
   original.a = 2;
   expect(copied.a).toBe(1);
 });
+
+test('Test errorMessage', () => {
+  expect(utils.errorMessage(undefined)).toBe('');
+  expect(utils.errorMessage(null)).toBe('');
+  expect(utils.errorMessage(new Error('test'))).toBe('Error: test');
+  expect(utils.errorMessage({ a: 1 })).toBe('{"a":1}');
+  expect(utils.errorMessage(1)).toBe('1');
+});
