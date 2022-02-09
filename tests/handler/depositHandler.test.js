@@ -195,7 +195,7 @@ test('test createDeposit poly erc20', async () => {
     expect(oldStatus).not.toBe(newStatus);
     cbCount++;
   };
-  const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer, cb);
+  let { deposit, depositPromise } = await depositHandler.createDeposit(request, signer, cb);
   expect(deposit.srcChainId).toBe(1);
   expect(deposit.dstChainId).toBe(56);
   expect(deposit.bridge).toBe(BridgeType.POLY);
@@ -206,6 +206,7 @@ test('test createDeposit poly erc20', async () => {
   expect(deposit.shieldedRecipientAddress).toBe(request.shieldedAddress);
   expect(depositPromise).not.toBe(undefined);
   await depositPromise;
+  deposit = depositHandler.getDeposit(deposit.id);
   expect(deposit.errorMessage).toBe(undefined);
   expect(contracts.asset.approveCount).toBe(1);
   expect(contracts.asset.tx).not.toBe(undefined);
@@ -231,7 +232,7 @@ test('test createDeposit loop erc20', async () => {
     '0x98ed94360cad67a76a53d8aa15905e52485b73d1'
   ] = toDecimals(200, 18);
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
-  const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
+  let { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
   expect(deposit.srcChainId).toBe(1);
   expect(deposit.dstChainId).toBe(1);
   expect(deposit.bridge).toBe(BridgeType.LOOP);
@@ -242,6 +243,7 @@ test('test createDeposit loop erc20', async () => {
   expect(deposit.shieldedRecipientAddress).toBe(request.shieldedAddress);
   expect(depositPromise).not.toBe(undefined);
   await depositPromise;
+  deposit = depositHandler.getDeposit(deposit.id);
   expect(deposit.errorMessage).toBe(undefined);
   expect(contracts.asset.approveCount).toBe(0);
   expect(contracts.asset.tx).toBe(undefined);
@@ -271,7 +273,7 @@ test('test createDeposit loop main', async () => {
   });
   const contracts = contractPool.getDepositContracts(1, 1, 'ETH', BridgeType.LOOP);
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
-  const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
+  let { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
   expect(deposit.srcChainId).toBe(1);
   expect(deposit.dstChainId).toBe(1);
   expect(deposit.bridge).toBe(BridgeType.LOOP);
@@ -282,6 +284,7 @@ test('test createDeposit loop main', async () => {
   expect(deposit.shieldedRecipientAddress).toBe(request.shieldedAddress);
   expect(depositPromise).not.toBe(undefined);
   await depositPromise;
+  deposit = depositHandler.getDeposit(deposit.id);
   expect(deposit.errorMessage).toBe(undefined);
   expect(contracts.asset).toBe(undefined);
   expect(deposit.assetApproveTxHash).toBe(undefined);
@@ -311,8 +314,9 @@ test('test createDeposit loop error', async () => {
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   const contracts = contractPool.getDepositContracts(1, 1, 'ETH', BridgeType.LOOP);
   contracts.protocol.errorMessage = 'error here';
-  const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
+  let { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
   await depositPromise;
+  deposit = depositHandler.getDeposit(deposit.id);
   expect(deposit.errorMessage).toBe('error here');
   expect(deposit.status).toBe(DepositStatus.FAILED);
 });
@@ -337,8 +341,9 @@ test('test auto import privateNote', async () => {
     '0x98ed94360cad67a76a53d8aa15905e52485b73d1'
   ] = toDecimals(200, 18);
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1);
-  const { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
+  let { deposit, depositPromise } = await depositHandler.createDeposit(request, signer);
   await depositPromise;
+  deposit = depositHandler.getDeposit(deposit.id);
   const privateNote = noteHandler.getPrivateNote(1);
   expect(deposit.errorMessage).toBe(undefined);
   expect(privateNote).not.toBe(undefined);
@@ -398,14 +403,14 @@ test('test query deposits', async () => {
   });
   const ret2 = await depositHandler.createDeposit(request2, signer);
   await ret2.depositPromise;
-  expect(ret2.deposit.errorMessage).toBe(undefined);
+  expect(depositHandler.getDeposit(ret2.deposit.id).errorMessage).toBe(undefined);
   const ret3 = await depositHandler.createDeposit(request3, signer);
   await ret3.depositPromise;
-  expect(ret3.deposit.errorMessage).toBe(undefined);
-  expect(depositHandler.getDeposit(1).srcTxHash).toBe(ret1.deposit.srcTxHash);
+  expect(depositHandler.getDeposit(ret3.deposit.id).errorMessage).toBe(undefined);
+  expect(depositHandler.getDeposit(1).srcTxHash).toBe(depositHandler.getDeposit(ret1.deposit.id).srcTxHash);
   expect(depositHandler.getDeposit(10000)).toBe(undefined);
   expect(depositHandler.getDeposit('wrong tx hash')).toBe(undefined);
-  expect(depositHandler.getDeposit(ret3.deposit.srcTxHash).id).toBe(3);
+  expect(depositHandler.getDeposit(depositHandler.getDeposit(3).srcTxHash).id).toBe(3);
   expect(depositHandler.getDeposit(ret2.deposit).id).toBe(2);
   expect(depositHandler.getDepositsCount()).toBe(3);
   expect(depositHandler.getDepositsCount((d) => d.bridge === BridgeType.LOOP)).toBe(2);
@@ -447,11 +452,11 @@ test('test exportOffChainNote', async () => {
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   const ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
-  expect(ret.deposit.errorMessage).toBe(undefined);
+  expect(depositHandler.getDeposit(ret.deposit.id).errorMessage).toBe(undefined);
   expect(() => depositHandler.exportOffChainNote(1000)).toThrow();
   const offChainNote = depositHandler.exportOffChainNote(ret.deposit.id);
   expect(offChainNote.chainId).toBe(ret.deposit.srcChainId);
-  expect(offChainNote.transactionHash).toBe(ret.deposit.srcTxHash);
+  expect(offChainNote.transactionHash).toBe(depositHandler.getDeposit(ret.deposit.id).srcTxHash);
 });
 
 test('test insufficient balance', async () => {
@@ -475,7 +480,7 @@ test('test insufficient balance', async () => {
   const signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 500);
   let ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
-  expect(ret.deposit.errorMessage).not.toBe(undefined);
+  expect(depositHandler.getDeposit(ret.deposit.id).errorMessage).not.toBe(undefined);
   request = {
     srcChainId: 1,
     dstChainId: 1,
@@ -495,5 +500,5 @@ test('test insufficient balance', async () => {
   });
   ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
-  expect(ret.deposit.errorMessage).not.toBe(undefined);
+  expect(depositHandler.getDeposit(ret.deposit.id).errorMessage).not.toBe(undefined);
 });

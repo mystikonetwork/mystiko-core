@@ -111,7 +111,7 @@ export class DepositHandler extends Handler {
         return this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
       });
     this.logger.info(`successfully created a deposit(id=${deposit.id}), waiting on the transaction(s)...`);
-    return { deposit, depositPromise };
+    return { deposit: new Deposit(deposit), depositPromise };
   }
 
   /**
@@ -136,7 +136,7 @@ export class DepositHandler extends Handler {
         deposit = this.db.deposits.findOne({ bridgeTxHash: query });
       }
     } else if (query instanceof Deposit) {
-      return query;
+      return this.getDeposit(query.id);
     }
     return deposit ? new Deposit(deposit) : undefined;
   }
@@ -282,7 +282,7 @@ export class DepositHandler extends Handler {
     deposit.status = newStatus;
     await this._updateDeposit(deposit);
     if (statusCallback && statusCallback instanceof Function) {
-      statusCallback(deposit, oldStatus, newStatus);
+      statusCallback(new Deposit(deposit), oldStatus, newStatus);
     }
     this.logger.info(
       `successfully updated deposit(id=${deposit.id}) status from ${oldStatus} to ${newStatus}`,
