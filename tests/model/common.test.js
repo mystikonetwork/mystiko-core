@@ -16,5 +16,7 @@ test('Test BaseModel', () => {
   model2.data['count'] = 2;
   users.update(model2.data);
   expect(model2.updatedAt).toBeGreaterThan(0);
+  const model3 = new BaseModel(model2);
+  expect(model3.data).toStrictEqual(model2.data);
   db.close();
 });

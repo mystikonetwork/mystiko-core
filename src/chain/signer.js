@@ -72,6 +72,18 @@ export class BaseSigner {
   }
 
   /**
+   * @desc get current active chain name of the signer in string.
+   * @returns {Promise<string>} chain name if the chain is supported. Otherwise it returns 'Unsupported Network'
+   * @throws {Error} if this signer has not been connected.
+   */
+  async chainName() {
+    check(this.provider, 'wallet is not connected');
+    const chainIdHex = await this.chainId();
+    const chainConfig = this.config.getChainConfig(parseInt(chainIdHex));
+    return chainConfig ? chainConfig.name : 'Unsupported Network';
+  }
+
+  /**
    * @desc connect this signer by asking user permission from the browser.
    * @param {external:Provider} [etherProvider] if provided it overrides this default {@link external:Provider} constructor.
    * @returns {Promise<string[]>} an array of account addresses, which this signer offers.

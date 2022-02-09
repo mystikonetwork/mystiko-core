@@ -117,7 +117,7 @@ export class WithdrawHandler extends Handler {
         return this._updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);
       });
     this.logger.info(`successfully created a withdraw(id=${withdraw.id}), waiting on the transaction...`);
-    return { withdraw, withdrawPromise };
+    return { withdraw: new Withdraw(withdraw), withdrawPromise };
   }
 
   /**
@@ -139,7 +139,7 @@ export class WithdrawHandler extends Handler {
         withdraw = this.db.withdraws.findOne({ serialNumber: query });
       }
     } else if (query instanceof Withdraw) {
-      return query;
+      return this.getWithdraw(query.id);
     }
     return withdraw ? new Withdraw(withdraw) : undefined;
   }
@@ -285,7 +285,7 @@ export class WithdrawHandler extends Handler {
     this.logger.info(`withdrawal transaction for withdraw(id=${withdraw.id}) is confirmed on chain`);
     withdraw.transactionHash = txReceipt.transactionHash;
     await this._updateStatus(withdraw, WithdrawStatus.SUCCEEDED, statusCallback);
-    privateNote.withdrawTransactionHash = txReceipt.transactionHash;
+    await this.noteHandler.updateWithdrawTransactionHash(privateNote, txReceipt.transactionHash);
     await this.noteHandler.updateStatus(privateNote, PrivateNoteStatus.SPENT);
   }
 
@@ -304,7 +304,7 @@ export class WithdrawHandler extends Handler {
     withdraw.status = newStatus;
     await this._updateWithdraw(withdraw);
     if (statusCallback && statusCallback instanceof Function) {
-      statusCallback(withdraw, oldStatus, newStatus);
+      statusCallback(new Withdraw(withdraw), oldStatus, newStatus);
     }
     this.logger.info(
       `successfully updated withdraw(id=${withdraw.id}) status from ${oldStatus} to ${newStatus}`,

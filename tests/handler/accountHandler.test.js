@@ -34,7 +34,8 @@ test('Test AccountHandler addAccount', async () => {
   expect(toHexNoPrefix(account1.encPublicKey)).toBe(toHexNoPrefix(expectedEncPK1));
   expect(account1.toString()).toBe(accountHandler.getAccount(account1.id).toString());
   expect(walletHandler.getCurrentWallet().accountNonce).toBe(2);
-  const account2 = await accountHandler.addAccount(walletPassword, 'account 2');
+  const account2 = await accountHandler.addAccount(walletPassword);
+  expect(account2.name).toBe('Account 2');
   expect(account2.toString()).toBe(accountHandler.getAccount(account2.shieldedAddress).toString());
   expect(account2.toString()).toBe(accountHandler.getAccount(account2).toString());
   expect(toHexNoPrefix(account2.verifyPublicKey)).not.toBe(toHexNoPrefix(account1.verifyPublicKey));
@@ -42,6 +43,8 @@ test('Test AccountHandler addAccount', async () => {
   expect(account2.encryptedVerifySecretKey).not.toBe(account1.encryptedVerifySecretKey);
   expect(account2.encryptedEncSecretKey).not.toBe(account1.encryptedEncSecretKey);
   expect(walletHandler.getCurrentWallet().accountNonce).toBe(4);
+  const account3 = await accountHandler.addAccount(walletPassword, '');
+  expect(account3.name).toBe('Account 3');
 });
 
 test('Test AccountHandler with same seed', async () => {
@@ -100,12 +103,19 @@ test('Test AccountHandler importAccountFromSecretKey', async () => {
   await expect(
     accountHandler.importAccountFromSecretKey('wrong password', 'account 2', secretKey),
   ).rejects.toThrow();
-  const account2 = await accountHandler.importAccountFromSecretKey(walletPassword, 'account 2', secretKey);
+  let account2 = await accountHandler.importAccountFromSecretKey(walletPassword, undefined, secretKey);
+  expect(account2.name).toBe('Account 1');
   expect(toHexNoPrefix(account2.verifyPublicKey)).toBe(toHexNoPrefix(account1.verifyPublicKey));
   expect(toHexNoPrefix(account2.encPublicKey)).toBe(toHexNoPrefix(account1.encPublicKey));
   expect(accountHandler.getAccounts().length).toBe(1);
   await accountHandler.importAccountFromSecretKey(walletPassword, 'account 2', secretKey);
   expect(accountHandler.getAccounts().length).toBe(1);
+  await accountHandler.removeAccount(walletPassword, account2);
+  account2 = await accountHandler.importAccountFromSecretKey(walletPassword, 'Some Name', secretKey);
+  expect(account2.name).toBe('Some Name');
+  await accountHandler.removeAccount(walletPassword, account2);
+  account2 = await accountHandler.importAccountFromSecretKey(walletPassword, '', secretKey);
+  expect(account2.name).toBe('Account 1');
 });
 
 test('Test AccountHandler updateAccountKeys', async () => {
@@ -143,5 +153,9 @@ test('Test AccountHandler updateAccountName', async () => {
   );
   await expect(accountHandler.updateAccountName('wrong password', account, 'account 1.1')).rejects.toThrow();
   await accountHandler.updateAccountName(walletPassword, account.id, 'account 1.1');
+  expect(accountHandler.getAccount(account.id).name).toBe('account 1.1');
+  await accountHandler.updateAccountName(walletPassword, account.id, '');
+  expect(accountHandler.getAccount(account.id).name).toBe('account 1.1');
+  await accountHandler.updateAccountName(walletPassword, account.id, undefined);
   expect(accountHandler.getAccount(account.id).name).toBe('account 1.1');
 });

@@ -81,15 +81,18 @@ export class AccountHandler extends Handler {
    * @desc add a new account with the given account name. The generated secret keys are based on the
    * master seed from the wallet.
    * @param {string} walletPassword the password of the current running wallet.
-   * @param {string} accountName name of account.
+   * @param {string | undefined} [accountName] name of account.
    * @returns {Promise<Account>} promise of an instance of {@link Account}.
    * @throws {Error} if the given wallet password is incorrect.
    */
   async addAccount(walletPassword, accountName) {
-    check(typeof accountName === 'string', 'accountName should be instance of string');
+    check(!accountName || typeof accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     if (!this.walletHandler.checkPassword(walletPassword)) {
       throw new Error('incorrect walletPassword is given');
+    }
+    if (!accountName || accountName === '') {
+      accountName = this._defaultAccountName();
     }
     const wallet = this.walletHandler.getCurrentWallet();
     const walletMasterSeed = this.protocol.decryptSymmetric(walletPassword, wallet.encryptedMasterSeed);
@@ -116,17 +119,20 @@ export class AccountHandler extends Handler {
   /**
    * @desc import an account from the given full secret key.
    * @param {string} walletPassword the password of the current running wallet.
-   * @param {string} accountName name of account.
+   * @param {string | undefined} [accountName] name of account.
    * @param {string} secretKey the full secret key in plain text.
    * @returns {Promise<Account>} promise of an instance of {@link Account}.
    * @throws {Error} if the given wallet password is incorrect.
    */
   async importAccountFromSecretKey(walletPassword, accountName, secretKey) {
-    check(typeof accountName === 'string', 'accountName should be instance of string');
+    check(typeof !accountName || accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     check(typeof secretKey === 'string', 'secretKey should be instance of string');
     if (!this.walletHandler.checkPassword(walletPassword)) {
       throw new Error('incorrect walletPassword is given');
+    }
+    if (!accountName || accountName === '') {
+      accountName = this._defaultAccountName();
     }
     const secretKeys = this.protocol.separatedSecretKeys(toBuff(secretKey));
     const verifySecretKey = secretKeys.skVerify;
@@ -194,19 +200,21 @@ export class AccountHandler extends Handler {
    * @desc update the name of the given account.
    * @param {string} walletPassword the password of the current running wallet.
    * @param {number|string|Account} account account id or shielded address or instance of {@link Account}.
-   * @param {string} newName new name of the account.
+   * @param {string | undefined} newName new name of the account.
    * @returns {Promise<Account>} the updated instance of {@link Account}.
    * @throws {Error} if the given wallet password is incorrect.
    */
   async updateAccountName(walletPassword, account, newName) {
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
-    check(typeof newName === 'string', 'newName should be instance of string');
+    check(!newName || typeof newName === 'string', 'newName should be instance of string');
     check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     const existingAccount = this.getAccount(account);
     check(existingAccount, `${toString(account)} does not exist`);
-    existingAccount.name = newName;
-    this.db.accounts.update(existingAccount.data);
-    await this.saveDatabase();
+    if (newName && newName !== '') {
+      existingAccount.name = newName;
+      this.db.accounts.update(existingAccount.data);
+      await this.saveDatabase();
+    }
     this.logger.info(`successfully updated account(id=${existingAccount.id}) name to ${newName}`);
     return existingAccount;
   }
@@ -224,5 +232,9 @@ export class AccountHandler extends Handler {
     );
     account.encryptedEncSecretKey = this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(skEnc));
     return account;
+  }
+
+  _defaultAccountName() {
+    return `Account ${this.getAccounts().length + 1}`;
   }
 }

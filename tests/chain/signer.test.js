@@ -79,6 +79,7 @@ async function testSigner(conf, signer, defaultInstalled = false) {
   expect(await signer.installed()).toBe(defaultInstalled);
   expect((await signer.accounts()).length).toBe(0);
   expect(await signer.chainId()).toBe('0x7b');
+  expect(await signer.chainName()).toBe('Unsupported Network');
   expect((await signer.connect()).length).toBe(1);
   expect((await signer.connect())[0]).toBe('0xccac11fe23f9dee6e8d548ec811375af9fe01e55');
   expect(await signer.connected()).toBe(true);
@@ -115,6 +116,7 @@ test('test private key signer', async () => {
   expect(signer.signer).not.toBe(undefined);
   expect(signer.signer instanceof ethers.Signer).toBe(true);
   expect(await signer.chainId()).toBe('0x1');
+  expect(await signer.chainName()).toBe('Ethereum Mainnet');
   expect(await signer.accounts()).toStrictEqual([etherWallet.address]);
   expect(await signer.connect(etherWallet)).toStrictEqual([etherWallet.address]);
 });

@@ -162,13 +162,15 @@ test('test withdraw basic', async () => {
     cbCount++;
   };
   const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
-  const { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(
+  let { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(
     walletPassword,
     request,
     signer,
     cb,
   );
   await withdrawPromise;
+  withdraw = withdrawHandler.getWithdraw(withdraw);
+  privateNote = noteHandler.getPrivateNote(privateNote);
   expect(withdraw.errorMessage).toBe(undefined);
   expect(cbCount).toBe(4);
   expect(withdraw.chainId).toBe(56);
@@ -183,11 +185,12 @@ test('test withdraw basic', async () => {
   expect(privateNote.withdrawTransactionHash).toBe(withdraw.transactionHash);
   expect(privateNote.status).toBe(PrivateNoteStatus.SPENT);
   await expect(withdrawHandler.createWithdraw(walletPassword, request, signer, cb)).rejects.toThrow();
-  privateNote.status = PrivateNoteStatus.IMPORTED;
+  await noteHandler.updateStatus(privateNote, PrivateNoteStatus.IMPORTED);
   const ret = await withdrawHandler.createWithdraw(walletPassword, request, signer, cb);
   await ret.withdrawPromise;
-  expect(ret.withdraw.errorMessage).not.toBe(undefined);
-  expect(ret.withdraw.status).toBe(WithdrawStatus.FAILED);
+  withdraw = withdrawHandler.getWithdraw(ret.withdraw);
+  expect(withdraw.errorMessage).not.toBe(undefined);
+  expect(withdraw.status).toBe(WithdrawStatus.FAILED);
 });
 
 test('test getWithdraw/getWithdraws', async () => {
@@ -195,10 +198,10 @@ test('test getWithdraw/getWithdraws', async () => {
   const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
   const ret = await withdrawHandler.createWithdraw(walletPassword, request, signer);
   await ret.withdrawPromise;
-  expect(withdrawHandler.getWithdraw(1).transactionHash).toBe(ret.withdraw.transactionHash);
-  expect(withdrawHandler.getWithdraw(ret.withdraw.transactionHash).id).toBe(1);
-  expect(withdrawHandler.getWithdraw(ret.withdraw.serialNumber.toString()).id).toBe(1);
-  expect(withdrawHandler.getWithdraw(ret.withdraw)).toBe(ret.withdraw);
+  expect(withdrawHandler.getWithdraw(1).transactionHash).not.toBe(undefined);
+  expect(withdrawHandler.getWithdraw(withdrawHandler.getWithdraw(1).transactionHash).id).toBe(1);
+  expect(withdrawHandler.getWithdraw(withdrawHandler.getWithdraw(1).serialNumber.toString()).id).toBe(1);
+  expect(withdrawHandler.getWithdraw(withdrawHandler.getWithdraw(1)).id).toBe(1);
   expect(
     withdrawHandler.getWithdraws({
       filterFunc: (w) => w.chainId === 1,

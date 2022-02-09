@@ -147,7 +147,7 @@ test('test getPrivateNote/getPrivateNotes', async () => {
         '873b64fc4a3b648b7edb0adf185cc0f9f91e1578',
     ).id,
   ).toBe(2);
-  expect(noteHandler.getPrivateNote(privateNote)).toBe(privateNote);
+  expect(noteHandler.getPrivateNote(privateNote).id).toBe(privateNote.id);
   expect(noteHandler.getPrivateNote(10001)).toBe(undefined);
   expect(
     noteHandler.getPrivateNotes({
@@ -220,13 +220,13 @@ test('test groupBy', () => {
   });
   let groups = noteHandler.groupPrivateNoteByDstAsset();
   expect(groups).toStrictEqual([
-    { dstAsset: 'TokenA', count: 3, total: 5, unspent: 4 },
-    { dstAsset: 'TokenB', count: 1, total: 8.1, unspent: 0 },
+    { dstAsset: 'TokenA', count: 2, total: 5, unspent: 4 },
+    { dstAsset: 'TokenB', count: 0, total: 8.1, unspent: 0 },
     { dstAsset: 'TokenC', count: 2, total: 9.3, unspent: 9.3 },
   ]);
   groups = noteHandler.groupPrivateNoteByDstAsset({ filterFunc: (note) => note.dstAsset !== 'TokenB' });
   expect(groups).toStrictEqual([
-    { dstAsset: 'TokenA', count: 3, total: 5, unspent: 4 },
+    { dstAsset: 'TokenA', count: 2, total: 5, unspent: 4 },
     { dstAsset: 'TokenC', count: 2, total: 9.3, unspent: 9.3 },
   ]);
 });
