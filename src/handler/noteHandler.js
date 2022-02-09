@@ -173,9 +173,15 @@ export class NoteHandler extends Handler {
     );
     const groups = {};
     for (let i = 0; i < groupWithCounts.length; i++) {
+      const count = this.getPrivateNotes({
+        ...filterOptions,
+        filterFunc: (note) => {
+          return note.dstAsset === groupWithCounts[i].groupName && filterFunc(note);
+        },
+      }).length;
       groups[groupWithCounts[i].groupName] = {
         dstAsset: groupWithCounts[i].groupName,
-        count: groupWithCounts[i].reducedValue,
+        count,
         total: 0,
         unspent: 0,
       };
