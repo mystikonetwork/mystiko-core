@@ -6,7 +6,7 @@ import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract.js';
-import { check, toBuff, toString, toHexNoPrefix } from '../utils.js';
+import { check, toBuff, errorMessage, toHexNoPrefix } from '../utils.js';
 import { checkSigner } from '../chain/signer.js';
 import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../model';
 import rootLogger from '../logger';
@@ -112,7 +112,7 @@ export class WithdrawHandler extends Handler {
         );
       })
       .catch((error) => {
-        withdraw.errorMessage = toString(error);
+        withdraw.errorMessage = errorMessage(error);
         this.logger.error(`withdraw(id=${withdraw.id}) transaction raised error: ${withdraw.errorMessage}`);
         return this._updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);
       });

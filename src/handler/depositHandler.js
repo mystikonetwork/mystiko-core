@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 
 import { Handler } from './handler.js';
-import { check, toHex, toDecimals, toFixedLenHex, toString } from '../utils.js';
+import { check, toHex, toDecimals, toFixedLenHex, toString, errorMessage } from '../utils.js';
 import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
@@ -106,7 +106,7 @@ export class DepositHandler extends Handler {
         );
       })
       .catch((error) => {
-        deposit.errorMessage = toString(error);
+        deposit.errorMessage = errorMessage(error);
         this.logger.error(`deposit(id=${deposit.id}) transaction raised error: ${deposit.errorMessage}`);
         return this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
       });
