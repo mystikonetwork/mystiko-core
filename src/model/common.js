@@ -11,12 +11,16 @@ export const ID_KEY = '$loki';
 
 /**
  * @class BaseModel
- * @param {Object} [data={}] raw data of this model.
+ * @param {Object | BaseModel} [data={}] raw data of this model.
  * @desc a base class for all data stored in the local database.
  */
 export class BaseModel {
   constructor(data = {}) {
-    this.data = deepCopy(data);
+    if (data instanceof BaseModel) {
+      this.data = deepCopy(data.data);
+    } else {
+      this.data = deepCopy(data);
+    }
     this.protocol = protocol;
   }
 

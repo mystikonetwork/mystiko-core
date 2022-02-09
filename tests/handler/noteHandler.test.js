@@ -147,7 +147,7 @@ test('test getPrivateNote/getPrivateNotes', async () => {
         '873b64fc4a3b648b7edb0adf185cc0f9f91e1578',
     ).id,
   ).toBe(2);
-  expect(noteHandler.getPrivateNote(privateNote)).toBe(privateNote);
+  expect(noteHandler.getPrivateNote(privateNote).id).toBe(privateNote.id);
   expect(noteHandler.getPrivateNote(10001)).toBe(undefined);
   expect(
     noteHandler.getPrivateNotes({

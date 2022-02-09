@@ -82,7 +82,7 @@ export class NoteHandler extends Handler {
         privateNote = this.db.notes.findOne({ encryptedOnChainNote: query });
       }
     } else if (query instanceof PrivateNote) {
-      return query;
+      return this.getPrivateNote(query.id);
     }
     return privateNote ? new PrivateNote(privateNote) : undefined;
   }
@@ -207,6 +207,22 @@ export class NoteHandler extends Handler {
     this.logger.info(
       `successfully updated private note(id=${privateNote.id}) status from ${oldStatus} to ${status}`,
     );
+    return privateNote;
+  }
+
+  /**
+   * @desc update the withdrawal transaction hash of the given {@link PrivateNote}.
+   * @param {number|string|PrivateNote} privateNote id or transaction hash or commitment hash or
+   * instance of {@link PrivateNote}.
+   * @param {string} withdrawTransactionHash the hash of withdrawal transaction.
+   * @returns {Promise<PrivateNote>} a promise of updated {@link PrivateNote} instance.
+   */
+  async updateWithdrawTransactionHash(privateNote, withdrawTransactionHash) {
+    privateNote = this.getPrivateNote(privateNote);
+    check(privateNote, 'no given privateNote found');
+    privateNote.withdrawTransactionHash = withdrawTransactionHash;
+    this.db.notes.update(privateNote.data);
+    await this.saveDatabase();
     return privateNote;
   }
 
