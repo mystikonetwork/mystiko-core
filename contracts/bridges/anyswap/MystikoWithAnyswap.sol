@@ -46,6 +46,9 @@ abstract contract MystikoWithAnySwap is Mystiko, CrossChainDataSerializable {
     uint256[] memory nonces,
     uint256 fromChainID
   ) external onlyRelayProxyContract returns (bool) {
+    to;
+    fallbacks;
+    nonces;
     CrossChainData memory txData = deserializeTxData(data[0]);
     require(from == peerContractAddress, "from proxy address not matched");
     require(fromChainID == peerChainId, "from chain id not matched");
