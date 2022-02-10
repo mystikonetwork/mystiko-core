@@ -162,6 +162,7 @@ test('test withdraw basic', async () => {
     cbCount++;
   };
   const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  await expect(withdrawHandler.createWithdraw('wrong password', request, signer, cb)).rejects.toThrow();
   let { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(
     walletPassword,
     request,

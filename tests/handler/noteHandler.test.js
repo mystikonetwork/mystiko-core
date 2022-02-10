@@ -55,6 +55,7 @@ test('test importFromOffChainNote basic', async () => {
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
   providerPool.connect(() => new MockProvider(txReceipt01));
+  await expect(noteHandler.importFromOffChainNote('wrong password', note)).rejects.toThrow();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
   expect(privateNote.srcChainId).toBe(1);
   expect(privateNote.srcTransactionHash).toBe(

@@ -247,7 +247,7 @@ export class NoteHandler extends Handler {
     const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
     let wallet;
     if (requireCheck) {
-      this.walletHandler.checkPassword(walletPassword);
+      check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
       wallet = this.walletHandler.getCurrentWallet();
       shieldedAddress = await this._tryDecryptOnChainNote(walletPassword, encryptedNote);
       check(shieldedAddress, 'this deposit does not belong to your accounts');

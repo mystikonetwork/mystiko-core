@@ -63,7 +63,7 @@ export class WithdrawHandler extends Handler {
     signer,
     statusCallback = undefined,
   ) {
-    this.walletHandler.checkPassword(walletPassword);
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     const wallet = this.walletHandler.getCurrentWallet();
     check(ethers.utils.isAddress(recipientAddress), `${recipientAddress} is invalid address`);
     privateNote = this.noteHandler.getPrivateNote(privateNote);

@@ -69,9 +69,7 @@ export class AccountHandler extends Handler {
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     account = this.getAccount(account);
     check(account, `${account.toString()} does not exist`);
-    if (!this.walletHandler.checkPassword(walletPassword)) {
-      throw new Error('incorrect walletPassword is given');
-    }
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     const skVerify = this.protocol.decryptSymmetric(walletPassword, account.encryptedVerifySecretKey);
     const skEnc = this.protocol.decryptSymmetric(walletPassword, account.encryptedEncSecretKey);
     return toHexNoPrefix(this.protocol.fullSecretKey(toBuff(skVerify), toBuff(skEnc)));
@@ -88,9 +86,7 @@ export class AccountHandler extends Handler {
   async addAccount(walletPassword, accountName) {
     check(!accountName || typeof accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
-    if (!this.walletHandler.checkPassword(walletPassword)) {
-      throw new Error('incorrect walletPassword is given');
-    }
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     if (!accountName || accountName === '') {
       accountName = this._defaultAccountName();
     }
@@ -128,9 +124,7 @@ export class AccountHandler extends Handler {
     check(typeof !accountName || accountName === 'string', 'accountName should be instance of string');
     check(typeof walletPassword === 'string', 'walletPassword should be instance of string');
     check(typeof secretKey === 'string', 'secretKey should be instance of string');
-    if (!this.walletHandler.checkPassword(walletPassword)) {
-      throw new Error('incorrect walletPassword is given');
-    }
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     if (!accountName || accountName === '') {
       accountName = this._defaultAccountName();
     }
