@@ -10,7 +10,7 @@ import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { MystikoABI } from '../../src/chain/abi.js';
-import { WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../../src/model';
+import { WithdrawStatus, PrivateNoteStatus } from '../../src/model';
 import txReceipt02 from './files/txReceipt02.json';
 
 class MockTransactionResponse {

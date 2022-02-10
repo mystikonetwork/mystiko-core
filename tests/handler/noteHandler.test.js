@@ -6,7 +6,7 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { toDecimals, toHexNoPrefix } from '../../src/utils.js';
-import { OffChainNote, ID_KEY, PrivateNoteStatus, BridgeType } from '../../src/model';
+import { OffChainNote, PrivateNoteStatus, BridgeType } from '../../src/model';
 import txReceipt01 from './files/txReceipt01.json';
 import txReceipt02 from './files/txReceipt02.json';
 
