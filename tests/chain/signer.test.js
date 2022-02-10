@@ -11,6 +11,7 @@ class MockProvider {
     this.chainIds = [toHex(chainId)];
     this.addChainCount = 0;
     this.connected = false;
+    this.listeners = {};
   }
 
   async request({ method, params }) {
@@ -55,6 +56,15 @@ class MockProvider {
     }
     throw new Error('unexpected method');
   }
+
+  on(eventName, callback) {
+    this.listeners[eventName] = callback;
+  }
+
+  removeListener(eventName, callback) {
+    expect(this.listeners[eventName]).toBe(callback);
+    delete this.listeners[eventName];
+  }
 }
 
 class MockEtherProvider extends ethers.providers.Provider {
@@ -73,17 +83,6 @@ async function testSigner(conf, signer, defaultInstalled = false) {
   await expect(signer.accounts()).rejects.toThrow();
   await expect(signer.chainId()).rejects.toThrow();
   await expect(signer.connect()).rejects.toThrow();
-  const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 123);
-  signer = new MetaMaskSigner(conf, provider);
-  expect(await signer.connected()).toBe(false);
-  expect(await signer.installed()).toBe(defaultInstalled);
-  expect((await signer.accounts()).length).toBe(0);
-  expect(await signer.chainId()).toBe('0x7b');
-  expect(await signer.chainName()).toBe('Unsupported Network');
-  expect((await signer.connect()).length).toBe(1);
-  expect((await signer.connect())[0]).toBe('0xccac11fe23f9dee6e8d548ec811375af9fe01e55');
-  expect(await signer.connected()).toBe(true);
-  expect(signer.signer).not.toBe(undefined);
 }
 
 test('test base signer', async () => {
@@ -94,6 +93,22 @@ test('test base signer', async () => {
 test('test metamask signer', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');
   await testSigner(conf, new MetaMaskSigner(conf));
+  const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 123);
+  const signer = new MetaMaskSigner(conf, provider);
+  expect(await signer.connected()).toBe(false);
+  expect(await signer.installed()).toBe(false);
+  expect((await signer.accounts()).length).toBe(0);
+  expect(await signer.chainId()).toBe('0x7b');
+  expect(await signer.chainName()).toBe('Unsupported Network');
+  expect((await signer.connect()).length).toBe(1);
+  expect((await signer.connect())[0]).toBe('0xccac11fe23f9dee6e8d548ec811375af9fe01e55');
+  expect(await signer.connected()).toBe(true);
+  const callback = () => {};
+  signer.addListener('connect', callback);
+  expect(provider.listeners['connect']).not.toBe(undefined);
+  signer.removeListener('connect', callback);
+  expect(provider.listeners['connect']).toBe(undefined);
+  expect(signer.signer).not.toBe(undefined);
 });
 
 test('test private key signer', async () => {
