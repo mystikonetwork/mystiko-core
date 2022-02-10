@@ -3,6 +3,7 @@
   "chains": [
     {
       "name": "Ethereum Ropsten",
+      "assetSymbol": "ETH",
       "chainId": 3,
       "explorerUrl": "https://ropsten.etherscan.io",
       "providers": [
@@ -76,6 +77,7 @@
     },
     {
       "name": "BSC Testnet",
+      "assetSymbol": "BNB",
       "chainId": 97,
       "explorerUrl": "https://testnet.bscscan.com",
       "providers": [

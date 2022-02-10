@@ -68,6 +68,8 @@ test('test ChainConfig constructor', () => {
   expect(() => new ChainConfig(rawConfig)).toThrow();
   rawConfig['name'] = 'Binance Smart Chain';
   expect(() => new ChainConfig(rawConfig)).toThrow();
+  rawConfig['assetSymbol'] = 'BNB';
+  expect(() => new ChainConfig(rawConfig)).toThrow();
   rawConfig['explorerUrl'] = 'https://testnet.bscscan.com';
   expect(() => new ChainConfig(rawConfig)).toThrow();
   rawConfig['providers'] = [];
@@ -78,6 +80,10 @@ test('test ChainConfig constructor', () => {
   const config = new ChainConfig(rawConfig);
   expect(config.chainId).toBe(123);
   expect(config.name).toBe('Binance Smart Chain');
+  expect(config.assetSymbol).toBe('BNB');
+  expect(config.assetDecimals).toBe(18);
+  rawConfig['assetDecimals'] = 17;
+  expect(new ChainConfig(rawConfig).assetDecimals).toBe(17);
   expect(config.explorerUrl).toBe('https://testnet.bscscan.com');
   expect(config.explorerPrefix).toBe(EXPLORER_DEFAULT_PREFIX);
   expect(config.getTxUrl('a7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69')).toBe(

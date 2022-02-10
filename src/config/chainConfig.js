@@ -18,6 +18,8 @@ export class ChainConfig extends BaseConfig {
     super(rawConfig);
     BaseConfig.checkNumber(this.config, 'chainId');
     BaseConfig.checkString(this.config, 'name');
+    BaseConfig.checkString(this.config, 'assetSymbol');
+    BaseConfig.checkNumber(this.config, 'assetDecimals', false);
     BaseConfig.checkString(this.config, 'explorerUrl');
     BaseConfig.checkString(this.config, 'explorerPrefix', false);
     if (!this.explorerPrefix) {
@@ -50,6 +52,22 @@ export class ChainConfig extends BaseConfig {
    */
   get name() {
     return this.config['name'];
+  }
+
+  /**
+   * @property {string} assetSymbol
+   * @desc the main asset symbol of this configured blockchain network.
+   */
+  get assetSymbol() {
+    return this.config['assetSymbol'];
+  }
+
+  /**
+   * @property {number} assetDecimals
+   * @desc the main asset decimals of this configured blockchain network.
+   */
+  get assetDecimals() {
+    return this.config['assetDecimals'] ? this.config['assetDecimals'] : 18;
   }
 
   /**

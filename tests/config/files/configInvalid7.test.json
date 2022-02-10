@@ -3,6 +3,7 @@
   "chains": [
     {
       "name": "Ethereum Mainnet",
+      "assetSymbol": "ETH",
       "chainId": 1,
       "explorerUrl": "https://etherscan.io",
       "providers": [
@@ -38,6 +39,7 @@
     },
     {
       "name": "BSC Mainnet",
+      "assetSymbol": "BNB",
       "explorerUrl": "https://bscscan.io",
       "chainId": 56,
       "providers": [
