@@ -129,6 +129,11 @@ export class BaseSigner {
               chainName: chainConfig.name,
               rpcUrls: chainConfig.providers,
               blockExplorerUrls: [chainConfig.explorerUrl],
+              nativeCurrency: {
+                name: chainConfig.assetSymbol,
+                symbol: chainConfig.assetSymbol,
+                decimals: chainConfig.assetDecimals,
+              },
             },
           ],
         });
