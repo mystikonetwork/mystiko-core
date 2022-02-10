@@ -117,7 +117,7 @@ export class NoteHandler extends Handler {
    * a group name and a reduced value.
    */
   groupPrivateNotes(groupBy, reducer, filterOptions = {}) {
-    check(typeof groupBy === 'string', 'groupBy should a string');
+    check(typeof groupBy === 'string', 'groupBy should be a string');
     check(typeof reducer === 'function', 'reducer should be a function');
     const distinctValues = new Set(
       this._getPrivateNotes(filterOptions)
