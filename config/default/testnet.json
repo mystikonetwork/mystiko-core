@@ -47,7 +47,7 @@
         },
         {
           "name": "MystikoWithLoopERC20",
-          "address": "0xFF4A5B1Dc2D227908DC6d866ae767D5F1f0119b3",
+          "address": "0xD9EA1a5cB6b68d329E3b2a7acd747DEd4Bd1c001",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
@@ -123,7 +123,7 @@
         },
         {
           "name": "MystikoWithLoopERC20",
-          "address": "0x631fd9279c3fD9DaC55F053Ba75EfaA39524Fff5",
+          "address": "0x67905a247Da527A2951404588013292178911b0C",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
