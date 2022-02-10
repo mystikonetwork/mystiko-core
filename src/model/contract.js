@@ -144,7 +144,7 @@ export class Contract extends BaseModel {
   }
 
   set circuits(scheme) {
-    check(typeof scheme === 'string', 'scheme should a string type');
+    check(typeof scheme === 'string', 'scheme should be a string type');
     this.data['circuits'] = scheme;
   }
 
@@ -157,7 +157,7 @@ export class Contract extends BaseModel {
   }
 
   set syncedBlock(blockNumber) {
-    check(typeof blockNumber === 'number', 'blockNumber should a number type');
+    check(typeof blockNumber === 'number', 'blockNumber should be a number type');
     this.data['syncedBlock'] = blockNumber;
   }
 }

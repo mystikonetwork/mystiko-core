@@ -9,7 +9,7 @@ var account
 mystiko.accounts.addAccount('wallet password', 'name of account').then((a) => { account = a })
 ```
 
-This method is `async`, you should await it properly to get the instance of the created {@link Account}.
+This method is `async`, you should be await it properly to get the instance of the created {@link Account}.
 Check {@link AccountHandler#addAccount} for more information about this method.
 
 ## List created accounts

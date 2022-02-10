@@ -10,7 +10,7 @@ import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { MystikoABI } from '../../src/chain/abi.js';
-import { WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../../src/model';
+import { WithdrawStatus, PrivateNoteStatus } from '../../src/model';
 import txReceipt02 from './files/txReceipt02.json';
 
 class MockTransactionResponse {
@@ -162,6 +162,7 @@ test('test withdraw basic', async () => {
     cbCount++;
   };
   const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  await expect(withdrawHandler.createWithdraw('wrong password', request, signer, cb)).rejects.toThrow();
   let { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(
     walletPassword,
     request,
@@ -210,7 +211,7 @@ test('test getWithdraw/getWithdraws', async () => {
   expect(
     withdrawHandler.getWithdraws({
       filterFunc: (w) => w.chainId === 56,
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
       offset: 1,
       limit: 10,
@@ -218,7 +219,7 @@ test('test getWithdraw/getWithdraws', async () => {
   ).toBe(0);
   expect(
     withdrawHandler.getWithdraws({
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
       offset: 0,
       limit: 10,

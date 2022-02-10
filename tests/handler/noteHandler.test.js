@@ -6,7 +6,7 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { toDecimals, toHexNoPrefix } from '../../src/utils.js';
-import { OffChainNote, ID_KEY, PrivateNoteStatus, BridgeType } from '../../src/model';
+import { OffChainNote, PrivateNoteStatus, BridgeType } from '../../src/model';
 import txReceipt01 from './files/txReceipt01.json';
 import txReceipt02 from './files/txReceipt02.json';
 
@@ -55,6 +55,7 @@ test('test importFromOffChainNote basic', async () => {
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
   providerPool.connect(() => new MockProvider(txReceipt01));
+  await expect(noteHandler.importFromOffChainNote('wrong password', note)).rejects.toThrow();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
   expect(privateNote.srcChainId).toBe(1);
   expect(privateNote.srcTransactionHash).toBe(
@@ -158,7 +159,7 @@ test('test getPrivateNote/getPrivateNotes', async () => {
     noteHandler.getPrivateNotes({
       offset: 1,
       limit: 2,
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
     })[0].id,
   ).toBe(1);

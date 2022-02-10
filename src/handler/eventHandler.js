@@ -52,9 +52,9 @@ export class EventHandler extends Handler {
    * @returns {Event|undefined} the {@link Event} it found, otherwise it returns undefined.
    */
   getEvent(chainId, transactionHash, topic) {
-    check(typeof chainId === 'number', 'chainId should a number type');
-    check(typeof transactionHash === 'string', 'transactionHash should a string type');
-    check(typeof topic === 'string', 'topic should a string type');
+    check(typeof chainId === 'number', 'chainId should be a number type');
+    check(typeof transactionHash === 'string', 'transactionHash should be a string type');
+    check(typeof topic === 'string', 'topic should be a string type');
     const eventData = this.db.events.findOne({ chainId, transactionHash, topic });
     return eventData ? new Event(eventData) : undefined;
   }

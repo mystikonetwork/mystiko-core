@@ -11,6 +11,7 @@ import {
   PrivateNoteStatus,
   ID_KEY,
   BridgeType,
+  BaseModel,
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';
 import rootLogger from '../logger';
@@ -117,7 +118,7 @@ export class NoteHandler extends Handler {
    * a group name and a reduced value.
    */
   groupPrivateNotes(groupBy, reducer, filterOptions = {}) {
-    check(typeof groupBy === 'string', 'groupBy should a string');
+    check(typeof groupBy === 'string', 'groupBy should be a string');
     check(typeof reducer === 'function', 'reducer should be a function');
     const distinctValues = new Set(
       this._getPrivateNotes(filterOptions)
@@ -246,7 +247,7 @@ export class NoteHandler extends Handler {
     const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
     let wallet;
     if (requireCheck) {
-      this.walletHandler.checkPassword(walletPassword);
+      check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
       wallet = this.walletHandler.getCurrentWallet();
       shieldedAddress = await this._tryDecryptOnChainNote(walletPassword, encryptedNote);
       check(shieldedAddress, 'this deposit does not belong to your accounts');
@@ -333,7 +334,14 @@ export class NoteHandler extends Handler {
     };
     let queryChain = this.db.notes.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+      queryChain = queryChain.sort((n1, n2) => {
+        return BaseModel.columnComparator(
+          new PrivateNote(n1),
+          new PrivateNote(n2),
+          sortBy,
+          desc ? desc : false,
+        );
+      });
     }
     if (offset && typeof offset === 'number') {
       queryChain = queryChain.offset(offset);
