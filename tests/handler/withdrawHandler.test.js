@@ -210,7 +210,7 @@ test('test getWithdraw/getWithdraws', async () => {
   expect(
     withdrawHandler.getWithdraws({
       filterFunc: (w) => w.chainId === 56,
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
       offset: 1,
       limit: 10,
@@ -218,7 +218,7 @@ test('test getWithdraw/getWithdraws', async () => {
   ).toBe(0);
   expect(
     withdrawHandler.getWithdraws({
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
       offset: 0,
       limit: 10,

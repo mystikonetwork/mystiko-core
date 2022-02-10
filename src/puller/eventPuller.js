@@ -231,7 +231,8 @@ export class EventPuller {
           promises.push(this.depositHandler._updateDeposit(deposit));
         } else if (
           contract.bridgeType !== BridgeType.LOOP &&
-          deposit.status !== DepositStatus.SRC_CONFIRMED
+          deposit.status !== DepositStatus.SRC_CONFIRMED &&
+          deposit.status !== DepositStatus.SUCCEEDED
         ) {
           deposit.status = DepositStatus.SRC_CONFIRMED;
           promises.push(this.depositHandler._updateDeposit(deposit));

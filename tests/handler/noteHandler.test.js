@@ -158,7 +158,7 @@ test('test getPrivateNote/getPrivateNotes', async () => {
     noteHandler.getPrivateNotes({
       offset: 1,
       limit: 2,
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
     })[0].id,
   ).toBe(1);

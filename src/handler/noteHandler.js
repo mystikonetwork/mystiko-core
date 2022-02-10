@@ -11,6 +11,7 @@ import {
   PrivateNoteStatus,
   ID_KEY,
   BridgeType,
+  BaseModel,
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';
 import rootLogger from '../logger';
@@ -333,7 +334,14 @@ export class NoteHandler extends Handler {
     };
     let queryChain = this.db.notes.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+      queryChain = queryChain.sort((n1, n2) => {
+        return BaseModel.columnComparator(
+          new PrivateNote(n1),
+          new PrivateNote(n2),
+          sortBy,
+          desc ? desc : false,
+        );
+      });
     }
     if (offset && typeof offset === 'number') {
       queryChain = queryChain.offset(offset);

@@ -429,6 +429,14 @@ test('test query deposits', async () => {
       })
       .map((d) => d.id),
   ).toStrictEqual([2, 1, 3]);
+  expect(
+    depositHandler
+      .getDeposits({
+        sortBy: 'id',
+        desc: true,
+      })
+      .map((d) => d.id),
+  ).toStrictEqual([3, 2, 1]);
 });
 
 test('test exportOffChainNote', async () => {

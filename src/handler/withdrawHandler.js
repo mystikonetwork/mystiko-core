@@ -8,7 +8,7 @@ import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract.js';
 import { check, toBuff, errorMessage, toHexNoPrefix } from '../utils.js';
 import { checkSigner } from '../chain/signer.js';
-import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../model';
+import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY, BaseModel } from '../model';
 import rootLogger from '../logger';
 
 /**
@@ -169,7 +169,9 @@ export class WithdrawHandler extends Handler {
     };
     let queryChain = this.db.withdraws.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+      queryChain = queryChain.sort((w1, w2) => {
+        return BaseModel.columnComparator(new Withdraw(w1), new Withdraw(w2), sortBy, desc ? desc : false);
+      });
     }
     if (offset && typeof offset === 'number') {
       queryChain = queryChain.offset(offset);
