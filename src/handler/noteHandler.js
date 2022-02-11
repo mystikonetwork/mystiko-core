@@ -3,7 +3,7 @@ import BN from 'bn.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
-import { check, toBuff, toHexNoPrefix, toString } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toString } from '../utils.js';
 import {
   isValidPrivateNoteStatus,
   OffChainNote,
@@ -11,8 +11,10 @@ import {
   PrivateNoteStatus,
   ID_KEY,
   BridgeType,
+  BaseModel,
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';
+import { ContractPool } from '../chain/contract';
 import rootLogger from '../logger';
 
 /**
@@ -21,18 +23,21 @@ import rootLogger from '../logger';
  * @desc handler class for PrivateNote related business logic
  * @param {WalletHandler} walletHandler instance of {@link WalletHandler}.
  * @param {AccountHandler} accountHandler instance of {@link AccountHandler}.
+ * @param {ContractPool} contractPool instance of {@link ContractPool}.
  * @param {module:mystiko/db.WrappedDb} db instance of {@link module:mystiko/db.WrappedDb}.
  * @param {MystikoConfig} config instance of {@link MystikoConfig}.
  */
 export class NoteHandler extends Handler {
-  constructor(walletHandler, accountHandler, providerPool, db, config) {
+  constructor(walletHandler, accountHandler, providerPool, contractPool, db, config) {
     super(db, config);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     check(accountHandler instanceof AccountHandler, 'accountHandler should be instance of AccountHandler');
     check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
+    check(contractPool instanceof ContractPool, 'contractPool should be instance of ContractPool');
     this.walletHandler = walletHandler;
     this.accountHandler = accountHandler;
     this.providerPool = providerPool;
+    this.contractPool = contractPool;
     this.logger = rootLogger.getLogger('NoteHandler');
   }
 
@@ -117,7 +122,7 @@ export class NoteHandler extends Handler {
    * a group name and a reduced value.
    */
   groupPrivateNotes(groupBy, reducer, filterOptions = {}) {
-    check(typeof groupBy === 'string', 'groupBy should a string');
+    check(typeof groupBy === 'string', 'groupBy should be a string');
     check(typeof reducer === 'function', 'reducer should be a function');
     const distinctValues = new Set(
       this._getPrivateNotes(filterOptions)
@@ -232,6 +237,21 @@ export class NoteHandler extends Handler {
     return privateNote;
   }
 
+  async getPoolBalance(privateNote) {
+    privateNote = this.getPrivateNote(privateNote);
+    check(privateNote, 'given privateNote does not exist');
+    const chainConfig = this.config.getChainConfig(privateNote.dstChainId);
+    check(chainConfig, 'chain config does not exist');
+    const contractConfig = chainConfig.getContract(privateNote.dstProtocolAddress);
+    check(contractConfig, 'contract config does not exist');
+    const wrappedContract = this.contractPool.getWrappedContract(
+      privateNote.dstChainId,
+      privateNote.dstProtocolAddress,
+    );
+    const amount = await wrappedContract.assetBalance();
+    return fromDecimals(amount, contractConfig.assetDecimals);
+  }
+
   async _createPrivateNoteFromTxReceipt(
     chainId,
     txReceipt,
@@ -246,7 +266,7 @@ export class NoteHandler extends Handler {
     const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
     let wallet;
     if (requireCheck) {
-      this.walletHandler.checkPassword(walletPassword);
+      check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
       wallet = this.walletHandler.getCurrentWallet();
       shieldedAddress = await this._tryDecryptOnChainNote(walletPassword, encryptedNote);
       check(shieldedAddress, 'this deposit does not belong to your accounts');
@@ -333,7 +353,14 @@ export class NoteHandler extends Handler {
     };
     let queryChain = this.db.notes.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+      queryChain = queryChain.sort((n1, n2) => {
+        return BaseModel.columnComparator(
+          new PrivateNote(n1),
+          new PrivateNote(n2),
+          sortBy,
+          desc ? desc : false,
+        );
+      });
     }
     if (offset && typeof offset === 'number') {
       queryChain = queryChain.offset(offset);

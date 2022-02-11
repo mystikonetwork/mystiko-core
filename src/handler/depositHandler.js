@@ -1,13 +1,13 @@
 import BN from 'bn.js';
 
 import { Handler } from './handler.js';
-import { check, toHex, toDecimals, toFixedLenHex, toString } from '../utils.js';
+import { check, toHex, toDecimals, toFixedLenHex, toString, errorMessage } from '../utils.js';
 import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
-import { Deposit, DepositStatus, AssetType, BridgeType, ID_KEY, OffChainNote } from '../model';
+import { Deposit, DepositStatus, AssetType, BridgeType, ID_KEY, OffChainNote, BaseModel } from '../model';
 import rootLogger from '../logger';
 
 /**
@@ -106,7 +106,7 @@ export class DepositHandler extends Handler {
         );
       })
       .catch((error) => {
-        deposit.errorMessage = toString(error);
+        deposit.errorMessage = errorMessage(error);
         this.logger.error(`deposit(id=${deposit.id}) transaction raised error: ${deposit.errorMessage}`);
         return this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
       });
@@ -166,7 +166,9 @@ export class DepositHandler extends Handler {
     };
     let queryChain = this.db.deposits.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+      queryChain = queryChain.sort((d1, d2) => {
+        return BaseModel.columnComparator(new Deposit(d1), new Deposit(d2), sortBy, desc ? desc : false);
+      });
     }
     if (offset && typeof offset === 'number') {
       queryChain = queryChain.offset(offset);

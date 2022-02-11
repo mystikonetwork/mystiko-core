@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import BN from 'bn.js';
 import { ContractConfig, MystikoConfig } from '../config';
 import { ProviderPool } from './provider.js';
 import { check } from '../utils.js';
@@ -62,6 +63,40 @@ export class MystikoContract {
       this.contract = contractGenerator(this.config.address, this.config.abi, providerOrSigner);
       return this.contract;
     }
+  }
+
+  /**
+   * @desc get current asset balance of this contract.
+   * @param {Function} [contractGenerator] for constructing smart contract instance,
+   * if not provided, it will generate {@link external:Contract}.
+   * @returns {Promise<external:BN>} a BN instance which is the current balance of this contract.
+   */
+  async assetBalance(contractGenerator = undefined) {
+    check(this.contract, 'this contract is not connected');
+    check(
+      this.contract.provider || this.contract.signer,
+      'this contract is not connected with provider or signer',
+    );
+    const providerOrSigner = this.contract.provider ? this.contract.provider : this.contract.signer;
+    if (!contractGenerator) {
+      contractGenerator = (address, abi, providerOrSigner) => {
+        return new ethers.Contract(address, abi, providerOrSigner);
+      };
+    }
+    let balance = new BN(0);
+    if (this.config.assetType === AssetType.ERC20) {
+      const erc20Contract = contractGenerator(
+        this.config.assetAddress,
+        MystikoABI.ERC20.abi,
+        providerOrSigner,
+      );
+      const balanceRaw = await erc20Contract.balanceOf(this.contract.address);
+      balance = new BN(balanceRaw.toString());
+    } else if (this.config.assetType === AssetType.MAIN) {
+      const balanceRaw = await providerOrSigner.getBalance(this.contract.address);
+      balance = new BN(balanceRaw.toString());
+    }
+    return balance;
   }
 }
 
@@ -140,8 +175,20 @@ export class ContractPool {
    * otherwise it returns undefined.
    */
   getContract(chainId, contractAddress) {
+    const wrappedContract = this.getWrappedContract(chainId, contractAddress);
+    return wrappedContract ? wrappedContract.contract : undefined;
+  }
+
+  /**
+   * get contract for given chain id and contract address.
+   * @param {number} chainId chain id of the chain being queried.
+   * @param {string} contractAddress address of the smart contract being queried.
+   * @returns {MystikoContract|undefined} a wrapped contract object if it exists in the pool,
+   * otherwise it returns undefined.
+   */
+  getWrappedContract(chainId, contractAddress) {
     if (this.pool[chainId] && this.pool[chainId][contractAddress]) {
-      return this.pool[chainId][contractAddress].contract;
+      return this.pool[chainId][contractAddress];
     }
     return undefined;
   }

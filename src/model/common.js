@@ -1,5 +1,6 @@
+import BN from 'bn.js';
 import * as protocol from '../protocol';
-import { deepCopy } from '../utils.js';
+import { deepCopy, check } from '../utils.js';
 
 /**
  * @memberOf module:mystiko/models
@@ -60,6 +61,48 @@ export class BaseModel {
    */
   toString() {
     return JSON.stringify(this.data);
+  }
+
+  /**
+   * @desc compare two models with given column name and sorting direction.
+   * @param {BaseModel | undefined} model1 first model to be compared.
+   * @param {BaseModel | undefined} model2 second model to be compared.
+   * @param {string} col name of the column being sorted by.
+   * @param {boolean} [desc=false] sorting direction, if true, sort with descending order. Otherwise,
+   * sort with ascending order.
+   * @returns {number} 0 indicates the two models' given column is equal, 1 indicates first should be ahead of second,
+   * -1 indicates second should be ahead of first.
+   */
+  static columnComparator(model1, model2, col, desc = false) {
+    check(!model1 || model1 instanceof BaseModel, 'model1 should be an instance of BaseModel');
+    check(!model2 || model2 instanceof BaseModel, 'model2 should be an instance of BaseModel');
+    check(typeof col === 'string', 'col should be a string type');
+    check(typeof desc === 'boolean', 'desc should be a boolean type');
+    const col1 = model1[col];
+    const col2 = model2[col];
+    if (col1 && !col2) {
+      return desc ? -1 : 1;
+    } else if (!col1 && col2) {
+      return desc ? 1 : -1;
+    } else if (!col1 && !col2) {
+      return 0;
+    } else if (col1 instanceof BN && col2 instanceof BN) {
+      if (col1.eq(col2)) {
+        return 0;
+      } else if (col1.gt(col2)) {
+        return desc ? -1 : 1;
+      } else {
+        return desc ? 1 : -1;
+      }
+    } else {
+      if (col1 === col2) {
+        return 0;
+      } else if (col1 > col2) {
+        return desc ? -1 : 1;
+      } else {
+        return desc ? 1 : -1;
+      }
+    }
   }
 }
 

@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
+import BN from 'bn.js';
 import { createDatabase } from '../../src/database.js';
 import { readFromFile } from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
-import { ContractPool } from '../../src/chain/contract.js';
+import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
@@ -10,7 +11,7 @@ import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
 import { MystikoABI } from '../../src/chain/abi.js';
-import { WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../../src/model';
+import { WithdrawStatus, PrivateNoteStatus } from '../../src/model';
 import txReceipt02 from './files/txReceipt02.json';
 
 class MockTransactionResponse {
@@ -100,6 +101,17 @@ class MockProvider extends ethers.providers.Provider {
   }
 }
 
+class MockWrappedContract extends MystikoContract {
+  constructor(contract, balance) {
+    super(contract);
+    this.balance = balance;
+  }
+
+  assetBalance() {
+    return Promise.resolve(this.balance);
+  }
+}
+
 let db;
 let conf;
 let providerPool;
@@ -124,9 +136,13 @@ beforeEach(async () => {
     MystikoABI.MystikoWithLoopERC20.abi,
   );
   contractPool.connect(() => contract);
+  contractPool.pool[56]['0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'] = new MockWrappedContract(
+    contract,
+    new BN('100000000000000000000'),
+  );
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, conf);
+  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
   withdrawHandler = new WithdrawHandler(
     walletHandler,
     accountHandler,
@@ -162,6 +178,7 @@ test('test withdraw basic', async () => {
     cbCount++;
   };
   const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  await expect(withdrawHandler.createWithdraw('wrong password', request, signer, cb)).rejects.toThrow();
   let { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(
     walletPassword,
     request,
@@ -193,6 +210,20 @@ test('test withdraw basic', async () => {
   expect(withdraw.status).toBe(WithdrawStatus.FAILED);
 });
 
+test('test insufficient pool balance', async () => {
+  contractPool.pool[56]['0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'] = new MockWrappedContract(
+    contract,
+    new BN('0'),
+  );
+  const signer = new MockSigner(conf, 56);
+  const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  let { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(walletPassword, request, signer);
+  await withdrawPromise;
+  withdraw = withdrawHandler.getWithdraw(withdraw);
+  expect(withdraw.errorMessage).not.toBe(undefined);
+  expect(withdraw.status).toBe(WithdrawStatus.FAILED);
+});
+
 test('test getWithdraw/getWithdraws', async () => {
   const signer = new MockSigner(conf, 56);
   const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
@@ -210,7 +241,7 @@ test('test getWithdraw/getWithdraws', async () => {
   expect(
     withdrawHandler.getWithdraws({
       filterFunc: (w) => w.chainId === 56,
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
       offset: 1,
       limit: 10,
@@ -218,7 +249,7 @@ test('test getWithdraw/getWithdraws', async () => {
   ).toBe(0);
   expect(
     withdrawHandler.getWithdraws({
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
       offset: 0,
       limit: 10,

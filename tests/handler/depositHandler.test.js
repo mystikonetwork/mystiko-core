@@ -160,7 +160,7 @@ beforeEach(async () => {
   contractPool = new ContractPool(conf, providerPool);
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, conf);
+  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
   depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, conf);
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await contractPool.connect((address, abi, providerOrSigner) => {
@@ -429,6 +429,14 @@ test('test query deposits', async () => {
       })
       .map((d) => d.id),
   ).toStrictEqual([2, 1, 3]);
+  expect(
+    depositHandler
+      .getDeposits({
+        sortBy: 'id',
+        desc: true,
+      })
+      .map((d) => d.id),
+  ).toStrictEqual([3, 2, 1]);
 });
 
 test('test exportOffChainNote', async () => {

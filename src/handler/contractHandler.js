@@ -38,7 +38,7 @@ export class ContractHandler extends Handler {
    * @returns {Contract|undefined} a {@link Contract} object if it exists, otherwise it returns undefined.
    */
   getContract(chainId, address) {
-    check(typeof chainId === 'number', 'chainId should a number type');
+    check(typeof chainId === 'number', 'chainId should be a number type');
     check(ethers.utils.isAddress(address), `address ${address} is invalid`);
     const contractData = this.db.contracts.findOne({ chainId, address });
     return contractData ? new Contract(contractData) : undefined;
@@ -84,7 +84,7 @@ export class ContractHandler extends Handler {
    * @returns {Promise<void>}
    */
   async updateSyncedBlock(chainId, address, syncedBlock) {
-    check(typeof syncedBlock === 'number', 'syncedBlock should a number type');
+    check(typeof syncedBlock === 'number', 'syncedBlock should be a number type');
     const contract = this.getContract(chainId, address);
     if (contract) {
       contract.syncedBlock = syncedBlock;

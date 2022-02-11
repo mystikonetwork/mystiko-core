@@ -136,6 +136,7 @@ export class EventPuller {
           this.errorMessage = undefined;
         })
         .catch((error) => {
+          console.log('error', error);
           this.logger.warn(`something wrong during pulling contract events: ${toString(error)}`);
           this.hasPendingPull = false;
           this.errorMessage = error;
@@ -219,7 +220,9 @@ export class EventPuller {
       const commitmentHash = new BN(toHexNoPrefix(rawEvent.argumentData.commitmentHash), 16).toString();
       const deposits = this.depositHandler.getDeposits({
         filterFunc: (deposit) =>
-          deposit.srcChainId === rawEvent.chainId && deposit.commitmentHash.toString() === commitmentHash,
+          deposit.srcChainId === rawEvent.chainId &&
+          deposit.commitmentHash &&
+          deposit.commitmentHash.toString() === commitmentHash,
       });
       for (let j = 0; j < deposits.length; j++) {
         const deposit = deposits[j];
@@ -228,7 +231,8 @@ export class EventPuller {
           promises.push(this.depositHandler._updateDeposit(deposit));
         } else if (
           contract.bridgeType !== BridgeType.LOOP &&
-          deposit.status !== DepositStatus.SRC_CONFIRMED
+          deposit.status !== DepositStatus.SRC_CONFIRMED &&
+          deposit.status !== DepositStatus.SUCCEEDED
         ) {
           deposit.status = DepositStatus.SRC_CONFIRMED;
           promises.push(this.depositHandler._updateDeposit(deposit));
@@ -245,11 +249,15 @@ export class EventPuller {
       const commitmentHash = new BN(toHexNoPrefix(rawEvent.argumentData.leaf), 16).toString();
       const deposits = this.depositHandler.getDeposits({
         filterFunc: (deposit) =>
-          deposit.dstChainId === rawEvent.chainId && deposit.commitmentHash.toString() === commitmentHash,
+          deposit.dstChainId === rawEvent.chainId &&
+          deposit.commitmentHash &&
+          deposit.commitmentHash.toString() === commitmentHash,
       });
       const notes = this.noteHandler.getPrivateNotes({
         filterFunc: (note) =>
-          note.dstChainId === rawEvent.chainId && note.commitmentHash.toString() === commitmentHash,
+          note.dstChainId === rawEvent.chainId &&
+          note.commitmentHash &&
+          note.commitmentHash.toString() === commitmentHash,
       });
       for (let j = 0; j < deposits.length; j++) {
         const deposit = deposits[j];
@@ -277,7 +285,9 @@ export class EventPuller {
       const withdraws = this.withdrawHandler.getWithdraws({
         filterFunc: (withdraw) => {
           return (
+            withdraw.merkleRootHash &&
             withdraw.merkleRootHash.toString() === rootHash &&
+            withdraw.serialNumber &&
             withdraw.serialNumber.toString() === serialNumber &&
             withdraw.chainId === rawEvent.chainId
           );

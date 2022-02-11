@@ -6,7 +6,8 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { toDecimals, toHexNoPrefix } from '../../src/utils.js';
-import { OffChainNote, ID_KEY, PrivateNoteStatus, BridgeType } from '../../src/model';
+import { OffChainNote, PrivateNoteStatus, BridgeType } from '../../src/model';
+import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import txReceipt01 from './files/txReceipt01.json';
 import txReceipt02 from './files/txReceipt02.json';
 
@@ -21,9 +22,21 @@ class MockProvider extends ethers.providers.Provider {
   }
 }
 
+class MockWrappedContract extends MystikoContract {
+  constructor(contract, balance) {
+    super(contract);
+    this.balance = balance;
+  }
+
+  assetBalance() {
+    return Promise.resolve(this.balance);
+  }
+}
+
 let db;
 let conf;
 let providerPool;
+let contractPool;
 let walletHandler;
 let accountHandler;
 let noteHandler;
@@ -34,9 +47,12 @@ beforeEach(async () => {
   db = await createDatabase('test.db');
   conf = await readFromFile('tests/config/files/config.test.json');
   providerPool = new ProviderPool(conf);
+  providerPool.connect();
+  contractPool = new ContractPool(conf, providerPool);
+  await contractPool.connect();
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, conf);
+  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await accountHandler.importAccountFromSecretKey(
     walletPassword,
@@ -55,6 +71,7 @@ test('test importFromOffChainNote basic', async () => {
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
   providerPool.connect(() => new MockProvider(txReceipt01));
+  await expect(noteHandler.importFromOffChainNote('wrong password', note)).rejects.toThrow();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
   expect(privateNote.srcChainId).toBe(1);
   expect(privateNote.srcTransactionHash).toBe(
@@ -158,7 +175,7 @@ test('test getPrivateNote/getPrivateNotes', async () => {
     noteHandler.getPrivateNotes({
       offset: 1,
       limit: 2,
-      sortBy: ID_KEY,
+      sortBy: 'id',
       desc: true,
     })[0].id,
   ).toBe(1);
@@ -229,4 +246,20 @@ test('test groupBy', () => {
     { dstAsset: 'TokenA', count: 2, total: 5, unspent: 4 },
     { dstAsset: 'TokenC', count: 2, total: 9.3, unspent: 9.3 },
   ]);
+});
+
+test('test getPoolBalance', async () => {
+  const note =
+    '{"chainId":1,"transactionHash":' +
+    '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
+  providerPool.connect(() => new MockProvider(txReceipt01));
+  const contractConfig = conf.getChainConfig(1).getContract('0x98ed94360cad67a76a53d8aa15905e52485b73d1');
+  contractConfig.config['assetDecimals'] = 17;
+  contractPool.pool[1]['0x98ed94360cad67a76a53d8aa15905e52485b73d1'] = new MockWrappedContract(
+    contractConfig,
+    toDecimals(1234, 17),
+  );
+  const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
+  const balance = await noteHandler.getPoolBalance(privateNote);
+  expect(balance).toBe(1234);
 });

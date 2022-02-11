@@ -6,9 +6,9 @@ import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract.js';
-import { check, toBuff, toString, toHexNoPrefix } from '../utils.js';
+import { check, toBuff, errorMessage, toHexNoPrefix } from '../utils.js';
 import { checkSigner } from '../chain/signer.js';
-import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY } from '../model';
+import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY, BaseModel } from '../model';
 import rootLogger from '../logger';
 
 /**
@@ -63,7 +63,7 @@ export class WithdrawHandler extends Handler {
     signer,
     statusCallback = undefined,
   ) {
-    this.walletHandler.checkPassword(walletPassword);
+    check(this.walletHandler.checkPassword(walletPassword), 'incorrect walletPassword is given');
     const wallet = this.walletHandler.getCurrentWallet();
     check(ethers.utils.isAddress(recipientAddress), `${recipientAddress} is invalid address`);
     privateNote = this.noteHandler.getPrivateNote(privateNote);
@@ -76,8 +76,12 @@ export class WithdrawHandler extends Handler {
     check(chainConfig, 'chain config does not exist');
     const contractConfig = chainConfig.getContract(privateNote.dstProtocolAddress);
     check(contractConfig, 'contract config does not exist');
-    const contract = this.contractPool.getContract(privateNote.dstChainId, privateNote.dstProtocolAddress);
-    check(contract, 'contract instance does not exist');
+    const wrappedContract = this.contractPool.getWrappedContract(
+      privateNote.dstChainId,
+      privateNote.dstProtocolAddress,
+    );
+    check(wrappedContract, 'contract instance does not exist');
+    const contract = wrappedContract.contract;
     const withdraw = new Withdraw();
     withdraw.chainId = privateNote.dstChainId;
     withdraw.asset = privateNote.dstAsset;
@@ -95,6 +99,7 @@ export class WithdrawHandler extends Handler {
       account,
       walletPassword,
       privateNote,
+      wrappedContract,
       contract,
       contractConfig,
       withdraw,
@@ -112,7 +117,7 @@ export class WithdrawHandler extends Handler {
         );
       })
       .catch((error) => {
-        withdraw.errorMessage = toString(error);
+        withdraw.errorMessage = errorMessage(error);
         this.logger.error(`withdraw(id=${withdraw.id}) transaction raised error: ${withdraw.errorMessage}`);
         return this._updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);
       });
@@ -169,7 +174,9 @@ export class WithdrawHandler extends Handler {
     };
     let queryChain = this.db.withdraws.chain().where(whereClause);
     if (sortBy && typeof sortBy === 'string') {
-      queryChain = queryChain.simplesort(sortBy, desc ? desc : false);
+      queryChain = queryChain.sort((w1, w2) => {
+        return BaseModel.columnComparator(new Withdraw(w1), new Withdraw(w2), sortBy, desc ? desc : false);
+      });
     }
     if (offset && typeof offset === 'number') {
       queryChain = queryChain.offset(offset);
@@ -202,12 +209,15 @@ export class WithdrawHandler extends Handler {
     account,
     walletPassword,
     privateNote,
+    wrappedContract,
     contract,
     contractConfig,
     withdraw,
     statusCallback,
   ) {
     await this._updateStatus(withdraw, WithdrawStatus.GENERATING_PROOF, statusCallback);
+    const balance = await wrappedContract.assetBalance();
+    check(balance.gte(privateNote.amount), 'insufficient pool balance for withdrawing');
     this.logger.info(`generating zkSnark proofs for withdraw(id=${withdraw.id})...`);
     const { leaves, leafIndex } = await this._buildMerkleTree(contract, privateNote.commitmentHash);
     const pkVerify = account.verifyPublicKey;

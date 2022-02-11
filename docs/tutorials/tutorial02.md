@@ -10,7 +10,7 @@ mystiko.wallets.getCurrentWallet()
 ```
 
 This method will return the {@link Wallet} instance if it exists, otherwise it returns `undefined`. We should expect `undefined`
-here, because we just started our tutorial. However, in real world scenario, you should always check before you create
+here, because we just started our tutorial. However, in real world scenario, you should be always check before you create
 a new one. Otherwise, the newly created one will replace the old one, all existing transaction history and accounts will
 be ignored. Please check {@link WalletHandler#getCurrentWallet} for more information about this method.
 
@@ -26,7 +26,7 @@ library to generate master seed from mnemonic words. The above function is `asyn
 created {@link Wallet} instance. Please check {@link WalletHandler#createWallet} for more information about this method.
 
 ## Login the wallet
-After user session ends in the browser, you should ask the user re-login the wallet. Login the wallet could be implemented
+After user session ends in the browser, you should be ask the user re-login the wallet. Login the wallet could be implemented
 by checking the password that the user offers. The method is used like this way.
 
 ```javascript

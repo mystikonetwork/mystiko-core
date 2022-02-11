@@ -129,6 +129,11 @@ export class BaseSigner {
               chainName: chainConfig.name,
               rpcUrls: chainConfig.providers,
               blockExplorerUrls: [chainConfig.explorerUrl],
+              nativeCurrency: {
+                name: chainConfig.assetSymbol,
+                symbol: chainConfig.assetSymbol,
+                decimals: chainConfig.assetDecimals,
+              },
             },
           ],
         });
@@ -140,6 +145,26 @@ export class BaseSigner {
     check(toHex(chainId) === (await this.chainId()), 'chain has not been switched');
     await this.connect();
     this.logger.info(`successfully switch to chain ${chainId}`);
+  }
+
+  /**
+   * @desc add listener to subscribe signer events, this is useful to detect accounts or network changes.
+   * @param {string} eventName name of the event.
+   * @param {function} callback function to call when event occurs.
+   */
+  addListener(eventName, callback) {
+    check(typeof eventName === 'string', 'eventName should be a string');
+    check(typeof callback === 'function', 'callback should be a function');
+  }
+
+  /**
+   * @desc remove listener to stop subscribing signer events.
+   * @param {string} eventName name of the event.
+   * @param {function} callback function to call when event occurs.
+   */
+  removeListener(eventName, callback) {
+    check(typeof eventName === 'string', 'eventName should be a string');
+    check(typeof callback === 'function', 'callback should be a function');
   }
 }
 
@@ -180,6 +205,30 @@ export class MetaMaskSigner extends BaseSigner {
     }
     check(this.provider, 'MetaMask is not installed');
     return await super.connect(etherProvider);
+  }
+
+  /**
+   * @desc add listener to subscribe signer events, this is useful to detect accounts or network changes.
+   * @override
+   * @param {string} eventName name of the event.
+   * @param {function} callback function to call when event occurs.
+   */
+  addListener(eventName, callback) {
+    super.addListener(eventName, callback);
+    check(this.provider, 'MetaMask is not installed');
+    this.provider.on(eventName, callback);
+  }
+
+  /**
+   * @desc remove listener to stop subscribing signer events.
+   * @override
+   * @param {string} eventName name of the event.
+   * @param {function} callback function to call when event occurs.
+   */
+  removeListener(eventName, callback) {
+    super.removeListener(eventName, callback);
+    check(this.provider, 'MetaMask is not installed');
+    this.provider.removeListener(eventName, callback);
   }
 }
 

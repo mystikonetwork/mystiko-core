@@ -183,7 +183,7 @@ export class MystikoConfig extends BaseConfig {
    */
   getChainTxExplorerUrl(chainId, transactionHash) {
     if (transactionHash) {
-      check(typeof chainId === 'number', 'chainId should a number');
+      check(typeof chainId === 'number', 'chainId should be a number');
       check(typeof transactionHash === 'string', 'transactionHash should be string');
       const chainConfig = this.getChainConfig(chainId);
       if (chainConfig) {

@@ -3,7 +3,7 @@ Before you go through this tutorial, please make sure you have finished {@tutori
 
 ## Use MetaMask as a signer in browser environment
 ### Check whether MetaMask is installed
-Before we connect to [Metamask](https://metamask.io), you should always check whether MetaMask is installed
+Before we connect to [Metamask](https://metamask.io), you should be always check whether MetaMask is installed
 in user's browser. You could call this method to check it.
 
 ```javascript
@@ -11,7 +11,7 @@ mystiko.signers.metaMask.installed() // returns Promise<boolean>
 ```
 
 The method is `async`, you should properly await for it before it resolves.
-If MetaMask is not installed, you should ask the user install it before proceeding to the deposit/withdraw process.
+If MetaMask is not installed, you should be ask the user install it before proceeding to the deposit/withdraw process.
 Check {@link MetaMaskSigner#installed} for more information.
 
 ### Check whether MetaMask is connected

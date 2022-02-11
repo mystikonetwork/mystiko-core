@@ -269,3 +269,21 @@ export async function readJsonFile(path) {
 export function deepCopy(object) {
   return JSON.parse(JSON.stringify(object));
 }
+
+/**
+ * @function module:mystiko/utils.errorMessage
+ * @desc get error message from the caught error.
+ * @param {any} error the error object.
+ * @returns {string} error message.
+ */
+export function errorMessage(error) {
+  if (!error) {
+    return '';
+  } else if (error instanceof Error) {
+    return error.toString();
+  } else if (error instanceof Object) {
+    return JSON.stringify(error);
+  } else {
+    return error.toString();
+  }
+}
