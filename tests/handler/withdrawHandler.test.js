@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
+import BN from 'bn.js';
 import { createDatabase } from '../../src/database.js';
 import { readFromFile } from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
-import { ContractPool } from '../../src/chain/contract.js';
+import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
@@ -100,6 +101,17 @@ class MockProvider extends ethers.providers.Provider {
   }
 }
 
+class MockWrappedContract extends MystikoContract {
+  constructor(contract, balance) {
+    super(contract);
+    this.balance = balance;
+  }
+
+  assetBalance() {
+    return Promise.resolve(this.balance);
+  }
+}
+
 let db;
 let conf;
 let providerPool;
@@ -124,9 +136,13 @@ beforeEach(async () => {
     MystikoABI.MystikoWithLoopERC20.abi,
   );
   contractPool.connect(() => contract);
+  contractPool.pool[56]['0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'] = new MockWrappedContract(
+    contract,
+    new BN('100000000000000000000'),
+  );
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, conf);
+  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
   withdrawHandler = new WithdrawHandler(
     walletHandler,
     accountHandler,
@@ -190,6 +206,20 @@ test('test withdraw basic', async () => {
   const ret = await withdrawHandler.createWithdraw(walletPassword, request, signer, cb);
   await ret.withdrawPromise;
   withdraw = withdrawHandler.getWithdraw(ret.withdraw);
+  expect(withdraw.errorMessage).not.toBe(undefined);
+  expect(withdraw.status).toBe(WithdrawStatus.FAILED);
+});
+
+test('test insufficient pool balance', async () => {
+  contractPool.pool[56]['0x961f315a836542e603a3df2e0dd9d4ecd06ebc67'] = new MockWrappedContract(
+    contract,
+    new BN('0'),
+  );
+  const signer = new MockSigner(conf, 56);
+  const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  let { withdraw, withdrawPromise } = await withdrawHandler.createWithdraw(walletPassword, request, signer);
+  await withdrawPromise;
+  withdraw = withdrawHandler.getWithdraw(withdraw);
   expect(withdraw.errorMessage).not.toBe(undefined);
   expect(withdraw.status).toBe(WithdrawStatus.FAILED);
 });

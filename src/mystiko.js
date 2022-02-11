@@ -131,6 +131,7 @@ mystiko.initialize = async ({
     mystiko.wallets,
     mystiko.accounts,
     mystiko.providers,
+    mystiko.contractPool,
     mystiko.db,
     mystiko.config,
   );

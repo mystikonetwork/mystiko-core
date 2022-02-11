@@ -3,7 +3,7 @@ import BN from 'bn.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
-import { check, toBuff, toHexNoPrefix, toString } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toString } from '../utils.js';
 import {
   isValidPrivateNoteStatus,
   OffChainNote,
@@ -14,6 +14,7 @@ import {
   BaseModel,
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';
+import { ContractPool } from '../chain/contract';
 import rootLogger from '../logger';
 
 /**
@@ -22,18 +23,21 @@ import rootLogger from '../logger';
  * @desc handler class for PrivateNote related business logic
  * @param {WalletHandler} walletHandler instance of {@link WalletHandler}.
  * @param {AccountHandler} accountHandler instance of {@link AccountHandler}.
+ * @param {ContractPool} contractPool instance of {@link ContractPool}.
  * @param {module:mystiko/db.WrappedDb} db instance of {@link module:mystiko/db.WrappedDb}.
  * @param {MystikoConfig} config instance of {@link MystikoConfig}.
  */
 export class NoteHandler extends Handler {
-  constructor(walletHandler, accountHandler, providerPool, db, config) {
+  constructor(walletHandler, accountHandler, providerPool, contractPool, db, config) {
     super(db, config);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     check(accountHandler instanceof AccountHandler, 'accountHandler should be instance of AccountHandler');
     check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
+    check(contractPool instanceof ContractPool, 'contractPool should be instance of ContractPool');
     this.walletHandler = walletHandler;
     this.accountHandler = accountHandler;
     this.providerPool = providerPool;
+    this.contractPool = contractPool;
     this.logger = rootLogger.getLogger('NoteHandler');
   }
 
@@ -231,6 +235,21 @@ export class NoteHandler extends Handler {
     this.db.notes.update(privateNote.data);
     await this.saveDatabase();
     return privateNote;
+  }
+
+  async getPoolBalance(privateNote) {
+    privateNote = this.getPrivateNote(privateNote);
+    check(privateNote, 'given privateNote does not exist');
+    const chainConfig = this.config.getChainConfig(privateNote.dstChainId);
+    check(chainConfig, 'chain config does not exist');
+    const contractConfig = chainConfig.getContract(privateNote.dstProtocolAddress);
+    check(contractConfig, 'contract config does not exist');
+    const wrappedContract = this.contractPool.getWrappedContract(
+      privateNote.dstChainId,
+      privateNote.dstProtocolAddress,
+    );
+    const amount = await wrappedContract.assetBalance();
+    return fromDecimals(amount, contractConfig.assetDecimals);
   }
 
   async _createPrivateNoteFromTxReceipt(

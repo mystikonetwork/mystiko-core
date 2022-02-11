@@ -153,7 +153,7 @@ beforeEach(async () => {
   walletHandler = new WalletHandler(db, config);
   wallet = await walletHandler.createWallet(walletMasterSeed, walletPassword);
   accountHandler = new AccountHandler(walletHandler, db, config);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, db, config);
+  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, config);
   depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, config);
   withdrawHandler = new WithdrawHandler(
     walletHandler,
