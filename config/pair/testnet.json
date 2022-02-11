@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "chains": [
+    {
+      "network": "ropsten",
+      "chainId": "3",
+      "tokens": [
+        {
+          "name": "MTT",
+          "erc20": true,
+          "address": "0x2f1306362422e341e08e656d656719d5e8facdc7"
+        }
+      ],
+      "hashAddress": "0x99948e29c025CAacb3f8288b0a01fe3E8643bA1B",
+      "verifierAddress": "0x830Dd2D13EAAFf019ABFdA8432FD75855cAC753b"
+    },
+    {
+      "network": "bsctestnet",
+      "chainId": "97",
+      "tokens": [
+        {
+          "name": "MTT",
+          "erc20": true,
+          "address": "0x2f1306362422e341e08e656d656719d5e8facdc7"
+        }
+      ],
+      "hashAddress": "0x99948e29c025CAacb3f8288b0a01fe3E8643bA1B",
+      "verifierAddress": "0x830Dd2D13EAAFf019ABFdA8432FD75855cAC753b"
+    }
+  ],
+  "bridges": [
+    {
+      "name": "celer",
+      "proxys": [
+        {
+          "network": "ropsten",
+          "address": "0x830Dd2D13EAAFf019ABFdA8432FD75855cAC753b"
+        },
+        {
+          "network": "bsctestnet",
+          "address": "0x830Dd2D13EAAFf019ABFdA8432FD75855cAC753b"
+        }
+      ],
+      "pairs": [
+        [
+          {
+            "network": "ropsten",
+            "token": "MTT",
+            "address": "0xAA38ea1647C6c705d37753dDeb578Bbd13D847C4"
+          },
+          {
+            "network": "bsctestnet",
+            "token": "MTT",
+            "address": "0x5061100aF32153730e4Ef4843f65a5Dd38a49bCe"
+          }
+        ]
+      ]
+    }
+  ]
+}
