@@ -1,5 +1,6 @@
 import { check } from '../utils.js';
 import { BaseModel } from './common.js';
+import { isValidVersion } from '../version.js';
 
 /**
  * @class Wallet
@@ -50,5 +51,18 @@ export class Wallet extends BaseModel {
   set accountNonce(nonce) {
     check(typeof nonce === 'number', 'nonce should be instance of number');
     this.data['accountNonce'] = nonce;
+  }
+
+  /**
+   * @property {string} version
+   * @desc version string of this wallet instance.
+   */
+  get version() {
+    return this.data['version'];
+  }
+
+  set version(v) {
+    check(!v || isValidVersion(v), `${v} is an invalid version string`);
+    this.data['version'] = v;
   }
 }
