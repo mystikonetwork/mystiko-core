@@ -76,8 +76,12 @@ export class WithdrawHandler extends Handler {
     check(chainConfig, 'chain config does not exist');
     const contractConfig = chainConfig.getContract(privateNote.dstProtocolAddress);
     check(contractConfig, 'contract config does not exist');
-    const contract = this.contractPool.getContract(privateNote.dstChainId, privateNote.dstProtocolAddress);
-    check(contract, 'contract instance does not exist');
+    const wrappedContract = this.contractPool.getWrappedContract(
+      privateNote.dstChainId,
+      privateNote.dstProtocolAddress,
+    );
+    check(wrappedContract, 'contract instance does not exist');
+    const contract = wrappedContract.contract;
     const withdraw = new Withdraw();
     withdraw.chainId = privateNote.dstChainId;
     withdraw.asset = privateNote.dstAsset;
@@ -95,6 +99,7 @@ export class WithdrawHandler extends Handler {
       account,
       walletPassword,
       privateNote,
+      wrappedContract,
       contract,
       contractConfig,
       withdraw,
@@ -204,12 +209,15 @@ export class WithdrawHandler extends Handler {
     account,
     walletPassword,
     privateNote,
+    wrappedContract,
     contract,
     contractConfig,
     withdraw,
     statusCallback,
   ) {
     await this._updateStatus(withdraw, WithdrawStatus.GENERATING_PROOF, statusCallback);
+    const balance = await wrappedContract.assetBalance();
+    check(balance.gte(privateNote.amount), 'insufficient pool balance for withdrawing');
     this.logger.info(`generating zkSnark proofs for withdraw(id=${withdraw.id})...`);
     const { leaves, leafIndex } = await this._buildMerkleTree(contract, privateNote.commitmentHash);
     const pkVerify = account.verifyPublicKey;
