@@ -229,7 +229,8 @@ test('test MystikoContract assetBalance', async () => {
   });
   contract1.connect(mockProvider);
   contract2.connect(mockProvider);
-  const balance1 = await contract1.assetBalance((address, abi, providerOrSigner) => {
+  const balance1 = await contract1.assetBalance((erc20Address, abi, providerOrSigner) => {
+    expect(erc20Address).toBe(assetAddress);
     return new MockErc20Contract(address, abi, providerOrSigner, { [address]: new BN(3456) });
   });
   expect(balance1.toString()).toBe('3456');
