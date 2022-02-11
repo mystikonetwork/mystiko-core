@@ -2,8 +2,8 @@ const truffleCfg = require('../truffle-config');
 const util = require('../src/utils');
 const fs = require('fs');
 
-const TESTNET_CONFIG_FILE = 'config/pair/testnet.json';
-const MAINNET_CONFIG_FILE = 'config/pair/mainnet.json';
+const TESTNET_CONFIG_FILE = 'deploy/pair/testnet.json';
+const MAINNET_CONFIG_FILE = 'deploy/pair/mainnet.json';
 
 module.exports = {
   async loadConfig(network) {
