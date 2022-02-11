@@ -156,9 +156,9 @@ async function deployStep2or3() {
     return;
   }
 
-  src = pair[i];
-  dst = pair[j];
-  proxyAddress = common.getBridgeProxyAddress(bridge, pair[i].network);
+  const src = pair[i];
+  const dst = pair[j];
+  const proxyAddress = common.getBridgeProxyAddress(bridge, pair[i].network);
 
   if (step == 'step2') {
     const m = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
