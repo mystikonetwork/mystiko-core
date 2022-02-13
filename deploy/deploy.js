@@ -38,7 +38,7 @@ function getMystikoContract(bridge, bErc20) {
       return MystikoWithPolyMain;
     }
   } else {
-    console.error(common.RED,'bridge not support');
+    console.error(common.RED, 'bridge not support');
     return null;
   }
 }
