@@ -1,7 +1,4 @@
-const fs = require('fs');
 const common = require('./common');
-const util = require('../src/utils');
-const abi = require('../src/chain/abi');
 
 const CLI_TESTNET_CONFIG_FILE = 'config/cli/testnet.json';
 const CLI_MAINNET_CONFIG_FILE = 'config/cli/mainnet.json';
@@ -101,7 +98,7 @@ module.exports = {
     return null;
   },
 
-  async savePeerConfig(mystikoNetwork, bridgeName, src, dst, config) {
+  savePeerConfig(mystikoNetwork, bridgeName, src, dst, config) {
     const bridge = common.getBridgeConfig(config, bridgeName);
     if (bridge == null) {
       return;

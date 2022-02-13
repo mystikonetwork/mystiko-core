@@ -1,4 +1,3 @@
-const truffleCfg = require('../truffle-config');
 const fs = require('fs');
 
 const DEVELOPMENT_CONFIG_FILE = 'deploy/pair/development.json';
@@ -32,7 +31,7 @@ module.exports = {
     } else if (mystikoNetwork == 'development') {
       return this.readJsonFile(DEVELOPMENT_CONFIG_FILE);
     } else {
-      console.error(common.RED, 'load config network not support');
+      console.error(this.RED, 'load config network not support');
       return null;
     }
   },
@@ -45,7 +44,7 @@ module.exports = {
     } else if (mystikoNetwork == 'development') {
       this.writeJsonFile(DEVELOPMENT_CONFIG_FILE, data);
     } else {
-      console.error(common.RED, 'save base address config network not support');
+      console.error(this.RED, 'save base address config network not support');
       return;
     }
   },
@@ -80,7 +79,7 @@ module.exports = {
       }
     }
 
-    console.error(common.RED, 'bridge configure not support');
+    console.error(this.RED, 'bridge configure not support');
     return null;
   },
 
@@ -91,7 +90,7 @@ module.exports = {
       }
     }
 
-    console.error(common.RED, 'bridge proxy not exist');
+    console.error(this.RED, 'bridge proxy not exist');
     return null;
   },
 
@@ -128,7 +127,7 @@ module.exports = {
       }
     }
 
-    console.error(common.RED, 'chain configure not support');
+    console.error(this.RED, 'chain configure not support');
     return null;
   },
 
@@ -139,7 +138,7 @@ module.exports = {
       }
     }
 
-    console.error(common.RED, 'chain token configure not support');
+    console.error(this.RED, 'chain token configure not support');
     return null;
   },
 };

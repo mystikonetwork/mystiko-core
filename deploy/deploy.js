@@ -224,7 +224,7 @@ async function deployStep2or3() {
       return;
     }
 
-    // const result = await setMystikoPeerAddress(bridgeName, src, dst, config);
+    await setMystikoPeerAddress(bridgeName, src, dst, config);
     coreConfig.savePeerConfig(mystikoNetwork, bridgeName, src, dst, config);
   } else {
     console.error(common.RED, 'not support step');
