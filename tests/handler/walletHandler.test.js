@@ -55,3 +55,12 @@ test('Test WalletHandler exportMasterSeed', async () => {
   expect(handler.exportMasterSeed(walletPassword)).toBe(walletMasterSeed);
   expect(() => handler.exportMasterSeed('wrong password')).toThrow();
 });
+
+test('test WalletHandler with unsupported version', async () => {
+  const walletMasterSeed = 'awesomeMasterSeed';
+  const walletPassword = 'P@ssw0rd';
+  const wallet = await handler.createWallet(walletMasterSeed, walletPassword);
+  wallet.version = undefined;
+  handler.db.wallets.update(wallet.data);
+  expect(handler.getCurrentWallet()).toBe(undefined);
+});
