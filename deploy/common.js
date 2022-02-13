@@ -1,23 +1,21 @@
 const truffleCfg = require('../truffle-config');
-const util = require('../src/utils');
 const fs = require('fs');
 
+const DEVELOPMENT_CONFIG_FILE = 'deploy/pair/development.json';
 const TESTNET_CONFIG_FILE = 'deploy/pair/testnet.json';
 const MAINNET_CONFIG_FILE = 'deploy/pair/mainnet.json';
 
+const RED = '\x1b[31m';
+
 module.exports = {
-  async loadConfig(network) {
-    if (network == 'testnet') {
-      return await util.readJsonFile(TESTNET_CONFIG_FILE);
-    } else if (network == 'mainnet') {
-      return await util.readJsonFile(MAINNET_CONFIG_FILE);
-    } else {
-      console.log('network configure not support');
-      return null;
-    }
+  RED: RED,
+
+  readJsonFile(fileName) {
+    const data = fs.readFileSync(fileName);
+    return JSON.parse(data);
   },
 
-  saveJsonFile(fileName, data) {
+  writeJsonFile(fileName, data) {
     var jsonData = JSON.stringify(data, null, 2);
     try {
       fs.writeFileSync(fileName, jsonData);
@@ -26,7 +24,33 @@ module.exports = {
     }
   },
 
-  saveBaseAddressConfig(cfgNetwork, network, config, hashAddress, verifierAddress) {
+  loadConfig(mystikoNetwork) {
+    if (mystikoNetwork == 'testnet') {
+      return this.readJsonFile(TESTNET_CONFIG_FILE);
+    } else if (mystikoNetwork == 'mainnet') {
+      return this.readJsonFile(MAINNET_CONFIG_FILE);
+    } else if (mystikoNetwork == 'development') {
+      return this.readJsonFile(DEVELOPMENT_CONFIG_FILE);
+    } else {
+      console.error(common.RED, 'load config network not support');
+      return null;
+    }
+  },
+
+  saveConfig(mystikoNetwork, data) {
+    if (mystikoNetwork == 'testnet') {
+      this.writeJsonFile(TESTNET_CONFIG_FILE, data);
+    } else if (mystikoNetwork == 'mainnet') {
+      this.writeJsonFile(MAINNET_CONFIG_FILE, data);
+    } else if (mystikoNetwork == 'development') {
+      this.writeJsonFile(DEVELOPMENT_CONFIG_FILE, data);
+    } else {
+      console.error(common.RED, 'save base address config network not support');
+      return;
+    }
+  },
+
+  saveBaseAddressConfig(mystikoNetwork, network, config, hashAddress, verifierAddress) {
     for (let i = 0; i < config.chains.length; i++) {
       if (config.chains[i].network == network) {
         config.chains[i].hashAddress = hashAddress;
@@ -35,30 +59,18 @@ module.exports = {
       }
     }
 
-    if (cfgNetwork == 'testnet') {
-      this.saveJsonFile(TESTNET_CONFIG_FILE, config);
-    } else if (cfgNetwork == 'mainnet') {
-      this.saveJsonFile(MAINNET_CONFIG_FILE, config);
-    } else {
-      console.log('network configure not support');
-    }
+    this.saveConfig(mystikoNetwork, config);
   },
 
-  saveMystikoAddressConfig(cfgNetwork, config, bridgeName, index, elem, address) {
+  saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, index, pos, address) {
     for (let i = 0; i < config.bridges.length; i++) {
       if (config.bridges[i].name == bridgeName) {
-        config.bridges[i].pairs[index][elem].address = address;
+        config.bridges[i].pairs[index][pos].address = address;
         break;
       }
     }
 
-    if (cfgNetwork == 'testnet') {
-      this.saveJsonFile(TESTNET_CONFIG_FILE, config);
-    } else if (cfgNetwork == 'mainnet') {
-      this.saveJsonFile(MAINNET_CONFIG_FILE, config);
-    } else {
-      console.log('network configure not support');
-    }
+    this.saveConfig(mystikoNetwork, config);
   },
 
   getBridgeConfig(config, bridgeName) {
@@ -68,7 +80,7 @@ module.exports = {
       }
     }
 
-    console.log('bridge configure not support');
+    console.error(common.RED, 'bridge configure not support');
     return null;
   },
 
@@ -79,16 +91,33 @@ module.exports = {
       }
     }
 
-    console.log('bridge proxy not exist');
+    console.error(common.RED, 'bridge proxy not exist');
     return null;
   },
 
-  getBridgePairByIndex(bridge, index) {
-    if (index > bridge.pairs.length) {
-      console.log('pair index error');
-      return null;
+  getBridgePairIndexByTokenName(bridge, srcNetwork, dstNetwork, tokenName) {
+    for (let i = 0; i < bridge.pairs.length; i++) {
+      if (bridge.pairs[i].length == 1) {
+        if (bridge.pairs[i][0].network == srcNetwork && bridge.pairs[i][0].token == tokenName) {
+          return i;
+        }
+      } else {
+        if (bridge.pairs[i][0].token == tokenName || bridge.pairs[i][1].token == tokenName) {
+          if (
+            (bridge.pairs[i][0].network == srcNetwork && bridge.pairs[i][1].network == dstNetwork) ||
+            (bridge.pairs[i][1].network == srcNetwork && bridge.pairs[i][0].network == dstNetwork)
+          ) {
+            return i;
+          }
+        }
+      }
     }
 
+    console.log('bridge pair token ', tokenName, ' not exist ');
+    return -1;
+  },
+
+  getBridgePairByIndex(bridge, index) {
     return bridge.pairs[index];
   },
 
@@ -99,7 +128,7 @@ module.exports = {
       }
     }
 
-    console.log('chain configure not support');
+    console.error(common.RED, 'chain configure not support');
     return null;
   },
 
@@ -110,18 +139,7 @@ module.exports = {
       }
     }
 
-    console.log('chain token configure not support');
+    console.error(common.RED, 'chain token configure not support');
     return null;
-  },
-
-  getProvider(network) {
-    if (network == 'bsctestnet') {
-      return truffleCfg.networks.bsctestnet.provider();
-    } else if (network == 'ropsten') {
-      return truffleCfg.networks.ropsten.provider();
-    } else {
-      console.log('provider configure not support');
-      return null;
-    }
   },
 };

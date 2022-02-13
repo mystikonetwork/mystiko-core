@@ -1,27 +1,44 @@
-const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
-const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
+const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
+const MystikoWithLoopMain = artifacts.require('MystikoWithLoopMain');
+const MystikoWithTBridgeERC20 = artifacts.require('MystikoWithTBridgeERC20');
+const MystikoWithTBridgeMain = artifacts.require('MystikoWithTBridgeMain');
 const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
+const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
+const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
 
 const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 const common = require('./common');
+const coreConfig = require('./coreConfig');
 
 function getMystikoContract(bridge, bErc20) {
-  if (bridge == 'celer') {
-    if (bErc20) {
+  if (bridge == 'loop') {
+    if (bErc20 == 'true') {
+      return MystikoWithLoopERC20;
+    } else {
+      return MystikoWithLoopMain;
+    }
+  } else if (bridge == 'tbridge') {
+    if (bErc20 == 'true') {
+      return MystikoWithTBridgeERC20;
+    } else {
+      return MystikoWithTBridgeMain;
+    }
+  } else if (bridge == 'celer') {
+    if (bErc20 == 'true') {
       return MystikoWithCelerERC20;
     } else {
       return MystikoWithCelerMain;
     }
   } else if (bridge == 'poly') {
-    if (bErc20) {
+    if (bErc20 == 'true') {
       return MystikoWithPolyERC20;
     } else {
       return MystikoWithPolyMain;
     }
   } else {
-    console.log('bridge not support');
+    console.error(common.RED,'bridge not support');
     return null;
   }
 }
@@ -29,15 +46,15 @@ function getMystikoContract(bridge, bErc20) {
 async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
   const { MERKLE_TREE_HEIGHT } = process.env;
 
-  const provider = common.getProvider(src.network);
-  if (provider == null) {
-    return null;
-  }
-
-  console.log('src.network ', src.network);
+  common.info('src.network ', src.network);
 
   const srcChain = common.getChainConfig(config, src.network);
   if (srcChain == null) {
+    return null;
+  }
+
+  if (srcChain.verifierAddress == '' || srcChain.hashAddress == '') {
+    console.log('should do step1');
     return null;
   }
 
@@ -56,14 +73,37 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
     return null;
   }
 
-  return await MystikoCore.new(
-    proxyAddress,
-    dstChain.chainId,
-    srcChain.verifierAddress,
-    token.address,
-    srcChain.hashAddress,
-    MERKLE_TREE_HEIGHT,
-  );
+  if (bridgeName == 'loop') {
+    if (token.erc20 == 'true') {
+      return await MystikoCore.new(
+        srcChain.verifierAddress,
+        token.address,
+        srcChain.hashAddress,
+        MERKLE_TREE_HEIGHT,
+      );
+    } else {
+      return await MystikoCore.new(srcChain.verifierAddress, srcChain.hashAddress, MERKLE_TREE_HEIGHT);
+    }
+  } else {
+    if (token.erc20 == 'true') {
+      return await MystikoCore.new(
+        proxyAddress,
+        dstChain.chainId,
+        srcChain.verifierAddress,
+        token.address,
+        srcChain.hashAddress,
+        MERKLE_TREE_HEIGHT,
+      );
+    } else {
+      return await MystikoCore.new(
+        proxyAddress,
+        dstChain.chainId,
+        srcChain.verifierAddress,
+        srcChain.hashAddress,
+        MERKLE_TREE_HEIGHT,
+      );
+    }
+  }
 }
 
 async function setMystikoPeerAddress(bridgeName, src, dst, config) {
@@ -83,10 +123,10 @@ async function setMystikoPeerAddress(bridgeName, src, dst, config) {
   }
 
   let mystikoCore = await MystikoCore.at(src.address);
-  await mystikoCore.setPeerContractAddress(dst.address);
+  return await mystikoCore.setPeerContractAddress(dst.address);
 }
 
-//depoly hasher and verifier
+//deploy hasher and verifier
 async function deployStep1() {
   if (process.argv.length != 8) {
     console.log('should special parameter ');
@@ -98,38 +138,40 @@ async function deployStep1() {
   const network = process.argv[5];
   const cfgNetwork = process.argv[6];
 
-  const config = await common.loadConfig(cfgNetwork);
+  const config = common.loadConfig(cfgNetwork);
   if (config == null) {
     return;
   }
 
-  const hasher = await Hasher.deployed();
+  const hasher = await Hasher.new();
   console.log('hasher address: ', hasher.address);
 
-  const verifier = await Verifier.deployed();
+  const verifier = await Verifier.new();
   console.log('verifier address: ', verifier.address);
 
   common.saveBaseAddressConfig(cfgNetwork, network, config, hasher.address, verifier.address);
 }
 
-//deploy mystiko contract
+//deploy mystiko contract and configure peer contract address
 async function deployStep2or3() {
-  if (process.argv.length != 10) {
+  if (process.argv.length != 11) {
     console.log('should special parameter ');
-    console.log('   network           : testnet 、 mainnet) ');
-    console.log('   step              : step2  ');
-    console.log('   bridge name       : tbridge 、 celer、 poly ');
-    console.log('   token pair index  :  0,1,3...  ');
+    console.log('   mystiko network     : testnet、mainnet) ');
+    console.log('   step                : step2  ');
+    console.log('   bridge name         : tbridge、celer、poly ');
+    console.log('   destination network : ropsten、bsctestnet ...  ');
+    console.log('   token name          : ETH、MTT、mUSD、BNB...  ');
     return;
   }
 
-  const network = process.argv[5];
-  const cfgNetwork = process.argv[6];
+  const srcNetwork = process.argv[5];
+  const mystikoNetwork = process.argv[6];
   const step = process.argv[7];
   const bridgeName = process.argv[8];
-  const pairIndex = process.argv[9];
+  const dstNetwork = process.argv[9];
+  const tokenName = process.argv[10];
 
-  const config = await common.loadConfig(cfgNetwork);
+  const config = common.loadConfig(mystikoNetwork);
   if (config == null) {
     return;
   }
@@ -139,21 +181,28 @@ async function deployStep2or3() {
     return;
   }
 
-  const pair = common.getBridgePairByIndex(bridge, pairIndex);
-  if (pair == null) {
+  const pairIndex = common.getBridgePairIndexByTokenName(bridge, srcNetwork, dstNetwork, tokenName);
+  if (pairIndex == -1) {
     return;
   }
 
+  const pair = common.getBridgePairByIndex(bridge, pairIndex);
+
   let i, j;
-  if (pair[0].network == network) {
+  if (bridgeName == 'loop') {
     i = 0;
-    j = 1;
-  } else if (pair[1].network == network) {
-    i = 1;
     j = 0;
   } else {
-    console.log('network wrong ');
-    return;
+    if (pair[0].network == srcNetwork) {
+      i = 0;
+      j = 1;
+    } else if (pair[1].network == srcNetwork) {
+      i = 1;
+      j = 0;
+    } else {
+      console.error(common.RED, 'network wrong ');
+      return;
+    }
   }
 
   const src = pair[i];
@@ -163,21 +212,22 @@ async function deployStep2or3() {
   if (step == 'step2') {
     const m = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
     console.log(m.address);
-    common.saveMystikoAddressConfig(cfgNetwork, config, bridgeName, pairIndex, i, m.address);
+    common.saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, pairIndex, i, m.address);
   } else if (step == 'step3') {
     if (src.address == '') {
-      console.log('src mystiko address is null');
+      console.error(common.RED, 'src mystiko address is null');
       return;
     }
 
     if (dst.address == '') {
-      console.log('dst mystiko address is null');
+      console.error(common.RED, 'dst mystiko address is null');
       return;
     }
 
-    await setMystikoPeerAddress(bridgeName, src, dst, config);
+    // const result = await setMystikoPeerAddress(bridgeName, src, dst, config);
+    coreConfig.savePeerConfig(mystikoNetwork, bridgeName, src, dst, config);
   } else {
-    console.log('not support step');
+    console.error(common.RED, 'not support step');
   }
 }
 
