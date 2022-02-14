@@ -106,6 +106,9 @@ export function testDeposit(
           minRollupFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: estimateGas },
         );
+        expect(await mystikoContract.depositedCommitments(commitments[i].commitmentHash.toString())).to.equal(
+          true,
+        );
         const noteEvent = tx.logs.find((e) => e['event'] === 'EncryptedNote');
         expect(noteEvent).to.not.equal(undefined);
         expect(noteEvent.args.commitment.toString()).to.equal(commitments[i].commitmentHash.toString());
@@ -136,6 +139,46 @@ export function testDeposit(
           toHex(commitments[0].privateNote),
           minRollupFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0' },
+        ),
+      );
+    });
+    it('should revert when tree is full', async () => {
+      const mystikoContract2 = await contractGetter({ treeHeight: 1 });
+      if (!isMainAsset) {
+        const approveAmount = new BN(minTotalAmount).muln(3);
+        await testTokenContract.approve(mystikoContract2.address, approveAmount.toString(), {
+          from: accounts[0],
+          gas: 1000000,
+        });
+      }
+      for (let i = 0; i < 2; i++) {
+        const commitment = await commitmentWithShieldedAddress(
+          'EggPbWC9MXEiAj3XBcfaN7c7z9taax5Dm429MPP4UCUA7tsTqmqxgkwYYUwc6fzo8oTqMuDctvrHpcxgWx5W6Stmx',
+          new BN(depositAmount),
+        );
+        await mystikoContract2.deposit(
+          depositAmount,
+          commitment.commitmentHash.toString(),
+          commitment.k.toString(),
+          commitment.randomS.toString(),
+          toHex(commitment.privateNote),
+          minRollupFee,
+          { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: 1000000 },
+        );
+      }
+      const commitment = await commitmentWithShieldedAddress(
+        'EggPbWC9MXEiAj3XBcfaN7c7z9taax5Dm429MPP4UCUA7tsTqmqxgkwYYUwc6fzo8oTqMuDctvrHpcxgWx5W6Stmx',
+        new BN(depositAmount),
+      );
+      await expectThrowsAsync(() =>
+        mystikoContract2.deposit(
+          depositAmount,
+          commitment.commitmentHash.toString(),
+          commitment.k.toString(),
+          commitment.randomS.toString(),
+          toHex(commitment.privateNote),
+          minRollupFee,
+          { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: 1000000 },
         ),
       );
     });

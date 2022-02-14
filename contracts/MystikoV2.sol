@@ -111,7 +111,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(rollupFee >= minRollupFee, "rollup fee too few");
-    require(currentRootIndex + 1 <= treeCapacity, "tree is full");
+    require(depositIncludedCount + depositQueueSize < treeCapacity, "tree is full");
     require(!depositedCommitments[commitment], "the commitment has been submitted");
     uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
