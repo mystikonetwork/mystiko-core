@@ -1,5 +1,6 @@
 import { Handler } from './handler.js';
-import { ID_KEY, Wallet } from '../model/';
+import { ID_KEY, Wallet } from '../model';
+import { VERSION } from '../version.js';
 import { check } from '../utils.js';
 import rootLogger from '../logger';
 
@@ -36,6 +37,7 @@ export class WalletHandler extends Handler {
       encryptedMasterSeed: encryptedMasterSeed,
       hashedPassword: hashedPassword,
       accountNonce: 0,
+      version: VERSION,
     };
     const wallet = new Wallet(this.db.wallets.insert(data));
     await this.saveDatabase();
@@ -48,7 +50,11 @@ export class WalletHandler extends Handler {
    * @returns {Wallet|undefined} the instance if it exists, otherwise it returns undefined.
    */
   getCurrentWallet() {
-    const results = this.db.wallets.chain().find().simplesort(ID_KEY, { desc: true }).data();
+    const results = this.db.wallets
+      .chain()
+      .where(this._versionFilter)
+      .simplesort(ID_KEY, { desc: true })
+      .data();
     if (results.length > 0) {
       return new Wallet(results[0]);
     }
@@ -128,5 +134,9 @@ export class WalletHandler extends Handler {
     check(this.checkPassword(walletPassword), 'incorrect wallet password');
     const wallet = this.checkCurrentWallet();
     return this.protocol.decryptSymmetric(walletPassword, wallet.encryptedMasterSeed);
+  }
+
+  _versionFilter(wallet) {
+    return wallet.version && wallet.version >= '0.0.1';
   }
 }
