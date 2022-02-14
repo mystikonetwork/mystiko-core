@@ -8,17 +8,17 @@ export function testRollup(
   contractGetter,
   rollupVerifierContractGetter,
   accounts,
-  { rollupSize, treeHeight = 20, rootHistoryLength = 30 },
+  { commitments, rollupSize, treeHeight = 20, rootHistoryLength = 30 },
 ) {
   let mystikoContract;
   let rollupVerifierContract;
   let proof;
-  describe('Test Mystiko rollup operation', () => {
+  describe(`Test Mystiko rollup ${rollupSize} operation`, () => {
     before(async () => {
       mystikoContract = await contractGetter();
       rollupVerifierContract = await rollupVerifierContractGetter();
       await _enableRollupVerifier(mystikoContract, rollupVerifierContract, rollupSize, accounts);
-      proof = await _generateProof(mystikoContract, treeHeight, rollupSize);
+      proof = await _generateProof(commitments, mystikoContract, treeHeight, rollupSize);
     });
     it('should revert known root', () => {
       expectThrowsAsync(() =>
@@ -123,11 +123,14 @@ async function _enableRollupVerifier(mystikoContract, rollupVerifierContract, ro
   });
 }
 
-async function _generateProof(mystikoContract, treeHeight, rollupSize) {
+async function _generateProof(commitments, mystikoContract, treeHeight, rollupSize) {
+  const oldLeaves = [];
   const depositsInQueue = [];
   const newLeaves = [];
   const depositIncludedCount = (await mystikoContract.depositIncludedCount()).toNumber();
-  expect(depositIncludedCount).to.equal(0);
+  for (let i = 0; i < depositIncludedCount; i++) {
+    oldLeaves.push(commitments[i].commitmentHash);
+  }
   const depositQueueSize = (await mystikoContract.depositQueueSize()).toNumber();
   expect(depositQueueSize).to.gte(rollupSize);
   const currentRootIndex = (await mystikoContract.currentRootIndex()).toNumber();
@@ -137,7 +140,7 @@ async function _generateProof(mystikoContract, treeHeight, rollupSize) {
     depositsInQueue.push(await mystikoContract.depositQueue(`${i + depositIncludedCount}`));
     newLeaves.push(new BN(depositsInQueue[i].commitment.toString()));
   }
-  const tree = new MerkleTree(treeHeight);
+  const tree = new MerkleTree(treeHeight, oldLeaves);
   expect(tree.root().toString()).to.equal(currentRoot);
   let proof;
   if (rollupSize === 1) {

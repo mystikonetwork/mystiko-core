@@ -1,6 +1,17 @@
 import BN from 'bn.js';
 import { expectThrowsAsync } from './utils.js';
-import { commitmentWithShieldedAddress, randomBigInt } from '../../../src/protocol';
+import {
+  commitmentWithShieldedAddress,
+  randomBigInt,
+  randomBytes,
+  secretKeyForVerification,
+  secretKeyForEncryption,
+  publicKeyForVerification,
+  publicKeyForEncryption,
+  shieldedAddress,
+  VERIFY_SK_SIZE,
+  ENCRYPT_SK_SIZE,
+} from '../../../src/protocol';
 import { toHex } from '../../../src/utils.js';
 
 const TestTokenContract = artifacts.require('TestToken');
@@ -15,15 +26,21 @@ export function testDeposit(
   const commitments = [];
   let minTotalAmount;
   let minRollupFee;
+  let pkVerify, rawSkVerify, skVerify, pkEnc, rawSkEnc, skEnc;
+  let mystikoAddress;
   describe('Test Mystiko deposit operation', () => {
     before(async () => {
       mystikoContract = await contractGetter();
       testTokenContract = await TestTokenContract.deployed();
+      rawSkVerify = randomBytes(VERIFY_SK_SIZE);
+      rawSkEnc = randomBytes(ENCRYPT_SK_SIZE);
+      pkVerify = publicKeyForVerification(rawSkVerify);
+      skVerify = secretKeyForVerification(rawSkVerify);
+      pkEnc = publicKeyForEncryption(rawSkEnc);
+      skEnc = secretKeyForEncryption(rawSkEnc);
+      mystikoAddress = shieldedAddress(pkVerify, pkEnc);
       for (let i = 0; i < numOfCommitments; i++) {
-        const commitment = await commitmentWithShieldedAddress(
-          'EggPbWC9MXEiAj3XBcfaN7c7z9taax5Dm429MPP4UCUA7tsTqmqxgkwYYUwc6fzo8oTqMuDctvrHpcxgWx5W6Stmx',
-          new BN(depositAmount),
-        );
+        const commitment = await commitmentWithShieldedAddress(mystikoAddress, new BN(depositAmount));
         commitments.push(commitment);
       }
       minRollupFee = (await mystikoContract.minRollupFee()).toString();
@@ -152,10 +169,7 @@ export function testDeposit(
         });
       }
       for (let i = 0; i < 2; i++) {
-        const commitment = await commitmentWithShieldedAddress(
-          'EggPbWC9MXEiAj3XBcfaN7c7z9taax5Dm429MPP4UCUA7tsTqmqxgkwYYUwc6fzo8oTqMuDctvrHpcxgWx5W6Stmx',
-          new BN(depositAmount),
-        );
+        const commitment = await commitmentWithShieldedAddress(mystikoAddress, new BN(depositAmount));
         await mystikoContract2.deposit(
           depositAmount,
           commitment.commitmentHash.toString(),
@@ -166,10 +180,7 @@ export function testDeposit(
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: 1000000 },
         );
       }
-      const commitment = await commitmentWithShieldedAddress(
-        'EggPbWC9MXEiAj3XBcfaN7c7z9taax5Dm429MPP4UCUA7tsTqmqxgkwYYUwc6fzo8oTqMuDctvrHpcxgWx5W6Stmx',
-        new BN(depositAmount),
-      );
+      const commitment = await commitmentWithShieldedAddress(mystikoAddress, new BN(depositAmount));
       await expectThrowsAsync(() =>
         mystikoContract2.deposit(
           depositAmount,
@@ -183,6 +194,7 @@ export function testDeposit(
       );
     });
   });
+  return { pkVerify, rawSkVerify, skVerify, pkEnc, rawSkEnc, skEnc, mystikoAddress, commitments };
 }
 
 async function _testDepositEnqueue(mystikoContract, depositAmount, minRollupFee, commitments, depositTxs) {

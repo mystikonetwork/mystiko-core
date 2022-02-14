@@ -3,6 +3,8 @@ import { toDecimals } from '../../../../src/utils.js';
 
 const MystikoContract = artifacts.require('MystikoV2WithLoopMain');
 const WithdrawVerifierContract = artifacts.require('WithdrawVerifier');
+const Rollup1VerifierContract = artifacts.require('Rollup1Verifier');
+const Rollup4VerifierContract = artifacts.require('Rollup4Verifier');
 const Rollup16VerifierContract = artifacts.require('Rollup16Verifier');
 
 async function getContract(options = undefined) {
@@ -22,16 +24,27 @@ async function getContract(options = undefined) {
 
 contract('MystikoV2WithLoopMain', (accounts) => {
   const withdrawVerifierContractGetter = () => WithdrawVerifierContract.deployed();
-  const rollupVerifierContractGetter = () => Rollup16VerifierContract.deployed();
+  const rollup1VerifierContractGetter = () => Rollup1VerifierContract.deployed();
+  const rollup4VerifierContractGetter = () => Rollup4VerifierContract.deployed();
+  const rollup16VerifierContractGetter = () => Rollup16VerifierContract.deployed();
   testConstructor(getContract, withdrawVerifierContractGetter, {
     minRollupFee: toDecimals(0.001).toString(),
   });
   testAdminOperations(getContract, accounts);
-  testDeposit(getContract, accounts, {
+  const depositContext = testDeposit(getContract, accounts, {
     depositAmount: toDecimals(0.001).toString(),
-    numOfCommitments: 16,
+    numOfCommitments: 21,
   });
-  testRollup(getContract, rollupVerifierContractGetter, accounts, {
+  testRollup(getContract, rollup16VerifierContractGetter, accounts, {
+    commitments: depositContext.commitments,
     rollupSize: 16,
+  });
+  testRollup(getContract, rollup4VerifierContractGetter, accounts, {
+    commitments: depositContext.commitments,
+    rollupSize: 4,
+  });
+  testRollup(getContract, rollup1VerifierContractGetter, accounts, {
+    commitments: depositContext.commitments,
+    rollupSize: 1,
   });
 });
