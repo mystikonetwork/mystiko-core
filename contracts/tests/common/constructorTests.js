@@ -5,7 +5,7 @@ export function testConstructor(
   withdrawVerifierGetter,
   { treeHeight = 20, rootHistoryLength = 30, minRollupFee },
 ) {
-  describe('test Mystiko contract constructor', () => {
+  describe('Test Mystiko contract constructor', () => {
     let mystikoContract;
     let withdrawVerifierContract;
     before(async () => {
