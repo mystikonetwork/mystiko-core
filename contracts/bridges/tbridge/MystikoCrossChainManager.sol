@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
 
+import "./relay/interface/IEthCrossChainManager.sol";
+import "./relay/interface/IEthCrossChainManagerProxy.sol";
 import "../CrossChainDataSerializable.sol";
-import "../poly/MystikoWithPoly.sol";
+import "./MystikoWithTBridge.sol";
 
 contract MystikoCrossChainManager is
   CrossChainDataSerializable,
   IEthCrossChainManager,
   IEthCrossChainManagerProxy
 {
+  event MerkleTreeInsert(bytes32 indexed leaf, uint32 leafIndex, uint256 amount);
+
   address public operator;
 
   constructor() public {
@@ -31,7 +35,7 @@ contract MystikoCrossChainManager is
     bytes memory txDataBytes = serializeTxData(txData);
     bytes memory fromContractAddressBytes = Utils.addressToBytes(_fromContractAddress);
     require(
-      MystikoWithPoly(_toContractAddress).syncTx(txDataBytes, fromContractAddressBytes, _fromChainId),
+      MystikoWithTBridge(_toContractAddress).syncTx(txDataBytes, fromContractAddressBytes, _fromChainId),
       "call syncTx returns error"
     );
     return true;
