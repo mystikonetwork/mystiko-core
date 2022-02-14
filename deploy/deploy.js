@@ -46,7 +46,7 @@ function getMystikoContract(bridge, bErc20) {
 async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
   const { MERKLE_TREE_HEIGHT } = process.env;
 
-  common.info('src.network ', src.network);
+  console.info('src.network ', src.network);
 
   const srcChain = common.getChainConfig(config, src.network);
   if (srcChain == null) {
