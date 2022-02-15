@@ -103,7 +103,7 @@ export class DepositHandler extends Handler {
           depositContracts,
           contractConfig.assetType === AssetType.MAIN,
           statusCallback,
-        );
+        ).then((txReceipt) => this._createPrivateNoteIfNecessary(deposit, txReceipt));
       })
       .catch((error) => {
         deposit.errorMessage = errorMessage(error);
@@ -266,7 +266,7 @@ export class DepositHandler extends Handler {
         await this._updateDepositStatus(deposit, DepositStatus.SUCCEEDED, statusCallback);
       }
     }
-    await this._createPrivateNoteIfNecessary(deposit, txReceipt);
+    return txReceipt;
   }
 
   async _updateDeposit(deposit) {

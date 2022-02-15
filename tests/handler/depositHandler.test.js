@@ -6,6 +6,7 @@ import { ContractPool } from '../../src/chain/contract.js';
 import { createDatabase } from '../../src/database';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
+import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
 import { toDecimals, toHex } from '../../src/utils.js';
@@ -147,6 +148,7 @@ let providerPool;
 let contractPool;
 let walletHandler;
 let accountHandler;
+let contractHandler;
 let noteHandler;
 let depositHandler;
 const walletMasterSeed = 'awesomeMasterSeed';
@@ -157,10 +159,20 @@ beforeEach(async () => {
   conf = await readFromFile('tests/config/files/config.test.json');
   providerPool = new ProviderPool(conf);
   providerPool.connect();
-  contractPool = new ContractPool(conf, providerPool);
+  contractHandler = new ContractHandler(db, conf);
+  await contractHandler.importFromConfig();
+  contractPool = new ContractPool(conf, contractHandler, providerPool);
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
+  noteHandler = new NoteHandler(
+    walletHandler,
+    accountHandler,
+    contractHandler,
+    providerPool,
+    contractPool,
+    db,
+    conf,
+  );
   depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, conf);
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await contractPool.connect((address, abi, providerOrSigner) => {

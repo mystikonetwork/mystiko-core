@@ -145,19 +145,28 @@ beforeEach(async () => {
   providerPool.connect((rpcEndPoints) => {
     return new MockProvider(rpcEndPoints[0]);
   });
-  contractPool = new ContractPool(config, providerPool);
-  contractPool.connect((address, abi, provider) => new MockContract(address, abi, provider));
   contractHandler = new ContractHandler(db, config);
   await contractHandler.importFromConfig();
+  contractPool = new ContractPool(config, contractHandler, providerPool);
+  contractPool.connect((address, abi, provider) => new MockContract(address, abi, provider));
   eventHandler = new EventHandler(db, config);
   walletHandler = new WalletHandler(db, config);
   wallet = await walletHandler.createWallet(walletMasterSeed, walletPassword);
   accountHandler = new AccountHandler(walletHandler, db, config);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, config);
+  noteHandler = new NoteHandler(
+    walletHandler,
+    accountHandler,
+    contractHandler,
+    providerPool,
+    contractPool,
+    db,
+    config,
+  );
   depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, config);
   withdrawHandler = new WithdrawHandler(
     walletHandler,
     accountHandler,
+    contractHandler,
     noteHandler,
     providerPool,
     contractPool,

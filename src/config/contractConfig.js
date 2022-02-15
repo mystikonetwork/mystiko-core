@@ -12,6 +12,7 @@ import { AssetType, BridgeType } from '../model';
 export class ContractConfig extends BaseConfig {
   constructor(rawConfig) {
     super(rawConfig);
+    BaseConfig.checkNumber(this.config, 'version');
     BaseConfig.checkString(this.config, 'name');
     this._checkContractName();
     BaseConfig.checkEthAddress(this.config, 'address');
@@ -25,6 +26,14 @@ export class ContractConfig extends BaseConfig {
       BaseConfig.checkEthAddress(this.config, 'peerContractAddress');
     }
     BaseConfig.checkString(this.config, 'circuits');
+  }
+
+  /**
+   * @property {number} version
+   * @desc the version number of this configured blockchain network.
+   */
+  get version() {
+    return this.config['version'];
   }
 
   /**

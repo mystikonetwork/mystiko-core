@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import BN from 'bn.js';
-import { ContractConfig, MystikoConfig } from '../config';
+import { Contract } from '../model';
+import { ContractHandler } from '../handler/contractHandler.js';
+import { MystikoConfig } from '../config';
 import { ProviderPool } from './provider.js';
 import { check } from '../utils.js';
 import { MystikoABI } from './abi.js';
@@ -25,17 +27,14 @@ import { AssetType } from '../model';
  */
 /**
  * @class MystikoContract
- * @param {ContractConfig} contract configuration of this contract.
+ * @param {Contract | external:Contract} contract configuration of this contract.
  * @desc a wrapped contract object with {@link external:Contract} and
  * ContractConfig.
  */
 export class MystikoContract {
   constructor(contract) {
-    check(
-      contract instanceof ContractConfig || contract instanceof ethers.Contract,
-      'incorrect contract type',
-    );
-    if (contract instanceof ContractConfig) {
+    check(contract instanceof Contract || contract instanceof ethers.Contract, 'incorrect contract type');
+    if (contract instanceof Contract) {
       this.config = contract;
     }
     if (contract instanceof ethers.Contract) {
@@ -90,10 +89,10 @@ export class MystikoContract {
         MystikoABI.ERC20.abi,
         providerOrSigner,
       );
-      const balanceRaw = await erc20Contract.balanceOf(this.contract.address);
+      const balanceRaw = await erc20Contract.balanceOf(this.config.address);
       balance = new BN(balanceRaw.toString());
     } else if (this.config.assetType === AssetType.MAIN) {
-      const balanceRaw = await providerOrSigner.getBalance(this.contract.address);
+      const balanceRaw = await providerOrSigner.getBalance(this.config.address);
       balance = new BN(balanceRaw.toString());
     }
     return balance;
@@ -102,15 +101,21 @@ export class MystikoContract {
 
 /**
  * @class ContractPool
- * @param {MystikoConfig} config full configuration as {@link MystikoConfig}.
+ * @param {MystikoConfig} config a config instance of {@link MystikoConfig}
+ * @param {ContractHandler} contractHandler a handler to get all saved contract information.
  * @param {ProviderPool} providerPool pool of JSON-RPC providers.
  * @desc a pool wrapped Mystiko contracts from different blockchains.
  */
 export class ContractPool {
-  constructor(config, providerPool) {
+  constructor(config, contractHandler, providerPool) {
     check(config instanceof MystikoConfig, 'config should be instance of MystikoConfig');
+    check(
+      contractHandler instanceof ContractHandler,
+      'contractHandler should be instance of ContractHandler',
+    );
     check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
     this.config = config;
+    this.contractHandler = contractHandler;
     this.providerPool = providerPool;
     this.pool = {};
     this.assetPool = {};
@@ -122,27 +127,24 @@ export class ContractPool {
    * it will generate {@link external:Contract}.
    */
   connect(contractGenerator = undefined) {
-    this.config.chains.forEach((chainConfig) => {
-      const chainId = chainConfig.chainId;
-      if (!this.pool[chainId]) {
-        this.pool[chainId] = {};
-        this.assetPool[chainId] = {};
+    this.contractHandler.getContracts().forEach((contractConfig) => {
+      if (!this.pool[contractConfig.chainId]) {
+        this.pool[contractConfig.chainId] = {};
+        this.assetPool[contractConfig.chainId] = {};
       }
-      const provider = this.providerPool.getProvider(chainId);
-      chainConfig.contracts.forEach((contractConfig) => {
-        this.pool[chainId][contractConfig.address] = new MystikoContract(contractConfig);
-        this.pool[chainId][contractConfig.address].connect(provider, contractGenerator);
-        if (contractConfig.assetType !== AssetType.MAIN) {
-          if (!contractGenerator) {
-            contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
-          }
-          this.assetPool[chainId][contractConfig.assetAddress] = contractGenerator(
-            contractConfig.assetAddress,
-            MystikoABI.ERC20.abi,
-            provider,
-          );
+      const provider = this.providerPool.getProvider(contractConfig.chainId);
+      this.pool[contractConfig.chainId][contractConfig.address] = new MystikoContract(contractConfig);
+      this.pool[contractConfig.chainId][contractConfig.address].connect(provider, contractGenerator);
+      if (contractConfig.assetType !== AssetType.MAIN) {
+        if (!contractGenerator) {
+          contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
         }
-      });
+        this.assetPool[contractConfig.chainId][contractConfig.assetAddress] = contractGenerator(
+          contractConfig.assetAddress,
+          MystikoABI.ERC20.abi,
+          provider,
+        );
+      }
     });
   }
 

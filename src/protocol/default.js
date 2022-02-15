@@ -10,6 +10,7 @@ import MerkleTree from 'fixed-merkle-tree';
 import { groth16, wtns } from 'snarkjs';
 import bs58 from 'bs58';
 import BN from 'bn.js';
+import { ethers } from 'ethers';
 import { toHex, toString, check, toHexNoPrefix, readJsonFile } from '../utils.js';
 import logger from '../logger.js';
 
@@ -305,7 +306,7 @@ export async function encryptAsymmetric(publicKey, plainData) {
 export async function decryptAsymmetric(secretKey, cipherData) {
   check(secretKey instanceof Buffer, 'unsupported secretKey type ' + typeof secretKey);
   check(cipherData instanceof Buffer, 'unsupported cipherData type ' + typeof cipherData);
-  check(cipherData.length > ECIES_META_LENGTH, 'incorrected cipherData length');
+  check(cipherData.length > ECIES_META_LENGTH, 'incorrect cipherData length');
 
   return await eccrypto.decrypt(secretKey, {
     iv: cipherData.slice(0, ECIES_IV_LENGTH),
@@ -511,6 +512,7 @@ export function serialNumber(skVerify, randomP) {
  * @param {Buffer} pkEnc public key for asymmetric encryption.
  * @param {Buffer} skEnc secret key for asymmetric encryption.
  * @param {external:BN} amount the amount of the deposited asset.
+ * @param {string} recipient the address of the recipient.
  * @param {external:BN} commitmentHash the commitment hash in the deposit transaction.
  * @param {Buffer} privateNote the encrypted on-chain private note, which include the value of
  * random secret P, random secret R, random secret S.
@@ -528,6 +530,7 @@ export async function zkProve(
   pkEnc,
   skEnc,
   amount,
+  recipient,
   commitmentHash,
   privateNote,
   treeLeaves,
@@ -540,6 +543,7 @@ export async function zkProve(
   check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
   check(skEnc instanceof Buffer, 'unsupported skEnc type ' + typeof skEnc);
   check(amount instanceof BN, 'amount should be instance of BN');
+  check(ethers.utils.isAddress(recipient), 'recipient is invalid Ethereum address');
   check(commitmentHash instanceof BN, 'commitmentHash should be instance of BN');
   check(privateNote instanceof Buffer, 'unsupported privateNote type ' + typeof privateNote);
   check(treeLeaves instanceof Array, 'unsupported treeLeaves type ' + typeof treeLeaves);
@@ -572,6 +576,7 @@ export async function zkProve(
     rootHash: tree.root(),
     serialNumber: sn.toString(),
     amount: amount.toString(),
+    recipient: new BN(toHexNoPrefix(recipient), 16).toString(),
     // private inputs
     pathElements,
     pathIndices,

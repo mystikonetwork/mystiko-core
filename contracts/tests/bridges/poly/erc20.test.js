@@ -179,6 +179,7 @@ contract('MystikoWithPolyERC20', (accounts) => {
         pkEnc,
         skEnc,
         dAmount,
+        accounts[2],
         commitmentHash,
         privateNote,
         treeLeaves,
@@ -193,12 +194,13 @@ contract('MystikoWithPolyERC20', (accounts) => {
       expect(proof['pi_b'][0].length).to.equal(2);
       expect(proof['pi_b'][1].length).to.equal(2);
       expect(proof['pi_c'].length).to.be.gte(2);
-      expect(publicSignals.length).to.equal(3);
+      expect(publicSignals.length).to.equal(4);
       const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/withdraw.vkey.json');
       expect(result).to.equal(true);
     });
 
     it('should withdraw successfully', async () => {
+      const recipient = accounts[2];
       await testToken.transfer(mystikoCoreDestinationERC20.address, amount.toString(), {
         from: accounts[0],
       });
@@ -211,9 +213,13 @@ contract('MystikoWithPolyERC20', (accounts) => {
       const proofC = [new BN(proof.pi_c[0]), new BN(proof.pi_c[1])];
       const rootHash = new BN(publicSignals[0]);
       const serialNumber = new BN(publicSignals[1]);
-      const result = await verifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
+      const result = await verifier.verifyProof(proofA, proofB, proofC, [
+        rootHash,
+        serialNumber,
+        amount,
+        recipient,
+      ]);
       expect(result).to.equal(true);
-      const recipient = accounts[2];
       const initialBalanceOfAccount2 = await testToken.balanceOf(accounts[2]);
       const gasEstimated = await mystikoCoreDestinationERC20.withdraw.estimateGas(
         proofA,
