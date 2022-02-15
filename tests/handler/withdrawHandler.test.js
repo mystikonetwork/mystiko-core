@@ -6,6 +6,7 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
+import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
@@ -119,6 +120,7 @@ let contractPool;
 let contract;
 let walletHandler;
 let accountHandler;
+let contractHandler;
 let noteHandler;
 let withdrawHandler;
 let privateNote;
@@ -130,7 +132,9 @@ beforeEach(async () => {
   conf = await readFromFile('tests/config/files/config.test.json');
   providerPool = new ProviderPool(conf);
   providerPool.connect(() => new MockProvider(txReceipt02));
-  contractPool = new ContractPool(conf, providerPool);
+  contractHandler = new ContractHandler(db, conf);
+  await contractHandler.importFromConfig();
+  contractPool = new ContractPool(conf, contractHandler, providerPool);
   contract = new MockMystikoContract(
     '0x98ed94360cad67a76a53d8aa15905e52485b73d1',
     MystikoABI.MystikoWithLoopERC20.abi,
@@ -142,10 +146,19 @@ beforeEach(async () => {
   );
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
+  noteHandler = new NoteHandler(
+    walletHandler,
+    accountHandler,
+    contractHandler,
+    providerPool,
+    contractPool,
+    db,
+    conf,
+  );
   withdrawHandler = new WithdrawHandler(
     walletHandler,
     accountHandler,
+    contractHandler,
     noteHandler,
     providerPool,
     contractPool,

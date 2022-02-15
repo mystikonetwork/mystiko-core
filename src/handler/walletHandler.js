@@ -137,6 +137,6 @@ export class WalletHandler extends Handler {
   }
 
   _versionFilter(wallet) {
-    return wallet.version && wallet.version >= '0.0.1';
+    return wallet.version && wallet.version >= '0.0.2';
   }
 }

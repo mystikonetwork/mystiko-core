@@ -3,6 +3,7 @@
   "chains": [
     {
       "name": "Ethereum Ropsten",
+      "assetSymbol": "ETH",
       "chainId": 3,
       "explorerUrl": "https://etherscan.io",
       "providers": [

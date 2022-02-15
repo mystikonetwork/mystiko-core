@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
+import { ContractHandler } from './contractHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract.js';
@@ -17,6 +18,7 @@ import rootLogger from '../logger';
  * @desc handler class for Withdraw related business logic
  * @param {WalletHandler} walletHandler instance of {@link WalletHandler}.
  * @param {AccountHandler} accountHandler instance of {@link AccountHandler}.
+ * @param {ContractHandler} contractHandler instance of {@link ContractHandler}.
  * @param {NoteHandler} noteHandler instance of {@link NoteHandler}.
  * @param {ProviderPool} providerPool instance of {@link ProviderPool}.
  * @param {ContractPool} contractPool instance of {@link ContractPool}.
@@ -24,15 +26,29 @@ import rootLogger from '../logger';
  * @param {MystikoConfig} config instance of {@link MystikoConfig}.
  */
 export class WithdrawHandler extends Handler {
-  constructor(walletHandler, accountHandler, noteHandler, providerPool, contractPool, db, conf) {
+  constructor(
+    walletHandler,
+    accountHandler,
+    contractHandler,
+    noteHandler,
+    providerPool,
+    contractPool,
+    db,
+    conf,
+  ) {
     super(db, conf);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     check(accountHandler instanceof AccountHandler, 'accountHandler should be instance of AccountHandler');
+    check(
+      contractHandler instanceof ContractHandler,
+      'contractHandler should be instance of ContractHandler',
+    );
     check(noteHandler instanceof NoteHandler, 'noteHandler should be instance of NoteHandler');
     check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
     check(contractPool instanceof ContractPool, 'contractPool should be instance of ContractPool');
     this.walletHandler = walletHandler;
     this.accountHandler = accountHandler;
+    this.contractHandler = contractHandler;
     this.noteHandler = noteHandler;
     this.providerPool = providerPool;
     this.contractPool = contractPool;
@@ -72,9 +88,10 @@ export class WithdrawHandler extends Handler {
     await checkSigner(signer, privateNote.dstChainId, this.config);
     const account = this.accountHandler.getAccount(privateNote.shieldedAddress);
     check(account, `account does not exist with ${privateNote.shieldedAddress}`);
-    const chainConfig = this.config.getChainConfig(privateNote.dstChainId);
-    check(chainConfig, 'chain config does not exist');
-    const contractConfig = chainConfig.getContract(privateNote.dstProtocolAddress);
+    const contractConfig = this.contractHandler.getContract(
+      privateNote.dstChainId,
+      privateNote.dstProtocolAddress,
+    );
     check(contractConfig, 'contract config does not exist');
     const wrappedContract = this.contractPool.getWrappedContract(
       privateNote.dstChainId,
@@ -235,6 +252,7 @@ export class WithdrawHandler extends Handler {
       pkEnc,
       skEnc,
       privateNote.amount,
+      withdraw.recipientAddress,
       privateNote.commitmentHash,
       privateNote.encryptedOnChainNote,
       leaves,

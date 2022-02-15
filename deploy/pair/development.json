@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "chains": [
+    {
+      "network": "development",
+      "chainId": "0",
+      "tokens": [
+        {
+          "name": "ETH",
+          "erc20": "false"
+        }
+      ],
+      "hashAddress": "0x4C5a3C4C4D103C7365241f6Dbe6899A4D37abEcC",
+      "verifierAddress": "0x7c007e4c957eb8811fdb3D3E078fBA707a7F908b"
+    }
+  ],
+  "bridges": [
+    {
+      "name": "loop",
+      "proxys": [
+        {
+          "network": "development",
+          "address": ""
+        }
+      ],
+      "pairs": [
+        [
+          {
+            "network": "development",
+            "token": "ETH",
+            "address": "0xb5086aF2326dF54C13403FD5798BB17389d577dc"
+          }
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "version": "1.0",
+  "chains": [
+    {
+      "name": "Ethereum Ropsten",
+      "network": "ropsten",
+      "chainId": "3",
+      "tokens": [
+        {
+          "name": "ETH",
+          "erc20": "false"
+        },
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "address": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3"
+        },
+        {
+          "name": "mUSD",
+          "erc20": "true",
+          "address": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD"
+        },
+        {
+          "name": "mBNB",
+          "erc20": "true",
+          "address": "0x2f1306362422e341e08e656d656719d5e8facdc7"
+        }
+      ],
+      "hashAddress": "0x4E424790551C6F300ba14ddC742c4ac75724B5d9",
+      "verifierAddress": "0xb7aefC5ce917B841258d26E5Cf01C0Cd17b4aAc2"
+    },
+    {
+      "name": "Ethereum Goerli",
+      "network": "goerli",
+      "chainId": "5",
+      "tokens": [
+        {
+          "name": "ETH",
+          "erc20": "false"
+        }
+      ],
+      "hashAddress": "0x80B46C896E26C1cB7DCdD23019d9e7cca6854864",
+      "verifierAddress": "0x2407cB6C76500103BAF36d5577aEe633A5C0bE86"
+    },
+    {
+      "name": "BSC Testnet",
+      "network": "bsctestnet",
+      "chainId": "97",
+      "tokens": [
+        {
+          "name": "BNB",
+          "erc20": "false"
+        },
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "address": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0"
+        },
+        {
+          "name": "mUSD",
+          "erc20": "true",
+          "address": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88"
+        },
+        {
+          "name": "mETH",
+          "erc20": "true",
+          "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613"
+        }
+      ],
+      "hashAddress": "0x7b13260988b46b83B30Cc55932E43991d99c38A9",
+      "verifierAddress": "0x5FD28088Ff9bb56D5D20A0f971BDa81e8872ee19"
+    }
+  ],
+  "bridges": [
+    {
+      "name": "loop",
+      "contractName": "Loop",
+      "proxys": [
+        {
+          "network": "ropsten",
+          "address": ""
+        },
+        {
+          "network": "bsctestnet",
+          "address": ""
+        }
+      ],
+      "pairs": [
+        [
+          {
+            "network": "ropsten",
+            "token": "ETH",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "ropsten",
+            "token": "MTT",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "ropsten",
+            "token": "mUSD",
+            "address": "3"
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "BNB",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "MTT",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "mUSD",
+            "address": ""
+          }
+        ]
+      ]
+    },
+    {
+      "name": "celer",
+      "contractName": "Celer",
+      "proxys": [
+        {
+          "network": "goerli",
+          "address": "0x358234B325EF9eA8115291A8b81b7d33A2Fa762D"
+        },
+        {
+          "network": "bsctestnet",
+          "address": "0xf89354F314faF344Abd754924438bA798E306DF2"
+        }
+      ],
+      "pairs": [
+        [
+          {
+            "network": "goerli",
+            "token": "ETH",
+            "address": ""
+          },
+          {
+            "network": "bsctestnet",
+            "token": "mETH",
+            "address": ""
+          }
+        ]
+      ]
+    },
+    {
+      "name": "tbridge",
+      "contractName": "TBridge",
+      "proxys": [
+        {
+          "network": "ropsten",
+          "address": "0xE910377ff38dc083AF99bcbEC5eEC65141424DCD"
+        },
+        {
+          "network": "bsctestnet",
+          "address": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        }
+      ],
+      "pairs": [
+        [
+          {
+            "network": "ropsten",
+            "token": "ETH",
+            "address": ""
+          },
+          {
+            "network": "bsctestnet",
+            "token": "mETH",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "ropsten",
+            "token": "MTT",
+            "address": ""
+          },
+          {
+            "network": "bsctestnet",
+            "token": "MTT",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "ropsten",
+            "token": "mUSD",
+            "address": ""
+          },
+          {
+            "network": "bsctestnet",
+            "token": "mUSD",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "ropsten",
+            "token": "mBNB",
+            "address": ""
+          },
+          {
+            "network": "bsctestnet",
+            "token": "BNB",
+            "address": ""
+          }
+        ]
+      ]
+    }
+  ]
+}

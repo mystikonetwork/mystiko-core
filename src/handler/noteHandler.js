@@ -3,6 +3,7 @@ import BN from 'bn.js';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
+import { ContractHandler } from './contractHandler.js';
 import { check, fromDecimals, toBuff, toHexNoPrefix, toString } from '../utils.js';
 import {
   isValidPrivateNoteStatus,
@@ -28,14 +29,19 @@ import rootLogger from '../logger';
  * @param {MystikoConfig} config instance of {@link MystikoConfig}.
  */
 export class NoteHandler extends Handler {
-  constructor(walletHandler, accountHandler, providerPool, contractPool, db, config) {
+  constructor(walletHandler, accountHandler, contractHandler, providerPool, contractPool, db, config) {
     super(db, config);
     check(walletHandler instanceof WalletHandler, 'walletHandler should be instance of WalletHandler');
     check(accountHandler instanceof AccountHandler, 'accountHandler should be instance of AccountHandler');
+    check(
+      contractHandler instanceof ContractHandler,
+      'contractHandler should be instance of ContractHandler',
+    );
     check(providerPool instanceof ProviderPool, 'providerPool should be instance of ProviderPool');
     check(contractPool instanceof ContractPool, 'contractPool should be instance of ContractPool');
     this.walletHandler = walletHandler;
     this.accountHandler = accountHandler;
+    this.contractHandler = contractHandler;
     this.providerPool = providerPool;
     this.contractPool = contractPool;
     this.logger = rootLogger.getLogger('NoteHandler');
@@ -240,10 +246,7 @@ export class NoteHandler extends Handler {
   async getPoolBalance(privateNote) {
     privateNote = this.getPrivateNote(privateNote);
     check(privateNote, 'given privateNote does not exist');
-    const chainConfig = this.config.getChainConfig(privateNote.dstChainId);
-    check(chainConfig, 'chain config does not exist');
-    const contractConfig = chainConfig.getContract(privateNote.dstProtocolAddress);
-    check(contractConfig, 'contract config does not exist');
+    const contractConfig = this._getContractConfig(privateNote.dstChainId, privateNote.dstProtocolAddress);
     const wrappedContract = this.contractPool.getWrappedContract(
       privateNote.dstChainId,
       privateNote.dstProtocolAddress,
@@ -259,8 +262,7 @@ export class NoteHandler extends Handler {
     walletPassword = undefined,
     shieldedAddress = undefined,
   ) {
-    const chainConfig = this.config.getChainConfig(chainId);
-    const contractConfig = chainConfig.getContract(txReceipt.to);
+    const contractConfig = this._getContractConfig(chainId, txReceipt.to);
     const parsedEvents = this._parseDepositLog(txReceipt, contractConfig);
     check(parsedEvents['Deposit'], 'no deposit event in transaction logs');
     const { amount, commitmentHash, encryptedNote } = parsedEvents['Deposit'].args;
@@ -283,8 +285,11 @@ export class NoteHandler extends Handler {
     privateNote.amount = new BN(amount.toString());
     privateNote.bridge = contractConfig.bridgeType;
     if (contractConfig.bridgeType !== BridgeType.LOOP) {
-      const peerChainConfig = this.config.getChainConfig(contractConfig.peerChainId);
-      const peerContractConfig = peerChainConfig.getContract(contractConfig.peerContractAddress);
+      const peerContractConfig = this.contractHandler.getContract(
+        contractConfig.peerChainId,
+        contractConfig.peerContractAddress,
+      );
+      check(peerContractConfig, 'peerContractConfig does not exist');
       privateNote.dstChainId = contractConfig.peerChainId;
       privateNote.dstAsset = peerContractConfig.assetSymbol;
       privateNote.dstAssetAddress = peerContractConfig.assetAddress;
@@ -376,5 +381,11 @@ export class NoteHandler extends Handler {
     await this.saveDatabase();
     this.logger.info(`privateNote(id=${note.id}) has been updated`);
     return note;
+  }
+
+  _getContractConfig(chainId, address) {
+    const contractConfig = this.contractHandler.getContract(chainId, address);
+    check(contractConfig, 'contract config does not exist');
+    return contractConfig;
   }
 }

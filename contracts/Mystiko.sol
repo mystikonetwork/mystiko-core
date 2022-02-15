@@ -10,7 +10,7 @@ interface IVerifier {
     uint256[2] memory a,
     uint256[2][2] memory b,
     uint256[2] memory c,
-    uint256[3] memory input
+    uint256[4] memory input
   ) external returns (bool);
 }
 
@@ -79,7 +79,11 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   ) public payable nonReentrant {
     require(!withdrewSerialNumbers[serialNumber], "The note has been already spent");
     require(isKnownRoot(bytes32(rootHash)), "Cannot find your merkle root");
-    require(verifier.verifyProof(a, b, c, [rootHash, serialNumber, amount]), "Invalid withdraw proof");
+    uint256 recipientNumber = uint256(uint160(recipient));
+    require(
+      verifier.verifyProof(a, b, c, [rootHash, serialNumber, amount, recipientNumber]),
+      "Invalid withdraw proof"
+    );
     withdrewSerialNumbers[serialNumber] = true;
     _processWithdrawTransfer(recipient, amount);
     emit Withdraw(recipient, rootHash, serialNumber);
