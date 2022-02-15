@@ -1,12 +1,12 @@
 import BN from 'bn.js';
 import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../../../src/utils.js';
 import * as protocol from '../../../../src/protocol';
-import MerkleTree from 'fixed-merkle-tree';
+import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 
 const MystikoCoreERC20 = artifacts.require('MystikoWithAnyswapERC20');
 const RelayProxy = artifacts.require('AnyswapBillManagerMock');
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const Verifier = artifacts.require('WithdrawVerifier');
+const Hasher = artifacts.require('Hasher2');
 const TestToken = artifacts.require('TestToken');
 
 contract('MystikoWithAnyswapERC20', (accounts) => {
@@ -123,7 +123,7 @@ contract('MystikoWithAnyswapERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1] },
       );
@@ -132,7 +132,7 @@ contract('MystikoWithAnyswapERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],
@@ -156,7 +156,9 @@ contract('MystikoWithAnyswapERC20', (accounts) => {
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
       const levels = await mystikoCoreDestinationERC20.getLevels();
-      const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
+      const tree = new MerkleTree(parseInt(levels), [
+        new BN(toHexNoPrefix(merkleTreeInsertEvent.args.leaf), 16),
+      ]);
       const root = new BN(tree.root());
       const isKnownRoot = await mystikoCoreDestinationERC20.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
@@ -184,8 +186,8 @@ contract('MystikoWithAnyswapERC20', (accounts) => {
         privateNote,
         treeLeaves,
         treeIndex,
-        'dist/circom/dev/withdraw.wasm',
-        'dist/circom/dev/withdraw.zkey',
+        'dist/circom/dev/Withdraw.wasm',
+        'dist/circom/dev/Withdraw.zkey',
       );
       proof = fullProof.proof;
       publicSignals = fullProof.publicSignals;
@@ -195,7 +197,7 @@ contract('MystikoWithAnyswapERC20', (accounts) => {
       expect(proof['pi_b'][1].length).to.equal(2);
       expect(proof['pi_c'].length).to.be.gte(2);
       expect(publicSignals.length).to.equal(4);
-      const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/withdraw.vkey.json');
+      const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/Withdraw.vkey.json');
       expect(result).to.equal(true);
     });
 

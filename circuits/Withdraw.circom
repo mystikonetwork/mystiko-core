@@ -64,6 +64,7 @@ template Withdraw(levels, nPkBits, nSkBits, nRandomBits) {
     signal input rootHash;
     signal input serialNumber;
     signal input amount;
+    signal input recipient;
     signal input publicKey;
     signal input secretKey;
     signal input randomP;
@@ -95,6 +96,9 @@ template Withdraw(levels, nPkBits, nSkBits, nRandomBits) {
     serialNumber === snHasher.hash;
     publicKey === ownershipChecker.Ax;
     tree.root === rootHash;
+
+    signal recipientSquare;
+    recipientSquare <== recipient * recipient;
 }
 
-component main {public [rootHash, serialNumber, amount]} = Withdraw(20, 256, 256, 128);
+component main {public [rootHash, serialNumber, amount, recipient]} = Withdraw(20, 256, 256, 128);
