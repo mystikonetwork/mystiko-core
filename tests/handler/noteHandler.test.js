@@ -5,6 +5,7 @@ import { readFromFile } from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
+import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { toDecimals, toHexNoPrefix } from '../../src/utils.js';
 import { OffChainNote, PrivateNoteStatus, BridgeType } from '../../src/model';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
@@ -39,6 +40,7 @@ let providerPool;
 let contractPool;
 let walletHandler;
 let accountHandler;
+let contractHandler;
 let noteHandler;
 const walletMasterSeed = 'awesomeMasterSeed';
 const walletPassword = 'P@ssw0rd';
@@ -46,13 +48,24 @@ const walletPassword = 'P@ssw0rd';
 beforeEach(async () => {
   db = await createDatabase('test.db');
   conf = await readFromFile('tests/config/files/config.test.json');
+  const emptyConf = await readFromFile('tests/config/files/config2.test.json');
+  contractHandler = new ContractHandler(db, conf);
+  await contractHandler.importFromConfig();
   providerPool = new ProviderPool(conf);
   providerPool.connect();
-  contractPool = new ContractPool(conf, providerPool);
+  contractPool = new ContractPool(conf, contractHandler, providerPool);
   await contractPool.connect();
   walletHandler = new WalletHandler(db, conf);
   accountHandler = new AccountHandler(walletHandler, db, conf);
-  noteHandler = new NoteHandler(walletHandler, accountHandler, providerPool, contractPool, db, conf);
+  noteHandler = new NoteHandler(
+    walletHandler,
+    accountHandler,
+    contractHandler,
+    providerPool,
+    contractPool,
+    db,
+    emptyConf,
+  );
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await accountHandler.importAccountFromSecretKey(
     walletPassword,
@@ -253,8 +266,10 @@ test('test getPoolBalance', async () => {
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
   providerPool.connect(() => new MockProvider(txReceipt01));
-  const contractConfig = conf.getChainConfig(1).getContract('0x98ed94360cad67a76a53d8aa15905e52485b73d1');
-  contractConfig.config['assetDecimals'] = 17;
+  const contractConfig = contractHandler.getContract(1, '0x98ed94360cad67a76a53d8aa15905e52485b73d1');
+  expect(contractConfig).not.toBe(undefined);
+  contractConfig.assetDecimals = 17;
+  contractHandler.db.contracts.update(contractConfig.data);
   contractPool.pool[1]['0x98ed94360cad67a76a53d8aa15905e52485b73d1'] = new MockWrappedContract(
     contractConfig,
     toDecimals(1234, 17),

@@ -7,6 +7,7 @@ import {
 
 const contractConfigs = [
   {
+    version: 1,
     name: 'MystikoWithLoopMain',
     address: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
     assetSymbol: 'ETH',
@@ -14,6 +15,7 @@ const contractConfigs = [
     circuits: 'circom-1.0',
   },
   {
+    version: 1,
     name: 'MystikoWithLoopERC20',
     address: '0x98ed94360cad67a76a53d8aa15905e52485b73d1',
     assetSymbol: 'USDT',
@@ -22,6 +24,7 @@ const contractConfigs = [
     circuits: 'circom-1.0',
   },
   {
+    version: 1,
     name: 'MystikoWithPolyMain',
     address: '0x26fc224b37952bd12c792425f242e0b0a55453a6',
     assetSymbol: 'BNB',
@@ -31,6 +34,7 @@ const contractConfigs = [
     circuits: 'circom-1.0',
   },
   {
+    version: 1,
     name: 'MystikoWithPolyERC20',
     address: '0x8fb1df17768e29c936edfbce1207ad13696268b7',
     assetSymbol: 'USDT',
@@ -41,6 +45,7 @@ const contractConfigs = [
     circuits: 'circom-1.0',
   },
   {
+    version: 1,
     name: 'MystikoWithPolyERC20',
     address: '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
     assetSymbol: 'USDT',
@@ -51,6 +56,7 @@ const contractConfigs = [
     circuits: 'circom-1.0',
   },
   {
+    version: 1,
     name: 'MystikoWithPolyMain',
     address: '0x110a13fc3efe6a245b50102d2d79b3e76125ae83',
     assetSymbol: 'BNB',

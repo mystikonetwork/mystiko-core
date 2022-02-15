@@ -102,6 +102,8 @@ export class ContractHandler extends Handler {
     if (!contract) {
       contract = new Contract();
     }
+    contract.version = contractConfig.version;
+    contract.name = contractConfig.name;
     contract.chainId = chainId;
     contract.address = contractConfig.address;
     contract.bridgeType = contractConfig.bridgeType;

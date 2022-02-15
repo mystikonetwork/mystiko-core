@@ -13,6 +13,10 @@ beforeEach(async () => {
   contractHandler = new ContractHandler(db, config);
 });
 
+afterEach(() => {
+  db.database.close();
+});
+
 test('test importFromConfig', async () => {
   db.contracts.insert({
     chainId: 1,

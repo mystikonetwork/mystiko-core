@@ -125,11 +125,14 @@ mystiko.initialize = async ({
   mystiko.accounts = new handler.AccountHandler(mystiko.wallets, mystiko.db, mystiko.config);
   mystiko.providers = new ProviderPool(mystiko.config);
   mystiko.providers.connect();
-  mystiko.contractPool = new ContractPool(mystiko.config, mystiko.providers);
+  mystiko.contracts = new handler.ContractHandler(mystiko.db, mystiko.config);
+  await mystiko.contracts.importFromConfig();
+  mystiko.contractPool = new ContractPool(mystiko.config, mystiko.contracts, mystiko.providers);
   mystiko.contractPool.connect();
   mystiko.notes = new handler.NoteHandler(
     mystiko.wallets,
     mystiko.accounts,
+    mystiko.contracts,
     mystiko.providers,
     mystiko.contractPool,
     mystiko.db,
@@ -146,14 +149,13 @@ mystiko.initialize = async ({
   mystiko.withdraws = new handler.WithdrawHandler(
     mystiko.wallets,
     mystiko.accounts,
+    mystiko.contracts,
     mystiko.notes,
     mystiko.providers,
     mystiko.contractPool,
     mystiko.db,
     mystiko.config,
   );
-  mystiko.contracts = new handler.ContractHandler(mystiko.db, mystiko.config);
-  await mystiko.contracts.importFromConfig();
   mystiko.events = new handler.EventHandler(mystiko.db, mystiko.config);
   mystiko.signers = {
     metaMask: new MetaMaskSigner(mystiko.config),

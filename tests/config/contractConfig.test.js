@@ -4,7 +4,9 @@ import { MystikoABI } from '../../src/chain/abi.js';
 
 test('test ContractConfig constructor', () => {
   expect(() => new ContractConfig()).toThrow();
-  const rawConfig = { name: 'WrongContractName' };
+  const rawConfig = { version: 1 };
+  expect(() => new ContractConfig(rawConfig)).toThrow();
+  rawConfig['name'] = 'WrongContractName';
   expect(() => new ContractConfig(rawConfig)).toThrow();
   rawConfig['name'] = 'MystikoWithLoopMain';
   expect(() => new ContractConfig(rawConfig)).toThrow();
@@ -21,6 +23,7 @@ test('test ContractConfig constructor', () => {
   rawConfig['assetAddress'] = undefined;
   rawConfig['circuits'] = 'circom-1.0';
   const conf1 = new ContractConfig(rawConfig);
+  expect(conf1.version).toBe(1);
   expect(conf1.name).toBe('MystikoWithLoopMain');
   expect(conf1.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
   expect(conf1.assetSymbol).toBe('ETH');

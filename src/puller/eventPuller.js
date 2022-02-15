@@ -121,13 +121,8 @@ export class EventPuller {
       this.logger.debug('start event pulling...');
       this.hasPendingPull = true;
       const promises = [];
-      this.config.chains.forEach((chainConfig) => {
-        chainConfig.contracts.forEach((contractConfig) => {
-          const contract = this.contractHandler.getContract(chainConfig.chainId, contractConfig.address);
-          if (contract) {
-            promises.push(this._pullContractEvents(contract));
-          }
-        });
+      this.contractHandler.getContracts().forEach((contract) => {
+        promises.push(this._pullContractEvents(contract));
       });
       return Promise.all(promises)
         .then(() => {

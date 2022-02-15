@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 
 import { BaseModel, isValidAssetType, isValidBridgeType } from './common.js';
 import { check } from '../utils.js';
+import { MystikoABI } from '../chain/abi.js';
 
 /**
  * @class Contract
@@ -12,6 +13,32 @@ import { check } from '../utils.js';
 export class Contract extends BaseModel {
   constructor(data) {
     super(data);
+  }
+
+  /**
+   * @property {number} version
+   * @desc the version number of this deployed contract.
+   */
+  get version() {
+    return this.data['version'] ? this.data['version'] : 1;
+  }
+
+  set version(ver) {
+    check(typeof ver === 'number', 'ver should be instance of number');
+    this.data['version'] = ver;
+  }
+
+  /**
+   * @property {string} name
+   * @desc the name of this smart contract.
+   */
+  get name() {
+    return this.data['name'];
+  }
+
+  set name(n) {
+    check(typeof n === 'string', 'name should be a string type');
+    this.data['name'] = n;
   }
 
   /**
@@ -159,5 +186,13 @@ export class Contract extends BaseModel {
   set syncedBlock(blockNumber) {
     check(typeof blockNumber === 'number', 'blockNumber should be a number type');
     this.data['syncedBlock'] = blockNumber;
+  }
+
+  /**
+   * @property {Object} abi
+   * @desc the compiled ABI encoding information of this configured smart contract.
+   */
+  get abi() {
+    return MystikoABI[this.name].abi;
   }
 }
