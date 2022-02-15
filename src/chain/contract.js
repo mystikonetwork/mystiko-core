@@ -89,10 +89,10 @@ export class MystikoContract {
         MystikoABI.ERC20.abi,
         providerOrSigner,
       );
-      const balanceRaw = await erc20Contract.balanceOf(this.contract.address);
+      const balanceRaw = await erc20Contract.balanceOf(this.config.address);
       balance = new BN(balanceRaw.toString());
     } else if (this.config.assetType === AssetType.MAIN) {
-      const balanceRaw = await providerOrSigner.getBalance(this.contract.address);
+      const balanceRaw = await providerOrSigner.getBalance(this.config.address);
       balance = new BN(balanceRaw.toString());
     }
     return balance;
