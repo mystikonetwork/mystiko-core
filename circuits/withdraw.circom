@@ -73,6 +73,7 @@ template Withdraw(levels, nPkBits, nSkBits, nRandomBits) {
     signal input rootHash;
     signal input serialNumber;
     signal input amount;
+    signal input recipient;
     signal private input publicKey;
     signal private input secretKey;
     signal private input randomP;
@@ -104,6 +105,9 @@ template Withdraw(levels, nPkBits, nSkBits, nRandomBits) {
     commitment === commitmentHasher.hash;
     serialNumber === snHasher.hash;
     publicKey === ownershipChecker.Ax;
+
+    signal recipientSquare;
+    recipientSquare <== recipient * recipient;
 }
 
 component main = Withdraw(20, 256, 256, 128);

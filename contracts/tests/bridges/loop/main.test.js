@@ -95,6 +95,7 @@ contract('MystikoWithLoopMain', (accounts) => {
         pkEnc,
         skEnc,
         amount,
+        accounts[2],
         commitmentHash,
         privateNote,
         treeLeaves,
@@ -109,12 +110,13 @@ contract('MystikoWithLoopMain', (accounts) => {
       expect(proof['pi_b'][0].length).to.equal(2);
       expect(proof['pi_b'][1].length).to.equal(2);
       expect(proof['pi_c'].length).to.be.gte(2);
-      expect(publicSignals.length).to.equal(3);
+      expect(publicSignals.length).to.equal(4);
       const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/withdraw.vkey.json');
       expect(result).to.equal(true);
     });
 
     it('should withdraw successfully', async () => {
+      const recipient = accounts[2];
       const loopContract = await MystikoWithLoopMain.deployed();
       const verifierContract = await Verifier.deployed();
       const proofA = [new BN(proof.pi_a[0]), new BN(proof.pi_a[1])];
@@ -130,9 +132,9 @@ contract('MystikoWithLoopMain', (accounts) => {
         rootHash,
         serialNumber,
         amount,
+        recipient,
       ]);
       expect(result).to.equal(true);
-      const recipient = accounts[2];
       const gasEstimated = await loopContract.withdraw.estimateGas(
         proofA,
         proofB,

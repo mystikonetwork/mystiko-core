@@ -252,6 +252,7 @@ export class WithdrawHandler extends Handler {
       pkEnc,
       skEnc,
       privateNote.amount,
+      withdraw.recipientAddress,
       privateNote.commitmentHash,
       privateNote.encryptedOnChainNote,
       leaves,

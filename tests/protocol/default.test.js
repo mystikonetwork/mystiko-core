@@ -282,6 +282,7 @@ test('test zkProve/zkVerify', async () => {
     pkEnc,
     skEnc,
     amount,
+    '0x71CB05EE1b1F506fF321Da3dac38f25c0c9ce6E1',
     commitment2.commitmentHash,
     commitment2.privateNote,
     treeLeaves,
@@ -289,6 +290,9 @@ test('test zkProve/zkVerify', async () => {
     wasmFile,
     zkeyFile,
   );
-  const result = await DefaultProtocol.zkVerify(proof, publicSignals, vkeyFile);
+  let result = await DefaultProtocol.zkVerify(proof, publicSignals, vkeyFile);
   expect(result).toBe(true);
+  publicSignals[3] = '0x722122dF12D4e14e13Ac3b6895a86e84145b6967';
+  result = await DefaultProtocol.zkVerify(proof, publicSignals, vkeyFile);
+  expect(result).toBe(false);
 });
