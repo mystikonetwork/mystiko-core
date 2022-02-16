@@ -134,6 +134,7 @@ export class WithdrawHandler extends Handler {
         );
       })
       .catch((error) => {
+        console.log('withdraw error', error);
         withdraw.errorMessage = errorMessage(error);
         this.logger.error(`withdraw(id=${withdraw.id}) transaction raised error: ${withdraw.errorMessage}`);
         return this._updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);

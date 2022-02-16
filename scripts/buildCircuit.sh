@@ -25,7 +25,6 @@ if [ ! -f "${BUILD}/ptau${POWERS_OF_TAU}" ]; then
 fi
 
 echo "Building circuit for ${ROOT}/circuits/${CIRCUIT}.circom"
-lowerName=`echo "${CIRCUIT}" | tr '[:upper:]' '[:lower:]'`
 circom --r1cs --wasm --sym --output "${BUILD}" "${ROOT}/circuits/${CIRCUIT}.circom"
 npx snarkjs groth16 setup "${BUILD}/${CIRCUIT}.r1cs" "${BUILD}/ptau${POWERS_OF_TAU}" "${BUILD}/tmp_${CIRCUIT}.zkey"
 echo "qwe" | npx snarkjs zkey contribute "${BUILD}/tmp_${CIRCUIT}.zkey" "${BUILD}/${CIRCUIT}.zkey"
@@ -36,6 +35,5 @@ sed -i '' "s/Verifier/${CIRCUIT}Verifier/g" "${ROOT}/contracts/verifiers/${CIRCU
 sed -i '' "s/Pairing/${CIRCUIT}Pairing/g" "${ROOT}/contracts/verifiers/${CIRCUIT}Verifier.sol"
 npx snarkjs info -r "${BUILD}/${CIRCUIT}.r1cs"
 cp "${BUILD}/${CIRCUIT}_js/${CIRCUIT}.wasm" "${DIST}/${CIRCUIT}.wasm"
-cp "${BUILD}/${CIRCUIT}_js/witness_calculator.js" "${SRC}/protocol/generated/${lowerName}_witness_calculator.js"
 cp "${BUILD}/${CIRCUIT}.zkey" "${DIST}/${CIRCUIT}.zkey"
 cp "${BUILD}/${CIRCUIT}.vkey.json" "${DIST}/${CIRCUIT}.vkey.json"

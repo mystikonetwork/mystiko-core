@@ -5,17 +5,14 @@ import { check, readFile, toFixedLenHexNoPrefix, toHexNoPrefix } from '../utils.
 import { MerkleTree } from '../lib/merkleTree.js';
 import { FIELD_SIZE } from '../protocol';
 
-const Rollup1WitnessCalculator = require('../protocol/generated/rollup1_witness_calculator.js');
-const Rollup4WitnessCalculator = require('../protocol/generated/rollup4_witness_calculator.js');
-const Rollup16WitnessCalculator = require('../protocol/generated/rollup16_witness_calculator.js');
+const WitnessCalculator = require('../protocol/witness_calculator.js');
 
 export function zkProveRollup1(tree, newLeaf, wasmFile, zkeyFile) {
   return _zkProve({
     tree,
     newLeaves: [newLeaf],
     wasmFile,
-    zkeyFile,
-    WitnessCalculator: Rollup1WitnessCalculator,
+    zkeyFile
   });
 }
 
@@ -25,8 +22,7 @@ export function zkProveRollup4(tree, newLeaves, wasmFile, zkeyFile) {
     tree,
     newLeaves,
     wasmFile,
-    zkeyFile,
-    WitnessCalculator: Rollup4WitnessCalculator,
+    zkeyFile
   });
 }
 
@@ -36,12 +32,11 @@ export function zkProveRollup16(tree, newLeaves, wasmFile, zkeyFile) {
     tree,
     newLeaves,
     wasmFile,
-    zkeyFile,
-    WitnessCalculator: Rollup16WitnessCalculator,
+    zkeyFile
   });
 }
 
-async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile, WitnessCalculator }) {
+async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile }) {
   check(tree instanceof MerkleTree, 'tree should be instance of MerkleTree');
   check(newLeaves instanceof Array, 'newLeaves should be an array');
   newLeaves.forEach((newLeave) => {
@@ -50,7 +45,6 @@ async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile, WitnessCalculator
   check(_isPowerOfTwo(newLeaves.length), 'newLeaves length should be power of 2');
   check(typeof wasmFile === 'string', 'wasmFile should be a string');
   check(typeof zkeyFile === 'string', 'zkeyFile should be a string');
-  check(WitnessCalculator, 'witnessCalculator cannot be undefined or null');
   const rollupSize = newLeaves.length;
   const rollupHeight = Math.log2(rollupSize);
   const currentLeafCount = tree.elements().length;

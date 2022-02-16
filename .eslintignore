@@ -4,4 +4,4 @@ coverage/*
 dist/*
 .idea
 jsdoc
-src/protocol/generated/*
+src/protocol/witness_calculator.js

@@ -69,7 +69,7 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "terser-webpack-plugin": "^5.3.0",
-    "truffle": "^5.4.27",
+    "truffle": "^5.4.33",
     "truffle-plugin-verify": "^0.5.20",
     "url": "^0.11.0",
     "util": "^0.12.4",

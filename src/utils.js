@@ -238,12 +238,16 @@ export function toString(object) {
 /**
  * @function module:mystiko/utils.readFile
  * @desc read a file's whole content with given path.
- * @param path file's path, it could be a URL or a file system path.
+ * @param {string} path file's path, it could be a URL or a file system path.
+ * @param {number|undefined} [cacheSize] cache size for this file.
+ * @param {number|undefined} [pageSize] page size for this file.
  * @returns {Promise<Buffer>} check {@link https://nodejs.org/api/buffer.html Node.js Buffer}
  */
-export async function readFile(path) {
+export async function readFile(path, cacheSize = undefined, pageSize = undefined) {
   check(typeof path === 'string', 'path should be string');
-  const fd = await fastfile.readExisting(path);
+  check(!cacheSize || typeof cacheSize === 'number', 'cacheSize should be number');
+  check(!pageSize || typeof pageSize === 'number', 'pageSize should be number');
+  const fd = await fastfile.readExisting(path, cacheSize, pageSize);
   const data = await fd.read(fd.totalSize);
   await fd.close();
   return Buffer.from(data);
@@ -252,7 +256,7 @@ export async function readFile(path) {
 /**
  * @function module:mystiko/utils.readJsonFile
  * @desc read a file's whole content with given path, and parse it as JSON.
- * @param path file's path, it could be a URL or a file system path.
+ * @param  {string} path file's path, it could be a URL or a file system path.
  * @returns {Object} parsed JSON object.
  */
 export async function readJsonFile(path) {

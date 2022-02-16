@@ -23,7 +23,7 @@ import {
 } from '../utils.js';
 import logger from '../logger.js';
 
-const WithdrawWitnessCalculator = require('./generated/withdraw_witness_calculator.js');
+const WithdrawWitnessCalculator = require('./witness_calculator.js');
 
 /**
  * @module module:mystiko/protocol/default
@@ -619,7 +619,8 @@ export async function zkProve(
   const witnessCalculator = await WithdrawWitnessCalculator(wasm);
   const buff = await witnessCalculator.calculateWTNSBin(inputs, 0);
   logger.debug('witness calculation is done, start proving...');
-  const proofs = await groth16.prove(zkeyFile, buff);
+  const zkey = await readFile(zkeyFile);
+  const proofs = await groth16.prove(zkey, buff);
   logger.debug('zkSnark proof is generated successfully');
   return proofs;
 }
