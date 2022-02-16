@@ -290,9 +290,9 @@ export class EventPuller {
           );
         },
       });
+      const withdrewNoteIds = withdraws.map((withdraw) => withdraw.privateNoteId);
       const notes = this.noteHandler.getPrivateNotes({
-        filterFunc: (note) =>
-          note.dstChainId === rawEvent.chainId && note.withdrawTransactionHash === rawEvent.transactionHash,
+        filterFunc: (note) => withdrewNoteIds.indexOf(note.id) !== -1,
       });
       for (let j = 0; j < withdraws.length; j++) {
         const withdraw = withdraws[j];
