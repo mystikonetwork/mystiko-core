@@ -11,6 +11,7 @@ const Verifier = artifacts.require('Verifier');
 const Hasher = artifacts.require('Hasher');
 const common = require('./common');
 const coreConfig = require('./coreConfig');
+const tbridgeConfig = require('./tbridgeConfig');
 
 function getMystikoContract(bridge, bErc20) {
   if (bridge == 'loop') {
@@ -226,6 +227,9 @@ async function deployStep2or3() {
 
     await setMystikoPeerAddress(bridgeName, src, dst, config);
     coreConfig.savePeerConfig(mystikoNetwork, bridgeName, src, dst, config);
+    if (bridgeName == 'tbridge') {
+      tbridgeConfig.savePeerConfig(mystikoNetwork, src, dst, proxyAddress, config);
+    }
   } else {
     console.error(common.RED, 'not support step');
   }
@@ -239,6 +243,8 @@ module.exports = async function (callback) {
     await deployStep2or3();
   } else if (step == 'step3') {
     await deployStep2or3();
+  } else {
+    console.error(common.RED, 'wrong step');
   }
 
   // invoke callback

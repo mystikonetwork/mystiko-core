@@ -1,0 +1,103 @@
+{
+  "eth": {
+    "gas": 5000000
+  },
+  "networks": [
+    {
+      "name": "bsctestnet",
+      "providers": [
+        "https://data-seed-prebsc-1-s3.binance.org:8545",
+        "https://data-seed-prebsc-2-s3.binance.org:8545",
+        "https://data-seed-prebsc-1-s2.binance.org:8545",
+        "https://data-seed-prebsc-2-s2.binance.org:8545",
+        "wss://data-seed-prebsc-1-s3.binance.org:8545",
+        "wss://data-seed-prebsc-2-s3.binance.org:8545",
+        "wss://data-seed-prebsc-1-s2.binance.org:8545",
+        "wss://data-seed-prebsc-2-s2.binance.org:8545"
+      ]
+    },
+    {
+      "name": "ropsten",
+      "providers": [
+        "https://ropsten.infura.io/v3/1a85c8f5801a49b38294c4f292d3cbb8",
+        "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j",
+        "wss://ropsten.infura.io/ws/v3/1a85c8f5801a49b38294c4f292d3cbb8",
+        "wss://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+      ]
+    }
+  ],
+  "bridge": {
+    "pairs": [
+      {
+        "local": {
+          "name": "bsctestnet",
+          "chainId": 97,
+          "token": "mETH",
+          "mystikoAddress": "0xbED9F6fe8DDc7Ef82E74b3c5418f2b9e3DD91D11",
+          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        },
+        "remote": {
+          "name": "ropsten",
+          "chainId": 3,
+          "token": "ETH",
+          "mystikoAddress": "0x77dA3768bEAC947E7A5Fa61a89F6d19cF9BC8d40",
+          "relayProxyAddress": "0xE910377ff38dc083AF99bcbEC5eEC65141424DCD"
+        }
+      },
+      {
+        "local": {
+          "name": "bsctestnet",
+          "chainId": 97,
+          "token": "mUSD",
+          "mystikoAddress": "0x730C482913F3F00B8B4BA8d9e632B58B406AeA15",
+          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        },
+        "remote": {
+          "name": "ropsten",
+          "chainId": 3,
+          "token": "mUSD",
+          "mystikoAddress": "0xD2F95DF7b4C5Da1DA25Cf93d9b18AcC36eC3a3Bf",
+          "relayProxyAddress": "0xE910377ff38dc083AF99bcbEC5eEC65141424DCD"
+        }
+      },
+      {
+        "local": {
+          "name": "bsctestnet",
+          "chainId": 97,
+          "token": "BNB",
+          "mystikoAddress": "0xE4364385083bEe9Ac3fA3510eEc9613DB7a5421a",
+          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        },
+        "remote": {
+          "name": "ropsten",
+          "chainId": 3,
+          "token": "mBNB",
+          "mystikoAddress": "0x66161ad4F9340e18aADdC84FEDe908713644Bd27",
+          "relayProxyAddress": "0xE910377ff38dc083AF99bcbEC5eEC65141424DCD"
+        }
+      },
+      {
+        "local": {
+          "name": "bsctestnet",
+          "chainId": "97",
+          "token": "MTT",
+          "mystikoAddress": "0x0A9b6e4eECA6AF93602b5F3f9e14688E02299CcE",
+          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        },
+        "remote": {
+          "name": "ropsten",
+          "chainId": "3",
+          "token": "MTT"
+        }
+      }
+    ]
+  },
+  "monitor": {
+    "checkTimer": 20,
+    "retryTimer": 10,
+    "transactionTimeout": 60,
+    "getEventTimeout": 30,
+    "getEventMaxBatchNumber": 10000,
+    "blockGapToDelay": 2
+  }
+}
