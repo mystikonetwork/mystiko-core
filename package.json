@@ -95,6 +95,7 @@
     "loglevel": "^1.8.0",
     "loglevel-plugin-prefix": "^0.8.4",
     "lokijs": "^1.5.12",
+    "pako": "^2.0.4",
     "randombytes": "^2.1.0",
     "snarkjs": "^0.4.12"
   }

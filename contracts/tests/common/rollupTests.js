@@ -147,22 +147,22 @@ async function _generateProof(commitments, mystikoContract, treeHeight, rollupSi
     proof = await zkProveRollup1(
       tree,
       newLeaves[0],
-      'dist/circom/dev/Rollup1.wasm',
-      'dist/circom/dev/Rollup1.zkey',
+      'dist/circom/dev/Rollup1.wasm.gz',
+      'dist/circom/dev/Rollup1.zkey.gz',
     );
   } else if (rollupSize === 4) {
     proof = await zkProveRollup4(
       tree,
       newLeaves,
-      'dist/circom/dev/Rollup4.wasm',
-      'dist/circom/dev/Rollup4.zkey',
+      'dist/circom/dev/Rollup4.wasm.gz',
+      'dist/circom/dev/Rollup4.zkey.gz',
     );
   } else if (rollupSize === 16) {
     proof = await zkProveRollup16(
       tree,
       newLeaves,
-      'dist/circom/dev/Rollup16.wasm',
-      'dist/circom/dev/Rollup16.zkey',
+      'dist/circom/dev/Rollup16.wasm.gz',
+      'dist/circom/dev/Rollup16.zkey.gz',
     );
   }
   expect(proof).to.not.equal(undefined);

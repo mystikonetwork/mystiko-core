@@ -1,4 +1,5 @@
 import BN from 'bn.js';
+import pako from 'pako';
 import { ethers } from 'ethers';
 import * as fastfile from 'fastfile';
 
@@ -256,12 +257,31 @@ export async function readFile(path, cacheSize = undefined, pageSize = undefined
 /**
  * @function module:mystiko/utils.readJsonFile
  * @desc read a file's whole content with given path, and parse it as JSON.
- * @param  {string} path file's path, it could be a URL or a file system path.
+ * @param {string} path file's path, it could be a URL or a file system path.
+ * @param {number|undefined} [cacheSize] cache size for this file.
+ * @param {number|undefined} [pageSize] page size for this file.
  * @returns {Object} parsed JSON object.
  */
-export async function readJsonFile(path) {
-  const data = await readFile(path);
+export async function readJsonFile(path, cacheSize = undefined, pageSize = undefined) {
+  const data = await readCompressedFile(path, cacheSize, pageSize);
   return JSON.parse(data);
+}
+
+/**
+ * @function module:mystiko/utils.readCompressedFile
+ * @desc read file with gz extension and decompress it. If the path is not ended with gz, it returns original file.
+ * @param {string} path file's path, it could be a URL or a file system path.
+ * @param {number|undefined} [cacheSize] cache size for this file.
+ * @param {number|undefined} [pageSize] page size for this file.
+ * @returns {Object} decompressed file if the path is ended with gz, otherwise it returns original file.
+ */
+export async function readCompressedFile(path, cacheSize = undefined, pageSize = undefined) {
+  if (path.endsWith('.gz')) {
+    const data = await readFile(path, cacheSize, pageSize);
+    return Buffer.from(pako.inflate(data));
+  } else {
+    return readFile(path, cacheSize, pageSize);
+  }
 }
 
 /**

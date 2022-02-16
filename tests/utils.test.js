@@ -1,5 +1,9 @@
+import fs from 'fs';
+import os from 'os';
 import BN from 'bn.js';
+import pako from 'pako';
 import * as utils from '../src/utils.js';
+import path from 'path';
 
 test('Test bnToFixedBytes', () => {
   const bn1 = new BN(0xdeadbeef);
@@ -112,4 +116,15 @@ test('Test errorMessage', () => {
   expect(utils.errorMessage(new Error('test'))).toBe('Error: test');
   expect(utils.errorMessage({ a: 1 })).toBe('{"a":1}');
   expect(utils.errorMessage(1)).toBe('1');
+});
+
+test('Test readCompressedFile', async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'utilsTest'));
+  const uncompressedFile = path.join(os.tmpdir(), 'uncompressed.txt');
+  const compressedFile = path.join(os.tmpdir(), 'compressed.gz');
+  fs.writeFileSync(uncompressedFile, 'hello world');
+  fs.writeFileSync(compressedFile, pako.deflate('hello world'));
+  expect((await utils.readCompressedFile(uncompressedFile)).toString()).toBe('hello world');
+  expect((await utils.readCompressedFile(compressedFile)).toString()).toBe('hello world');
+  fs.rmSync(tmpDir, { recursive: true });
 });

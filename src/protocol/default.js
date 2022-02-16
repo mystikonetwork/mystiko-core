@@ -17,9 +17,9 @@ import {
   check,
   toHexNoPrefix,
   readJsonFile,
-  readFile,
   toBuff,
   toFixedLenHexNoPrefix,
+  readCompressedFile,
 } from '../utils.js';
 import logger from '../logger.js';
 
@@ -615,11 +615,11 @@ export async function zkProve(
       `serialNumber='${toString(serialNumber)}', ` +
       `amount="${toString(amount)}"'`,
   );
-  const wasm = await readFile(wasmFile);
+  const wasm = await readCompressedFile(wasmFile);
   const witnessCalculator = await WithdrawWitnessCalculator(wasm);
   const buff = await witnessCalculator.calculateWTNSBin(inputs, 0);
   logger.debug('witness calculation is done, start proving...');
-  const zkey = await readFile(zkeyFile);
+  const zkey = await readCompressedFile(zkeyFile);
   const proofs = await groth16.prove(zkey, buff);
   logger.debug('zkSnark proof is generated successfully');
   return proofs;

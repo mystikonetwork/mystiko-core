@@ -9,11 +9,11 @@ test('test zkProveRollup1', async () => {
   const { proof, publicSignals } = await zkProveRollup1(
     tree,
     new BN('1'),
-    'dist/circom/dev/Rollup1.wasm',
-    'dist/circom/dev/Rollup1.zkey',
+    'dist/circom/dev/Rollup1.wasm.gz',
+    'dist/circom/dev/Rollup1.zkey.gz',
   );
   console.timeEnd('zkProveRollup1');
-  const verified = await zkVerify(proof, publicSignals, 'dist/circom/dev/Rollup1.vkey.json');
+  const verified = await zkVerify(proof, publicSignals, 'dist/circom/dev/Rollup1.vkey.json.gz');
   expect(verified).toBe(true);
   expect(tree.elements().length).toBe(4);
 });
@@ -24,11 +24,11 @@ test('test zkProveRollup4', async () => {
   const { proof, publicSignals } = await zkProveRollup4(
     tree,
     [new BN('1'), new BN('2'), new BN('3'), new BN('4')],
-    'dist/circom/dev/Rollup4.wasm',
-    'dist/circom/dev/Rollup4.zkey',
+    'dist/circom/dev/Rollup4.wasm.gz',
+    'dist/circom/dev/Rollup4.zkey.gz',
   );
   console.timeEnd('zkProveRollup4');
-  const verified = await zkVerify(proof, publicSignals, 'dist/circom/dev/Rollup4.vkey.json');
+  const verified = await zkVerify(proof, publicSignals, 'dist/circom/dev/Rollup4.vkey.json.gz');
   expect(verified).toBe(true);
   expect(tree.elements().length).toBe(8);
   tree.insert(new BN(5));
@@ -36,8 +36,8 @@ test('test zkProveRollup4', async () => {
     zkProveRollup4(
       tree,
       [new BN('6'), new BN('7'), new BN('8'), new BN('9')],
-      'dist/circom/dev/Rollup4.wasm',
-      'dist/circom/dev/Rollup4.zkey',
+      'dist/circom/dev/Rollup4.wasm.gz',
+      'dist/circom/dev/Rollup4.zkey.gz',
     ),
   ).rejects.toThrow();
 });
@@ -82,11 +82,11 @@ test('test zkProveRollup16', async () => {
       new BN('15'),
       new BN('16'),
     ],
-    'dist/circom/dev/Rollup16.wasm',
-    'dist/circom/dev/Rollup16.zkey',
+    'dist/circom/dev/Rollup16.wasm.gz',
+    'dist/circom/dev/Rollup16.zkey.gz',
   );
   console.timeEnd('zkProveRollup16');
-  const verified = await zkVerify(proof, publicSignals, 'dist/circom/dev/Rollup16.vkey.json');
+  const verified = await zkVerify(proof, publicSignals, 'dist/circom/dev/Rollup16.vkey.json.gz');
   expect(verified).toBe(true);
   expect(tree.elements().length).toBe(32);
 });

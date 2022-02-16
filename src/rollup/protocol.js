@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import { groth16 } from 'snarkjs';
-import { check, readFile, toFixedLenHexNoPrefix, toHexNoPrefix } from '../utils.js';
+import { check, readCompressedFile, toFixedLenHexNoPrefix, toHexNoPrefix } from '../utils.js';
 import { MerkleTree } from '../lib/merkleTree.js';
 import { FIELD_SIZE } from '../protocol';
 
@@ -12,7 +12,7 @@ export function zkProveRollup1(tree, newLeaf, wasmFile, zkeyFile) {
     tree,
     newLeaves: [newLeaf],
     wasmFile,
-    zkeyFile
+    zkeyFile,
   });
 }
 
@@ -22,7 +22,7 @@ export function zkProveRollup4(tree, newLeaves, wasmFile, zkeyFile) {
     tree,
     newLeaves,
     wasmFile,
-    zkeyFile
+    zkeyFile,
   });
 }
 
@@ -32,7 +32,7 @@ export function zkProveRollup16(tree, newLeaves, wasmFile, zkeyFile) {
     tree,
     newLeaves,
     wasmFile,
-    zkeyFile
+    zkeyFile,
   });
 }
 
@@ -59,7 +59,7 @@ async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile }) {
   const pathIndices = _pathIndicesNumber(leafPath.pathIndices.slice(rollupHeight));
   const pathElements = leafPath.pathElements.slice(rollupHeight);
   const leafHash = _calcLeaveHash(newLeaves);
-  const wasm = await readFile(wasmFile);
+  const wasm = await readCompressedFile(wasmFile);
   const witnessCalculator = await WitnessCalculator(wasm);
   const buff = await witnessCalculator.calculateWTNSBin(
     {
@@ -72,7 +72,8 @@ async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile }) {
     },
     0,
   );
-  return await groth16.prove(zkeyFile, buff);
+  const zkey = await readCompressedFile(zkeyFile);
+  return await groth16.prove(zkey, buff);
 }
 
 function _calcLeaveHash(leaves) {
