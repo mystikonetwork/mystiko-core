@@ -121,9 +121,11 @@ export class EventPuller {
       this.logger.debug('start event pulling...');
       this.hasPendingPull = true;
       const promises = [];
-      this.contractHandler.getContracts().forEach((contract) => {
-        promises.push(this._pullContractEvents(contract));
-      });
+      this.contractHandler
+        .getContracts({ filterFunc: (contract) => contract.version > 0 })
+        .forEach((contract) => {
+          promises.push(this._pullContractEvents(contract));
+        });
       return Promise.all(promises)
         .then(() => {
           this.logger.debug(`one event pulling is done, resume in ${this.pullIntervalMs / 1000} seconds`);

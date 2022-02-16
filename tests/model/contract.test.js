@@ -3,7 +3,7 @@ import { MystikoABI } from '../../src/chain/abi.js';
 
 test('test Contract getters/setters', () => {
   const contract = new Contract();
-  expect(contract.version).toBe(1);
+  expect(contract.version).toBe(0);
   expect(contract.name).toBe(undefined);
   expect(contract.chainId).toBe(undefined);
   expect(contract.address).toBe(undefined);
