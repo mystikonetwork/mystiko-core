@@ -1,20 +1,20 @@
 import BN from 'bn.js';
 import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix } from '../../../../src/utils.js';
 import * as protocol from '../../../../src/protocol';
-import MerkleTree from 'fixed-merkle-tree';
+import { MerkleTree } from '../../../../src/lib/merkleTree.js';
 
 const MystikoCoreMain = artifacts.require('MystikoWithPolyMain');
 const MystikoCoreERC20 = artifacts.require('MystikoWithPolyERC20');
 const RelayProxy = artifacts.require('PolyCrossChainManagerMock');
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const Verifier = artifacts.require('WithdrawVerifier');
+const Hasher2 = artifacts.require('Hasher2');
 const TestToken = artifacts.require('TestToken');
 
 contract('MystikoWithPolyERC20ToMain', (accounts) => {
   let mystikoCoreSourceERC20;
   let mystikoCoreDestinationMain;
   let relayProxy;
-  let hasher;
+  let hasher2;
   let verifier;
   let testToken;
   let amount = new BN(toDecimals(2, 16).toString());
@@ -26,7 +26,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
 
     testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();
-    hasher = await Hasher.deployed();
+    hasher2 = await Hasher2.deployed();
     relayProxy = await RelayProxy.new();
 
     mystikoCoreSourceERC20 = await MystikoCoreERC20.new(
@@ -34,7 +34,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       DESTINATION_CHAIN_ID,
       verifier.address,
       testToken.address,
-      hasher.address,
+      hasher2.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -42,7 +42,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       relayProxy.address,
       SOURCE_CHAIN_ID,
       verifier.address,
-      hasher.address,
+      hasher2.address,
       MERKLE_TREE_HEIGHT,
     );
 
@@ -88,8 +88,8 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
     });
 
     it('should set hasher information correctly', async () => {
-      expect(await mystikoCoreSourceERC20.getHasherAddress()).to.equal(hasher.address);
-      expect(await mystikoCoreDestinationMain.getHasherAddress()).to.equal(hasher.address);
+      expect(await mystikoCoreSourceERC20.getHasherAddress()).to.equal(hasher2.address);
+      expect(await mystikoCoreDestinationMain.getHasherAddress()).to.equal(hasher2.address);
     });
   });
 
@@ -126,7 +126,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1] },
       );
@@ -135,7 +135,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS),
+        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],
@@ -159,7 +159,9 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(new BN(0))).to.equal(true);
       const levels = await mystikoCoreDestinationMain.getLevels();
-      const tree = new MerkleTree(levels, [merkleTreeInsertEvent.args.leaf]);
+      const tree = new MerkleTree(parseInt(levels), [
+        new BN(toHexNoPrefix(merkleTreeInsertEvent.args.leaf), 16),
+      ]);
       const root = new BN(tree.root());
       const isKnownRoot = await mystikoCoreDestinationMain.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
@@ -187,8 +189,8 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         privateNote,
         treeLeaves,
         treeIndex,
-        'dist/circom/dev/withdraw.wasm',
-        'dist/circom/dev/withdraw.zkey',
+        'dist/circom/dev/Withdraw.wasm.gz',
+        'dist/circom/dev/Withdraw.zkey.gz',
       );
       proof = fullProof.proof;
       publicSignals = fullProof.publicSignals;
@@ -198,7 +200,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       expect(proof['pi_b'][1].length).to.equal(2);
       expect(proof['pi_c'].length).to.be.gte(2);
       expect(publicSignals.length).to.equal(4);
-      const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/withdraw.vkey.json');
+      const result = await protocol.zkVerify(proof, publicSignals, 'dist/circom/dev/Withdraw.vkey.json.gz');
       expect(result).to.equal(true);
     });
 

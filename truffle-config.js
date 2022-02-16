@@ -115,7 +115,10 @@ module.exports = {
       command: 'node ./scripts/compileHasher.js',
       targets: [
         {
-          path: './build/Hasher.json',
+          path: './build/Hasher2.json',
+        },
+        {
+          path: './build/Hasher3.json',
         },
       ],
     },

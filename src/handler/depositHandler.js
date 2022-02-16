@@ -106,6 +106,7 @@ export class DepositHandler extends Handler {
         ).then((txReceipt) => this._createPrivateNoteIfNecessary(deposit, txReceipt));
       })
       .catch((error) => {
+        console.log('error', error);
         deposit.errorMessage = errorMessage(error);
         this.logger.error(`deposit(id=${deposit.id}) transaction raised error: ${deposit.errorMessage}`);
         return this._updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);
@@ -244,7 +245,7 @@ export class DepositHandler extends Handler {
       deposit.amount.toString(),
       toFixedLenHex(deposit.commitmentHash),
       toFixedLenHex(deposit.hashK),
-      toFixedLenHex(deposit.randomS),
+      toFixedLenHex(deposit.randomS, this.protocol.RANDOM_SK_SIZE),
       toHex(deposit.privateNote),
       { value: isMainAsset ? deposit.amount.toString() : '0' },
     );

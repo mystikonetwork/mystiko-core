@@ -41,9 +41,9 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     address _relayProxyAddress,
     uint64 _peerChainId,
     address _verifier,
-    address _hasher,
+    address _hasher2,
     uint32 _merkleTreeHeight
-  ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher) {
+  ) public MerkleTreeWithHistory(_merkleTreeHeight, _hasher2) {
     relayProxyAddress = _relayProxyAddress;
     peerChainId = _peerChainId;
     verifier = IVerifier(_verifier);
@@ -55,14 +55,13 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     uint256 amount,
     bytes32 commitmentHash,
     bytes32 hashK,
-    bytes32 randomS,
+    bytes16 randomS,
     bytes memory encryptedNote
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
-    bytes32 cHash = hashLeftRight(hasher, hashK, bytes32(amount));
-    cHash = hashLeftRight(hasher, cHash, randomS);
-    require(cHash == commitmentHash, "commitment hash incorrect");
+    uint256 cHash = uint256(sha256(abi.encodePacked(hashK, amount, randomS))) % FIELD_SIZE;
+    require(bytes32(cHash) == commitmentHash, "commitment hash incorrect");
     _processDepositTransfer(amount);
     depositedCommitments[commitmentHash] = true;
     _sendCrossChainTx(amount, commitmentHash);

@@ -169,24 +169,24 @@ test('test symmetric encryption/decryption', () => {
   expect(DefaultProtocol.decryptSymmetric('P@ssw0rd', cipherText)).toBe(plainText);
 });
 
-test('test hash', () => {
-  expect(() => DefaultProtocol.hash('data to be hashed')).toThrow();
+test('test sha256', () => {
+  expect(() => DefaultProtocol.sha256(['data to be hashed'])).toThrow();
   const data1 = toBuff('baad');
   const data2 = toBuff('beef');
   const data3 = toBuff('baad');
-  const hash1 = DefaultProtocol.hash(data1);
-  const hash2 = DefaultProtocol.hash(data2);
-  const hash3 = DefaultProtocol.hash(data3);
+  const hash1 = DefaultProtocol.sha256([data1]);
+  const hash2 = DefaultProtocol.sha256([data2]);
+  const hash3 = DefaultProtocol.sha256([data3]);
   expect(toHex(hash1)).not.toBe(toHex(hash2));
   expect(toHex(hash1)).toBe(toHex(hash3));
 });
 
-test('test hash2', () => {
-  expect(() => DefaultProtocol.hash2('data to be hashed', new BN(1))).toThrow();
-  expect(() => DefaultProtocol.hash2(new BN(1), 'data to be hashed')).toThrow();
-  const h1 = DefaultProtocol.hash2(new BN(1), new BN(2));
-  const h2 = DefaultProtocol.hash2(new BN(3), new BN(4));
-  const h3 = DefaultProtocol.hash2(new BN(1), new BN(2));
+test('test poseidonHash', () => {
+  expect(() => DefaultProtocol.poseidonHash(['data to be hashed', new BN(1)])).toThrow();
+  expect(() => DefaultProtocol.poseidonHash([new BN(1), 'data to be hashed'])).toThrow();
+  const h1 = DefaultProtocol.poseidonHash([new BN(1), new BN(2)]);
+  const h2 = DefaultProtocol.poseidonHash([new BN(3), new BN(4)]);
+  const h3 = DefaultProtocol.poseidonHash([new BN(1), new BN(2)]);
   expect(h1.toString()).toBe(h3.toString());
   expect(h2.toString()).not.toBe(h3.toString());
 });
@@ -256,7 +256,7 @@ test('test serialNumber', () => {
   expect(() => DefaultProtocol.serialNumber(toBuff('baadbabe'), 'deadbeef')).toThrow();
   const rawSkVerify = DefaultProtocol.randomBytes(DefaultProtocol.VERIFY_SK_SIZE);
   const skVerify = DefaultProtocol.secretKeyForVerification(rawSkVerify);
-  const randomP = DefaultProtocol.randomBytes(DefaultProtocol.RANDOM_SK_SIZE);
+  const randomP = DefaultProtocol.randomBigInt(DefaultProtocol.RANDOM_SK_SIZE);
   const serialNumber = DefaultProtocol.serialNumber(skVerify, randomP);
   expect(serialNumber).not.toBe(undefined);
 });
@@ -273,9 +273,9 @@ test('test zkProve/zkVerify', async () => {
   const commitment2 = await DefaultProtocol.commitment(pkVerify, pkEnc, amount);
   const treeLeaves = [commitment1.commitmentHash, commitment2.commitmentHash];
   const treeIndex = 1;
-  const wasmFile = 'dist/circom/dev/withdraw.wasm';
-  const zkeyFile = 'dist/circom/dev/withdraw.zkey';
-  const vkeyFile = 'dist/circom/dev/withdraw.vkey.json';
+  const wasmFile = 'dist/circom/dev/Withdraw.wasm.gz';
+  const zkeyFile = 'dist/circom/dev/Withdraw.zkey.gz';
+  const vkeyFile = 'dist/circom/dev/Withdraw.vkey.json.gz';
   const { proof, publicSignals } = await DefaultProtocol.zkProve(
     pkVerify,
     skVerify,

@@ -7,7 +7,7 @@ import "../../pool/MainAssetPool.sol";
 contract MystikoWithLoopMain is MystikoWithLoop, MainAssetPool {
   constructor(
     address _verifier,
-    address _hasher,
+    address _hasher2,
     uint32 _merkleTreeHeight
-  ) public MystikoWithLoop(_verifier, _hasher, _merkleTreeHeight) {}
+  ) public MystikoWithLoop(_verifier, _hasher2, _merkleTreeHeight) {}
 }

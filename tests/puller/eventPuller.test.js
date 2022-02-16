@@ -223,6 +223,7 @@ test('test pulling behaviour', async () => {
     chainId: 56,
     status: WithdrawStatus.PENDING,
     walletId: wallet.id,
+    privateNoteId: 3,
   });
   const eventPuller = new EventPuller({
     config,
