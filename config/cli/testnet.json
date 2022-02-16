@@ -14,7 +14,7 @@
         {
           "version": 1,
           "name": "MystikoWithLoopERC20",
-          "address": "0x12d5dfE0399b1572A4975D7eF4F28aDcdd92c241",
+          "address": "0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
@@ -23,7 +23,7 @@
         {
           "version": 1,
           "name": "MystikoWithLoopMain",
-          "address": "0x2f17A623FdbBb46591fd2Ed73Fbd65BCB1adAD3E",
+          "address": "0x6A9EA7A2A67f99Bd68Dd535C7a7CF93e3a2554c8",
           "assetSymbol": "ETH",
           "assetDecimals": 18,
           "circuits": "circom-1.0"
@@ -31,28 +31,28 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeMain",
-          "address": "0x77dA3768bEAC947E7A5Fa61a89F6d19cF9BC8d40",
+          "address": "0x6d580B030eA21912645c90324D0Ba613D098C5eA",
           "assetSymbol": "ETH",
           "assetDecimals": 18,
           "peerChainId": 97,
-          "peerContractAddress": "0xbED9F6fe8DDc7Ef82E74b3c5418f2b9e3DD91D11",
+          "peerContractAddress": "0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD",
           "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0x14fA97F582bd30c39107051E1c687A68Cb9233Bf",
+          "address": "0x66acbcFb5749989bcBE49d63DBda887baeee973E",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
           "peerChainId": 97,
-          "peerContractAddress": "0x01fb3460620Cc82f2B69B2710Aa45AC3d8Fc1e80",
+          "peerContractAddress": "0xbeE39Ef5ff333F150725a47eF140369a311afaAD",
           "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithLoopERC20",
-          "address": "0xd38b209B49A703AF092A717F2c023D62686850d8",
+          "address": "0x840E68A09181b7E94DBB76E9d116c934d43DF74c",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
@@ -61,23 +61,23 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0xD2F95DF7b4C5Da1DA25Cf93d9b18AcC36eC3a3Bf",
+          "address": "0x09f84Fe13971D1434496c63bb33092a5216E7981",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
           "peerChainId": 97,
-          "peerContractAddress": "0x730C482913F3F00B8B4BA8d9e632B58B406AeA15",
+          "peerContractAddress": "0x66E166A887BDB0bCc58C5E52b286eA27d52854f5",
           "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0x66161ad4F9340e18aADdC84FEDe908713644Bd27",
+          "address": "0x2E6E1c147e9A1E37733CBa1CDB52758F9ED1a4Aa",
           "assetSymbol": "mBNB",
           "assetDecimals": 18,
           "assetAddress": "0x2f1306362422e341e08e656d656719d5e8facdc7",
           "peerChainId": 97,
-          "peerContractAddress": "0xE4364385083bEe9Ac3fA3510eEc9613DB7a5421a",
+          "peerContractAddress": "0x33974bB158Ad7a0E7c7efAeC9071BF14F7Ceec8C",
           "circuits": "circom-1.0"
         }
       ]
@@ -94,7 +94,7 @@
         {
           "version": 1,
           "name": "MystikoWithLoopERC20",
-          "address": "0x5A4EC88A0c778b472843D830dc4ea5a7595b31D1",
+          "address": "0x277BF8A3A79B7023FEa307FcaF0bAD51b2cd2f43",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
@@ -103,7 +103,7 @@
         {
           "version": 1,
           "name": "MystikoWithLoopMain",
-          "address": "0x0f14889A13a738e38F1d66263245782C9700baE2",
+          "address": "0x6fa1b14Ff577A8Fe106Cb305b53ee6d06b6631a2",
           "assetSymbol": "BNB",
           "assetDecimals": 18,
           "circuits": "circom-1.0"
@@ -111,28 +111,28 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeMain",
-          "address": "0xE4364385083bEe9Ac3fA3510eEc9613DB7a5421a",
+          "address": "0x33974bB158Ad7a0E7c7efAeC9071BF14F7Ceec8C",
           "assetSymbol": "BNB",
           "assetDecimals": 18,
           "peerChainId": 3,
-          "peerContractAddress": "0x66161ad4F9340e18aADdC84FEDe908713644Bd27",
+          "peerContractAddress": "0x2E6E1c147e9A1E37733CBa1CDB52758F9ED1a4Aa",
           "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0x01fb3460620Cc82f2B69B2710Aa45AC3d8Fc1e80",
+          "address": "0xbeE39Ef5ff333F150725a47eF140369a311afaAD",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "peerChainId": 3,
-          "peerContractAddress": "0x14fA97F582bd30c39107051E1c687A68Cb9233Bf",
+          "peerContractAddress": "0x66acbcFb5749989bcBE49d63DBda887baeee973E",
           "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithLoopERC20",
-          "address": "0x4A3FcB039B6CD3c7408eca8e3c447e62DFA6cC5C",
+          "address": "0x6bB0b8C913010fe97e8E51F42cde73Ba465a670c",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
@@ -141,23 +141,23 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0x730C482913F3F00B8B4BA8d9e632B58B406AeA15",
+          "address": "0x66E166A887BDB0bCc58C5E52b286eA27d52854f5",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
           "peerChainId": 3,
-          "peerContractAddress": "0xD2F95DF7b4C5Da1DA25Cf93d9b18AcC36eC3a3Bf",
+          "peerContractAddress": "0x09f84Fe13971D1434496c63bb33092a5216E7981",
           "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0xbED9F6fe8DDc7Ef82E74b3c5418f2b9e3DD91D11",
+          "address": "0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD",
           "assetSymbol": "mETH",
           "assetDecimals": 18,
           "assetAddress": "0xc714b6884d66a7D2618c820D86f58A01b789f613",
           "peerChainId": 3,
-          "peerContractAddress": "0x77dA3768bEAC947E7A5Fa61a89F6d19cF9BC8d40",
+          "peerContractAddress": "0x6d580B030eA21912645c90324D0Ba613D098C5eA",
           "circuits": "circom-1.0"
         }
       ]
@@ -180,9 +180,9 @@
   "circuits": [
     {
       "name": "circom-1.0",
-      "wasmFile": "dist/circom/dev/Withdraw.wasm",
-      "zkeyFile": "dist/circom/dev/Withdraw.zkey",
-      "vkeyFile": "dist/circom/dev/Withdraw.vkey.json"
+      "wasmFile": "dist/circom/dev/Withdraw.wasm.gz",
+      "zkeyFile": "dist/circom/dev/Withdraw.zkey.gz",
+      "vkeyFile": "dist/circom/dev/Withdraw.vkey.json.gz"
     }
   ]
 }
