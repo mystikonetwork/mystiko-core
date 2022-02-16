@@ -1,3 +1,5 @@
+const BN = require('bn.js');
+
 module.exports = async function builder(code, options) {
   options = options || {};
 
@@ -9,15 +11,15 @@ module.exports = async function builder(code, options) {
     runtime: {
       exceptionHandler: function (code) {
         let errStr;
-        if (code == 1) {
+        if (code === 1) {
           errStr = 'Signal not found. ';
-        } else if (code == 2) {
+        } else if (code === 2) {
           errStr = 'Too many signals set. ';
-        } else if (code == 3) {
+        } else if (code === 3) {
           errStr = 'Signal already set. ';
-        } else if (code == 4) {
+        } else if (code === 4) {
           errStr = 'Assert Failed. ';
-        } else if (code == 5) {
+        } else if (code === 5) {
           errStr = 'Not enough memory. ';
         } else {
           errStr = 'Unknown error\n';
@@ -48,7 +50,7 @@ module.exports = async function builder(code, options) {
   function getMessage() {
     var message = '';
     var c = instance.exports.getMessageChar();
-    while (c != 0) {
+    while (c !== 0) {
       message += String.fromCharCode(c);
       c = instance.exports.getMessageChar();
     }
@@ -220,11 +222,11 @@ class WitnessCalculator {
 
 function toArray32(s, size) {
   const res = []; //new Uint32Array(size); //has no unshift
-  let rem = BigInt(s);
-  const radix = BigInt(0x100000000);
-  while (rem) {
-    res.unshift(Number(rem % radix));
-    rem = rem / radix;
+  let rem = new BN(s);
+  const radix = new BN(0x100000000);
+  while (!rem.isZero()) {
+    res.unshift(Number(rem.mod(radix)));
+    rem = rem.div(radix);
   }
   if (size) {
     var i = size - res.length;
@@ -238,10 +240,10 @@ function toArray32(s, size) {
 
 function fromArray32(arr) {
   //returns a BigInt
-  var res = BigInt(0);
-  const radix = BigInt(0x100000000);
+  var res = new BN(0);
+  const radix = new BN(0x100000000);
   for (let i = 0; i < arr.length; i++) {
-    res = res * radix + BigInt(arr[i]);
+    res = res.mul(radix).add(new BN(arr[i]));
   }
   return res;
 }
@@ -263,12 +265,12 @@ function flatArray(a) {
 }
 
 function fnvHash(str) {
-  const uint64_max = BigInt(2) ** BigInt(64);
-  let hash = BigInt('0xCBF29CE484222325');
+  const uint64_max = new BN(2).pow(new BN(64));
+  let hash = new BN('CBF29CE484222325', 16);
   for (var i = 0; i < str.length; i++) {
-    hash ^= BigInt(str[i].charCodeAt());
-    hash *= BigInt(0x100000001b3);
-    hash %= uint64_max;
+    hash = hash.xor(new BN(str[i].charCodeAt()));
+    hash = hash.mul(new BN(0x100000001b3));
+    hash = hash.mod(uint64_max);
   }
   let shash = hash.toString(16);
   let n = 16 - shash.length;
