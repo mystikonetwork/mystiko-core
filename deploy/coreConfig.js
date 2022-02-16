@@ -60,6 +60,8 @@ module.exports = {
     peerChainId,
     address,
     peerContractAddress,
+    version,
+    circuits,
   ) {
     for (let i = 0; i < coreConfig.chains.length; i++) {
       if (coreConfig.chains[i].name != chainName) {
@@ -94,7 +96,62 @@ module.exports = {
       }
     }
 
-    console.error(common.RED, 'contract configure not exist');
+    return this.addNewConfigContractAddress(
+      bridgeName,
+      coreConfig,
+      chainName,
+      contractName,
+      token,
+      peerChainId,
+      address,
+      peerContractAddress,
+      version,
+      circuits,
+    );
+  },
+
+  addNewConfigContractAddress(
+    bridgeName,
+    coreConfig,
+    chainName,
+    contractName,
+    token,
+    peerChainId,
+    address,
+    peerContractAddress,
+    version,
+    circuits,
+  ) {
+    console.log('core add new contract');
+
+    for (let i = 0; i < coreConfig.chains.length; i++) {
+      if (coreConfig.chains[i].name != chainName) {
+        continue;
+      }
+
+      var newContract = {
+        version: version,
+        name: contractName,
+        address: address,
+        assetSymbol: token.name,
+        assetDecimals: token.assetDecimals,
+        circuits: circuits,
+      };
+
+      if (token.erc20 == 'true') {
+        newContract.assetAddress = token.address;
+      }
+
+      if (bridgeName != 'loop') {
+        newContract.peerChainId = peerChainId;
+        newContract.peerContractAddress = peerContractAddress;
+      }
+
+      coreConfig.chains[i].contracts.push(newContract);
+      return coreConfig;
+    }
+
+    console.error(common.RED, 'core add new contract error, should add chain configure');
     return null;
   },
 
@@ -110,7 +167,7 @@ module.exports = {
     }
 
     const dstChain = common.getChainConfig(config, dst.network);
-    if (srcChain == null) {
+    if (dstChain == null) {
       return null;
     }
 
@@ -135,6 +192,8 @@ module.exports = {
       dstChain.chainId,
       src.address,
       dst.address,
+      config.version,
+      config.circuits,
     );
     if (cliCoreConfig == null) {
       return null;
@@ -155,6 +214,8 @@ module.exports = {
       dstChain.chainId,
       src.address,
       dst.address,
+      config.version,
+      config.circuits,
     );
     if (defaultCoreConfig == null) {
       return null;

@@ -90,7 +90,9 @@ module.exports = {
       }
     }
 
-    console.error(this.RED, 'bridge proxy not exist');
+    if (bridge.name != 'loop') {
+      console.error(this.RED, 'bridge proxy not exist');
+    }
     return null;
   },
 
@@ -112,7 +114,7 @@ module.exports = {
       }
     }
 
-    console.log('bridge pair token ', tokenName, ' not exist ');
+    console.error(this.RED, 'bridge pair token ', tokenName, ' not exist ');
     return -1;
   },
 
