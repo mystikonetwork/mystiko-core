@@ -1,5 +1,6 @@
 {
-  "version": "1.0",
+  "version": 1,
+  "circuits": "circom-1.0",
   "chains": [
     {
       "name": "Ethereum Ropsten",
@@ -8,21 +9,25 @@
       "tokens": [
         {
           "name": "ETH",
+          "assetDecimals": 18,
           "erc20": "false"
         },
         {
           "name": "MTT",
           "erc20": "true",
+          "assetDecimals": 18,
           "address": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3"
         },
         {
           "name": "mUSD",
           "erc20": "true",
+          "assetDecimals": 6,
           "address": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD"
         },
         {
           "name": "mBNB",
           "erc20": "true",
+          "assetDecimals": 18,
           "address": "0x2f1306362422e341e08e656d656719d5e8facdc7"
         }
       ],
@@ -36,6 +41,7 @@
       "tokens": [
         {
           "name": "ETH",
+          "assetDecimals": 18,
           "erc20": "false"
         }
       ],
@@ -49,26 +55,44 @@
       "tokens": [
         {
           "name": "BNB",
+          "assetDecimals": 18,
           "erc20": "false"
         },
         {
           "name": "MTT",
           "erc20": "true",
+          "assetDecimals": 18,
           "address": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0"
         },
         {
           "name": "mUSD",
           "erc20": "true",
+          "assetDecimals": 6,
           "address": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88"
         },
         {
           "name": "mETH",
           "erc20": "true",
+          "assetDecimals": 18,
           "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613"
         }
       ],
-      "hashAddress": "0x7b13260988b46b83B30Cc55932E43991d99c38A9",
-      "verifierAddress": "0x5FD28088Ff9bb56D5D20A0f971BDa81e8872ee19"
+      "hashAddress": "0x697CA57f0c848672038DAFBa8A07fCbe7015024C",
+      "verifierAddress": "0xDca6C84ffF69248d6DE92205B86a70bdd65C9dE3"
+    },
+    {
+      "name": "Arbitrum Testnet",
+      "network": "arbitrumtestnet",
+      "chainId": "1313161555",
+      "tokens": [
+        {
+          "name": "ETH",
+          "assetDecimals": 18,
+          "erc20": "false"
+        }
+      ],
+      "hashAddress": "0x697CA57f0c848672038DAFBa8A07fCbe7015024C",
+      "verifierAddress": "0xDca6C84ffF69248d6DE92205B86a70bdd65C9dE3"
     }
   ],
   "bridges": [
@@ -127,6 +151,13 @@
             "token": "mUSD",
             "address": ""
           }
+        ],
+        [
+          {
+            "network": "arbitrumtestnet",
+            "token": "ETH",
+            "address": "0xbDe788B88A40a76a16Bff03E5Ab96CB732538bFb"
+          }
         ]
       ]
     },
@@ -136,11 +167,11 @@
       "proxys": [
         {
           "network": "goerli",
-          "address": "0x358234B325EF9eA8115291A8b81b7d33A2Fa762D"
+          "address": "0x942E8e0e4b021F55b89660c886146e0Ec57F4b5B"
         },
         {
           "network": "bsctestnet",
-          "address": "0xf89354F314faF344Abd754924438bA798E306DF2"
+          "address": "0xAd204986D6cB67A5Bc76a3CB8974823F43Cb9AAA"
         }
       ],
       "pairs": [
@@ -148,12 +179,12 @@
           {
             "network": "goerli",
             "token": "ETH",
-            "address": ""
+            "address": "0x58Fe6A9996f37472aDCe495B00585D6Fc7010303"
           },
           {
             "network": "bsctestnet",
             "token": "mETH",
-            "address": ""
+            "address": "0x8D2fB8699A740a93EF9d6239425a9d6b2Bf6fe19"
           }
         ]
       ]
@@ -188,12 +219,12 @@
           {
             "network": "ropsten",
             "token": "MTT",
-            "address": ""
+            "address": "0x0BDF500811a5A0Eb79E117147f3131119d5fb77F"
           },
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": ""
+            "address": "0x0A9b6e4eECA6AF93602b5F3f9e14688E02299CcE"
           }
         ],
         [
