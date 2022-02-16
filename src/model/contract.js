@@ -20,7 +20,7 @@ export class Contract extends BaseModel {
    * @desc the version number of this deployed contract.
    */
   get version() {
-    return this.data['version'] ? this.data['version'] : 1;
+    return this.data['version'] ? this.data['version'] : 0;
   }
 
   set version(ver) {

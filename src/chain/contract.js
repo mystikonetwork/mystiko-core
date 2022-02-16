@@ -127,25 +127,27 @@ export class ContractPool {
    * it will generate {@link external:Contract}.
    */
   connect(contractGenerator = undefined) {
-    this.contractHandler.getContracts().forEach((contractConfig) => {
-      if (!this.pool[contractConfig.chainId]) {
-        this.pool[contractConfig.chainId] = {};
-        this.assetPool[contractConfig.chainId] = {};
-      }
-      const provider = this.providerPool.getProvider(contractConfig.chainId);
-      this.pool[contractConfig.chainId][contractConfig.address] = new MystikoContract(contractConfig);
-      this.pool[contractConfig.chainId][contractConfig.address].connect(provider, contractGenerator);
-      if (contractConfig.assetType !== AssetType.MAIN) {
-        if (!contractGenerator) {
-          contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
+    this.contractHandler
+      .getContracts({ filterFunc: (contract) => contract.version > 0 })
+      .forEach((contractConfig) => {
+        if (!this.pool[contractConfig.chainId]) {
+          this.pool[contractConfig.chainId] = {};
+          this.assetPool[contractConfig.chainId] = {};
         }
-        this.assetPool[contractConfig.chainId][contractConfig.assetAddress] = contractGenerator(
-          contractConfig.assetAddress,
-          MystikoABI.ERC20.abi,
-          provider,
-        );
-      }
-    });
+        const provider = this.providerPool.getProvider(contractConfig.chainId);
+        this.pool[contractConfig.chainId][contractConfig.address] = new MystikoContract(contractConfig);
+        this.pool[contractConfig.chainId][contractConfig.address].connect(provider, contractGenerator);
+        if (contractConfig.assetType !== AssetType.MAIN) {
+          if (!contractGenerator) {
+            contractGenerator = (address, abi, provider) => new ethers.Contract(address, abi, provider);
+          }
+          this.assetPool[contractConfig.chainId][contractConfig.assetAddress] = contractGenerator(
+            contractConfig.assetAddress,
+            MystikoABI.ERC20.abi,
+            provider,
+          );
+        }
+      });
   }
 
   /**
