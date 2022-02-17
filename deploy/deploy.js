@@ -151,10 +151,10 @@ async function deployStep1() {
   }
 
   const hasher2 = await Hasher2.new();
-  console.log('hasher2 address: ', hasher.address);
+  console.log('hasher2 address: ', hasher2.address);
 
   const withdrawVerifier = await WithdrawVerifier.new();
-  console.log('withdrawVerifier address: ', verifier.address);
+  console.log('withdrawVerifier address: ', withdrawVerifier.address);
 
   common.saveBaseAddressConfig(cfgNetwork, network, config, hasher2.address, withdrawVerifier.address);
 }
