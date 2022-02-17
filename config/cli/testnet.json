@@ -7,8 +7,7 @@
       "chainId": 3,
       "explorerUrl": "https://ropsten.etherscan.io",
       "providers": [
-        "https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5",
-        "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+        "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
       ],
       "contracts": [
         {
