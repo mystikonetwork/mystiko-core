@@ -24,7 +24,7 @@ const babelRegister = require('@babel/register');
 const utils = require('./src/utils.js');
 
 const providers = {
-  ropsten: 'https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j',
+  ropsten: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   bsctestnet: 'https://data-seed-prebsc-1-s2.binance.org:8545/',
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
