@@ -49,13 +49,24 @@ module.exports = {
     for (var i = 0; i < tbridgeConfig.bridge.pairs.length; i++) {
       const pair = tbridgeConfig.bridge.pairs[i];
       if (
-        (pair.local.name == src.network &&
-          pair.local.token == src.token &&
-          pair.remote.name == dst.network) ||
-        (pair.local.name == dst.network && pair.local.token == dst.token && pair.remote.name == src.network)
+        pair.local.name == src.network &&
+        pair.local.token == src.token &&
+        pair.remote.name == dst.network
       ) {
         tbridgeConfig.bridge.pairs[i].local.mystikoAddress = src.address;
         tbridgeConfig.bridge.pairs[i].local.relayProxyAddress = proxyAddress;
+
+        this.saveConfig(mystikoNetwork, tbridgeConfig);
+        return;
+      }
+
+      if (
+        pair.remote.name == src.network &&
+        pair.remote.token == src.token &&
+        pair.local.name == dst.network
+      ) {
+        tbridgeConfig.bridge.pairs[i].remote.mystikoAddress = src.address;
+        tbridgeConfig.bridge.pairs[i].remote.relayProxyAddress = proxyAddress;
 
         this.saveConfig(mystikoNetwork, tbridgeConfig);
         return;

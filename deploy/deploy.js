@@ -6,9 +6,10 @@ const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
 const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
+const MystikoCrossChainProxy = artifacts.require('MystikoCrossChainProxy');
 
-const Verifier = artifacts.require('Verifier');
-const Hasher = artifacts.require('Hasher');
+const WithdrawVerifier = artifacts.require('WithdrawVerifier');
+const Hasher2 = artifacts.require('Hasher2');
 const common = require('./common');
 const coreConfig = require('./coreConfig');
 const tbridgeConfig = require('./tbridgeConfig');
@@ -42,6 +43,11 @@ function getMystikoContract(bridge, bErc20) {
     console.error(common.RED, 'bridge not support');
     return null;
   }
+}
+
+async function deployCrossChainProxy() {
+  const proxy = await MystikoCrossChainProxy.new();
+  return proxy.address;
 }
 
 async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
@@ -144,13 +150,13 @@ async function deployStep1() {
     return;
   }
 
-  const hasher = await Hasher.new();
-  console.log('hasher address: ', hasher.address);
+  const hasher2 = await Hasher2.new();
+  console.log('hasher2 address: ', hasher.address);
 
-  const verifier = await Verifier.new();
-  console.log('verifier address: ', verifier.address);
+  const withdrawVerifier = await WithdrawVerifier.new();
+  console.log('withdrawVerifier address: ', verifier.address);
 
-  common.saveBaseAddressConfig(cfgNetwork, network, config, hasher.address, verifier.address);
+  common.saveBaseAddressConfig(cfgNetwork, network, config, hasher2.address, withdrawVerifier.address);
 }
 
 //deploy mystiko contract and configure peer contract address
@@ -172,7 +178,7 @@ async function deployStep2or3() {
   const dstNetwork = process.argv[9];
   const tokenName = process.argv[10];
 
-  const config = common.loadConfig(mystikoNetwork);
+  var config = common.loadConfig(mystikoNetwork);
   if (config == null) {
     return;
   }
@@ -208,7 +214,20 @@ async function deployStep2or3() {
 
   const src = pair[i];
   const dst = pair[j];
-  const proxyAddress = common.getBridgeProxyAddress(bridge, pair[i].network);
+  var proxyAddress = common.getBridgeProxyAddress(bridge, pair[i].network, bridgeName, config);
+  if (proxyAddress == null) {
+    if (bridge.name == 'tbridge') {
+      console.log('tbridge proxy not exist, create');
+      proxyAddress = await deployCrossChainProxy();
+      config = common.updateTBridgeCrossChainProxyConfig(config, pair[i].network, proxyAddress);
+      if (config == null) {
+        return;
+      }
+    } else if (bridge.name != 'loop') {
+      console.error(this.RED, 'bridge proxy not exist');
+      return;
+    }
+  }
 
   if (step == 'step2') {
     const m = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
