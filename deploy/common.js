@@ -72,6 +72,22 @@ module.exports = {
     this.saveConfig(mystikoNetwork, config);
   },
 
+  updateTBridgeCrossChainProxyConfig(config, network, proxyAddress) {
+    for (let i = 0; i < config.bridges.length; i++) {
+      if (config.bridges[i].name == 'tbridge') {
+        for (let j = 0; j < config.bridges[i].proxys.length; j++) {
+          if (config.bridges[i].proxys[j].network == network) {
+            config.bridges[i].proxys[j].address = proxyAddress;
+            return config;
+          }
+        }
+      }
+    }
+
+    console.log(this.RED, 'update tbridge cross chain proxy error');
+    return null;
+  },
+
   getBridgeConfig(config, bridgeName) {
     for (const b of config.bridges) {
       if (b.name == bridgeName) {
@@ -90,9 +106,6 @@ module.exports = {
       }
     }
 
-    if (bridge.name != 'loop') {
-      console.error(this.RED, 'bridge proxy not exist');
-    }
     return null;
   },
 
