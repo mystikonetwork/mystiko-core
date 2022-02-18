@@ -10,6 +10,7 @@
   "scripts": {
     "build": "rm -rf build/* && webpack -c webpack.config.js",
     "test": "jest --forceExit",
+    "coverage": "jest --forceExit --silent --ci --coverage --coverageReporters=\"text\" --coverageReporters=\"text-summary\"",
     "lint": "eslint --ext .js .",
     "prettier:check": "prettier --check \"./**/*.js\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.js\" --config .prettierrc",
