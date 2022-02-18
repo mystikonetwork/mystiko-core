@@ -9,8 +9,7 @@
   "private": true,
   "scripts": {
     "build": "rm -rf build/* && babel src --out-dir build",
-    "test": "jest --forceExit",
-    "coverage": "jest --forceExit --silent --ci --coverage --coverageReporters=\"text\" --coverageReporters=\"text-summary\"",
+    "test": "jest --forceExit --silent --ci --coverage --coverageReporters=\"text\" --coverageReporters=\"text-summary\"",
     "lint": "eslint --ext .js .",
     "doc": "jsdoc -c jsdoc.json",
     "prettier:check": "prettier --check \"./**/*.js\" --config .prettierrc",

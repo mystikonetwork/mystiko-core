@@ -6,5 +6,9 @@
   "repository": "https://github.com/mystikonetwork/mystiko-core",
   "author": "Mystiko.Network",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "circomlib": "^2.0.2",
+    "snarkjs": "^0.4.12"
+  }
 }

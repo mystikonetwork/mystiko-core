@@ -17,18 +17,18 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: npm install --global ganache-cli
-      - run: yarn install --network-timeout 100000
-      - run: cp .env.example .env
+      - run: npm install --global ganache-cli lerna
       - run: ganache-cli --port 7545 > /dev/null &
-      - run: yarn build
-      - run: yarn test:contract
+      - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
+      - run: lerna bootstrap
+      - run: lerna run lint
+      - run: lerna run build
       - name: Jest test with coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: 90
-          test-script: yarn test:js --silent --ci --coverage --coverageReporters="text" --coverageReporters="text-summary"
+          test-script: lerna test
           package-manager: yarn
           annotations: none
       - name: Telegram Failure Notification

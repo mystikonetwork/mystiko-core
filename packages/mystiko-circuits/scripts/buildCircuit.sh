@@ -13,7 +13,7 @@ fi
 
 BASE=$(cd "$(dirname "$0")";pwd)
 ROOT="${BASE}/.."
-BUILD="${ROOT}/build/circuits"
+BUILD="${ROOT}/build"
 SRC="${ROOT}/src"
 DIST="${ROOT}/dist/circom/dev"
 CIRCUIT="$1"
