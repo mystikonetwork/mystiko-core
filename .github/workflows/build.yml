@@ -23,14 +23,15 @@ jobs:
       - run: lerna bootstrap
       - run: lerna run lint
       - run: lerna run build
-      - name: Jest test with coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+      - run: lerna run test
+      - name: Report @mystiko/client test coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
+          coverage-file: ./packages/mystiko-client/coverage/report.json
+          base-coverage-file: ./packages/mystiko-client/coverage/master/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: 90
-          test-script: lerna run test
           package-manager: yarn
-          annotations: none
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()
