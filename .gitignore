@@ -1,13 +1,6 @@
 node_modules
 build
-.vscode
-*.log
-.env
-.env.test
 coverage
-db
-*.db
-*.db.*
+.vscode
 .idea
-jsdoc
-contracts/**/artifacts
+*.log
