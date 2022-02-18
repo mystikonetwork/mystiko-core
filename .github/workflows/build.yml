@@ -28,7 +28,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: 90
-          test-script: lerna test
+          test-script: lerna run test
           package-manager: yarn
           annotations: none
       - name: Telegram Failure Notification
