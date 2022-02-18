@@ -1,4 +1,8 @@
-###step1
+## @mystiko/contracts
+This package contains the Smart Contract written in Solidity
+
+### Deploy Smart Contracts
+#### Deploy Step 1
 deploy hash contract and verifier contract, parameter:
 
 ```
@@ -9,7 +13,7 @@ example:
 
 ```yarn deploy:bsctestnet  testnet  step1```
 
-###step2
+#### Deploy Step 2
 deploy mystiko core contract, parameter
 ```
  mystiko network     : testnet、mainnet)
@@ -23,7 +27,7 @@ example:
 
 ``` yarn deploy:bsctestnet  testnet  step2 celer goerli ETH```
 
-###step3
+#### Deploy Step 3
 configure peer contract address, parameter:
 
 ```

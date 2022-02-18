@@ -8,10 +8,11 @@ We have to build the UMD format javascript bundle to let it runs smoothly in bro
 javascript bundle:
 
 ```bash
+cd packages/mystiko-client-browser
 yarn build
 ```
 
-The output file is located in [build/js/mystiko.js](/build/js/mystiko.js).
+The output file is located in `build/mystiko.*.js`.
 
 ### Use the bundle
 You could use the bundled javascript library by adding it into the `<script>` tag in your `index.html`. For example:
@@ -21,7 +22,7 @@ You could use the bundled javascript library by adding it into the `<script>` ta
 <html>
   <head>
     <title>Mystiko Is Awesome</title>
-    <script type='text/javascript' src='./mystiko.js'></script>
+    <script type='text/javascript' src='./mystiko.474e6f967ef70ff8c557.js'></script>
   </head>
   <body>
     <p>Hello Mystiko</p>
@@ -47,6 +48,7 @@ Please check the {@link module:mystiko.initialize} for more information of this 
 Before you run, there are some resources need to be built. Run this command:
 
 ```bash
+cd packages/mystiko-client-node
 yarn build
 ```
 
@@ -56,6 +58,7 @@ therefore, [babel-node](https://babeljs.io/docs/en/babel-node) is required to be
 the interactive console. You could run this command to start `babel-node`:
 
 ```bash
+cd packages/mystiko-client-node
 npx babel-node
 ```
 

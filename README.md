@@ -13,6 +13,15 @@ zkSnark compiler and toolchain. Here is the details of the proving schemes we ar
 * **[snarkjs](https://github.com/iden3/snarkjs)** - a zkSnark backend and runtime.
 
 ## Preliminaries
+### Install Git LFS
+Some large files are tracked with [Git LFS](https://git-lfs.github.com/), please follow the instruction there to install
+Git LFS. After you successfully installed Git LFS, you should check out those Git LFS tracked files by running these commands:
+
+```bash
+git lfs install
+git lfs pull
+```
+
 ### Install Node 14
 Please install Node.js 14 as the recommended running Node environment for this project. If you don't know which
 node version you have installed, you can check it by running the below command:
@@ -32,150 +41,51 @@ manager for Node.js and web applications. You can do it by running this command:
 npm install -g yarn
 ```
 
-## Developing Guide
+### Install Lerna
+This repository is managed by [Lerna](https://lerna.js.org/), which is a tool for managing JavaScript projects with multiple packages.
+You can install Lerna by running this command:
+
+```bash
+npm install -g lerna
+```
+
 ### Install dependencies
 Once you have checked out this repo into your local machine, you could install all dependencies by running this command:
 
 ```bash
-yarn install
+lerna bootstrap
 ```
 
-If you observed some network failure when running above command, you could add `--network-timeout 100000` to the above
-command, which sets the network timeout threshold in milliseconds.
+## Package Structures
+This repository contains five packages at this moment:
+* [mystiko-circuits](./packages/mystiko-circuits) - It contains the zkSnark circuit written in Circom language.
+* [mystiko-client](./packages/mystiko-client) - It contains a Javascript client SDK of Mystiko's core protocol.
+* [mystiko-client-browser](./packages/mystiko-client-browser) - It contains a Javascript bundle for browser environment.
+* [mystiko-client-node](./packages/mystiko-client-node) - It contains a Javascript bundle for NodeJS environment.
+* [mystiko-contracts](./packages/mystiko-contracts) - It contains all smart contracts written in Solidity.
+
+## Developing Guide
 
 ### Build the repo
-This repo includes three parts:
-* [contracts](/contracts) it contains the smart contract written in Solidity.
-* [circom circuits](/circuits) it contains the zkSnark circuit written in Circom language.
-* [javascript library](/src) it contains the Javascript implementation of all off-chain computation and wallet related logic.
-
-Normally you don't need to build circuits, because it is kinda stable and the build script will overwrite the generated
-public parameters of zkSnark in the [dist](/dist) folder. You could just run this command to build the other two parts:
+You can build the entire codebase by running this command:
 
 ```bash
-yarn build
+lerna run build
 ```
 
-If you want to build the Solidity contract separately, you could run this command:
+### Test the Repo
+
+You can test entire codebase by running this command:
 
 ```bash
-yarn build:contract
+cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
+lerna run test
 ```
-
-The final built outputs and intermediate outputs are stored in [build/contracts](/build/contracts).
-
-If you want to build the Javascript library into bundled UMD or CommandJS library separately, you could run this command:
-
-```bash
-yarn build:js
-```
-
-The built outputs are stored in [build/js](/build/js). More precisely, [build/js/mystiko.js](/build/js/mystiko.js) is the UMD bundle,
-and [build/js/mystiko.cjs](/build/js/mystiko.cjs) is the CommonJS bundle.
-
-If you do want to regenerate the [WithdrawVerifier](/contracts/WithdrawVerifier.sol) contract and regenerate zkSnark public
-parameters in [dist](/dist), you could run this command.
-
-```bash
-yarn build:circuits
-```
-
-Please take this step cautiously, because it will overwrite the existing files.
-
-### Test the Solidity smart contract
-
-Firstly, you need to start [Ganache](https://trufflesuite.com/ganache/) as local Ethereum testnet as the prerequisites
-of running `truffle test`. You could bootstrap Ganache environment either by installing their GUI application
-or by running this command:
-
-```bash
-npx ganache-cli --port 7545
-```
-
-Please make sure the Ganache client runs on port `7545`, which is configured in [truffle-config.js](/truffle-config.js).
-You have to change it to other number before you run Ganache client on different port.
-
-The second step before running tests is: setting the correct environment variables. We have put some example settings
-in [.env.example](/.env.example), you use it by running this command:
-
-```bash
-cp .env.example .env
-```
-
-You could modify these environment variables to your preferred values before you start running the tests.
-
-All tests written for the Solidity are located in [contracts/tests](/contracts/tests), which are wrapped with
-Truffle's test suite. Please run the tests with this command:
-
-```bash
-yarn test:contract
-```
-
-### Test the Javascript library
-
-All Javascript unit test cases are located in [tests](/tests). The testing suite used by this project is
-[Jest](https://jestjs.io). You could run the Javascript test with this command:
-
-```bash
-yarn test:js
-```
-
-These will output the test results and the coverage summary. The coverage report will be generated into the
-[coverage](/coverage) folder, you could find more coverage information in there.
 
 ### Linting the repo
 
-We configured the linters for Javascript and Solidity, which are [ESLint](https://eslint.org/)
-and [solhint](https://github.com/protofire/solhint). You could check their configuration with
-[.eslintrc](/.eslintrc) and [.solhint.json](/.solhint.json). You could run the linters with this command:
+You can lint the entire codebase by running this command:
 
 ```bash
-yarn lint
+lerna run lint
 ```
-
-Or with these command separately for linting different language:
-
-```bash
-yarn lint:js # for linting .js files
-```
-```bash
-yarn lint:sol # for linting .sol files
-```
-
-If you see any code style violation errors, you could run the prettier command to help you fix them:
-
-```bash
-yarn prettier:fix
-```
-
-If the above prettier command cannot solve it, you should modify the code violates the rules manually.
-
-### Deploy the smart contracts
-
-This project relies on Truffle to deploy into different blockchain networks. The deploying scripts are
-located in [migrations](/migrations) folder. Therefore, you could deploy the smart contracts into different
-network by running this command:
-
-```bash
-npx truffle migrate --network ropsten
-```
-
-Please check [Truffle Document](https://trufflesuite.com/docs/truffle/getting-started/running-migrations.html)
-for more information about `truffle migrate`.
-
-After successfully deployed, you could then verify the smart contracts by running this command:
-
-```bash
-npx truffle run verify [Contract Name]@[Contract Address] --network [Network]
-```
-For more information about the verification process, please check [truffle-plugin-verify](https://github.com/rkalis/truffle-plugin-verify).
-
-### Generate jsdoc
-
-Please you this command to generate [jsdoc](https://jsdoc.app/) for the Mystiko Javascript library:
-
-```bash
-yarn jsdoc
-```
-
-The generated jsdoc will be located in [jsdoc](/jsdoc) folder. Use your browser to open the `index.html` in the folder.
