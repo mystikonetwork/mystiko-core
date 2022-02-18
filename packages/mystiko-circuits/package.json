@@ -1,0 +1,14 @@
+{
+  "name": "@mystiko/circuits",
+  "version": "0.1.0",
+  "description": "circom circuits of Mystiko",
+  "main": "index.js",
+  "repository": "https://github.com/mystikonetwork/mystiko-core",
+  "author": "Mystiko.Network",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "circomlib": "^2.0.2",
+    "snarkjs": "^0.4.12"
+  }
+}
