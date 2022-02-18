@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
     "build": "rm -rf build/* && webpack -c webpack.config.js",
-    "test": "jest --forceExit --ci --json --coverage --testLocationInResults --outputFile=report.json",
+    "test": "jest --forceExit --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json",
     "lint": "eslint --ext .js .",
     "prettier:check": "prettier --check \"./**/*.js\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.js\" --config .prettierrc",
