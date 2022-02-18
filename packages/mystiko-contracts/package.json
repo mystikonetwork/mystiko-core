@@ -16,6 +16,7 @@
     "prettier": "yarn prettier:fix",
     "migrate": "yarn migrate:dev",
     "migrate:dev": "truffle migrate --network development --reset",
+    "deploy": "yarn deploy:dev",
     "deploy:dev": "truffle exec deploy/deploy.js --network development",
     "deploy:bsctestnet": "truffle exec deploy/deploy.js --network bsctestnet",
     "deploy:ropsten": "truffle exec deploy/deploy.js --network ropsten",

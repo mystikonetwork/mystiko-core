@@ -52,14 +52,13 @@ cd packages/mystiko-client-node
 yarn build
 ```
 
-### Start babel-node
-Our javascript codebase is written in [ES6](https://www.w3schools.com/js/js_es6.asp),
-therefore, [babel-node](https://babeljs.io/docs/en/babel-node) is required to be able to run this tutorial
-the interactive console. You could run this command to start `babel-node`:
+### Start node console
+You need to first build the package before running it in node console.
 
 ```bash
 cd packages/mystiko-client-node
-npx babel-node
+yarn build
+node
 ```
 
 **Tips** If you want to input multiple lines of code, you could just enter `.editor` in the node console:
@@ -71,10 +70,10 @@ babel > .editor
 Then use `ctrl-D` to exit the editor mode.
 
 ### Import the library
-After your `babel-node` successfully being installed, you could import the library like this:
+After your successfully build the package, you could import the library like this:
 
 ```javascript
-var mystiko = require('./src/index.js').default
+var mystiko = require('./build/mystiko.cjs').default
 ```
 
 ### Initialize the library
