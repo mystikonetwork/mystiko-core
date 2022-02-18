@@ -28,8 +28,8 @@ jobs:
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-client
+          test-script: yarn test
           coverage-file: ./coverage/report.json
-          base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: 90
           package-manager: yarn

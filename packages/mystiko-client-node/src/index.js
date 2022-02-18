@@ -7,7 +7,19 @@ import { MystikoConfig } from '@mystiko/client/src/config';
 import DefaultTestnetConfigJson from '@mystiko/contracts/config/default/testnet.json';
 import DefaultMainnetConfigJson from '@mystiko/contracts/config/default/mainnet.json';
 
-const DefaultTestnetConfig = new MystikoConfig(DefaultTestnetConfigJson);
+const defaultTestnetCircuitsConfig = [
+  {
+    name: 'circom-1.0',
+    wasmFile: 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.wasm.gz',
+    zkeyFile: 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.zkey.gz',
+    vkeyFile: 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz',
+  },
+];
+
+const DefaultTestnetConfig = new MystikoConfig({
+  ...DefaultTestnetConfigJson,
+  circuits: defaultTestnetCircuitsConfig,
+});
 const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
 
 const colors = {
