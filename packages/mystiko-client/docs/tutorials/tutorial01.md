@@ -70,7 +70,7 @@ babel > .editor
 Then use `ctrl-D` to exit the editor mode.
 
 ### Import the library
-After your `babel-node` successfully being installed, you could import the library like this:
+After your successfully build the package, you could import the library like this:
 
 ```javascript
 var mystiko = require('./build/mystiko.cjs').default
