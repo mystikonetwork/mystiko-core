@@ -1,0 +1,187 @@
+{
+  "version": "1.0",
+  "chains": [
+    {
+      "name": "Ethereum Ropsten",
+      "assetSymbol": "ETH",
+      "chainId": 3,
+      "explorerUrl": "https://ropsten.etherscan.io",
+      "providers": [
+        "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopMain",
+          "address": "0x6A9EA7A2A67f99Bd68Dd535C7a7CF93e3a2554c8",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeMain",
+          "address": "0x6d580B030eA21912645c90324D0Ba613D098C5eA",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "peerChainId": 97,
+          "peerContractAddress": "0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0x66acbcFb5749989bcBE49d63DBda887baeee973E",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
+          "peerChainId": 97,
+          "peerContractAddress": "0xbeE39Ef5ff333F150725a47eF140369a311afaAD",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x840E68A09181b7E94DBB76E9d116c934d43DF74c",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0x09f84Fe13971D1434496c63bb33092a5216E7981",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
+          "peerChainId": 97,
+          "peerContractAddress": "0x66E166A887BDB0bCc58C5E52b286eA27d52854f5",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0x2E6E1c147e9A1E37733CBa1CDB52758F9ED1a4Aa",
+          "assetSymbol": "mBNB",
+          "assetDecimals": 18,
+          "assetAddress": "0x2f1306362422e341e08e656d656719d5e8facdc7",
+          "peerChainId": 97,
+          "peerContractAddress": "0x33974bB158Ad7a0E7c7efAeC9071BF14F7Ceec8C",
+          "circuits": "circom-1.0"
+        }
+      ]
+    },
+    {
+      "name": "BSC Testnet",
+      "assetSymbol": "BNB",
+      "chainId": 97,
+      "explorerUrl": "https://testnet.bscscan.com",
+      "providers": [
+        "https://data-seed-prebsc-2-s2.binance.org:8545"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x277BF8A3A79B7023FEa307FcaF0bAD51b2cd2f43",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopMain",
+          "address": "0x6fa1b14Ff577A8Fe106Cb305b53ee6d06b6631a2",
+          "assetSymbol": "BNB",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeMain",
+          "address": "0x33974bB158Ad7a0E7c7efAeC9071BF14F7Ceec8C",
+          "assetSymbol": "BNB",
+          "assetDecimals": 18,
+          "peerChainId": 3,
+          "peerContractAddress": "0x2E6E1c147e9A1E37733CBa1CDB52758F9ED1a4Aa",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0xbeE39Ef5ff333F150725a47eF140369a311afaAD",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
+          "peerChainId": 3,
+          "peerContractAddress": "0x66acbcFb5749989bcBE49d63DBda887baeee973E",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x6bB0b8C913010fe97e8E51F42cde73Ba465a670c",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0x66E166A887BDB0bCc58C5E52b286eA27d52854f5",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
+          "peerChainId": 3,
+          "peerContractAddress": "0x09f84Fe13971D1434496c63bb33092a5216E7981",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD",
+          "assetSymbol": "mETH",
+          "assetDecimals": 18,
+          "assetAddress": "0xc714b6884d66a7D2618c820D86f58A01b789f613",
+          "peerChainId": 3,
+          "peerContractAddress": "0x6d580B030eA21912645c90324D0Ba613D098C5eA",
+          "circuits": "circom-1.0"
+        }
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "name": "Poly Bridge",
+      "type": "poly",
+      "explorerUrl": "https://explorer.poly.network",
+      "explorerPrefix": "/testnet/tx/%tx%",
+      "apiUrl": "https://explorer.poly.network",
+      "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+    },
+    {
+      "name": "Mystiko Testnet Bridge",
+      "type": "tbridge"
+    }
+  ],
+  "circuits": [
+    {
+      "name": "circom-1.0",
+      "wasmFile": "node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.wasm.gz",
+      "zkeyFile": "node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.zkey.gz",
+      "vkeyFile": "node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz"
+    }
+  ]
+}

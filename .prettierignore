@@ -1,9 +1,0 @@
-.vscode
-build
-circuits
-*.log
-yarn.lock
-coverage
-dist
-.idea
-jsdoc
