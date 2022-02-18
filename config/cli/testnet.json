@@ -160,6 +160,26 @@
           "circuits": "circom-1.0"
         }
       ]
+    },
+    {
+      "name": "Polygon Testnet",
+      "assetSymbol": "MATIC",
+      "chainId": 80001,
+      "explorerUrl": "https://mumbai.polygonscan.com/",
+      "providers": [
+        "https://polygon-mumbai.g.alchemy.com/v2/mpL4IKNdH3vPE2e-KvrMo4kThFsxaOuc"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0xA9A0DaeC99EEf5DCFc40Ad10FE00ad5C7B6EF578",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "assetAddress": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        }
+      ]
     }
   ],
   "bridges": [

@@ -18,6 +18,7 @@
     "deploy:bsctestnet": "npx truffle exec deploy/deploy.js --network bsctestnet",
     "deploy:ropsten": "npx truffle exec deploy/deploy.js --network ropsten",
     "deploy:goerli": "npx truffle exec deploy/deploy.js --network goerli",
+    "deploy:polygon_testnet": "npx truffle exec deploy/deploy.js --network polygon_testnet",
     "prettier:check": "prettier --check \"./**/*.{js,sol}\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.{js,sol}\" --config .prettierrc",
     "prettier": "yarn prettier:fix",

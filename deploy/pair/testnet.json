@@ -93,6 +93,21 @@
       ],
       "hashAddress": "0x697CA57f0c848672038DAFBa8A07fCbe7015024C",
       "verifierAddress": "0xDca6C84ffF69248d6DE92205B86a70bdd65C9dE3"
+    },
+    {
+      "name": "Polygon Testnet",
+      "network": "polygon_testnet",
+      "chainId": "80001",
+      "tokens": [
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        }
+      ],
+      "hashAddress": "0xff3Ac4ca8600EFe33c3A01f87f3b73B9693A263F",
+      "verifierAddress": "0xae6e4165F06165bab85cd6bf62903Ec51A7459cB"
     }
   ],
   "bridges": [
@@ -157,6 +172,13 @@
             "network": "arbitrumtestnet",
             "token": "ETH",
             "address": "0xbDe788B88A40a76a16Bff03E5Ab96CB732538bFb"
+          }
+        ],
+        [
+          {
+            "network": "polygon_testnet",
+            "token": "MTT",
+            "address": "0xA9A0DaeC99EEf5DCFc40Ad10FE00ad5C7B6EF578"
           }
         ]
       ]

@@ -29,6 +29,8 @@ const providers = {
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
   moonbase: 'https://rpc.api.moonbase.moonbeam.network',
+  polygon: 'https://polygon-mainnet.g.alchemy.com/v2/3T6SIjTew57SlLvLrxVEoU-olO2LN7m8',
+  polygon_testnet: 'https://polygon-mumbai.g.alchemy.com/v2/mpL4IKNdH3vPE2e-KvrMo4kThFsxaOuc',
 };
 
 function getGasPrice() {
@@ -91,6 +93,24 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+    },
+    polygon: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.polygon),
+      network_id: 137,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      networkCheckTimeout: 1000000000,
+    },
+    polygon_testnet: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.polygon_testnet),
+      network_id: 80001,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      networkCheckTimeout: 1000000000,
     },
   },
 
