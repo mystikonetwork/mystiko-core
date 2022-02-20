@@ -12,7 +12,11 @@ if (window) {
   mystiko.initialize = (options = {}) => {
     const wrappedOptions = { dbAdapter: new Adapter(), ...options };
     if (!options.conf) {
-      wrappedOptions.conf = options.isTestnet ? DefaultTestnetConfig : DefaultMainnetConfig;
+      if (options.isTestnet === undefined || options.isTestnet === null) {
+        wrappedOptions.conf = DefaultTestnetConfig;
+      } else {
+        wrappedOptions.conf = options.isTestnet ? DefaultTestnetConfig : DefaultMainnetConfig;
+      }
     }
     return initialize(wrappedOptions).then((ret) => {
       mystiko.pullers.eventPuller.start();
