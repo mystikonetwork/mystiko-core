@@ -158,10 +158,10 @@ module.exports = {
   },
 
   toDecimals(amount, decimals) {
-    stringf = '';
+    let padDecimals = '';
     for (var i = 0; i < decimals; i++) {
-      stringf = stringf + '0';
+      padDecimals = padDecimals + '0';
     }
-    return amount + stringf;
+    return amount + padDecimals;
   },
 };
