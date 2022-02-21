@@ -34,6 +34,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.node', '...'],
+    mainFields: ['main'],
   },
   devtool: isProduction() ? undefined : 'source-map',
   mode: isProduction() ? 'production' : 'development',
