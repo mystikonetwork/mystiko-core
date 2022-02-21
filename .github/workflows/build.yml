@@ -31,7 +31,25 @@ jobs:
           coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          threshold: 90
+          threshold: 95
+          package-manager: yarn
+      - name: Report @mystiko/client-browser test coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
+        with:
+          working-directory: ./packages/mystiko-client-browser
+          coverage-file: ./coverage/report.json
+          base-coverage-file: ./coverage/report.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: 95
+          package-manager: yarn
+      - name: Report @mystiko/client-node test coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
+        with:
+          working-directory: ./packages/mystiko-client-node
+          coverage-file: ./coverage/report.json
+          base-coverage-file: ./coverage/report.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: 95
           package-manager: yarn
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
