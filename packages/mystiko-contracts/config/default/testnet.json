@@ -224,17 +224,7 @@
           "peerContractAddress": "0x5475F4AcD54D6d98Ff607C4305A79A02EB64f1e2",
           "circuits": "circom-1.0"
         },
-        {
-          "version": 1,
-          "name": "MystikoWithCelerERC20",
-          "address": "0xa3bF511A38E6804a6ad680AA3B16CF5823ab5f81",
-          "assetSymbol": "MTT",
-          "assetDecimals": 18,
-          "circuits": "circom-1.0",
-          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
-          "peerChainId": 4002,
-          "peerContractAddress": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
-        },
+       
         {
           "version": 1,
           "name": "MystikoWithCelerERC20",
