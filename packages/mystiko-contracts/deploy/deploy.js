@@ -7,6 +7,7 @@ const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
 const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
 const MystikoTBridgeProxy = artifacts.require('MystikoTBridgeProxy');
+const TestToken = artifacts.require('TestToken');
 
 const WithdrawVerifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
@@ -206,6 +207,32 @@ async function setMystikoPeerAddress(bridgeName, src, dst, config) {
     });
 }
 
+async function transferTokneToContract(tokenAddress, contractAddress) {
+  const testToken = await TestToken.at(tokenAddress);
+  console.log('transfer token to contract ');
+  const tokenDecimals = await testToken
+    .decimals()
+    .then((dicmals) => {
+      return dicmals;
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
+
+  const amount = common.toDecimals('10000', tokenDecimals);
+
+  await testToken
+    .transfer(contractAddress, amount)
+    .then(() => {
+      console.log('transfer token to contract success ');
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
+}
+
 //deploy hasher and verifier
 async function deployStep1() {
   if (process.argv.length !== 7) {
@@ -340,6 +367,20 @@ async function deployStep2or3() {
     coreConfig.savePeerConfig(mystikoNetwork, bridgeName, src, dst, config);
     if (bridgeName === 'tbridge') {
       tbridgeConfig.savePeerConfig(mystikoNetwork, src, dst, proxyAddress, config);
+    }
+
+    const srcChain = common.getChainConfig(config, src.network);
+    if (srcChain === null) {
+      return null;
+    }
+    const srcToken = common.getChainTokenConfig(srcChain, src.token);
+    if (srcToken === null) {
+      return null;
+    }
+
+    //transfer token to contract
+    if (mystikoNetwork === 'testnet' && srcToken.erc20 === 'true') {
+      await transferTokneToContract(srcToken.address, src.address);
     }
   } else {
     console.error(common.RED, 'not support step');
