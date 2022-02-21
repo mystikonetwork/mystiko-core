@@ -79,7 +79,7 @@ async function deployTBridgeProxy() {
     console.log('change  CrossChainProxy operator');
     await proxy
       .changeOperator(process.env.TBRIDGE_PROXY_OPERATOR)
-      .then((result) => {})
+      .then(() => {})
       .catch((err) => {
         console.error(common.RED, err);
         process.exit(1);
@@ -197,7 +197,7 @@ async function setMystikoPeerAddress(bridgeName, src, dst, config) {
   console.log('mystikoCore contract set peer contract address');
   await mystikoCore
     .setPeerContractAddress(dst.address)
-    .then((response) => {
+    .then(() => {
       console.log('set peer contract address success ');
     })
     .catch((err) => {
@@ -215,7 +215,7 @@ async function deployStep1() {
   }
 
   const network = process.argv[5];
-  const mystikoNetwork = this.getMystikoNetwork(network);
+  const mystikoNetwork = getMystikoNetwork(network);
 
   const config = common.loadConfig(mystikoNetwork);
   if (config === null) {
@@ -263,7 +263,7 @@ async function deployStep2or3() {
   const bridgeName = process.argv[7];
   const dstNetwork = process.argv[8];
   const tokenName = process.argv[9];
-  const mystikoNetwork = this.getMystikoNetwork(srcNetwork);
+  const mystikoNetwork = getMystikoNetwork(srcNetwork);
 
   let config = common.loadConfig(mystikoNetwork);
   if (config === null) {

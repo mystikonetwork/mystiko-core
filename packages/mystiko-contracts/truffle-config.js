@@ -125,14 +125,6 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
     },
-    moonbase: {
-      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.moonbase),
-      network_id: 1287,
-      gas: 8000000,
-      gasPrice: getGasPrice(),
-      skipDryRun: true,
-      confirmations: getConfirmation(),
-    },
   },
 
   // Set default mocha options here, use special reporters etc.
