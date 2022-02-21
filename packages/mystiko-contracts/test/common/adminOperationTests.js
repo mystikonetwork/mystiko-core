@@ -196,10 +196,10 @@ export function testAdminOperations(contractGetter, accounts) {
       await expectThrowsAsync(() =>
         mystikoContract.changeOperator.estimateGas(accounts[1], { from: accounts[1] }),
       );
-      let estimateGas = await mystikoContract.changeOperator.estimateGas(accounts[1], { from: accounts[0] });
-      await mystikoContract.changeOperator(accounts[1], { from: accounts[0], gas: estimateGas });
+      // let estimateGas = await mystikoContract.changeOperator.estimateGas(accounts[1], { from: accounts[0] });
+      await mystikoContract.changeOperator(accounts[1], { from: accounts[0], gasLimit: 200000 });
       expect(await mystikoContract.operator()).to.equal(accounts[1]);
-      await mystikoContract.changeOperator(accounts[0], { from: accounts[1], gas: estimateGas });
+      await mystikoContract.changeOperator(accounts[0], { from: accounts[1], gasLimit: 200000 });
       expect(await mystikoContract.operator()).to.equal(accounts[0]);
     });
   });
