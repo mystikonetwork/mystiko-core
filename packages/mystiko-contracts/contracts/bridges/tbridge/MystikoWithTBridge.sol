@@ -2,8 +2,7 @@
 pragma solidity ^0.6.11;
 
 import "../../Mystiko.sol";
-import "./relay/interface/IEthCrossChainManager.sol";
-import "./relay/interface/IEthCrossChainManagerProxy.sol";
+import "./relay/interface/ICrossChainProxy.sol";
 import "../CrossChainDataSerializable.sol";
 
 abstract contract MystikoWithTBridge is Mystiko, CrossChainDataSerializable {
@@ -11,13 +10,12 @@ abstract contract MystikoWithTBridge is Mystiko, CrossChainDataSerializable {
     address _relayProxyAddress,
     uint64 _peerChainId,
     address _verifier,
-    address _hasher,
+    address _hasher2,
     uint32 _merkleTreeHeight
-  ) public Mystiko(_relayProxyAddress, _peerChainId, _verifier, _hasher, _merkleTreeHeight) {}
+  ) public Mystiko(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _merkleTreeHeight) {}
 
   modifier onlyRelayProxyContract() {
-    IEthCrossChainManagerProxy relayProxy = IEthCrossChainManagerProxy(relayProxyAddress);
-    require(msg.sender == relayProxy.getEthCrossChainManager(), "msgSender is not relay proxy manager");
+    require(msg.sender == relayProxyAddress, "msg sender is not relay proxy");
     _;
   }
 
@@ -41,12 +39,8 @@ abstract contract MystikoWithTBridge is Mystiko, CrossChainDataSerializable {
   function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
     bytes memory txDataBytes = serializeTxData(txData);
-    IEthCrossChainManagerProxy relayProxy = IEthCrossChainManagerProxy(relayProxyAddress);
-    IEthCrossChainManager eccm = IEthCrossChainManager(relayProxy.getEthCrossChainManager());
-    require(
-      eccm.crossChain(peerChainId, Utils.addressToBytes(peerContractAddress), "syncTx", txDataBytes),
-      "eccm returns error"
-    );
+    ICrossChainProxy relayProxy = ICrossChainProxy(relayProxyAddress);
+    relayProxy.sendMessage(peerChainId, peerContractAddress, txDataBytes);
   }
 
   function bridgeType() public view override returns (string memory) {

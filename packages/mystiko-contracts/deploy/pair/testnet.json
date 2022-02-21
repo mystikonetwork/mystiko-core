@@ -5,7 +5,7 @@
     {
       "name": "Ethereum Ropsten",
       "network": "ropsten",
-      "chainId": "3",
+      "chainId": 3,
       "tokens": [
         {
           "name": "ETH",
@@ -31,13 +31,13 @@
           "address": "0x2f1306362422e341e08e656d656719d5e8facdc7"
         }
       ],
-      "hashAddress": "0x4E424790551C6F300ba14ddC742c4ac75724B5d9",
-      "verifierAddress": "0xb7aefC5ce917B841258d26E5Cf01C0Cd17b4aAc2"
+      "hashAddress": "0x325eDAB94fB2B589ae627272f8feD1949C58f9ad",
+      "verifierAddress": "0xB1f5245F19c1911e5d3B8099188A783326626B83"
     },
     {
       "name": "Ethereum Goerli",
       "network": "goerli",
-      "chainId": "5",
+      "chainId": 5,
       "tokens": [
         {
           "name": "ETH",
@@ -45,13 +45,13 @@
           "erc20": "false"
         }
       ],
-      "hashAddress": "0x80B46C896E26C1cB7DCdD23019d9e7cca6854864",
-      "verifierAddress": "0x2407cB6C76500103BAF36d5577aEe633A5C0bE86"
+      "hashAddress": "0x09475dE7e9131a678Eee2621e783266Cfed34D94",
+      "verifierAddress": "0x99Ee7A1BC153CB3b48348fe01f2bb1a3B97eaf79"
     },
     {
       "name": "BSC Testnet",
       "network": "bsctestnet",
-      "chainId": "97",
+      "chainId": 97,
       "tokens": [
         {
           "name": "BNB",
@@ -77,13 +77,13 @@
           "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613"
         }
       ],
-      "hashAddress": "0x697CA57f0c848672038DAFBa8A07fCbe7015024C",
-      "verifierAddress": "0xDca6C84ffF69248d6DE92205B86a70bdd65C9dE3"
+      "hashAddress": "0x3B96eAf28D9972F11ED57D7e8DDc5bF42675316E",
+      "verifierAddress": "0x79A98BC35e6c65ef0cb47D9BFFC952FDff1a6E41"
     },
     {
-      "name": "Arbitrum Testnet",
-      "network": "arbitrumtestnet",
-      "chainId": "1313161555",
+      "name": "Aurora Testnet",
+      "network": "auroratestnet",
+      "chainId": 1313161555,
       "tokens": [
         {
           "name": "ETH",
@@ -93,6 +93,26 @@
       ],
       "hashAddress": "0x697CA57f0c848672038DAFBa8A07fCbe7015024C",
       "verifierAddress": "0xDca6C84ffF69248d6DE92205B86a70bdd65C9dE3"
+    },
+    {
+      "name": "Fantom Testnet",
+      "network": "fantomtestnet",
+      "chainId": 4002,
+      "tokens": [
+        {
+          "name": "FTM",
+          "assetDecimals": 18,
+          "erc20": "false"
+        },
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0x80B46C896E26C1cB7DCdD23019d9e7cca6854864"
+        }
+      ],
+      "hashAddress": "0x39d2082dE4FF6ed250f7959A6E9EE441eC2096c4",
+      "verifierAddress": "0xf900322b2D706b35F43B9f8D00dc4617292c2697"
     }
   ],
   "bridges": [
@@ -172,6 +192,22 @@
         {
           "network": "bsctestnet",
           "address": "0xAd204986D6cB67A5Bc76a3CB8974823F43Cb9AAA"
+        },
+        {
+          "network": "fantomtestnet",
+          "address": "0xb92d6933A024bcca9A21669a480C236Cbc973110"
+        },
+        {
+          "network": "arbitrumtestnet",
+          "address": "0x7d43AABC515C356145049227CeE54B608342c0ad"
+        },
+        {
+          "network": "polygonmumbai",
+          "address": "0x7d43AABC515C356145049227CeE54B608342c0ad"
+        },
+        {
+          "network": "avalanchefuji",
+          "address": "0xE9533976C590200E32d95C53f06AE12d292cFc47"
         }
       ],
       "pairs": [
@@ -179,12 +215,24 @@
           {
             "network": "goerli",
             "token": "ETH",
-            "address": "0x58Fe6A9996f37472aDCe495B00585D6Fc7010303"
+            "address": "0xB02A15cbb70fAd81f74348434ea9F03Ea6F65F4d"
           },
           {
             "network": "bsctestnet",
             "token": "mETH",
-            "address": "0x8D2fB8699A740a93EF9d6239425a9d6b2Bf6fe19"
+            "address": "0xD8eF8d3D7cf05B485EcB5678Ad303F356297e8A6"
+          }
+        ],
+        [
+          {
+            "network": "fantomtestnet",
+            "token": "MTT",
+            "address": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
+          },
+          {
+            "network": "bsctestnet",
+            "token": "MTT",
+            "address": "0xa3bF511A38E6804a6ad680AA3B16CF5823ab5f81"
           }
         ]
       ]
@@ -219,12 +267,12 @@
           {
             "network": "ropsten",
             "token": "MTT",
-            "address": "0x0BDF500811a5A0Eb79E117147f3131119d5fb77F"
+            "address": "0x1CedA0653B248Dc65a157C9C62A61E68Dc5b3ab3"
           },
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": "0x0A9b6e4eECA6AF93602b5F3f9e14688E02299CcE"
+            "address": "0xE0c1eDfEc79c931471bb702256EF4072715129ad"
           }
         ],
         [

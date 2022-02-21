@@ -27,11 +27,16 @@ babelRegister({
 const { ethers } = require('ethers');
 
 const providers = {
+  //testnet
   ropsten: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+  goerli: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   bsctestnet: 'https://data-seed-prebsc-1-s2.binance.org:8545/',
+  moonbase: 'https://rpc.api.moonbase.moonbeam.network',
+  auroratestnet: 'https://testnet.aurora.dev',
+  fantomtestnet: 'https://rpc.testnet.fantom.network',
+  //main net
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
-  moonbase: 'https://rpc.api.moonbase.moonbeam.network',
 };
 
 function getGasPrice() {
@@ -59,6 +64,14 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
     },
+    goerli: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.goerli),
+      network_id: 5,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+    },
     bsctestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsctestnet),
       network_id: 97,
@@ -68,6 +81,31 @@ module.exports = {
       confirmations: getConfirmation(),
       timeoutBlocks: 200,
       networkCheckTimeout: 1000000000,
+    },
+    auroratestnet: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.auroratestnet),
+      network_id: 1313161555,
+      gas: 8000000,
+      gasPrice: 0,
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      timeoutBlocks: 200,
+    },
+    moonbase: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.moonbase),
+      network_id: 1287,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+    },
+    fantomtestnet: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.fantomtestnet),
+      network_id: 4002,
+      gas: 8000000,
+      gasPrice: 300000000000,
+      skipDryRun: true,
+      confirmations: getConfirmation(),
     },
     bsc: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsc),

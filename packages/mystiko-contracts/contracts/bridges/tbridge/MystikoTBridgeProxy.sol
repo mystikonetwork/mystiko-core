@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
 
-import "./relay/interface/IEthCrossChainManager.sol";
-import "./relay/interface/IEthCrossChainManagerProxy.sol";
+import "./relay/interface/ICrossChainProxy.sol";
 import "../CrossChainDataSerializable.sol";
 import "./MystikoWithTBridge.sol";
 
-contract MystikoCrossChainManager is
-  CrossChainDataSerializable,
-  IEthCrossChainManager,
-  IEthCrossChainManagerProxy
-{
+contract MystikoTBridgeProxy is CrossChainDataSerializable, ICrossChainProxy {
   event MerkleTreeInsert(bytes32 indexed leaf, uint32 leafIndex, uint256 amount);
 
   address public operator;
@@ -41,16 +36,15 @@ contract MystikoCrossChainManager is
     return true;
   }
 
-  function crossChain(
+  function sendMessage(
     uint64 _toChainId,
-    bytes calldata _toContract,
-    bytes calldata _method,
-    bytes calldata _txData
-  ) external override returns (bool) {
-    return true;
+    address _toContract,
+    bytes memory _message
+  ) external payable override {
+    emit TBridgeCrossChainMessage(_toContract, _toChainId, msg.sender, _message);
   }
 
-  function getEthCrossChainManager() external view override returns (address) {
-    return address(this);
+  function changeOperator(address _newOperator) external onlyOperator {
+    operator = _newOperator;
   }
 }

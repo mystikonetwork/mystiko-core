@@ -73,7 +73,7 @@ Then use `ctrl-D` to exit the editor mode.
 After your successfully build the package, you could import the library like this:
 
 ```javascript
-var mystiko = require('./build/mystiko.cjs').default
+var { mystiko } = require('./build/mystiko.cjs')
 ```
 
 ### Initialize the library

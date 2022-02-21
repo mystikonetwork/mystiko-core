@@ -6,7 +6,7 @@ import "../bridges/celer/relay/interface/IMessageSenderApp.sol";
 import "../bridges/celer/MystikoWithCeler.sol";
 import "../libs/utils/Utils.sol";
 
-contract CelerMessageBusMock is IMessageReceiverApp, IMessageSenderApp {
+contract CelerMessageBusMock is IMessageSenderApp {
   address public operator;
   uint64 public chainIdA;
   address public contractAddressA;
@@ -36,13 +36,12 @@ contract CelerMessageBusMock is IMessageReceiverApp, IMessageSenderApp {
 
   function sendMessage(
     address _receiver,
-    uint64 _dstChainId,
-    bytes memory _message,
-    uint256 _fee
-  ) external override {
+    uint256 _dstChainId,
+    bytes memory _message
+  ) external payable override {
     uint64 fromChainId;
     address fromContractAddress;
-    _fee;
+    require(msg.value >= 0, "require bridge fee");
 
     if (_dstChainId == chainIdA) {
       fromChainId = chainIdB;
@@ -71,7 +70,7 @@ contract CelerMessageBusMock is IMessageReceiverApp, IMessageSenderApp {
     bytes memory _message,
     MessageSenderLib.BridgeType _bridgeType,
     uint256 _fee
-  ) external override returns (bytes32) {
+  ) external payable override {
     _receiver;
     _token;
     _amount;
@@ -81,36 +80,6 @@ contract CelerMessageBusMock is IMessageReceiverApp, IMessageSenderApp {
     _message;
     _bridgeType;
     _fee;
-    return 0;
-  }
-
-  function sendTokenTransfer(
-    address _receiver,
-    address _token,
-    uint256 _amount,
-    uint64 _dstChainId,
-    uint64 _nonce,
-    uint32 _maxSlippage,
-    MessageSenderLib.BridgeType _bridgeType
-  ) external override {
-    _receiver;
-    _token;
-    _amount;
-    _dstChainId;
-    _nonce;
-    _maxSlippage;
-    _bridgeType;
     return;
-  }
-
-  function executeMessage(
-    address _sender,
-    uint64 _srcChainId,
-    bytes calldata _message
-  ) external payable override returns (bool) {
-    _sender;
-    _srcChainId;
-    _message;
-    return true;
   }
 }

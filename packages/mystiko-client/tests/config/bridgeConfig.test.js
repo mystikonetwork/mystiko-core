@@ -64,4 +64,7 @@ test('test createConfig', () => {
 
   rawConfig['type'] = BridgeType.TBRIDGE;
   expect(BaseBridgeConfig.createConfig(rawConfig) instanceof BaseBridgeConfig).toBe(true);
+
+  rawConfig['type'] = BridgeType.CELER;
+  expect(BaseBridgeConfig.createConfig(rawConfig) instanceof BaseBridgeConfig).toBe(true);
 });

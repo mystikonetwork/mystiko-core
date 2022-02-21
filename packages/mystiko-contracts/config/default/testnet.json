@@ -82,6 +82,28 @@
       ]
     },
     {
+      "name": "Ethereum Goerli",
+      "assetSymbol": "ETH",
+      "chainId": 5,
+      "explorerUrl": "https://goerli.etherscan.io",
+      "providers": [
+        "https://goerli.infura.io/v3/042d213dd3bc4f7e91cfde96345c587e",
+        "https://eth-goerli.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithCelerMain",
+          "address": "0xB02A15cbb70fAd81f74348434ea9F03Ea6F65F4d",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "peerChainId": 97,
+          "peerContractAddress": "0x95b23a05797Fb5314B35Fe8CFD2d61D96075343f",
+          "circuits": "circom-1.0"
+        }
+      ]
+    },
+    {
       "name": "BSC Testnet",
       "assetSymbol": "BNB",
       "chainId": 97,
@@ -158,6 +180,69 @@
           "peerChainId": 3,
           "peerContractAddress": "0x6d580B030eA21912645c90324D0Ba613D098C5eA",
           "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithCelerERC20",
+          "address": "0x95b23a05797Fb5314B35Fe8CFD2d61D96075343f",
+          "assetSymbol": "mETH",
+          "assetDecimals": 18,
+          "assetAddress": "0xc714b6884d66a7D2618c820D86f58A01b789f613",
+          "peerChainId": 5,
+          "peerContractAddress": "0xB02A15cbb70fAd81f74348434ea9F03Ea6F65F4d",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithCelerERC20",
+          "address": "0xa3bF511A38E6804a6ad680AA3B16CF5823ab5f81",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
+          "peerChainId": 4002,
+          "peerContractAddress": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
+        }
+      ]
+    },
+    {
+      "name": "Aurora Testnet",
+      "assetSymbol": "ETH",
+      "chainId": 1313161555,
+      "explorerUrl": "https://testnet.aurorascan.dev",
+      "providers": [
+        "https://testnet.aurora.dev"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithLoopMain",
+          "address": "0xbDe788B88A40a76a16Bff03E5Ab96CB732538bFb",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0"
+        }
+      ]
+    },
+    {
+      "name": "Fantom Testnet",
+      "assetSymbol": "FTM",
+      "chainId": 4002,
+      "explorerUrl": "https://testnet.ftmscan.com/",
+      "providers": [
+        "https://rpc.testnet.fantom.network"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithCelerERC20",
+          "address": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "assetAddress": "0x80B46C896E26C1cB7DCdD23019d9e7cca6854864",
+          "peerChainId": 97,
+          "peerContractAddress": "0xa3bF511A38E6804a6ad680AA3B16CF5823ab5f81"
         }
       ]
     }
@@ -174,6 +259,10 @@
     {
       "name": "Mystiko Testnet Bridge",
       "type": "tbridge"
+    },
+    {
+      "name": "Celer Bridge",
+      "type": "celer"
     }
   ],
   "circuits": [
