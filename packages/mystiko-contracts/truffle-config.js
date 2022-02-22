@@ -35,9 +35,11 @@ const providers = {
   moonbase: 'https://rpc.api.moonbase.moonbeam.network',
   auroratestnet: 'https://testnet.aurora.dev',
   fantomtestnet: 'https://rpc.testnet.fantom.network',
+  polygontestnet: 'https://matic.getblock.io/testnet/?api_key=7763cd90-3977-4673-adc0-390d06798968',
   //main net
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
+  polygon: 'https://matic-mainnet.chainstacklabs.com',
 };
 
 function getGasPrice() {
@@ -108,6 +110,15 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
     },
+    polygontestnet: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.polygontestnet),
+      network_id: 80001,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      networkCheckTimeout: 1000000000,
+    },
     bsc: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsc),
       network_id: 56,
@@ -125,6 +136,15 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+    },
+    polygon: {
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.polygon),
+      network_id: 137,
+      gas: 8000000,
+      gasPrice: getGasPrice(),
+      skipDryRun: true,
+      confirmations: getConfirmation(),
+      networkCheckTimeout: 1000000000,
     },
   },
 

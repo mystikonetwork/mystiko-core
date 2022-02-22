@@ -131,6 +131,38 @@
       ],
       "hashAddress": "0x39d2082dE4FF6ed250f7959A6E9EE441eC2096c4",
       "verifierAddress": "0xf900322b2D706b35F43B9f8D00dc4617292c2697"
+    },
+    {
+      "name": "Polygon Testnet",
+      "network": "polygontestnet",
+      "chainId": "80001",
+      "tokens": [
+        {
+          "name": "MATIC",
+          "assetDecimals": 18,
+          "erc20": "false"
+        },
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        },
+        {
+          "name": "mUSD",
+          "erc20": "true",
+          "assetDecimals": 6,
+          "address": "0x749931bcb3830F5792B5F5e74a4622e146E9F75b"
+        },
+        {
+          "name": "mETH",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0x2191B259307dDE156074B70aca701B1143c33256"
+        }
+      ],
+      "hashAddress": "0xde0222931c3a34Bd97F5e5C663A2f8f34afc12E1",
+      "verifierAddress": "0xA09B5d6A55e79C8A19595cb60248214509Cd05B9"
     }
   ],
   "bridges": [
@@ -195,6 +227,27 @@
             "network": "arbitrumtestnet",
             "token": "ETH",
             "address": "0xbDe788B88A40a76a16Bff03E5Ab96CB732538bFb"
+          }
+        ],
+        [
+          {
+            "network": "polygontestnet",
+            "token": "MATIC",
+            "address": "0x4C36593ca83826c019318e7C83150ef221aA79d7"
+          }
+        ],
+        [
+          {
+            "network": "polygontestnet",
+            "token": "MTT",
+            "address": "0x1a56777a35052B0a28558e2fa4f789D1eB9Bc869"
+          }
+        ],
+        [
+          {
+            "network": "polygontestnet",
+            "token": "mUSD",
+            "address": "0xE6B8f4eb63D65390F7139388173854A012f504ae"
           }
         ]
       ]
