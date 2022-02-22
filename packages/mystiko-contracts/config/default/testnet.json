@@ -264,10 +264,7 @@
       "chainId": 80001,
       "explorerUrl": "https://mumbai.polygonscan.com/",
       "providers": [
-        "https://matic-mainnet.chainstacklabs.com",
-        "https://rpc-mumbai.matic.today",
-        "https://rpc-mumbai.maticvigil.com",
-        "https://matic-testnet-archive-rpc.bwarelabs.com"
+        "https://matic.getblock.io/testnet/?api_key=7763cd90-3977-4673-adc0-390d06798968"
       ],
       "contracts": [
         {

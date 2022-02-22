@@ -35,7 +35,7 @@ const providers = {
   moonbase: 'https://rpc.api.moonbase.moonbeam.network',
   auroratestnet: 'https://testnet.aurora.dev',
   fantomtestnet: 'https://rpc.testnet.fantom.network',
-  polygontestnet: 'https://matic-mumbai.chainstacklabs.com',
+  polygontestnet: 'https://matic.getblock.io/testnet/?api_key=7763cd90-3977-4673-adc0-390d06798968',
   //main net
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
