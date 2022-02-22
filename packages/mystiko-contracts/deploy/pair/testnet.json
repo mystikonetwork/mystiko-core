@@ -232,6 +232,13 @@
         [
           {
             "network": "polygontestnet",
+            "token": "MATIC",
+            "address": "0x4C36593ca83826c019318e7C83150ef221aA79d7"
+          }
+        ],
+        [
+          {
+            "network": "polygontestnet",
             "token": "MTT",
             "address": "0x1a56777a35052B0a28558e2fa4f789D1eB9Bc869"
           }
@@ -241,13 +248,6 @@
             "network": "polygontestnet",
             "token": "mUSD",
             "address": "0xE6B8f4eb63D65390F7139388173854A012f504ae"
-          }
-        ],
-        [
-          {
-            "network": "polygontestnet",
-            "token": "mETH",
-            "address": "0x00Ae53e726eeB94669a688be8B508f42e52150DB"
           }
         ]
       ]

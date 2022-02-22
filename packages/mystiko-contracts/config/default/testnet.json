@@ -287,12 +287,11 @@
         },
         {
           "version": 1,
-          "name": "MystikoWithLoopERC20",
-          "address": "0x00Ae53e726eeB94669a688be8B508f42e52150DB",
-          "assetSymbol": "mETH",
+          "name": "MystikoWithLoopMain",
+          "address": "0x4C36593ca83826c019318e7C83150ef221aA79d7",
+          "assetSymbol": "MATIC",
           "assetDecimals": 18,
-          "circuits": "circom-1.0",
-          "assetAddress": "0x2191B259307dDE156074B70aca701B1143c33256"
+          "circuits": "circom-1.0"
         }
       ]
     }
