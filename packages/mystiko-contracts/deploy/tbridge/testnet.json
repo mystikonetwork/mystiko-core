@@ -6,23 +6,19 @@
     {
       "name": "bsctestnet",
       "providers": [
+        "https://apis.ankr.com/93b31afb5ca4462a8ad33f748bae9496/4489eb2f81889dbdadb35a7136a70f34/binance/full/test",
         "https://data-seed-prebsc-1-s3.binance.org:8545",
         "https://data-seed-prebsc-2-s3.binance.org:8545",
         "https://data-seed-prebsc-1-s2.binance.org:8545",
-        "https://data-seed-prebsc-2-s2.binance.org:8545",
-        "wss://data-seed-prebsc-1-s3.binance.org:8545",
-        "wss://data-seed-prebsc-2-s3.binance.org:8545",
-        "wss://data-seed-prebsc-1-s2.binance.org:8545",
-        "wss://data-seed-prebsc-2-s2.binance.org:8545"
+        "https://data-seed-prebsc-2-s2.binance.org:8545"
       ]
     },
     {
       "name": "ropsten",
       "providers": [
+        "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
         "https://ropsten.infura.io/v3/1a85c8f5801a49b38294c4f292d3cbb8",
-        "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j",
-        "wss://ropsten.infura.io/ws/v3/1a85c8f5801a49b38294c4f292d3cbb8",
-        "wss://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
+        "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
       ]
     }
   ],
