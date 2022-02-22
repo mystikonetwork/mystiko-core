@@ -326,7 +326,19 @@ export function errorMessage(error) {
   if (!error) {
     return '';
   } else if (error instanceof Error) {
-    return error.toString();
+    let message = undefined;
+    if (error.reason) {
+      message = error.reason;
+    } else if (error.message) {
+      message = error.message;
+    } else {
+      message = error.toString();
+    }
+    if (error.code) {
+      return `[${error.code}] ${message}`;
+    } else {
+      return message;
+    }
   } else if (error instanceof Object) {
     return JSON.stringify(error);
   } else {
