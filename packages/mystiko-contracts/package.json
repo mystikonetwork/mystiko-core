@@ -22,7 +22,8 @@
     "deploy:ropsten": "truffle exec deploy/deploy.js --network ropsten",
     "deploy:goerli": "truffle exec deploy/deploy.js --network goerli",
     "deploy:auroratestnet": "truffle exec deploy/deploy.js --network auroratestnet",
-    "deploy:fantomtestnet": "truffle exec deploy/deploy.js --network fantomtestnet"
+    "deploy:fantomtestnet": "truffle exec deploy/deploy.js --network fantomtestnet",
+    "deploy:polygontestnet": "truffle exec deploy/deploy.js --network polygontestnet"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",

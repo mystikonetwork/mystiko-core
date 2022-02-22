@@ -275,6 +275,24 @@
           "assetDecimals": 18,
           "circuits": "circom-1.0",
           "assetAddress": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0xE6B8f4eb63D65390F7139388173854A012f504ae",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "circuits": "circom-1.0",
+          "assetAddress": "0x749931bcb3830F5792B5F5e74a4622e146E9F75b"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x00Ae53e726eeB94669a688be8B508f42e52150DB",
+          "assetSymbol": "mETH",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "assetAddress": "0x2191B259307dDE156074B70aca701B1143c33256"
         }
       ]
     }
