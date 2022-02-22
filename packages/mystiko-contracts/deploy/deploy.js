@@ -220,7 +220,13 @@ async function transferTokneToContract(tokenAddress, contractAddress) {
       process.exit(1);
     });
 
-  const amount = common.toDecimals('10000', tokenDecimals);
+  let amount = common.toDecimals('10000', tokenDecimals);
+  if (process.env.DEFAULT_TOKEN_TRANSFER) {
+    console.log('transfer amount ', process.env.DEFAULT_TOKEN_TRANSFER);
+    amount = common.toDecimals(process.env.DEFAULT_TOKEN_TRANSFER, tokenDecimals);
+  } else {
+    console.log('transfer default amount 10000', process.env.DEFAULT_TOKEN_TRANSFER);
+  }
 
   await testToken
     .transfer(contractAddress, amount)
@@ -333,10 +339,11 @@ async function deployStep2or3() {
     if (pair[i].network === 'development') {
       //deploy tbridge cross chain proxy for ci test
       proxyAddress = await deployTBridgeProxy();
-    } else if (proxyAddress === null) {
+    } else if (proxyAddress === '') {
       if (bridge.name === 'tbridge') {
         console.log('tbridge proxy not exist, create');
         proxyAddress = await deployTBridgeProxy();
+        console.log('proxyAddress is ', proxyAddress);
         config = common.updateTBridgeCrossChainProxyConfig(config, pair[i].network, proxyAddress);
         if (config === null) {
           return;
@@ -381,6 +388,10 @@ async function deployStep2or3() {
     //transfer token to contract
     if (mystikoNetwork === 'testnet' && srcToken.erc20 === 'true') {
       await transferTokneToContract(srcToken.address, src.address);
+    }
+
+    if (mystikoNetwork === 'development') {
+      common.resetDefaultDevelopmentConfig(config);
     }
   } else {
     console.error(common.RED, 'not support step');

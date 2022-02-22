@@ -1,17 +1,14 @@
+require('dotenv').config();
 const common = require('./common');
-
-const DEFAULT_TESTNET_CONFIG_FILE = 'config/default/testnet.json';
-const DEFAULT_MAINNET_CONFIG_FILE = 'config/default/mainnet.json';
-const DEFAULT_DEVELOPMENT_CONFIG_FILE = 'config/default/development.json';
 
 module.exports = {
   getConfigFileName(mystikoNetwork) {
     if (mystikoNetwork === 'testnet') {
-      return DEFAULT_TESTNET_CONFIG_FILE;
+      return process.env.CLIENT_CONFIG_FILE_PATH + '/testnet.json';
     } else if (mystikoNetwork === 'mainnet') {
-      return DEFAULT_MAINNET_CONFIG_FILE;
+      return process.env.CLIENT_CONFIG_FILE_PATH + '/mainnet.json';
     } else if (mystikoNetwork === 'development') {
-      return DEFAULT_DEVELOPMENT_CONFIG_FILE;
+      return process.env.CLIENT_CONFIG_FILE_PATH + '/development.json';
     } else {
       console.error(common.RED, 'load config network not support');
       return '';
@@ -28,6 +25,10 @@ module.exports = {
   },
 
   saveConfig(mystikoNetwork, data) {
+    if (mystikoNetwork === 'development') {
+      return;
+    }
+
     const fileName = this.getConfigFileName(mystikoNetwork);
     if (fileName === '') {
       return;
