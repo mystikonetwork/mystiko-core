@@ -30,13 +30,12 @@ const providers = {
   //testnet
   ropsten: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   goerli: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-  bsctestnet:
-    'https://apis.ankr.com/93b31afb5ca4462a8ad33f748bae9496/4489eb2f81889dbdadb35a7136a70f34/binance/full/test',
+  bsctestnet: 'https://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0',
   moonbase: 'https://rpc.api.moonbase.moonbeam.network',
   auroratestnet: 'https://testnet.aurora.dev',
   fantomtestnet: 'https://rpc.testnet.fantom.network',
   polygontestnet: 'https://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0',
-  //main net
+  //mainnet
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
   polygon: 'https://matic-mainnet.chainstacklabs.com',
