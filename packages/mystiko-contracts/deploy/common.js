@@ -10,16 +10,32 @@ module.exports = {
   RED: RED,
 
   readJsonFile(fileName) {
-    const data = fs.readFileSync(fileName);
-    return JSON.parse(data);
+    if (!fs.existsSync(fileName)) {
+      console.error(this.RED, fileName, ' not exist');
+      return null;
+    }
+
+    try {
+      const data = fs.readFileSync(fileName);
+      return JSON.parse(data);
+    } catch (err) {
+      console.error(this.RED, err);
+      console.error(this.RED, 'read file error');
+    }
   },
 
   writeJsonFile(fileName, data) {
     let jsonData = JSON.stringify(data, null, 2);
     try {
+      if (!fs.existsSync(fileName)) {
+        console.error(this.RED, fileName, ' not exist');
+        return;
+      }
+
       fs.writeFileSync(fileName, jsonData);
     } catch (err) {
-      console.error(err);
+      console.error(this.RED, err);
+      console.error(this.RED, 'write file error');
     }
   },
 
@@ -106,7 +122,7 @@ module.exports = {
       }
     }
 
-    return null;
+    return '';
   },
 
   getBridgePairIndexByTokenName(bridge, srcNetwork, dstNetwork, tokenName) {

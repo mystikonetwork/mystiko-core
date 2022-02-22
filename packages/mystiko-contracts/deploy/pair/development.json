@@ -1,5 +1,6 @@
 {
-  "version": "1.0",
+  "version": 1,
+  "circuits": "circom-1.0",
   "chains": [
     {
       "name": "Ganache",
@@ -11,13 +12,14 @@
           "erc20": "false"
         }
       ],
-      "hashAddress": "0x5762cf75453F13689076444E4E0e9a27F95E898a",
-      "verifierAddress": "0x6359b0CE98c504B45ad8C60f4B7bb3A0cB7c4077"
+      "hashAddress": "",
+      "verifierAddress": ""
     }
   ],
   "bridges": [
     {
       "name": "loop",
+      "contractName": "Loop",
       "proxys": [
         {
           "network": "development",
@@ -29,7 +31,7 @@
           {
             "network": "development",
             "token": "ETH",
-            "address": "0x2D65B54AC376F14D623c6d1C4efB3bd9a95b6915"
+            "address": ""
           }
         ]
       ]
