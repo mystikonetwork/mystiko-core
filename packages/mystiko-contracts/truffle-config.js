@@ -35,11 +35,11 @@ const providers = {
   moonbase: 'https://rpc.api.moonbase.moonbeam.network',
   auroratestnet: 'https://testnet.aurora.dev',
   fantomtestnet: 'https://rpc.testnet.fantom.network',
-  polygontestnet: 'https://polygon-mumbai.g.alchemy.com/v2/mpL4IKNdH3vPE2e-KvrMo4kThFsxaOuc',
+  polygontestnet: 'https://matic-mumbai.chainstacklabs.com',
   //main net
   bsc: 'https://bsc-dataseed1.binance.org',
   moonbeam: 'https://rpc.api.moonbeam.network',
-  polygon: 'https://polygon-mainnet.g.alchemy.com/v2/3T6SIjTew57SlLvLrxVEoU-olO2LN7m8',
+  polygon: 'https://matic-mainnet.chainstacklabs.com',
 };
 
 function getGasPrice() {
