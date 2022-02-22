@@ -141,7 +141,7 @@
       "chainId": 97,
       "explorerUrl": "https://testnet.bscscan.com",
       "providers": [
-        "https://bsc.getblock.io/testnet/?api_key=7763cd90-3977-4673-adc0-390d06798968"
+        "https://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
       "contracts": [
         {
@@ -264,7 +264,7 @@
       "chainId": 80001,
       "explorerUrl": "https://mumbai.polygonscan.com/",
       "providers": [
-        "https://matic.getblock.io/testnet/?api_key=7763cd90-3977-4673-adc0-390d06798968"
+        "https://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
       "contracts": [
         {
