@@ -30,7 +30,8 @@ const providers = {
   //testnet
   ropsten: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   goerli: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-  bsctestnet: 'https://data-seed-prebsc-1-s2.binance.org:8545/',
+  bsctestnet:
+    'https://apis.ankr.com/93b31afb5ca4462a8ad33f748bae9496/4489eb2f81889dbdadb35a7136a70f34/binance/full/test',
   moonbase: 'https://rpc.api.moonbase.moonbeam.network',
   auroratestnet: 'https://testnet.aurora.dev',
   fantomtestnet: 'https://rpc.testnet.fantom.network',
