@@ -17,14 +17,12 @@ interface IMessageSenderApp {
    * @param _receiver The address of the destination app contract.
    * @param _dstChainId The destination chain ID.
    * @param _message Arbitrary message bytes to be decoded by the destination app contract.
-   * @param _fee The fee amount to pay to MessageBus.
    */
   function sendMessage(
     address _receiver,
-    uint64 _dstChainId,
-    bytes memory _message,
-    uint256 _fee
-  ) external;
+    uint256 _dstChainId,
+    bytes memory _message
+  ) external payable;
 
   /**
    * @notice Sends a message to an app on another chain via MessageBus with an associated transfer.
@@ -39,7 +37,6 @@ interface IMessageSenderApp {
    * @param _message Arbitrary message bytes to be decoded by the destination app contract.
    * @param _bridgeType One of the {BridgeType} enum.
    * @param _fee The fee amount to pay to MessageBus.
-   * @return The transfer ID.
    */
   function sendMessageWithTransfer(
     address _receiver,
@@ -51,27 +48,5 @@ interface IMessageSenderApp {
     bytes memory _message,
     MessageSenderLib.BridgeType _bridgeType,
     uint256 _fee
-  ) external returns (bytes32);
-
-  /**
-   * @notice Sends a token transfer via a bridge.
-   * @param _receiver The address of the destination app contract.
-   * @param _token The address of the token to be sent.
-   * @param _amount The amount of tokens to be sent.
-   * @param _dstChainId The destination chain ID.
-   * @param _nonce A number input to guarantee uniqueness of transferId. Can be timestamp in practice.
-   * @param _maxSlippage The max slippage accepted, given as percentage in point (pip). Eg. 5000 means 0.5%.
-   * Must be greater than minimalMaxSlippage. Receiver is guaranteed to receive at least (100% - max slippage percentage) * amount or the
-   * transfer can be refunded.
-   * @param _bridgeType One of the {BridgeType} enum.
-   */
-  function sendTokenTransfer(
-    address _receiver,
-    address _token,
-    uint256 _amount,
-    uint64 _dstChainId,
-    uint64 _nonce,
-    uint32 _maxSlippage,
-    MessageSenderLib.BridgeType _bridgeType
-  ) external;
+  ) external payable;
 }

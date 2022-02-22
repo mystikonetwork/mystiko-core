@@ -24,6 +24,7 @@ jobs:
       - run: lerna run lint
       - run: lerna run build
       - run: lerna run test
+      - run: lerna run deploy --scope @mystiko/contracts
       - name: Report @mystiko/client test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:

@@ -43,6 +43,9 @@ export class BaseBridgeConfig extends BaseConfig {
       return new PolyBridgeConfig(rawConfig);
     } else if (rawConfig['type'] === BridgeType.TBRIDGE) {
       return new BaseBridgeConfig(rawConfig);
+    } else if (rawConfig['type'] === BridgeType.CELER) {
+      //todo eric add CelerBridgeConfig
+      return new CelerBridgeConfig(rawConfig);
     }
     throw new Error('unsupported bridge type');
   }
@@ -118,5 +121,17 @@ export class PolyBridgeConfig extends BaseBridgeConfig {
   getFullApiUrl(txHash) {
     check(typeof txHash === 'string', 'txHash should be a valid string');
     return `${this.apiUrl}${this.apiPrefix.replace(EXPLORER_TX_PLACEHOLDER, toHexNoPrefix(txHash))}`;
+  }
+}
+
+/**
+ * @class CelerBridgeConfig
+ * @extends BaseBridgeConfig
+ * @param {Object} rawConfig raw configuration object.
+ * @desc configuration class for Celer cross-chain bridge.
+ */
+export class CelerBridgeConfig extends BaseBridgeConfig {
+  constructor(rawConfig) {
+    super(rawConfig);
   }
 }

@@ -156,4 +156,12 @@ module.exports = {
     console.error(this.RED, 'chain token configure not support');
     return null;
   },
+
+  toDecimals(amount, decimals) {
+    let padDecimals = '';
+    for (var i = 0; i < decimals; i++) {
+      padDecimals = padDecimals + '0';
+    }
+    return amount + padDecimals;
+  },
 };

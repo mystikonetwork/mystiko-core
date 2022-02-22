@@ -17,10 +17,12 @@
     "migrate": "yarn migrate:dev",
     "migrate:dev": "truffle migrate --network development --reset",
     "deploy": "yarn deploy:dev",
-    "deploy:dev": "truffle exec deploy/deploy.js --network development",
+    "deploy:dev": "truffle exec deploy/deploy.js --network development step1 && truffle exec deploy/deploy.js --network development step2  loop development ETH &&  truffle exec deploy/deploy.js --network development step3  loop development ETH ",
     "deploy:bsctestnet": "truffle exec deploy/deploy.js --network bsctestnet",
     "deploy:ropsten": "truffle exec deploy/deploy.js --network ropsten",
-    "deploy:goerli": "truffle exec deploy/deploy.js --network goerli"
+    "deploy:goerli": "truffle exec deploy/deploy.js --network goerli",
+    "deploy:auroratestnet": "truffle exec deploy/deploy.js --network auroratestnet",
+    "deploy:fantomtestnet": "truffle exec deploy/deploy.js --network fantomtestnet"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",

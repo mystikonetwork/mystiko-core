@@ -6,13 +6,16 @@ const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
 const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
 const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
-const MystikoCrossChainProxy = artifacts.require('MystikoCrossChainProxy');
+const MystikoTBridgeProxy = artifacts.require('MystikoTBridgeProxy');
+const TestToken = artifacts.require('TestToken');
 
 const WithdrawVerifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
+
 const common = require('./common');
 const coreConfig = require('./coreConfig');
 const tbridgeConfig = require('./tbridgeConfig');
+const mainNetwork = ['bsc', 'ethereum', 'moonbeam'];
 
 function getMystikoContract(bridge, bErc20) {
   if (bridge === 'loop') {
@@ -45,72 +48,134 @@ function getMystikoContract(bridge, bErc20) {
   }
 }
 
-async function deployCrossChainProxy() {
-  const proxy = await MystikoCrossChainProxy.new();
+function getMystikoNetwork(network) {
+  if (network == 'development') {
+    console.log('development network');
+    return 'development';
+  } else {
+    for (const n of mainNetwork) {
+      if (n === network) {
+        console.log('main network');
+        return 'mainnet';
+      }
+    }
+
+    console.log('testnet network');
+    return 'testnet';
+  }
+}
+
+async function deployTBridgeProxy() {
+  console.log('deploy contract CrossChainProxy');
+  const proxy = await MystikoTBridgeProxy.new()
+    .then((proxy) => {
+      return proxy;
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
+
+  if (process.env.TBRIDGE_PROXY_OPERATOR) {
+    console.log('change  CrossChainProxy operator');
+    await proxy
+      .changeOperator(process.env.TBRIDGE_PROXY_OPERATOR)
+      .then(() => {})
+      .catch((err) => {
+        console.error(common.RED, err);
+        process.exit(1);
+      });
+  }
+
   return proxy.address;
 }
 
 async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
   const { MERKLE_TREE_HEIGHT } = process.env;
 
-  console.info('src.network ', src.network);
-
   const srcChain = common.getChainConfig(config, src.network);
   if (srcChain === null) {
-    return null;
+    return '';
   }
 
   if (srcChain.verifierAddress === '' || srcChain.hashAddress === '') {
     console.log('should do step1');
-    return null;
+    return '';
   }
 
   const dstChain = common.getChainConfig(config, dst.network);
   if (srcChain === null) {
-    return null;
+    return '';
   }
 
   const token = common.getChainTokenConfig(srcChain, src.token);
   if (token === null) {
-    return null;
+    return '';
   }
 
   const MystikoCore = getMystikoContract(bridgeName, token.erc20);
   if (MystikoCore === null) {
-    return null;
+    return '';
   }
 
+  let mystikoCoreAddress = '';
   if (bridgeName === 'loop') {
     if (token.erc20 === 'true') {
-      return await MystikoCore.new(
-        srcChain.verifierAddress,
-        token.address,
-        srcChain.hashAddress,
-        MERKLE_TREE_HEIGHT,
-      );
+      await MystikoCore.new(srcChain.verifierAddress, token.address, srcChain.hashAddress, MERKLE_TREE_HEIGHT)
+        .then((response) => {
+          mystikoCoreAddress = response.address;
+        })
+        .catch((err) => {
+          console.error(common.RED, err);
+          process.exit(1);
+        });
     } else {
-      return await MystikoCore.new(srcChain.verifierAddress, srcChain.hashAddress, MERKLE_TREE_HEIGHT);
+      await MystikoCore.new(srcChain.verifierAddress, srcChain.hashAddress, MERKLE_TREE_HEIGHT)
+        .then((response) => {
+          mystikoCoreAddress = response.address;
+        })
+        .catch((err) => {
+          console.error(common.RED, err);
+          process.exit(1);
+        });
     }
   } else {
     if (token.erc20 === 'true') {
-      return await MystikoCore.new(
+      await MystikoCore.new(
         proxyAddress,
         dstChain.chainId,
         srcChain.verifierAddress,
         token.address,
         srcChain.hashAddress,
         MERKLE_TREE_HEIGHT,
-      );
+      )
+        .then((response) => {
+          mystikoCoreAddress = response.address;
+        })
+        .catch((err) => {
+          console.error(common.RED, err);
+          process.exit(1);
+        });
     } else {
-      return await MystikoCore.new(
+      await MystikoCore.new(
         proxyAddress,
         dstChain.chainId,
         srcChain.verifierAddress,
         srcChain.hashAddress,
         MERKLE_TREE_HEIGHT,
-      );
+      )
+        .then((response) => {
+          mystikoCoreAddress = response.address;
+        })
+        .catch((err) => {
+          console.error(common.RED, err);
+          process.exit(1);
+        });
     }
   }
+
+  console.log('mystikoCore address ', mystikoCoreAddress);
+  return mystikoCoreAddress;
 }
 
 async function setMystikoPeerAddress(bridgeName, src, dst, config) {
@@ -130,53 +195,102 @@ async function setMystikoPeerAddress(bridgeName, src, dst, config) {
   }
 
   let mystikoCore = await MystikoCore.at(src.address);
-  return await mystikoCore.setPeerContractAddress(dst.address);
+  console.log('mystikoCore contract set peer contract address');
+  await mystikoCore
+    .setPeerContractAddress(dst.address)
+    .then(() => {
+      console.log('set peer contract address success ');
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
+}
+
+async function transferTokneToContract(tokenAddress, contractAddress) {
+  const testToken = await TestToken.at(tokenAddress);
+  console.log('transfer token to contract ');
+  const tokenDecimals = await testToken
+    .decimals()
+    .then((dicmals) => {
+      return dicmals;
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
+
+  const amount = common.toDecimals('10000', tokenDecimals);
+
+  await testToken
+    .transfer(contractAddress, amount)
+    .then(() => {
+      console.log('transfer token to contract success ');
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
 }
 
 //deploy hasher and verifier
 async function deployStep1() {
-  if (process.argv.length !== 8) {
+  if (process.argv.length !== 7) {
     console.log('should special parameter ');
-    console.log('   network           : testnet 、 mainnet) ');
-    console.log('   step              : step1  ');
+    console.log('   step              : step1、step2、step3  ');
     return;
   }
 
   const network = process.argv[5];
-  const cfgNetwork = process.argv[6];
+  const mystikoNetwork = getMystikoNetwork(network);
 
-  const config = common.loadConfig(cfgNetwork);
+  const config = common.loadConfig(mystikoNetwork);
   if (config === null) {
     return;
   }
 
-  const hasher2 = await Hasher2.new();
-  console.log('hasher2 address: ', hasher2.address);
+  let hasher2Address = '';
+  await Hasher2.new()
+    .then((hasher2) => {
+      hasher2Address = hasher2.address;
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
 
-  const withdrawVerifier = await WithdrawVerifier.new();
-  console.log('withdrawVerifier address: ', withdrawVerifier.address);
+  let withdrawVerifierAddress = '';
+  await WithdrawVerifier.new()
+    .then((withdrawVerifier) => {
+      withdrawVerifierAddress = withdrawVerifier.address;
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
 
-  common.saveBaseAddressConfig(cfgNetwork, network, config, hasher2.address, withdrawVerifier.address);
+  console.log('hasher2 address: ', hasher2Address);
+  console.log('withdrawVerifier address: ', withdrawVerifierAddress);
+  common.saveBaseAddressConfig(mystikoNetwork, network, config, hasher2Address, withdrawVerifierAddress);
 }
 
 //deploy mystiko contract and configure peer contract address
 async function deployStep2or3() {
-  if (process.argv.length !== 11) {
+  if (process.argv.length !== 10) {
     console.log('should special parameter ');
-    console.log('   mystiko network     : testnet、mainnet) ');
     console.log('   step                : step2  ');
-    console.log('   bridge name         : tbridge、celer、poly ');
+    console.log('   bridge name         : tbridge、celer、poly、loop ');
     console.log('   destination network : ropsten、bsctestnet ...  ');
     console.log('   token name          : ETH、MTT、mUSD、BNB...  ');
     return;
   }
 
   const srcNetwork = process.argv[5];
-  const mystikoNetwork = process.argv[6];
-  const step = process.argv[7];
-  const bridgeName = process.argv[8];
-  const dstNetwork = process.argv[9];
-  const tokenName = process.argv[10];
+  const step = process.argv[6];
+  const bridgeName = process.argv[7];
+  const dstNetwork = process.argv[8];
+  const tokenName = process.argv[9];
+  const mystikoNetwork = getMystikoNetwork(srcNetwork);
 
   let config = common.loadConfig(mystikoNetwork);
   if (config === null) {
@@ -215,24 +329,29 @@ async function deployStep2or3() {
   const src = pair[i];
   const dst = pair[j];
   let proxyAddress = common.getBridgeProxyAddress(bridge, pair[i].network, bridgeName, config);
-  if (proxyAddress === null) {
-    if (bridge.name === 'tbridge') {
-      console.log('tbridge proxy not exist, create');
-      proxyAddress = await deployCrossChainProxy();
-      config = common.updateTBridgeCrossChainProxyConfig(config, pair[i].network, proxyAddress);
-      if (config === null) {
+  if (step === 'step2') {
+    if (pair[i].network === 'development') {
+      //deploy tbridge cross chain proxy for ci test
+      proxyAddress = await deployTBridgeProxy();
+    } else if (proxyAddress === null) {
+      if (bridge.name === 'tbridge') {
+        console.log('tbridge proxy not exist, create');
+        proxyAddress = await deployTBridgeProxy();
+        config = common.updateTBridgeCrossChainProxyConfig(config, pair[i].network, proxyAddress);
+        if (config === null) {
+          return;
+        }
+      } else if (bridge.name !== 'loop') {
+        console.error(common.RED, 'bridge proxy not exist');
         return;
       }
-    } else if (bridge.name !== 'loop') {
-      console.error(this.RED, 'bridge proxy not exist');
+    }
+
+    const mystikoCoreAddress = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
+    if (mystikoCoreAddress === '') {
       return;
     }
-  }
-
-  if (step === 'step2') {
-    const m = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
-    console.log(m.address);
-    common.saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, pairIndex, i, m.address);
+    common.saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, pairIndex, i, mystikoCoreAddress);
   } else if (step === 'step3') {
     if (src.address === '') {
       console.error(common.RED, 'src mystiko address is null');
@@ -249,13 +368,27 @@ async function deployStep2or3() {
     if (bridgeName === 'tbridge') {
       tbridgeConfig.savePeerConfig(mystikoNetwork, src, dst, proxyAddress, config);
     }
+
+    const srcChain = common.getChainConfig(config, src.network);
+    if (srcChain === null) {
+      return null;
+    }
+    const srcToken = common.getChainTokenConfig(srcChain, src.token);
+    if (srcToken === null) {
+      return null;
+    }
+
+    //transfer token to contract
+    if (mystikoNetwork === 'testnet' && srcToken.erc20 === 'true') {
+      await transferTokneToContract(srcToken.address, src.address);
+    }
   } else {
     console.error(common.RED, 'not support step');
   }
 }
 
 module.exports = async function (callback) {
-  const step = process.argv[7];
+  const step = process.argv[6];
   if (step === 'step1') {
     await deployStep1();
   } else if (step === 'step2') {

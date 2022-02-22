@@ -116,6 +116,7 @@ export const BridgeType = {
   LOOP: 'loop',
   POLY: 'poly',
   TBRIDGE: 'tbridge',
+  CELER: 'celer',
 };
 
 /**

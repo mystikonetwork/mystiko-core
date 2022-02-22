@@ -3,7 +3,6 @@ pragma solidity ^0.6.11;
 
 import "./MystikoWithCeler.sol";
 import "../../pool/ERC20AssetPool.sol";
-import "./MystikoWithCeler.sol";
 
 contract MystikoWithCelerERC20 is MystikoWithCeler, ERC20AssetPool {
   constructor(

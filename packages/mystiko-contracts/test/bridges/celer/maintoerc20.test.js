@@ -2,20 +2,21 @@ import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix, toBN } from '@
 import * as protocol from '@mystiko/client/src/protocol';
 import { MerkleTree } from '@mystiko/client/src/lib/merkleTree.js';
 
-const MystikoCoreERC20 = artifacts.require('MystikoWithCelerERC20');
+const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
+const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
 const RelayProxy = artifacts.require('CelerMessageBusMock');
 const Verifier = artifacts.require('WithdrawVerifier');
 const Hasher2 = artifacts.require('Hasher2');
 const TestToken = artifacts.require('TestToken');
 
-contract('MystikoWithCelerERC20', (accounts) => {
-  let mystikoCoreSourceERC20;
+contract('MystikoWithCelerMainToERC20', (accounts) => {
+  let mystikoCoreSourceMain;
   let mystikoCoreDestinationERC20;
   let relayProxy;
   let hasher2;
   let verifier;
   let testToken;
-  let amount = toBN(toDecimals(1000, 18).toString());
+  let amount = toBN(toDecimals(1, 16).toString());
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
@@ -25,19 +26,17 @@ contract('MystikoWithCelerERC20', (accounts) => {
     testToken = await TestToken.deployed();
     verifier = await Verifier.deployed();
     hasher2 = await Hasher2.deployed();
-
     relayProxy = await RelayProxy.new();
 
-    mystikoCoreSourceERC20 = await MystikoCoreERC20.new(
+    mystikoCoreSourceMain = await MystikoWithCelerMain.new(
       relayProxy.address,
       DESTINATION_CHAIN_ID,
       verifier.address,
-      testToken.address,
       hasher2.address,
       MERKLE_TREE_HEIGHT,
     );
 
-    mystikoCoreDestinationERC20 = await MystikoCoreERC20.new(
+    mystikoCoreDestinationERC20 = await MystikoWithCelerERC20.new(
       relayProxy.address,
       SOURCE_CHAIN_ID,
       verifier.address,
@@ -48,28 +47,21 @@ contract('MystikoWithCelerERC20', (accounts) => {
 
     await relayProxy.setChainPair(
       SOURCE_CHAIN_ID,
-      mystikoCoreSourceERC20.address,
+      mystikoCoreSourceMain.address,
       DESTINATION_CHAIN_ID,
       mystikoCoreDestinationERC20.address,
     );
 
-    await mystikoCoreSourceERC20.setPeerContractAddress(mystikoCoreDestinationERC20.address);
-    await mystikoCoreDestinationERC20.setPeerContractAddress(mystikoCoreSourceERC20.address);
+    await mystikoCoreSourceMain.setPeerContractAddress(mystikoCoreDestinationERC20.address);
+    await mystikoCoreDestinationERC20.setPeerContractAddress(mystikoCoreSourceMain.address);
   });
 
   describe('Test basic read operations', () => {
     it('should set token correctly information correctly', async () => {
-      expect(await mystikoCoreSourceERC20.asset()).to.equal(testToken.address);
-      expect(await mystikoCoreSourceERC20.assetName()).to.equal(await testToken.name());
-      expect(await mystikoCoreSourceERC20.assetSymbol()).to.equal(await testToken.symbol());
-      const actualDecimals = (await mystikoCoreSourceERC20.assetDecimals()).toString();
-      const expectedDecimals = (await testToken.decimals()).toString();
-      expect(actualDecimals).to.equal(expectedDecimals);
-
-      const bridgeTypeSource = await mystikoCoreSourceERC20.bridgeType();
-      const assetTypeSource = await mystikoCoreSourceERC20.assetType();
+      const bridgeTypeSource = await mystikoCoreSourceMain.bridgeType();
+      const assetTypeSource = await mystikoCoreSourceMain.assetType();
       expect(bridgeTypeSource).to.equal('celer');
-      expect(assetTypeSource).to.equal('erc20');
+      expect(assetTypeSource).to.equal('main');
 
       const bridgeTypeDestination = await mystikoCoreDestinationERC20.bridgeType();
       const assetTypeDestination = await mystikoCoreDestinationERC20.assetType();
@@ -78,12 +70,12 @@ contract('MystikoWithCelerERC20', (accounts) => {
     });
 
     it('should set verifier information correctly', async () => {
-      expect(await mystikoCoreSourceERC20.getVerifierAddress()).to.equal(verifier.address);
+      expect(await mystikoCoreSourceMain.getVerifierAddress()).to.equal(verifier.address);
       expect(await mystikoCoreDestinationERC20.getVerifierAddress()).to.equal(verifier.address);
     });
 
     it('should set hasher information correctly', async () => {
-      expect(await mystikoCoreSourceERC20.getHasherAddress()).to.equal(hasher2.address);
+      expect(await mystikoCoreSourceMain.getHasherAddress()).to.equal(hasher2.address);
       expect(await mystikoCoreDestinationERC20.getHasherAddress()).to.equal(hasher2.address);
     });
   });
@@ -97,42 +89,26 @@ contract('MystikoWithCelerERC20', (accounts) => {
   let depositTx;
 
   describe('Test deposit operation', () => {
-    it('should transfer token to account 1 correctly', async () => {
-      const tokenContract = await TestToken.deployed();
-      const initialBalanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
-      await tokenContract.transfer(accounts[1], amount.toString(), { from: accounts[0] });
-      const finalBalanceOfAccount0 = await tokenContract.balanceOf(accounts[0]);
-      const differenceBalanceOfAccount0 = toBN(initialBalanceOfAccount0).sub(toBN(finalBalanceOfAccount0));
-      expect(differenceBalanceOfAccount0.toString()).to.equal(amount.toString());
-      const balanceOfAccount1 = await tokenContract.balanceOf(accounts[1]);
-      expect(balanceOfAccount1.toString()).to.equal(amount.toString());
-
-      await testToken.approve(mystikoCoreSourceERC20.address, amount.toString(), { from: accounts[1] });
-      const allowance = await testToken.allowance(accounts[1], mystikoCoreSourceERC20.address);
-      expect(allowance.toString()).to.equal(amount.toString());
-    });
-
     it('should deposit successfully', async () => {
       const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
-      const initialBalanceOfAccount1 = await testToken.balanceOf(accounts[1]);
-
-      const gasEstimated = await mystikoCoreSourceERC20.deposit.estimateGas(
+      const initialBalanceOfAccount1 = await web3.eth.getBalance(accounts[1]);
+      const gasEstimated = await mystikoCoreSourceMain.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
         toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
-        { from: accounts[1] },
+        { from: accounts[1], value: toHex(amount) },
       );
 
-      let balance = await web3.eth.getBalance(mystikoCoreSourceERC20.address);
+      let balance = await web3.eth.getBalance(mystikoCoreSourceMain.address);
       expect(balance.toString()).to.equal('0');
       balance = await web3.eth.getBalance(relayProxy.address);
       expect(balance.toString()).to.equal('0');
       balance = await web3.eth.getBalance(mystikoCoreDestinationERC20.address);
       expect(balance.toString()).to.equal('0');
 
-      depositTx = await mystikoCoreSourceERC20.deposit(
+      depositTx = await mystikoCoreSourceMain.deposit(
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
@@ -141,19 +117,20 @@ contract('MystikoWithCelerERC20', (accounts) => {
         {
           from: accounts[1],
           gas: gasEstimated,
+          value: toHex(amount),
         },
       );
 
-      balance = await web3.eth.getBalance(mystikoCoreSourceERC20.address);
-      expect(balance.toString()).to.equal('0');
+      balance = await web3.eth.getBalance(mystikoCoreSourceMain.address);
+      expect(balance.toString()).to.equal(amount.toString());
       balance = await web3.eth.getBalance(relayProxy.address);
       expect(balance.toString()).to.equal('0');
       balance = await web3.eth.getBalance(mystikoCoreDestinationERC20.address);
       expect(balance.toString()).to.equal('0');
 
-      const finalBalanceOfAccount1 = await testToken.balanceOf(accounts[1]);
+      const finalBalanceOfAccount1 = await web3.eth.getBalance(accounts[1]);
       const differenceBalanceOfAccount1 = toBN(initialBalanceOfAccount1).sub(toBN(finalBalanceOfAccount1));
-      expect(differenceBalanceOfAccount1.toString()).to.equal(amount.toString());
+      expect(Number(differenceBalanceOfAccount1)).to.be.above(Number(amount));
       const depositEvent = depositTx.logs.find((e) => e['event'] === 'Deposit');
       expect(depositEvent).to.not.equal(undefined);
       expect(depositEvent.args.amount.toString()).to.equal(amount.toString());
@@ -259,11 +236,11 @@ contract('MystikoWithCelerERC20', (accounts) => {
           gas: gasEstimated,
         },
       );
+      const isSpent = await mystikoCoreDestinationERC20.isSpent(serialNumber);
+      expect(isSpent).to.equal(true);
       const finalBalanceOfAccount2 = await testToken.balanceOf(accounts[2]);
       const differenceBalanceOfAccount2 = toBN(finalBalanceOfAccount2).sub(toBN(initialBalanceOfAccount2));
       expect(differenceBalanceOfAccount2.toString()).to.equal(amount.toString());
-      const isSpent = await mystikoCoreDestinationERC20.isSpent(serialNumber);
-      expect(isSpent).to.equal(true);
     });
   });
 });

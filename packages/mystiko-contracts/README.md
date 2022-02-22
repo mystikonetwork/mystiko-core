@@ -6,7 +6,6 @@ This package contains the Smart Contract written in Solidity
 deploy hash contract and verifier contract, parameter:
 
 ```
-   network           : testnet 、 mainnet)
    step              : step1
 ```
 example:
@@ -16,9 +15,8 @@ example:
 #### Deploy Step 2
 deploy mystiko core contract, parameter
 ```
- mystiko network     : testnet、mainnet)
  step                : step2
- bridge name         : tbridge、celer、poly
+ bridge name         : tbridge、celer、poly、loop
  destination network : ropsten、bsctestnet ...
  token name          : ETH、MTT、mUSD、BNB...
 
@@ -31,9 +29,8 @@ example:
 configure peer contract address, parameter:
 
 ```
- mystiko network     : testnet、mainnet)
  step                : step3
- bridge name         : tbridge、celer、poly
+ bridge name         : tbridge、celer、poly、loop
  destination network : ropsten、bsctestnet ...
  token name          : ETH、MTT、mUSD、BNB...
 

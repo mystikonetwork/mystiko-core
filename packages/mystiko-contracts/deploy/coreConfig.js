@@ -1,42 +1,35 @@
 const common = require('./common');
 
-const CLI_TESTNET_CONFIG_FILE = 'config/cli/testnet.json';
-const CLI_MAINNET_CONFIG_FILE = 'config/cli/mainnet.json';
 const DEFAULT_TESTNET_CONFIG_FILE = 'config/default/testnet.json';
 const DEFAULT_MAINNET_CONFIG_FILE = 'config/default/mainnet.json';
+const DEFAULT_DEVELOPMENT_CONFIG_FILE = 'config/default/development.json';
 
 module.exports = {
-  getConfigFileName(mystikoNetwork, mod) {
+  getConfigFileName(mystikoNetwork) {
     if (mystikoNetwork === 'testnet') {
-      if (mod === 'cli') {
-        return CLI_TESTNET_CONFIG_FILE;
-      } else {
-        return DEFAULT_TESTNET_CONFIG_FILE;
-      }
+      return DEFAULT_TESTNET_CONFIG_FILE;
     } else if (mystikoNetwork === 'mainnet') {
-      if (mod === 'cli') {
-        return CLI_MAINNET_CONFIG_FILE;
-      } else {
-        return DEFAULT_MAINNET_CONFIG_FILE;
-      }
+      return DEFAULT_MAINNET_CONFIG_FILE;
+    } else if (mystikoNetwork === 'development') {
+      return DEFAULT_DEVELOPMENT_CONFIG_FILE;
     } else {
       console.error(common.RED, 'load config network not support');
-      return null;
+      return '';
     }
   },
 
-  loadConfig(mystikoNetwork, mod) {
-    const fileName = this.getConfigFileName(mystikoNetwork, mod);
-    if (fileName === null) {
+  loadConfig(mystikoNetwork) {
+    const fileName = this.getConfigFileName(mystikoNetwork);
+    if (fileName === '') {
       return;
     }
 
     return common.readJsonFile(fileName);
   },
 
-  saveConfig(mystikoNetwork, mod, data) {
-    const fileName = this.getConfigFileName(mystikoNetwork, mod);
-    if (fileName === null) {
+  saveConfig(mystikoNetwork, data) {
+    const fileName = this.getConfigFileName(mystikoNetwork);
+    if (fileName === '') {
       return;
     }
 
@@ -178,7 +171,7 @@ module.exports = {
 
     const contractName = this.buildContractName(bridge.contractName, srcToken.erc20);
 
-    let cliCoreConfig = this.loadConfig(mystikoNetwork, 'cli');
+    let cliCoreConfig = this.loadConfig(mystikoNetwork);
     if (cliCoreConfig === null) {
       return null;
     }
@@ -198,28 +191,6 @@ module.exports = {
     if (cliCoreConfig === null) {
       return null;
     }
-    this.saveConfig(mystikoNetwork, 'cli', cliCoreConfig);
-
-    let defaultCoreConfig = this.loadConfig(mystikoNetwork, 'default');
-    if (defaultCoreConfig === null) {
-      return null;
-    }
-
-    defaultCoreConfig = this.updateConfigContractAddress(
-      bridgeName,
-      defaultCoreConfig,
-      srcChain.name,
-      contractName,
-      srcToken,
-      dstChain.chainId,
-      src.address,
-      dst.address,
-      config.version,
-      config.circuits,
-    );
-    if (defaultCoreConfig === null) {
-      return null;
-    }
-    this.saveConfig(mystikoNetwork, 'default', defaultCoreConfig);
+    this.saveConfig(mystikoNetwork, cliCoreConfig);
   },
 };

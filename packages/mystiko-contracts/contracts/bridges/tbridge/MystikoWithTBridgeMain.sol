@@ -11,9 +11,9 @@ contract MystikoWithTBridgeMain is MystikoWithTBridge, MainAssetPool {
     address _relayProxyAddress,
     uint64 _peerChainId,
     address _verifier,
-    address _hasher,
+    address _hasher2,
     uint32 _merkleTreeHeight
-  ) public MystikoWithTBridge(_relayProxyAddress, _peerChainId, _verifier, _hasher, _merkleTreeHeight) {}
+  ) public MystikoWithTBridge(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _merkleTreeHeight) {}
 
   receive() external payable {
     emit Received(msg.sender, msg.value);
