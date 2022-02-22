@@ -122,7 +122,13 @@ test('Test deepCopy', () => {
 test('Test errorMessage', () => {
   expect(utils.errorMessage(undefined)).toBe('');
   expect(utils.errorMessage(null)).toBe('');
-  expect(utils.errorMessage(new Error('test'))).toBe('Error: test');
+  expect(utils.errorMessage(new Error(undefined))).toBe('Error');
+  expect(utils.errorMessage(new Error('test'))).toBe('test');
+  let error = new Error('abc');
+  error.code = 'test code';
+  expect(utils.errorMessage(error)).toBe('[test code] abc');
+  error.reason = 'error reason';
+  expect(utils.errorMessage(error)).toBe('[test code] error reason');
   expect(utils.errorMessage({ a: 1 })).toBe('{"a":1}');
   expect(utils.errorMessage(1)).toBe('1');
 });

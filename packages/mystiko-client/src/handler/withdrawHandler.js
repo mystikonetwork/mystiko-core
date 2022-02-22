@@ -218,7 +218,10 @@ export class WithdrawHandler extends Handler {
         index = index + 1;
         return leafOther;
       });
-    check(leafIndex !== -1, 'cannot find leaf on the merkle tree');
+    check(
+      leafIndex !== -1,
+      'cannot find your deposit on chains, maybe it has not been relayed to destination chain?',
+    );
     return { leaves, leafIndex };
   }
 
