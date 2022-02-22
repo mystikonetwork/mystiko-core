@@ -138,7 +138,7 @@
       "chainId": "80001",
       "tokens": [
         {
-          "name": "DEV",
+          "name": "MATIC",
           "assetDecimals": 18,
           "erc20": "false"
         },
