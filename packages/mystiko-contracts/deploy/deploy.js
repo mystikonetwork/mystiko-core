@@ -389,6 +389,10 @@ async function deployStep2or3() {
     if (mystikoNetwork === 'testnet' && srcToken.erc20 === 'true') {
       await transferTokneToContract(srcToken.address, src.address);
     }
+
+    if (mystikoNetwork === 'development') {
+      common.resetDefaultDevelopmentConfig(config);
+    }
   } else {
     console.error(common.RED, 'not support step');
   }

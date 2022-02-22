@@ -8,13 +8,13 @@ module.exports = {
       return TBRIDGE_TESTNET_CONFIG_FILE;
     } else {
       console.error(common.RED, 'load tbridge config, network not support');
-      return null;
+      return '';
     }
   },
 
   loadConfig(mystikoNetwork) {
     const fileName = this.getConfigFileName(mystikoNetwork);
-    if (fileName === null) {
+    if (fileName === '') {
       return;
     }
 
