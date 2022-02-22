@@ -224,7 +224,6 @@
           "peerContractAddress": "0x5475F4AcD54D6d98Ff607C4305A79A02EB64f1e2",
           "circuits": "circom-1.0"
         },
-       
         {
           "version": 1,
           "name": "MystikoWithCelerERC20",
@@ -258,8 +257,27 @@
           "peerContractAddress": "0xFf8914EC09cD7E40aBeD95F92ef6c539C127C9cF"
         }
       ]
+    },
+    {
+      "name": "Polygon Testnet",
+      "assetSymbol": "MATIC",
+      "chainId": 80001,
+      "explorerUrl": "https://mumbai.polygonscan.com/",
+      "providers": [
+        "https://polygon-mumbai.g.alchemy.com/v2/mpL4IKNdH3vPE2e-KvrMo4kThFsxaOuc"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x1a56777a35052B0a28558e2fa4f789D1eB9Bc869",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "assetAddress": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        }
+      ]
     }
-
   ],
   "bridges": [
     {
