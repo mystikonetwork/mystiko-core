@@ -4,11 +4,11 @@ const common = require('./common');
 module.exports = {
   getConfigFileName(mystikoNetwork) {
     if (mystikoNetwork === 'testnet') {
-      return process.env.CLIENT_CONFIG_FILE + 'testnet.json';
+      return process.env.CLIENT_CONFIG_FILE_PATH + '/testnet.json';
     } else if (mystikoNetwork === 'mainnet') {
-      return process.env.CLIENT_CONFIG_FILE + 'mainnet.json';
+      return process.env.CLIENT_CONFIG_FILE_PATH + '/mainnet.json';
     } else if (mystikoNetwork === 'development') {
-      return process.env.CLIENT_CONFIG_FILE + 'development.json';
+      return process.env.CLIENT_CONFIG_FILE_PATH + '/development.json';
     } else {
       console.error(common.RED, 'load config network not support');
       return '';
@@ -25,7 +25,7 @@ module.exports = {
   },
 
   saveConfig(mystikoNetwork, data) {
-    if (mystikoNetwork === 'development'){
+    if (mystikoNetwork === 'development') {
       return;
     }
 
