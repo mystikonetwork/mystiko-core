@@ -2,8 +2,8 @@
   "name": "@mystiko/utils",
   "version": "0.1.0",
   "description": "utilities of mystiko core",
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
   "author": "Mystiko Network",
   "license": "MIT",
@@ -35,6 +35,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@babel/runtime": "^7.16.7",
     "bn.js": "^5.2.0",
     "ethers": "^5.5.3",
     "fastfile": "^0.0.19",
