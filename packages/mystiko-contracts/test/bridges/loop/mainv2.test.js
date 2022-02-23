@@ -1,5 +1,5 @@
 import { testConstructor, testAdminOperations, testDeposit, testRollup } from '../../common';
-import { toDecimals } from '@mystiko/client/src/utils.js';
+import { toDecimals } from '@mystiko/utils';
 
 const MystikoContract = artifacts.require('MystikoV2WithLoopMain');
 const WithdrawVerifierContract = artifacts.require('WithdrawVerifier');

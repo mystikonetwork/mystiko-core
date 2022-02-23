@@ -36,6 +36,7 @@
     "@babel/register": "^7.16.8",
     "@mystiko/circuits": "*",
     "@mystiko/client": "*",
+    "@mystiko/utils": "*",
     "@openzeppelin/contracts": "^3.4.2",
     "@truffle/contract": "^4.4.9",
     "@truffle/hdwallet-provider": "^2.0.3",

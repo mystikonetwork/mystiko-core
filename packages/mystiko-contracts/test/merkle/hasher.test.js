@@ -1,4 +1,4 @@
-import { toFixedLenHex, toBN } from '@mystiko/client/src/utils.js';
+import { toFixedLenHex, toBN } from '@mystiko/utils';
 
 const Hasher2 = artifacts.require('Hasher2');
 contract('Hasher', () => {
