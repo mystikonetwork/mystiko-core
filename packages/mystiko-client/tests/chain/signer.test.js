@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { BaseSigner, MetaMaskSigner, PrivateKeySigner, checkSigner } from '../../src/chain/signer.js';
 import { readFromFile } from '../../src/config';
-import { toHex } from '../../src/utils.js';
+import { toHex } from '@mystiko/utils';
 import { ProviderPool } from '../../src/chain/provider.js';
 
 class MockProvider {

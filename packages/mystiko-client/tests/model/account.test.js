@@ -1,5 +1,5 @@
 import { Account } from '../../src/model';
-import { toHexNoPrefix } from '../../src/utils.js';
+import { toHexNoPrefix } from '@mystiko/utils';
 
 test('Test Account getters/setters', () => {
   const account = new Account();

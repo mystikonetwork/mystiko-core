@@ -1,5 +1,5 @@
 import Loki from 'lokijs';
-import { check, readFile } from './utils';
+import { check, readFile } from '@mystiko/utils';
 import { ID_KEY } from './model';
 
 const collections = ['accounts', 'wallets', 'notes', 'deposits', 'withdraws', 'contracts', 'events'];

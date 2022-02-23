@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
+    "@mystiko/utils": "*",
     "big-integer": "^1.6.51",
     "blake-hash": "^2.0.0",
     "bn.js": "^5.2.0",

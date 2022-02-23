@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check, deepCopy } from '../utils.js';
+import { check, deepCopy } from '@mystiko/utils';
 
 /**
  * @class BaseConfig

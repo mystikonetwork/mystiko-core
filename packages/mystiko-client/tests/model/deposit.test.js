@@ -1,5 +1,5 @@
 import { AssetType, Deposit, DepositStatus } from '../../src/model';
-import { toBuff, toHexNoPrefix, toDecimals, toBN } from '../../src/utils.js';
+import { toBuff, toHexNoPrefix, toDecimals, toBN } from '@mystiko/utils';
 import { readFromFile } from '../../src/config';
 
 test('Test Deposit getters/setters', async () => {

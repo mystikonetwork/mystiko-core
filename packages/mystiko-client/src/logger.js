@@ -1,6 +1,6 @@
 import logger from 'loglevel';
 import logPrefixer from 'loglevel-plugin-prefix';
-import { check } from './utils.js';
+import { check } from '@mystiko/utils';
 
 /**
  * @module module:mystiko/logger

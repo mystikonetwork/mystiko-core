@@ -3,7 +3,7 @@ import { Contract } from '../model';
 import { ContractHandler } from '../handler/contractHandler.js';
 import { MystikoConfig } from '../config';
 import { ProviderPool } from './provider.js';
-import { check, toBN } from '../utils.js';
+import { check, toBN } from '@mystiko/utils';
 import { MystikoABI } from './abi.js';
 import { AssetType } from '../model';
 

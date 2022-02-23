@@ -1,4 +1,4 @@
-import { check, fromDecimals, toBN, isBN } from '../utils.js';
+import { check, fromDecimals, toBN, isBN } from '@mystiko/utils';
 import { BaseModel } from './common.js';
 import { MystikoConfig } from '../config';
 

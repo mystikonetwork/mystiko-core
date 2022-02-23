@@ -1,6 +1,6 @@
 import { BaseConfig } from './common.js';
 import { EXPLORER_TX_PLACEHOLDER } from './chainConfig.js';
-import { check, toHexNoPrefix } from '../utils.js';
+import { check, toHexNoPrefix } from '@mystiko/utils';
 import { BridgeType, isValidBridgeType } from '../model';
 
 /**

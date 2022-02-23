@@ -1,6 +1,6 @@
 import { Withdraw, WithdrawStatus } from '../../src/model';
 import { readFromFile } from '../../src/config';
-import { toDecimals, toBN } from '../../src/utils';
+import { toDecimals, toBN } from '@mystiko/utils';
 
 test('Test Withdraw getters/setters', async () => {
   const conf = await readFromFile('tests/config/files/config.test.json');

@@ -3,7 +3,7 @@ import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { ContractHandler } from './contractHandler.js';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toString, toBN } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toString, toBN } from '@mystiko/utils';
 import {
   isValidPrivateNoteStatus,
   OffChainNote,

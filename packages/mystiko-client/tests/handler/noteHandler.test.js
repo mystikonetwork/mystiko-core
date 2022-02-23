@@ -6,7 +6,7 @@ import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
-import { toDecimals, toHexNoPrefix } from '../../src/utils.js';
+import { toDecimals, toHexNoPrefix } from '@mystiko/utils';
 import { OffChainNote, PrivateNoteStatus, BridgeType } from '../../src/model';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import txReceipt01 from './files/txReceipt01.json';

@@ -12,7 +12,7 @@ import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { EventHandler } from '../../src/handler/eventHandler.js';
 import { EventPuller } from '../../src/puller';
-import { toFixedLenHex, toBN } from '../../src/utils.js';
+import { toFixedLenHex, toBN } from '@mystiko/utils';
 import { DepositStatus, PrivateNoteStatus, WithdrawStatus } from '../../src/model';
 
 class MockProvider extends ethers.providers.JsonRpcProvider {

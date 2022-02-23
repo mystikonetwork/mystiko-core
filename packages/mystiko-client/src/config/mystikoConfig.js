@@ -1,7 +1,7 @@
 import { BaseConfig } from './common.js';
 import { BridgeType, isValidBridgeType } from '../model';
 import { ChainConfig } from './chainConfig.js';
-import { check, readJsonFile } from '../utils.js';
+import { check, readJsonFile } from '@mystiko/utils';
 import { BaseBridgeConfig } from './bridgeConfig.js';
 import { CircuitConfig } from './circuitConfig.js';
 

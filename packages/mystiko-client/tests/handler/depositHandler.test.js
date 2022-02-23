@@ -8,7 +8,7 @@ import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
-import { toDecimals, toHex, toBN } from '../../src/utils.js';
+import { toDecimals, toHex, toBN } from '@mystiko/utils';
 import { readFromFile } from '../../src/config';
 import { DepositStatus, BridgeType, AssetType } from '../../src/model';
 import { MystikoABI } from '../../src/chain/abi.js';

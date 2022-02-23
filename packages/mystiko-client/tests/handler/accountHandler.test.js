@@ -1,7 +1,7 @@
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { createDatabase } from '../../src/database.js';
-import { toBuff, toHexNoPrefix } from '../../src/utils.js';
+import { toBuff, toHexNoPrefix } from '@mystiko/utils';
 
 let db;
 let wallet;

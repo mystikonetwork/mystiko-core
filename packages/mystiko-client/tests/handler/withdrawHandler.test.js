@@ -9,7 +9,7 @@ import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { WithdrawHandler } from '../../src/handler/withdrawHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
-import { toDecimals, toHex, toBN } from '../../src/utils.js';
+import { toDecimals, toHex, toBN } from '@mystiko/utils';
 import { MystikoABI } from '../../src/chain/abi.js';
 import { WithdrawStatus, PrivateNoteStatus } from '../../src/model';
 import txReceipt02 from './files/txReceipt02.json';

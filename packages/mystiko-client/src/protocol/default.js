@@ -21,7 +21,7 @@ import {
   toBN,
   isBN,
   readCompressedFile,
-} from '../utils.js';
+} from '@mystiko/utils';
 import logger from '../logger.js';
 
 const WithdrawWitnessCalculator = require('./witness_calculator.js');

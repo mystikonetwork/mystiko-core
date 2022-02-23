@@ -1,12 +1,12 @@
 import { Handler } from './handler.js';
-import { check, toHex, toDecimals, toFixedLenHex, toString, errorMessage } from '../utils.js';
+import { check, toHex, toDecimals, toFixedLenHex, toString, errorMessage } from '@mystiko/utils';
 import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
 import { Deposit, DepositStatus, AssetType, BridgeType, ID_KEY, OffChainNote, BaseModel } from '../model';
-import { toBN } from '../utils.js';
+import { toBN } from '@mystiko/utils';
 import rootLogger from '../logger';
 
 /**

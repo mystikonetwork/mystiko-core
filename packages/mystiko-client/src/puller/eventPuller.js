@@ -6,7 +6,7 @@ import { DepositHandler } from '../handler/depositHandler.js';
 import { WithdrawHandler } from '../handler/withdrawHandler.js';
 import { EventHandler } from '../handler/eventHandler.js';
 import { ContractPool } from '../chain/contract.js';
-import { check, toHexNoPrefix, toString, toBN } from '../utils.js';
+import { check, toHexNoPrefix, toString, toBN } from '@mystiko/utils';
 import { BridgeType, DepositStatus, PrivateNoteStatus, WithdrawStatus } from '../model';
 import rootLogger from '../logger';
 

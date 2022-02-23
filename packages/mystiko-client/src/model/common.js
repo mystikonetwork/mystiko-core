@@ -1,5 +1,5 @@
 import * as protocol from '../protocol';
-import { deepCopy, check, isBN } from '../utils.js';
+import { deepCopy, check, isBN } from '@mystiko/utils';
 
 /**
  * @memberOf module:mystiko/models

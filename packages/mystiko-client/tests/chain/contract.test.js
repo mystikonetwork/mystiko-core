@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { ProviderPool } from '../../src/chain/provider.js';
-import { toBN, readJsonFile } from '../../src/utils.js';
+import { toBN, readJsonFile } from '@mystiko/utils';
 import { AssetType, BridgeType, Contract } from '../../src/model';
 import { readFromFile } from '../../src/config';
 import { MystikoABI } from '../../src/chain/abi.js';

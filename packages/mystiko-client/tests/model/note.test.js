@@ -1,5 +1,5 @@
 import { OffChainNote, PrivateNote, PrivateNoteStatus, BridgeType } from '../../src/model';
-import { toBuff, toDecimals, toHexNoPrefix, toBN } from '../../src/utils.js';
+import { toBuff, toDecimals, toHexNoPrefix, toBN } from '@mystiko/utils';
 import { readFromFile } from '../../src/config';
 
 test('Test OffChainNote getters/setters', () => {

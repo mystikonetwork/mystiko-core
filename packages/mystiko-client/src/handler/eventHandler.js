@@ -1,6 +1,6 @@
 import { Handler } from './handler.js';
 import { Event } from '../model';
-import { check } from '../utils.js';
+import { check } from '@mystiko/utils';
 import rootLogger from '../logger';
 
 /**

@@ -6,7 +6,7 @@ import { ContractHandler } from './contractHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract.js';
-import { check, toBuff, errorMessage, toHexNoPrefix, toBN } from '../utils.js';
+import { check, toBuff, errorMessage, toHexNoPrefix, toBN } from '@mystiko/utils';
 import { checkSigner } from '../chain/signer.js';
 import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY, BaseModel } from '../model';
 import rootLogger from '../logger';

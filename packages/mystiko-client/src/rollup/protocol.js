@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { groth16 } from 'snarkjs';
-import { check, readCompressedFile, toFixedLenHexNoPrefix, toHexNoPrefix, toBN, isBN } from '../utils.js';
+import { check, readCompressedFile, toFixedLenHexNoPrefix, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
 import { MerkleTree } from '../lib/merkleTree.js';
 import { FIELD_SIZE } from '../protocol';
 

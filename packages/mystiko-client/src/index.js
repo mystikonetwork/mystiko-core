@@ -13,7 +13,7 @@ import {
   importDataFromJsonFile,
 } from './database.js';
 import handler from './handler';
-import * as utils from './utils.js';
+import * as utils from '@mystiko/utils';
 import * as models from './model';
 import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';

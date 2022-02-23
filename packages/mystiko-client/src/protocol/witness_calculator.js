@@ -1,4 +1,4 @@
-const { toBN } = require('../utils.js');
+const { toBN } = require('@mystiko/utils');
 
 module.exports = async function builder(code, options) {
   options = options || {};

@@ -1,5 +1,5 @@
 import { BaseModel } from './common.js';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
 import { isValidBridgeType } from './common.js';
 import { MystikoConfig } from '../config';
 

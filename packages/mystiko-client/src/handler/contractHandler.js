@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 import { Handler } from './handler.js';
 import { Contract } from '../model';
-import { check } from '../utils.js';
+import { check } from '@mystiko/utils';
 import rootLogger from '../logger.js';
 
 /**

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { BaseConfig } from './common.js';
 import { ContractConfig } from './contractConfig.js';
-import { check, toHex } from '../utils.js';
+import { check, toHex } from '@mystiko/utils';
 import { BridgeType } from '../model';
 
 export const EXPLORER_TX_PLACEHOLDER = '%tx%';

@@ -1,5 +1,5 @@
 import { BaseModel, isValidAssetType } from './common.js';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '../utils.js';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
 import { MystikoConfig } from '../config';
 
 /**
