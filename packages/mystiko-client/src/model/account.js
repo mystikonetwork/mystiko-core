@@ -35,7 +35,7 @@ export class Account extends BaseModel {
   }
 
   set verifyPublicKey(key) {
-    check(key instanceof Buffer, 'key should be instance of Buffer');
+    check(Buffer.isBuffer(key), 'key should be instance of Buffer');
     this.data['verifyPublicKey'] = toHexNoPrefix(key);
   }
 
@@ -49,7 +49,7 @@ export class Account extends BaseModel {
   }
 
   set encPublicKey(key) {
-    check(key instanceof Buffer, 'key should be instance of Buffer');
+    check(Buffer.isBuffer(key), 'key should be instance of Buffer');
     this.data['encPublicKey'] = toHexNoPrefix(key);
   }
 

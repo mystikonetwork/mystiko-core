@@ -5,7 +5,7 @@
  * Javascript library of Mystiko.Network's core protocol.
  */
 import { ethers } from 'ethers';
-import { MystikoConfig, readFromFile } from '@mystiko/config';
+import { MystikoConfig, AssetType, BridgeType, readFromFile } from '@mystiko/config';
 import * as utils from '@mystiko/utils';
 import {
   createDatabase,
@@ -57,7 +57,7 @@ import { EventPuller } from './puller';
  * @property {EventPuller} pullers.eventPuller puller that pulling events in fixed time frame.
  * @property {external:Logger} logger log handler for logging useful information.
  */
-const mystiko = { utils, models, ethers };
+const mystiko = { utils, models: { ...models, AssetType, BridgeType }, ethers };
 /**
  * Initialize resources to make Mystiko wallet work.
  * Please call this function at the startup of your application.

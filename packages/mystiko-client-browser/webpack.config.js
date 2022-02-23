@@ -65,6 +65,7 @@ module.exports = {
   plugins: [
     new webpack.ProvidePlugin({
       Buffer: ['safe-buffer', 'Buffer'],
+      process: 'process',
     }),
   ],
   optimization: getOptimization(),

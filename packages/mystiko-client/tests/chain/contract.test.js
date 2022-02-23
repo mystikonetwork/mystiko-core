@@ -87,7 +87,7 @@ class MockProvider extends ethers.providers.Provider {
   }
 }
 
-test('test MystikoContract constructor', async () => {
+test('test MystikoContract constructor', () => {
   expect(() => new MystikoContract({})).toThrow();
   const contractConfig = new Contract({
     version: 1,
@@ -115,7 +115,7 @@ test('test MystikoContract constructor', async () => {
   expect(contract2.contract).not.toBe(undefined);
 });
 
-test('test MystikoContract connect', async () => {
+test('test MystikoContract connect', () => {
   const address = '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1';
   const peerAddress = '0x8fb1df17768e29c936edfbce1207ad13696268b7';
   const assetAddress = '0xaE110b575E21949DEc823EfB81951355EB71E038';

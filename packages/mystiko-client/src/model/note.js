@@ -304,7 +304,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set encryptedOnChainNote(note) {
-    check(note instanceof Buffer, 'note should be instance of Buffer');
+    check(Buffer.isBuffer(note), 'note should be instance of Buffer');
     this.data['encryptedOnChainNote'] = toHexNoPrefix(note);
   }
 

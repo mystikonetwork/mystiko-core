@@ -172,7 +172,7 @@ export class Deposit extends BaseModel {
   }
 
   set privateNote(note) {
-    check(note instanceof Buffer, 'note should be instance of Buffer');
+    check(Buffer.isBuffer(note), 'note should be instance of Buffer');
     this.data['privateNote'] = toHexNoPrefix(note);
   }
 
