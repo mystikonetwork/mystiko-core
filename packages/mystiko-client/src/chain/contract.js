@@ -1,11 +1,10 @@
 import { ethers } from 'ethers';
+import { MystikoConfig } from '@mystiko/config';
+import { check, toBN } from '@mystiko/utils';
+import { MystikoABI, AssetType } from '@mystiko/config';
 import { Contract } from '../model';
 import { ContractHandler } from '../handler/contractHandler.js';
-import { MystikoConfig } from '../config';
 import { ProviderPool } from './provider.js';
-import { check, toBN } from '@mystiko/utils';
-import { MystikoABI } from './abi.js';
-import { AssetType } from '../model';
 
 /**
  * @external external:Contract
@@ -155,7 +154,7 @@ export class ContractPool {
    * @param {number} srcChainId chain id of the source blockchain(from chain).
    * @param {number} dstChainId chain id of the destination blockchain(to chain).
    * @param {string} assetSymbol symbol of the asset. E.g. ETH/USDT/BNB
-   * @param {module:mystiko/models.BridgeType} bridge the type of cross-chain bridge.
+   * @param {BridgeType} bridge the type of cross-chain bridge.
    * @returns {{protocol: external:Contract, asset: external:Contract}|{protocol: external:Contract}}
    * an object contains protocol contract and asset contract if the asset is not main asset, otherwise
    * the asset contract is undefined.

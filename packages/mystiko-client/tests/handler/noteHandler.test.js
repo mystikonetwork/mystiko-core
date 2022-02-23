@@ -1,13 +1,13 @@
 import { ethers } from 'ethers';
+import { BridgeType, readFromFile } from '@mystiko/config';
+import { toDecimals, toHexNoPrefix } from '@mystiko/utils';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { createDatabase } from '../../src/database.js';
-import { readFromFile } from '../../src/config';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { WalletHandler } from '../../src/handler/walletHandler.js';
 import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
-import { toDecimals, toHexNoPrefix } from '@mystiko/utils';
-import { OffChainNote, PrivateNoteStatus, BridgeType } from '../../src/model';
+import { OffChainNote, PrivateNoteStatus } from '../../src/model';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import txReceipt01 from './files/txReceipt01.json';
 import txReceipt02 from './files/txReceipt02.json';
@@ -47,8 +47,8 @@ const walletPassword = 'P@ssw0rd';
 
 beforeEach(async () => {
   db = await createDatabase('test.db');
-  conf = await readFromFile('tests/config/files/config.test.json');
-  const emptyConf = await readFromFile('tests/config/files/config2.test.json');
+  conf = await readFromFile('tests/config/config.test.json');
+  const emptyConf = await readFromFile('tests/config/config2.test.json');
   contractHandler = new ContractHandler(db, conf);
   await contractHandler.importFromConfig();
   providerPool = new ProviderPool(conf);

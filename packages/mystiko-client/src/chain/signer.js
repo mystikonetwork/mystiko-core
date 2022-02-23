@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { MystikoConfig, ChainConfig } from '../config';
+import { MystikoConfig, ChainConfig } from '@mystiko/config';
 import { check, toHex, toHexNoPrefix, toString } from '@mystiko/utils';
 import { ProviderPool } from './provider.js';
 import rootLogger from '../logger.js';

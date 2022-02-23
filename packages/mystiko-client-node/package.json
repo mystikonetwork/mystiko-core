@@ -40,6 +40,7 @@
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@mystiko/client": "*",
+    "@mystiko/config": "*",
     "@mystiko/contracts": "*",
     "lokijs": "^1.5.12"
   }

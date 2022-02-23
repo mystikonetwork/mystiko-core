@@ -1,10 +1,9 @@
 import { ethers } from 'ethers';
+import { AssetType, BridgeType, MystikoABI, readFromFile } from '@mystiko/config';
+import { toBN, readJsonFile } from '@mystiko/utils';
 import { ContractPool, MystikoContract } from '../../src/chain/contract.js';
 import { ProviderPool } from '../../src/chain/provider.js';
-import { toBN, readJsonFile } from '@mystiko/utils';
-import { AssetType, BridgeType, Contract } from '../../src/model';
-import { readFromFile } from '../../src/config';
-import { MystikoABI } from '../../src/chain/abi.js';
+import { Contract } from '../../src/model';
 import { createDatabase } from '../../src/database.js';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
 
@@ -102,7 +101,7 @@ test('test MystikoContract constructor', async () => {
   const contract1 = new MystikoContract(contractConfig);
   const mockContract = new MockContract(
     '0x98ED94360CAd67A76a53d8Aa15905E52485B73d1',
-    await readJsonFile('src/chain/abis/MystikoWithLoopERC20.json'),
+    MystikoABI.MystikoWithLoopERC20.abi,
     AssetType.ERC20,
     BridgeType.LOOP,
     '0xaE110b575E21949DEc823EfB81951355EB71E038',
@@ -202,7 +201,7 @@ test('test MystikoContract connect', async () => {
   expect(contract2Connected instanceof ethers.Contract).toBe(true);
   expect(contract3Connected instanceof ethers.Contract).toBe(true);
   expect(contract4Connected instanceof ethers.Contract).toBe(true);
-  const abiData = await readJsonFile('src/chain/abis/MystikoWithLoopERC20.json');
+  const abiData = MystikoABI.MystikoWithLoopERC20.abi;
   const rawContract = new ethers.Contract('0x98ED94360CAd67A76a53d8Aa15905E52485B73d1', abiData);
   const contract5 = new MystikoContract(rawContract);
   const contract5Connected = contract5.connect();
@@ -249,7 +248,7 @@ test('test MystikoContract assetBalance', async () => {
 
 test('test ContractPool connect', async () => {
   expect(() => new ContractPool({})).toThrow();
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const db = await createDatabase('test.db');
   const contractHandler = new ContractHandler(db, conf);
   await contractHandler.importFromConfig();

@@ -1,5 +1,5 @@
-import { BaseModel } from './common.js';
 import { check, toBuff, toHexNoPrefix } from '@mystiko/utils';
+import { BaseModel } from './common.js';
 
 /**
  * @class Account

@@ -1,9 +1,9 @@
-import { AssetType, Deposit, DepositStatus } from '../../src/model';
+import { AssetType, readFromFile } from '@mystiko/config';
 import { toBuff, toHexNoPrefix, toDecimals, toBN } from '@mystiko/utils';
-import { readFromFile } from '../../src/config';
+import { Deposit, DepositStatus } from '../../src/model';
 
 test('Test Deposit getters/setters', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const deposit = new Deposit();
   expect(deposit.srcChainId).toBe(undefined);
   expect(deposit.dstChainId).toBe(undefined);

@@ -198,3 +198,23 @@ export enum AssetType {
   ERC20 = 'erc20',
   MAIN = 'main',
 }
+
+/**
+ * @function module:mystiko/models.isValidBridgeType
+ * @desc check whether given type is one of the supported bridge types.
+ * @param {string} type bridge type to be checked.
+ * @returns {boolean} true if the type is supported, otherwise returns false.
+ */
+export function isValidBridgeType(type: BridgeType): boolean {
+  return Object.values(BridgeType).includes(type);
+}
+
+/**
+ * @function module:mystiko/models.isValidAssetType
+ * @desc check whether given type is one of the supported asset types.
+ * @param {string} type bridge type to be checked.
+ * @returns {boolean} true if the type is supported, otherwise returns false.
+ */
+export function isValidAssetType(type: AssetType): boolean {
+  return Object.values(AssetType).includes(type);
+}

@@ -1,6 +1,6 @@
 import { check, fromDecimals, toBN, isBN } from '@mystiko/utils';
+import { MystikoConfig } from '@mystiko/config';
 import { BaseModel } from './common.js';
-import { MystikoConfig } from '../config';
 
 /**
  * @class Withdraw

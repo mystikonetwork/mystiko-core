@@ -1,16 +1,16 @@
 import { ethers } from 'ethers';
+import { BridgeType } from '@mystiko/config';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toString, toBN } from '@mystiko/utils';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { ContractHandler } from './contractHandler.js';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toString, toBN } from '@mystiko/utils';
 import {
   isValidPrivateNoteStatus,
   OffChainNote,
   PrivateNote,
   PrivateNoteStatus,
   ID_KEY,
-  BridgeType,
   BaseModel,
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';

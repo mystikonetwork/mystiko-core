@@ -5,7 +5,8 @@
  * Javascript library of Mystiko.Network's core protocol.
  */
 import { ethers } from 'ethers';
-import { MystikoConfig, readFromFile } from './config';
+import { MystikoConfig, readFromFile } from '@mystiko/config';
+import * as utils from '@mystiko/utils';
 import {
   createDatabase,
   exportDataAsString,
@@ -13,7 +14,6 @@ import {
   importDataFromJsonFile,
 } from './database.js';
 import handler from './handler';
-import * as utils from '@mystiko/utils';
 import * as models from './model';
 import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';

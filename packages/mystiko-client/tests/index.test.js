@@ -1,7 +1,7 @@
 import mystiko from '../src/index.js';
 
 test('test initialize', async () => {
-  await mystiko.initialize({ isTestnet: true, conf: 'tests/config/files/config.test.json' });
+  await mystiko.initialize({ isTestnet: true, conf: 'tests/config/config.test.json' });
   expect(mystiko.utils).not.toBe(undefined);
   expect(mystiko.models).not.toBe(undefined);
   expect(mystiko.ethers).not.toBe(undefined);
@@ -28,12 +28,12 @@ test('test initialize', async () => {
   await mystiko.initialize({
     isTestnet: true,
     dbFile: 'test_file.db',
-    conf: 'tests/config/files/config.test.json',
+    conf: 'tests/config/config.test.json',
   });
   expect(mystiko.db).not.toBe(undefined);
 
   await expect(
-    mystiko.initialize({ isTestnet: 'random', conf: 'tests/config/files/config.test.json' }),
+    mystiko.initialize({ isTestnet: 'random', conf: 'tests/config/config.test.json' }),
   ).rejects.toThrow();
   await expect(mystiko.initialize({ conf: {} })).rejects.toThrow();
 });

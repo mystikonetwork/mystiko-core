@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { MystikoConfig } from '../config';
+import { MystikoConfig } from '@mystiko/config';
 import { check } from '@mystiko/utils';
 
 /**

@@ -1,6 +1,6 @@
-import { OffChainNote, PrivateNote, PrivateNoteStatus, BridgeType } from '../../src/model';
+import { BridgeType, readFromFile } from '@mystiko/config';
 import { toBuff, toDecimals, toHexNoPrefix, toBN } from '@mystiko/utils';
-import { readFromFile } from '../../src/config';
+import { OffChainNote, PrivateNote, PrivateNoteStatus } from '../../src/model';
 
 test('Test OffChainNote getters/setters', () => {
   const note = new OffChainNote();
@@ -13,7 +13,7 @@ test('Test OffChainNote getters/setters', () => {
 });
 
 test('Test PrivateNote getters/setters', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const note = new PrivateNote();
   expect(note.srcChainId).toBe(undefined);
   expect(note.srcTransactionHash).toBe(undefined);

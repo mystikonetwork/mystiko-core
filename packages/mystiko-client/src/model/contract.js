@@ -1,8 +1,7 @@
 import { ethers } from 'ethers';
-
-import { BaseModel, isValidAssetType, isValidBridgeType } from './common.js';
 import { check } from '@mystiko/utils';
-import { MystikoABI } from '../chain/abi.js';
+import { MystikoABI, isValidAssetType, isValidBridgeType } from '@mystiko/config';
+import { BaseModel } from './common.js';
 
 /**
  * @class Contract
@@ -81,9 +80,9 @@ export class Contract extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.AssetType} assetType
+   * @property {AssetType} assetType
    * @desc the asset type which this smart contract associates with,
-   * check {@link module:mystiko/models.AssetType AssetType}.
+   * check {@link AssetType AssetType}.
    */
   get assetType() {
     return this.data['assetType'];
@@ -121,9 +120,9 @@ export class Contract extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.BridgeType} bridgeType
+   * @property {BridgeType} bridgeType
    * @desc the cross-chain bridge type which this smart contract associates with,
-   * check {@link module:mystiko/models.BridgeType BridgeType}.
+   * check {@link BridgeType BridgeType}.
    */
   get bridgeType() {
     return this.data['bridgeType'];

@@ -1,7 +1,6 @@
-import { BaseModel } from './common.js';
+import { MystikoConfig, isValidBridgeType } from '@mystiko/config';
 import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
-import { isValidBridgeType } from './common.js';
-import { MystikoConfig } from '../config';
+import { BaseModel } from './common.js';
 
 /**
  * @class OffChainNote
@@ -166,7 +165,7 @@ export class PrivateNote extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.BridgeType} bridge
+   * @property {BridgeType} bridge
    * @desc the type of cross-chain for the underlying deposit.
    */
   get bridge() {

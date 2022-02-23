@@ -1,5 +1,5 @@
 import { check } from '@mystiko/utils';
-import { BaseConfig, BridgeType } from '../base';
+import { BaseConfig, BridgeType, isValidBridgeType } from '../base';
 
 export interface RawBaseBridgeConfig {
   name: string;
@@ -17,7 +17,7 @@ export class BaseBridgeConfig extends BaseConfig {
     super(rawConfig);
     BaseConfig.checkString(this.config, 'name');
     BaseConfig.checkString(this.config, 'type');
-    check(Object.values(BridgeType).includes(this.type), `${this.type} is an invalid BridgetType`);
+    check(isValidBridgeType(this.type), `${this.type} is an invalid BridgetType`);
   }
 
   /**

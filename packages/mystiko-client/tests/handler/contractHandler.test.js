@@ -1,7 +1,6 @@
+import { AssetType, BridgeType, readFromFile } from '@mystiko/config';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { createDatabase } from '../../src/database.js';
-import { readFromFile } from '../../src/config';
-import { AssetType, BridgeType } from '../../src/model';
 
 let db;
 let config;
@@ -9,7 +8,7 @@ let contractHandler;
 
 beforeEach(async () => {
   db = await createDatabase('test.db');
-  config = await readFromFile('tests/config/files/config.test.json');
+  config = await readFromFile('tests/config/config.test.json');
   contractHandler = new ContractHandler(db, config);
 });
 

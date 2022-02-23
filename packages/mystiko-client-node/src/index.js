@@ -2,10 +2,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 import Adapter from 'lokijs/src/loki-fs-structured-adapter';
 import mystiko from '@mystiko/client/src/index.js';
-import { MystikoConfig } from '@mystiko/client/src/config';
-
-import DefaultTestnetConfigJson from '@mystiko/contracts/config/default/testnet.json';
-import DefaultMainnetConfigJson from '@mystiko/contracts/config/default/mainnet.json';
+import { MystikoConfig, DefaultClientConfigJson } from '@mystiko/config';
 
 const colors = {
   TRACE: chalk.magentaBright,
@@ -31,10 +28,10 @@ const defaultTestnetCircuitsConfig = [
 ];
 
 export const DefaultTestnetConfig = new MystikoConfig({
-  ...DefaultTestnetConfigJson,
+  ...DefaultClientConfigJson.testnet,
   circuits: defaultTestnetCircuitsConfig,
 });
-export const DefaultMainnetConfig = new MystikoConfig(DefaultMainnetConfigJson);
+export const DefaultMainnetConfig = new MystikoConfig(DefaultClientConfigJson.mainnet);
 
 const initialize = mystiko.initialize;
 mystiko.initialize = (options = {}) => {

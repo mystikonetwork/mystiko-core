@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
+import { check } from '@mystiko/utils';
 
 import { Handler } from './handler.js';
 import { Contract } from '../model';
-import { check } from '@mystiko/utils';
 import rootLogger from '../logger.js';
 
 /**

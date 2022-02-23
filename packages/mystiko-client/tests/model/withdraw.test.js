@@ -1,9 +1,9 @@
-import { Withdraw, WithdrawStatus } from '../../src/model';
-import { readFromFile } from '../../src/config';
+import { readFromFile } from '@mystiko/config';
 import { toDecimals, toBN } from '@mystiko/utils';
+import { Withdraw, WithdrawStatus } from '../../src/model';
 
 test('Test Withdraw getters/setters', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const withdraw = new Withdraw();
   expect(withdraw.chainId).toBe(undefined);
   expect(withdraw.asset).toBe(undefined);

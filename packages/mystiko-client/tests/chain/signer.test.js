@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
-import { BaseSigner, MetaMaskSigner, PrivateKeySigner, checkSigner } from '../../src/chain/signer.js';
-import { readFromFile } from '../../src/config';
+import { readFromFile } from '@mystiko/config';
 import { toHex } from '@mystiko/utils';
+import { BaseSigner, MetaMaskSigner, PrivateKeySigner, checkSigner } from '../../src/chain/signer.js';
 import { ProviderPool } from '../../src/chain/provider.js';
 
 class MockProvider {
@@ -86,12 +86,12 @@ async function testSigner(conf, signer, defaultInstalled = false) {
 }
 
 test('test base signer', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   await testSigner(conf, new BaseSigner(conf));
 });
 
 test('test metamask signer', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   await testSigner(conf, new MetaMaskSigner(conf));
   const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 123);
   const signer = new MetaMaskSigner(conf, provider);
@@ -112,7 +112,7 @@ test('test metamask signer', async () => {
 });
 
 test('test private key signer', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const providerPool = new ProviderPool(conf);
   providerPool.connect((rpcEndpoints) => {
     return new MockEtherProvider(rpcEndpoints[0], 1);
@@ -137,7 +137,7 @@ test('test private key signer', async () => {
 });
 
 test('test checkSigner', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   await expect(checkSigner({}, 123, conf)).rejects.toThrow();
   const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 1);
   const signer = new MetaMaskSigner(conf, provider);
@@ -149,7 +149,7 @@ test('test checkSigner', async () => {
 });
 
 test('test MetaMask switchChain', async () => {
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const provider = new MockProvider(['0xccac11fe23f9dee6e8d548ec811375af9fe01e55'], 1);
   const signer = new MetaMaskSigner(conf, provider);
   const chainConfig = conf.getChainConfig(56);

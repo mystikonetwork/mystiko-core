@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
-
-import { BaseModel } from './common.js';
 import { check } from '@mystiko/utils';
+import { BaseModel } from './common.js';
 
 /**
  * @class Event

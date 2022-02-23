@@ -1,6 +1,6 @@
-import { BaseModel, isValidAssetType } from './common.js';
+import { MystikoConfig, isValidAssetType } from '@mystiko/config';
 import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
-import { MystikoConfig } from '../config';
+import { BaseModel } from './common.js';
 
 /**
  * @class Deposit
@@ -42,7 +42,7 @@ export class Deposit extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.BridgeType} bridge
+   * @property {BridgeType} bridge
    * @desc the type of cross-chain for this deposit.
    */
   get bridge() {
@@ -68,7 +68,7 @@ export class Deposit extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.AssetType} assetType
+   * @property {AssetType} assetType
    * @desc the type of the supported asset of this deposit on the source chain.
    */
   get assetType() {

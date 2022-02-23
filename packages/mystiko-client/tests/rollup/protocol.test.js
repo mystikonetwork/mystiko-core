@@ -1,7 +1,7 @@
+import { toBN } from '@mystiko/utils';
 import { zkProveRollup1, zkProveRollup4, zkProveRollup16 } from '../../src/rollup/protocol.js';
 import { MerkleTree } from '../../src/lib/merkleTree.js';
 import { zkVerify } from '../../src/protocol';
-import { toBN } from '@mystiko/utils';
 
 test('test zkProveRollup1', async () => {
   const tree = new MerkleTree(20, [toBN('100'), toBN('200'), toBN('300')]);

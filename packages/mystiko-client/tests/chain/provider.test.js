@@ -1,9 +1,9 @@
+import { readFromFile } from '@mystiko/config';
 import { ProviderPool } from '../../src/chain/provider.js';
-import { readFromFile } from '../../src/config';
 
 test('test connect', async () => {
   expect(() => new ProviderPool({})).toThrow();
-  const conf = await readFromFile('tests/config/files/config.test.json');
+  const conf = await readFromFile('tests/config/config.test.json');
   const pool = new ProviderPool(conf);
   pool.connect();
   expect(pool.getProvider(1)).not.toBe(undefined);

@@ -1,5 +1,5 @@
 import { check, readJsonFile } from '@mystiko/utils';
-import { BaseConfig, BridgeType } from './base';
+import { BaseConfig, BridgeType, isValidBridgeType } from './base';
 import { ChainConfig, RawChainConfig } from './chain';
 import { BaseBridgeConfig, createBridgeConfig, RawBaseBridgeConfig } from './bridge';
 import { CircuitConfig, RawCircuitConfig } from './circuit';
@@ -129,7 +129,7 @@ export class MystikoConfig extends BaseConfig {
    * @returns {BaseBridgeConfig} configuration of the specified cross-chain bridge.
    */
   public getBridgeConfig(bridgeType: BridgeType): BaseBridgeConfig {
-    check(Object.values(BridgeType).includes(bridgeType), 'invalid bridge type');
+    check(isValidBridgeType(bridgeType), 'invalid bridge type');
     return this.asRawMystikoConfig().wrappedBridges[bridgeType];
   }
 
@@ -153,10 +153,7 @@ export class MystikoConfig extends BaseConfig {
     if (srcChainId === dstChainId) {
       check(bridge === BridgeType.LOOP, 'equal chain ids should have loop bridge');
     } else {
-      check(
-        Object.values(BridgeType).includes(bridge) && bridge !== BridgeType.LOOP,
-        `${bridge} is invalid bridge type`,
-      );
+      check(isValidBridgeType(bridge) && bridge !== BridgeType.LOOP, `${bridge} is invalid bridge type`);
     }
     const srcChainConfig = this.asRawMystikoConfig().wrappedChains[srcChainId];
     check(!!srcChainConfig, `chain ${srcChainId} does not exist in config`);
@@ -209,7 +206,7 @@ export class MystikoConfig extends BaseConfig {
    */
   public getBridgeTxExplorerUrl(bridgeType: BridgeType, transactionHash: string): string | undefined {
     if (transactionHash) {
-      check(Object.values(BridgeType).includes(bridgeType), `${bridgeType} is an invalid bridge type`);
+      check(isValidBridgeType(bridgeType), `${bridgeType} is an invalid bridge type`);
       const bridgeConfig = this.getBridgeConfig(bridgeType);
       if (bridgeConfig && 'getTxUrl' in bridgeConfig) {
         // @ts-ignore
