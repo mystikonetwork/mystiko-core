@@ -262,7 +262,7 @@
       "name": "Polygon Testnet",
       "assetSymbol": "MATIC",
       "chainId": 80001,
-      "explorerUrl": "https://mumbai.polygonscan.com/",
+      "explorerUrl": "https://mumbai.polygonscan.com",
       "providers": [
         "https://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
@@ -290,6 +290,43 @@
           "name": "MystikoWithLoopMain",
           "address": "0x4C36593ca83826c019318e7C83150ef221aA79d7",
           "assetSymbol": "MATIC",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0"
+        }
+      ]
+    },
+    {
+      "name": "Avalanche Testnet",
+      "assetSymbol": "AVAX",
+      "chainId": 43113,
+      "explorerUrl": "https://testnet.snowtrace.io",
+      "providers": [
+        "https://api.avax-test.network/ext/bc/C/rpc"
+      ],
+      "contracts": [
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0xaad221534D5110669a3a87816eE56E8FD9b9a22D",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "assetAddress": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x06d6c6518955BAB63068E98660f5A58D29B964FF",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "circuits": "circom-1.0",
+          "assetAddress": "0xD386e6bE9C093ebA4cB064C79eFf44A7AbBAd149"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopMain",
+          "address": "0xA813B9f80667e34A30FABcd24aB1C4c0b19979e1",
+          "assetSymbol": "AVAX",
           "assetDecimals": 18,
           "circuits": "circom-1.0"
         }

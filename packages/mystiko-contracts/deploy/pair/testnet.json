@@ -163,6 +163,38 @@
       ],
       "hashAddress": "0xde0222931c3a34Bd97F5e5C663A2f8f34afc12E1",
       "verifierAddress": "0xA09B5d6A55e79C8A19595cb60248214509Cd05B9"
+    },
+    {
+      "name": "Avalanche Testnet",
+      "network": "avalanchetestnet",
+      "chainId": "43113",
+      "tokens": [
+        {
+          "name": "AVAX",
+          "assetDecimals": 18,
+          "erc20": "false"
+        },
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB"
+        },
+        {
+          "name": "mUSD",
+          "erc20": "true",
+          "assetDecimals": 6,
+          "address": "0xD386e6bE9C093ebA4cB064C79eFf44A7AbBAd149"
+        },
+        {
+          "name": "mETH",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0x1AA34153F5166ccb8d385856c7e8cE9F15686585"
+        }
+      ],
+      "hashAddress": "0x3d864Ab33e05562Eb3Ae8382865DC7e0E258498b",
+      "verifierAddress": "0xD0b4d6Dbc2B8E77A8Fc32e5189dEB7549F75179A"
     }
   ],
   "bridges": [
@@ -248,6 +280,27 @@
             "network": "polygontestnet",
             "token": "mUSD",
             "address": "0xE6B8f4eb63D65390F7139388173854A012f504ae"
+          }
+        ],
+        [
+          {
+            "network": "avalanchetestnet",
+            "token": "AVAX",
+            "address": "0xA813B9f80667e34A30FABcd24aB1C4c0b19979e1"
+          }
+        ],
+        [
+          {
+            "network": "avalanchetestnet",
+            "token": "MTT",
+            "address": "0xaad221534D5110669a3a87816eE56E8FD9b9a22D"
+          }
+        ],
+        [
+          {
+            "network": "avalanchetestnet",
+            "token": "mUSD",
+            "address": "0x06d6c6518955BAB63068E98660f5A58D29B964FF"
           }
         ]
       ]
