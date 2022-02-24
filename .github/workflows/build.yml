@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NPM_USER: ${{ secrets.npm_user }}
+      NPM_PASS: ${{ secrets.npm_pass }}
+      NPM_EMAIL: ${{ secrets.npm_email }}
+      NPM_REGISTRY: https://npm.mystiko.network
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -17,7 +22,8 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: npm install --global ganache-cli lerna
+      - run: npm install --global ganache-cli lerna npm-cli-login
+      - run: npm-cli-login
       - run: ganache-cli --port 7545 > /dev/null &
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
@@ -32,7 +38,6 @@ jobs:
           coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          threshold: 95
           package-manager: yarn
       - name: Report @mystiko/config test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
@@ -41,7 +46,6 @@ jobs:
           coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          threshold: 95
           package-manager: yarn
       - name: Report @mystiko/client test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
@@ -50,7 +54,6 @@ jobs:
           coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          threshold: 95
           package-manager: yarn
       - name: Report @mystiko/client-browser test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
@@ -59,7 +62,6 @@ jobs:
           coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          threshold: 95
           package-manager: yarn
       - name: Report @mystiko/client-node test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
@@ -68,7 +70,6 @@ jobs:
           coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          threshold: 95
           package-manager: yarn
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
