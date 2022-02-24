@@ -21,7 +21,6 @@
   ],
   "files": ["build"],
   "license": "MIT",
-  "private": true,
   "scripts": {
     "build:cjs": "tsc -p ./tsconfig.json",
     "build:esm": "tsc -p ./tsconfig.esm.json",
