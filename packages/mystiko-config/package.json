@@ -19,7 +19,9 @@
     "ethereum",
     "cryptocurrency"
   ],
-  "files": ["build"],
+  "files": [
+    "build"
+  ],
   "license": "MIT",
   "private": true,
   "scripts": {
