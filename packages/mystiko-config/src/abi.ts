@@ -1,14 +1,14 @@
-import ERC20 from '../config/abi/ERC20.json';
-import MystikoWithLoopERC20 from '../config/abi/MystikoWithLoopERC20.json';
-import MystikoWithLoopMain from '../config/abi/MystikoWithLoopMain.json';
-import MystikoWithPolyERC20 from '../config/abi/MystikoWithPolyERC20.json';
-import MystikoWithPolyMain from '../config/abi/MystikoWithPolyMain.json';
-import MystikoWithCelerERC20 from '../config/abi/MystikoWithCelerERC20.json';
-import MystikoWithCelerMain from '../config/abi/MystikoWithCelerMain.json';
-import MystikoWithTBridgeERC20 from '../config/abi/MystikoWithTBridgeERC20.json';
-import MystikoWithTBridgeMain from '../config/abi/MystikoWithTBridgeMain.json';
-import MystikoV2WithLoopERC20 from '../config/abi/MystikoV2WithLoopERC20.json';
-import MystikoV2WithLoopMain from '../config/abi/MystikoV2WithLoopMain.json';
+import ERC20 from './json/abi/ERC20.json';
+import MystikoWithLoopERC20 from './json/abi/MystikoWithLoopERC20.json';
+import MystikoWithLoopMain from './json/abi/MystikoWithLoopMain.json';
+import MystikoWithPolyERC20 from './json/abi/MystikoWithPolyERC20.json';
+import MystikoWithPolyMain from './json/abi/MystikoWithPolyMain.json';
+import MystikoWithCelerERC20 from './json/abi/MystikoWithCelerERC20.json';
+import MystikoWithCelerMain from './json/abi/MystikoWithCelerMain.json';
+import MystikoWithTBridgeERC20 from './json/abi/MystikoWithTBridgeERC20.json';
+import MystikoWithTBridgeMain from './json/abi/MystikoWithTBridgeMain.json';
+import MystikoV2WithLoopERC20 from './json/abi/MystikoV2WithLoopERC20.json';
+import MystikoV2WithLoopMain from './json/abi/MystikoV2WithLoopMain.json';
 import { AssetType, BridgeType } from './base';
 
 export interface ContractMeta {

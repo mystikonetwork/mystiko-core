@@ -2,13 +2,13 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
   "include": ["src/**/*"],
   "compilerOptions": {
+    "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "sourceMap": true,
-    "outDir": "./build",
+    "outDir": "./build/cjs",
     "typeRoots": ["node_modules/@types", "./src/types"]
   }
 }

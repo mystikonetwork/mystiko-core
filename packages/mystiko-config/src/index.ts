@@ -1,5 +1,5 @@
-import DefaultClientTestnetJson from '../config/client/default/testnet.json';
-import DefaultClientMainnetJson from '../config/client/default/mainnet.json';
+import DefaultClientTestnetJson from './json/client/default/testnet.json';
+import DefaultClientMainnetJson from './json/client/default/mainnet.json';
 import { MystikoConfig } from './mystiko';
 
 export const DefaultClientTestnetConfig = new MystikoConfig(DefaultClientTestnetJson);

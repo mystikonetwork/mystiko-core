@@ -2,14 +2,17 @@
   "name": "@mystiko/config",
   "version": "0.1.0",
   "description": "configuration of mystiko-core",
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
+  "main": "build/cjs/index.js",
+  "module": "build/esm/index.js",
+  "types": "build/cjs/index.d.ts",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
   "author": "Mystiko Network",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "rm -rf build && tsc",
+    "build:cjs": "tsc -p ./tsconfig.json",
+    "build:esm": "tsc -p ./tsconfig.esm.json",
+    "build": "rm -rf build && yarn build:cjs && yarn build:esm",
     "test": "jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json",
     "lint": "eslint --ext .js,.ts .",
     "prettier:check": "prettier --check \"./**/*.{js,ts}\" --config .prettierrc",
@@ -36,7 +39,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/utils": "*",
+    "@mystiko/utils": "^0.1.0",
     "ethers": "^5.5.3"
   }
 }

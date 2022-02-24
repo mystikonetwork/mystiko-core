@@ -53,9 +53,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/client": "*",
-    "@mystiko/config": "*",
-    "@mystiko/contracts": "*",
+    "@mystiko/client": "^0.1.0",
+    "@mystiko/config": "^0.1.0",
+    "@mystiko/contracts": "^0.1.0",
     "lokijs": "^1.5.12"
   }
 }
