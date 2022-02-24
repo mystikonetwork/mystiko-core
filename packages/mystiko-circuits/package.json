@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/circuits",
-  "version": "0.1.1-alpha.0",
+  "version": "0.1.0",
   "description": "circom circuits of Mystiko",
   "main": "index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
