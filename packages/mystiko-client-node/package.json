@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/client-node",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha.0",
   "description": "NodeJs bundle of @mystiko/client",
   "module": "src/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
@@ -21,7 +21,7 @@
     "@babel/eslint-parser": "^7.16.5",
     "@babel/plugin-transform-runtime": "^7.16.8",
     "@babel/preset-env": "^7.16.7",
-    "@mystiko/circuits": "^0.1.0",
+    "@mystiko/circuits": "^0.1.1-alpha.0",
     "babel-jest": "^27.4.6",
     "babel-loader": "^8.2.3",
     "eslint": "^8.6.0",
@@ -38,9 +38,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/client": "^0.1.0",
-    "@mystiko/config": "^0.1.0",
-    "@mystiko/contracts": "^0.1.0",
+    "@mystiko/client": "^0.1.1-alpha.0",
+    "@mystiko/config": "^0.1.1-alpha.0",
+    "@mystiko/contracts": "^0.1.1-alpha.0",
     "lokijs": "^1.5.12"
   }
 }
