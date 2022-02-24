@@ -1,6 +1,7 @@
 import fs from 'fs';
+import { BridgeType } from '@mystiko/config';
 import mystiko from '../src/index.js';
-import { BridgeType, DepositStatus, PrivateNoteStatus } from '../src/model';
+import { DepositStatus, PrivateNoteStatus } from '../src/model';
 
 require('dotenv').config();
 

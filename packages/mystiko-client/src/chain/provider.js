@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { MystikoConfig } from '../config';
-import { check } from '../utils.js';
+import { MystikoConfig } from '@mystiko/config';
+import { check } from '@mystiko/utils';
 
 /**
  * @external external:JsonRpcProvider

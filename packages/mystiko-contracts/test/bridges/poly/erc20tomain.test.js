@@ -1,4 +1,4 @@
-import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix, toBN } from '@mystiko/client/src/utils.js';
+import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix, toBN } from '@mystiko/utils';
 import * as protocol from '@mystiko/client/src/protocol';
 import { MerkleTree } from '@mystiko/client/src/lib/merkleTree.js';
 

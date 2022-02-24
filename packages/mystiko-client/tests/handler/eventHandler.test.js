@@ -1,6 +1,6 @@
+import { readFromFile } from '@mystiko/config';
 import { EventHandler } from '../../src/handler/eventHandler.js';
 import { createDatabase } from '../../src/database';
-import { readFromFile } from '../../src/config';
 
 let db;
 let config;
@@ -8,7 +8,7 @@ let eventHandler;
 
 beforeEach(async () => {
   db = await createDatabase('test.db');
-  config = await readFromFile('tests/config/files/config.test.json');
+  config = await readFromFile('tests/config/config.test.json');
   eventHandler = new EventHandler(db, config);
 });
 

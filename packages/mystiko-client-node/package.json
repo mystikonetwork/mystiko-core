@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/client-node",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "NodeJs bundle of @mystiko/client",
   "module": "src/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
@@ -21,7 +21,7 @@
     "@babel/eslint-parser": "^7.16.5",
     "@babel/plugin-transform-runtime": "^7.16.8",
     "@babel/preset-env": "^7.16.7",
-    "@mystiko/circuits": "*",
+    "@mystiko/circuits": "^0.0.2",
     "babel-jest": "^27.4.6",
     "babel-loader": "^8.2.3",
     "eslint": "^8.6.0",
@@ -34,13 +34,13 @@
     "prettier": "^2.5.1",
     "terser-webpack-plugin": "^5.3.0",
     "webpack": "^5.66.0",
-    "webpack-cli": "^4.9.1",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-cli": "^4.9.1"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/client": "*",
-    "@mystiko/contracts": "*",
+    "@mystiko/client": "^0.0.2",
+    "@mystiko/config": "^0.0.2",
+    "@mystiko/contracts": "^0.0.2",
     "lokijs": "^1.5.12"
   }
 }

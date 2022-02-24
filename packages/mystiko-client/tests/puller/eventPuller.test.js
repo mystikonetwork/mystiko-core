@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
 import { randomBytes } from 'crypto';
+import { readFromFile } from '@mystiko/config';
+import { toFixedLenHex, toBN } from '@mystiko/utils';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { ContractPool } from '../../src/chain/contract.js';
-import { readFromFile } from '../../src/config';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { createDatabase } from '../../src/database.js';
 import { DepositHandler } from '../../src/handler/depositHandler.js';
@@ -12,7 +13,6 @@ import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { EventHandler } from '../../src/handler/eventHandler.js';
 import { EventPuller } from '../../src/puller';
-import { toFixedLenHex, toBN } from '../../src/utils.js';
 import { DepositStatus, PrivateNoteStatus, WithdrawStatus } from '../../src/model';
 
 class MockProvider extends ethers.providers.JsonRpcProvider {
@@ -139,7 +139,7 @@ const walletPassword = 'P@ssw0rd';
 
 beforeEach(async () => {
   db = await createDatabase('test.db');
-  config = await readFromFile('tests/config/files/config.test.json');
+  config = await readFromFile('tests/config/config.test.json');
   providerPool = new ProviderPool(config);
   providerPool.connect((rpcEndPoints) => {
     return new MockProvider(rpcEndPoints[0]);

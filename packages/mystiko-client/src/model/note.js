@@ -1,7 +1,6 @@
+import { MystikoConfig, isValidBridgeType } from '@mystiko/config';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
 import { BaseModel } from './common.js';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '../utils.js';
-import { isValidBridgeType } from './common.js';
-import { MystikoConfig } from '../config';
 
 /**
  * @class OffChainNote
@@ -166,7 +165,7 @@ export class PrivateNote extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.BridgeType} bridge
+   * @property {BridgeType} bridge
    * @desc the type of cross-chain for the underlying deposit.
    */
   get bridge() {
@@ -305,7 +304,7 @@ export class PrivateNote extends BaseModel {
   }
 
   set encryptedOnChainNote(note) {
-    check(note instanceof Buffer, 'note should be instance of Buffer');
+    check(Buffer.isBuffer(note), 'note should be instance of Buffer');
     this.data['encryptedOnChainNote'] = toHexNoPrefix(note);
   }
 

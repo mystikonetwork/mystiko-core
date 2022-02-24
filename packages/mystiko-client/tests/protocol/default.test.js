@@ -1,5 +1,5 @@
+import { toHex, toBuff, toDecimals, toBN } from '@mystiko/utils';
 import * as DefaultProtocol from '../../src/protocol/default.js';
-import { toHex, toBuff, toDecimals, toBN } from '../../src/utils.js';
 
 test('test randomBigInt', () => {
   const int1 = DefaultProtocol.randomBigInt(8);

@@ -57,6 +57,8 @@ module.exports = {
       assert: require.resolve('assert-browserify'),
       util: require.resolve('util'),
       events: require.resolve('events/'),
+      process: require.resolve('process/browser'),
+      buffer: require.resolve('buffer/'),
       fs: false,
     },
   },

@@ -1,5 +1,5 @@
-import { AssetType, BridgeType, Contract } from '../../src/model';
-import { MystikoABI } from '../../src/chain/abi.js';
+import { MystikoABI, AssetType, BridgeType } from '@mystiko/config';
+import { Contract } from '../../src/model';
 
 test('test Contract getters/setters', () => {
   const contract = new Contract();

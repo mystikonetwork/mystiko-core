@@ -2,7 +2,7 @@ import { hdkey } from 'ethereumjs-wallet';
 import { ID_KEY, Account } from '../model';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
-import { check, toBuff, toHexNoPrefix, toString } from '../utils.js';
+import { check, toBuff, toHexNoPrefix, toString } from '@mystiko/utils';
 import rootLogger from '../logger.js';
 
 /**

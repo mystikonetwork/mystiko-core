@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { poseidon } from 'circomlibjs';
-import { check, toHexNoPrefix, toBN, isBN } from '../utils.js';
+import { check, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
 import { FIELD_SIZE } from '../protocol';
 
 export class MerkleTree {

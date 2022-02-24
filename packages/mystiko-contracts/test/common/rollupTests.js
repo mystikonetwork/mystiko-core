@@ -1,7 +1,7 @@
 import { randomBigInt } from '@mystiko/client/src/protocol';
 import { MerkleTree } from '@mystiko/client/src/lib/merkleTree';
 import { zkProveRollup1, zkProveRollup16, zkProveRollup4 } from '@mystiko/client/src/rollup/protocol';
-import { toBN } from '@mystiko/client/src/utils.js';
+import { toBN } from '@mystiko/utils';
 import { expectThrowsAsync } from './utils';
 
 export function testRollup(

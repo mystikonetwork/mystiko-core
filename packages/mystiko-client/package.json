@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/client",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "Mystiko SDK in Javascript",
   "module": "src/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
@@ -23,7 +23,7 @@
     "@babel/node": "^7.16.8",
     "@babel/plugin-transform-runtime": "^7.16.8",
     "@babel/preset-env": "^7.16.7",
-    "@mystiko/circuits": "*",
+    "@mystiko/circuits": "^0.0.2",
     "babel-jest": "^27.4.6",
     "babel-loader": "^8.2.3",
     "eslint": "^8.6.0",
@@ -37,6 +37,8 @@
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
+    "@mystiko/config": "^0.0.2",
+    "@mystiko/utils": "^0.0.2",
     "big-integer": "^1.6.51",
     "blake-hash": "^2.0.0",
     "bn.js": "^5.2.0",

@@ -1,6 +1,6 @@
-import { check, checkDefinedAndNotNull } from '../utils.js';
+import { MystikoConfig } from '@mystiko/config';
+import { check, checkDefinedAndNotNull } from '@mystiko/utils';
 import * as protocol from '../protocol';
-import { MystikoConfig } from '../config';
 import rootLogger from '../logger';
 
 /**

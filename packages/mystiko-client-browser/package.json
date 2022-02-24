@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/client-browser",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "browser bundle of @mystiko/client",
   "main": "src/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
@@ -34,14 +34,14 @@
     "eslint-plugin-promise": "^6.0.0",
     "events": "^3.3.0",
     "https-browserify": "^1.0.0",
+    "jest": "^27.4.7",
     "node-fetch": "^3.2.0",
     "node-loader": "^2.0.0",
-    "jest": "^27.4.7",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "prettier": "^2.5.1",
     "process": "^0.11.10",
-    "safe-buffer": "^5.2.1",
+    "safe-buffer": "~5.1.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "terser-webpack-plugin": "^5.3.0",
@@ -53,8 +53,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/client": "*",
-    "@mystiko/contracts": "*",
+    "@mystiko/client": "^0.0.2",
+    "@mystiko/config": "^0.0.2",
+    "@mystiko/contracts": "^0.0.2",
     "lokijs": "^1.5.12"
   }
 }

@@ -1,7 +1,7 @@
+import { check } from '@mystiko/utils';
 import { Handler } from './handler.js';
 import { ID_KEY, Wallet } from '../model';
 import { VERSION } from '../version.js';
-import { check } from '../utils.js';
 import rootLogger from '../logger';
 
 /**

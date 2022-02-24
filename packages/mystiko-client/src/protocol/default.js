@@ -21,7 +21,7 @@ import {
   toBN,
   isBN,
   readCompressedFile,
-} from '../utils.js';
+} from '@mystiko/utils';
 import logger from '../logger.js';
 
 const WithdrawWitnessCalculator = require('./witness_calculator.js');
@@ -126,7 +126,7 @@ export function randomBytes(numBytes = 32) {
  * @returns {Buffer} the secret key as Buffer.
  */
 export function secretKeyForVerification(rawSecretKey) {
-  check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
+  check(Buffer.isBuffer(rawSecretKey), 'unsupported rawSecretKey type ' + typeof rawSecretKey);
   check(rawSecretKey.length === VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
   const keyHash = createBlakeHash('blake512').update(rawSecretKey).digest().slice(0, VERIFY_SK_SIZE);
   const sBuffer = eddsa.pruneBuffer(keyHash);
@@ -147,7 +147,7 @@ export function secretKeyForVerification(rawSecretKey) {
  * @returns {Buffer} the public key as Buffer.
  */
 export function publicKeyForVerification(rawSecretKey) {
-  check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
+  check(Buffer.isBuffer(rawSecretKey), 'unsupported rawSecretKey type ' + typeof rawSecretKey);
   check(rawSecretKey.length === VERIFY_SK_SIZE, 'rawSecretKey length does not equal to ' + VERIFY_SK_SIZE);
   const unpackedPoints = eddsa.prv2pub(rawSecretKey);
   const pkInt = toBN(unpackedPoints[0].toString());
@@ -167,7 +167,7 @@ export function publicKeyForVerification(rawSecretKey) {
  * @returns {Buffer} the secret key as Buffer.
  */
 export function secretKeyForEncryption(rawSecretKey) {
-  check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
+  check(Buffer.isBuffer(rawSecretKey), 'unsupported rawSecretKey type ' + typeof rawSecretKey);
   check(rawSecretKey.length === ENCRYPT_SK_SIZE, 'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE);
   return rawSecretKey;
 }
@@ -179,7 +179,7 @@ export function secretKeyForEncryption(rawSecretKey) {
  * @returns {Buffer} the public key as Buffer.
  */
 export function publicKeyForEncryption(rawSecretKey) {
-  check(rawSecretKey instanceof Buffer, 'unsupported rawSecretKey type ' + typeof rawSecretKey);
+  check(Buffer.isBuffer(rawSecretKey), 'unsupported rawSecretKey type ' + typeof rawSecretKey);
   check(rawSecretKey.length === ENCRYPT_SK_SIZE, 'rawSecretKey length does not equal to ' + ENCRYPT_SK_SIZE);
   const publicKey = eccrypto.getPublicCompressed(rawSecretKey);
   check(
@@ -198,9 +198,9 @@ export function publicKeyForEncryption(rawSecretKey) {
  * @returns {Buffer} a single Buffer as a full public key.
  */
 export function fullPublicKey(pkVerify, pkEnc) {
-  check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
+  check(Buffer.isBuffer(pkVerify), 'unsupported pkVerify type ' + typeof pkVerify);
   check(pkVerify.length === VERIFY_PK_SIZE, 'pkVerify length does not equal to ' + VERIFY_PK_SIZE);
-  check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
+  check(Buffer.isBuffer(pkEnc), 'unsupported pkEnc type ' + typeof pkEnc);
   check(pkEnc.length === ENCRYPT_PK_SIZE, 'pkEnc length does not equal to ' + ENCRYPT_PK_SIZE);
   return Buffer.concat([pkVerify, pkEnc]);
 }
@@ -214,9 +214,9 @@ export function fullPublicKey(pkVerify, pkEnc) {
  * @returns {Buffer} a single Buffer as a full secret key.
  */
 export function fullSecretKey(skVerify, skEnc) {
-  check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
+  check(Buffer.isBuffer(skVerify), 'unsupported skVerify type ' + typeof skVerify);
   check(skVerify.length === VERIFY_SK_SIZE, 'skVerify length does not equal to ' + VERIFY_SK_SIZE);
-  check(skEnc instanceof Buffer, 'unsupported skEnc type ' + typeof skEnc);
+  check(Buffer.isBuffer(skEnc), 'unsupported skEnc type ' + typeof skEnc);
   check(skEnc.length === ENCRYPT_SK_SIZE, 'skEnc length does not equal to ' + ENCRYPT_SK_SIZE);
   return Buffer.concat([skVerify, skEnc]);
 }
@@ -230,7 +230,7 @@ export function fullSecretKey(skVerify, skEnc) {
  * @throws {Error} if the input full public key has incorrect length.
  */
 export function separatedPublicKeys(fullPublicKey) {
-  check(fullPublicKey instanceof Buffer, 'unsupported fullPublicKey type ' + typeof fullPublicKey);
+  check(Buffer.isBuffer(fullPublicKey), 'unsupported fullPublicKey type ' + typeof fullPublicKey);
   const expectedSize = VERIFY_PK_SIZE + ENCRYPT_PK_SIZE;
   check(fullPublicKey.length === expectedSize, 'fullPublicKey length does not equal to ' + expectedSize);
   return { pkVerify: fullPublicKey.slice(0, VERIFY_PK_SIZE), pkEnc: fullPublicKey.slice(VERIFY_PK_SIZE) };
@@ -245,7 +245,7 @@ export function separatedPublicKeys(fullPublicKey) {
  * @throws {Error} if the input full secret key has incorrect length.
  */
 export function separatedSecretKeys(fullSecretKey) {
-  check(fullSecretKey instanceof Buffer, 'unsupported fullSecretKey type ' + typeof fullSecretKey);
+  check(Buffer.isBuffer(fullSecretKey), 'unsupported fullSecretKey type ' + typeof fullSecretKey);
   const expectedSize = VERIFY_SK_SIZE + ENCRYPT_SK_SIZE;
   check(fullSecretKey.length === expectedSize, 'fullSecretKey length does not equal to ' + expectedSize);
   return { skVerify: fullSecretKey.slice(0, VERIFY_SK_SIZE), skEnc: fullSecretKey.slice(VERIFY_SK_SIZE) };
@@ -302,8 +302,8 @@ export function publicKeysFromShieldedAddress(address) {
  * @returns {Promise<Buffer>} promise of an encrypted data buffer.
  */
 export async function encryptAsymmetric(publicKey, plainData) {
-  check(publicKey instanceof Buffer, 'unsupported publicKey type ' + typeof publicKey);
-  check(plainData instanceof Buffer, 'unsupported plainData type ' + typeof plainData);
+  check(Buffer.isBuffer(publicKey), 'unsupported publicKey type ' + typeof publicKey);
+  check(Buffer.isBuffer(plainData), 'unsupported plainData type ' + typeof plainData);
   return await eccrypto.encrypt(publicKey, plainData).then((r) => {
     return Buffer.concat([r.iv, r.ephemPublicKey, r.mac, r.ciphertext]);
   });
@@ -317,8 +317,8 @@ export async function encryptAsymmetric(publicKey, plainData) {
  * @returns {Promise<Buffer>} promise of a decrypted data buffer.
  */
 export async function decryptAsymmetric(secretKey, cipherData) {
-  check(secretKey instanceof Buffer, 'unsupported secretKey type ' + typeof secretKey);
-  check(cipherData instanceof Buffer, 'unsupported cipherData type ' + typeof cipherData);
+  check(Buffer.isBuffer(secretKey), 'unsupported secretKey type ' + typeof secretKey);
+  check(Buffer.isBuffer(cipherData), 'unsupported cipherData type ' + typeof cipherData);
   check(cipherData.length > ECIES_META_LENGTH, 'incorrect cipherData length');
 
   return await eccrypto.decrypt(secretKey, {
@@ -363,7 +363,7 @@ export function decryptSymmetric(password, cipherText) {
  */
 export function sha256(inputs) {
   check(inputs instanceof Array, 'inputs should be an array of Buffer');
-  inputs.forEach((input) => check(input instanceof Buffer, 'input should be instance of Buffer'));
+  inputs.forEach((input) => check(Buffer.isBuffer(input), 'input should be instance of Buffer'));
   const merged = Buffer.concat(inputs);
   const result = ethers.utils.sha256(toHex(merged));
   return toBN(toHexNoPrefix(result), 16).mod(FIELD_SIZE);
@@ -405,7 +405,7 @@ export function checkSum(data, salt = 'mystiko') {
  * @returns {external:BN} the converted big number.
  */
 export function buffToBigInt(buff) {
-  check(buff instanceof Buffer, 'unsupported buff type ' + typeof buff);
+  check(Buffer.isBuffer(buff), 'unsupported buff type ' + typeof buff);
   let res = toBN(0);
   for (let i = 0; i < buff.length; i++) {
     const byteNumber = toBN(buff[i]);
@@ -458,8 +458,8 @@ export async function commitment(
   randomR = undefined,
   randomS = undefined,
 ) {
-  check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
-  check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
+  check(Buffer.isBuffer(pkVerify), 'unsupported pkVerify type ' + typeof pkVerify);
+  check(Buffer.isBuffer(pkEnc), 'unsupported pkEnc type ' + typeof pkEnc);
   check(isBN(amount), 'amount should be instance of BN');
   check(!randomS || isBN(randomP), 'randomP should be instance of BN');
   check(!randomR || isBN(randomR), 'randomR should be instance of BN');
@@ -521,7 +521,7 @@ export async function commitmentWithShieldedAddress(
  * @returns {external:BN} the calculated serial number.
  */
 export function serialNumber(skVerify, randomP) {
-  check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
+  check(Buffer.isBuffer(skVerify), 'unsupported skVerify type ' + typeof skVerify);
   check(isBN(randomP), 'unsupported skVerify type ' + typeof randomP);
   return poseidonHash([randomP, buffToBigInt(skVerify)]);
 }
@@ -561,14 +561,14 @@ export async function zkProve(
   wasmFile,
   zkeyFile,
 ) {
-  check(pkVerify instanceof Buffer, 'unsupported pkVerify type ' + typeof pkVerify);
-  check(skVerify instanceof Buffer, 'unsupported skVerify type ' + typeof skVerify);
-  check(pkEnc instanceof Buffer, 'unsupported pkEnc type ' + typeof pkEnc);
-  check(skEnc instanceof Buffer, 'unsupported skEnc type ' + typeof skEnc);
+  check(Buffer.isBuffer(pkVerify), 'unsupported pkVerify type ' + typeof pkVerify);
+  check(Buffer.isBuffer(skVerify), 'unsupported skVerify type ' + typeof skVerify);
+  check(Buffer.isBuffer(pkEnc), 'unsupported pkEnc type ' + typeof pkEnc);
+  check(Buffer.isBuffer(skEnc), 'unsupported skEnc type ' + typeof skEnc);
   check(isBN(amount), 'amount should be instance of BN');
   check(ethers.utils.isAddress(recipient), 'recipient is invalid Ethereum address');
   check(isBN(commitmentHash), 'commitmentHash should be instance of BN');
-  check(privateNote instanceof Buffer, 'unsupported privateNote type ' + typeof privateNote);
+  check(Buffer.isBuffer(privateNote), 'unsupported privateNote type ' + typeof privateNote);
   check(treeLeaves instanceof Array, 'unsupported treeLeaves type ' + typeof treeLeaves);
   check(typeof treeIndex === 'number', 'unsupported treeIndex type ' + typeof treeIndex);
   check(typeof wasmFile === 'string', 'unsupported wasmFile type ' + typeof wasmFile);

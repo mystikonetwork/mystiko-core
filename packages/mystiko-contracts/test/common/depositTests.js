@@ -11,7 +11,7 @@ import {
   VERIFY_SK_SIZE,
   ENCRYPT_SK_SIZE,
 } from '@mystiko/client/src/protocol';
-import { toHex, toBN } from '@mystiko/client/src/utils.js';
+import { toHex, toBN } from '@mystiko/utils';
 
 const TestTokenContract = artifacts.require('TestToken');
 

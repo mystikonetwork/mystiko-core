@@ -1,4 +1,6 @@
 import { ethers } from 'ethers';
+import { MystikoABI, BridgeType, AssetType, readFromFile } from '@mystiko/config';
+import { toDecimals, toHex, toBN } from '@mystiko/utils';
 import { DepositHandler } from '../../src/handler/depositHandler.js';
 import { ProviderPool } from '../../src/chain/provider.js';
 import { ContractPool } from '../../src/chain/contract.js';
@@ -8,10 +10,7 @@ import { AccountHandler } from '../../src/handler/accountHandler.js';
 import { ContractHandler } from '../../src/handler/contractHandler.js';
 import { NoteHandler } from '../../src/handler/noteHandler.js';
 import { BaseSigner } from '../../src/chain/signer.js';
-import { toDecimals, toHex, toBN } from '../../src/utils.js';
-import { readFromFile } from '../../src/config';
-import { DepositStatus, BridgeType, AssetType } from '../../src/model';
-import { MystikoABI } from '../../src/chain/abi.js';
+import { DepositStatus } from '../../src/model';
 import txReceipt01 from './files/txReceipt01.json';
 
 class MockTransactionResponse {
@@ -155,7 +154,7 @@ const walletPassword = 'P@ssw0rd';
 
 beforeEach(async () => {
   db = await createDatabase('test.db');
-  conf = await readFromFile('tests/config/files/config.test.json');
+  conf = await readFromFile('tests/config/config.test.json');
   providerPool = new ProviderPool(conf);
   providerPool.connect();
   contractHandler = new ContractHandler(db, conf);

@@ -1,6 +1,6 @@
-import { BaseModel, isValidAssetType } from './common.js';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '../utils.js';
-import { MystikoConfig } from '../config';
+import { MystikoConfig, isValidAssetType } from '@mystiko/config';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
+import { BaseModel } from './common.js';
 
 /**
  * @class Deposit
@@ -42,7 +42,7 @@ export class Deposit extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.BridgeType} bridge
+   * @property {BridgeType} bridge
    * @desc the type of cross-chain for this deposit.
    */
   get bridge() {
@@ -68,7 +68,7 @@ export class Deposit extends BaseModel {
   }
 
   /**
-   * @property {module:mystiko/models.AssetType} assetType
+   * @property {AssetType} assetType
    * @desc the type of the supported asset of this deposit on the source chain.
    */
   get assetType() {
@@ -172,7 +172,7 @@ export class Deposit extends BaseModel {
   }
 
   set privateNote(note) {
-    check(note instanceof Buffer, 'note should be instance of Buffer');
+    check(Buffer.isBuffer(note), 'note should be instance of Buffer');
     this.data['privateNote'] = toHexNoPrefix(note);
   }
 

@@ -1,6 +1,6 @@
 import loki from 'lokijs';
+import { toBN } from '@mystiko/utils';
 import { BaseModel, ID_KEY } from '../../src/model';
-import { toBN } from '../../src/utils.js';
 
 class TestModel extends BaseModel {
   constructor(data = {}) {

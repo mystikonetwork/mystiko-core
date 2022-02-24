@@ -1,12 +1,12 @@
 import { Handler } from './handler.js';
-import { check, toHex, toDecimals, toFixedLenHex, toString, errorMessage } from '../utils.js';
+import { AssetType, BridgeType } from '@mystiko/config';
+import { check, toBN, toHex, toDecimals, toFixedLenHex, toString, errorMessage } from '@mystiko/utils';
 import { ContractPool } from '../chain/contract.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
 import { NoteHandler } from './noteHandler.js';
 import { checkSigner } from '../chain/signer.js';
-import { Deposit, DepositStatus, AssetType, BridgeType, ID_KEY, OffChainNote, BaseModel } from '../model';
-import { toBN } from '../utils.js';
+import { Deposit, DepositStatus, ID_KEY, OffChainNote, BaseModel } from '../model';
 import rootLogger from '../logger';
 
 /**
@@ -40,7 +40,7 @@ export class DepositHandler extends Handler {
    * @param {number} request.srcChainId the source chain id which this deposit will be sent from.
    * @param {number} request.dstChainId the destination chain id which this deposit will be sent to.
    * @param {string} request.assetSymbol the symbol of asset this deposit will operate.
-   * @param {module:mystiko/models.BridgeType} request.bridge the cross-chain bridge type which this deposit will
+   * @param {BridgeType} request.bridge the cross-chain bridge type which this deposit will
    * use to do cross-chain. If this is same-chain deposit/withdraw, you should set 'loop' as value.
    * @param {number} request.amount the amount of asset this deposit will operate.
    * @param {string} request.shieldedAddress the recipient shielded address which is used to protect the privacy of

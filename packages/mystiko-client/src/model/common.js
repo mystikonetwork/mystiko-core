@@ -1,5 +1,5 @@
+import { deepCopy, check, isBN } from '@mystiko/utils';
 import * as protocol from '../protocol';
-import { deepCopy, check, isBN } from '../utils.js';
 
 /**
  * @memberOf module:mystiko/models
@@ -103,50 +103,4 @@ export class BaseModel {
       }
     }
   }
-}
-
-/**
- * @typedef BridgeType
- * @name module:mystiko/models.BridgeType
- * @property {string} LOOP a loop bridge indicates no cross-chain needed.
- * The deposits and withdraws happens on the same blockchain.
- * @property {string} POLY the {@link https://poly.network Poly Bridge} cross-chain network.
- */
-export const BridgeType = {
-  LOOP: 'loop',
-  POLY: 'poly',
-  TBRIDGE: 'tbridge',
-  CELER: 'celer',
-};
-
-/**
- * @typedef AssetType
- * @name module:mystiko/models.AssetType
- * @property {string} ERC20 the {@link https://ethereum.org/en/developers/docs/standards/tokens/erc-20/ ERC20 Token}
- * standard.
- * @property {string} MAIN main asset type of the blockchains, e.g. ETH/BNB
- */
-export const AssetType = {
-  ERC20: 'erc20',
-  MAIN: 'main',
-};
-
-/**
- * @function module:mystiko/models.isValidBridgeType
- * @desc check whether given type is one of the supported bridge types.
- * @param {string} type bridge type to be checked.
- * @returns {boolean} true if the type is supported, otherwise returns false.
- */
-export function isValidBridgeType(type) {
-  return Object.values(BridgeType).indexOf(type) !== -1;
-}
-
-/**
- * @function module:mystiko/models.isValidAssetType
- * @desc check whether given type is one of the supported asset types.
- * @param {string} type bridge type to be checked.
- * @returns {boolean} true if the type is supported, otherwise returns false.
- */
-export function isValidAssetType(type) {
-  return Object.values(AssetType).indexOf(type) !== -1;
 }
