@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/client-browser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "browser bundle of @mystiko/client",
   "main": "src/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
@@ -53,9 +53,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/client": "^0.0.1",
-    "@mystiko/config": "^0.0.1",
-    "@mystiko/contracts": "^0.0.1",
+    "@mystiko/client": "^0.0.2",
+    "@mystiko/config": "^0.0.2",
+    "@mystiko/contracts": "^0.0.2",
     "lokijs": "^1.5.12"
   }
 }
