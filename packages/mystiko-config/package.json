@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/config",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "configuration of mystiko-core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mystiko/utils": "^0.1.0",
+    "@mystiko/utils": "^0.0.1",
     "ethers": "^5.5.3"
   }
 }
