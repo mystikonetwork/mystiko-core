@@ -5,8 +5,21 @@
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
   "types": "build/cjs/index.d.ts",
-  "repository": "https://github.com/mystikonetwork/mystiko-core",
-  "author": "Mystiko Network",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mystikonetwork/mystiko-core",
+    "directory": "packages/mystiko-utils"
+  },
+  "author": {
+    "name": "Mystiko Network"
+  },
+  "keywords": [
+    "mystiko",
+    "web3",
+    "ethereum",
+    "cryptocurrency"
+  ],
+  "files": ["build"],
   "license": "MIT",
   "private": true,
   "scripts": {
