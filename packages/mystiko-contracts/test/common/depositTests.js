@@ -1,17 +1,6 @@
-import { expectThrowsAsync } from './utils.js';
-import {
-  commitmentWithShieldedAddress,
-  randomBigInt,
-  randomBytes,
-  secretKeyForVerification,
-  secretKeyForEncryption,
-  publicKeyForVerification,
-  publicKeyForEncryption,
-  shieldedAddress,
-  VERIFY_SK_SIZE,
-  ENCRYPT_SK_SIZE,
-} from '@mystiko/client/src/protocol';
+import { v1Protocol } from '@mystiko/protocol';
 import { toHex, toBN } from '@mystiko/utils';
+import { expectThrowsAsync } from './utils.js';
 
 const TestTokenContract = artifacts.require('TestToken');
 
@@ -31,15 +20,18 @@ export function testDeposit(
     before(async () => {
       mystikoContract = await contractGetter();
       testTokenContract = await TestTokenContract.deployed();
-      rawSkVerify = randomBytes(VERIFY_SK_SIZE);
-      rawSkEnc = randomBytes(ENCRYPT_SK_SIZE);
-      pkVerify = publicKeyForVerification(rawSkVerify);
-      skVerify = secretKeyForVerification(rawSkVerify);
-      pkEnc = publicKeyForEncryption(rawSkEnc);
-      skEnc = secretKeyForEncryption(rawSkEnc);
-      mystikoAddress = shieldedAddress(pkVerify, pkEnc);
+      rawSkVerify = v1Protocol.randomBytes(v1Protocol.VERIFY_SK_SIZE);
+      rawSkEnc = v1Protocol.randomBytes(v1Protocol.ENCRYPT_SK_SIZE);
+      pkVerify = v1Protocol.publicKeyForVerification(rawSkVerify);
+      skVerify = v1Protocol.secretKeyForVerification(rawSkVerify);
+      pkEnc = v1Protocol.publicKeyForEncryption(rawSkEnc);
+      skEnc = v1Protocol.secretKeyForEncryption(rawSkEnc);
+      mystikoAddress = v1Protocol.shieldedAddress(pkVerify, pkEnc);
       for (let i = 0; i < numOfCommitments; i++) {
-        const commitment = await commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
+        const commitment = await v1Protocol.commitmentWithShieldedAddress(
+          mystikoAddress,
+          toBN(depositAmount),
+        );
         commitments.push(commitment);
       }
       minRollupFee = (await mystikoContract.minRollupFee()).toString();
@@ -168,7 +160,10 @@ export function testDeposit(
         });
       }
       for (let i = 0; i < 2; i++) {
-        const commitment = await commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
+        const commitment = await v1Protocol.commitmentWithShieldedAddress(
+          mystikoAddress,
+          toBN(depositAmount),
+        );
         await mystikoContract2.deposit(
           depositAmount,
           commitment.commitmentHash.toString(),
@@ -179,7 +174,7 @@ export function testDeposit(
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: 1000000 },
         );
       }
-      const commitment = await commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
+      const commitment = await v1Protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
       await expectThrowsAsync(() =>
         mystikoContract2.deposit(
           depositAmount,

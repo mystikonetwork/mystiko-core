@@ -1,5 +1,5 @@
 import { deepCopy, check, isBN } from '@mystiko/utils';
-import * as protocol from '../protocol';
+import { v1Protocol } from '@mystiko/protocol';
 
 /**
  * @memberOf module:mystiko/models
@@ -21,7 +21,7 @@ export class BaseModel {
     } else {
       this.data = deepCopy(data);
     }
-    this.protocol = protocol;
+    this.protocol = v1Protocol;
   }
 
   /**

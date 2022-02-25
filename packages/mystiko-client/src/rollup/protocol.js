@@ -1,10 +1,7 @@
 import { ethers } from 'ethers';
 import { groth16 } from 'snarkjs';
+import { MerkleTree, FIELD_SIZE, v1Protocol } from '@mystiko/protocol';
 import { check, readCompressedFile, toFixedLenHexNoPrefix, toHexNoPrefix, toBN, isBN } from '@mystiko/utils';
-import { MerkleTree } from '../lib/merkleTree.js';
-import { FIELD_SIZE } from '../protocol';
-
-const WitnessCalculator = require('../protocol/witness_calculator.js');
 
 export function zkProveRollup1(tree, newLeaf, wasmFile, zkeyFile) {
   return _zkProve({
@@ -59,7 +56,7 @@ async function _zkProve({ tree, newLeaves, wasmFile, zkeyFile }) {
   const pathElements = leafPath.pathElements.slice(rollupHeight);
   const leafHash = _calcLeaveHash(newLeaves);
   const wasm = await readCompressedFile(wasmFile);
-  const witnessCalculator = await WitnessCalculator(wasm);
+  const witnessCalculator = await v1Protocol.WitnessCalculatorBuilder(wasm);
   const buff = await witnessCalculator.calculateWTNSBin(
     {
       oldRoot: currentRoot.toString(),

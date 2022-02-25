@@ -1,7 +1,6 @@
 import { MystikoConfig } from '@mystiko/config';
-import { check, checkDefinedAndNotNull } from '@mystiko/utils';
-import * as protocol from '../protocol';
-import rootLogger from '../logger';
+import { v1Protocol } from '@mystiko/protocol';
+import { check, checkDefinedAndNotNull, logger as rootLogger } from '@mystiko/utils';
 
 /**
  * @class Handler
@@ -18,10 +17,10 @@ export class Handler {
     }
     this.db = db;
     /**
-     * @property {module:mystiko/protocol/default} protocol
+     * @property {module:mystiko/protocol/v1} protocol
      * @desc default implementation of Mystiko protocol
      */
-    this.protocol = protocol;
+    this.protocol = v1Protocol;
     this.logger = rootLogger.getLogger('Handler');
   }
 

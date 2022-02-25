@@ -18,7 +18,6 @@ import * as models from './model';
 import { ProviderPool } from './chain/provider.js';
 import { ContractPool } from './chain/contract.js';
 import { MetaMaskSigner, PrivateKeySigner } from './chain/signer.js';
-import logger, { initLogger } from './logger.js';
 import { EventPuller } from './puller';
 
 /**
@@ -106,9 +105,9 @@ mystiko.initialize = async ({
     !loggingOptions || loggingOptions instanceof Object,
     'loggingOptions should be an instance of Object',
   );
-  initLogger(loggingOptions);
-  logger.setLevel(loggingLevel);
-  mystiko.logger = logger;
+  utils.initLogger(loggingOptions);
+  utils.logger.setLevel(loggingLevel);
+  mystiko.logger = utils.logger;
   mystiko.db = await createDatabase(dbFile, dbAdapter);
   mystiko.db.adapter = dbAdapter;
   mystiko.db.exportDataAsString = exportDataAsString;

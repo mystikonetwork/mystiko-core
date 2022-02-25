@@ -470,6 +470,14 @@ export function serialNumber(skVerify: Buffer, randomP: BN): BN {
   return poseidonHash([randomP, buffToBigInt(skVerify)]);
 }
 
+export interface WitnessCalculatorInterface {
+  calculateWTNSBin(input: any, sanityCheck: any): Promise<Uint8Array>;
+}
+
+export function WitnessCalculatorBuilder(code: any, options?: any): Promise<WitnessCalculatorInterface> {
+  return WithdrawWitnessCalculator(code, options);
+}
+
 /**
  * @function module:mystiko/protocol/v1.zkProve
  * @desc generate zkSnark proofs with given public and private inputs.
@@ -549,7 +557,7 @@ export async function zkProve(
       `amount="${toString(amount)}"'`,
   );
   const wasm = await readCompressedFile(wasmFile);
-  const witnessCalculator = await WithdrawWitnessCalculator(wasm);
+  const witnessCalculator = await WitnessCalculatorBuilder(wasm);
   const buff = await witnessCalculator.calculateWTNSBin(inputs, 0);
   logger.debug('witness calculation is done, start proving...');
   const zkey = await readCompressedFile(zkeyFile);

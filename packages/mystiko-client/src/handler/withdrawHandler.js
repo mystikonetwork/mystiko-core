@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check, toBuff, errorMessage, toHexNoPrefix, toBN } from '@mystiko/utils';
+import { check, toBuff, errorMessage, toHexNoPrefix, toBN, logger as rootLogger } from '@mystiko/utils';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
@@ -9,7 +9,6 @@ import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract.js';
 import { checkSigner } from '../chain/signer.js';
 import { Withdraw, WithdrawStatus, PrivateNoteStatus, ID_KEY, BaseModel } from '../model';
-import rootLogger from '../logger';
 
 /**
  * @class WithdrawHandler

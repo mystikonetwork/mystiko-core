@@ -1,6 +1,14 @@
 import { ethers } from 'ethers';
 import { BridgeType } from '@mystiko/config';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toString, toBN } from '@mystiko/utils';
+import {
+  check,
+  fromDecimals,
+  toBuff,
+  toHexNoPrefix,
+  toString,
+  toBN,
+  logger as rootLogger,
+} from '@mystiko/utils';
 import { Handler } from './handler.js';
 import { WalletHandler } from './walletHandler.js';
 import { AccountHandler } from './accountHandler.js';
@@ -15,7 +23,6 @@ import {
 } from '../model';
 import { ProviderPool } from '../chain/provider.js';
 import { ContractPool } from '../chain/contract';
-import rootLogger from '../logger';
 
 /**
  * @class NoteHandler

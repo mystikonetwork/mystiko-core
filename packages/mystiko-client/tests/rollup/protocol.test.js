@@ -1,10 +1,9 @@
+import { MerkleTree, v1Protocol } from '@mystiko/protocol';
 import { toBN } from '@mystiko/utils';
 import { zkProveRollup1, zkProveRollup4, zkProveRollup16 } from '../../src/rollup/protocol.js';
-import { MerkleTree } from '../../src/lib/merkleTree.js';
-import { zkVerify } from '../../src/protocol';
 
 test('test zkProveRollup1', async () => {
-  const tree = new MerkleTree(20, [toBN('100'), toBN('200'), toBN('300')]);
+  const tree = new MerkleTree([toBN('100'), toBN('200'), toBN('300')]);
   console.time('zkProveRollup1');
   const { proof, publicSignals } = await zkProveRollup1(
     tree,
@@ -13,7 +12,7 @@ test('test zkProveRollup1', async () => {
     'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.zkey.gz',
   );
   console.timeEnd('zkProveRollup1');
-  const verified = await zkVerify(
+  const verified = await v1Protocol.zkVerify(
     proof,
     publicSignals,
     'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.vkey.json.gz',
@@ -23,7 +22,7 @@ test('test zkProveRollup1', async () => {
 });
 
 test('test zkProveRollup4', async () => {
-  const tree = new MerkleTree(20, [toBN('100'), toBN('200'), toBN('300'), toBN('400')]);
+  const tree = new MerkleTree([toBN('100'), toBN('200'), toBN('300'), toBN('400')]);
   console.time('zkProveRollup4');
   const { proof, publicSignals } = await zkProveRollup4(
     tree,
@@ -32,7 +31,7 @@ test('test zkProveRollup4', async () => {
     'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.zkey.gz',
   );
   console.timeEnd('zkProveRollup4');
-  const verified = await zkVerify(
+  const verified = await v1Protocol.zkVerify(
     proof,
     publicSignals,
     'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.vkey.json.gz',
@@ -51,7 +50,7 @@ test('test zkProveRollup4', async () => {
 });
 
 test('test zkProveRollup16', async () => {
-  const tree = new MerkleTree(20, [
+  const tree = new MerkleTree([
     toBN('100'),
     toBN('200'),
     toBN('300'),
@@ -94,7 +93,7 @@ test('test zkProveRollup16', async () => {
     'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.zkey.gz',
   );
   console.timeEnd('zkProveRollup16');
-  const verified = await zkVerify(
+  const verified = await v1Protocol.zkVerify(
     proof,
     publicSignals,
     'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.vkey.json.gz',

@@ -1,5 +1,5 @@
 import { MystikoConfig, BridgeType } from '@mystiko/config';
-import { check, toHexNoPrefix, toString, toBN } from '@mystiko/utils';
+import { check, toHexNoPrefix, toString, toBN, logger as rootLogger } from '@mystiko/utils';
 import { ContractHandler } from '../handler/contractHandler.js';
 import { WalletHandler } from '../handler/walletHandler.js';
 import { NoteHandler } from '../handler/noteHandler.js';
@@ -8,7 +8,6 @@ import { WithdrawHandler } from '../handler/withdrawHandler.js';
 import { EventHandler } from '../handler/eventHandler.js';
 import { ContractPool } from '../chain/contract.js';
 import { DepositStatus, PrivateNoteStatus, WithdrawStatus } from '../model';
-import rootLogger from '../logger';
 
 const TopicType = {
   DEPOSIT: 'Deposit',

@@ -1,4 +1,4 @@
-import { MerkleTree } from '@mystiko/client/src/lib/merkleTree';
+import { MerkleTree } from '@mystiko/protocol';
 
 export function testConstructor(
   contractGetter,

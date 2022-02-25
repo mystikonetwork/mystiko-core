@@ -35,7 +35,7 @@
     "@babel/preset-env": "^7.16.7",
     "@babel/register": "^7.16.8",
     "@mystiko/circuits": "^0.0.2",
-    "@mystiko/client": "^0.0.2",
+    "@mystiko/protocol": "^0.0.2",
     "@mystiko/utils": "^0.0.2",
     "@openzeppelin/contracts": "^3.4.2",
     "@truffle/contract": "^4.4.9",

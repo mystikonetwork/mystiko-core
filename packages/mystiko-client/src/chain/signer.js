@@ -1,9 +1,8 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MystikoConfig, ChainConfig } from '@mystiko/config';
-import { check, toHex, toHexNoPrefix, toString } from '@mystiko/utils';
+import { check, toHex, toHexNoPrefix, toString, logger as rootLogger } from '@mystiko/utils';
 import { ProviderPool } from './provider.js';
-import rootLogger from '../logger.js';
 
 /**
  * @class BaseSigner
