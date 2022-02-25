@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   collectCoverage: true,
   coverageDirectory: 'coverage',
+  collectCoverageFrom: ['src/**/*.ts', '!src/types/*.d.ts'],
   coverageThreshold: {
     global: {
       lines: 95,
@@ -12,5 +13,4 @@ module.exports = {
       functions: 95,
     },
   },
-  testPathIgnorePatterns: ['/node_modules/', '/build/tests'],
 };

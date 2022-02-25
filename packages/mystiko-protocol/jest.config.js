@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   collectCoverage: true,
   coverageDirectory: 'coverage',
+  collectCoverageFrom: ['src/**/*.ts', '!src/types/*.d.ts', '!src/witness_calculator.js'],
   coverageThreshold: {
     global: {
       lines: 95,
@@ -12,4 +13,12 @@ module.exports = {
       functions: 95,
     },
   },
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+        esModuleInterop: true,
+      },
+    },
+  },
+  setupFilesAfterEnv: ['./jest.setup.js'],
 };
