@@ -17,6 +17,7 @@
     "comma-dangle": ["error", "always-multiline"],
     "require-await": "error",
     "prettier/prettier": ["error", { "printWidth": 110 }],
-    "no-bitwise": "off"
+    "no-bitwise": "off",
+    "no-console": ["error", { "allow": ["time", "timeEnd", "trace", "debug"] }]
   }
 }

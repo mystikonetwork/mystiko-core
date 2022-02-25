@@ -42,7 +42,6 @@
     "@mystiko/utils": "^0.0.2",
     "ethereumjs-wallet": "^1.0.2",
     "ethers": "^5.5.3",
-    "lokijs": "^1.5.12",
-    "snarkjs": "^0.4.12"
+    "lokijs": "^1.5.12"
   }
 }

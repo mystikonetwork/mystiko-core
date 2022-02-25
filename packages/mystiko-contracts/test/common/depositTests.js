@@ -71,7 +71,7 @@ export function testDeposit(
         mystikoContract.deposit.estimateGas(
           depositAmount,
           commitments[0].commitmentHash.toString(),
-          randomBigInt().toString(),
+          v1Protocol.randomBigInt().toString(),
           commitments[0].randomS.toString(),
           toHex(commitments[0].privateNote),
           minRollupFee,

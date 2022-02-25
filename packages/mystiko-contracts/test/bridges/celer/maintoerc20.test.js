@@ -164,7 +164,7 @@ contract('MystikoWithCelerMainToERC20', (accounts) => {
       const privateNote = toBuff(toHexNoPrefix(depositEvent.args.encryptedNote));
       const treeLeaves = [commitmentHash];
       const treeIndex = Number(merkleTreeInsertEvent.args.leafIndex);
-      const fullProof = await v1Protocol.zkProve(
+      const fullProof = await v1Protocol.zkProveWithdraw(
         pkVerify,
         skVerify,
         pkEnc,

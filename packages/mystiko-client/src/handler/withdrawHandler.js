@@ -248,7 +248,7 @@ export class WithdrawHandler extends Handler {
       toBuff(this.protocol.decryptSymmetric(walletPassword, account.encryptedEncSecretKey)),
     );
     const circuitConfig = this.config.getCircuitConfig(contractConfig.circuits);
-    const zkProof = await this.protocol.zkProve(
+    const zkProof = await this.protocol.zkProveWithdraw(
       pkVerify,
       skVerify,
       pkEnc,

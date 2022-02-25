@@ -41,6 +41,7 @@
     "@mystiko/client": "^0.0.2",
     "@mystiko/config": "^0.0.2",
     "@mystiko/contracts": "^0.0.2",
+    "chalk": "^4.1.2",
     "lokijs": "^1.5.12"
   }
 }
