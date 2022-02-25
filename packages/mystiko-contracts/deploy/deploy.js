@@ -67,6 +67,7 @@ function getMystikoNetwork(network) {
 
 async function deployTBridgeProxy() {
   console.log('deploy contract CrossChainProxy');
+  console.log('deploy MystikoTBridgeProxy');
   const proxy = await MystikoTBridgeProxy.new()
     .then((proxy) => {
       return proxy;
@@ -118,6 +119,7 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
     return '';
   }
 
+  console.log('deploy MystikoCore');
   let mystikoCoreAddress = '';
   if (bridgeName === 'loop') {
     if (token.erc20 === 'true') {
@@ -256,6 +258,7 @@ async function deployStep1() {
   }
 
   let hasher2Address = '';
+  console.log('deploy Hasher2');
   await Hasher2.new()
     .then((hasher2) => {
       hasher2Address = hasher2.address;
@@ -266,6 +269,7 @@ async function deployStep1() {
     });
 
   let withdrawVerifierAddress = '';
+  console.log('deploy WithdrawVerifier');
   await WithdrawVerifier.new()
     .then((withdrawVerifier) => {
       withdrawVerifierAddress = withdrawVerifier.address;

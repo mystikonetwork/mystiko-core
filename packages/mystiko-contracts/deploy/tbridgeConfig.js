@@ -55,7 +55,7 @@ module.exports = {
       ) {
         tbridgeConfig.bridge.pairs[i].local.mystikoAddress = src.address;
         tbridgeConfig.bridge.pairs[i].local.relayProxyAddress = proxyAddress;
-
+        console.log('tbridge save config');
         this.saveConfig(mystikoNetwork, tbridgeConfig);
         return;
       }
@@ -67,7 +67,7 @@ module.exports = {
       ) {
         tbridgeConfig.bridge.pairs[i].remote.mystikoAddress = src.address;
         tbridgeConfig.bridge.pairs[i].remote.relayProxyAddress = proxyAddress;
-
+        console.log('tbridge save config');
         this.saveConfig(mystikoNetwork, tbridgeConfig);
         return;
       }
