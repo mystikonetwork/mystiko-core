@@ -108,7 +108,20 @@ module.exports = {
       }
     }
 
-    console.log(this.RED, 'update tbridge cross chain proxy error');
+    console.log('add new tbridge cross chain proxy');
+
+    for (let i = 0; i < config.bridges.length; i++) {
+      if (config.bridges[i].name === 'tbridge') {
+        const proxy = {
+          network: network,
+          address: proxyAddress,
+        };
+        config.bridges[i].proxys.push(proxy);
+        return config;
+      }
+    }
+
+    console.log(this.RED, 'update new tbridge cross chain proxy error');
     return null;
   },
 

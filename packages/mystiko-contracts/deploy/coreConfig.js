@@ -8,7 +8,7 @@ module.exports = {
     } else if (mystikoNetwork === 'mainnet') {
       return process.env.CLIENT_CONFIG_FILE_PATH + '/mainnet.json';
     } else if (mystikoNetwork === 'development') {
-      return process.env.CLIENT_CONFIG_FILE_PATH + '/development.json';
+      return 'config/default/development.json';
     } else {
       console.error(common.RED, 'load config network not support');
       return '';

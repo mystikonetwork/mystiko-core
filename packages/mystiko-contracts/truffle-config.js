@@ -67,6 +67,9 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+      websocket: true,
+      timeoutBlocks: 300,
+      networkCheckTimeout: 10000,
     },
     goerli: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.goerli),
@@ -75,6 +78,8 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
     bsctestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsctestnet),
@@ -84,7 +89,7 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
       timeoutBlocks: 200,
-      networkCheckTimeout: 1000000000,
+      networkCheckTimeout: 10000,
     },
     auroratestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.auroratestnet),
@@ -93,7 +98,8 @@ module.exports = {
       gasPrice: 0,
       skipDryRun: true,
       confirmations: getConfirmation(),
-      timeoutBlocks: 200,
+      timeoutBlocks: 200000,
+      networkCheckTimeout: 100000000,
     },
     moonbase: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.moonbase),
@@ -102,6 +108,8 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
     fantomtestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.fantomtestnet),
@@ -110,6 +118,8 @@ module.exports = {
       gasPrice: 300000000000,
       skipDryRun: true,
       confirmations: getConfirmation(),
+      timeoutBlocks: 20000,
+      networkCheckTimeout: 100000000,
     },
     polygontestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.polygontestnet),
@@ -118,7 +128,8 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
-      networkCheckTimeout: 1000000000,
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
     avalanchetestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.avalanchetestnet),
@@ -127,7 +138,8 @@ module.exports = {
       gasPrice: 300000000000,
       skipDryRun: true,
       confirmations: getConfirmation(),
-      networkCheckTimeout: 1000000000,
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
     bsc: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.bsc),
@@ -137,7 +149,7 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
       timeoutBlocks: 200,
-      networkCheckTimeout: 1000000000,
+      networkCheckTimeout: 10000,
     },
     moonbeam: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.moonbeam),
@@ -146,6 +158,8 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
     polygon: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.polygon),
@@ -154,7 +168,8 @@ module.exports = {
       gasPrice: getGasPrice(),
       skipDryRun: true,
       confirmations: getConfirmation(),
-      networkCheckTimeout: 1000000000,
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
     avalanche: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.avalanche),
@@ -163,7 +178,8 @@ module.exports = {
       gasPrice: 300000000000,
       skipDryRun: true,
       confirmations: getConfirmation(),
-      networkCheckTimeout: 1000000000,
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
     },
   },
 
