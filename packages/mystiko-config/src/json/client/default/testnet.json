@@ -143,39 +143,8 @@
           "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
           "peerChainId": 43113,
           "peerContractAddress": "0xf900322b2D706b35F43B9f8D00dc4617292c2697"
-        },
-        {
-          "version": 1,
-          "name": "MystikoWithTBridgeERC20",
-          "address": "0x6D8F3102160B31deDc886de6b93f516825479e7a",
-          "assetSymbol": "mUSD",
-          "assetDecimals": 6,
-          "circuits": "circom-1.0",
-          "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
-          "peerChainId": 1313161555,
-          "peerContractAddress": "0xA33cB8399a362527Be3D5c899FD6819D7cE7Cf74"
-        },
-        {
-          "version": 1,
-          "name": "MystikoWithTBridgeERC20",
-          "address": "0xc06686F28046AE620126a37F399ee9432feeB1f6",
-          "assetSymbol": "MTT",
-          "assetDecimals": 18,
-          "circuits": "circom-1.0",
-          "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
-          "peerChainId": 1313161555,
-          "peerContractAddress": "0xFE1229741a51133DDe078793Cf5B343570961f47"
-        },
-        {
-          "version": 1,
-          "name": "MystikoWithTBridgeMain",
-          "address": "0x8f6d6b50aD9F354eb1D7d4E87A77CA4768aC9b45",
-          "assetSymbol": "ETH",
-          "assetDecimals": 18,
-          "circuits": "circom-1.0",
-          "peerChainId": 1313161555,
-          "peerContractAddress": "0x42641BE2F80DfC7a74D21991d26283ed360f640d"
-        },
+        },    
+
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
@@ -535,59 +504,6 @@
           "peerContractAddress": "0x4Ca06F314C022b593d287b1b16AB2959620619A2"
         }
       ]
-    },
-    {
-      "name": "Aurora Testnet",
-      "assetSymbol": "aETH",
-      "chainId": 1313161555,
-      "explorerUrl": "https://testnet.aurorascan.dev",
-      "providers": [
-        "https://testnet.aurora.dev"
-      ],
-      "contracts": [
-        {
-          "version": 1,
-          "name": "MystikoWithTBridgeMain",
-          "address": "0x42641BE2F80DfC7a74D21991d26283ed360f640d",
-          "assetSymbol": "aETH",
-          "assetDecimals": 18,
-          "circuits": "circom-1.0",
-          "peerChainId": 3,
-          "peerContractAddress": "0x8f6d6b50aD9F354eb1D7d4E87A77CA4768aC9b45"
-        },
-        {
-          "version": 1,
-          "name": "MystikoWithTBridgeERC20",
-          "address": "0xFE1229741a51133DDe078793Cf5B343570961f47",
-          "assetSymbol": "MTT",
-          "assetDecimals": 18,
-          "circuits": "circom-1.0",
-          "assetAddress": "0x8bF9752F8c9195b603d534038BCb9F6c0C26351E",
-          "peerChainId": 3,
-          "peerContractAddress": "0xc06686F28046AE620126a37F399ee9432feeB1f6"
-        },
-        {
-          "version": 1,
-          "name": "MystikoWithTBridgeERC20",
-          "address": "0xA33cB8399a362527Be3D5c899FD6819D7cE7Cf74",
-          "assetSymbol": "mUSD",
-          "assetDecimals": 6,
-          "circuits": "circom-1.0",
-          "assetAddress": "0x2E34eDA41d0E0DFC8E6fe8Fd032827b20C395aD1",
-          "peerChainId": 3,
-          "peerContractAddress": "0x6D8F3102160B31deDc886de6b93f516825479e7a"
-        }
-      ]
-    },
-    {
-      "name": "Fantom Testnet",
-      "assetSymbol": "FTM",
-      "chainId": 4002,
-      "explorerUrl": "https://testnet.ftmscan.com",
-      "providers": [
-        "https://rpc.testnet.fantom.network"
-      ],
-      "contracts": []
     }
   ],
   "bridges": [
