@@ -300,7 +300,7 @@ export class WithdrawHandler extends Handler {
     contract: ethers.Contract,
     leaf: BN,
   ): Promise<{ leaves: BN[]; leafIndex: number }> {
-    const leaves = await contract.queryFilter({ topics: ['MerkleTreeInsert'] });
+    const leaves = await contract.queryFilter(contract.filters.MerkleTreeInsert());
     let leafIndex = -1;
     let index = 0;
     const convertedLeaves = leaves

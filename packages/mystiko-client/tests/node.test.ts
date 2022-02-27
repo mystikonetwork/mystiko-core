@@ -1,5 +1,6 @@
 import fs from 'fs';
-import mystiko, { DefaultTestnetConfig, DefaultMainnetConfig } from '../src/index.js';
+import mystiko, { DefaultTestnetConfig, DefaultMainnetConfig } from '../src/node';
+
 test('test initialize', async () => {
   await mystiko.initialize();
   expect(mystiko.config).toStrictEqual(DefaultTestnetConfig);

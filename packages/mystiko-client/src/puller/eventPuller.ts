@@ -183,9 +183,23 @@ export class EventPuller {
       if (connectedContract) {
         const currentBlockNumber = await connectedContract.provider.getBlockNumber();
         const fromBlock = contract.syncedBlock ? contract.syncedBlock : 0;
-        connectedContract
-          .queryFilter({ topics: this.topics }, fromBlock, currentBlockNumber)
-          .then((events) => this.handleEvents(contract, events))
+        const depositPromise = connectedContract.queryFilter(
+          connectedContract.filters.Deposit(),
+          fromBlock,
+          currentBlockNumber,
+        );
+        const merkleTreePromise = connectedContract.queryFilter(
+          connectedContract.filters.MerkleTreeInsert(),
+          fromBlock,
+          currentBlockNumber,
+        );
+        const withdrawPromise = connectedContract.queryFilter(
+          connectedContract.filters.Withdraw(),
+          fromBlock,
+          currentBlockNumber,
+        );
+        Promise.all([depositPromise, merkleTreePromise, withdrawPromise])
+          .then((events: ethers.Event[][]) => this.handleEvents(contract, events.flat()))
           .then(() => this.contractHandler.updateSyncedBlock(chainId, address, currentBlockNumber + 1));
       }
     }

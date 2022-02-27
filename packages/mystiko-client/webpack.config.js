@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 
 function isProduction() {
-  return process.env.NODE_ENV === 'production';
+  return !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
 }
 
 function getOptimization() {
@@ -21,10 +21,15 @@ function getOptimization() {
 }
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/browser.ts',
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'build/browser'),
     filename: 'mystiko.[contenthash].js',
+    library: {
+      name: 'mystiko',
+      type: 'window',
+      export: 'default',
+    },
   },
   devtool: isProduction() ? undefined : 'source-map',
   mode: isProduction() ? 'production' : 'development',
@@ -32,16 +37,21 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            sourceType: 'unambiguous',
-            presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-transform-runtime'],
+        test: /\.ts$/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {
+                declaration: false,
+                declarationMap: false,
+                outDir: path.resolve(__dirname, 'build/browser'),
+              },
+              onlyCompileBundledFiles: true,
+            },
           },
-        },
+        ],
+        exclude: /node_modules/,
       },
     ],
   },
@@ -60,7 +70,9 @@ module.exports = {
       process: require.resolve('process/browser'),
       buffer: require.resolve('buffer/'),
       fs: false,
+      readline: false,
     },
+    extensions: ['.ts', '...'],
   },
   plugins: [
     new webpack.ProvidePlugin({

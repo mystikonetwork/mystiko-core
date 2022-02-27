@@ -52,7 +52,6 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@babel/runtime": "^7.16.7",
     "bn.js": "^5.2.0",
     "ethers": "^5.5.3",
     "fastfile": "^0.0.19",

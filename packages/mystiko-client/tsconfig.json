@@ -2,6 +2,7 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
   "include": ["src/**/*"],
   "compilerOptions": {
+    "lib": ["es6"],
     "allowJs": true,
     "declaration": true,
     "declarationMap": true,
@@ -10,5 +11,8 @@
     "sourceMap": true,
     "outDir": "./build/cjs",
     "typeRoots": ["node_modules/@types", "./src/types"]
+  },
+  "ts-node": {
+    "files": true
   }
 }

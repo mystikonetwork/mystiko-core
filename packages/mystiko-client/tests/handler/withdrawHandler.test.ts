@@ -83,7 +83,7 @@ class MockMystikoContract extends ethers.Contract {
 
   // eslint-disable-next-line class-methods-use-this
   queryFilter(event: ethers.EventFilter): Promise<ethers.Event[]> {
-    expect(event.topics).toStrictEqual(['MerkleTreeInsert']);
+    expect(event.address).toStrictEqual(this.address);
     const events = [
       {
         args: {
