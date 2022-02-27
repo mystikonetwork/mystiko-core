@@ -3,7 +3,7 @@ import { BaseConfig, AssetType, BridgeType } from './base';
 import { ContractMeta, MystikoABI, MystikoContractMeta } from './abi';
 
 export interface RawContractConfig {
-  version: string;
+  version: number;
   name: string;
   address: string;
   bridgeType: BridgeType;
@@ -45,7 +45,7 @@ export class ContractConfig extends BaseConfig {
    * @property {number} version
    * @desc the version number of this configured blockchain network.
    */
-  public get version(): string {
+  public get version(): number {
     return this.asRawContractConfig().version;
   }
 

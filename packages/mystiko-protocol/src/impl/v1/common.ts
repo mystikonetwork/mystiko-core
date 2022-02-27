@@ -320,7 +320,7 @@ export function encryptAsymmetric(publicKey: Buffer, plainData: Buffer): Promise
  * @param {Buffer} cipherData encrypted data to be decrypted.
  * @returns {Promise<Buffer>} promise of a decrypted data buffer.
  */
-export function decryptAsymmetric(secretKey: Buffer, cipherData: Buffer) {
+export function decryptAsymmetric(secretKey: Buffer, cipherData: Buffer): Promise<Buffer> {
   check(cipherData.length > ECIES_META_LENGTH, 'incorrect cipherData length');
   return eccrypto.decrypt(secretKey, {
     iv: cipherData.slice(0, ECIES_IV_LENGTH),
@@ -385,8 +385,8 @@ export function poseidonHash(inputs: BN[]): BN {
  * @param {string} [salt='mystiko'] a salt for improve security.
  * @returns {string} the checksum of given data.
  */
-export function checkSum(data: string, salt: string = 'mystiko'): string {
-  return hmacSHA512(data, salt).toString();
+export function checkSum(data: string, salt?: string): string {
+  return hmacSHA512(data, salt || 'mystiko').toString();
 }
 
 /**

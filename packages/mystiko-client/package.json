@@ -1,47 +1,73 @@
 {
   "name": "@mystiko/client",
   "version": "0.0.2",
-  "description": "Mystiko SDK in Javascript",
-  "module": "src/index.js",
-  "repository": "https://github.com/mystikonetwork/mystiko-core",
-  "author": "Mystiko.Network",
+  "description": "client of mystiko core",
+  "main": "build/cjs/index.js",
+  "module": "build/esm/index.js",
+  "types": "build/cjs/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mystikonetwork/mystiko-core",
+    "directory": "packages/mystiko-client"
+  },
+  "author": {
+    "name": "Mystiko Network"
+  },
+  "keywords": [
+    "mystiko",
+    "web3",
+    "ethereum",
+    "cryptocurrency"
+  ],
+  "files": [
+    "build"
+  ],
   "license": "MIT",
-  "private": true,
   "scripts": {
-    "build": "rm -rf build/* && babel src --out-dir build",
-    "test": "jest --forceExit --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json",
-    "lint": "eslint --ext .js .",
-    "doc": "jsdoc -c jsdoc.json",
-    "prettier:check": "prettier --check \"./**/*.js\" --config .prettierrc",
-    "prettier:fix": "prettier --write \"./**/*.js\" --config .prettierrc",
+    "build:cjs": "tsc -p ./tsconfig.json",
+    "build:esm": "tsc -p ./tsconfig.esm.json",
+    "build": "rm -rf build && yarn build:cjs && yarn build:esm",
+    "test": "jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json",
+    "lint": "eslint --ext .js,.ts .",
+    "prettier:check": "prettier --check \"./**/*.{js,ts}\" --config .prettierrc",
+    "prettier:fix": "prettier --write \"./**/*.{js,ts}\" --config .prettierrc",
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
-    "@babel/cli": "^7.16.8",
-    "@babel/core": "^7.16.7",
-    "@babel/eslint-parser": "^7.16.5",
-    "@babel/node": "^7.16.8",
-    "@babel/plugin-transform-runtime": "^7.16.8",
-    "@babel/preset-env": "^7.16.7",
     "@mystiko/circuits": "^0.0.2",
-    "babel-jest": "^27.4.6",
-    "babel-loader": "^8.2.3",
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/bn.js": "^5.1.0",
+    "@types/bs58": "^4.0.1",
+    "@types/crypto-js": "^4.1.1",
+    "@types/eccrypto": "^1.1.3",
+    "@types/jest": "^27.4.0",
+    "@types/lokijs": "^1.5.7",
+    "@types/node": "^17.0.21",
+    "@types/pako": "^1.0.3",
+    "@types/randombytes": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "dts-gen": "^0.6.0",
     "eslint": "^8.6.0",
+    "eslint-config-airbnb-typescript": "^16.1.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^6.0.0",
     "jest": "^27.4.7",
-    "jsdoc": "^3.6.7",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.5.5"
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
     "@mystiko/config": "^0.0.2",
     "@mystiko/protocol": "^0.0.2",
     "@mystiko/utils": "^0.0.2",
+    "bn.js": "^5.2.0",
     "ethereumjs-wallet": "^1.0.2",
     "ethers": "^5.5.3",
+    "loglevel": "^1.8.0",
+    "loglevel-plugin-prefix": "^0.8.4",
     "lokijs": "^1.5.12"
   }
 }

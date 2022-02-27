@@ -16,6 +16,10 @@ export class BaseConfig {
     this.config = deepCopy(_rawConfig);
   }
 
+  public getRawConfig(): Object {
+    return this.rawConfig;
+  }
+
   /**
    * @desc get the human-readable JSON string of this config.
    * @returns {string}

@@ -141,10 +141,12 @@ export class ChainConfig extends BaseConfig {
     const chainIds: { [key: number]: number } = {};
     this.contractAddresses.forEach((address) => {
       const contract = this.getContract(address);
-      if (contract.bridgeType === BridgeType.LOOP) {
-        chainIds[this.chainId] = this.chainId;
-      } else if (contract.peerChainId) {
-        chainIds[contract.peerChainId] = contract.peerChainId;
+      if (contract) {
+        if (contract.bridgeType === BridgeType.LOOP) {
+          chainIds[this.chainId] = this.chainId;
+        } else if (contract.peerChainId) {
+          chainIds[contract.peerChainId] = contract.peerChainId;
+        }
       }
     });
     return Object.values(chainIds);
@@ -159,10 +161,12 @@ export class ChainConfig extends BaseConfig {
     const symbols: { [key: string]: boolean } = {};
     this.contractAddresses.forEach((address) => {
       const contract = this.getContract(address);
-      if (contract.bridgeType === BridgeType.LOOP && this.chainId === peerChainId) {
-        symbols[contract.assetSymbol] = true;
-      } else if (contract.peerChainId === peerChainId) {
-        symbols[contract.assetSymbol] = true;
+      if (contract) {
+        if (contract.bridgeType === BridgeType.LOOP && this.chainId === peerChainId) {
+          symbols[contract.assetSymbol] = true;
+        } else if (contract.peerChainId === peerChainId) {
+          symbols[contract.assetSymbol] = true;
+        }
       }
     });
     return Object.keys(symbols);
@@ -173,7 +177,7 @@ export class ChainConfig extends BaseConfig {
    * @param {string} address the address of contract.
    * @returns {ContractConfig} the contract config instance.
    */
-  public getContract(address: string): ContractConfig {
+  public getContract(address: string): ContractConfig | undefined {
     check(ethers.utils.isAddress(address), `${address} is invalid address`);
     return this.contractByAddress[address];
   }
