@@ -1,0 +1,34 @@
+import { currentProtocol } from '@mystiko/protocol';
+import { toHexNoPrefix } from '@mystiko/utils';
+import { Account } from '../../src';
+
+test('Test Account getters/setters', () => {
+  const account = new Account();
+  expect(account.id).toBe(undefined);
+  expect(account.name).toBe(undefined);
+  expect(account.verifyPublicKey).toBe(undefined);
+  expect(account.encPublicKey).toBe(undefined);
+  expect(account.encryptedVerifySecretKey).toBe(undefined);
+  expect(account.encryptedEncSecretKey).toBe(undefined);
+  expect(account.walletId).toBe(undefined);
+  expect(account.fullPublicKey).toBe(undefined);
+  expect(account.shieldedAddress).toBe(undefined);
+  account.name = 'Test Account #1';
+  expect(account.name).toBe('Test Account #1');
+  account.verifyPublicKey = currentProtocol.randomBytes(currentProtocol.VERIFY_PK_SIZE);
+  expect(toHexNoPrefix(account.verifyPublicKey)).not.toBe(undefined);
+  account.encPublicKey = currentProtocol.randomBytes(currentProtocol.ENCRYPT_PK_SIZE);
+  expect(toHexNoPrefix(account.encPublicKey)).not.toBe(undefined);
+  account.encryptedVerifySecretKey = 'deaddead';
+  expect(account.encryptedVerifySecretKey).toBe('deaddead');
+  account.encryptedEncSecretKey = 'baadbabe';
+  expect(account.encryptedEncSecretKey).toBe('baadbabe');
+  account.walletId = 1234;
+  expect(account.walletId).toBe(1234);
+  expect(account.fullPublicKey).not.toBe(undefined);
+  expect(account.shieldedAddress).not.toBe(undefined);
+  account.verifyPublicKey = undefined;
+  expect(account.verifyPublicKey).toBe(undefined);
+  account.encPublicKey = undefined;
+  expect(account.encPublicKey).toBe(undefined);
+});

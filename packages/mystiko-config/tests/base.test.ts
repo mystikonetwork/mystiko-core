@@ -1,5 +1,12 @@
 import { BaseConfig } from '../src';
 
+test('test getRawConfig', () => {
+  const conf1 = new BaseConfig({});
+  const conf2 = new BaseConfig({ a: 1, b: 2 });
+  expect(conf1.getRawConfig()).toStrictEqual({});
+  expect(conf2.getRawConfig()).toStrictEqual({ a: 1, b: 2 });
+});
+
 test('test toString', () => {
   const conf1 = new BaseConfig({});
   const conf2 = new BaseConfig({ a: 1, b: 2 });

@@ -32,10 +32,10 @@ test('test readFromFile', async () => {
   expect(conf.getBridges(1, 56, 'USDT').map((b) => b.type)).toEqual([BridgeType.POLY]);
   expect(conf.getBridges(1, 56, 'ETH')).toEqual([]);
   expect(conf.getChainConfig(100)).toBe(undefined);
-  expect(conf.getChainConfig(1).name).toBe('Ethereum Mainnet');
-  expect(conf.getChainConfig(Number(56)).name).toBe('BSC Mainnet');
+  expect(conf.getChainConfig(1)?.name).toBe('Ethereum Mainnet');
+  expect(conf.getChainConfig(Number(56))?.name).toBe('BSC Mainnet');
   expect(conf.getBridgeConfig(BridgeType.LOOP)).toBe(undefined);
-  expect(conf.getBridgeConfig(BridgeType.POLY).type).toBe(BridgeType.POLY);
+  expect(conf.getBridgeConfig(BridgeType.POLY)?.type).toBe(BridgeType.POLY);
   expect(conf.circuits.length).toBe(1);
   expect(conf.circuits.map((c) => c.name)).toStrictEqual(['circom-1.0']);
   expect(conf.getCircuitConfig('circom-1.0')).not.toBe(undefined);

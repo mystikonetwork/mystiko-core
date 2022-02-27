@@ -1,6 +1,4 @@
-import { randomBigInt } from '@mystiko/client/src/protocol';
-import { MerkleTree } from '@mystiko/client/src/lib/merkleTree';
-import { zkProveRollup1, zkProveRollup16, zkProveRollup4 } from '@mystiko/client/src/rollup/protocol';
+import { MerkleTree, v1Protocol } from '@mystiko/protocol';
 import { toBN } from '@mystiko/utils';
 import { expectThrowsAsync } from './utils';
 
@@ -60,7 +58,7 @@ export function testRollup(
           proof.proofC,
           `${rollupSize}`,
           proof.newRoot,
-          randomBigInt().toString(),
+          v1Protocol.randomBigInt().toString(),
           {
             from: accounts[0],
             gas: 1000000,
@@ -75,7 +73,7 @@ export function testRollup(
           proof.proofB,
           proof.proofC,
           `${rollupSize}`,
-          randomBigInt().toString(),
+          v1Protocol.randomBigInt().toString(),
           proof.leafHash,
           {
             from: accounts[0],
@@ -140,25 +138,25 @@ async function _generateProof(commitments, mystikoContract, treeHeight, rollupSi
     depositsInQueue.push(await mystikoContract.depositQueue(`${i + depositIncludedCount}`));
     newLeaves.push(toBN(depositsInQueue[i].commitment.toString()));
   }
-  const tree = new MerkleTree(treeHeight, oldLeaves);
+  const tree = new MerkleTree(oldLeaves, { maxLevels: treeHeight });
   expect(tree.root().toString()).to.equal(currentRoot);
   let proof;
   if (rollupSize === 1) {
-    proof = await zkProveRollup1(
+    proof = await v1Protocol.zkProveRollup1(
       tree,
       newLeaves[0],
       'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.wasm.gz',
       'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.zkey.gz',
     );
   } else if (rollupSize === 4) {
-    proof = await zkProveRollup4(
+    proof = await v1Protocol.zkProveRollup4(
       tree,
       newLeaves,
       'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.wasm.gz',
       'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.zkey.gz',
     );
   } else if (rollupSize === 16) {
-    proof = await zkProveRollup16(
+    proof = await v1Protocol.zkProveRollup16(
       tree,
       newLeaves,
       'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.wasm.gz',

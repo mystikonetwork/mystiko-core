@@ -1,6 +1,5 @@
+import { MerkleTree, v1Protocol } from '@mystiko/protocol';
 import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix, toBN } from '@mystiko/utils';
-import * as protocol from '@mystiko/client/src/protocol';
-import { MerkleTree } from '@mystiko/client/src/lib/merkleTree.js';
 
 const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
 const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
@@ -80,23 +79,27 @@ contract('MystikoWithCelerMainToERC20', (accounts) => {
     });
   });
 
-  const rawSkVerify = protocol.randomBytes(protocol.VERIFY_SK_SIZE);
-  const rawSkEnc = protocol.randomBytes(protocol.ENCRYPT_SK_SIZE);
-  const skVerify = protocol.secretKeyForVerification(rawSkVerify);
-  const skEnc = protocol.secretKeyForEncryption(rawSkEnc);
-  const pkVerify = protocol.publicKeyForVerification(rawSkVerify);
-  const pkEnc = protocol.publicKeyForEncryption(rawSkEnc);
+  const rawSkVerify = v1Protocol.randomBytes(v1Protocol.VERIFY_SK_SIZE);
+  const rawSkEnc = v1Protocol.randomBytes(v1Protocol.ENCRYPT_SK_SIZE);
+  const skVerify = v1Protocol.secretKeyForVerification(rawSkVerify);
+  const skEnc = v1Protocol.secretKeyForEncryption(rawSkEnc);
+  const pkVerify = v1Protocol.publicKeyForVerification(rawSkVerify);
+  const pkEnc = v1Protocol.publicKeyForEncryption(rawSkEnc);
   let depositTx;
 
   describe('Test deposit operation', () => {
     it('should deposit successfully', async () => {
-      const { commitmentHash, privateNote, k, randomS } = await protocol.commitment(pkVerify, pkEnc, amount);
+      const { commitmentHash, privateNote, k, randomS } = await v1Protocol.commitment(
+        pkVerify,
+        pkEnc,
+        amount,
+      );
       const initialBalanceOfAccount1 = await web3.eth.getBalance(accounts[1]);
       const gasEstimated = await mystikoCoreSourceMain.deposit.estimateGas(
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
+        toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         { from: accounts[1], value: toHex(amount) },
       );
@@ -112,7 +115,7 @@ contract('MystikoWithCelerMainToERC20', (accounts) => {
         amount,
         toFixedLenHex(commitmentHash),
         toFixedLenHex(k),
-        toFixedLenHex(randomS, protocol.RANDOM_SK_SIZE),
+        toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
         {
           from: accounts[1],
@@ -142,9 +145,9 @@ contract('MystikoWithCelerMainToERC20', (accounts) => {
       expect(merkleTreeInsertEvent.args.leaf).to.equal(toFixedLenHex(commitmentHash));
       expect(merkleTreeInsertEvent.args.leafIndex.eq(toBN(0))).to.equal(true);
       const levels = await mystikoCoreDestinationERC20.getLevels();
-      const tree = new MerkleTree(parseInt(levels), [
-        toBN(toHexNoPrefix(merkleTreeInsertEvent.args.leaf), 16),
-      ]);
+      const tree = new MerkleTree([toBN(toHexNoPrefix(merkleTreeInsertEvent.args.leaf), 16)], {
+        maxLevels: parseInt(levels),
+      });
       const root = toBN(tree.root());
       const isKnownRoot = await mystikoCoreDestinationERC20.isKnownRoot(toFixedLenHex(root));
       expect(isKnownRoot).to.equal(true);
@@ -161,7 +164,7 @@ contract('MystikoWithCelerMainToERC20', (accounts) => {
       const privateNote = toBuff(toHexNoPrefix(depositEvent.args.encryptedNote));
       const treeLeaves = [commitmentHash];
       const treeIndex = Number(merkleTreeInsertEvent.args.leafIndex);
-      const fullProof = await protocol.zkProve(
+      const fullProof = await v1Protocol.zkProveWithdraw(
         pkVerify,
         skVerify,
         pkEnc,
@@ -183,7 +186,7 @@ contract('MystikoWithCelerMainToERC20', (accounts) => {
       expect(proof['pi_b'][1].length).to.equal(2);
       expect(proof['pi_c'].length).to.be.gte(2);
       expect(publicSignals.length).to.equal(4);
-      const result = await protocol.zkVerify(
+      const result = await v1Protocol.zkVerify(
         proof,
         publicSignals,
         'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz',

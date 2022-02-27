@@ -61,10 +61,10 @@ export class MystikoConfig extends BaseConfig {
   /**
    * @desc get the configuration of blockchain with given chainId.
    * @param {number} chainId blockchain's chainId @see {@link https://chainlist.org/ ChainList}.
-   * @returns {ChainConfig} the config object of given blockchain. It returns undefined,
+   * @returns {ChainConfig | undefined} the config object of given blockchain. It returns undefined,
    * if given chainId is not configured.
    */
-  public getChainConfig(chainId: number): ChainConfig {
+  public getChainConfig(chainId: number): ChainConfig | undefined {
     return this.asRawMystikoConfig().wrappedChains[chainId];
   }
 
@@ -77,7 +77,14 @@ export class MystikoConfig extends BaseConfig {
   public getPeerChains(chainId: number): ChainConfig[] {
     const chainConfig = this.getChainConfig(chainId);
     if (chainConfig) {
-      return chainConfig.peerChainIds.map((peerChainId) => this.getChainConfig(peerChainId));
+      const peerChainConfigs: ChainConfig[] = [];
+      chainConfig.peerChainIds.forEach((peerChainId) => {
+        const peerChainConfig = this.getChainConfig(peerChainId);
+        if (peerChainConfig) {
+          peerChainConfigs.push(peerChainConfig);
+        }
+      });
+      return peerChainConfigs;
     }
     return [];
   }
@@ -115,7 +122,10 @@ export class MystikoConfig extends BaseConfig {
       if (chainConfig) {
         chainConfig.contracts.forEach((contractConfig) => {
           if (dstChainId === contractConfig.peerChainId && assetSymbol === contractConfig.assetSymbol) {
-            bridges[contractConfig.bridgeType] = this.getBridgeConfig(contractConfig.bridgeType);
+            const bridgeConfig = this.getBridgeConfig(contractConfig.bridgeType);
+            if (bridgeConfig) {
+              bridges[contractConfig.bridgeType] = bridgeConfig;
+            }
           }
         });
       }
@@ -126,9 +136,9 @@ export class MystikoConfig extends BaseConfig {
   /**
    * @desc get the configuration of given cross-chain bridge.
    * @param {BridgeType} bridgeType the type of cross-chain bridge.
-   * @returns {BaseBridgeConfig} configuration of the specified cross-chain bridge.
+   * @returns {BaseBridgeConfig | undefined} configuration of the specified cross-chain bridge.
    */
-  public getBridgeConfig(bridgeType: BridgeType): BaseBridgeConfig {
+  public getBridgeConfig(bridgeType: BridgeType): BaseBridgeConfig | undefined {
     check(isValidBridgeType(bridgeType), 'invalid bridge type');
     return this.asRawMystikoConfig().wrappedBridges[bridgeType];
   }
@@ -174,9 +184,9 @@ export class MystikoConfig extends BaseConfig {
   /**
    * @desc get the configuration of zero knowledge proof resources with given scheme name.
    * @param {string} name name of supported zkp scheme.
-   * @returns {CircuitConfig} configuration of zkp scheme.
+   * @returns {CircuitConfig | undefined} configuration of zkp scheme.
    */
-  public getCircuitConfig(name: string): CircuitConfig {
+  public getCircuitConfig(name: string): CircuitConfig | undefined {
     return this.asRawMystikoConfig().wrappedCircuits[name];
   }
 
@@ -263,12 +273,18 @@ export class MystikoConfig extends BaseConfig {
             check(!!rawConfig.wrappedChains[contract.peerChainId], 'non-exist peerChainId');
             const peerChain = rawConfig.wrappedChains[contract.peerChainId];
             if (contract.peerContractAddress) {
-              check(!!peerChain.getContract(contract.peerContractAddress), 'non-exist peerChainContract');
               const peerContract = peerChain.getContract(contract.peerContractAddress);
-              check(peerContract.bridgeType === contract.bridgeType, 'bridge type does not match');
-              check(peerContract.assetDecimals === contract.assetDecimals, 'token decimals does not match');
-              check(peerContract.peerChainId === chainConfig.chainId, 'chain id does not match');
-              check(peerContract.peerContractAddress === contract.address, 'contract address does not match');
+              if (peerContract) {
+                check(peerContract.bridgeType === contract.bridgeType, 'bridge type does not match');
+                check(peerContract.assetDecimals === contract.assetDecimals, 'token decimals does not match');
+                check(peerContract.peerChainId === chainConfig.chainId, 'chain id does not match');
+                check(
+                  peerContract.peerContractAddress === contract.address,
+                  'contract address does not match',
+                );
+              } else {
+                throw new Error(`peerContract ${contract.peerContractAddress} does not exist`);
+              }
             }
           }
         }

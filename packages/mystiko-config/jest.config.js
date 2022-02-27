@@ -12,5 +12,4 @@ module.exports = {
       functions: 95,
     },
   },
-  testPathIgnorePatterns: ['/node_modules/', '/build/tests'],
 };

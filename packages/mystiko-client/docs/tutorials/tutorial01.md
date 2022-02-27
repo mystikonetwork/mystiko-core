@@ -8,11 +8,11 @@ We have to build the UMD format javascript bundle to let it runs smoothly in bro
 javascript bundle:
 
 ```bash
-cd packages/mystiko-client-browser
+cd packages/mystiko-client
 yarn build
 ```
 
-The output file is located in `build/mystiko.*.js`.
+The output file is located in `build/browser/mystiko.*.js`.
 
 ### Use the bundle
 You could use the bundled javascript library by adding it into the `<script>` tag in your `index.html`. For example:
@@ -48,7 +48,7 @@ Please check the {@link module:mystiko.initialize} for more information of this 
 Before you run, there are some resources need to be built. Run this command:
 
 ```bash
-cd packages/mystiko-client-node
+cd packages/mystiko-client
 yarn build
 ```
 
@@ -56,15 +56,13 @@ yarn build
 You need to first build the package before running it in node console.
 
 ```bash
-cd packages/mystiko-client-node
-yarn build
-node
+npx node
 ```
 
 **Tips** If you want to input multiple lines of code, you could just enter `.editor` in the node console:
 
 ```bash
-babel > .editor
+> .editor
 // Entering editor mode (Ctrl+D to finish, Ctrl+C to cancel)
 ```
 Then use `ctrl-D` to exit the editor mode.
@@ -73,7 +71,7 @@ Then use `ctrl-D` to exit the editor mode.
 After your successfully build the package, you could import the library like this:
 
 ```javascript
-var { mystiko } = require('./build/mystiko.cjs')
+var mystiko = require('./build/cjs').default
 ```
 
 ### Initialize the library

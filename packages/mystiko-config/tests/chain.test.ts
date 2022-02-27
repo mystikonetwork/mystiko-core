@@ -112,22 +112,22 @@ test('test ChainConfig constructor', () => {
   expect(config.getAssetSymbols(123).sort()).toEqual(['ETH', 'USDT'].sort());
   expect(() => config.getContract('0xdeadbeef')).toThrow();
   expect(config.getContract('0x243752cf8a2612373aef8d17b8c474214ba3ce24')).toBe(undefined);
-  expect(config.getContract('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879').toString()).toBe(
+  expect(config.getContract('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879')?.toString()).toBe(
     new ContractConfig(contractConfigs[0]).toString(),
   );
-  expect(config.getContract('0x98ed94360cad67a76a53d8aa15905e52485b73d1').toString()).toBe(
+  expect(config.getContract('0x98ed94360cad67a76a53d8aa15905e52485b73d1')?.toString()).toBe(
     new ContractConfig(contractConfigs[1]).toString(),
   );
-  expect(config.getContract('0x26fc224b37952bd12c792425f242e0b0a55453a6').toString()).toBe(
+  expect(config.getContract('0x26fc224b37952bd12c792425f242e0b0a55453a6')?.toString()).toBe(
     new ContractConfig(contractConfigs[2]).toString(),
   );
-  expect(config.getContract('0x8fb1df17768e29c936edfbce1207ad13696268b7').toString()).toBe(
+  expect(config.getContract('0x8fb1df17768e29c936edfbce1207ad13696268b7')?.toString()).toBe(
     new ContractConfig(contractConfigs[3]).toString(),
   );
-  expect(config.getContract('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67').toString()).toBe(
+  expect(config.getContract('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67')?.toString()).toBe(
     new ContractConfig(contractConfigs[4]).toString(),
   );
-  expect(config.getContract('0x110a13fc3efe6a245b50102d2d79b3e76125ae83').toString()).toBe(
+  expect(config.getContract('0x110a13fc3efe6a245b50102d2d79b3e76125ae83')?.toString()).toBe(
     new ContractConfig(contractConfigs[5]).toString(),
   );
 });
