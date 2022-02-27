@@ -178,9 +178,8 @@ test('test checksum', () => {
       'c88b417ce764624ed5a2443681afcd',
   );
   expect(hash2).toBe(
-    'db3c4095645e61571b2994839bd19d61a3087e5f6d864c446' +
-      '96f70058c2db602adbd2bf66d987b9f7e25006e99561eeb7d' +
-      '2cbd960663701268cb5a45b300e4b0',
+    '8b9fb4d5f890ea83d09f63af9dee5ba8a53a9f5dedeb9bfd0e6e' +
+      'd135d5dca7abbc75d455fe0ee46040828834186543e008401238aeaaab1039f3a5ab37bb1c97',
   );
 });
 

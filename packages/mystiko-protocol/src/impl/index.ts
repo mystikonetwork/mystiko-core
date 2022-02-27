@@ -12,8 +12,8 @@ export interface V1ProtocolInterface {
   MERKLE_TREE_LEVELS: number;
   buffToBigInt(buff: Buffer): BN;
   bigIntToBuff(bigInt: BN, numBytes: number): Buffer;
-  randomBigInt(numBytes: number): BN;
-  randomBytes(numBytes: number): Buffer;
+  randomBigInt(numBytes?: number): BN;
+  randomBytes(numBytes?: number): Buffer;
   secretKeyForVerification(rawSecretKey: Buffer): Buffer;
   publicKeyForVerification(rawSecretKey: Buffer): Buffer;
   secretKeyForEncryption(rawSecretKey: Buffer): Buffer;
