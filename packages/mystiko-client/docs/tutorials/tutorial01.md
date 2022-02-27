@@ -56,7 +56,7 @@ yarn build
 You need to first build the package before running it in node console.
 
 ```bash
-npx ts-node
+npx node
 ```
 
 **Tips** If you want to input multiple lines of code, you could just enter `.editor` in the node console:
@@ -70,14 +70,14 @@ Then use `ctrl-D` to exit the editor mode.
 ### Import the library
 After your successfully build the package, you could import the library like this:
 
-```typescript
-import mystiko from './src/index'
+```javascript
+var mystiko = require('./build/cjs').default
 ```
 
 ### Initialize the library
 You need to initialize the library before you do other things, you can achieve it by calling this function:
 
-```typescript
+```javascript
 mystiko.initialize()
 ```
 
