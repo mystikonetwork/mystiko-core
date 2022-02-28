@@ -14,6 +14,7 @@ export interface RawChainConfig {
   explorerUrl: string;
   explorerPrefix: string;
   providers: string[];
+  signerEndpoint: string;
   contracts: RawContractConfig[];
   wrappedContracts: ContractConfig[];
 }
@@ -42,6 +43,7 @@ export class ChainConfig extends BaseConfig {
     }
     BaseConfig.checkStringArray(this.config, 'providers');
     check(this.providers.length > 0, 'providers cannot be empty');
+    BaseConfig.checkString(this.config, 'signerEndpoint');
     BaseConfig.checkObjectArray(this.config, 'contracts');
     this.contractByAddress = {};
     this.asRawChainConfig().wrappedContracts = this.asRawChainConfig().contracts.map((contract) => {
@@ -115,6 +117,13 @@ export class ChainConfig extends BaseConfig {
    */
   public get providers(): string[] {
     return this.asRawChainConfig().providers;
+  }
+
+  /**
+   * For configuring Signer when network configuration does not exist.
+   */
+  public get signerEndpoint(): string {
+    return this.asRawChainConfig().signerEndpoint;
   }
 
   /**

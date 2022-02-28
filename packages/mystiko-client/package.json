@@ -1,6 +1,6 @@
 {
   "name": "@mystiko/client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "client of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -35,7 +35,7 @@
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
-    "@mystiko/circuits": "^0.0.3",
+    "@mystiko/circuits": "^0.0.4",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.0",
     "@types/bs58": "^4.0.1",
@@ -82,9 +82,9 @@
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@metamask/detect-provider": "^1.2.0",
-    "@mystiko/config": "^0.0.3",
-    "@mystiko/protocol": "^0.0.3",
-    "@mystiko/utils": "^0.0.3",
+    "@mystiko/config": "^0.0.4",
+    "@mystiko/protocol": "^0.0.4",
+    "@mystiko/utils": "^0.0.4",
     "bn.js": "^5.2.0",
     "browser-or-node": "^2.0.0",
     "chalk": "^4.1.2",

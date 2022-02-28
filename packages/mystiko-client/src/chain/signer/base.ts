@@ -141,7 +141,7 @@ export class BaseSigner {
               {
                 chainId: toHex(chainId),
                 chainName: chainConfig.name,
-                rpcUrls: chainConfig.providers,
+                rpcUrls: [chainConfig.signerEndpoint],
                 blockExplorerUrls: [chainConfig.explorerUrl],
                 nativeCurrency: {
                   name: chainConfig.assetSymbol,

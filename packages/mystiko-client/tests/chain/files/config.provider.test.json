@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "chains": [
+    {
+      "name": "Chain #1",
+      "assetSymbol": "ETH",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "providers": [
+        "http://localhost:8545"
+      ],
+      "signerEndpoint": "http://localhost:8545",
+      "contracts": []
+    },
+    {
+      "name": "Chain #2",
+      "assetSymbol": "ETH",
+      "chainId": 2,
+      "explorerUrl": "https://etherscan.io",
+      "providers": [
+        "https://localhost:8545"
+      ],
+      "signerEndpoint": "http://localhost:8545",
+      "contracts": []
+    },
+    {
+      "name": "Chain #3",
+      "assetSymbol": "ETH",
+      "chainId": 3,
+      "explorerUrl": "https://etherscan.io",
+      "providers": [
+        "http://localhost:8545",
+        "http://localhost:7545"
+      ],
+      "signerEndpoint": "http://localhost:8545",
+      "contracts": []
+    }
+  ]
+}

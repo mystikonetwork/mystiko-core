@@ -26,10 +26,15 @@ export class ProviderPool {
     let pGenerator: (rpcEndpoints: string[]) => ethers.providers.Provider;
     if (!providerGenerator) {
       pGenerator = (rpcEndpoints) => {
-        const jsonRpcProviders = rpcEndpoints.map(
-          (rpcEndpoint) => new ethers.providers.JsonRpcProvider(rpcEndpoint),
-        );
-        return new ethers.providers.FallbackProvider(jsonRpcProviders, 1);
+        const jsonRpcProviders = rpcEndpoints.map((rpcEndpoint) => {
+          if (rpcEndpoint.startsWith('wss://') || rpcEndpoint.startsWith('ws://')) {
+            return new ethers.providers.WebSocketProvider(rpcEndpoint);
+          }
+          return new ethers.providers.JsonRpcProvider(rpcEndpoint);
+        });
+        return jsonRpcProviders.length === 1
+          ? jsonRpcProviders[0]
+          : new ethers.providers.FallbackProvider(jsonRpcProviders, 1);
       };
     } else {
       pGenerator = providerGenerator;

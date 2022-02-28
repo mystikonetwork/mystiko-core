@@ -77,26 +77,29 @@ test('test ChainConfig constructor', () => {
   expect(() => new ChainConfig(rawConfig6)).toThrow();
   const rawConfig7 = { ...rawConfig5, providers: ['http://127.0.0.1:7545'] };
   expect(() => new ChainConfig(rawConfig7)).toThrow();
-  const rawConfig8 = { ...rawConfig7, contracts: contractConfigs };
-  const config = new ChainConfig(rawConfig8);
+  const rawConfig8 = { ...rawConfig7, signerEndpoint: 'http://127.0.0.1:7545' };
+  expect(() => new ChainConfig(rawConfig7)).toThrow();
+  const rawConfig9 = { ...rawConfig8, contracts: contractConfigs };
+  const config = new ChainConfig(rawConfig9);
   expect(config.chainId).toBe(123);
   expect(config.name).toBe('Binance Smart Chain');
   expect(config.assetSymbol).toBe('BNB');
   expect(config.assetDecimals).toBe(18);
-  const rawConfig9 = { ...rawConfig8, assetDecimals: 17 };
-  expect(new ChainConfig(rawConfig9).assetDecimals).toBe(17);
+  const rawConfig10 = { ...rawConfig9, assetDecimals: 17 };
+  expect(new ChainConfig(rawConfig10).assetDecimals).toBe(17);
   expect(config.explorerUrl).toBe('https://testnet.bscscan.com');
   expect(config.explorerPrefix).toBe(EXPLORER_DEFAULT_PREFIX);
   expect(config.getTxUrl('a7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69')).toBe(
     'https://testnet.bscscan.com/tx/0xa7109a6824734d49c34e9848028e9309911ea31d69651cea7a6f002f8c8b1a69',
   );
   const newPrefix = `/testnet/tx/${EXPLORER_TX_PLACEHOLDER}`;
-  const rawConfig10 = { ...rawConfig9, explorerPrefix: newPrefix };
-  expect(new ChainConfig(rawConfig10).explorerPrefix).toBe(newPrefix);
-  const rawConfig11 = { ...rawConfig9, explorerPrefix: 'wrong string' };
-  expect(() => new ChainConfig(rawConfig11)).toThrow();
+  const rawConfig11 = { ...rawConfig10, explorerPrefix: newPrefix };
+  expect(new ChainConfig(rawConfig11).explorerPrefix).toBe(newPrefix);
+  const rawConfig12 = { ...rawConfig11, explorerPrefix: 'wrong string' };
+  expect(() => new ChainConfig(rawConfig12)).toThrow();
   expect(config.providers.length).toBe(1);
   expect(config.providers[0]).toBe('http://127.0.0.1:7545');
+  expect(config.signerEndpoint).toBe('http://127.0.0.1:7545');
   expect(config.contracts.length).toBe(6);
   expect(config.contracts[0].toString()).toBe(new ContractConfig(contractConfigs[0]).toString());
   expect(config.contracts[1].toString()).toBe(new ContractConfig(contractConfigs[1]).toString());

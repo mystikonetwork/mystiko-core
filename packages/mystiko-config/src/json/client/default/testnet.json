@@ -7,8 +7,9 @@
       "chainId": 3,
       "explorerUrl": "https://ropsten.etherscan.io",
       "providers": [
-        "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        "wss://ropsten.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
       ],
+      "signerEndpoint": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "contracts": [
         {
           "version": 1,
@@ -143,7 +144,7 @@
           "assetAddress": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
           "peerChainId": 43113,
           "peerContractAddress": "0xf900322b2D706b35F43B9f8D00dc4617292c2697"
-        },    
+        },
 
         {
           "version": 1,
@@ -174,8 +175,9 @@
       "chainId": 5,
       "explorerUrl": "https://goerli.etherscan.io",
       "providers": [
-        "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        "wss://goerli.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
       ],
+      "signerEndpoint": "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "contracts": [
         {
           "version": 1,
@@ -228,8 +230,9 @@
       "chainId": 97,
       "explorerUrl": "https://testnet.bscscan.com",
       "providers": [
-        "https://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
+        "wss://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
+      "signerEndpoint": "https://data-seed-prebsc-2-s2.binance.org:8545",
       "contracts": [
         {
           "version": 1,
@@ -351,8 +354,9 @@
       "chainId": 80001,
       "explorerUrl": "https://mumbai.polygonscan.com",
       "providers": [
-        "https://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
+        "wss://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
+      "signerEndpoint": "https://rpc-mumbai.maticvigil.com",
       "contracts": [
         {
           "version": 1,
@@ -431,8 +435,9 @@
       "chainId": 43113,
       "explorerUrl": "https://testnet.snowtrace.io",
       "providers": [
-        "https://api.avax-test.network/ext/bc/C/rpc"
+        "wss://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet/ws"
       ],
+      "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
       "contracts": [
         {
           "version": 1,
