@@ -4,7 +4,7 @@ pragma solidity ^0.6.11;
 import "./AssetPool.sol";
 
 abstract contract MainAssetPool is AssetPool {
-  function _processDepositTransfer(uint256 amount) internal override {
+  function _processDepositTransfer(uint256 amount, uint256 bridgeFee) internal virtual override {
     require(msg.value == amount, "insufficient token");
   }
 

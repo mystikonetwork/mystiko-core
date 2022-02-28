@@ -10,7 +10,11 @@ abstract contract MystikoWithLoop is Mystiko {
     uint32 _merkleTreeHeight
   ) public Mystiko(address(0), 0, _verifier, _hasher2, _merkleTreeHeight) {}
 
-  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
+  function _sendCrossChainTx(
+    uint256 amount,
+    bytes32 commitmentHash,
+    uint256 bridgeFee
+  ) internal override {
     uint32 leafIndex = _insert(commitmentHash);
     emit MerkleTreeInsert(commitmentHash, leafIndex, amount);
   }

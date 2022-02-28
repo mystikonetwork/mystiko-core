@@ -13,7 +13,7 @@ abstract contract ERC20AssetPool is AssetPool {
     asset = IERC20Metadata(_assetAddress);
   }
 
-  function _processDepositTransfer(uint256 amount) internal override {
+  function _processDepositTransfer(uint256 amount, uint256 bridgeFee) internal virtual override {
     require(msg.value == 0, "no mainnet token allowed");
     asset.safeTransferFrom(msg.sender, address(this), amount);
   }

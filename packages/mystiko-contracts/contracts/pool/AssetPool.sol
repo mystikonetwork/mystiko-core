@@ -2,7 +2,7 @@
 pragma solidity ^0.6.11;
 
 abstract contract AssetPool {
-  function _processDepositTransfer(uint256 amount) internal virtual;
+  function _processDepositTransfer(uint256 amount, uint256 bridgeFee) internal virtual;
 
   function _processRollupFeeTransfer(uint256 amount) internal virtual;
 

@@ -76,6 +76,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
         toFixedLenHex(k),
         toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
+        '0',
         { from: accounts[1] },
       );
       depositTx = await loopContract.deposit(
@@ -84,6 +85,7 @@ contract('MystikoWithLoopERC20', (accounts) => {
         toFixedLenHex(k),
         toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
+        '0',
         {
           from: accounts[1],
           gas: gasEstimated,

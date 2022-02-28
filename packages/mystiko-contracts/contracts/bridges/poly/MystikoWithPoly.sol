@@ -38,7 +38,11 @@ abstract contract MystikoWithPoly is Mystiko, CrossChainDataSerializable {
     return true;
   }
 
-  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
+  function _sendCrossChainTx(
+    uint256 amount,
+    bytes32 commitmentHash,
+    uint256 bridgeFee
+  ) internal override {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
     bytes memory txDataBytes = serializeTxData(txData);
     IEthCrossChainManagerProxy relayProxy = IEthCrossChainManagerProxy(relayProxyAddress);

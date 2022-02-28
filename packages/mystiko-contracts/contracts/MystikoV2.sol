@@ -59,6 +59,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   // Admin related.
   address public operator;
   uint256 public minRollupFee;
+  uint256 public minBridgeFee;
   mapping(address => bool) public rollupWhitelist;
 
   // Some switches.
@@ -99,6 +100,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     treeCapacity = 2**uint256(_treeHeight);
     currentRoot = _zeros(_treeHeight);
     rootHistory[currentRootIndex] = currentRoot;
+    minBridgeFee = 0;
   }
 
   function deposit(
@@ -107,7 +109,8 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 hashK,
     uint128 randomS,
     bytes memory encryptedNote,
-    uint256 rollupFee
+    uint256 rollupFee,
+    uint256 bridgeFee
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(rollupFee >= minRollupFee, "rollup fee too few");
@@ -116,7 +119,7 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
     uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
     depositedCommitments[commitment] = true;
-    _processDepositTransfer(amount + rollupFee);
+    _processDepositTransfer(amount + rollupFee, bridgeFee);
     _processDeposit(amount, commitment, rollupFee);
     emit EncryptedNote(commitment, encryptedNote);
   }
@@ -236,6 +239,14 @@ abstract contract MystikoV2 is AssetPool, ReentrancyGuard {
   function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
     require(_minRollupFee > 0, "invalid _minRollupFee");
     minRollupFee = _minRollupFee;
+  }
+
+  function getMinBridgeFee() public view returns (uint256) {
+    return minBridgeFee;
+  }
+
+  function setMinBridgeFee(uint256 _minBridgeFee) external onlyOperator {
+    minBridgeFee = _minBridgeFee;
   }
 
   function changeOperator(address _newOperator) external onlyOperator {

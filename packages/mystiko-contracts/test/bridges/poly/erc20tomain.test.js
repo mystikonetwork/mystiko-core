@@ -128,6 +128,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         toFixedLenHex(k),
         toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
+        '0',
         { from: accounts[1] },
       );
 
@@ -137,6 +138,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         toFixedLenHex(k),
         toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
+        '0',
         {
           from: accounts[1],
           gas: gasEstimated,

@@ -28,6 +28,8 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
   bool public isDepositsDisabled;
   bool public isVerifierUpdateDisabled;
 
+  uint256 public minBridgeFee;
+
   modifier onlyOperator() {
     require(msg.sender == operator, "Only operator can call this function.");
     _;
@@ -49,6 +51,7 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     verifier = IVerifier(_verifier);
     operator = msg.sender;
     peerContractAddress = address(0);
+    minBridgeFee = 0;
   }
 
   function deposit(
@@ -56,15 +59,18 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     bytes32 commitmentHash,
     bytes32 hashK,
     bytes16 randomS,
-    bytes memory encryptedNote
+    bytes memory encryptedNote,
+    uint256 bridgeFee
   ) public payable {
     require(!isDepositsDisabled, "deposits are disabled");
     require(!depositedCommitments[commitmentHash], "The commitment has been submitted");
+    require(bridgeFee >= minBridgeFee, "bridge fee is too small");
+
     uint256 cHash = uint256(sha256(abi.encodePacked(hashK, amount, randomS))) % FIELD_SIZE;
     require(bytes32(cHash) == commitmentHash, "commitment hash incorrect");
-    _processDepositTransfer(amount);
+    _processDepositTransfer(amount, bridgeFee);
     depositedCommitments[commitmentHash] = true;
-    _sendCrossChainTx(amount, commitmentHash);
+    _sendCrossChainTx(amount, commitmentHash, bridgeFee);
     emit Deposit(amount, commitmentHash, encryptedNote);
   }
 
@@ -89,7 +95,11 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
     emit Withdraw(recipient, rootHash, serialNumber);
   }
 
-  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal virtual;
+  function _sendCrossChainTx(
+    uint256 amount,
+    bytes32 commitmentHash,
+    uint256 bridgeFee
+  ) internal virtual;
 
   function bridgeType() public view virtual returns (string memory);
 
@@ -107,6 +117,10 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
 
   function getIsDepositsDisabled() public view returns (bool) {
     return isDepositsDisabled;
+  }
+
+  function getMinBridgeFee() public view returns (uint256) {
+    return minBridgeFee;
   }
 
   function toggleDeposits(bool _state) external onlyOperator {
@@ -132,5 +146,9 @@ abstract contract Mystiko is MerkleTreeWithHistory, AssetPool, ReentrancyGuard {
 
   function setPeerContractAddress(address _peerContractAddress) external onlyOperator {
     peerContractAddress = _peerContractAddress;
+  }
+
+  function setMinBridgeFee(uint256 _minBridgeFee) external onlyOperator {
+    minBridgeFee = _minBridgeFee;
   }
 }

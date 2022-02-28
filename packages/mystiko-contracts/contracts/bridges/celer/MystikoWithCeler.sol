@@ -36,11 +36,15 @@ abstract contract MystikoWithCeler is Mystiko, IMessageReceiverApp, CrossChainDa
     return true;
   }
 
-  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
+  function _sendCrossChainTx(
+    uint256 amount,
+    bytes32 commitmentHash,
+    uint256 bridgeFee
+  ) internal override {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
     bytes memory txDataBytes = serializeTxData(txData);
     IMessageSenderApp sender = IMessageSenderApp(relayProxyAddress);
-    sender.sendMessage(peerContractAddress, uint256(peerChainId), txDataBytes);
+    sender.sendMessage{value: bridgeFee}(peerContractAddress, uint256(peerChainId), txDataBytes);
   }
 
   function bridgeType() public view override returns (string memory) {

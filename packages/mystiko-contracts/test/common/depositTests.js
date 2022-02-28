@@ -14,6 +14,7 @@ export function testDeposit(
   const commitments = [];
   let minTotalAmount;
   let minRollupFee;
+  let bridgeFee;
   let pkVerify, rawSkVerify, skVerify, pkEnc, rawSkEnc, skEnc;
   let mystikoAddress;
   describe('Test Mystiko deposit operation', () => {
@@ -35,6 +36,7 @@ export function testDeposit(
         commitments.push(commitment);
       }
       minRollupFee = (await mystikoContract.minRollupFee()).toString();
+      bridgeFee = (await mystikoContract.getMinBridgeFee()).toString();
       minTotalAmount = toBN(depositAmount).add(toBN(minRollupFee)).toString();
     });
     it('should revert when deposit is disabled', async () => {
@@ -48,6 +50,7 @@ export function testDeposit(
           commitments[0].randomS.toString(),
           toHex(commitments[0].privateNote),
           minRollupFee,
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0' },
         ),
       );
@@ -62,6 +65,7 @@ export function testDeposit(
           commitments[0].randomS.toString(),
           toHex(commitments[0].privateNote),
           '0',
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0' },
         ),
       );
@@ -75,6 +79,7 @@ export function testDeposit(
           commitments[0].randomS.toString(),
           toHex(commitments[0].privateNote),
           minRollupFee,
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0' },
         ),
       );
@@ -101,6 +106,7 @@ export function testDeposit(
         commitments[0].randomS.toString(),
         toHex(commitments[0].privateNote),
         minRollupFee,
+        bridgeFee,
         { from: accounts[0], value: isMainAsset ? minTotalAmount : '0' },
       );
       const txs = [];
@@ -112,6 +118,7 @@ export function testDeposit(
           commitments[i].randomS.toString(),
           toHex(commitments[i].privateNote),
           minRollupFee,
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: estimateGas },
         );
         expect(await mystikoContract.depositedCommitments(commitments[i].commitmentHash.toString())).to.equal(
@@ -146,6 +153,7 @@ export function testDeposit(
           commitments[0].randomS.toString(),
           toHex(commitments[0].privateNote),
           minRollupFee,
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0' },
         ),
       );
@@ -171,6 +179,7 @@ export function testDeposit(
           commitment.randomS.toString(),
           toHex(commitment.privateNote),
           minRollupFee,
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: 1000000 },
         );
       }
@@ -183,6 +192,7 @@ export function testDeposit(
           commitment.randomS.toString(),
           toHex(commitment.privateNote),
           minRollupFee,
+          bridgeFee,
           { from: accounts[0], value: isMainAsset ? minTotalAmount : '0', gas: 1000000 },
         ),
       );

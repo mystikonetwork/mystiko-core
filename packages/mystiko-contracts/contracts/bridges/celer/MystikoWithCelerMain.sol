@@ -18,4 +18,11 @@ contract MystikoWithCelerMain is MystikoWithCeler, MainAssetPool {
   receive() external payable {
     emit Received(msg.sender, msg.value);
   }
+
+  function _processDepositTransfer(uint256 amount, uint256 bridgeFee)
+    internal
+    override(AssetPool, MainAssetPool)
+  {
+    require(msg.value == amount + bridgeFee, "insufficient token");
+  }
 }

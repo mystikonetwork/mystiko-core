@@ -22,7 +22,11 @@ abstract contract MystikoWithAnySwap is Mystiko, CrossChainDataSerializable {
     _;
   }
 
-  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
+  function _sendCrossChainTx(
+    uint256 amount,
+    bytes32 commitmentHash,
+    uint256 bridgeFee
+  ) internal override {
     CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
     bytes memory txDataBytes = serializeTxData(txData);
     IBillManager sender = IBillManager(relayProxyAddress);
