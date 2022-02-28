@@ -9,6 +9,7 @@
       "providers": [
         "http://localhost:8545"
       ],
+      "signerEndpoint": "http://localhost:8545",
       "contracts": []
     },
     {
@@ -19,6 +20,7 @@
       "providers": [
         "https://localhost:8545"
       ],
+      "signerEndpoint": "http://localhost:8545",
       "contracts": []
     },
     {
@@ -30,6 +32,7 @@
         "http://localhost:8545",
         "http://localhost:7545"
       ],
+      "signerEndpoint": "http://localhost:8545",
       "contracts": []
     }
   ]

@@ -10,6 +10,7 @@
         "http://localhost:8545",
         "https://eth-ropsten.alchemyapi.io/v2/LPkA3Wlc-6tR-ZMGJLBgEhi-HTNo7H1j"
       ],
+      "signerEndpoint": "http://localhost:8545",
       "contracts": [
         {
           "version": 1,
@@ -49,6 +50,7 @@
         "http://localhost:7545",
         "https://bsc-dataseed.binance.org"
       ],
+      "signerEndpoint": "http://localhost:8545",
       "contracts": [
         {
           "version": 1,

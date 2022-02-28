@@ -9,6 +9,7 @@
       "providers": [
         "wss://ropsten.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
       ],
+      "signerEndpoint": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "contracts": [
         {
           "version": 1,
@@ -176,6 +177,7 @@
       "providers": [
         "wss://goerli.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
       ],
+      "signerEndpoint": "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "contracts": [
         {
           "version": 1,
@@ -230,6 +232,7 @@
       "providers": [
         "wss://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
+      "signerEndpoint": "https://data-seed-prebsc-2-s2.binance.org:8545",
       "contracts": [
         {
           "version": 1,
@@ -353,6 +356,7 @@
       "providers": [
         "wss://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ],
+      "signerEndpoint": "https://rpc-mumbai.maticvigil.com",
       "contracts": [
         {
           "version": 1,
@@ -433,6 +437,7 @@
       "providers": [
         "wss://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet/ws"
       ],
+      "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
       "contracts": [
         {
           "version": 1,
