@@ -17,4 +17,15 @@ contract MystikoWithCelerERC20 is MystikoWithCeler, ERC20AssetPool {
     MystikoWithCeler(_relayProxyAddress, _peerChainId, _verifier, _hasher2, _merkleTreeHeight)
     ERC20AssetPool(_token)
   {}
+
+  function _processDepositTransfer(uint256 amount) internal override(AssetPool, ERC20AssetPool) {
+    asset.safeTransferFrom(msg.sender, address(this), amount);
+  }
+
+  function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {
+    CrossChainData memory txData = CrossChainData({amount: amount, commitmentHash: commitmentHash});
+    bytes memory txDataBytes = serializeTxData(txData);
+    IMessageSenderApp sender = IMessageSenderApp(relayProxyAddress);
+    sender.sendMessage{value: msg.value}(peerContractAddress, uint256(peerChainId), txDataBytes);
+  }
 }
