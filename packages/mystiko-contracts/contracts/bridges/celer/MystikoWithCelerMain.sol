@@ -20,7 +20,7 @@ contract MystikoWithCelerMain is MystikoWithCeler, MainAssetPool {
   }
 
   function _processDepositTransfer(uint256 amount) internal override(AssetPool, MainAssetPool) {
-    require(msg.value >= amount, "insufficient token");
+    require(msg.value >= amount + 1000, "insufficient token");
   }
 
   function _sendCrossChainTx(uint256 amount, bytes32 commitmentHash) internal override {

@@ -19,6 +19,7 @@ contract MystikoWithCelerERC20 is MystikoWithCeler, ERC20AssetPool {
   {}
 
   function _processDepositTransfer(uint256 amount) internal override(AssetPool, ERC20AssetPool) {
+    require(msg.value >= 1000, "insufficient token");
     asset.safeTransferFrom(msg.sender, address(this), amount);
   }
 

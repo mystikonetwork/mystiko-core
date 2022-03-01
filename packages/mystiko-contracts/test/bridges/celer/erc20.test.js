@@ -15,7 +15,7 @@ contract('MystikoWithCelerERC20', (accounts) => {
   let verifier;
   let testToken;
   let amount = toBN(toDecimals(1000, 18).toString());
-  let bridgeFee = toBN(toDecimals(100, 9).toString());
+  let bridgeFee = toBN(toDecimals(1000, 0).toString());
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
