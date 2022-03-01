@@ -15,6 +15,7 @@ contract('MystikoWithCelerERC20', (accounts) => {
   let verifier;
   let testToken;
   let amount = toBN(toDecimals(1000, 18).toString());
+  let bridgeFee = toBN(toDecimals(1000, 0).toString());
 
   before(async () => {
     const { MERKLE_TREE_HEIGHT } = process.env;
@@ -125,7 +126,7 @@ contract('MystikoWithCelerERC20', (accounts) => {
         toFixedLenHex(k),
         toFixedLenHex(randomS, v1Protocol.RANDOM_SK_SIZE),
         toHex(privateNote),
-        { from: accounts[1] },
+        { from: accounts[1], value: toHex(bridgeFee) },
       );
 
       let balance = await web3.eth.getBalance(mystikoCoreSourceERC20.address);
@@ -144,13 +145,14 @@ contract('MystikoWithCelerERC20', (accounts) => {
         {
           from: accounts[1],
           gas: gasEstimated,
+          value: toHex(bridgeFee),
         },
       );
 
       balance = await web3.eth.getBalance(mystikoCoreSourceERC20.address);
       expect(balance.toString()).to.equal('0');
       balance = await web3.eth.getBalance(relayProxy.address);
-      expect(balance.toString()).to.equal('0');
+      expect(balance.toString()).to.equal(bridgeFee.toString());
       balance = await web3.eth.getBalance(mystikoCoreDestinationERC20.address);
       expect(balance.toString()).to.equal('0');
 
