@@ -17,6 +17,7 @@ export interface RawContractConfig {
   minBridgeFee?: string;
   syncStart?: number;
   circuits: string;
+  depositDisabled?: boolean;
 }
 
 /**
@@ -168,6 +169,14 @@ export class ContractConfig extends BaseConfig {
    */
   public get circuits(): string {
     return this.asRawContractConfig().circuits;
+  }
+
+  /**
+   * @property {boolean} depositDisabled
+   * @desc whether this contract's deposit has been disabled.
+   */
+  public get depositDisabled(): boolean {
+    return this.asRawContractConfig().depositDisabled || false;
   }
 
   private checkContractName() {

@@ -20,6 +20,7 @@ export interface RawContract {
   syncStart?: number;
   circuits?: string;
   syncedBlock?: number;
+  depositDisabled?: boolean;
 }
 
 /**
@@ -212,6 +213,18 @@ export class Contract extends BaseModel {
 
   public set circuits(scheme: string | undefined) {
     this.asRawContract().circuits = scheme;
+  }
+
+  /**
+   * @property {boolean} depositDisabled
+   * @desc whether this contract's deposit has been disabled.
+   */
+  public get depositDisabled(): boolean {
+    return this.asRawContract().depositDisabled || false;
+  }
+
+  public set depositDisabled(flag: boolean) {
+    this.asRawContract().depositDisabled = flag;
   }
 
   /**

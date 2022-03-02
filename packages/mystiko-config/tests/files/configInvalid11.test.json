@@ -47,18 +47,16 @@
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "assetAddress": "0x65b515536364a36e28d38b233d3d335b3f035519",
-          "circuits": "circom-1.0",
-          "depositDisabled": true
+          "circuits": "circom-1.0"
         },
         {
           "version": 1,
           "name": "MystikoWithLoopERC20",
-          "address": "0x2856cf9905d923469bb749e9787fc953b0a321e8",
-          "assetSymbol": "USDC",
+          "address": "0x9914496decf95a5fbf391f51c52236ad6f2a4d98",
+          "assetSymbol": "MTT",
           "assetDecimals": 18,
-          "assetAddress": "0xb08aa0e20a4aebc8e2b99d3247975d1c02959cfd",
-          "circuits": "circom-1.0",
-          "depositDisabled": false
+          "assetAddress": "0x65b515536364a36e28d38b233d3d335b3f035519",
+          "circuits": "circom-1.0"
         }
       ]
     },
