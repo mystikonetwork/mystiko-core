@@ -369,48 +369,48 @@
           {
             "network": "goerli",
             "token": "ETH",
-            "address": "0x5475F4AcD54D6d98Ff607C4305A79A02EB64f1e2"
+            "address": "0x75619A701a4993EbB6f4A5E990adbDE709735145"
           },
           {
             "network": "bsctestnet",
             "token": "mETH",
-            "address": "0x029d1cB61F1Fdba240fd03Bf46Bac75b887F2EDC"
+            "address": "0x3F727cFF6e7558A17D48a6E3b5Afc264e5d1B63F"
           }
         ],
         [
           {
             "network": "goerli",
             "token": "MTT",
-            "address": "0x1c72e89017aC273BbC998fD62bca865c2208cA59"
+            "address": "0xC0bF2e5F03ca15df1b2b30d2024245F6dFd4354A"
           },
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": "0x5475F4AcD54D6d98Ff607C4305A79A02EB64f1e2"
+            "address": "0xDdc67fd0a242b637Afc438C6dA7045F05412A4F7"
           }
         ],
         [
           {
             "network": "goerli",
             "token": "mUSD",
-            "address": "0xFf8914EC09cD7E40aBeD95F92ef6c539C127C9cF"
+            "address": "0x66d5E69ce90540b04c9C2e8AfB9838AA38be7Ef5"
           },
           {
             "network": "bsctestnet",
             "token": "mUSD",
-            "address": "0x40e1eE77c2D51cfBb0BF7ee733CB65C285517523"
+            "address": "0x54c2557b9061c1581b4779380Af38BCA4d6bD5fD"
           }
         ],
         [
           {
             "network": "goerli",
             "token": "mBNB",
-            "address": "0x8b1b69c704F0015aeCc69d712423476355c461B4"
+            "address": "0x0B0DC00755d0deC2a6a0eb45d588C29c0C5A6a4C"
           },
           {
             "network": "bsctestnet",
             "token": "BNB",
-            "address": "0x055F611f9ca3eBf30bdA1f030e37fFB0511464E1"
+            "address": "0xd46173DB05a6A0577e07B35036134AcCE7837163"
           }
         ]
       ]
