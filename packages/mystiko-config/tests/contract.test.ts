@@ -33,6 +33,7 @@ test('test ContractConfig constructor', () => {
   expect(conf1.minBridgeFee.toNumber()).toBe(0);
   expect(conf1.syncStart).toBe(0);
   expect(conf1.circuits).toBe('circom-1.0');
+  expect(conf1.depositDisabled).toBe(false);
   const rawConfig10 = { ...rawConfig9, name: 'MystikoWithPolyERC20', peerChainId: 10 };
   expect(() => new ContractConfig(rawConfig10)).toThrow();
   const rawConfig11 = {
@@ -56,4 +57,7 @@ test('test ContractConfig constructor', () => {
   const rawConfig16 = { ...rawConfig14, syncStart: 456 };
   const conf4 = new ContractConfig(rawConfig16);
   expect(conf4.syncStart).toBe(456);
+  const rawConfig17 = { ...rawConfig16, depositDisabled: true };
+  const conf5 = new ContractConfig(rawConfig17);
+  expect(conf5.depositDisabled).toBe(true);
 });

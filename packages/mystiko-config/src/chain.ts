@@ -166,20 +166,32 @@ export class ChainConfig extends BaseConfig {
   /**
    * @desc get the array of supported asset symbols for the given peer chain id.
    * @param {number} peerChainId peer chain id
+   * @param {function} [contractFilter] filter for filter out some contracts.
    * @returns {string[]} the array of asset symbols.
    */
-  public getAssetSymbols(peerChainId: number): string[] {
+  public getAssetSymbols(
+    peerChainId: number,
+    contractFilter?: (config?: ContractConfig) => boolean,
+  ): string[] {
     const symbols: { [key: string]: boolean } = {};
-    this.contractAddresses.forEach((address) => {
-      const contract = this.getContract(address);
-      if (contract) {
-        if (contract.bridgeType === BridgeType.LOOP && this.chainId === peerChainId) {
-          symbols[contract.assetSymbol] = true;
-        } else if (contract.peerChainId === peerChainId) {
-          symbols[contract.assetSymbol] = true;
+    this.contractAddresses
+      .filter((address) => {
+        const contract = this.getContract(address);
+        if (contractFilter) {
+          return contractFilter(contract);
         }
-      }
-    });
+        return !!contract;
+      })
+      .forEach((address) => {
+        const contract = this.getContract(address);
+        if (contract) {
+          if (contract.bridgeType === BridgeType.LOOP && this.chainId === peerChainId) {
+            symbols[contract.assetSymbol] = true;
+          } else if (contract.peerChainId === peerChainId) {
+            symbols[contract.assetSymbol] = true;
+          }
+        }
+      });
     return Object.keys(symbols);
   }
 

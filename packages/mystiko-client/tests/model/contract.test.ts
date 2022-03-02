@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { MystikoABI, AssetType, BridgeType } from '@mystiko/config';
 import { Contract } from '../../src';
 
@@ -17,6 +18,9 @@ test('test Contract getters/setters', () => {
   expect(contract.circuits).toBe(undefined);
   expect(contract.syncedBlock).toBe(0);
   expect(contract.abi).toBe(undefined);
+  expect(contract.depositDisabled).toBe(false);
+  expect(contract.minBridgeFee.toNumber()).toBe(0);
+  expect(contract.syncStart).toBe(0);
 
   contract.version = 12;
   expect(contract.version).toBe(12);
@@ -56,4 +60,10 @@ test('test Contract getters/setters', () => {
   expect(contract.abi).toStrictEqual(MystikoABI.MystikoWithLoopMain.abi);
   contract.name = 'Wrong Contract';
   expect(contract.abi).toBe(undefined);
+  contract.depositDisabled = true;
+  expect(contract.depositDisabled).toBe(true);
+  contract.minBridgeFee = new BN(123);
+  expect(contract.minBridgeFee.toNumber()).toBe(123);
+  contract.syncStart = 456;
+  expect(contract.syncStart).toBe(456);
 });

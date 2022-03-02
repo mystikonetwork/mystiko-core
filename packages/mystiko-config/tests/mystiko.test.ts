@@ -6,10 +6,13 @@ test('test getContractConfig', async () => {
   expect(() => conf.getContractConfig(1, 56, 'USDT', BridgeType.LOOP)).toThrow();
   expect(() => conf.getContractConfig(200, 200, 'USDT', BridgeType.LOOP)).toThrow();
   expect(() => conf.getContractConfig(1, 188, 'USDT', BridgeType.POLY)).toThrow();
+  expect(() => conf.getContractConfig(1, 1, 'MTT', BridgeType.LOOP)).toThrow();
   const contractConf1 = conf.getContractConfig(1, 56, 'USDT', BridgeType.POLY);
   expect(contractConf1.address).toBe('0x8fb1df17768e29c936edfbce1207ad13696268b7');
   const contractConf2 = conf.getContractConfig(1, 1, 'ETH', BridgeType.LOOP);
   expect(contractConf2.address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
+  const contractConf3 = conf.getContractConfig(1, 1, 'USDC', BridgeType.LOOP);
+  expect(contractConf3.address).toBe('0x2856cf9905d923469bb749e9787fc953b0a321e8');
 });
 
 test('test readFromFile', async () => {
@@ -24,11 +27,12 @@ test('test readFromFile', async () => {
       .map((c) => c.chainId)
       .sort(),
   ).toEqual([1, 56].sort());
-  expect(conf.getAssetSymbols(1, 1).sort()).toEqual(['ETH', 'USDT'].sort());
+  expect(conf.getAssetSymbols(1, 1).sort()).toEqual(['ETH', 'USDC', 'USDT'].sort());
   expect(conf.getAssetSymbols(1, 56).sort()).toEqual(['USDT'].sort());
   expect(conf.getAssetSymbols(1, 100)).toEqual([]);
   expect(conf.getAssetSymbols(100, 56)).toEqual([]);
   expect(conf.getBridges(1, 1, 'USDT')).toEqual([]);
+  expect(conf.getBridges(1, 1, 'USDC')).toEqual([]);
   expect(conf.getBridges(1, 56, 'USDT').map((b) => b.type)).toEqual([BridgeType.POLY]);
   expect(conf.getBridges(1, 56, 'ETH')).toEqual([]);
   expect(conf.getChainConfig(100)).toBe(undefined);
@@ -51,6 +55,7 @@ test('test readFromFile', async () => {
   await expect(readFromFile('tests/files/configInvalid8.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/files/configInvalid9.test.json')).rejects.toThrow();
   await expect(readFromFile('tests/files/configInvalid10.test.json')).rejects.toThrow();
+  await expect(readFromFile('tests/files/configInvalid11.test.json')).rejects.toThrow();
 });
 
 test('test explorer url getters', async () => {

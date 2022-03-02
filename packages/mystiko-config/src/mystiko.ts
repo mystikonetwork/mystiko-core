@@ -99,7 +99,7 @@ export class MystikoConfig extends BaseConfig {
   public getAssetSymbols(srcChainId: number, dstChainId: number): string[] {
     const chainConfig = this.getChainConfig(srcChainId);
     if (chainConfig) {
-      return chainConfig.getAssetSymbols(dstChainId);
+      return chainConfig.getAssetSymbols(dstChainId, MystikoConfig.depositContractFilter);
     }
     return [];
   }
@@ -120,7 +120,7 @@ export class MystikoConfig extends BaseConfig {
     if (srcChainId !== dstChainId) {
       const chainConfig = this.getChainConfig(srcChainId);
       if (chainConfig) {
-        chainConfig.contracts.forEach((contractConfig) => {
+        chainConfig.contracts.filter(MystikoConfig.depositContractFilter).forEach((contractConfig) => {
           if (dstChainId === contractConfig.peerChainId && assetSymbol === contractConfig.assetSymbol) {
             const bridgeConfig = this.getBridgeConfig(contractConfig.bridgeType);
             if (bridgeConfig) {
@@ -167,8 +167,9 @@ export class MystikoConfig extends BaseConfig {
     }
     const srcChainConfig = this.asRawMystikoConfig().wrappedChains[srcChainId];
     check(!!srcChainConfig, `chain ${srcChainId} does not exist in config`);
-    for (let i = 0; i < srcChainConfig.contracts.length; i += 1) {
-      const contract = srcChainConfig.contracts[i];
+    const contracts = srcChainConfig.contracts.filter(MystikoConfig.depositContractFilter);
+    for (let i = 0; i < contracts.length; i += 1) {
+      const contract = contracts[i];
       if (contract.assetSymbol === assetSymbol && contract.bridgeType === bridge) {
         if (bridge === BridgeType.LOOP) {
           return contract;
@@ -265,7 +266,18 @@ export class MystikoConfig extends BaseConfig {
   private validateConfig() {
     const rawConfig = this.asRawMystikoConfig();
     this.chains.forEach((chainConfig) => {
+      const duplicates: { [key: string]: string } = {};
       chainConfig.contracts.forEach((contract) => {
+        if (MystikoConfig.depositContractFilter(contract)) {
+          const key = `${contract.peerChainId || chainConfig.chainId}/${contract.assetSymbol}/${
+            contract.bridgeType
+          }/`;
+          check(
+            !duplicates[key],
+            `duplicate contract(${contract.address} vs ${duplicates[key]}) with same asset symbol and bridge type`,
+          );
+          duplicates[key] = contract.address;
+        }
         if (contract.bridgeType !== BridgeType.LOOP) {
           check(!!rawConfig.wrappedBridges[contract.bridgeType], `no bridge ${contract.bridgeType} config`);
           if (contract.peerChainId) {
@@ -298,6 +310,10 @@ export class MystikoConfig extends BaseConfig {
 
   private asRawMystikoConfig(): RawMystikoConfig {
     return this.config as RawMystikoConfig;
+  }
+
+  private static depositContractFilter(contractConfig?: ContractConfig): boolean {
+    return contractConfig ? !contractConfig.depositDisabled : false;
   }
 }
 

@@ -60,6 +60,17 @@ const contractConfigs = [
     peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
     circuits: 'circom-1.0',
   },
+  {
+    version: 1,
+    name: 'MystikoWithPolyMain',
+    address: '0xc83cc3d27fbe6dc046bb109eadba117e3da06c56',
+    assetSymbol: 'BNB',
+    assetDecimals: 18,
+    peerChainId: 30,
+    peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
+    circuits: 'circom-1.0',
+    depositDisabled: true,
+  },
 ];
 
 test('test ChainConfig constructor', () => {
@@ -100,19 +111,22 @@ test('test ChainConfig constructor', () => {
   expect(config.providers.length).toBe(1);
   expect(config.providers[0]).toBe('http://127.0.0.1:7545');
   expect(config.signerEndpoint).toBe('http://127.0.0.1:7545');
-  expect(config.contracts.length).toBe(6);
+  expect(config.contracts.length).toBe(7);
   expect(config.contracts[0].toString()).toBe(new ContractConfig(contractConfigs[0]).toString());
   expect(config.contracts[1].toString()).toBe(new ContractConfig(contractConfigs[1]).toString());
   expect(config.contracts[2].toString()).toBe(new ContractConfig(contractConfigs[2]).toString());
   expect(config.contracts[3].toString()).toBe(new ContractConfig(contractConfigs[3]).toString());
   expect(config.contracts[4].toString()).toBe(new ContractConfig(contractConfigs[4]).toString());
   expect(config.contracts[5].toString()).toBe(new ContractConfig(contractConfigs[5]).toString());
-  expect(config.contractAddresses.length).toBe(6);
-  expect(config.peerChainIds.sort()).toEqual([10, 20, 123].sort());
+  expect(config.contracts[6].toString()).toBe(new ContractConfig(contractConfigs[6]).toString());
+  expect(config.contractAddresses.length).toBe(7);
+  expect(config.peerChainIds.sort()).toEqual([10, 20, 123, 30].sort());
   expect(config.getAssetSymbols(1000)).toEqual([]);
   expect(config.getAssetSymbols(10).sort()).toEqual(['BNB', 'USDT'].sort());
   expect(config.getAssetSymbols(20).sort()).toEqual(['BNB', 'USDT'].sort());
   expect(config.getAssetSymbols(123).sort()).toEqual(['ETH', 'USDT'].sort());
+  expect(config.getAssetSymbols(30).sort()).toEqual(['BNB']);
+  expect(config.getAssetSymbols(30, (conf) => !!conf && !conf.depositDisabled)).toEqual([]);
   expect(() => config.getContract('0xdeadbeef')).toThrow();
   expect(config.getContract('0x243752cf8a2612373aef8d17b8c474214ba3ce24')).toBe(undefined);
   expect(config.getContract('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879')?.toString()).toBe(
