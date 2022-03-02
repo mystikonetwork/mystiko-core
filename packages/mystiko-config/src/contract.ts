@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { check } from '@mystiko/utils';
 import { BaseConfig, AssetType, BridgeType } from './base';
 import { ContractMeta, MystikoABI, MystikoContractMeta } from './abi';
@@ -13,6 +14,8 @@ export interface RawContractConfig {
   assetDecimals: number;
   peerChainId?: number;
   peerContractAddress?: string;
+  minBridgeFee?: string;
+  syncStart?: number;
   circuits: string;
 }
 
@@ -38,6 +41,10 @@ export class ContractConfig extends BaseConfig {
       BaseConfig.checkNumber(this.config, 'peerChainId');
       BaseConfig.checkEthAddress(this.config, 'peerContractAddress');
     }
+    BaseConfig.checkNumberString(this.config, 'minBridgeFee', false);
+    check(this.minBridgeFee.gte(new BN(0)), 'minBridgeFee should not be negative');
+    BaseConfig.checkNumber(this.config, 'syncStart', false);
+    check(this.syncStart >= 0, 'syncStart should not be negative');
     BaseConfig.checkString(this.config, 'circuits');
   }
 
@@ -135,6 +142,24 @@ export class ContractConfig extends BaseConfig {
       return this.asRawContractConfig().peerContractAddress;
     }
     return undefined;
+  }
+
+  /**
+   * @property {BN} bridgeFee
+   * @desc the minimum number of bridge fee if this is a cross-chain contract. The bridge fee amount should be
+   * in wei as unit.
+   */
+  public get minBridgeFee(): BN {
+    const rawConfig = this.asRawContractConfig();
+    return rawConfig.minBridgeFee ? new BN(rawConfig.minBridgeFee) : new BN(0);
+  }
+
+  /**
+   * @property {number} syncStart
+   * @desc the block number from where the application should start synchronization.
+   */
+  public get syncStart(): number {
+    return this.asRawContractConfig().syncStart || 0;
   }
 
   /**

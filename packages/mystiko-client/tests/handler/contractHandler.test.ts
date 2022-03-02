@@ -22,7 +22,7 @@ test('test importFromConfig', async () => {
     assetDecimals: 10,
   });
   await contractHandler.importFromConfig();
-  expect(contractHandler.getContracts().length).toBe(4);
+  expect(contractHandler.getContracts().length).toBe(8);
   expect(contractHandler.getContract(1, '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879')?.assetDecimals).toBe(
     18,
   );
@@ -45,10 +45,10 @@ test('test getContracts', async () => {
   expect(contracts.length).toBe(1);
   expect(contracts[0].address).toBe('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
   contracts = contractHandler.getContracts({ sortBy: 'assetSymbol' });
-  expect(contracts.length).toBe(4);
+  expect(contracts.length).toBe(8);
   expect(contracts[0].address).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
   contracts = contractHandler.getContracts({ sortBy: 'assetType', desc: true });
-  expect(contracts.length).toBe(4);
+  expect(contracts.length).toBe(8);
   expect(contracts[0].assetType).toBe(AssetType.MAIN);
   contracts = contractHandler.getContracts({ offset: 2, limit: 2 });
   expect(contracts.length).toBe(2);

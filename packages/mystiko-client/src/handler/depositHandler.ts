@@ -1,5 +1,6 @@
+import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { AssetType, BridgeType, MystikoConfig } from '@mystiko/config';
+import { AssetType, BridgeType, ContractConfig, MystikoConfig } from '@mystiko/config';
 import {
   check,
   errorMessage,
@@ -131,15 +132,23 @@ export class DepositHandler extends Handler {
     deposit.status = DepositStatus.INIT;
     this.db.deposits.insert(deposit.data);
     await this.saveDatabase();
-    const depositPromise = this.approveAsset(signer, deposit, depositContracts, statusCallback)
-      .then((newDeposit) =>
-        this.sendDeposit(
-          signer,
-          newDeposit,
-          depositContracts,
-          contractConfig.assetType === AssetType.MAIN,
-          statusCallback,
-        ).then((txReceipt) => this.createPrivateNoteIfNecessary(deposit, txReceipt)),
+    const depositPromise = DepositHandler.checkBalance(
+      deposit,
+      signer,
+      contractConfig,
+      depositContracts.asset,
+    )
+      .then(() =>
+        this.approveAsset(signer, deposit, depositContracts, statusCallback).then((newDeposit) =>
+          this.sendDeposit(
+            signer,
+            newDeposit,
+            contractConfig,
+            depositContracts,
+            contractConfig.assetType === AssetType.MAIN,
+            statusCallback,
+          ).then((txReceipt) => this.createPrivateNoteIfNecessary(deposit, txReceipt)),
+        ),
       )
       .then(() => (deposit.id ? this.getDeposit(deposit.id) || deposit : deposit))
       .catch((error) => {
@@ -313,8 +322,6 @@ export class DepositHandler extends Handler {
       if (asset) {
         const assetContract = asset.connect(signer.signer);
         const spenderAddress = protocol.address;
-        const balance = await asset.balanceOf(deposit.srcAddress);
-        check(toBN(toString(balance)).gte(deposit.amount), 'insufficient balance');
         const allowance = await asset.allowance(deposit.srcAddress, spenderAddress);
         const allowanceBN = toBN(allowance.toString());
         if (allowanceBN.lt(deposit.amount)) {
@@ -340,9 +347,6 @@ export class DepositHandler extends Handler {
           newDeposit.assetApproveTxHash = txReceipt.transactionHash;
           return this.updateDepositStatus(newDeposit, newStatus, statusCallback);
         }
-      } else {
-        const balance = await signer.signer.getBalance();
-        check(deposit.amount.lte(toBN(toString(balance))), 'insufficient balance');
       }
     }
     return this.updateDepositStatus(deposit, DepositStatus.ASSET_APPROVED, statusCallback);
@@ -351,6 +355,7 @@ export class DepositHandler extends Handler {
   private async sendDeposit(
     signer: BaseSigner,
     deposit: Deposit,
+    contractConfig: ContractConfig,
     depositContracts: { asset: ethers.Contract | undefined; protocol: ethers.Contract },
     isMainAsset: boolean,
     statusCallback?: (deposit: Deposit, oldStatus: DepositStatus, newStatus: DepositStatus) => void,
@@ -373,7 +378,11 @@ export class DepositHandler extends Handler {
       toFixedLenHex(deposit.hashK),
       toFixedLenHex(deposit.randomS, this.protocol.RANDOM_SK_SIZE),
       toHex(deposit.privateNote),
-      { value: isMainAsset ? deposit.amount.toString() : '0' },
+      {
+        value: isMainAsset
+          ? deposit.amount.add(contractConfig.minBridgeFee).toString()
+          : contractConfig.minBridgeFee.toString(),
+      },
     );
     this.logger.info(
       `deposit transaction for deposit(id=${deposit.id}) is submitted ` +
@@ -395,5 +404,25 @@ export class DepositHandler extends Handler {
       }
     }
     return txReceipt;
+  }
+
+  private static async checkBalance(
+    deposit: Deposit,
+    signer: BaseSigner,
+    contractConfig: ContractConfig,
+    asset: ethers.Contract | undefined,
+  ) {
+    if (contractConfig.assetType === AssetType.MAIN || contractConfig.minBridgeFee.gtn(0)) {
+      const balance = await signer.signer.getBalance();
+      const expectedBalance =
+        contractConfig.assetType === AssetType.MAIN && deposit.amount
+          ? deposit.amount.add(contractConfig.minBridgeFee)
+          : contractConfig.minBridgeFee;
+      check(expectedBalance.lte(toBN(toString(balance))), 'insufficient balance');
+    }
+    if (contractConfig.assetType !== AssetType.MAIN && asset) {
+      const balance = await asset.balanceOf(deposit.srcAddress);
+      check(toBN(toString(balance)).gte(deposit.amount || new BN(0)), 'insufficient balance');
+    }
   }
 }

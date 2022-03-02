@@ -17,6 +17,7 @@ export interface RawChainConfig {
   signerEndpoint: string;
   contracts: RawContractConfig[];
   wrappedContracts: ContractConfig[];
+  syncSize?: number;
 }
 
 /**
@@ -51,6 +52,7 @@ export class ChainConfig extends BaseConfig {
       this.contractByAddress[contractConfig.address] = contractConfig;
       return contractConfig;
     });
+    BaseConfig.checkNumber(this.config, 'syncSize', false);
   }
 
   /**
@@ -179,6 +181,13 @@ export class ChainConfig extends BaseConfig {
       }
     });
     return Object.keys(symbols);
+  }
+
+  /**
+   * @desc get maximum number of blocks every sync queries. If it is undefined, it means there's no limit
+   */
+  public get syncSize(): number | undefined {
+    return this.asRawChainConfig().syncSize;
   }
 
   /**

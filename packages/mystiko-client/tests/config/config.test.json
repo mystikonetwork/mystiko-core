@@ -39,6 +39,29 @@
           "peerChainId": 56,
           "peerContractAddress": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
           "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithCelerERC20",
+          "address": "0x7ee3898ed0cbfa67457d504915ca3d8bf9114dab",
+          "assetSymbol": "USDT",
+          "assetDecimals": 18,
+          "assetAddress": "0x26fc224b37952bd12c792425f242e0b0a55453a6",
+          "peerChainId": 56,
+          "peerContractAddress": "0x0ae943774f9a4badd54d163fc12748dffa4413b8",
+          "minBridgeFee": "2000000000000000000",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithCelerMain",
+          "address": "0x615057afcd67324059b1671ec0db6f918f365656",
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "peerChainId": 56,
+          "peerContractAddress": "0xc74aeeba5887973f6697b6bcdc28c579d4407a1f",
+          "minBridgeFee": "1000",
+          "circuits": "circom-1.0"
         }
       ]
     },
@@ -63,6 +86,30 @@
           "peerChainId": 1,
           "peerContractAddress": "0x8fb1df17768e29c936edfbce1207ad13696268b7",
           "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithCelerERC20",
+          "address": "0x0ae943774f9a4badd54d163fc12748dffa4413b8",
+          "assetSymbol": "USDT",
+          "assetDecimals": 18,
+          "assetAddress": "0x3162b6ce79df04608db04a8d609f83521c3cf9ae",
+          "peerChainId": 1,
+          "peerContractAddress": "0x7ee3898ed0cbfa67457d504915ca3d8bf9114dab",
+          "minBridgeFee": "2000000000000000000",
+          "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithCelerERC20",
+          "address": "0xc74aeeba5887973f6697b6bcdc28c579d4407a1f",
+          "assetSymbol": "mETH",
+          "assetDecimals": 18,
+          "assetAddress": "0xfbb289d8f597d6e15575d85aae8bf6bcc3e1dfc9",
+          "peerChainId": 1,
+          "peerContractAddress": "0x615057afcd67324059b1671ec0db6f918f365656",
+          "minBridgeFee": "1000",
+          "circuits": "circom-1.0"
         }
       ]
     }
@@ -75,6 +122,10 @@
       "explorerPrefix": "/testnet/tx/%tx%",
       "apiUrl": "https://explorer.poly.network",
       "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+    },
+    {
+      "name": "Celer Network",
+      "type": "celer"
     }
   ],
   "circuits": [

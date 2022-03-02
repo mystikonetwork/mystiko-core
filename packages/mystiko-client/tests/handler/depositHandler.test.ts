@@ -104,6 +104,8 @@ class MockMystikoContract extends ethers.Contract {
 
   private readonly isMain: boolean;
 
+  private readonly minBridgeFee: BN;
+
   public tx?: MockTransactionResponse;
 
   constructor(
@@ -112,10 +114,12 @@ class MockMystikoContract extends ethers.Contract {
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
     errorMessage?: string,
     isMain?: boolean,
+    minBridgeFee?: BN,
   ) {
     super(address, abi, providerOrSigner);
     this.errorMessage = errorMessage;
     this.isMain = isMain || false;
+    this.minBridgeFee = minBridgeFee || new BN(0);
   }
 
   public connect(providerOrSigner: any) {
@@ -138,9 +142,9 @@ class MockMystikoContract extends ethers.Contract {
     expect(randomS.startsWith('0x') && randomS.length === 66);
     expect(privateNote.startsWith('0x'));
     if (this.isMain) {
-      expect(params.value).toBe(amount);
+      expect(params.value).toBe(this.minBridgeFee.add(new BN(amount)).toString());
     } else {
-      expect(params.value).toBe('0');
+      expect(params.value).toBe(this.minBridgeFee.toString());
     }
     return new Promise((resolve, reject) => {
       if (this.errorMessage) {
@@ -608,4 +612,58 @@ test('test insufficient balance', async () => {
   ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
   expect(depositHandler.getDeposit(ret.deposit || -1)?.errorMessage).not.toBe(undefined);
+});
+
+test('test minBridgeFee main token', async () => {
+  const request = {
+    srcChainId: 1,
+    dstChainId: 56,
+    assetSymbol: 'ETH',
+    bridge: BridgeType.CELER,
+    amount: 200,
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+  };
+  await contractPool.connect(contractHandler.getContracts(), (address, abi, providerOrSigner) => {
+    if (abi === MystikoABI.ERC20.abi) {
+      const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
+      return new MockERC20Contract(address, abi, defaultOwner, 0);
+    }
+    return new MockMystikoContract(address, abi, providerOrSigner, undefined, true, new BN(1000));
+  });
+  let signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 200);
+  let ret = await depositHandler.createDeposit(request, signer);
+  await ret.depositPromise;
+  expect(depositHandler.getDeposit(ret.deposit || -1)?.errorMessage).not.toBe(undefined);
+  signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 300);
+  ret = await depositHandler.createDeposit(request, signer);
+  await ret.depositPromise;
+  expect(depositHandler.getDeposit(ret.deposit || -1)?.errorMessage).toBe(undefined);
+});
+
+test('test minBridgeFee erc20', async () => {
+  const request = {
+    srcChainId: 1,
+    dstChainId: 56,
+    assetSymbol: 'USDT',
+    bridge: BridgeType.CELER,
+    amount: 200,
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+  };
+  await contractPool.connect(contractHandler.getContracts(), (address, abi, providerOrSigner) => {
+    if (abi === MystikoABI.ERC20.abi) {
+      const defaultOwner = '0x7dfb6962c9974bf6334ab587b77030515886e96f';
+      return new MockERC20Contract(address, abi, defaultOwner, 200);
+    }
+    return new MockMystikoContract(address, abi, providerOrSigner, undefined, false, toDecimals(2));
+  });
+  let signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 1);
+  let ret = await depositHandler.createDeposit(request, signer);
+  await ret.depositPromise;
+  expect(depositHandler.getDeposit(ret.deposit || -1)?.errorMessage).not.toBe(undefined);
+  signer = new MockSigner(conf, '0x7dfb6962c9974bf6334ab587b77030515886e96f', 1, 2);
+  ret = await depositHandler.createDeposit(request, signer);
+  await ret.depositPromise;
+  expect(depositHandler.getDeposit(ret.deposit || -1)?.errorMessage).toBe(undefined);
 });
