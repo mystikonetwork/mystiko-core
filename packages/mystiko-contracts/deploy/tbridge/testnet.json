@@ -37,14 +37,8 @@
       "name": "avalanchetestnet",
       "privateKey": "",
       "providers": [
-        "https://api.avax-test.network/ext/bc/C/rpc"
-      ]
-    },
-    {
-      "name": "auroratestnet",
-      "privateKey": "",
-      "providers": [
-        "https://testnet.aurora.dev"
+        "https://api.avax-test.network/ext/bc/C/rpc",
+        "https://avax.getblock.io/testnet/ext/bc/C/rpc/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ]
     }
   ],
@@ -240,54 +234,6 @@
           "token": "mETH",
           "mystikoAddress": "0xd5F0E1b5A37A58B26624811514006ceBB961ac1E",
           "relayProxyAddress": "0x62F686F657aae4E8D0e38F7Fa606dE2F02381d2e"
-        }
-      },
-      {
-        "local": {
-          "name": "ropsten",
-          "chainId": 3,
-          "token": "mUSD",
-          "mystikoAddress": "0x6D8F3102160B31deDc886de6b93f516825479e7a",
-          "relayProxyAddress": "0x719E61aa21BE87Ed72a6093F965973cFe1D45c1c"
-        },
-        "remote": {
-          "name": "auroratestnet",
-          "chainId": 1313161555,
-          "token": "mUSD",
-          "mystikoAddress": "0xA33cB8399a362527Be3D5c899FD6819D7cE7Cf74",
-          "relayProxyAddress": "0x029d1cB61F1Fdba240fd03Bf46Bac75b887F2EDC"
-        }
-      },
-      {
-        "local": {
-          "name": "ropsten",
-          "chainId": 3,
-          "token": "MTT",
-          "mystikoAddress": "0xc06686F28046AE620126a37F399ee9432feeB1f6",
-          "relayProxyAddress": "0x719E61aa21BE87Ed72a6093F965973cFe1D45c1c"
-        },
-        "remote": {
-          "name": "auroratestnet",
-          "chainId": 1313161555,
-          "token": "MTT",
-          "mystikoAddress": "0xFE1229741a51133DDe078793Cf5B343570961f47",
-          "relayProxyAddress": "0x029d1cB61F1Fdba240fd03Bf46Bac75b887F2EDC"
-        }
-      },
-      {
-        "local": {
-          "name": "ropsten",
-          "chainId": 3,
-          "token": "ETH",
-          "mystikoAddress": "0x8f6d6b50aD9F354eb1D7d4E87A77CA4768aC9b45",
-          "relayProxyAddress": "0x719E61aa21BE87Ed72a6093F965973cFe1D45c1c"
-        },
-        "remote": {
-          "name": "auroratestnet",
-          "chainId": 1313161555,
-          "token": "aETH",
-          "mystikoAddress": "0x42641BE2F80DfC7a74D21991d26283ed360f640d",
-          "relayProxyAddress": "0x029d1cB61F1Fdba240fd03Bf46Bac75b887F2EDC"
         }
       }
     ]
