@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import { ethers } from 'ethers';
 import { check } from '@mystiko/utils';
 import { MystikoABI, AssetType, BridgeType, isValidAssetType, isValidBridgeType } from '@mystiko/config';
@@ -15,6 +16,8 @@ export interface RawContract {
   bridgeType?: BridgeType;
   peerChainId?: number;
   peerContractAddress?: string;
+  minBridgeFee?: string;
+  syncStart?: number;
   circuits?: string;
   syncedBlock?: number;
 }
@@ -169,6 +172,34 @@ export class Contract extends BaseModel {
   public set peerContractAddress(addr: string | undefined) {
     check(!addr || ethers.utils.isAddress(addr), `${addr} is an invalid address`);
     this.asRawContract().peerContractAddress = addr;
+  }
+
+  /**
+   * @property {BN} minBridgeFee
+   * @desc the minimum number of bridge fee if this is a cross-chain contract. The bridge fee amount should be
+   * in wei as unit.
+   */
+  public get minBridgeFee(): BN {
+    const rawContract = this.asRawContract();
+    return rawContract.minBridgeFee ? new BN(rawContract.minBridgeFee) : new BN(0);
+  }
+
+  public set minBridgeFee(fee: BN) {
+    check(fee.gte(new BN(0)), 'minBridgeFee should not be a negative number');
+    this.asRawContract().minBridgeFee = fee.toString();
+  }
+
+  /**
+   * @property {number} syncStart
+   * @desc the block number from where the application should start synchronization.
+   */
+  public get syncStart(): number {
+    return this.asRawContract().syncStart || 0;
+  }
+
+  public set syncStart(blockNumber: number) {
+    check(blockNumber >= 0, 'syncStart should not be a negative number');
+    this.asRawContract().syncStart = blockNumber;
   }
 
   /**

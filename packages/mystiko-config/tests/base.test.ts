@@ -47,6 +47,13 @@ test('test checkNumber', () => {
   BaseConfig.checkNumber({ a: 1 }, 'a');
 });
 
+test('test checkNumberString', () => {
+  expect(() => BaseConfig.checkNumberString({ a: '1' }, 'b')).toThrow();
+  BaseConfig.checkNumberString({ a: '1' }, 'b', false);
+  expect(() => BaseConfig.checkNumberString({ a: '1abc' }, 'a')).toThrow();
+  BaseConfig.checkNumberString({ a: '1' }, 'a');
+});
+
 test('test checkObject', () => {
   expect(() => BaseConfig.checkObject({ a: {} }, 'b')).toThrow();
   BaseConfig.checkObject({ a: {} }, 'b', false);

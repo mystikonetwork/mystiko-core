@@ -30,6 +30,8 @@ test('test ContractConfig constructor', () => {
   expect(conf1.abi).toBe(MystikoABI.MystikoWithLoopMain.abi);
   expect(conf1.peerChainId).toBe(undefined);
   expect(conf1.peerContractAddress).toBe(undefined);
+  expect(conf1.minBridgeFee.toNumber()).toBe(0);
+  expect(conf1.syncStart).toBe(0);
   expect(conf1.circuits).toBe('circom-1.0');
   const rawConfig10 = { ...rawConfig9, name: 'MystikoWithPolyERC20', peerChainId: 10 };
   expect(() => new ContractConfig(rawConfig10)).toThrow();
@@ -42,4 +44,16 @@ test('test ContractConfig constructor', () => {
   expect(conf2.peerChainId).toBe(10);
   expect(conf2.peerContractAddress).toBe('0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
   expect(conf2.assetAddress).toBe('0x7826bfec2f7811f20feeb7f294e7f561233e2a2a');
+  const rawConfig12 = { ...rawConfig11, minBridgeFee: '0x' };
+  expect(() => new ContractConfig(rawConfig12)).toThrow();
+  const rawConfig13 = { ...rawConfig11, minBridgeFee: '-1' };
+  expect(() => new ContractConfig(rawConfig13)).toThrow();
+  const rawConfig14 = { ...rawConfig11, minBridgeFee: '123' };
+  const conf3 = new ContractConfig(rawConfig14);
+  expect(conf3.minBridgeFee.toNumber()).toBe(123);
+  const rawConfig15 = { ...rawConfig14, syncStart: -123 };
+  expect(() => new ContractConfig(rawConfig15)).toThrow();
+  const rawConfig16 = { ...rawConfig14, syncStart: 456 };
+  const conf4 = new ContractConfig(rawConfig16);
+  expect(conf4.syncStart).toBe(456);
 });
