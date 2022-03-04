@@ -4,7 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   collectCoverage: true,
   coverageDirectory: 'coverage',
-  collectCoverageFrom: ['src/**/*.ts', '!src/types/*.d.ts', '!src/witness_calculator.js'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/types/*.d.ts'],
   coverageThreshold: {
     global: {
       lines: 95,

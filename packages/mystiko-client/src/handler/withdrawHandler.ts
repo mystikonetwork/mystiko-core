@@ -1,7 +1,15 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import { MystikoConfig } from '@mystiko/config';
-import { check, errorMessage, logger as rootLogger, toBN, toBuff, toHexNoPrefix } from '@mystiko/utils';
+import {
+  check,
+  errorMessage,
+  logger as rootLogger,
+  toBN,
+  toBuff,
+  toHexNoPrefix,
+  waitTransaction,
+} from '@mystiko/utils';
 import { Handler } from './handler';
 import { WalletHandler } from './walletHandler';
 import { AccountHandler } from './accountHandler';
@@ -435,7 +443,7 @@ export class WithdrawHandler extends Handler {
     newWithdraw.serialNumber = toBN(serialNumber);
     newWithdraw.transactionHash = txResponse.hash;
     await this.updateStatus(newWithdraw, WithdrawStatus.PENDING, statusCallback);
-    const txReceipt = await txResponse.wait();
+    const txReceipt = await waitTransaction(txResponse);
     this.logger.info(`withdrawal transaction for withdraw(id=${newWithdraw.id}) is confirmed on chain`);
     newWithdraw.transactionHash = txReceipt.transactionHash;
     await this.updateStatus(newWithdraw, WithdrawStatus.SUCCEEDED, statusCallback);
