@@ -1,6 +1,9 @@
+import { ethers } from 'ethers';
+
 export interface EtherError extends Error {
   reason?: string;
   code?: string;
+  receipt?: ethers.providers.TransactionReceipt;
 }
 
 /**
