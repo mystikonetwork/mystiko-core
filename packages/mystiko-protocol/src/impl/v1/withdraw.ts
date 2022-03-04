@@ -10,7 +10,10 @@ import {
   RANDOM_SK_SIZE,
   serialNumber,
   WitnessCalculatorBuilder,
+  WitnessCalculatorInterface,
 } from './common';
+
+let witnessCalculator: WitnessCalculatorInterface;
 
 /**
  * @function module:mystiko/protocol/v1.zkProveWithdraw
@@ -92,7 +95,9 @@ export async function zkProveWithdraw(
       `amount="${toString(amount)}"'`,
   );
   const wasm = await readCompressedFile(wasmFile);
-  const witnessCalculator = await WitnessCalculatorBuilder(wasm);
+  if (!witnessCalculator) {
+    witnessCalculator = await WitnessCalculatorBuilder(wasm);
+  }
   const buff = await witnessCalculator.calculateWTNSBin(inputs, 0);
   logger.debug('witness calculation is done, start proving...');
   const zkey = await readCompressedFile(zkeyFile);

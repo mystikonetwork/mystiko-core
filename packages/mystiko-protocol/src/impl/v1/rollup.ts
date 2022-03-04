@@ -4,7 +4,9 @@ import BN from 'bn.js';
 import { check, readCompressedFile, toBN, toFixedLenHexNoPrefix, toHexNoPrefix } from '@mystiko/utils';
 import { FIELD_SIZE } from '../../constants';
 import { MerkleTree } from '../../merkle';
-import { WitnessCalculatorBuilder } from './common';
+import { WitnessCalculatorBuilder, WitnessCalculatorInterface } from './common';
+
+const witnessCalculators: { [key: string]: WitnessCalculatorInterface } = {};
 
 function calcLeaveHash(leaves: BN[]): BN {
   const leafBuffer = Buffer.concat(leaves.map((leaf) => Buffer.from(toFixedLenHexNoPrefix(leaf), 'hex')));
@@ -36,8 +38,10 @@ async function zkProve(tree: MerkleTree, newLeaves: BN[], wasmFile: string, zkey
   const pathElements = leafPath.pathElements.slice(rollupHeight);
   const leafHash = calcLeaveHash(newLeaves);
   const wasm = await readCompressedFile(wasmFile);
-  const witnessCalculator = await WitnessCalculatorBuilder(wasm);
-  const buff = await witnessCalculator.calculateWTNSBin(
+  if (!witnessCalculators[wasmFile]) {
+    witnessCalculators[wasmFile] = await WitnessCalculatorBuilder(wasm);
+  }
+  const buff = await witnessCalculators[wasmFile].calculateWTNSBin(
     {
       oldRoot: currentRoot.toString(),
       newRoot: newRoot.toString(),
