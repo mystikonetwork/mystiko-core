@@ -21,6 +21,7 @@ export interface RawContract {
   circuits?: string;
   syncedBlock?: number;
   depositDisabled?: boolean;
+  syncedTopicBlocks?: { [key: string]: number };
 }
 
 /**
@@ -245,6 +246,19 @@ export class Contract extends BaseModel {
    */
   public get abi(): any {
     return this.name ? MystikoABI[this.name]?.abi : undefined;
+  }
+
+  public getSyncedTopicBlock(topic: string): number {
+    const topicBlocks = this.asRawContract().syncedTopicBlocks;
+    return !!topicBlocks && !!topicBlocks[topic] ? topicBlocks[topic] : this.syncStart;
+  }
+
+  public setSyncedTopicBlock(topic: string, blockNumber: number) {
+    check(blockNumber >= this.syncStart, `synced topic block number cannot be less than ${this.syncStart}`);
+    this.asRawContract().syncedTopicBlocks = {
+      ...this.asRawContract().syncedTopicBlocks,
+      [topic]: blockNumber,
+    };
   }
 
   private asRawContract(): RawContract {

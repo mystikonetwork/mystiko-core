@@ -1,0 +1,62 @@
+import { ethers } from 'ethers';
+import TopicSync from './base';
+import { Contract, PrivateNoteStatus, RawEvent, WithdrawStatus } from '../../model';
+import { ContractHandler, EventHandler, NoteHandler, WithdrawHandler } from '../../handler';
+
+export default class WithdrawTopicSync extends TopicSync {
+  private readonly withdrawHandler: WithdrawHandler;
+
+  private readonly noteHandler: NoteHandler;
+
+  constructor(
+    contract: Contract,
+    etherContract: ethers.Contract,
+    topic: string,
+    eventHandler: EventHandler,
+    contractHandler: ContractHandler,
+    withdrawHandler: WithdrawHandler,
+    noteHandler: NoteHandler,
+    syncSize: number,
+  ) {
+    super(contract, etherContract, topic, eventHandler, contractHandler, syncSize);
+    this.withdrawHandler = withdrawHandler;
+    this.noteHandler = noteHandler;
+  }
+
+  protected handleEvents(events: RawEvent[]): Promise<void> {
+    const promises = [];
+    for (let i = 0; i < events.length; i += 1) {
+      const rawEvent = events[i];
+      const rootHash = rawEvent.argumentData.rootHash.toString();
+      const serialNumber = rawEvent.argumentData.serialNumber.toString();
+      const withdraws = this.withdrawHandler.getWithdraws({
+        filterFunc: (withdraw) =>
+          !!withdraw.merkleRootHash &&
+          withdraw.merkleRootHash.toString() === rootHash &&
+          !!withdraw.serialNumber &&
+          withdraw.serialNumber.toString() === serialNumber &&
+          withdraw.chainId === rawEvent.chainId,
+      });
+      const withdrewNoteIds = withdraws.map((withdraw) => withdraw.privateNoteId);
+      const notes = this.noteHandler.getPrivateNotes({
+        filterFunc: (note) => withdrewNoteIds.indexOf(note.id) !== -1,
+      });
+      for (let j = 0; j < withdraws.length; j += 1) {
+        const withdraw = withdraws[j];
+        if (withdraw.status !== WithdrawStatus.SUCCEEDED) {
+          withdraw.status = WithdrawStatus.SUCCEEDED;
+          withdraw.transactionHash = rawEvent.transactionHash;
+          promises.push(this.withdrawHandler.updateWithdraw(withdraw));
+        }
+      }
+      for (let j = 0; j < notes.length; j += 1) {
+        const note = notes[j];
+        if (note.status !== PrivateNoteStatus.SPENT) {
+          note.status = PrivateNoteStatus.SPENT;
+          promises.push(this.noteHandler.updatePrivateNote(note));
+        }
+      }
+    }
+    return Promise.all(promises).then(() => {});
+  }
+}

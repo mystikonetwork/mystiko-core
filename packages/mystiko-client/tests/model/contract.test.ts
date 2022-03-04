@@ -21,6 +21,7 @@ test('test Contract getters/setters', () => {
   expect(contract.depositDisabled).toBe(false);
   expect(contract.minBridgeFee.toNumber()).toBe(0);
   expect(contract.syncStart).toBe(0);
+  expect(contract.getSyncedTopicBlock('any topic')).toBe(0);
 
   contract.version = 12;
   expect(contract.version).toBe(12);
@@ -66,4 +67,14 @@ test('test Contract getters/setters', () => {
   expect(contract.minBridgeFee.toNumber()).toBe(123);
   contract.syncStart = 456;
   expect(contract.syncStart).toBe(456);
+  expect(contract.getSyncedTopicBlock('any topic')).toBe(456);
+  expect(() => {
+    contract.setSyncedTopicBlock('any topic', 123);
+  }).toThrow();
+  contract.setSyncedTopicBlock('some topic', 987);
+  expect(contract.getSyncedTopicBlock('some topic')).toBe(987);
+  expect(contract.getSyncedTopicBlock('another topic')).toBe(456);
+  contract.setSyncedTopicBlock('another topic', 678);
+  contract.setSyncedTopicBlock('some topic', 987);
+  expect(contract.getSyncedTopicBlock('another topic')).toBe(678);
 });

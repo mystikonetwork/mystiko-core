@@ -54,6 +54,22 @@ test('test getContracts', async () => {
   expect(contracts.length).toBe(2);
 });
 
+test('test updateContract', async () => {
+  await contractHandler.importFromConfig();
+  const contract = contractHandler.getContract(1, '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879');
+  if (contract) {
+    contract.setSyncedTopicBlock('some topic', 12345);
+    await contractHandler.updateContract(contract);
+    expect(
+      contractHandler
+        .getContract(1, '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879')
+        ?.getSyncedTopicBlock('some topic'),
+    ).toBe(12345);
+  } else {
+    throw new Error('expected contract does not exist');
+  }
+});
+
 test('test updateSyncedBlock', async () => {
   await contractHandler.importFromConfig();
   await contractHandler.updateSyncedBlock(1, '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879', 1024);

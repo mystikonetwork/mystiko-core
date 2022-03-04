@@ -79,7 +79,7 @@ export class EventHandler extends Handler {
    * normally used for pagination.
    * @returns {Event[]} an array of {@link Event} which meets the search criteria.
    */
-  getEvents(queryParams: QueryParams = {}) {
+  public getEvents(queryParams: QueryParams = {}) {
     const { filterFunc, sortBy, desc, offset, limit } = queryParams;
     let queryChain = this.db.events.chain();
     if (filterFunc) {
