@@ -228,10 +228,12 @@ export class NoteHandler extends Handler {
       };
     }
     for (let i = 0; i < groupWithTotals.length; i += 1) {
-      groups[groupWithTotals[i].groupName].total = groupWithTotals[i].reducedValue;
+      const { groupName } = groupWithTotals[i];
+      groups[groupName] = { ...groups[groupName], total: groupWithTotals[i].reducedValue };
     }
     for (let i = 0; i < groupWithUnspent.length; i += 1) {
-      groups[groupWithUnspent[i].groupName].unspent = groupWithUnspent[i].reducedValue;
+      const { groupName } = groupWithUnspent[i];
+      groups[groupName] = { ...groups[groupName], unspent: groupWithUnspent[i].reducedValue };
     }
     return Object.values(groups).sort((a, b) => (a.dstAsset >= b.dstAsset ? 1 : -1));
   }
