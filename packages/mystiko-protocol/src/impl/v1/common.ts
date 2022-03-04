@@ -2,6 +2,7 @@ import unsafeRandomBytes from 'randombytes';
 import { Scalar } from 'ffjavascript';
 import createBlakeHash from 'blake-hash';
 import { eddsa, poseidon } from 'circomlibjs';
+import { WitnessCalculatorBuilder as WCBuilder } from 'circom_runtime';
 import cryptojs from 'crypto-js';
 import aes from 'crypto-js/aes';
 import hmacSHA512 from 'crypto-js/hmac-sha512';
@@ -22,7 +23,6 @@ import {
   logger,
 } from '@mystiko/utils';
 import { FIELD_SIZE } from '../../constants';
-import WithdrawWitnessCalculator from '../../witness_calculator';
 
 /**
  * @module module:mystiko/protocol/v1
@@ -473,7 +473,7 @@ export interface WitnessCalculatorInterface {
 }
 
 export function WitnessCalculatorBuilder(code: any, options?: any): Promise<WitnessCalculatorInterface> {
-  return WithdrawWitnessCalculator(code, options);
+  return WCBuilder(code, options);
 }
 
 /**
