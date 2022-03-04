@@ -10,6 +10,7 @@ import {
   toFixedLenHex,
   toHex,
   toString,
+  waitTransaction,
 } from '@mystiko/utils';
 import { Handler } from './handler';
 import { WalletHandler } from './walletHandler';
@@ -339,7 +340,7 @@ export class DepositHandler extends Handler {
             statusCallback,
           );
           let newStatus = newDeposit.status;
-          const txReceipt = await txResponse.wait();
+          const txReceipt = await waitTransaction(txResponse);
           this.logger.info(
             `asset approving transaction for deposit(id=${newDeposit.id}) is confirmed on chain`,
           );
@@ -392,7 +393,7 @@ export class DepositHandler extends Handler {
     newDeposit.srcTxHash = depositTxResponse.hash;
     newDeposit = await this.updateDepositStatus(newDeposit, DepositStatus.SRC_PENDING, statusCallback);
     let newStatus = newDeposit.status;
-    const txReceipt = await depositTxResponse.wait();
+    const txReceipt = await waitTransaction(depositTxResponse);
     this.logger.info(`deposit transaction for deposit(id=${newDeposit.id}) is confirmed on source chain`);
     newStatus = DepositStatus.SRC_CONFIRMED;
     newDeposit.srcTxHash = txReceipt.transactionHash;
