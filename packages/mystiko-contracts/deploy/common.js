@@ -69,6 +69,7 @@ module.exports = {
     config.chains[0].hashAddress = '';
     config.chains[0].verifierAddress = '';
     config.bridges[0].pairs[0][0].address = '';
+    config.bridges[0].pairs[0][0].syncStart = '';
 
     this.saveConfig('development', config);
   },
@@ -85,10 +86,11 @@ module.exports = {
     this.saveConfig(mystikoNetwork, config);
   },
 
-  saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, index, pos, address) {
+  saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, index, pos, contractDeployInfo) {
     for (let i = 0; i < config.bridges.length; i++) {
       if (config.bridges[i].name === bridgeName) {
-        config.bridges[i].pairs[index][pos].address = address;
+        config.bridges[i].pairs[index][pos].address = contractDeployInfo.address;
+        config.bridges[i].pairs[index][pos].syncStart = contractDeployInfo.syncStart;
         break;
       }
     }

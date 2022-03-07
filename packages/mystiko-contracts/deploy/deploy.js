@@ -120,12 +120,14 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
   }
 
   console.log('deploy MystikoCore');
-  let mystikoCoreAddress = '';
+  let address = '';
+  let trxHash = '';
   if (bridgeName === 'loop') {
     if (token.erc20 === 'true') {
       await MystikoCore.new(srcChain.verifierAddress, token.address, srcChain.hashAddress, MERKLE_TREE_HEIGHT)
         .then((response) => {
-          mystikoCoreAddress = response.address;
+          address = response.address;
+          trxHash = response.transactionHash;
         })
         .catch((err) => {
           console.error(common.RED, err);
@@ -134,7 +136,8 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
     } else {
       await MystikoCore.new(srcChain.verifierAddress, srcChain.hashAddress, MERKLE_TREE_HEIGHT)
         .then((response) => {
-          mystikoCoreAddress = response.address;
+          address = response.address;
+          trxHash = response.transactionHash;
         })
         .catch((err) => {
           console.error(common.RED, err);
@@ -152,7 +155,8 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
         MERKLE_TREE_HEIGHT,
       )
         .then((response) => {
-          mystikoCoreAddress = response.address;
+          address = response.address;
+          trxHash = response.transactionHash;
         })
         .catch((err) => {
           console.error(common.RED, err);
@@ -167,7 +171,8 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
         MERKLE_TREE_HEIGHT,
       )
         .then((response) => {
-          mystikoCoreAddress = response.address;
+          address = response.address;
+          trxHash = response.transactionHash;
         })
         .catch((err) => {
           console.error(common.RED, err);
@@ -176,8 +181,18 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
     }
   }
 
-  console.log('mystikoCore address ', mystikoCoreAddress);
-  return mystikoCoreAddress;
+  let syncStart = await web3.eth
+    .getTransaction(trxHash)
+    .then((response) => {
+      return response.blockNumber;
+    })
+    .catch((err) => {
+      console.error(common.RED, err);
+      process.exit(1);
+    });
+
+  console.log('mystikoCore address ', address, ' block height ', syncStart);
+  return { address, syncStart };
 }
 
 async function setMystikoPeerAddress(bridgeName, src, dst, config) {
@@ -358,11 +373,11 @@ async function deployStep2or3() {
       }
     }
 
-    const mystikoCoreAddress = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
-    if (mystikoCoreAddress === '') {
+    const contractDeployInfo = await deployMystiko(bridgeName, src, dst, config, proxyAddress);
+    if (contractDeployInfo === '') {
       return;
     }
-    common.saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, pairIndex, i, mystikoCoreAddress);
+    common.saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, pairIndex, i, contractDeployInfo);
   } else if (step === 'step3') {
     if (src.address === '') {
       console.error(common.RED, 'src mystiko address is null');

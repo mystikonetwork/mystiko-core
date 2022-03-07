@@ -31,7 +31,8 @@
           {
             "network": "development",
             "token": "ETH",
-            "address": ""
+            "address": "",
+            "syncStart": ""
           }
         ]
       ]
