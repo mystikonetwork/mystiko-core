@@ -128,6 +128,9 @@ export class ContractHandler extends Handler {
     contract.peerChainId = contractConfig.peerChainId;
     contract.peerContractAddress = contractConfig.peerContractAddress;
     contract.circuits = contractConfig.circuits;
+    contract.syncStart = contractConfig.syncStart;
+    contract.minBridgeFee = contractConfig.minBridgeFee;
+    contract.depositDisabled = contractConfig.depositDisabled;
     if (contract.id) {
       this.db.contracts.update(contract.data);
       this.logger.debug(

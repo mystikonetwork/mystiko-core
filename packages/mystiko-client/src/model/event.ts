@@ -6,6 +6,7 @@ export interface RawEvent {
   chainId?: number;
   contractAddress?: string;
   topic?: string;
+  blockNumber?: number;
   transactionHash?: string;
   argumentData?: any;
 }
@@ -68,6 +69,15 @@ export class Event extends BaseModel {
 
   public set transactionHash(hash: string | undefined) {
     this.asRawEvent().transactionHash = hash;
+  }
+
+  public get blockNumber(): number {
+    return this.asRawEvent().blockNumber || 0;
+  }
+
+  public set blockNumber(block: number) {
+    check(block > 0, `blockNumber ${block} is less or equal to 0`);
+    this.asRawEvent().blockNumber = block;
   }
 
   /**

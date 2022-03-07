@@ -14,10 +14,7 @@ export class MystikoInBrowser extends Mystiko {
           : DefaultClientMainnetConfig;
       }
     }
-    return super.initialize(wrappedOptions).then((ret) => {
-      this.pullers?.eventPuller.start();
-      return ret;
-    });
+    return super.initialize(wrappedOptions);
   }
 }
 

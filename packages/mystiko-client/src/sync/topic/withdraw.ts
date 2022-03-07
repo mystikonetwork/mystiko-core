@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ContractInterface, ethers } from 'ethers';
 import { TopicSync } from './base';
 import { Contract, PrivateNoteStatus, RawEvent, WithdrawStatus } from '../../model';
 import { ContractHandler, EventHandler, NoteHandler, WithdrawHandler } from '../../handler';
@@ -10,15 +10,18 @@ export default class WithdrawTopicSync extends TopicSync {
 
   constructor(
     contract: Contract,
-    etherContract: ethers.Contract,
-    topic: string,
     eventHandler: EventHandler,
     contractHandler: ContractHandler,
     withdrawHandler: WithdrawHandler,
     noteHandler: NoteHandler,
     syncSize: number,
+    contractGenerator?: (
+      address: string,
+      abi: ContractInterface,
+      providerOrSigner: ethers.providers.Provider | ethers.Signer,
+    ) => ethers.Contract,
   ) {
-    super(contract, etherContract, topic, eventHandler, contractHandler, syncSize);
+    super(contract, 'Withdraw', eventHandler, contractHandler, syncSize, contractGenerator);
     this.withdrawHandler = withdrawHandler;
     this.noteHandler = noteHandler;
   }

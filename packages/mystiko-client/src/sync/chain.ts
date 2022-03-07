@@ -1,8 +1,9 @@
-import { ethers } from 'ethers';
+import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
 import { errorMessage, logger as rootLogger } from '@mystiko/utils';
-import { SyncResult } from './base';
+import { BaseSync, SyncResult } from './base';
 import { ContractSync, ContractSyncStatus } from './contract';
+import { ContractHandler, DepositHandler, EventHandler, NoteHandler, WithdrawHandler } from '../handler';
 
 export interface ChainSyncStatus {
   chainId: number;
@@ -12,10 +13,8 @@ export interface ChainSyncStatus {
   contractStatus: { [key: string]: ContractSyncStatus };
 }
 
-export class ChainSync {
+export class ChainSync implements BaseSync {
   public readonly chainId: number;
-
-  private readonly provider: ethers.providers.JsonRpcProvider;
 
   private readonly contractSyncs: ContractSync[];
 
@@ -25,33 +24,55 @@ export class ChainSync {
 
   private statusUpdateCallbacks: Array<(status: ChainSyncStatus) => void>;
 
-  constructor(chainId: number, provider: ethers.providers.JsonRpcProvider, contractSyncs: ContractSync[]) {
+  constructor(
+    chainId: number,
+    eventHandler: EventHandler,
+    contractHandler: ContractHandler,
+    depositHandler: DepositHandler,
+    withdrawHandler: WithdrawHandler,
+    noteHandler: NoteHandler,
+    syncSize: number,
+    contractGenerator?: (
+      address: string,
+      abi: ContractInterface,
+      providerOrSigner: ethers.providers.Provider | ethers.Signer,
+    ) => ethers.Contract,
+  ) {
     this.chainId = chainId;
-    this.provider = provider;
-    this.contractSyncs = contractSyncs;
     this.logger = rootLogger.getLogger('ChainSync');
     this.statusUpdateCallbacks = [];
-    this.contractSyncs.forEach((contractSync) => {
-      contractSync.onStatusUpdate(() => this.runCallbacks());
-    });
+    this.contractSyncs = contractHandler
+      .getContracts({ filterFunc: (c) => c.chainId === chainId })
+      .map((contract) => {
+        const contractSync = new ContractSync(
+          contract,
+          eventHandler,
+          contractHandler,
+          depositHandler,
+          withdrawHandler,
+          noteHandler,
+          syncSize,
+          contractGenerator,
+        );
+        contractSync.onStatusUpdate(() => this.runCallbacks());
+        return contractSync;
+      });
   }
 
-  public execute(): Promise<SyncResult> {
+  public execute(provider: ethers.providers.Provider, targetBlockNumber: number): Promise<SyncResult> {
     if (!this.isSyncing) {
       this.error = undefined;
-      return this.provider.getBlockNumber().then((targetBlockNumber) =>
-        this.executeContract(targetBlockNumber, 0)
-          .then((result: SyncResult) => {
-            this.error = result.error;
-            return result;
-          })
-          .catch((error) => {
-            this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
-            this.error = error;
-            this.runCallbacks();
-            return Promise.resolve({ syncedBlock: this.syncedBlock, error });
-          }),
-      );
+      return this.executeContract(provider, targetBlockNumber, 0)
+        .then((result: SyncResult) => {
+          this.error = result.error;
+          return result;
+        })
+        .catch((error) => {
+          this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
+          this.error = error;
+          this.runCallbacks();
+          return Promise.resolve({ syncedBlock: this.syncedBlock, error });
+        });
     }
     return Promise.resolve({ syncedBlock: this.syncedBlock });
   }
@@ -94,14 +115,20 @@ export class ChainSync {
     this.statusUpdateCallbacks = this.statusUpdateCallbacks.filter((cb) => cb !== callback);
   }
 
-  private executeContract(targetBlockNumber: number, index: number): Promise<SyncResult> {
+  private executeContract(
+    provider: ethers.providers.Provider,
+    targetBlockNumber: number,
+    index: number,
+  ): Promise<SyncResult> {
     if (index < this.contractSyncs.length) {
-      return this.contractSyncs[index].execute(targetBlockNumber).then((contractResult: SyncResult) =>
-        this.executeContract(targetBlockNumber, index + 1).then((chainResult: SyncResult) => ({
-          syncedBlock: chainResult.syncedBlock,
-          error: chainResult.error || contractResult.error,
-        })),
-      );
+      return this.contractSyncs[index]
+        .execute(provider, targetBlockNumber)
+        .then((contractResult: SyncResult) =>
+          this.executeContract(provider, targetBlockNumber, index + 1).then((chainResult: SyncResult) => ({
+            syncedBlock: chainResult.syncedBlock,
+            error: chainResult.error || contractResult.error,
+          })),
+        );
     }
     return Promise.resolve({ syncedBlock: this.syncedBlock });
   }

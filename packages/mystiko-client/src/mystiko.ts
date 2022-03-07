@@ -18,7 +18,7 @@ import * as utils from '@mystiko/utils';
 import { createDatabase, exportDataAsString, importDataFromJson, importDataFromJsonFile } from './database';
 import * as models from './model';
 import { ProviderPool, ContractPool, MetaMaskSigner, PrivateKeySigner } from './chain';
-import { EventPuller } from './puller';
+import { FullSync } from './sync';
 import {
   AccountHandler,
   ContractHandler,
@@ -101,7 +101,7 @@ export class Mystiko {
 
   public signers?: { metaMask: MetaMaskSigner; privateKey: PrivateKeySigner };
 
-  public pullers?: { eventPuller: EventPuller };
+  public sync?: FullSync;
 
   constructor() {
     this.models = { ...models, AssetType, BridgeType };
@@ -134,8 +134,6 @@ export class Mystiko {
       conf = undefined,
       dbFile = undefined,
       dbAdapter = undefined,
-      isStoreEvent = false,
-      eventPullingIntervalMs = 60000,
       loggingLevel = 'error',
       loggingOptions = undefined,
     } = options || {};
@@ -203,20 +201,15 @@ export class Mystiko {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
-    this.pullers = {
-      eventPuller: new EventPuller({
-        config: this.config,
-        contractHandler: this.contracts,
-        walletHandler: this.wallets,
-        noteHandler: this.notes,
-        depositHandler: this.deposits,
-        withdrawHandler: this.withdraws,
-        eventHandler: this.events,
-        contractPool: this.contractPool,
-        isStoreEvent,
-        pullIntervalMs: eventPullingIntervalMs,
-      }),
-    };
+    this.sync = new FullSync(
+      this.events,
+      this.contracts,
+      this.deposits,
+      this.withdraws,
+      this.notes,
+      this.config,
+      this.providers,
+    );
     this.logger.info('@mystiko/client has been successfully initialized, enjoy!');
   }
 }

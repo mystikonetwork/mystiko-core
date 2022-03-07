@@ -1,8 +1,11 @@
+import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
 import { errorMessage, logger as rootLogger } from '@mystiko/utils';
 import { BaseSync, SyncResult } from './base';
 import { TopicSync, TopicSyncStatus } from './topic/base';
 import { Contract } from '../model';
+import { ContractHandler, DepositHandler, EventHandler, NoteHandler, WithdrawHandler } from '../handler';
+import { DepositTopicSync, MerkleTreeInsertTopicSync, WithdrawTopicSync } from './topic';
 
 export interface ContractSyncStatus {
   contract: Contract;
@@ -23,19 +26,59 @@ export class ContractSync implements BaseSync {
 
   private statusUpdateCallbacks: Array<(status: ContractSyncStatus) => void>;
 
-  constructor(contract: Contract, topicSyncs: TopicSync[]) {
+  constructor(
+    contract: Contract,
+    eventHandler: EventHandler,
+    contractHandler: ContractHandler,
+    depositHandler: DepositHandler,
+    withdrawHandler: WithdrawHandler,
+    noteHandler: NoteHandler,
+    syncSize: number,
+    contractGenerator?: (
+      address: string,
+      abi: ContractInterface,
+      providerOrSigner: ethers.providers.Provider | ethers.Signer,
+    ) => ethers.Contract,
+  ) {
     this.contract = contract;
-    this.topicSyncs = topicSyncs;
     this.statusUpdateCallbacks = [];
     this.logger = rootLogger.getLogger('ContractSync');
+    this.topicSyncs = [
+      new DepositTopicSync(
+        contract,
+        eventHandler,
+        contractHandler,
+        depositHandler,
+        syncSize,
+        contractGenerator,
+      ),
+      new MerkleTreeInsertTopicSync(
+        contract,
+        eventHandler,
+        contractHandler,
+        depositHandler,
+        noteHandler,
+        syncSize,
+        contractGenerator,
+      ),
+      new WithdrawTopicSync(
+        contract,
+        eventHandler,
+        contractHandler,
+        withdrawHandler,
+        noteHandler,
+        syncSize,
+        contractGenerator,
+      ),
+    ];
     this.topicSyncs.forEach((topicSync) => {
       topicSync.onStatusUpdate(() => this.runCallbacks());
     });
   }
 
-  public execute(targetBlockNumber: number): Promise<SyncResult> {
+  public execute(provider: ethers.providers.Provider, targetBlockNumber: number): Promise<SyncResult> {
     if (!this.isSyncing) {
-      return this.executeTopic(targetBlockNumber, 0)
+      return this.executeTopic(provider, targetBlockNumber, 0)
         .then((result) => {
           this.error = result.error;
           return result;
@@ -90,10 +133,14 @@ export class ContractSync implements BaseSync {
     return `[chainId=${this.contract.chainId}][address=${this.contract.address}]`;
   }
 
-  private executeTopic(targetBlockNumber: number, index: number): Promise<SyncResult> {
+  private executeTopic(
+    provider: ethers.providers.Provider,
+    targetBlockNumber: number,
+    index: number,
+  ): Promise<SyncResult> {
     if (index < this.topicSyncs.length) {
-      return this.topicSyncs[index].execute(targetBlockNumber).then((topicResult: SyncResult) =>
-        this.executeTopic(targetBlockNumber, index + 1).then((contractResult: SyncResult) => ({
+      return this.topicSyncs[index].execute(provider, targetBlockNumber).then((topicResult: SyncResult) =>
+        this.executeTopic(provider, targetBlockNumber, index + 1).then((contractResult: SyncResult) => ({
           syncedBlock: contractResult.syncedBlock,
           error: contractResult.error || topicResult.error,
         })),

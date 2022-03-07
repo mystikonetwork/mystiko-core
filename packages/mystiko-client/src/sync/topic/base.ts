@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
 import { errorMessage, logger as rootLogger } from '@mystiko/utils';
 import { BaseSync, SyncResult } from '../base';
@@ -18,13 +18,19 @@ export abstract class TopicSync implements BaseSync {
 
   protected readonly contract: Contract;
 
-  protected readonly etherContract: ethers.Contract;
-
   protected readonly eventHandler: EventHandler;
 
   protected readonly contractHandler: ContractHandler;
 
   protected readonly syncSize: number;
+
+  protected readonly contractGenerator: (
+    address: string,
+    abi: ContractInterface,
+    providerOrSigner: ethers.providers.Provider | ethers.Signer,
+  ) => ethers.Contract;
+
+  protected readonly storeEvent: boolean;
 
   protected readonly logger: Logger;
 
@@ -36,14 +42,18 @@ export abstract class TopicSync implements BaseSync {
 
   protected constructor(
     contract: Contract,
-    etherContract: ethers.Contract,
     topic: string,
     eventHandler: EventHandler,
     contractHandler: ContractHandler,
     syncSize: number,
+    contractGenerator?: (
+      address: string,
+      abi: ContractInterface,
+      providerOrSigner: ethers.providers.Provider | ethers.Signer,
+    ) => ethers.Contract,
+    storeEvent?: boolean,
   ) {
     this.contract = contract;
-    this.etherContract = etherContract;
     this.topic = topic;
     this.eventHandler = eventHandler;
     this.contractHandler = contractHandler;
@@ -51,23 +61,36 @@ export abstract class TopicSync implements BaseSync {
     this.logger = rootLogger.getLogger('TopicSync');
     this.syncing = false;
     this.statusUpdateCallbacks = [];
+    this.storeEvent = storeEvent || false;
+    if (contractGenerator) {
+      this.contractGenerator = contractGenerator;
+    } else {
+      this.contractGenerator = (
+        address: string,
+        abi: ContractInterface,
+        providerOrSigner: ethers.providers.Provider | ethers.Signer,
+      ) => new ethers.Contract(address, abi, providerOrSigner);
+    }
   }
 
-  public execute(targetBlockNumber: number): Promise<SyncResult> {
+  public execute(provider: ethers.providers.Provider, targetBlockNumber: number): Promise<SyncResult> {
     if (!this.syncing) {
-      this.error = undefined;
-      this.updateStatus(true);
-      return this.executeChain(targetBlockNumber)
-        .then((result) => {
-          this.updateStatus(false);
-          return { syncedBlock: result };
-        })
-        .catch((error) => {
-          this.error = error;
-          this.updateStatus(false);
-          this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
-          return { syncedBlock: this.syncedBlock, error };
-        });
+      const etherContract = this.getEtherContract(provider);
+      if (etherContract) {
+        this.error = undefined;
+        this.updateStatus(true);
+        return this.executeChain(etherContract, targetBlockNumber)
+          .then((result) => {
+            this.updateStatus(false);
+            return { syncedBlock: result };
+          })
+          .catch((error) => {
+            this.error = error;
+            this.updateStatus(false);
+            this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
+            return { syncedBlock: this.syncedBlock, error };
+          });
+      }
     }
     return Promise.resolve({ syncedBlock: this.syncedBlock });
   }
@@ -104,16 +127,16 @@ export abstract class TopicSync implements BaseSync {
     return this.syncing;
   }
 
-  private executeChain(targetBlockNumber: number): Promise<number> {
+  private executeChain(etherContract: ethers.Contract, targetBlockNumber: number): Promise<number> {
     const fromBlockNumber = this.contract.getSyncedTopicBlock(this.topic) + 1;
     if (fromBlockNumber <= targetBlockNumber) {
       const toBlockNumber =
         fromBlockNumber + this.syncSize - 1 < targetBlockNumber
           ? fromBlockNumber + this.syncSize - 1
           : targetBlockNumber;
-      const filter = this.etherContract.filters[this.topic]();
-      this.logger.info(`${this.logPrefix} start syncing from ${fromBlockNumber} to ${toBlockNumber}`);
-      return this.etherContract
+      const filter = etherContract.filters[this.topic]();
+      this.logger.debug(`${this.logPrefix} start syncing from ${fromBlockNumber} to ${toBlockNumber}`);
+      return etherContract
         .queryFilter(filter, fromBlockNumber, toBlockNumber)
         .then((events: ethers.Event[]) => {
           const rawEvents = events.map((event: ethers.Event) => {
@@ -121,19 +144,24 @@ export abstract class TopicSync implements BaseSync {
               chainId: this.contract.chainId,
               topic: this.topic,
               contractAddress: this.contract.address,
+              transactionHash: event.transactionHash,
+              blockNumber: event.blockNumber,
               argumentData: event.args,
             };
             return rawEvent;
           });
-          return this.handleEvents(rawEvents).then(() => this.eventHandler.addEvents(rawEvents));
+          if (this.storeEvent) {
+            return this.handleEvents(rawEvents).then(() => this.eventHandler.addEvents(rawEvents));
+          }
+          return rawEvents;
         })
         .then(() => {
           this.contract.setSyncedTopicBlock(this.topic, toBlockNumber);
           return this.contractHandler.updateContract(this.contract).then(() => toBlockNumber);
         })
         .then(() => {
-          this.logger.info(`${this.logPrefix} finished syncing from ${fromBlockNumber} to ${toBlockNumber}`);
-          return this.executeChain(targetBlockNumber);
+          this.logger.debug(`${this.logPrefix} finished syncing from ${fromBlockNumber} to ${toBlockNumber}`);
+          return this.executeChain(etherContract, targetBlockNumber);
         });
     }
     return Promise.resolve(this.syncedBlock);
@@ -150,5 +178,16 @@ export abstract class TopicSync implements BaseSync {
         }
       });
     }
+  }
+
+  private getEtherContract(provider: ethers.providers.Provider): ethers.Contract | undefined {
+    if (this.contract.address) {
+      try {
+        return this.contractGenerator(this.contract.address, this.contract.abi, provider);
+      } catch (error) {
+        this.logger.warn(`${this.logPrefix} failed to create contract instance: ${errorMessage(error)}`);
+      }
+    }
+    return undefined;
   }
 }
