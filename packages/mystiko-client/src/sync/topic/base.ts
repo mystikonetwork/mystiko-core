@@ -38,8 +38,6 @@ export abstract class TopicSync implements BaseSync {
 
   protected error?: any;
 
-  protected statusUpdateCallbacks: Array<(status: TopicSyncStatus) => void>;
-
   protected constructor(
     contract: Contract,
     topic: string,
@@ -60,7 +58,6 @@ export abstract class TopicSync implements BaseSync {
     this.syncSize = syncSize;
     this.logger = rootLogger.getLogger('TopicSync');
     this.syncing = false;
-    this.statusUpdateCallbacks = [];
     this.storeEvent = storeEvent || false;
     if (contractGenerator) {
       this.contractGenerator = contractGenerator;
@@ -82,17 +79,17 @@ export abstract class TopicSync implements BaseSync {
         return this.executeChain(etherContract, targetBlockNumber)
           .then((result) => {
             this.updateStatus(false);
-            return { syncedBlock: result };
+            return { syncedBlock: result, errors: [] };
           })
           .catch((error) => {
             this.error = error;
             this.updateStatus(false);
             this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
-            return { syncedBlock: this.syncedBlock, error };
+            return { syncedBlock: this.syncedBlock, errors: [error] };
           });
       }
     }
-    return Promise.resolve({ syncedBlock: this.syncedBlock });
+    return Promise.resolve({ syncedBlock: this.syncedBlock, errors: [] });
   }
 
   public get syncedBlock(): number {
@@ -107,14 +104,6 @@ export abstract class TopicSync implements BaseSync {
       syncedBlock: this.syncedBlock,
       error: this.error,
     };
-  }
-
-  public onStatusUpdate(callback: (status: TopicSyncStatus) => void) {
-    this.statusUpdateCallbacks.push(callback);
-  }
-
-  public removeStatusUpdateCallback(callback: (status: TopicSyncStatus) => void) {
-    this.statusUpdateCallbacks = this.statusUpdateCallbacks.filter((cb) => cb !== callback);
   }
 
   protected abstract handleEvents(events: RawEvent[]): Promise<void>;
@@ -170,13 +159,6 @@ export abstract class TopicSync implements BaseSync {
   private updateStatus(syncingFlag: boolean) {
     if (this.syncing !== syncingFlag) {
       this.syncing = syncingFlag;
-      this.statusUpdateCallbacks.forEach((callback) => {
-        try {
-          callback(this.status);
-        } catch (error) {
-          this.logger.warn(`${this.logPrefix} status update callback failed: ${errorMessage(error)}`);
-        }
-      });
     }
   }
 

@@ -9,7 +9,7 @@ export interface ChainSyncStatus {
   chainId: number;
   isSyncing: boolean;
   syncedBlock: number;
-  error?: any;
+  errors: Array<any>;
   contractStatus: { [key: string]: ContractSyncStatus };
 }
 
@@ -20,7 +20,9 @@ export class ChainSync implements BaseSync {
 
   private readonly logger: Logger;
 
-  private error?: any;
+  private errors: Array<any>;
+
+  private syncing: boolean;
 
   private statusUpdateCallbacks: Array<(status: ChainSyncStatus) => void>;
 
@@ -39,42 +41,45 @@ export class ChainSync implements BaseSync {
     ) => ethers.Contract,
   ) {
     this.chainId = chainId;
+    this.errors = [];
     this.logger = rootLogger.getLogger('ChainSync');
     this.statusUpdateCallbacks = [];
     this.contractSyncs = contractHandler
       .getContracts({ filterFunc: (c) => c.chainId === chainId })
-      .map((contract) => {
-        const contractSync = new ContractSync(
-          contract,
-          eventHandler,
-          contractHandler,
-          depositHandler,
-          withdrawHandler,
-          noteHandler,
-          syncSize,
-          contractGenerator,
-        );
-        contractSync.onStatusUpdate(() => this.runCallbacks());
-        return contractSync;
-      });
+      .map(
+        (contract) =>
+          new ContractSync(
+            contract,
+            eventHandler,
+            contractHandler,
+            depositHandler,
+            withdrawHandler,
+            noteHandler,
+            syncSize,
+            contractGenerator,
+          ),
+      );
+    this.syncing = false;
   }
 
   public execute(provider: ethers.providers.Provider, targetBlockNumber: number): Promise<SyncResult> {
-    if (!this.isSyncing) {
-      this.error = undefined;
+    if (!this.syncing) {
+      this.errors = [];
+      this.updateSyncing(true);
       return this.executeContract(provider, targetBlockNumber, 0)
         .then((result: SyncResult) => {
-          this.error = result.error;
+          this.errors.push(...result.errors);
+          this.updateSyncing(false);
           return result;
         })
         .catch((error) => {
           this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
-          this.error = error;
-          this.runCallbacks();
-          return Promise.resolve({ syncedBlock: this.syncedBlock, error });
+          this.errors.push(error);
+          this.updateSyncing(false);
+          return Promise.resolve({ syncedBlock: this.syncedBlock, errors: this.errors });
         });
     }
-    return Promise.resolve({ syncedBlock: this.syncedBlock });
+    return Promise.resolve({ syncedBlock: this.syncedBlock, errors: this.errors });
   }
 
   public get syncedBlock(): number {
@@ -83,12 +88,7 @@ export class ChainSync implements BaseSync {
   }
 
   public get isSyncing(): boolean {
-    for (let index = 0; index < this.contractSyncs.length; index += 1) {
-      if (this.contractSyncs[index].isSyncing) {
-        return true;
-      }
-    }
-    return false;
+    return this.syncing;
   }
 
   public get status(): ChainSyncStatus {
@@ -102,7 +102,7 @@ export class ChainSync implements BaseSync {
       chainId: this.chainId,
       isSyncing: this.isSyncing,
       syncedBlock: this.syncedBlock,
-      error: this.error,
+      errors: this.errors,
       contractStatus: contracts,
     };
   }
@@ -126,15 +126,22 @@ export class ChainSync implements BaseSync {
         .then((contractResult: SyncResult) =>
           this.executeContract(provider, targetBlockNumber, index + 1).then((chainResult: SyncResult) => ({
             syncedBlock: chainResult.syncedBlock,
-            error: chainResult.error || contractResult.error,
+            errors: [...chainResult.errors, ...contractResult.errors],
           })),
         );
     }
-    return Promise.resolve({ syncedBlock: this.syncedBlock });
+    return Promise.resolve({ syncedBlock: this.syncedBlock, errors: [] });
   }
 
   private get logPrefix(): string {
     return `[chainId=${this.chainId}]`;
+  }
+
+  private updateSyncing(s: boolean) {
+    if (this.syncing !== s) {
+      this.syncing = s;
+      this.runCallbacks();
+    }
   }
 
   private runCallbacks() {

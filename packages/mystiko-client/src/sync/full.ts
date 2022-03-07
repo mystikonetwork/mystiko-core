@@ -69,7 +69,7 @@ export class FullSync {
             this.logger.warn(
               `failed to execute sync on chain(id=${chainSync.chainId}): ${errorMessage(error)}`,
             );
-            return { syncedBlock: chainSync.syncedBlock, error };
+            return { syncedBlock: chainSync.syncedBlock, errors: [error] };
           });
         promises.push(promise);
       }

@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 export interface SyncResult {
   syncedBlock: number;
-  error?: any;
+  errors: Array<any>;
 }
 
 export interface BaseSync {

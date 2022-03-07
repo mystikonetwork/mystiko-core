@@ -11,7 +11,7 @@ export interface ContractSyncStatus {
   contract: Contract;
   isSyncing: boolean;
   syncedBlock: number;
-  error?: any;
+  errors: Array<any>;
   topicStatus: { [key: string]: TopicSyncStatus };
 }
 
@@ -22,9 +22,7 @@ export class ContractSync implements BaseSync {
 
   private readonly logger: Logger;
 
-  private error?: any;
-
-  private statusUpdateCallbacks: Array<(status: ContractSyncStatus) => void>;
+  private errors: Array<any>;
 
   constructor(
     contract: Contract,
@@ -41,7 +39,7 @@ export class ContractSync implements BaseSync {
     ) => ethers.Contract,
   ) {
     this.contract = contract;
-    this.statusUpdateCallbacks = [];
+    this.errors = [];
     this.logger = rootLogger.getLogger('ContractSync');
     this.topicSyncs = [
       new DepositTopicSync(
@@ -71,26 +69,26 @@ export class ContractSync implements BaseSync {
         contractGenerator,
       ),
     ];
-    this.topicSyncs.forEach((topicSync) => {
-      topicSync.onStatusUpdate(() => this.runCallbacks());
-    });
   }
 
   public execute(provider: ethers.providers.Provider, targetBlockNumber: number): Promise<SyncResult> {
     if (!this.isSyncing) {
-      return this.executeTopic(provider, targetBlockNumber, 0)
-        .then((result) => {
-          this.error = result.error;
-          return result;
+      this.errors = [];
+      const promises: Array<Promise<SyncResult>> = [];
+      this.topicSyncs.forEach((topicSync) => {
+        promises.push(topicSync.execute(provider, targetBlockNumber));
+      });
+      return Promise.all(promises)
+        .then((results: SyncResult[]) => {
+          this.errors = results.map((result) => result.errors).flat();
+          return { syncedBlock: this.syncedBlock, errors: this.errors };
         })
         .catch((error) => {
-          this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
-          this.error = error;
-          this.runCallbacks();
-          return { syncedBlock: this.syncedBlock, error };
+          this.logger.warn(`${this.logPrefix} failed to execute sync: ${errorMessage(error)}`);
+          return { syncedBlock: this.syncedBlock, errors: [error] };
         });
     }
-    return Promise.resolve({ syncedBlock: this.syncedBlock });
+    return Promise.resolve({ syncedBlock: this.syncedBlock, errors: [] });
   }
 
   public get status(): ContractSyncStatus {
@@ -102,17 +100,9 @@ export class ContractSync implements BaseSync {
       contract: this.contract,
       isSyncing: this.isSyncing,
       syncedBlock: this.syncedBlock,
-      error: this.error,
+      errors: this.errors,
       topicStatus: topics,
     };
-  }
-
-  public onStatusUpdate(callback: (status: ContractSyncStatus) => void) {
-    this.statusUpdateCallbacks.push(callback);
-  }
-
-  public removeStatusUpdateCallback(callback: (status: ContractSyncStatus) => void) {
-    this.statusUpdateCallbacks = this.statusUpdateCallbacks.filter((cb) => cb !== callback);
   }
 
   public get syncedBlock(): number {
@@ -131,31 +121,5 @@ export class ContractSync implements BaseSync {
 
   private get logPrefix(): string {
     return `[chainId=${this.contract.chainId}][address=${this.contract.address}]`;
-  }
-
-  private executeTopic(
-    provider: ethers.providers.Provider,
-    targetBlockNumber: number,
-    index: number,
-  ): Promise<SyncResult> {
-    if (index < this.topicSyncs.length) {
-      return this.topicSyncs[index].execute(provider, targetBlockNumber).then((topicResult: SyncResult) =>
-        this.executeTopic(provider, targetBlockNumber, index + 1).then((contractResult: SyncResult) => ({
-          syncedBlock: contractResult.syncedBlock,
-          error: contractResult.error || topicResult.error,
-        })),
-      );
-    }
-    return Promise.resolve({ syncedBlock: this.syncedBlock });
-  }
-
-  private runCallbacks() {
-    this.statusUpdateCallbacks.forEach((callback) => {
-      try {
-        callback(this.status);
-      } catch (error) {
-        this.logger.warn(`${this.logPrefix} status update callback failed: ${errorMessage(error)}`);
-      }
-    });
   }
 }
