@@ -108,6 +108,8 @@ export abstract class TopicSync implements BaseSync {
 
   protected abstract handleEvents(events: RawEvent[]): Promise<void>;
 
+  protected abstract parseArguments(args?: ethers.utils.Result): any;
+
   protected get logPrefix(): string {
     return `[chainId=${this.contract.chainId}][address=${this.contract.address}][topic=${this.topic}]`;
   }
@@ -135,7 +137,7 @@ export abstract class TopicSync implements BaseSync {
               contractAddress: this.contract.address,
               transactionHash: event.transactionHash,
               blockNumber: event.blockNumber,
-              argumentData: event.args,
+              argumentData: this.parseArguments(event.args),
             };
             return rawEvent;
           });

@@ -45,7 +45,7 @@ export class ChainSync implements BaseSync {
     this.logger = rootLogger.getLogger('ChainSync');
     this.statusUpdateCallbacks = [];
     this.contractSyncs = contractHandler
-      .getContracts({ filterFunc: (c) => c.chainId === chainId })
+      .getContracts({ filterFunc: (c) => c.chainId === chainId && c.syncStart > 0 })
       .map(
         (contract) =>
           new ContractSync(
@@ -66,11 +66,16 @@ export class ChainSync implements BaseSync {
     if (!this.syncing) {
       this.errors = [];
       this.updateSyncing(true);
-      return this.executeContract(provider, targetBlockNumber, 0)
-        .then((result: SyncResult) => {
-          this.errors.push(...result.errors);
+      const promises: Promise<SyncResult>[] = [];
+      this.contractSyncs.forEach((contractSync) => {
+        promises.push(contractSync.execute(provider, targetBlockNumber));
+      });
+      return Promise.all(promises)
+        .then((results) => {
+          const errors = results.map((result) => result.errors).flat();
+          this.errors.push(...errors);
           this.updateSyncing(false);
-          return result;
+          return { syncedBlock: this.syncedBlock, errors };
         })
         .catch((error) => {
           this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
@@ -113,24 +118,6 @@ export class ChainSync implements BaseSync {
 
   public removeStatusUpdateCallback(callback: (status: ChainSyncStatus) => void) {
     this.statusUpdateCallbacks = this.statusUpdateCallbacks.filter((cb) => cb !== callback);
-  }
-
-  private executeContract(
-    provider: ethers.providers.Provider,
-    targetBlockNumber: number,
-    index: number,
-  ): Promise<SyncResult> {
-    if (index < this.contractSyncs.length) {
-      return this.contractSyncs[index]
-        .execute(provider, targetBlockNumber)
-        .then((contractResult: SyncResult) =>
-          this.executeContract(provider, targetBlockNumber, index + 1).then((chainResult: SyncResult) => ({
-            syncedBlock: chainResult.syncedBlock,
-            errors: [...chainResult.errors, ...contractResult.errors],
-          })),
-        );
-    }
-    return Promise.resolve({ syncedBlock: this.syncedBlock, errors: [] });
   }
 
   private get logPrefix(): string {

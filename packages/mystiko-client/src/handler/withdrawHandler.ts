@@ -506,7 +506,11 @@ export class WithdrawHandler extends Handler {
             contractAddress: etherContract.address,
             transactionHash: rawEvent.transactionHash,
             blockNumber: rawEvent.blockNumber,
-            argumentData: rawEvent.args,
+            argumentData: {
+              leaf: rawEvent.args?.leaf,
+              leafIndex: rawEvent.args?.leafIndex,
+              amount: rawEvent.args?.amount?.toString(),
+            },
           }),
       ),
     );
