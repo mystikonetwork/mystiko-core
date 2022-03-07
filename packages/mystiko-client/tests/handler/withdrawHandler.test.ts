@@ -19,6 +19,7 @@ import {
   PrivateNote,
   Withdraw,
   WithdrawStatus,
+  EventHandler,
 } from '../../src';
 import txReceipt02 from './files/txReceipt02.json';
 
@@ -46,8 +47,8 @@ class MockTransactionResponse {
 class MockMystikoContract extends ethers.Contract {
   private readonly withdrewSN: { [key: string]: boolean };
 
-  constructor(address: string, abi: any) {
-    super(address, abi);
+  constructor(address: string, abi: any, providerOrSigner?: ethers.providers.Provider | ethers.Signer) {
+    super(address, abi, providerOrSigner);
     this.withdrewSN = {};
   }
 
@@ -137,6 +138,11 @@ class MockProvider extends ethers.providers.JsonRpcProvider {
   public getTransactionReceipt() {
     return Promise.resolve(this.txReceipt);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  public getBlockNumber(): Promise<number> {
+    return Promise.resolve(12345);
+  }
 }
 
 class MockWrappedContract extends MystikoContract {
@@ -169,6 +175,7 @@ let walletHandler: WalletHandler;
 let accountHandler: AccountHandler;
 let contractHandler: ContractHandler;
 let noteHandler: NoteHandler;
+let eventHandler: EventHandler;
 let withdrawHandler: WithdrawHandler;
 let privateNote: PrivateNote;
 const walletMasterSeed = 'awesomeMasterSeed';
@@ -184,10 +191,14 @@ beforeEach(async () => {
   await contractHandler.importFromConfig();
   contractPool = new ContractPool(conf, providerPool);
   contract = new MockMystikoContract(
-    '0x98ed94360cad67a76a53d8aa15905e52485b73d1',
+    '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
     MystikoABI.MystikoWithLoopERC20.abi,
+    providerPool.getProvider(56),
   );
-  contractPool.connect(contractHandler.getContracts(), () => contract);
+  contractPool.connect(
+    contractHandler.getContracts(),
+    (address, abi, providerOrSigner) => new MockMystikoContract(address, abi, providerOrSigner),
+  );
   contractPool.updateWrappedContract(
     56,
     '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
@@ -204,11 +215,13 @@ beforeEach(async () => {
     db,
     conf,
   );
+  eventHandler = new EventHandler(db, conf);
   withdrawHandler = new WithdrawHandler(
     walletHandler,
     accountHandler,
     contractHandler,
     noteHandler,
+    eventHandler,
     providerPool,
     contractPool,
     db,

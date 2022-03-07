@@ -163,6 +163,7 @@ export class Mystiko {
     this.providers = new ProviderPool(this.config);
     this.providers.connect();
     this.contracts = new ContractHandler(this.db, this.config);
+    this.events = new EventHandler(this.db, this.config);
     await this.contracts.importFromConfig();
     this.contractPool = new ContractPool(this.config, this.providers);
     const contracts = this.contracts.getContracts({
@@ -191,12 +192,12 @@ export class Mystiko {
       this.accounts,
       this.contracts,
       this.notes,
+      this.events,
       this.providers,
       this.contractPool,
       this.db,
       this.config,
     );
-    this.events = new EventHandler(this.db, this.config);
     this.signers = {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
