@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { BridgeType } from '@mystiko/config';
 import { toBN, toHexNoPrefix } from '@mystiko/utils';
 import { Contract, DepositStatus, RawEvent } from '../../model';
-import TopicSync from './base';
+import { TopicSync } from './base';
 import { ContractHandler, DepositHandler, EventHandler } from '../../handler';
 
 export default class DepositTopicSync extends TopicSync {

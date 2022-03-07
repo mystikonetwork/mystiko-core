@@ -1,12 +1,10 @@
-export enum SyncStatus {
-  INIT = 0,
-  SYNCING = 1,
-  SYNCED = 2,
-  FAILED = 3,
+export interface SyncResult {
+  syncedBlock: number;
+  error?: any;
 }
 
-export default interface BaseSync {
-  execute(targetBlockNumber: number): Promise<number>;
+export interface BaseSync {
+  execute(targetBlockNumber: number): Promise<SyncResult>;
   get syncedBlock(): number;
   get isSyncing(): boolean;
 }

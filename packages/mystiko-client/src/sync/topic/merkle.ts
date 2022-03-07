@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { toBN, toHexNoPrefix } from '@mystiko/utils';
-import TopicSync from './base';
+import { TopicSync } from './base';
 import { Contract, DepositStatus, RawEvent } from '../../model';
 import { ContractHandler, NoteHandler, DepositHandler, EventHandler } from '../../handler';
 

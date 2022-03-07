@@ -1,12 +1,20 @@
 import { ethers } from 'ethers';
 import { Logger } from 'loglevel';
 import { errorMessage, logger as rootLogger } from '@mystiko/utils';
-import BaseSync from '../base';
+import { BaseSync, SyncResult } from '../base';
 import { Contract, RawEvent } from '../../model';
 import { ContractHandler, EventHandler } from '../../handler';
 
-export default abstract class TopicSync implements BaseSync {
-  protected readonly topic: string;
+export interface TopicSyncStatus {
+  contract: Contract;
+  topic: string;
+  isSyncing: boolean;
+  syncedBlock: number;
+  error?: any;
+}
+
+export abstract class TopicSync implements BaseSync {
+  public readonly topic: string;
 
   protected readonly contract: Contract;
 
@@ -21,6 +29,10 @@ export default abstract class TopicSync implements BaseSync {
   protected readonly logger: Logger;
 
   protected syncing: boolean;
+
+  protected error?: any;
+
+  protected statusUpdateCallbacks: Array<(status: TopicSyncStatus) => void>;
 
   protected constructor(
     contract: Contract,
@@ -38,24 +50,48 @@ export default abstract class TopicSync implements BaseSync {
     this.syncSize = syncSize;
     this.logger = rootLogger.getLogger('TopicSync');
     this.syncing = false;
+    this.statusUpdateCallbacks = [];
   }
 
-  public execute(targetBlockNumber: number): Promise<number> {
-    this.syncing = true;
-    return this.executeChain(targetBlockNumber)
-      .then((result) => {
-        this.syncing = false;
-        return result;
-      })
-      .catch((error) => {
-        this.syncing = false;
-        this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
-        return this.syncedBlock;
-      });
+  public execute(targetBlockNumber: number): Promise<SyncResult> {
+    if (!this.syncing) {
+      this.error = undefined;
+      this.updateStatus(true);
+      return this.executeChain(targetBlockNumber)
+        .then((result) => {
+          this.updateStatus(false);
+          return { syncedBlock: result };
+        })
+        .catch((error) => {
+          this.error = error;
+          this.updateStatus(false);
+          this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
+          return { syncedBlock: this.syncedBlock, error };
+        });
+    }
+    return Promise.resolve({ syncedBlock: this.syncedBlock });
   }
 
   public get syncedBlock(): number {
     return this.contract.getSyncedTopicBlock(this.topic);
+  }
+
+  public get status(): TopicSyncStatus {
+    return {
+      contract: this.contract,
+      topic: this.topic,
+      isSyncing: this.isSyncing,
+      syncedBlock: this.syncedBlock,
+      error: this.error,
+    };
+  }
+
+  public onStatusUpdate(callback: (status: TopicSyncStatus) => void) {
+    this.statusUpdateCallbacks.push(callback);
+  }
+
+  public removeStatusUpdateCallback(callback: (status: TopicSyncStatus) => void) {
+    this.statusUpdateCallbacks = this.statusUpdateCallbacks.filter((cb) => cb !== callback);
   }
 
   protected abstract handleEvents(events: RawEvent[]): Promise<void>;
@@ -101,5 +137,18 @@ export default abstract class TopicSync implements BaseSync {
         });
     }
     return Promise.resolve(this.syncedBlock);
+  }
+
+  private updateStatus(syncingFlag: boolean) {
+    if (this.syncing !== syncingFlag) {
+      this.syncing = syncingFlag;
+      this.statusUpdateCallbacks.forEach((callback) => {
+        try {
+          callback(this.status);
+        } catch (error) {
+          this.logger.warn(`${this.logPrefix} status update callback failed: ${errorMessage(error)}`);
+        }
+      });
+    }
   }
 }

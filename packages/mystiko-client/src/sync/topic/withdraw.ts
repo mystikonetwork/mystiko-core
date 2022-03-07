@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import TopicSync from './base';
+import { TopicSync } from './base';
 import { Contract, PrivateNoteStatus, RawEvent, WithdrawStatus } from '../../model';
 import { ContractHandler, EventHandler, NoteHandler, WithdrawHandler } from '../../handler';
 
