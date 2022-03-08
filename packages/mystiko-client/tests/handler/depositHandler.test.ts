@@ -536,6 +536,8 @@ test('test query deposits', async () => {
     deposit = await depositHandler.updateDepositStatus(deposit, oldStatus);
     expect(deposit.status).toBe(oldStatus);
   }
+  db.wallets.findAndRemove();
+  expect(depositHandler.getDeposits()).toStrictEqual([]);
 });
 
 test('test exportOffChainNote', async () => {

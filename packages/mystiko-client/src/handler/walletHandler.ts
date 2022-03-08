@@ -70,7 +70,7 @@ export class WalletHandler extends Handler {
     if (wallet) {
       return wallet;
     }
-    throw new Error('no existing wallet or compatible in database');
+    throw new Error('no existing wallet or compatible one in database');
   }
 
   /**
