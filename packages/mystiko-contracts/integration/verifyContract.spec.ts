@@ -6,7 +6,7 @@ import mystiko, {
   WithdrawParams,
   WithdrawStatus,
 } from '@mystiko/client';
-import { ChainConfig } from '@mystiko/config';
+import { ChainConfig, ContractConfig } from '@mystiko/config';
 
 require('dotenv').config();
 
@@ -18,10 +18,26 @@ let signer: PrivateKeySigner | undefined;
 let privateNote: PrivateNote | undefined;
 let shieldedAddress: string | undefined;
 let configChains: ChainConfig[] | undefined;
+const chainid: string | undefined = process.env.npm_config_chainid;
+const contracts: string | undefined = process.env.npm_config_contracts;
 const walletMasterSeed: string = 'integration@seed';
 const walletPassword: string = 'integration@psd';
 const accountName: string = 'integration@test';
 const depositAmount: number = 0.1;
+
+function filterContracts(cs: ContractConfig): ContractConfig | undefined {
+  if (cs.name.startsWith('MystikoWithLoop')) {
+    if (contracts === undefined) {
+      return cs;
+    }
+    const contractList = contracts.split(',');
+    if (contractList.includes(cs.assetSymbol)) {
+      return cs;
+    }
+  }
+
+  return undefined;
+}
 
 describe('Integration test for verify deployed contract', async () => {
   before(() => {
@@ -29,7 +45,10 @@ describe('Integration test for verify deployed contract', async () => {
   });
 
   await mystiko.initialize({ dbAdapter: undefined });
-  configChains = mystiko.config?.chains;
+  configChains =
+    chainid === undefined
+      ? mystiko.config?.chains
+      : mystiko.config?.chains.filter((chain) => chain.chainId.toString() === chainid);
 
   describe('Make Mystiko ready', () => {
     it('should initialize mystiko successful', () => {
@@ -63,48 +82,46 @@ describe('Integration test for verify deployed contract', async () => {
     configChains?.forEach((chain) => {
       describe(`${chain.name} should deposit and withdraw successful`, () => {
         const allContract = chain.contracts;
-        allContract
-          .filter((c) => c.name.startsWith('MystikoWithLoop'))
-          .forEach((contract) => {
-            let recipientAddress: string | undefined;
+        allContract.filter(filterContracts).forEach((contract) => {
+          let recipientAddress: string | undefined;
 
-            it(`[${chain.name}] ${contract.name} ${contract.assetSymbol} shoud deposit successful`, async () => {
-              const depositRequest: DepositParams = {
-                srcChainId: chain.chainId,
-                dstChainId: chain.chainId,
-                assetSymbol: contract.assetSymbol,
-                bridge: mystiko.models.BridgeType.LOOP,
-                amount: depositAmount,
-                shieldedAddress: shieldedAddress as string,
-              };
-              const depositResponse = await mystiko.deposits?.createDeposit(
-                depositRequest,
-                signer as PrivateKeySigner,
-              );
-              await depositResponse?.depositPromise;
-              const deposit1 = mystiko.deposits?.getDeposit(depositResponse?.deposit.id as number);
-              expect(deposit1?.errorMessage).to.be.an('undefined');
-              expect(deposit1?.status).to.equal(DepositStatus.SUCCEEDED);
-              privateNote = mystiko.notes?.getPrivateNote(depositResponse?.deposit.id as number);
-              recipientAddress = deposit1?.srcAddress;
-            });
-
-            it(`[${chain.name}] ${contract.name} ${contract.assetSymbol} shoud withdraw successful`, async () => {
-              const withdrawRequest: WithdrawParams = {
-                privateNote: privateNote as PrivateNote,
-                recipientAddress: recipientAddress as string,
-              };
-              const withdrawResponse = await mystiko.withdraws?.createWithdraw(
-                walletPassword,
-                withdrawRequest,
-                signer as PrivateKeySigner,
-              );
-              await withdrawResponse?.withdrawPromise;
-              const withdraw1 = mystiko.withdraws?.getWithdraw(withdrawResponse?.withdraw.id as number);
-              expect(withdraw1?.errorMessage).to.be.an('undefined');
-              expect(withdraw1?.status).to.equal(WithdrawStatus.SUCCEEDED);
-            });
+          it(`[${chain.name}] ${contract.name} ${contract.assetSymbol} should deposit successful`, async () => {
+            const depositRequest: DepositParams = {
+              srcChainId: chain.chainId,
+              dstChainId: chain.chainId,
+              assetSymbol: contract.assetSymbol,
+              bridge: mystiko.models.BridgeType.LOOP,
+              amount: depositAmount,
+              shieldedAddress: shieldedAddress as string,
+            };
+            const depositResponse = await mystiko.deposits?.createDeposit(
+              depositRequest,
+              signer as PrivateKeySigner,
+            );
+            await depositResponse?.depositPromise;
+            const deposit1 = mystiko.deposits?.getDeposit(depositResponse?.deposit.id as number);
+            expect(deposit1?.errorMessage).to.be.an('undefined');
+            expect(deposit1?.status).to.equal(DepositStatus.SUCCEEDED);
+            privateNote = mystiko.notes?.getPrivateNote(depositResponse?.deposit.id as number);
+            recipientAddress = deposit1?.srcAddress;
           });
+
+          it(`[${chain.name}] ${contract.name} ${contract.assetSymbol} should withdraw successful`, async () => {
+            const withdrawRequest: WithdrawParams = {
+              privateNote: privateNote as PrivateNote,
+              recipientAddress: recipientAddress as string,
+            };
+            const withdrawResponse = await mystiko.withdraws?.createWithdraw(
+              walletPassword,
+              withdrawRequest,
+              signer as PrivateKeySigner,
+            );
+            await withdrawResponse?.withdrawPromise;
+            const withdraw1 = mystiko.withdraws?.getWithdraw(withdrawResponse?.withdraw.id as number);
+            expect(withdraw1?.errorMessage).to.be.an('undefined');
+            expect(withdraw1?.status).to.equal(WithdrawStatus.SUCCEEDED);
+          });
+        });
       });
     });
   });
