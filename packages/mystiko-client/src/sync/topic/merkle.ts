@@ -61,7 +61,6 @@ export default class MerkleTreeInsertTopicSync extends TopicSync {
     return Promise.all(promises).then(() => {});
   }
 
-  // eslint-disable-next-line class-methods-use-this
   protected parseArguments(args?: ethers.utils.Result): any {
     return {
       leaf: args?.leaf,

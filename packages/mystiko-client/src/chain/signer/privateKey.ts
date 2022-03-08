@@ -34,7 +34,6 @@ export class PrivateKeySigner extends BaseSigner {
    * @override
    * @returns {Promise<boolean>} true if it is installed properly, otherwise it returns false.
    */
-  // eslint-disable-next-line class-methods-use-this
   public installed(): Promise<boolean> {
     return Promise.resolve(true);
   }

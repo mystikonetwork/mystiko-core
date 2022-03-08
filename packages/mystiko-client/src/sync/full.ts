@@ -6,6 +6,7 @@ import { ChainSync, ChainSyncStatus } from './chain';
 import { SyncResult } from './base';
 import { ContractHandler, DepositHandler, EventHandler, NoteHandler, WithdrawHandler } from '../handler';
 import { ProviderPool } from '../chain';
+import tracer from '../tracing';
 
 export interface FullSyncStatus {
   isSyncing: boolean;
@@ -123,6 +124,7 @@ export class FullSync {
           .getBlockNumber()
           .then((targetBlockNumber) => chainSync.execute(provider, targetBlockNumber))
           .catch((error) => {
+            tracer.traceError(error);
             this.logger.warn(
               `failed to execute sync on chain(id=${chainSync.chainId}): ${errorMessage(error)}`,
             );

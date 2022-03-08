@@ -29,6 +29,8 @@ import {
   WithdrawHandler,
 } from './handler';
 import { Contract } from './model';
+import tracer, { MystikoTracer } from './tracing';
+import { VERSION } from './version';
 
 export interface InitOptions {
   isTestnet?: boolean;
@@ -102,9 +104,15 @@ export class Mystiko {
 
   public sync?: FullSync;
 
+  public tracer: MystikoTracer;
+
+  public readonly version: string;
+
   constructor() {
     this.models = { ...models, AssetType, BridgeType };
     this.utils = utils;
+    this.tracer = tracer;
+    this.version = VERSION;
   }
 
   /**
@@ -133,7 +141,7 @@ export class Mystiko {
       conf = undefined,
       dbFile = undefined,
       dbAdapter = undefined,
-      loggingLevel = 'error',
+      loggingLevel = 'warn',
       loggingOptions = undefined,
       syncInitIntervalMs,
       syncIntervalMs,

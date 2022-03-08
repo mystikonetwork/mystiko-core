@@ -6,6 +6,7 @@ import { TopicSync, TopicSyncStatus } from './topic/base';
 import { Contract } from '../model';
 import { ContractHandler, DepositHandler, EventHandler, NoteHandler, WithdrawHandler } from '../handler';
 import { DepositTopicSync, MerkleTreeInsertTopicSync, WithdrawTopicSync } from './topic';
+import tracer from '../tracing';
 
 export interface ContractSyncStatus {
   contract: Contract;
@@ -84,6 +85,7 @@ export class ContractSync implements BaseSync {
           return { syncedBlock: this.syncedBlock, errors: this.errors };
         })
         .catch((error) => {
+          tracer.traceError(error);
           this.logger.warn(`${this.logPrefix} failed to execute sync: ${errorMessage(error)}`);
           return { syncedBlock: this.syncedBlock, errors: [error] };
         });

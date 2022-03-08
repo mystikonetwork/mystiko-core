@@ -22,7 +22,6 @@ export class MetaMaskSigner extends BaseSigner {
    * @override
    * @returns {Promise<boolean>} true if it is installed properly, otherwise it returns false.
    */
-  // eslint-disable-next-line class-methods-use-this
   public async installed(): Promise<boolean> {
     const provider = await detectEthereumProvider().catch(() => undefined);
     return !!provider;

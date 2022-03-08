@@ -4,6 +4,7 @@ import { errorMessage, logger as rootLogger } from '@mystiko/utils';
 import { BaseSync, SyncResult } from './base';
 import { ContractSync, ContractSyncStatus } from './contract';
 import { ContractHandler, DepositHandler, EventHandler, NoteHandler, WithdrawHandler } from '../handler';
+import tracer from '../tracing';
 
 export interface ChainSyncStatus {
   chainId: number;
@@ -78,6 +79,7 @@ export class ChainSync implements BaseSync {
           return { syncedBlock: this.syncedBlock, errors };
         })
         .catch((error) => {
+          tracer.traceError(error);
           this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
           this.errors.push(error);
           this.updateSyncing(false);

@@ -29,6 +29,7 @@ import {
 } from '../model';
 import { MystikoDatabase } from '../database';
 import { EventHandler } from './eventHandler';
+import tracer from '../tracing';
 
 interface QueryParams {
   filterFunc?: (withdraw: Withdraw) => boolean;
@@ -210,6 +211,7 @@ export class WithdrawHandler extends Handler {
       )
       .then(() => (withdraw.id ? this.getWithdraw(withdraw.id) || withdraw : withdraw))
       .catch((error) => {
+        tracer.traceError(error);
         withdraw.errorMessage = errorMessage(error);
         this.logger.error(`withdraw(id=${withdraw.id}) transaction raised error: ${withdraw.errorMessage}`);
         return this.updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);

@@ -4,6 +4,7 @@ import { errorMessage, logger as rootLogger } from '@mystiko/utils';
 import { BaseSync, SyncResult } from '../base';
 import { Contract, RawEvent } from '../../model';
 import { ContractHandler, EventHandler } from '../../handler';
+import tracer from '../../tracing';
 
 export interface TopicSyncStatus {
   contract: Contract;
@@ -82,6 +83,7 @@ export abstract class TopicSync implements BaseSync {
             return { syncedBlock: result, errors: [] };
           })
           .catch((error) => {
+            tracer.traceError(error);
             this.error = error;
             this.updateStatus(false);
             this.logger.warn(`${this.logPrefix} failed to sync: ${errorMessage(error)}`);
