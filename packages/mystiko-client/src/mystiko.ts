@@ -18,7 +18,7 @@ import * as utils from '@mystiko/utils';
 import { createDatabase, exportDataAsString, importDataFromJson, importDataFromJsonFile } from './database';
 import * as models from './model';
 import { ProviderPool, ContractPool, MetaMaskSigner, PrivateKeySigner } from './chain';
-import { EventPuller } from './puller';
+import { FullSync } from './sync';
 import {
   AccountHandler,
   ContractHandler,
@@ -29,14 +29,16 @@ import {
   WithdrawHandler,
 } from './handler';
 import { Contract } from './model';
+import tracer, { MystikoTracer } from './tracing';
+import { VERSION } from './version';
 
 export interface InitOptions {
   isTestnet?: boolean;
   conf?: string | MystikoConfig;
   dbFile?: string;
   dbAdapter?: LokiPersistenceAdapter;
-  isStoreEvent?: boolean;
-  eventPullingIntervalMs?: number;
+  syncInitIntervalMs?: number;
+  syncIntervalMs?: number;
   loggingLevel?: LogLevelDesc;
   loggingOptions?: LoglevelPluginPrefixOptions;
 }
@@ -67,7 +69,6 @@ export interface InitOptions {
  * @property {ContractHandler} contracts handler of Contract related business logic.
  * @property {EventHandler} events handler of Contract events related business logic.
  * @property {Object} pullers object including supported pullers.
- * @property {EventPuller} pullers.eventPuller puller that pulling events in fixed time frame.
  * @property {Logger} logger log handler for logging useful information.
  */
 export class Mystiko {
@@ -101,11 +102,17 @@ export class Mystiko {
 
   public signers?: { metaMask: MetaMaskSigner; privateKey: PrivateKeySigner };
 
-  public pullers?: { eventPuller: EventPuller };
+  public sync?: FullSync;
+
+  public tracer: MystikoTracer;
+
+  public readonly version: string;
 
   constructor() {
     this.models = { ...models, AssetType, BridgeType };
     this.utils = utils;
+    this.tracer = tracer;
+    this.version = VERSION;
   }
 
   /**
@@ -134,10 +141,10 @@ export class Mystiko {
       conf = undefined,
       dbFile = undefined,
       dbAdapter = undefined,
-      isStoreEvent = false,
-      eventPullingIntervalMs = 60000,
-      loggingLevel = 'error',
+      loggingLevel = 'warn',
       loggingOptions = undefined,
+      syncInitIntervalMs,
+      syncIntervalMs,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await readFromFile(conf);
@@ -165,6 +172,7 @@ export class Mystiko {
     this.providers = new ProviderPool(this.config);
     this.providers.connect();
     this.contracts = new ContractHandler(this.db, this.config);
+    this.events = new EventHandler(this.db, this.config);
     await this.contracts.importFromConfig();
     this.contractPool = new ContractPool(this.config, this.providers);
     const contracts = this.contracts.getContracts({
@@ -193,30 +201,27 @@ export class Mystiko {
       this.accounts,
       this.contracts,
       this.notes,
+      this.events,
       this.providers,
       this.contractPool,
       this.db,
       this.config,
     );
-    this.events = new EventHandler(this.db, this.config);
     this.signers = {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
-    this.pullers = {
-      eventPuller: new EventPuller({
-        config: this.config,
-        contractHandler: this.contracts,
-        walletHandler: this.wallets,
-        noteHandler: this.notes,
-        depositHandler: this.deposits,
-        withdrawHandler: this.withdraws,
-        eventHandler: this.events,
-        contractPool: this.contractPool,
-        isStoreEvent,
-        pullIntervalMs: eventPullingIntervalMs,
-      }),
-    };
+    this.sync = new FullSync(
+      this.events,
+      this.contracts,
+      this.deposits,
+      this.withdraws,
+      this.notes,
+      this.config,
+      this.providers,
+      syncInitIntervalMs,
+      syncIntervalMs,
+    );
     this.logger.info('@mystiko/client has been successfully initialized, enjoy!');
   }
 }

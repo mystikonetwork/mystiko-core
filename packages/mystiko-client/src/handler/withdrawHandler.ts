@@ -20,6 +20,7 @@ import {
   Account,
   BaseModel,
   Contract,
+  Event,
   ID_KEY,
   PrivateNote,
   PrivateNoteStatus,
@@ -27,6 +28,8 @@ import {
   WithdrawStatus,
 } from '../model';
 import { MystikoDatabase } from '../database';
+import { EventHandler } from './eventHandler';
+import tracer from '../tracing';
 
 interface QueryParams {
   filterFunc?: (withdraw: Withdraw) => boolean;
@@ -72,6 +75,8 @@ export class WithdrawHandler extends Handler {
 
   private readonly noteHandler: NoteHandler;
 
+  private readonly eventHandler: EventHandler;
+
   private readonly providerPool: ProviderPool;
 
   private readonly contractPool: ContractPool;
@@ -81,6 +86,7 @@ export class WithdrawHandler extends Handler {
     accountHandler: AccountHandler,
     contractHandler: ContractHandler,
     noteHandler: NoteHandler,
+    eventHandler: EventHandler,
     providerPool: ProviderPool,
     contractPool: ContractPool,
     db: MystikoDatabase,
@@ -91,6 +97,7 @@ export class WithdrawHandler extends Handler {
     this.accountHandler = accountHandler;
     this.contractHandler = contractHandler;
     this.noteHandler = noteHandler;
+    this.eventHandler = eventHandler;
     this.providerPool = providerPool;
     this.contractPool = contractPool;
     this.logger = rootLogger.getLogger('WithdrawHandler');
@@ -204,6 +211,7 @@ export class WithdrawHandler extends Handler {
       )
       .then(() => (withdraw.id ? this.getWithdraw(withdraw.id) || withdraw : withdraw))
       .catch((error) => {
+        tracer.traceError(error);
         withdraw.errorMessage = errorMessage(error);
         this.logger.error(`withdraw(id=${withdraw.id}) transaction raised error: ${withdraw.errorMessage}`);
         return this.updateStatus(withdraw, WithdrawStatus.FAILED, statusCallback);
@@ -304,17 +312,18 @@ export class WithdrawHandler extends Handler {
     return newWithdraw;
   }
 
-  private static async buildMerkleTree(
-    contract: ethers.Contract,
+  private async buildMerkleTree(
+    withdraw: Withdraw,
+    etherContract: ethers.Contract,
     leaf: BN,
   ): Promise<{ leaves: BN[]; leafIndex: number }> {
-    const leaves = await contract.queryFilter(contract.filters.MerkleTreeInsert());
+    const leaves = await this.queryEvents(withdraw, etherContract);
     let leafIndex = -1;
     let index = 0;
     const convertedLeaves = leaves
-      .sort((e1, e2) => (e1.args?.leafIndex || 0) - (e2.args?.leafIndex || 0))
+      .sort((e1, e2) => (e1.argumentData?.leafIndex || 0) - (e2.argumentData?.leafIndex || 0))
       .map((e) => {
-        const leafOther = toBN(toHexNoPrefix(e.args?.leaf || '0'), 16);
+        const leafOther = toBN(toHexNoPrefix(e.argumentData?.leaf || '0'), 16);
         if (leafOther.toString() === leaf.toString()) {
           leafIndex = index;
         }
@@ -365,7 +374,7 @@ export class WithdrawHandler extends Handler {
     const balance = await wrappedContract.assetBalance();
     check(balance.gte(privateNote.amount), 'insufficient pool balance for withdrawing');
     this.logger.info(`generating zkSnark proofs for withdraw(id=${withdraw.id})...`);
-    const { leaves, leafIndex } = await WithdrawHandler.buildMerkleTree(contract, privateNote.commitmentHash);
+    const { leaves, leafIndex } = await this.buildMerkleTree(withdraw, contract, privateNote.commitmentHash);
     const pkVerify = account.verifyPublicKey;
     const pkEnc = account.encPublicKey;
     const skVerify = this.protocol.secretKeyForVerification(
@@ -451,5 +460,61 @@ export class WithdrawHandler extends Handler {
     newPrivateNote.withdrawTransactionHash = txReceipt.transactionHash;
     newPrivateNote.status = PrivateNoteStatus.SPENT;
     await this.noteHandler.updatePrivateNote(newPrivateNote);
+  }
+
+  private queryEvents(withdraw: Withdraw, etherContract: ethers.Contract): Promise<Event[]> {
+    const chainConfig = this.config.getChainConfig(withdraw.chainId || 0);
+    const contract = this.contractHandler.getContract(withdraw.chainId || 0, etherContract.address);
+    if (contract && chainConfig) {
+      return WithdrawHandler.queryEventsBatch(contract, etherContract, chainConfig.syncSize).then(
+        (events) => {
+          const storedEvents = this.eventHandler.getEvents({
+            filterFunc: (event) =>
+              event.chainId === chainConfig.chainId &&
+              event.contractAddress === etherContract.address &&
+              event.topic === 'MerkleTreeInsert',
+          });
+          return [...storedEvents, ...events];
+        },
+      );
+    }
+    return Promise.reject(
+      new Error(
+        `failed to get events of contract(chainId=${withdraw.chainId}, address=${etherContract.address})`,
+      ),
+    );
+  }
+
+  private static async queryEventsBatch(
+    contract: Contract,
+    etherContract: ethers.Contract,
+    syncSize: number,
+  ): Promise<Event[]> {
+    const syncedBlock = contract.getSyncedTopicBlock('MerkleTreeInsert');
+    const blockNumber = await etherContract.provider.getBlockNumber();
+    const promises: Promise<ethers.Event[]>[] = [];
+    for (let fromBlock = syncedBlock + 1; fromBlock <= blockNumber; ) {
+      const toBlock = fromBlock + syncSize - 1 > blockNumber ? blockNumber : fromBlock + syncSize - 1;
+      const promise = etherContract.queryFilter(etherContract.filters.MerkleTreeInsert(), fromBlock, toBlock);
+      promises.push(promise);
+      fromBlock = toBlock + 1;
+    }
+    return Promise.all(promises).then((events) =>
+      events.flat().map(
+        (rawEvent) =>
+          new Event({
+            chainId: contract.chainId,
+            topic: 'MerkleTreeInsert',
+            contractAddress: etherContract.address,
+            transactionHash: rawEvent.transactionHash,
+            blockNumber: rawEvent.blockNumber,
+            argumentData: {
+              leaf: rawEvent.args?.leaf,
+              leafIndex: rawEvent.args?.leafIndex,
+              amount: rawEvent.args?.amount?.toString(),
+            },
+          }),
+      ),
+    );
   }
 }

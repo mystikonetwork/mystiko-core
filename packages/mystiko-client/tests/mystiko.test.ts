@@ -23,7 +23,7 @@ test('test initialize', async () => {
   expect(mystiko.withdraws).not.toBe(undefined);
   expect(mystiko.signers).not.toBe(undefined);
   expect(mystiko.signers?.metaMask).not.toBe(undefined);
-  expect(mystiko.pullers?.eventPuller).not.toBe(undefined);
+  expect(mystiko.sync).not.toBe(undefined);
   expect(mystiko.logger).not.toBe(undefined);
 
   await mystiko.initialize({

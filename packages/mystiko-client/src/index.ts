@@ -11,5 +11,4 @@ export * from './database';
 export * from './chain';
 export * from './handler';
 export * from './model';
-export * from './puller';
 export * from './version';

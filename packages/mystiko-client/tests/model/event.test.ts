@@ -7,6 +7,7 @@ test('test Event getters/setters', () => {
   expect(event.topic).toBe(undefined);
   expect(event.argumentData).toBe(undefined);
   expect(event.transactionHash).toBe(undefined);
+  expect(event.blockNumber).toBe(0);
 
   event.chainId = 10;
   expect(event.chainId).toBe(10);
@@ -18,4 +19,9 @@ test('test Event getters/setters', () => {
   expect(event.argumentData).toStrictEqual({ a: 1, b: 2 });
   event.transactionHash = '0x714a4ca5465bfe9e0a4290429672acfc453c9e26a9e2a42921dbcc886e562be8';
   expect(event.transactionHash).toBe('0x714a4ca5465bfe9e0a4290429672acfc453c9e26a9e2a42921dbcc886e562be8');
+  expect(() => {
+    event.blockNumber = -1;
+  }).toThrow();
+  event.blockNumber = 1234;
+  expect(event.blockNumber).toBe(1234);
 });

@@ -147,7 +147,7 @@ test('test ChainConfig constructor', () => {
   expect(config.getContract('0x110a13fc3efe6a245b50102d2d79b3e76125ae83')?.toString()).toBe(
     new ContractConfig(contractConfigs[5]).toString(),
   );
-  expect(config.syncSize).toBe(undefined);
+  expect(config.syncSize).toBe(200000);
   const rawConfig13 = { ...rawConfig9, syncSize: 1000 };
   const config1 = new ChainConfig(rawConfig13);
   expect(config1.syncSize).toBe(1000);

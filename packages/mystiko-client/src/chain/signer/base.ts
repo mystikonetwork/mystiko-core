@@ -53,7 +53,6 @@ export class BaseSigner {
    * @desc whether this signer is properly installed in user's browser.
    * @returns {Promise<boolean>} true if it is installed properly, otherwise it returns false.
    */
-  // eslint-disable-next-line class-methods-use-this
   public installed(): Promise<boolean> {
     return Promise.resolve(false);
   }

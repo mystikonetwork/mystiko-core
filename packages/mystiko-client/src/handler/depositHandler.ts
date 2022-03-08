@@ -19,6 +19,7 @@ import { NoteHandler } from './noteHandler';
 import { BaseSigner, checkSigner, ContractPool } from '../chain';
 import { BaseModel, Deposit, DepositReceipt, DepositStatus, ID_KEY, PrivateNote } from '../model';
 import { MystikoDatabase } from '../database';
+import tracer from '../tracing';
 
 export interface DepositParams {
   srcChainId: number;
@@ -153,6 +154,7 @@ export class DepositHandler extends Handler {
       )
       .then(() => (deposit.id ? this.getDeposit(deposit.id) || deposit : deposit))
       .catch((error) => {
+        tracer.traceError(error);
         deposit.errorMessage = errorMessage(error);
         this.logger.error(`deposit(id=${deposit.id}) transaction raised error: ${deposit.errorMessage}`);
         return this.updateDepositStatus(deposit, DepositStatus.FAILED, statusCallback);

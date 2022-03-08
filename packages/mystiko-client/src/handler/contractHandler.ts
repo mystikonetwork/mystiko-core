@@ -85,6 +85,12 @@ export class ContractHandler extends Handler {
     return queryChain.data().map((rawObject) => new Contract(rawObject));
   }
 
+  public async updateContract(contract: Contract): Promise<Contract> {
+    this.db.contracts.update(contract.data);
+    await this.saveDatabase();
+    return contract;
+  }
+
   /**
    * @desc update the synchronized block number to the given new number.
    * @param {number} chainId chain id of this querying contract.
@@ -105,7 +111,7 @@ export class ContractHandler extends Handler {
     }
   }
 
-  upsertContractConfig(chainId: number, contractConfig: ContractConfig) {
+  private upsertContractConfig(chainId: number, contractConfig: ContractConfig) {
     let contract = this.getContract(chainId, contractConfig.address);
     if (!contract) {
       contract = new Contract();
@@ -122,6 +128,9 @@ export class ContractHandler extends Handler {
     contract.peerChainId = contractConfig.peerChainId;
     contract.peerContractAddress = contractConfig.peerContractAddress;
     contract.circuits = contractConfig.circuits;
+    contract.syncStart = contractConfig.syncStart;
+    contract.minBridgeFee = contractConfig.minBridgeFee;
+    contract.depositDisabled = contractConfig.depositDisabled;
     if (contract.id) {
       this.db.contracts.update(contract.data);
       this.logger.debug(

@@ -50,7 +50,8 @@
           "peerChainId": 56,
           "peerContractAddress": "0x0ae943774f9a4badd54d163fc12748dffa4413b8",
           "minBridgeFee": "2000000000000000000",
-          "circuits": "circom-1.0"
+          "circuits": "circom-1.0",
+          "syncStart": 12234
         },
         {
           "version": 1,
@@ -62,6 +63,16 @@
           "peerContractAddress": "0xc74aeeba5887973f6697b6bcdc28c579d4407a1f",
           "minBridgeFee": "1000",
           "circuits": "circom-1.0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0xA363c3Cb4f8d30741477bEA1f32A52e9Ed3D2075",
+          "assetAddress": "0x3a24dE22699aA9d94c57064126758AA5B3F7CebE",
+          "assetSymbol": "USDC",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "depositDisabled": true
         }
       ]
     },

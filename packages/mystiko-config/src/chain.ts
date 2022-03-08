@@ -198,8 +198,8 @@ export class ChainConfig extends BaseConfig {
   /**
    * @desc get maximum number of blocks every sync queries. If it is undefined, it means there's no limit
    */
-  public get syncSize(): number | undefined {
-    return this.asRawChainConfig().syncSize;
+  public get syncSize(): number {
+    return this.asRawChainConfig().syncSize || 200000;
   }
 
   /**
