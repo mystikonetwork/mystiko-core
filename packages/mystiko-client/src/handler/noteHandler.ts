@@ -148,9 +148,7 @@ export class NoteHandler extends Handler {
    * @returns {PrivateNote[]} an array of {@link PrivateNote} which meets the search criteria.
    */
   public getPrivateNotes(queryParams: QueryParams = {}): PrivateNote[] {
-    return this.getPrivateNotesResultSet(queryParams)
-      .data()
-      .map((rawObject) => new PrivateNote(rawObject));
+    return this.getPrivateNotesResultSet(queryParams).map((rawObject) => new PrivateNote(rawObject));
   }
 
   /**
@@ -166,11 +164,7 @@ export class NoteHandler extends Handler {
     reducer: (notes: PrivateNote[]) => any,
     queryParams: QueryParams = {},
   ): { groupName: string; reducedValue: any }[] {
-    const distinctValues = new Set(
-      this.getPrivateNotesResultSet(queryParams)
-        .data()
-        .map((note) => note[groupBy]),
-    );
+    const distinctValues = new Set(this.getPrivateNotesResultSet(queryParams).map((note) => note[groupBy]));
     const groups: { groupName: string; reducedValue: any }[] = [];
     distinctValues.forEach((groupName) => {
       const filterFunc = (note: PrivateNote) => {
@@ -180,7 +174,7 @@ export class NoteHandler extends Handler {
         return (note as { [key: string]: any })[groupBy] === groupName;
       };
       const newQueryParams = { ...queryParams, filterFunc };
-      const groupValues = this.getPrivateNotesResultSet(newQueryParams).data();
+      const groupValues = this.getPrivateNotesResultSet(newQueryParams);
       const reducedValue = reducer(groupValues.map((note) => new PrivateNote(note)));
       groups.push({ groupName: toString(groupName), reducedValue });
     });
@@ -419,28 +413,31 @@ export class NoteHandler extends Handler {
   }
 
   private getPrivateNotesResultSet(queryParams: QueryParams = {}) {
-    const wallet = this.walletHandler.checkCurrentWallet();
-    const { filterFunc, sortBy, desc, offset, limit } = queryParams;
-    const whereClause = (rawObject: Object) => {
-      const privateNote = new PrivateNote(rawObject);
-      if (filterFunc) {
-        return privateNote.walletId === wallet.id && filterFunc(privateNote);
+    const wallet = this.walletHandler.getCurrentWallet();
+    if (wallet) {
+      const { filterFunc, sortBy, desc, offset, limit } = queryParams;
+      const whereClause = (rawObject: Object) => {
+        const privateNote = new PrivateNote(rawObject);
+        if (filterFunc) {
+          return privateNote.walletId === wallet.id && filterFunc(privateNote);
+        }
+        return privateNote.walletId === wallet.id;
+      };
+      let queryChain = this.db.notes.chain().where(whereClause);
+      if (sortBy) {
+        queryChain = queryChain.sort((n1, n2) =>
+          BaseModel.columnComparator(new PrivateNote(n1), new PrivateNote(n2), sortBy, desc || false),
+        );
       }
-      return privateNote.walletId === wallet.id;
-    };
-    let queryChain = this.db.notes.chain().where(whereClause);
-    if (sortBy) {
-      queryChain = queryChain.sort((n1, n2) =>
-        BaseModel.columnComparator(new PrivateNote(n1), new PrivateNote(n2), sortBy, desc || false),
-      );
+      if (offset) {
+        queryChain = queryChain.offset(offset);
+      }
+      if (limit) {
+        queryChain = queryChain.limit(limit);
+      }
+      return queryChain.data();
     }
-    if (offset) {
-      queryChain = queryChain.offset(offset);
-    }
-    if (limit) {
-      queryChain = queryChain.limit(limit);
-    }
-    return queryChain;
+    return [];
   }
 
   private static parseDepositLog(

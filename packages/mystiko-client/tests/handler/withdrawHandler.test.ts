@@ -368,4 +368,6 @@ test('test getWithdraw/getWithdraws', async () => {
       limit: 10,
     }).length,
   ).toBe(1);
+  db.wallets.findAndRemove();
+  expect(withdrawHandler.getWithdraws()).toStrictEqual([]);
 });

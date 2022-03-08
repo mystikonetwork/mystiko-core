@@ -207,6 +207,8 @@ test('test getPrivateNote/getPrivateNotes', async () => {
       desc: true,
     })[0].id,
   ).toBe(1);
+  db.wallets.findAndRemove();
+  expect(noteHandler.getPrivateNotes()).toStrictEqual([]);
 });
 
 test('test updateStatus', async () => {

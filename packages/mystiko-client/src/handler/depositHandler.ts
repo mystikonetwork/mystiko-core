@@ -207,27 +207,30 @@ export class DepositHandler extends Handler {
    */
   public getDeposits(queryParams: QueryParam = {}): Deposit[] {
     const { filterFunc, sortBy, desc, offset, limit } = queryParams;
-    const wallet = this.walletHandler.checkCurrentWallet();
-    const whereClause = (rawObject: Object) => {
-      const deposit = new Deposit(rawObject);
-      if (filterFunc) {
-        return deposit.walletId === wallet.id && filterFunc(deposit);
+    const wallet = this.walletHandler.getCurrentWallet();
+    if (wallet) {
+      const whereClause = (rawObject: Object) => {
+        const deposit = new Deposit(rawObject);
+        if (filterFunc) {
+          return deposit.walletId === wallet.id && filterFunc(deposit);
+        }
+        return deposit.walletId === wallet.id;
+      };
+      let queryChain = this.db.deposits.chain().where(whereClause);
+      if (sortBy) {
+        queryChain = queryChain.sort((d1, d2) =>
+          BaseModel.columnComparator(new Deposit(d1), new Deposit(d2), sortBy, desc || false),
+        );
       }
-      return deposit.walletId === wallet.id;
-    };
-    let queryChain = this.db.deposits.chain().where(whereClause);
-    if (sortBy) {
-      queryChain = queryChain.sort((d1, d2) =>
-        BaseModel.columnComparator(new Deposit(d1), new Deposit(d2), sortBy, desc || false),
-      );
+      if (offset) {
+        queryChain = queryChain.offset(offset);
+      }
+      if (limit) {
+        queryChain = queryChain.limit(limit);
+      }
+      return queryChain.data().map((rawObject) => new Deposit(rawObject));
     }
-    if (offset) {
-      queryChain = queryChain.offset(offset);
-    }
-    if (limit) {
-      queryChain = queryChain.limit(limit);
-    }
-    return queryChain.data().map((rawObject) => new Deposit(rawObject));
+    return [];
   }
 
   /**

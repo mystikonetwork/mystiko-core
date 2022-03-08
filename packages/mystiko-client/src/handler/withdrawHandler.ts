@@ -261,27 +261,30 @@ export class WithdrawHandler extends Handler {
    */
   public getWithdraws(queryParams: QueryParams = {}): Withdraw[] {
     const { filterFunc, sortBy, desc, offset, limit } = queryParams;
-    const wallet = this.walletHandler.checkCurrentWallet();
-    const whereClause = (rawObject: Object) => {
-      const withdraw = new Withdraw(rawObject);
-      if (filterFunc) {
-        return withdraw.walletId === wallet.id && filterFunc(withdraw);
+    const wallet = this.walletHandler.getCurrentWallet();
+    if (wallet) {
+      const whereClause = (rawObject: Object) => {
+        const withdraw = new Withdraw(rawObject);
+        if (filterFunc) {
+          return withdraw.walletId === wallet.id && filterFunc(withdraw);
+        }
+        return withdraw.walletId === wallet.id;
+      };
+      let queryChain = this.db.withdraws.chain().where(whereClause);
+      if (sortBy) {
+        queryChain = queryChain.sort((w1, w2) =>
+          BaseModel.columnComparator(new Withdraw(w1), new Withdraw(w2), sortBy, desc || false),
+        );
       }
-      return withdraw.walletId === wallet.id;
-    };
-    let queryChain = this.db.withdraws.chain().where(whereClause);
-    if (sortBy) {
-      queryChain = queryChain.sort((w1, w2) =>
-        BaseModel.columnComparator(new Withdraw(w1), new Withdraw(w2), sortBy, desc || false),
-      );
+      if (offset) {
+        queryChain = queryChain.offset(offset);
+      }
+      if (limit) {
+        queryChain = queryChain.limit(limit);
+      }
+      return queryChain.data().map((rawObject) => new Withdraw(rawObject));
     }
-    if (offset) {
-      queryChain = queryChain.offset(offset);
-    }
-    if (limit) {
-      queryChain = queryChain.limit(limit);
-    }
-    return queryChain.data().map((rawObject) => new Withdraw(rawObject));
+    return [];
   }
 
   public async updateWithdraw(withdraw: Withdraw): Promise<Withdraw> {
