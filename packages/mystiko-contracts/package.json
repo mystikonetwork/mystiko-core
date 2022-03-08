@@ -10,7 +10,7 @@
   "scripts": {
     "build": "mkdir -p build && truffle compile",
     "test": "truffle test",
-    "integration": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 120000 --exit",
+    "integration": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 120000 --delay --exit",
     "lint": "solhint contracts/**/*.sol && eslint --ext .js,.ts .",
     "prettier:check": "prettier --check \"./**/*.{js,sol}\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.{js,sol}\" --config .prettierrc",
