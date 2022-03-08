@@ -53,6 +53,7 @@ module.exports = {
     token,
     peerChainId,
     address,
+    syncStart,
     peerContractAddress,
     version,
     circuits,
@@ -81,9 +82,11 @@ module.exports = {
 
         if (bridgeName !== 'loop') {
           coreConfig.chains[i].contracts[j].address = address;
+          coreConfig.chains[i].contracts[j].syncStart = syncStart;
           coreConfig.chains[i].contracts[j].peerContractAddress = peerContractAddress;
         } else {
           coreConfig.chains[i].contracts[j].address = address;
+          coreConfig.chains[i].contracts[j].syncStart = syncStart;
         }
 
         return coreConfig;
@@ -98,6 +101,7 @@ module.exports = {
       token,
       peerChainId,
       address,
+      syncStart,
       peerContractAddress,
       version,
       circuits,
@@ -112,6 +116,7 @@ module.exports = {
     token,
     peerChainId,
     address,
+    syncStart,
     peerContractAddress,
     version,
     circuits,
@@ -130,6 +135,7 @@ module.exports = {
         assetSymbol: token.name,
         assetDecimals: token.assetDecimals,
         circuits: circuits,
+        syncStart: syncStart,
       };
 
       if (token.erc20 === 'true') {
@@ -185,6 +191,7 @@ module.exports = {
       srcToken,
       dstChain.chainId,
       src.address,
+      src.syncStart,
       dst.address,
       config.version,
       config.circuits,
