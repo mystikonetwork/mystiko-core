@@ -23,6 +23,14 @@ export class FullSync {
 
   private statusUpdateCallbacks: Array<(status: FullSyncStatus) => void>;
 
+  private readonly initIntervalMs: number;
+
+  private readonly intervalMs: number;
+
+  private intervalTimer?: NodeJS.Timer;
+
+  private initTimer?: NodeJS.Timer;
+
   constructor(
     eventHandler: EventHandler,
     contractHandler: ContractHandler,
@@ -31,6 +39,8 @@ export class FullSync {
     noteHandler: NoteHandler,
     config: MystikoConfig,
     providerPool: ProviderPool,
+    initIntervalMs?: number,
+    intervalMs?: number,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
@@ -55,26 +65,27 @@ export class FullSync {
       chainSync.onStatusUpdate(() => this.runCallbacks());
       return chainSync;
     });
+    this.initIntervalMs = initIntervalMs || 10000;
+    this.intervalMs = intervalMs || 300000;
   }
 
-  public execute(): Promise<SyncResult[]> {
-    const promises: Array<Promise<SyncResult>> = [];
-    this.chainSyncs.forEach((chainSync) => {
-      const provider = this.providerPool.getProvider(chainSync.chainId);
-      if (provider) {
-        const promise = provider
-          .getBlockNumber()
-          .then((targetBlockNumber) => chainSync.execute(provider, targetBlockNumber))
-          .catch((error) => {
-            this.logger.warn(
-              `failed to execute sync on chain(id=${chainSync.chainId}): ${errorMessage(error)}`,
-            );
-            return { syncedBlock: chainSync.syncedBlock, errors: [error] };
-          });
-        promises.push(promise);
-      }
-    });
-    return Promise.all(promises);
+  public start() {
+    if (!this.initTimer && !this.intervalTimer) {
+      this.initTimer = setTimeout(() => {
+        this.execute().then(() => {
+          this.intervalTimer = setInterval(() => this.execute(), this.intervalMs);
+        });
+      }, this.initIntervalMs);
+    }
+  }
+
+  public stop() {
+    if (this.initTimer) {
+      clearTimeout(this.initTimer);
+    }
+    if (this.intervalTimer) {
+      clearInterval(this.intervalTimer);
+    }
   }
 
   public get status(): FullSyncStatus {
@@ -101,6 +112,26 @@ export class FullSync {
       }
     }
     return false;
+  }
+
+  private execute(): Promise<SyncResult[]> {
+    const promises: Array<Promise<SyncResult>> = [];
+    this.chainSyncs.forEach((chainSync) => {
+      const provider = this.providerPool.getProvider(chainSync.chainId);
+      if (provider) {
+        const promise = provider
+          .getBlockNumber()
+          .then((targetBlockNumber) => chainSync.execute(provider, targetBlockNumber))
+          .catch((error) => {
+            this.logger.warn(
+              `failed to execute sync on chain(id=${chainSync.chainId}): ${errorMessage(error)}`,
+            );
+            return { syncedBlock: chainSync.syncedBlock, errors: [error] };
+          });
+        promises.push(promise);
+      }
+    });
+    return Promise.all(promises);
   }
 
   private runCallbacks() {

@@ -35,8 +35,8 @@ export interface InitOptions {
   conf?: string | MystikoConfig;
   dbFile?: string;
   dbAdapter?: LokiPersistenceAdapter;
-  isStoreEvent?: boolean;
-  eventPullingIntervalMs?: number;
+  syncInitIntervalMs?: number;
+  syncIntervalMs?: number;
   loggingLevel?: LogLevelDesc;
   loggingOptions?: LoglevelPluginPrefixOptions;
 }
@@ -67,7 +67,6 @@ export interface InitOptions {
  * @property {ContractHandler} contracts handler of Contract related business logic.
  * @property {EventHandler} events handler of Contract events related business logic.
  * @property {Object} pullers object including supported pullers.
- * @property {EventPuller} pullers.eventPuller puller that pulling events in fixed time frame.
  * @property {Logger} logger log handler for logging useful information.
  */
 export class Mystiko {
@@ -136,6 +135,8 @@ export class Mystiko {
       dbAdapter = undefined,
       loggingLevel = 'error',
       loggingOptions = undefined,
+      syncInitIntervalMs,
+      syncIntervalMs,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await readFromFile(conf);
@@ -210,6 +211,8 @@ export class Mystiko {
       this.notes,
       this.config,
       this.providers,
+      syncInitIntervalMs,
+      syncIntervalMs,
     );
     this.logger.info('@mystiko/client has been successfully initialized, enjoy!');
   }
