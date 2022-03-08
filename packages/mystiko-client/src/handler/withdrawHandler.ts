@@ -81,6 +81,8 @@ export class WithdrawHandler extends Handler {
 
   private readonly contractPool: ContractPool;
 
+  private readonly gasEstimateFunc?: (method: string) => ethers.ContractFunction<ethers.BigNumber>;
+
   constructor(
     walletHandler: WalletHandler,
     accountHandler: AccountHandler,
@@ -91,6 +93,7 @@ export class WithdrawHandler extends Handler {
     contractPool: ContractPool,
     db: MystikoDatabase,
     conf?: MystikoConfig,
+    gasEstimateFunc?: (method: string) => ethers.ContractFunction<ethers.BigNumber>,
   ) {
     super(db, conf);
     this.walletHandler = walletHandler;
@@ -101,6 +104,7 @@ export class WithdrawHandler extends Handler {
     this.providerPool = providerPool;
     this.contractPool = contractPool;
     this.logger = rootLogger.getLogger('WithdrawHandler');
+    this.gasEstimateFunc = gasEstimateFunc;
   }
 
   /**
@@ -434,6 +438,22 @@ export class WithdrawHandler extends Handler {
     const { proofA, proofB, proofC, rootHash, serialNumber, amount } = zkProof;
     const connectedContract = contract.connect(signer.signer);
     this.logger.info(`start submitting withdrawal transaction for withdraw(id=${withdraw.id})`);
+    let gasEstimateFunc: (method: string) => ethers.ContractFunction<ethers.BigNumber>;
+    if (this.gasEstimateFunc) {
+      gasEstimateFunc = this.gasEstimateFunc;
+    } else {
+      gasEstimateFunc = (method: string) => connectedContract.estimateGas[method];
+    }
+    const minGas = await gasEstimateFunc('withdraw')(
+      proofA,
+      proofB,
+      proofC,
+      rootHash,
+      serialNumber,
+      amount,
+      recipientAddress,
+    );
+    const gasLimit = toBN(minGas.toString()).muln(120).divn(100);
     const txResponse = await connectedContract.withdraw(
       proofA,
       proofB,
@@ -442,6 +462,7 @@ export class WithdrawHandler extends Handler {
       serialNumber,
       amount,
       recipientAddress,
+      { gasLimit: gasLimit.toString() },
     );
     this.logger.info(
       `withdrawal transaction for withdraw(id=${withdraw.id}) is submitted ` +

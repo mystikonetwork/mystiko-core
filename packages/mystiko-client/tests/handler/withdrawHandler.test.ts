@@ -65,6 +65,7 @@ class MockMystikoContract extends ethers.Contract {
     serialNumber: string,
     amount: string,
     recipientAddress: string,
+    options?: { gasLimit?: string },
   ) {
     expect(proofA.length === 2).toBe(true);
     expect(proofB.length === 2).toBe(true);
@@ -74,6 +75,7 @@ class MockMystikoContract extends ethers.Contract {
     expect(rootHash).not.toBe(undefined);
     expect(serialNumber).not.toBe(undefined);
     expect(amount).not.toBe(undefined);
+    expect(options?.gasLimit).toBe('1200000');
     expect(ethers.utils.isAddress(recipientAddress)).toBe(true);
     if (this.withdrewSN[serialNumber]) {
       return Promise.resolve(new MockTransactionResponse('double withdraw'));
@@ -226,6 +228,7 @@ beforeEach(async () => {
     contractPool,
     db,
     conf,
+    () => () => Promise.resolve(ethers.BigNumber.from(1000000)),
   );
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await accountHandler.importAccountFromSecretKey(

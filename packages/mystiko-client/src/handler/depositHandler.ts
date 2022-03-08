@@ -58,6 +58,8 @@ export class DepositHandler extends Handler {
 
   private readonly contractPool: ContractPool;
 
+  private readonly gasEstimateFunc?: (method: string) => ethers.ContractFunction<ethers.BigNumber>;
+
   constructor(
     walletHandler: WalletHandler,
     accountHandler: AccountHandler,
@@ -65,6 +67,7 @@ export class DepositHandler extends Handler {
     contractPool: ContractPool,
     db: MystikoDatabase,
     config?: MystikoConfig,
+    gasEstimateFunc?: (method: string) => ethers.ContractFunction<ethers.BigNumber>,
   ) {
     super(db, config);
     this.walletHandler = walletHandler;
@@ -72,6 +75,7 @@ export class DepositHandler extends Handler {
     this.noteHandler = noteHandler;
     this.contractPool = contractPool;
     this.logger = rootLogger.getLogger('DepositHandler');
+    this.gasEstimateFunc = gasEstimateFunc;
   }
 
   /**
@@ -375,6 +379,25 @@ export class DepositHandler extends Handler {
     }
     const protocolContract = await depositContracts.protocol.connect(signer.signer);
     this.logger.info(`start submitting deposit transaction for deposit(id=${deposit.id})`);
+    let gasEstimateFunc: (method: string) => ethers.ContractFunction<ethers.BigNumber>;
+    if (this.gasEstimateFunc) {
+      gasEstimateFunc = this.gasEstimateFunc;
+    } else {
+      gasEstimateFunc = (method: string) => protocolContract.estimateGas[method];
+    }
+    const minGas = await gasEstimateFunc('deposit')(
+      deposit.amount.toString(),
+      toFixedLenHex(deposit.commitmentHash),
+      toFixedLenHex(deposit.hashK),
+      toFixedLenHex(deposit.randomS, this.protocol.RANDOM_SK_SIZE),
+      toHex(deposit.privateNote),
+      {
+        value: isMainAsset
+          ? deposit.amount.add(contractConfig.minBridgeFee).toString()
+          : contractConfig.minBridgeFee.toString(),
+      },
+    );
+    const gasLimit = toBN(minGas.toString()).muln(120).divn(100);
     const depositTxResponse = await protocolContract.deposit(
       deposit.amount.toString(),
       toFixedLenHex(deposit.commitmentHash),
@@ -385,6 +408,7 @@ export class DepositHandler extends Handler {
         value: isMainAsset
           ? deposit.amount.add(contractConfig.minBridgeFee).toString()
           : contractConfig.minBridgeFee.toString(),
+        gasLimit: gasLimit.toString(),
       },
     );
     this.logger.info(

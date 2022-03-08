@@ -133,7 +133,7 @@ class MockMystikoContract extends ethers.Contract {
     hashK: string,
     randomS: string,
     privateNote: string,
-    params: { value?: string },
+    params: { value?: string; gasLimit?: string },
   ) {
     const numberPattern = /^[0-9]*$/;
     expect(amount.match(numberPattern)).not.toBe(null);
@@ -141,6 +141,7 @@ class MockMystikoContract extends ethers.Contract {
     expect(hashK.startsWith('0x') && hashK.length === 66);
     expect(randomS.startsWith('0x') && randomS.length === 66);
     expect(privateNote.startsWith('0x'));
+    expect(params.gasLimit).toBe('1200000');
     if (this.isMain) {
       expect(params.value).toBe(this.minBridgeFee.add(new BN(amount)).toString());
     } else {
@@ -242,7 +243,15 @@ beforeEach(async () => {
     db,
     conf,
   );
-  depositHandler = new DepositHandler(walletHandler, accountHandler, noteHandler, contractPool, db, conf);
+  depositHandler = new DepositHandler(
+    walletHandler,
+    accountHandler,
+    noteHandler,
+    contractPool,
+    db,
+    conf,
+    () => () => Promise.resolve(ethers.BigNumber.from(1000000)),
+  );
   await walletHandler.createWallet(walletMasterSeed, walletPassword);
   await contractPool.connect(contractHandler.getContracts(), (address, abi, providerOrSigner) => {
     if (abi === MystikoABI.ERC20.abi) {
