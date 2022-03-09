@@ -9,4 +9,6 @@ export * from './convert';
 export * from './error';
 export * from './files';
 export * from './logger';
+export * from './promise';
+export * from './provider';
 export * from './transaction';

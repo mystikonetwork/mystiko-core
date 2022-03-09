@@ -1,8 +1,10 @@
 import { ethers } from 'ethers';
 
-export interface EtherError extends Error {
+export interface EtherError {
   reason?: string;
-  code?: string;
+  message?: string;
+  code?: string | number;
+  data?: { code: number; message: string };
   receipt?: ethers.providers.TransactionReceipt;
 }
 
@@ -16,23 +18,26 @@ export function errorMessage(error: any): string {
   if (!error) {
     return '';
   }
-  if (error instanceof Error) {
-    const convertedError = error as EtherError;
-    let message;
-    if (convertedError.reason) {
-      message = convertedError.reason;
-    } else if (convertedError.message) {
-      message = convertedError.message;
-    } else {
-      message = convertedError.toString();
-    }
-    if (convertedError.code) {
-      return `[${convertedError.code}] ${message}`;
+  const convertedError = error as EtherError;
+  let message;
+  if (convertedError.data) {
+    message = convertedError.data.message;
+  } else if (convertedError.reason) {
+    message = convertedError.reason;
+  } else if (convertedError.message) {
+    message = convertedError.message;
+  } else if (error instanceof Error) {
+    message = error.toString();
+  }
+  if (message) {
+    if (convertedError.code && typeof convertedError.code === 'string') {
+      if (convertedError.code === ethers.errors.CALL_EXCEPTION) {
+        message = `${message}, please check block explorer for more information`;
+      } else {
+        message = `[${convertedError.code}] ${message}`;
+      }
     }
     return message;
   }
-  if (error instanceof Object) {
-    return JSON.stringify(error);
-  }
-  return error.toString();
+  return JSON.stringify(error);
 }
