@@ -38,3 +38,22 @@ configure peer contract address, parameter:
 example:
 
 ``` yarn deploy:bsctestnet  testnet  step3 celer goerli ETH```
+
+### Test the deployed contract
+We need to update the config file first and execute the following command
+```bash
+cd packages/mystiko-config
+yarn build
+```
+Then we switch to the contract module and execute the integration test command
+```bash
+cd packages/mystiko-contracts
+npm run integration --chainid=80001 --contracts=MTT,mUSD
+```
+The script will automatically deposit and withdraw the specified loop-bridge network and contract
+```bash
+Parameter Description:
+--chainid: specify network chainid(radio).
+--contracts: the contracts under the specified network chainid(multiple choice).
+```
+`Note: If you do not fill in the two parameters, all network contracts under the configuration file will be tested`
