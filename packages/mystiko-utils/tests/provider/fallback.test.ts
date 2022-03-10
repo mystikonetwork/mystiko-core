@@ -36,6 +36,7 @@ test('test constructor', async () => {
   const fallbackProvider1 = new FallbackProvider([provider1, provider2]);
   await fallbackProvider1.ready;
   expect(fallbackProvider1.network.chainId).toBe(1);
+  expect(fallbackProvider1.providers).toStrictEqual([provider1, provider2]);
   const provider3 = new TestProvider(1, 'chain 1', { chainId: 1, name: 'chain 1' });
   const provider4 = new TestProvider(2, 'chain 2', { chainId: 2, name: 'chain 2' });
   expect(() => new FallbackProvider([provider3, provider4])).toThrow();
@@ -44,6 +45,7 @@ test('test constructor', async () => {
   const fallbackProvider2 = new FallbackProvider([provider5, provider6]);
   await fallbackProvider2.ready;
   expect(fallbackProvider2.network.chainId).toBe(2);
+  expect(fallbackProvider2.providers).toStrictEqual([provider5, provider6]);
 });
 
 test('test detectNetwork', async () => {

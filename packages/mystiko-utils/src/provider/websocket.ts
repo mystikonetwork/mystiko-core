@@ -50,42 +50,45 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
     return this.performWithRetry(method, params, 1);
   }
 
+  public destroy(): Promise<void> {
+    return this.rawProvider.destroy();
+  }
+
+  public get timeoutMs(): number {
+    return this.options.timeoutMs || 5000;
+  }
+
+  public get maxTryCount(): number {
+    return this.options.maxTryCount || 3;
+  }
+
   private detectNetworkWithRetry(tryCount: number): Promise<ethers.providers.Network> {
-    return promiseWithTimeout(this.rawProvider.detectNetwork(), this.timeoutMs).catch(
-      (error: TimeoutError) => {
-        if (tryCount < this.maxTryCount) {
-          this.reconnect();
-          return this.detectNetworkWithRetry(tryCount + 1);
+    return promiseWithTimeout(this.rawProvider.detectNetwork(), this.timeoutMs).catch((error: any) => {
+      if (error instanceof TimeoutError) {
+        if (tryCount <= this.maxTryCount) {
+          return this.reconnect().then(() => this.detectNetworkWithRetry(tryCount + 1));
         }
-        return Promise.reject(error);
-      },
-    );
+      }
+      return Promise.reject(error);
+    });
   }
 
   private performWithRetry(method: string, params: any, tryCount: number): Promise<any> {
     return promiseWithTimeout(this.rawProvider.perform(method, params), this.timeoutMs).catch(
-      (error: TimeoutError) => {
-        if (tryCount < this.maxTryCount) {
-          this.reconnect();
-          return this.performWithRetry(method, params, tryCount + 1);
+      (error: any) => {
+        if (error instanceof TimeoutError) {
+          if (tryCount <= this.maxTryCount) {
+            return this.reconnect().then(() => this.performWithRetry(method, params, tryCount + 1));
+          }
         }
         return Promise.reject(error);
       },
     );
   }
 
-  private get timeoutMs(): number {
-    return this.options.timeoutMs || 5000;
-  }
-
-  private get maxTryCount(): number {
-    return this.options.maxTryCount || 3;
-  }
-
-  private reconnect() {
+  private async reconnect(): Promise<void> {
     this.logger.info(`reconnecting websocket on ${this.url}`);
-    // eslint-disable-next-line no-underscore-dangle
-    this.rawProvider._websocket.close(1000);
+    await this.destroy();
     this.rawProvider = new ethers.providers.WebSocketProvider(this.url);
   }
 }

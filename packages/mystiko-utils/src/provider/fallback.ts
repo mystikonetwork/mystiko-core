@@ -44,11 +44,17 @@ export default class FallbackProvider extends ethers.providers.BaseProvider {
     return this.performRecursively(method, params, 0);
   }
 
+  public get providers(): ethers.providers.BaseProvider[] {
+    return this.rawProviders;
+  }
+
   private detectNetworkRecursively(index: number): Promise<ethers.providers.Network> {
     const rawProvider = this.rawProviders[index];
-    return rawProvider.detectNetwork().catch((error: Error) => {
-      if (index < this.rawProviders.length - 1) {
-        return this.detectNetworkRecursively(index + 1);
+    return rawProvider.detectNetwork().catch((error: any) => {
+      if (error instanceof Error) {
+        if (index < this.rawProviders.length - 1) {
+          return this.detectNetworkRecursively(index + 1);
+        }
       }
       return Promise.reject(error);
     });
@@ -56,9 +62,11 @@ export default class FallbackProvider extends ethers.providers.BaseProvider {
 
   private performRecursively(method: string, params: any, index: number): Promise<any> {
     const rawProvider = this.rawProviders[index];
-    return rawProvider.perform(method, params).catch((error: Error) => {
-      if (index < this.rawProviders.length - 1 && FallbackProvider.isRetryable(error)) {
-        return this.performRecursively(method, params, index + 1);
+    return rawProvider.perform(method, params).catch((error: any) => {
+      if (error instanceof Error) {
+        if (index < this.rawProviders.length - 1 && FallbackProvider.isRetryable(error)) {
+          return this.performRecursively(method, params, index + 1);
+        }
       }
       return Promise.reject(error);
     });
