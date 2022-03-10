@@ -1,25 +1,32 @@
 import { ethers } from 'ethers';
 import { check } from '../check';
-import { ReconnectingWebSocketProvider, ReconnectingWebSocketProviderOptions } from './websocket';
+import { ReconnectingWebSocketProvider } from './websocket';
 import FallbackProvider from './fallback';
 
+export interface ProviderConnection extends ethers.utils.ConnectionInfo {
+  maxTryCount?: number;
+}
+
 export interface ProviderFactory {
-  createProvider(urls: string[]): ethers.providers.BaseProvider;
+  createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider;
 }
 
 export class DefaultProviderFactory implements ProviderFactory {
   // eslint-disable-next-line class-methods-use-this
-  public createProvider(urls: string[], options?: { [key: string]: any }): ethers.providers.BaseProvider {
-    check(urls.length > 0, 'urls cannot be an empty array');
+  public createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider {
+    check(connections.length > 0, 'urls cannot be an empty array');
     const providers: ethers.providers.BaseProvider[] = [];
-    urls.forEach((url) => {
-      const providerOption = options ? options[url] : undefined;
+    connections.forEach((connection) => {
+      const url = typeof connection === 'string' ? connection : connection.url;
       if (url.match(/^wss?:\/\//)) {
         providers.push(
-          new ReconnectingWebSocketProvider(url, providerOption as ReconnectingWebSocketProviderOptions),
+          new ReconnectingWebSocketProvider(url, {
+            timeoutMs: typeof connection !== 'string' ? connection.timeout : undefined,
+            maxTryCount: typeof connection !== 'string' ? connection.maxTryCount : undefined,
+          }),
         );
       } else if (url.match(/^https?:\/\//)) {
-        providers.push(new ethers.providers.JsonRpcProvider(url));
+        providers.push(new ethers.providers.JsonRpcProvider(connection));
       } else {
         throw new Error(`unsupported url scheme: ${url}`);
       }

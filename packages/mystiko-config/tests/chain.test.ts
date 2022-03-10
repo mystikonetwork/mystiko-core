@@ -86,7 +86,12 @@ test('test ChainConfig constructor', () => {
   expect(() => new ChainConfig(rawConfig5)).toThrow();
   const rawConfig6 = { ...rawConfig5, providers: [] };
   expect(() => new ChainConfig(rawConfig6)).toThrow();
-  const rawConfig7 = { ...rawConfig5, providers: ['http://127.0.0.1:7545'] };
+  const rawConfig7Wrong = { ...rawConfig5, providers: ['http://127.0.0.1:7545', { timeout: 100 }] };
+  expect(() => new ChainConfig(rawConfig7Wrong)).toThrow();
+  const rawConfig7 = {
+    ...rawConfig5,
+    providers: ['http://127.0.0.1:7545', { url: 'http://127.0.0.1:8545', timeout: 100 }],
+  };
   expect(() => new ChainConfig(rawConfig7)).toThrow();
   const rawConfig8 = { ...rawConfig7, signerEndpoint: 'http://127.0.0.1:7545' };
   expect(() => new ChainConfig(rawConfig7)).toThrow();
@@ -108,8 +113,9 @@ test('test ChainConfig constructor', () => {
   expect(new ChainConfig(rawConfig11).explorerPrefix).toBe(newPrefix);
   const rawConfig12 = { ...rawConfig11, explorerPrefix: 'wrong string' };
   expect(() => new ChainConfig(rawConfig12)).toThrow();
-  expect(config.providers.length).toBe(1);
+  expect(config.providers.length).toBe(2);
   expect(config.providers[0]).toBe('http://127.0.0.1:7545');
+  expect(config.providers[1]).toStrictEqual({ url: 'http://127.0.0.1:8545', timeout: 100 });
   expect(config.signerEndpoint).toBe('http://127.0.0.1:7545');
   expect(config.contracts.length).toBe(7);
   expect(config.contracts[0].toString()).toBe(new ContractConfig(contractConfigs[0]).toString());

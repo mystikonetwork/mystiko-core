@@ -41,6 +41,7 @@ export interface InitOptions {
   syncIntervalMs?: number;
   loggingLevel?: LogLevelDesc;
   loggingOptions?: LoglevelPluginPrefixOptions;
+  providerFactory?: utils.ProviderFactory;
 }
 
 /**
@@ -145,6 +146,7 @@ export class Mystiko {
       loggingOptions = undefined,
       syncInitIntervalMs,
       syncIntervalMs,
+      providerFactory,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await readFromFile(conf);
@@ -169,7 +171,7 @@ export class Mystiko {
     this.db.importDataFromJsonFile = importDataFromJsonFile;
     this.wallets = new WalletHandler(this.db, this.config);
     this.accounts = new AccountHandler(this.wallets, this.db, this.config);
-    this.providers = new ProviderPool(this.config);
+    this.providers = new ProviderPool(this.config, providerFactory);
     this.providers.connect();
     this.contracts = new ContractHandler(this.db, this.config);
     this.events = new EventHandler(this.db, this.config);

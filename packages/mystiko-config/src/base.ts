@@ -123,6 +123,22 @@ export class BaseConfig {
   }
 
   /**
+   * @desc check whether the corresponding value of given key is an array in the config, if not, raise error.
+   * @param {Object} config an object contains configuration.
+   * @param {string} key the key of configuration.
+   * @param {boolean} requireExists if true, it will raise error if given key does not exist.
+   * @throws {Error} if the value of specified key is not an array,
+   * or key does not exist if the requestExists set to be true.
+   */
+  public static checkArray(config: any, key: string, requireExists: boolean = true) {
+    if (BaseConfig.isKeyExists(config, key)) {
+      check(config[key] instanceof Array, `value of ${key} is not Array type`);
+    } else if (requireExists) {
+      BaseConfig.checkKeyExists(config, key);
+    }
+  }
+
+  /**
    * @desc check whether the corresponding value of given key is an array of number in the config, if not, raise error.
    * @param {Object} config an object contains configuration.
    * @param {string} key the key of configuration.

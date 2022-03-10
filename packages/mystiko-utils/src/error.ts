@@ -18,6 +18,12 @@ export function errorMessage(error: any): string {
   if (!error) {
     return '';
   }
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (error instanceof String) {
+    return error.toString();
+  }
   const convertedError = error as EtherError;
   let message;
   if (convertedError.data) {

@@ -61,6 +61,13 @@ test('test checkObject', () => {
   BaseConfig.checkObject({ a: {} }, 'a');
 });
 
+test('test checkArray', () => {
+  expect(() => BaseConfig.checkArray({ a: [1, 2] }, 'b')).toThrow();
+  BaseConfig.checkArray({ a: [1, 2] }, 'b', false);
+  BaseConfig.checkArray({ a: [1, '2'] }, 'a');
+  BaseConfig.checkArray({ a: [] }, 'a');
+});
+
 test('test checkNumberArray', () => {
   expect(() => BaseConfig.checkNumberArray({ a: [1, 2] }, 'b')).toThrow();
   BaseConfig.checkNumberArray({ a: [1, 2] }, 'b', false);

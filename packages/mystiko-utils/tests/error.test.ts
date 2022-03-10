@@ -17,4 +17,6 @@ test('Test errorMessage', () => {
   expect(errorMessage({ a: 1 })).toBe('{"a":1}');
   expect(errorMessage({ data: { message: 'abc' } })).toBe('abc');
   expect(errorMessage(1)).toBe('1');
+  expect(errorMessage('abc')).toBe('abc');
+  expect(errorMessage(String('abc'))).toBe('abc');
 });

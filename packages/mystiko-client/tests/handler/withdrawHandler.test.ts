@@ -184,9 +184,11 @@ const walletPassword = 'P@ssw0rd';
 beforeEach(async () => {
   db = await createDatabase('test.db');
   conf = await readFromFile('tests/config/config.test.json');
-  providerPool = new ProviderPool(conf);
-  // @ts-ignore
-  providerPool.connect(() => new MockProvider(txReceipt02));
+  providerPool = new ProviderPool(conf, {
+    // @ts-ignore
+    createProvider: () => new MockProvider(txReceipt02),
+  });
+  providerPool.connect();
   contractHandler = new ContractHandler(db, conf);
   await contractHandler.importFromConfig();
   contractPool = new ContractPool(conf, providerPool);
