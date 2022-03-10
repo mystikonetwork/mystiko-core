@@ -3,7 +3,6 @@ import fs from 'fs';
 import { ProviderFactory } from '@mystiko/utils';
 import mystiko, { DefaultTestnetConfig, DefaultMainnetConfig } from '../src/node';
 
-
 test('test initialize', async () => {
   const providerFactory: ProviderFactory = {
     createProvider: (connections) => new ethers.providers.JsonRpcProvider(connections[0]),
