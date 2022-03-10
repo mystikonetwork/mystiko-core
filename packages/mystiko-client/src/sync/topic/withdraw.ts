@@ -32,7 +32,7 @@ export default class WithdrawTopicSync extends TopicSync {
       const rawEvent = events[i];
       const rootHash = rawEvent.argumentData.rootHash.toString();
       const serialNumber = rawEvent.argumentData.serialNumber.toString();
-      const withdraws = this.withdrawHandler.getWithdraws({
+      const withdraws1 = this.withdrawHandler.getWithdraws({
         filterFunc: (withdraw) =>
           !!withdraw.merkleRootHash &&
           withdraw.merkleRootHash.toString() === rootHash &&
@@ -40,6 +40,11 @@ export default class WithdrawTopicSync extends TopicSync {
           withdraw.serialNumber.toString() === serialNumber &&
           withdraw.chainId === rawEvent.chainId,
       });
+      const withdraws2 = this.withdrawHandler.getWithdraws({
+        filterFunc: (withdraw) =>
+          withdraw.transactionHash === rawEvent.transactionHash && withdraw.chainId === rawEvent.chainId,
+      });
+      const withdraws = [...withdraws1, ...withdraws2];
       const withdrewNoteIds = withdraws.map((withdraw) => withdraw.privateNoteId);
       const notes = this.noteHandler.getPrivateNotes({
         filterFunc: (note) => withdrewNoteIds.indexOf(note.id) !== -1,

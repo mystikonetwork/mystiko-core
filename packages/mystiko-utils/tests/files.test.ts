@@ -16,6 +16,9 @@ test('Test readCompressedFile', async () => {
 });
 
 test('Test readJsonFile', async () => {
-  const data = await readJsonFile('tests/files.test.json');
+  const data = await readJsonFile(['tests/files.non-exist.json', 'tests/files.test.json']);
   expect(data.test).toBe(true);
+  await expect(
+    readJsonFile(['tests/files.non-exist.json', 'tests/files.non-exist-1.json']),
+  ).rejects.toThrow();
 });

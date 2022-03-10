@@ -84,6 +84,12 @@ test('test checkStringArray', () => {
   BaseConfig.checkStringArray({ a: ['1', '2', '3'] }, 'a');
 });
 
+test('test checkStringOrStringArray', () => {
+  BaseConfig.checkStringOrStringArray({ a: '1' }, 'a');
+  BaseConfig.checkStringOrStringArray({ a: [] }, 'a');
+  BaseConfig.checkStringOrStringArray({ a: ['1', '2', '3'] }, 'a');
+});
+
 test('test checkObjectArray', () => {
   expect(() => BaseConfig.checkObjectArray({ a: [{}, {}] }, 'b')).toThrow();
   BaseConfig.checkObjectArray({ a: [{}, {}] }, 'b', false);

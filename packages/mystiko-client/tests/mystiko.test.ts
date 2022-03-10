@@ -1,4 +1,6 @@
+import { ethers } from 'ethers';
 import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystiko/config';
+import { ProviderFactory } from '@mystiko/utils';
 import { Mystiko } from '../src';
 
 test('test initialize', async () => {
@@ -34,8 +36,11 @@ test('test initialize', async () => {
   expect(mystiko.db).not.toBe(undefined);
   await mystiko.initialize({ isTestnet: false, conf: 'tests/config/config.test.json' });
   expect(mystiko.db).not.toBe(undefined);
-  await mystiko.initialize();
+  const providerFactory: ProviderFactory = {
+    createProvider: (connections) => new ethers.providers.JsonRpcProvider(connections[0]),
+  };
+  await mystiko.initialize({ providerFactory });
   expect(mystiko.config).toStrictEqual(DefaultClientTestnetConfig);
-  await mystiko.initialize({ isTestnet: false });
+  await mystiko.initialize({ isTestnet: false, providerFactory });
   expect(mystiko.config).toStrictEqual(DefaultClientMainnetConfig);
 });

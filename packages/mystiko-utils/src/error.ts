@@ -1,5 +1,7 @@
 import { ethers } from 'ethers';
 
+const executionRevertedRegex = /"execution reverted: ([^"]+)"/;
+
 export interface EtherError {
   reason?: string;
   message?: string;
@@ -28,10 +30,15 @@ export function errorMessage(error: any): string {
   let message;
   if (convertedError.data) {
     message = convertedError.data.message;
-  } else if (convertedError.reason) {
-    message = convertedError.reason;
-  } else if (convertedError.message) {
-    message = convertedError.message;
+  } else if (convertedError.reason || convertedError.message) {
+    const groups = executionRevertedRegex.exec(convertedError.message || '');
+    if (convertedError.message && groups) {
+      [, message] = groups;
+    } else if (convertedError.reason) {
+      message = convertedError.reason;
+    } else {
+      message = convertedError.message;
+    }
   } else if (error instanceof Error) {
     message = error.toString();
   }
@@ -43,7 +50,8 @@ export function errorMessage(error: any): string {
         message = `[${convertedError.code}] ${message}`;
       }
     }
-    return message;
+  } else {
+    message = JSON.stringify(error);
   }
-  return JSON.stringify(error);
+  return message;
 }

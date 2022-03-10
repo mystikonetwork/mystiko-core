@@ -48,8 +48,8 @@ export async function zkProveWithdraw(
   privateNote: Buffer,
   treeLeaves: BN[],
   treeIndex: number,
-  wasmFile: string,
-  zkeyFile: string,
+  wasmFile: string | string[],
+  zkeyFile: string | string[],
 ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }> {
   logger.debug('start generating zkSnark proofs...');
   const decryptedNote = await decryptAsymmetric(skEnc, privateNote);

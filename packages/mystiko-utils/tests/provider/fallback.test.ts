@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
-import { FallbackProvider } from '../../src';
+import { FallbackProvider, TimeoutError } from '../../src';
 
 class TestProvider extends ethers.providers.BaseProvider {
-  public error?: ethers.errors;
+  public error?: ethers.errors | TimeoutError;
 
   private readonly chainId: number;
 
@@ -15,6 +15,9 @@ class TestProvider extends ethers.providers.BaseProvider {
   }
 
   public detectNetwork(): Promise<ethers.providers.Network> {
+    if (this.error instanceof TimeoutError) {
+      return Promise.reject(this.error);
+    }
     if (this.error) {
       return Promise.reject(ethers.logger.makeError('error', this.error));
     }
@@ -22,6 +25,9 @@ class TestProvider extends ethers.providers.BaseProvider {
   }
 
   public perform(method: string, params: any): Promise<any> {
+    if (this.error instanceof TimeoutError) {
+      return Promise.reject(this.error);
+    }
     if (this.error) {
       return Promise.reject(ethers.logger.makeError('error', this.error));
     }
@@ -64,6 +70,7 @@ test('test perform', async () => {
   const provider1 = new TestProvider(1, 'chain 1 #1', { chainId: 1, name: 'chain 1 #1' });
   const provider2 = new TestProvider(1, 'chain 1 #2', { chainId: 1, name: 'chain 1 #2' });
   const retryableErrors = [
+    new TimeoutError('timeout'),
     ethers.errors.SERVER_ERROR,
     ethers.errors.TIMEOUT,
     ethers.errors.UNKNOWN_ERROR,

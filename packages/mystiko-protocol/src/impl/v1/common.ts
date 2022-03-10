@@ -487,7 +487,7 @@ export function WitnessCalculatorBuilder(code: any, options?: any): Promise<Witn
 export async function zkVerify(
   proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] },
   publicSignals: string[],
-  verifyKeyFile: string,
+  verifyKeyFile: string | string[],
 ): Promise<boolean> {
   const vkey = await readJsonFile(verifyKeyFile);
   logger.debug('start verifying generated proofs...');

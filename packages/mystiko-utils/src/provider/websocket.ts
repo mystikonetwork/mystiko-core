@@ -59,7 +59,7 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
   }
 
   public get maxTryCount(): number {
-    return this.options.maxTryCount || 3;
+    return this.options.maxTryCount || 2;
   }
 
   private detectNetworkWithRetry(tryCount: number): Promise<ethers.providers.Network> {
@@ -74,20 +74,19 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
   }
 
   private performWithRetry(method: string, params: any, tryCount: number): Promise<any> {
-    return promiseWithTimeout(this.rawProvider.perform(method, params), this.timeoutMs).catch(
-      (error: any) => {
-        if (error instanceof TimeoutError) {
-          if (tryCount <= this.maxTryCount) {
-            return this.reconnect().then(() => this.performWithRetry(method, params, tryCount + 1));
-          }
+    const timeout = method === 'getLogs' ? 30000 : this.timeoutMs;
+    return promiseWithTimeout(this.rawProvider.perform(method, params), timeout).catch((error: any) => {
+      if (error instanceof TimeoutError) {
+        if (tryCount <= this.maxTryCount) {
+          return this.reconnect().then(() => this.performWithRetry(method, params, tryCount + 1));
         }
-        return Promise.reject(error);
-      },
-    );
+      }
+      return Promise.reject(error);
+    });
   }
 
   private async reconnect(): Promise<void> {
-    this.logger.info(`reconnecting websocket on ${this.url}`);
+    this.logger.warn(`reconnecting websocket on ${this.url}`);
     await this.destroy();
     this.rawProvider = new ethers.providers.WebSocketProvider(this.url);
   }

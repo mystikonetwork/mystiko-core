@@ -1,6 +1,6 @@
 import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
-import { errorMessage, logger as rootLogger } from '@mystiko/utils';
+import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystiko/utils';
 import { BaseSync, SyncResult } from '../base';
 import { Contract, RawEvent } from '../../model';
 import { ContractHandler, EventHandler } from '../../handler';
@@ -129,8 +129,7 @@ export abstract class TopicSync implements BaseSync {
           : targetBlockNumber;
       const filter = etherContract.filters[this.topic]();
       this.logger.debug(`${this.logPrefix} start syncing from ${fromBlockNumber} to ${toBlockNumber}`);
-      return etherContract
-        .queryFilter(filter, fromBlockNumber, toBlockNumber)
+      return promiseWithTimeout(etherContract.queryFilter(filter, fromBlockNumber, toBlockNumber), 60000)
         .then((events: ethers.Event[]) => {
           const rawEvents = events.map((event: ethers.Event) => {
             const rawEvent: RawEvent = {

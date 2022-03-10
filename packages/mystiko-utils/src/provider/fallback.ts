@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { check } from '../check';
 import { EtherError } from '../error';
+import { TimeoutError } from '../promise';
 
 function checkNetworks(networks: Array<ethers.providers.Network>): ethers.providers.Network | undefined {
   let result: ethers.providers.Network | undefined;
@@ -73,6 +74,9 @@ export default class FallbackProvider extends ethers.providers.BaseProvider {
   }
 
   private static isRetryable(error: Error): boolean {
+    if (error instanceof TimeoutError) {
+      return true;
+    }
     const etherError = error as EtherError;
     switch (etherError.code) {
       case ethers.errors.SERVER_ERROR:
