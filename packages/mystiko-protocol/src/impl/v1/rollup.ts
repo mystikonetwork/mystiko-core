@@ -21,7 +21,12 @@ function isPowerOfTwo(aNumber: number): boolean {
   return aNumber !== 0 && (aNumber & (aNumber - 1)) === 0;
 }
 
-async function zkProve(tree: MerkleTree, newLeaves: BN[], wasmFile: string, zkeyFile: string) {
+async function zkProve(
+  tree: MerkleTree,
+  newLeaves: BN[],
+  wasmFile: string | string[],
+  zkeyFile: string | string[],
+) {
   check(isPowerOfTwo(newLeaves.length), 'newLeaves length should be power of 2');
   const rollupSize = newLeaves.length;
   const rollupHeight = Math.log2(rollupSize);
@@ -38,10 +43,11 @@ async function zkProve(tree: MerkleTree, newLeaves: BN[], wasmFile: string, zkey
   const pathElements = leafPath.pathElements.slice(rollupHeight);
   const leafHash = calcLeaveHash(newLeaves);
   const wasm = await readCompressedFile(wasmFile);
-  if (!witnessCalculators[wasmFile]) {
-    witnessCalculators[wasmFile] = await WitnessCalculatorBuilder(wasm);
+  const wcKey = wasmFile instanceof Array ? wasmFile.join(' ') : wasmFile;
+  if (!witnessCalculators[wcKey]) {
+    witnessCalculators[wcKey] = await WitnessCalculatorBuilder(wasm);
   }
-  const buff = await witnessCalculators[wasmFile].calculateWTNSBin(
+  const buff = await witnessCalculators[wcKey].calculateWTNSBin(
     {
       oldRoot: currentRoot.toString(),
       newRoot: newRoot.toString(),
@@ -59,8 +65,8 @@ async function zkProve(tree: MerkleTree, newLeaves: BN[], wasmFile: string, zkey
 export function zkProveRollup1(
   tree: MerkleTree,
   newLeaf: BN,
-  wasmFile: string,
-  zkeyFile: string,
+  wasmFile: string | string[],
+  zkeyFile: string | string[],
 ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }> {
   return zkProve(tree, [newLeaf], wasmFile, zkeyFile);
 }
@@ -68,8 +74,8 @@ export function zkProveRollup1(
 export function zkProveRollup4(
   tree: MerkleTree,
   newLeaves: BN[],
-  wasmFile: string,
-  zkeyFile: string,
+  wasmFile: string | string[],
+  zkeyFile: string | string[],
 ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }> {
   check(newLeaves && newLeaves.length === 4, 'newLeaves length should be 4');
   return zkProve(tree, newLeaves, wasmFile, zkeyFile);
@@ -78,8 +84,8 @@ export function zkProveRollup4(
 export function zkProveRollup16(
   tree: MerkleTree,
   newLeaves: BN[],
-  wasmFile: string,
-  zkeyFile: string,
+  wasmFile: string | string[],
+  zkeyFile: string | string[],
 ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }> {
   check(newLeaves && newLeaves.length === 16, 'newLeaves length should be 16');
   return zkProve(tree, newLeaves, wasmFile, zkeyFile);

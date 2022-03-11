@@ -60,31 +60,31 @@ export interface V1ProtocolInterface {
     privateNote: Buffer,
     treeLeaves: BN[],
     treeIndex: number,
-    wasmFile: string,
-    zkeyFile: string,
+    wasmFile: string | string[],
+    zkeyFile: string | string[],
   ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }>;
   zkProveRollup1(
     tree: MerkleTree,
     newLeaf: BN,
-    wasmFile: string,
-    zkeyFile: string,
+    wasmFile: string | string[],
+    zkeyFile: string | string[],
   ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }>;
   zkProveRollup4(
     tree: MerkleTree,
     newLeaves: BN[],
-    wasmFile: string,
-    zkeyFile: string,
+    wasmFile: string | string[],
+    zkeyFile: string | string[],
   ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }>;
   zkProveRollup16(
     tree: MerkleTree,
     newLeaves: BN[],
-    wasmFile: string,
-    zkeyFile: string,
+    wasmFile: string | string[],
+    zkeyFile: string | string[],
   ): Promise<{ publicSignals: string[]; proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] } }>;
   zkVerify(
     proof: { pi_a: string[]; pi_b: string[][]; pi_c: string[] },
     publicSignals: string[],
-    verifyKeyFile: string,
+    verifyKeyFile: string | string[],
   ): Promise<boolean>;
 }
 

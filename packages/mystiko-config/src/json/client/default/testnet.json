@@ -7,7 +7,10 @@
       "chainId": 3,
       "explorerUrl": "https://ropsten.etherscan.io",
       "providers": [
-        "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        "wss://ropsten.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "wss://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5",
+        "https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5"
       ],
       "signerEndpoint": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "contracts": [
@@ -189,7 +192,10 @@
       "chainId": 5,
       "explorerUrl": "https://goerli.etherscan.io",
       "providers": [
-        "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        "wss://goerli.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        "wss://eth-goerli.alchemyapi.io/v2/X0WmNwQWIjARyvQ2io1aZk0F3IjJ2qcM",
+        "https://eth-goerli.alchemyapi.io/v2/X0WmNwQWIjARyvQ2io1aZk0F3IjJ2qcM"
       ],
       "signerEndpoint": "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "contracts": [
@@ -303,7 +309,10 @@
       "chainId": 97,
       "explorerUrl": "https://testnet.bscscan.com",
       "providers": [
-        "https://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
+        "wss://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0",
+        "https://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0",
+        "wss://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/bsc/testnet/ws",
+        "https://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/bsc/testnet"
       ],
       "signerEndpoint": "https://data-seed-prebsc-2-s2.binance.org:8545",
       "syncSize": 100000,
@@ -494,7 +503,10 @@
       "chainId": 80001,
       "explorerUrl": "https://mumbai.polygonscan.com",
       "providers": [
-        "https://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
+        "wss://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0",
+        "https://matic.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0",
+        "wss://polygon-mumbai.g.alchemy.com/v2/JhuCQTtuNFg365zQ0WLKtrAf9AbfreOS",
+        "https://polygon-mumbai.g.alchemy.com/v2/JhuCQTtuNFg365zQ0WLKtrAf9AbfreOS"
       ],
       "signerEndpoint": "https://rpc-mumbai.maticvigil.com",
       "contracts": [
@@ -582,7 +594,9 @@
       "chainId": 43113,
       "explorerUrl": "https://testnet.snowtrace.io",
       "providers": [
-        "https://api.avax-test.network/ext/bc/C/rpc"
+        "https://api.avax-test.network/ext/bc/C/rpc",
+        "wss://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet/ws",
+        "https://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet"
       ],
       "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
       "contracts": [
@@ -686,9 +700,21 @@
   "circuits": [
     {
       "name": "circom-1.0",
-      "wasmFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/c8a90500e7b1e3f6360fc7ea0e11e93aa3bb5a65/circuits/circom/development/Withdraw.wasm.gz",
-      "zkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/c8a90500e7b1e3f6360fc7ea0e11e93aa3bb5a65/circuits/circom/development/Withdraw.zkey.gz",
-      "vkeyFile": "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/c8a90500e7b1e3f6360fc7ea0e11e93aa3bb5a65/circuits/circom/development/Withdraw.vkey.json.gz"
+      "wasmFile": [
+        "https://mystiko-static.s3.ap-southeast-1.amazonaws.com/circuits/circom/development/Withdraw.wasm.6b748f12f3f888a6c0ab2eafc9dcd389.gz",
+        "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/c8a90500e7b1e3f6360fc7ea0e11e93aa3bb5a65/circuits/circom/development/Withdraw.wasm.gz",
+        "https://static.mystiko.network/circuits/circom/development/Withdraw.wasm.6b748f12f3f888a6c0ab2eafc9dcd389.gz"
+      ],
+      "zkeyFile": [
+        "https://mystiko-static.s3.ap-southeast-1.amazonaws.com/circuits/circom/development/Withdraw.zkey.fa08463c4084ed0a101233e24ae2b97f.gz",
+        "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/c8a90500e7b1e3f6360fc7ea0e11e93aa3bb5a65/circuits/circom/development/Withdraw.zkey.gz",
+        "https://static.mystiko.network/circuits/circom/development/Withdraw.zkey.fa08463c4084ed0a101233e24ae2b97f.gz"
+      ],
+      "vkeyFile": [
+        "https://mystiko-static.s3.ap-southeast-1.amazonaws.com/circuits/circom/development/Withdraw.vkey.json.0eddac91219dc4292f6ac66f24f76a84.gz",
+        "https://raw.githubusercontent.com/mystikonetwork/mystiko-static/c8a90500e7b1e3f6360fc7ea0e11e93aa3bb5a65/circuits/circom/development/Withdraw.vkey.json.gz",
+        "https://static.mystiko.network/circuits/circom/development/Withdraw.vkey.json.0eddac91219dc4292f6ac66f24f76a84.gz"
+      ]
     }
   ]
 }

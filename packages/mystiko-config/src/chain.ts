@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check, toHex } from '@mystiko/utils';
+import { check, toHex, ProviderConnection } from '@mystiko/utils';
 import { BaseConfig, BridgeType } from './base';
 import { ContractConfig, RawContractConfig } from './contract';
 
@@ -13,7 +13,7 @@ export interface RawChainConfig {
   assetDecimals: number | undefined;
   explorerUrl: string;
   explorerPrefix: string;
-  providers: string[];
+  providers: Array<string | ProviderConnection>;
   signerEndpoint: string;
   contracts: RawContractConfig[];
   wrappedContracts: ContractConfig[];
@@ -42,7 +42,8 @@ export class ChainConfig extends BaseConfig {
     } else {
       check(this.explorerPrefix.indexOf(EXPLORER_TX_PLACEHOLDER) !== -1, 'not a valid prefix template');
     }
-    BaseConfig.checkStringArray(this.config, 'providers');
+    BaseConfig.checkArray(this.config, 'providers');
+    this.checkProviders();
     check(this.providers.length > 0, 'providers cannot be empty');
     BaseConfig.checkString(this.config, 'signerEndpoint');
     BaseConfig.checkObjectArray(this.config, 'contracts');
@@ -117,7 +118,7 @@ export class ChainConfig extends BaseConfig {
    * @property {string[]} providers
    * @desc the array of this configured blockchain's JSON-RPC providers.
    */
-  public get providers(): string[] {
+  public get providers(): Array<ProviderConnection | string> {
     return this.asRawChainConfig().providers;
   }
 
@@ -214,5 +215,13 @@ export class ChainConfig extends BaseConfig {
 
   private asRawChainConfig(): RawChainConfig {
     return this.config as RawChainConfig;
+  }
+
+  private checkProviders() {
+    this.providers.forEach((provider) => {
+      if (typeof provider !== 'string') {
+        check(!!provider.url, 'url cannot be empty');
+      }
+    });
   }
 }

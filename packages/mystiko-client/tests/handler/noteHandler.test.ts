@@ -97,7 +97,10 @@ test('test importFromOffChainNote basic', async () => {
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
   const wrongNote =
     '{"transactionHash":"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   await expect(noteHandler.importFromOffChainNote('wrong password', note)).rejects.toThrow();
   await expect(noteHandler.importFromOffChainNote(walletPassword, wrongNote)).rejects.toThrow();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
@@ -141,7 +144,10 @@ test('test importFromOffChainNote duplicate', async () => {
     '{"chainId":1,"transactionHash":' +
     '"0xdb8433b7b5f3f96e2f17d5fccd1c433b356bc210e3637447d5a284f5f06f6b3a"}';
   const offChainNote = new DepositReceipt(JSON.parse(note));
-  providerPool.connect(() => new MockProvider(txReceipt02));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt02),
+  });
+  providerPool.connect();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, offChainNote);
   expect(privateNote.dstChainId).toBe(56);
   expect(privateNote.dstAsset).toBe('USDT');
@@ -157,7 +163,10 @@ test('test importFromOffChainNote no authority', async () => {
   const note =
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   await expect(noteHandler.importFromOffChainNote(walletPassword, note)).rejects.toThrow();
 });
 
@@ -168,9 +177,15 @@ test('test getPrivateNote/getPrivateNotes', async () => {
   const note2 =
     '{"chainId":1,"transactionHash":' +
     '"0xdb8433b7b5f3f96e2f17d5fccd1c433b356bc210e3637447d5a284f5f06f6b3a"}';
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   await noteHandler.importFromOffChainNote(walletPassword, note1);
-  providerPool.connect(() => new MockProvider(txReceipt02));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt02),
+  });
+  providerPool.connect();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note2);
   expect(noteHandler.getPrivateNote(1)?.srcTransactionHash).toBe(
     '0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac',
@@ -215,7 +230,10 @@ test('test updateStatus', async () => {
   const note =
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
   expect(privateNote.status).toBe(PrivateNoteStatus.IMPORTED);
   await noteHandler.updateStatus(1, PrivateNoteStatus.SPENT);
@@ -283,7 +301,10 @@ test('test getPoolBalance', async () => {
   const note =
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   const contractConfig = contractHandler.getContract(1, '0x98ed94360cad67a76a53d8aa15905e52485b73d1');
   expect(contractConfig).not.toBe(undefined);
   if (contractConfig) {
@@ -305,7 +326,10 @@ test('test updateTransactionHash', async () => {
   const note =
     '{"chainId":1,"transactionHash":' +
     '"0x869b67d770d52eb17b67ce3328ba305d2cee10d5bb004e4e0f095f2803fdfaac"}';
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   const privateNote = await noteHandler.importFromOffChainNote(walletPassword, note);
   await noteHandler.updateWithdrawTransactionHash(
     privateNote,
@@ -319,7 +343,10 @@ test('test updateTransactionHash', async () => {
 });
 
 test('test createPrivateNoteFromTxReceipt', async () => {
-  providerPool.connect(() => new MockProvider(txReceipt01));
+  providerPool.setFactory({
+    createProvider: (): ethers.providers.BaseProvider => new MockProvider(txReceipt01),
+  });
+  providerPool.connect();
   db.contracts.clear();
   await expect(
     // @ts-ignore

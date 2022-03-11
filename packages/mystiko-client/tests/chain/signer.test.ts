@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { ethers } from 'ethers';
 import { ChainConfig, readFromFile } from '@mystiko/config';
-import { toHex } from '@mystiko/utils';
+import { ProviderConnection, toHex } from '@mystiko/utils';
 import { BaseSigner, MetaMaskSigner, PrivateKeySigner, checkSigner, ProviderPool } from '../../src';
 
 class MockError extends Error {
@@ -91,7 +91,7 @@ class MockProvider {
 class MockEtherProvider extends ethers.providers.JsonRpcProvider {
   private readonly expectedChainId: number;
 
-  constructor(rpcEndpoint: string, expectedChainId: number) {
+  constructor(rpcEndpoint: string | ProviderConnection, expectedChainId: number) {
     super(rpcEndpoint);
     this.expectedChainId = expectedChainId;
   }
@@ -142,8 +142,10 @@ test('test metamask signer', async () => {
 
 test('test private key signer', async () => {
   const conf = await readFromFile('tests/config/config.test.json');
-  const providerPool = new ProviderPool(conf);
-  providerPool.connect((rpcEndpoints) => new MockEtherProvider(rpcEndpoints[0], 1));
+  const providerPool = new ProviderPool(conf, {
+    createProvider: (connections) => new MockEtherProvider(connections[0], 1),
+  });
+  providerPool.connect();
   const signer = new PrivateKeySigner(conf, providerPool);
   expect(await signer.installed()).toBe(true);
   expect(await signer.connected()).toBe(false);

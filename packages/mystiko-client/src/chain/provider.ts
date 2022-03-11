@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { MystikoConfig } from '@mystiko/config';
+import { DefaultProviderFactory, ProviderFactory } from '@mystiko/utils';
 
 /**
  * @class ProviderPool
@@ -11,36 +12,20 @@ export class ProviderPool {
 
   private readonly providers: { [key: number]: ethers.providers.Provider };
 
-  constructor(conf: MystikoConfig) {
+  private providerFactory: ProviderFactory;
+
+  constructor(conf: MystikoConfig, providerFactory?: ProviderFactory) {
     this.config = conf;
     this.providers = {};
+    this.providerFactory = providerFactory || new DefaultProviderFactory();
   }
 
   /**
-   * @desc setting up provider pool with given provider generator.
-   * If providerGenerator is not given, it will generate ethers.providers.JsonRpcProvider
-   * wrapped with ethers.providers.FallbackProvider to offer better availability.
-   * @param {Function} [providerGenerator] a function to generate JSON-RPC provider.
+   * @desc setting up provider pool with given provider factory.
    */
-  connect(providerGenerator?: (rpcEndpoints: string[]) => ethers.providers.Provider) {
-    let pGenerator: (rpcEndpoints: string[]) => ethers.providers.Provider;
-    if (!providerGenerator) {
-      pGenerator = (rpcEndpoints) => {
-        const jsonRpcProviders = rpcEndpoints.map((rpcEndpoint) => {
-          if (rpcEndpoint.startsWith('wss://') || rpcEndpoint.startsWith('ws://')) {
-            return new ethers.providers.WebSocketProvider(rpcEndpoint);
-          }
-          return new ethers.providers.JsonRpcProvider(rpcEndpoint);
-        });
-        return jsonRpcProviders.length === 1
-          ? jsonRpcProviders[0]
-          : new ethers.providers.FallbackProvider(jsonRpcProviders, 1);
-      };
-    } else {
-      pGenerator = providerGenerator;
-    }
+  connect() {
     this.config.chains.forEach((chain) => {
-      this.providers[chain.chainId] = pGenerator(chain.providers);
+      this.providers[chain.chainId] = this.providerFactory.createProvider(chain.providers);
     });
   }
 
@@ -52,5 +37,9 @@ export class ProviderPool {
    */
   public getProvider(chainId: number): ethers.providers.Provider | undefined {
     return this.providers[chainId];
+  }
+
+  public setFactory(factory: ProviderFactory): void {
+    this.providerFactory = factory;
   }
 }
