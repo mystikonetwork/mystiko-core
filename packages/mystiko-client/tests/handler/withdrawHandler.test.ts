@@ -47,14 +47,37 @@ class MockTransactionResponse {
 class MockMystikoContract extends ethers.Contract {
   private readonly withdrewSN: { [key: string]: boolean };
 
-  constructor(address: string, abi: any, providerOrSigner?: ethers.providers.Provider | ethers.Signer) {
+  public knownRoots?: { [key: string]: boolean };
+
+  public events?: any[];
+
+  constructor(
+    address: string,
+    abi: any,
+    providerOrSigner?: ethers.providers.Provider | ethers.Signer,
+    knownRoots?: { [key: string]: boolean },
+    events?: any[],
+  ) {
     super(address, abi, providerOrSigner);
     this.withdrewSN = {};
+    this.knownRoots = knownRoots;
+    this.events = events;
   }
 
   public connect(providerOrSigner: ethers.Signer | ethers.providers.Provider | string): ethers.Contract {
     expect(providerOrSigner).not.toBe(undefined);
     return this;
+  }
+
+  public withdrewSerialNumbers(sn: string): Promise<boolean> {
+    return Promise.resolve(this.withdrewSN[sn] || false);
+  }
+
+  public isKnownRoot(root: string): Promise<boolean> {
+    if (!this.knownRoots || !!this.knownRoots[root]) {
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
   }
 
   public withdraw(
@@ -85,7 +108,7 @@ class MockMystikoContract extends ethers.Contract {
   // eslint-disable-next-line class-methods-use-this
   queryFilter(event: ethers.EventFilter): Promise<ethers.Event[]> {
     expect(event.address).toStrictEqual(this.address);
-    const events = [
+    const events = this.events || [
       {
         args: {
           leaf: '0x1b0b865b6fd5405112f51d8889556d825f77413a5d97b498406408d8e83f1b5b',
@@ -285,6 +308,34 @@ test('test withdraw basic', async () => {
   const withdraw2 = withdrawHandler.getWithdraw(ret.withdraw);
   expect(withdraw2?.errorMessage).not.toBe(undefined);
   expect(withdraw2?.status).toBe(WithdrawStatus.FAILED);
+  expect(noteHandler.getPrivateNote(privateNote || -1)?.status).toBe(PrivateNoteStatus.SPENT);
+});
+
+test('test is not known root', async () => {
+  (contract as MockMystikoContract).knownRoots = {};
+  const signer = new MockSigner(conf, 56);
+  const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  const ret = await withdrawHandler.createWithdraw(walletPassword, request, signer);
+  await ret.withdrawPromise;
+  const withdraw = withdrawHandler.getWithdraw(ret.withdraw);
+  expect(withdraw?.errorMessage).not.toBe(undefined);
+});
+
+test('test wrong event index', async () => {
+  (contract as MockMystikoContract).events = [
+    {
+      args: {
+        leaf: '0x1b0b865b6fd5405112f51d8889556d825f77413a5d97b498406408d8e83f1b5b',
+        leafIndex: 1,
+      },
+    },
+  ];
+  const signer = new MockSigner(conf, 56);
+  const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  const ret = await withdrawHandler.createWithdraw(walletPassword, request, signer);
+  await ret.withdrawPromise;
+  const withdraw = withdrawHandler.getWithdraw(ret.withdraw);
+  expect(withdraw?.errorMessage).not.toBe(undefined);
 });
 
 test('test withdraw errors', async () => {
