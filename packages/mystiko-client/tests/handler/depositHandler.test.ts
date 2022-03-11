@@ -108,6 +108,10 @@ class MockMystikoContract extends ethers.Contract {
 
   public tx?: MockTransactionResponse;
 
+  public depositedCommitmentHashes: { [key: string]: boolean } = {};
+
+  public relayCommitmentHashes: { [key: string]: boolean } = {};
+
   constructor(
     address: string,
     abi: any,
@@ -120,6 +124,14 @@ class MockMystikoContract extends ethers.Contract {
     this.errorMessage = errorMessage;
     this.isMain = isMain || false;
     this.minBridgeFee = minBridgeFee || new BN(0);
+  }
+
+  public depositedCommitments(commitmentHash: string): Promise<boolean> {
+    return Promise.resolve(!!this.depositedCommitmentHashes[commitmentHash]);
+  }
+
+  public relayCommitments(commitmentHash: string): Promise<boolean> {
+    return Promise.resolve(!!this.relayCommitmentHashes[commitmentHash]);
   }
 
   public connect(providerOrSigner: any) {
@@ -668,4 +680,81 @@ test('test minBridgeFee erc20', async () => {
   ret = await depositHandler.createDeposit(request, signer);
   await ret.depositPromise;
   expect(depositHandler.getDeposit(ret.deposit || -1)?.errorMessage).toBe(undefined);
+});
+
+test('test depositRelayed', async () => {
+  await expect(depositHandler.depositRelayed(100)).rejects.toThrow();
+  const deposit1 = new Deposit(db.deposits.insert({}));
+  await expect(depositHandler.depositRelayed(deposit1)).rejects.toThrow();
+  const deposit2 = new Deposit(db.deposits.insert({ srcChainId: 1 }));
+  await expect(depositHandler.depositRelayed(deposit2)).rejects.toThrow();
+  const deposit3 = new Deposit(db.deposits.insert({ srcChainId: 1, dstChainId: 1 }));
+  await expect(depositHandler.depositRelayed(deposit3)).rejects.toThrow();
+  const deposit4 = new Deposit(db.deposits.insert({ srcChainId: 1, dstChainId: 1, bridge: BridgeType.LOOP }));
+  await expect(depositHandler.depositRelayed(deposit4)).rejects.toThrow();
+  const deposit5 = new Deposit(
+    db.deposits.insert({ srcChainId: 1, dstChainId: 1, bridge: BridgeType.LOOP, asset: 'USDT' }),
+  );
+  await expect(depositHandler.depositRelayed(deposit5)).rejects.toThrow();
+  const deposit6 = new Deposit(
+    db.deposits.insert({
+      srcChainId: 1,
+      dstChainId: 100,
+      bridge: BridgeType.TBRIDGE,
+      asset: 'USDT',
+      commitmentHash: '12345',
+    }),
+  );
+  expect(() => depositHandler.depositRelayed(deposit6)).toThrow();
+  const deposit7 = new Deposit(
+    db.deposits.insert({
+      srcChainId: 1,
+      dstChainId: 1,
+      bridge: BridgeType.LOOP,
+      asset: 'USDT',
+      commitmentHash: '12345',
+    }),
+  );
+  expect(await depositHandler.depositRelayed(deposit7)).toBe(false);
+  const loopContract = contractPool.getContract(1, '0x98ed94360cad67a76a53d8aa15905e52485b73d1');
+  if (loopContract) {
+    (loopContract as MockMystikoContract).depositedCommitmentHashes['12345'] = false;
+    expect(await depositHandler.depositRelayed(deposit7)).toBe(false);
+    (loopContract as MockMystikoContract).depositedCommitmentHashes[
+      '0x0000000000000000000000000000000000000000000000000000000000003039'
+    ] = true;
+    expect(await depositHandler.depositRelayed(deposit7)).toBe(true);
+  } else {
+    throw new Error('contract does not exist');
+  }
+  const deposit8 = new Deposit(
+    db.deposits.insert({
+      srcChainId: 1,
+      dstChainId: 56,
+      bridge: BridgeType.POLY,
+      asset: 'USDT',
+      commitmentHash: '12345',
+    }),
+  );
+  expect(await depositHandler.depositRelayed(deposit8)).toBe(false);
+  const polyContract = contractPool.getContract(56, '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67');
+  if (polyContract) {
+    (polyContract as MockMystikoContract).relayCommitmentHashes['12345'] = false;
+    expect(await depositHandler.depositRelayed(deposit8)).toBe(false);
+    (polyContract as MockMystikoContract).relayCommitmentHashes[
+      '0x0000000000000000000000000000000000000000000000000000000000003039'
+    ] = true;
+    expect(await depositHandler.depositRelayed(deposit8)).toBe(true);
+  } else {
+    throw new Error('contract does not exist');
+  }
+  depositHandler = new DepositHandler(
+    walletHandler,
+    accountHandler,
+    noteHandler,
+    new ContractPool(conf, providerPool),
+    db,
+    conf,
+  );
+  await expect(depositHandler.depositRelayed(deposit8)).rejects.toThrow();
 });
