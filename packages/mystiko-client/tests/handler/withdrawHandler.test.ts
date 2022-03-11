@@ -115,6 +115,12 @@ class MockMystikoContract extends ethers.Contract {
           leafIndex: 0,
         },
       },
+      {
+        args: {
+          leaf: '0x1b0b865b6fd5405112f51d8889556d825f77413a5d97b498406408d8e83f1b5b',
+          leafIndex: 0,
+        },
+      },
     ];
     return Promise.resolve(events.map(MockMystikoContract.convertToEthersEvent));
   }
@@ -336,6 +342,28 @@ test('test wrong event index', async () => {
   await ret.withdrawPromise;
   const withdraw = withdrawHandler.getWithdraw(ret.withdraw);
   expect(withdraw?.errorMessage).not.toBe(undefined);
+});
+
+test('test wrong event cache', async () => {
+  await eventHandler.addEvent({
+    chainId: 56,
+    contractAddress: '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
+    topic: 'MerkleTreeInsert',
+    argumentData: {
+      leaf: '0x1b0b865b6fd5405112f51d8889556d825f77413a5d97b498406408d8e83f1bcd',
+      leafIndex: 2,
+    },
+  });
+  const signer = new MockSigner(conf, 56);
+  const request = { privateNote, recipientAddress: '0x44c2900FF76488a7C615Aab5a9Ef4ac61c241065' };
+  const ret = await withdrawHandler.createWithdraw(walletPassword, request, signer);
+  await ret.withdrawPromise;
+  const withdraw = withdrawHandler.getWithdraw(ret.withdraw);
+  expect(withdraw?.errorMessage).toBe(undefined);
+  expect(eventHandler.getEvents()[0].argumentData?.leafIndex).toBe(0);
+  expect(eventHandler.getEvents()[0].argumentData?.leaf).toBe(
+    '0x1b0b865b6fd5405112f51d8889556d825f77413a5d97b498406408d8e83f1b5b',
+  );
 });
 
 test('test withdraw errors', async () => {
