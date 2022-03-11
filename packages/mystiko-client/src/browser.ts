@@ -19,9 +19,9 @@ export class MystikoInBrowser extends Mystiko {
     }
     Sentry.init({
       dsn: 'https://2060c50a67ae4975bf6539bb2fb6574b@o1147711.ingest.sentry.io/6248066',
-      release: this.version,
+      release: wrappedOptions.tracingVersion || this.version,
       integrations: [new BrowserTracing()],
-      tracesSampleRate: options?.tracingSampleRate || 0.2,
+      tracesSampleRate: wrappedOptions.tracingSampleRate || 0.2,
     });
     this.tracer.setImpl(new SentryTracer(Sentry));
     return super.initialize(wrappedOptions).then((ret) => {
