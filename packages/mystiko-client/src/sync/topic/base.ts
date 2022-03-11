@@ -129,7 +129,7 @@ export abstract class TopicSync implements BaseSync {
           : targetBlockNumber;
       const filter = etherContract.filters[this.topic]();
       this.logger.debug(`${this.logPrefix} start syncing from ${fromBlockNumber} to ${toBlockNumber}`);
-      return promiseWithTimeout(etherContract.queryFilter(filter, fromBlockNumber, toBlockNumber), 60000)
+      return promiseWithTimeout(etherContract.queryFilter(filter, fromBlockNumber, toBlockNumber), 120000)
         .then((events: ethers.Event[]) => {
           const rawEvents = events.map((event: ethers.Event) => {
             const rawEvent: RawEvent = {
