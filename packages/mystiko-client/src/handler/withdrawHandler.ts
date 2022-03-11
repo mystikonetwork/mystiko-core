@@ -25,7 +25,6 @@ import {
   ID_KEY,
   PrivateNote,
   PrivateNoteStatus,
-  RawEvent,
   Withdraw,
   WithdrawStatus,
 } from '../model';
