@@ -7,6 +7,7 @@ import {
   logger as rootLogger,
   toBN,
   toBuff,
+  toFixedLenHex,
   toHexNoPrefix,
   waitTransaction,
 } from '@mystiko/utils';
@@ -323,19 +324,30 @@ export class WithdrawHandler extends Handler {
     const leaves = await this.queryEvents(withdraw, etherContract);
     let leafIndex = -1;
     let index = 0;
-    const convertedLeaves = leaves
-      .sort((e1, e2) => (e1.argumentData?.leafIndex || 0) - (e2.argumentData?.leafIndex || 0))
-      .map((e) => {
-        const leafOther = toBN(toHexNoPrefix(e.argumentData?.leaf || '0'), 16);
-        if (leafOther.toString() === leaf.toString()) {
-          leafIndex = index;
-        }
-        index += 1;
-        return leafOther;
-      });
+    const sortedLeaves = leaves.sort(
+      (e1, e2) => (e1.argumentData?.leafIndex || 0) - (e2.argumentData?.leafIndex || 0),
+    );
+    for (let i = 0; i < sortedLeaves.length; i += 1) {
+      if (sortedLeaves[i].argumentData?.leafIndex !== i) {
+        return Promise.reject(
+          new Error('invalid leaf index, it might be intermediate network issue, please retry later'),
+        );
+      }
+    }
+    const convertedLeaves = sortedLeaves.map((e) => {
+      const leafOther = toBN(toHexNoPrefix(e.argumentData?.leaf || '0'), 16);
+      if (leafOther.toString() === leaf.toString()) {
+        leafIndex = index;
+      }
+      index += 1;
+      return leafOther;
+    });
     check(
       leafIndex !== -1,
-      'cannot find your deposit on chains, maybe it has not been relayed to destination chain?',
+      'cannot find your deposit on destination chain, ' +
+        'maybe it has not been relayed to destination chain? ' +
+        'it might takes more than 20 minutes for cross-chain bridge syncing your deposit, ' +
+        'please wait patiently.',
     );
     return { leaves: convertedLeaves, leafIndex };
   }
@@ -433,8 +445,27 @@ export class WithdrawHandler extends Handler {
     zkProof: ZKProof,
     recipientAddress: string,
     statusCallback?: (withdraw: Withdraw, oldStatus: WithdrawStatus, newStatus: WithdrawStatus) => void,
-  ) {
+  ): Promise<Withdraw> {
     const { proofA, proofB, proofC, rootHash, serialNumber, amount } = zkProof;
+    const spent: boolean = await contract.withdrewSerialNumbers(serialNumber);
+    if (spent) {
+      await this.noteHandler.updateStatus(privateNote, PrivateNoteStatus.SPENT);
+      return Promise.reject(
+        new Error(
+          'your private asset has already been withdrew, ' +
+            'please check your public asset balance in block explorer or your connected wallet',
+        ),
+      );
+    }
+    const isKnownRoot: boolean = await contract.isKnownRoot(toFixedLenHex(toBN(rootHash)));
+    if (!isKnownRoot) {
+      return Promise.reject(
+        new Error(
+          'the merkle tree root you generated as proof is either invalid or outdated, ' +
+            'it might be caused by a delayed local network, please retry the withdraw later',
+        ),
+      );
+    }
     const connectedContract = contract.connect(signer.signer);
     this.logger.info(`start submitting withdrawal transaction for withdraw(id=${withdraw.id})`);
     const txResponse = await connectedContract.withdraw(
@@ -463,6 +494,7 @@ export class WithdrawHandler extends Handler {
     newPrivateNote.withdrawTransactionHash = txReceipt.transactionHash;
     newPrivateNote.status = PrivateNoteStatus.SPENT;
     await this.noteHandler.updatePrivateNote(newPrivateNote);
+    return newWithdraw;
   }
 
   private queryEvents(withdraw: Withdraw, etherContract: ethers.Contract): Promise<Event[]> {

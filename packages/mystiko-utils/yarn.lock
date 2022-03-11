@@ -2069,10 +2069,10 @@ fast-levenshtein@^2.0.6, fast-levenshtein@~2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fastfile@^0.0.19:
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/fastfile/-/fastfile-0.0.19.tgz#02cef9ade123b0a74adb794f4a1abcfa5719fd46"
-  integrity sha512-tz9nWR5KYb6eR2odFQ7oxqEkx8F3YQZ6NBJoJR92YEG3DqYOqyxMck8PKvTVNKx3uwvOqGnLXNScnqpdHRdHGQ==
+fastfile@^0.0.21:
+  version "0.0.21"
+  resolved "https://npm.mystiko.network/fastfile/-/fastfile-0.0.21.tgz#2824df89d73e5289b6256866c3d6272f7fab9f57"
+  integrity sha512-YIShiaXtbzVXg9cupLoIzA1nr5GKdeHhUGN50j62TtYSCp7hGNI+Ly3y4LTIvPpB92Hni35l/Y0iSvOaTzc10Q==
 
 fastq@^1.6.0:
   version "1.13.0"
