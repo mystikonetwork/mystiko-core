@@ -6,7 +6,7 @@ import mystiko, {
   WithdrawParams,
   WithdrawStatus,
 } from '@mystiko/client';
-import { ChainConfig, ContractConfig } from '@mystiko/config';
+import { BridgeType, ChainConfig, ContractConfig } from '@mystiko/config';
 
 require('dotenv').config();
 
@@ -18,15 +18,29 @@ let signer: PrivateKeySigner | undefined;
 let privateNote: PrivateNote | undefined;
 let shieldedAddress: string | undefined;
 let configChains: ChainConfig[] | undefined;
-const chainid: string | undefined = process.env.npm_config_chainid;
-const contracts: string | undefined = process.env.npm_config_contracts;
 const walletMasterSeed: string = 'integration@seed';
 const walletPassword: string = 'integration@psd';
 const accountName: string = 'integration@test';
 const depositAmount: number = 0.1;
 
+function parseArgsParameters(arg: string): string | undefined {
+  const args = process.argv;
+  const match = new RegExp(`^--${arg}=(.*)$`);
+
+  for (let i = 0; i <= args.length; i += 1) {
+    const arr = match.exec(args[i]);
+    if (arr !== null) {
+      return arr[1];
+    }
+  }
+
+  return undefined;
+}
+
 function filterContracts(cs: ContractConfig): ContractConfig | undefined {
-  if (cs.name.startsWith('MystikoWithLoop')) {
+  const contracts = parseArgsParameters('contracts');
+  const bridge = parseArgsParameters('bridge');
+  if (cs.name.startsWith(`MystikoWith${bridge}`)) {
     if (contracts === undefined) {
       return cs;
     }
@@ -39,16 +53,42 @@ function filterContracts(cs: ContractConfig): ContractConfig | undefined {
   return undefined;
 }
 
+function getBridgeTypeEnum(bd: string): BridgeType | undefined {
+  const match = /^MystikoWith(.*)(ERC20|Main)$/;
+  const rep = match.exec(bd);
+  if (rep === null) {
+    return undefined;
+  }
+  switch (rep[1]) {
+    case 'Loop': {
+      return BridgeType.LOOP;
+    }
+    case 'TBridge': {
+      return BridgeType.TBRIDGE;
+    }
+    case 'Celer': {
+      return BridgeType.CELER;
+    }
+    case 'Poly': {
+      return BridgeType.POLY;
+    }
+    default: {
+      return undefined;
+    }
+  }
+}
+
 describe('Integration test for verify deployed contract', async () => {
   before(() => {
     expect(process.env.PRIVATE_KEY).to.not.an('undefined', 'private key not found');
   });
 
   await mystiko.initialize({ dbAdapter: undefined });
+  const network = parseArgsParameters('network');
   configChains =
-    chainid === undefined
+    network === undefined
       ? mystiko.config?.chains
-      : mystiko.config?.chains.filter((chain) => chain.chainId.toString() === chainid);
+      : mystiko.config?.chains.filter((chain: ChainConfig) => chain.name === network);
 
   describe('Make Mystiko ready', () => {
     it('should initialize mystiko successful', () => {
@@ -79,18 +119,26 @@ describe('Integration test for verify deployed contract', async () => {
   });
 
   describe('Loop config to deposit and withdraw', () => {
-    configChains?.forEach((chain) => {
+    configChains?.forEach((chain: ChainConfig) => {
       describe(`${chain.name} should deposit and withdraw successful`, () => {
         const allContract = chain.contracts;
-        allContract.filter(filterContracts).forEach((contract) => {
+        allContract.filter(filterContracts).forEach((contract: ContractConfig) => {
           let recipientAddress: string | undefined;
 
           it(`[${chain.name}] ${contract.name} ${contract.assetSymbol} should deposit successful`, async () => {
+            const bridge: BridgeType | undefined = getBridgeTypeEnum(contract.name);
+            expect(bridge).to.not.an('undefined');
+            let dstChainId: number;
+            if (contract.peerChainId !== undefined) {
+              dstChainId = contract.peerChainId;
+            } else {
+              dstChainId = chain.chainId;
+            }
             const depositRequest: DepositParams = {
               srcChainId: chain.chainId,
-              dstChainId: chain.chainId,
+              dstChainId,
               assetSymbol: contract.assetSymbol,
-              bridge: mystiko.models.BridgeType.LOOP,
+              bridge: bridge as BridgeType,
               amount: depositAmount,
               shieldedAddress: shieldedAddress as string,
             };
@@ -101,7 +149,11 @@ describe('Integration test for verify deployed contract', async () => {
             await depositResponse?.depositPromise;
             const deposit1 = mystiko.deposits?.getDeposit(depositResponse?.deposit.id as number);
             expect(deposit1?.errorMessage).to.be.an('undefined');
-            expect(deposit1?.status).to.equal(DepositStatus.SUCCEEDED);
+            if (bridge === BridgeType.LOOP) {
+              expect(deposit1?.status).to.equal(DepositStatus.SUCCEEDED);
+            } else {
+              expect(deposit1?.status).to.equal(DepositStatus.SRC_CONFIRMED);
+            }
             privateNote = mystiko.notes?.getPrivateNote(depositResponse?.deposit.id as number);
             recipientAddress = deposit1?.srcAddress;
           });
