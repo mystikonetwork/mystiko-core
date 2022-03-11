@@ -324,17 +324,7 @@ export class WithdrawHandler extends Handler {
     const leaves = await this.queryEvents(withdraw, etherContract);
     let leafIndex = -1;
     let index = 0;
-    const sortedLeaves = leaves.sort(
-      (e1, e2) => (e1.argumentData?.leafIndex || 0) - (e2.argumentData?.leafIndex || 0),
-    );
-    for (let i = 0; i < sortedLeaves.length; i += 1) {
-      if (sortedLeaves[i].argumentData?.leafIndex !== i) {
-        return Promise.reject(
-          new Error('invalid leaf index, it might be intermediate network issue, please retry later'),
-        );
-      }
-    }
-    const convertedLeaves = sortedLeaves.map((e) => {
+    const convertedLeaves = leaves.map((e) => {
       const leafOther = toBN(toHexNoPrefix(e.argumentData?.leaf || '0'), 16);
       if (leafOther.toString() === leaf.toString()) {
         leafIndex = index;
@@ -501,17 +491,45 @@ export class WithdrawHandler extends Handler {
     const chainConfig = this.config.getChainConfig(withdraw.chainId || 0);
     const contract = this.contractHandler.getContract(withdraw.chainId || 0, etherContract.address);
     if (contract && chainConfig) {
-      return WithdrawHandler.queryEventsBatch(contract, etherContract, chainConfig.syncSize).then(
-        (events) => {
-          const storedEvents = this.eventHandler.getEvents({
-            filterFunc: (event) =>
-              event.chainId === chainConfig.chainId &&
-              event.contractAddress === etherContract.address &&
-              event.topic === 'MerkleTreeInsert',
-          });
-          return [...storedEvents, ...events];
-        },
-      );
+      return WithdrawHandler.queryEventsBatch(
+        contract,
+        etherContract,
+        contract.getSyncedTopicBlock('MerkleTreeInsert'),
+        chainConfig.syncSize,
+      ).then((events) => {
+        const storedEvents = this.eventHandler.getEvents({
+          filterFunc: (event) =>
+            event.chainId === chainConfig.chainId &&
+            event.contractAddress === etherContract.address &&
+            event.topic === 'MerkleTreeInsert',
+        });
+        const allEvents = this.sortedAndDedupEvents([...storedEvents, ...events]);
+        if (WithdrawHandler.validateEvents(allEvents)) {
+          return allEvents;
+        }
+        return WithdrawHandler.queryEventsBatch(
+          contract,
+          etherContract,
+          contract.syncStart,
+          chainConfig.syncSize,
+        ).then((allEventsAgain) => {
+          const newEvents = this.sortedAndDedupEvents(allEventsAgain);
+          if (WithdrawHandler.validateEvents(newEvents)) {
+            return this.eventHandler
+              .removeEvents(
+                (event) =>
+                  event.chainId === chainConfig.chainId &&
+                  event.contractAddress === etherContract.address &&
+                  event.topic === 'MerkleTreeInsert',
+              )
+              .then(() => this.eventHandler.addEvents(newEvents))
+              .then(() => newEvents);
+          }
+          return Promise.reject(
+            new Error('invalid leaf index, it might be intermediate network issue, please retry later'),
+          );
+        });
+      });
     }
     return Promise.reject(
       new Error(
@@ -523,9 +541,9 @@ export class WithdrawHandler extends Handler {
   private static async queryEventsBatch(
     contract: Contract,
     etherContract: ethers.Contract,
+    syncedBlock: number,
     syncSize: number,
   ): Promise<Event[]> {
-    const syncedBlock = contract.getSyncedTopicBlock('MerkleTreeInsert');
     const blockNumber = await etherContract.provider.getBlockNumber();
     const promises: Promise<ethers.Event[]>[] = [];
     for (let fromBlock = syncedBlock + 1; fromBlock <= blockNumber; ) {
@@ -551,5 +569,23 @@ export class WithdrawHandler extends Handler {
           }),
       ),
     );
+  }
+
+  private sortedAndDedupEvents(events: Event[]): Event[] {
+    const sortedEvents = events.sort(
+      (e1, e2) => (e1.argumentData?.leafIndex || 0) - (e2.argumentData?.leafIndex || 0),
+    );
+    return sortedEvents.filter(
+      (e1, index, self) => index === self.findIndex((e2) => e1.argumentData?.leaf === e2.argumentData?.leaf),
+    );
+  }
+
+  private static validateEvents(events: Event[]): boolean {
+    for (let i = 0; i < events.length; i += 1) {
+      if (events[i].argumentData?.leafIndex !== i) {
+        return false;
+      }
+    }
+    return true;
   }
 }

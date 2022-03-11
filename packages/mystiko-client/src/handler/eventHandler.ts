@@ -97,6 +97,15 @@ export class EventHandler extends Handler {
     return queryChain.data().map((rawObject) => new Event(rawObject));
   }
 
+  public async removeEvents(filterFunc?: (event: Event) => boolean): Promise<Event[]> {
+    const events = this.getEvents({ filterFunc });
+    events.forEach((event: Event) => {
+      this.db.events.remove(event.data);
+    });
+    await this.saveDatabase();
+    return Promise.resolve(events);
+  }
+
   private insertEvent(eventParams: RawEvent): Event {
     const { chainId, contractAddress, transactionHash, topic, argumentData } = eventParams;
     let event: Event | undefined;
