@@ -42,6 +42,7 @@ export interface InitOptions {
   loggingLevel?: LogLevelDesc;
   loggingOptions?: LoglevelPluginPrefixOptions;
   providerFactory?: utils.ProviderFactory;
+  tracingEndpoint?: string;
   tracingVersion?: string;
   tracingSampleRate?: number;
 }
