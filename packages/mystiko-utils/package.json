@@ -56,7 +56,7 @@
   "dependencies": {
     "bn.js": "^5.2.0",
     "ethers": "^5.5.3",
-    "fastfile": "^0.0.19",
+    "fastfile": "^0.0.21",
     "loglevel": "^1.8.0",
     "loglevel-plugin-prefix": "^0.8.4",
     "pako": "^2.0.4"
