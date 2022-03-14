@@ -263,6 +263,37 @@ export class DepositHandler extends Handler {
     return new DepositReceipt({ chainId: deposit.srcChainId, transactionHash: deposit.srcTxHash });
   }
 
+  public depositRelayed(depositQuery: number | string | Deposit): Promise<boolean> {
+    const deposit = this.getDeposit(depositQuery);
+    if (!deposit) {
+      return Promise.reject(new Error(`deposit ${depositQuery} does not exist`));
+    }
+    if (
+      !deposit.srcChainId ||
+      !deposit.dstChainId ||
+      !deposit.bridge ||
+      !deposit.asset ||
+      !deposit.commitmentHash
+    ) {
+      return Promise.reject(new Error(`deposit(id=${deposit.id}) does not contain all required information`));
+    }
+    const srcContract = this.config.getContractConfig(
+      deposit.srcChainId,
+      deposit.dstChainId,
+      deposit.asset,
+      deposit.bridge,
+    );
+    const contractAddress = srcContract.peerContractAddress || srcContract.address;
+    const contract = this.contractPool.getContract(deposit.dstChainId, contractAddress);
+    if (!contract) {
+      return Promise.reject(new Error(`deposit(id=${deposit.id}) does not have initialized contract`));
+    }
+    if (deposit.bridge === BridgeType.LOOP) {
+      return contract.depositedCommitments(toFixedLenHex(deposit.commitmentHash));
+    }
+    return contract.relayCommitments(toFixedLenHex(deposit.commitmentHash));
+  }
+
   public async updateDeposit(deposit: Deposit): Promise<Deposit> {
     this.db.deposits.update(deposit.data);
     await this.saveDatabase();
