@@ -48,12 +48,13 @@ yarn build
 Then we switch to the contract module and execute the integration test command
 ```bash
 cd packages/mystiko-contracts
-npm run integration --chainid=80001 --contracts=MTT,mUSD
+yarn integration --network="Ethereum Ropsten" --contracts="MTT,mUSD" --bridge="Loop"
 ```
 The script will automatically deposit and withdraw the specified loop-bridge network and contract
 ```bash
 Parameter Description:
---chainid: specify network chainid(radio).
+--network: specify network name(radio).
 --contracts: the contracts under the specified network chainid(multiple choice).
+--bridge: specify crosschain bridge type(radio), currently only supports Loop.
 ```
 `Note: If you do not fill in the two parameters, all network contracts under the configuration file will be tested`
