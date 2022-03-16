@@ -3,6 +3,27 @@ name: integration cron
 on:
   schedule:
     - cron: '0 21 * * *'
+    inputs:
+      network:
+        description: 'network name'
+        required: false
+      contracts:
+        description: 'contract symbol name'
+        required: false
+      bridge:
+        description: 'bridge type used(Loop/TBridge)'
+        required: false
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'network name'
+        required: false
+      contracts:
+        description: 'contract symbol name'
+        required: false
+      bridge:
+        description: 'bridge type used'
+        required: false
 
 jobs:
   bot:
@@ -26,7 +47,7 @@ jobs:
       - run: lerna bootstrap
       - run: lerna run build
       - run: cd packages/mystiko-contracts
-      - run: yarn integration --network="Polygon Testnet" --contracts="MTT,mUSD" --bridge="Loop"
+      - run: yarn integration --network=${{ github.event.inputs.network }} --contracts=${{ github.event.inputs.contracts }} --bridge=${{ github.event.inputs.bridge }}
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()
