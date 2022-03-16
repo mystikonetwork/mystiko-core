@@ -22,7 +22,7 @@ on:
         description: 'contract symbol name'
         required: false
       bridge:
-        description: 'bridge type used'
+        description: 'bridge type used(Loop/TBridge)'
         required: false
 
 jobs:
