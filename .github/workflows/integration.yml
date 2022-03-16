@@ -1,0 +1,45 @@
+name: integration cron
+
+on:
+  schedule:
+    - cron: '0 21 * * *'
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    env:
+      PRIVATE_KEY: ${{ secrets.private_key }}
+      NPM_USER: ${{ secrets.npm_user }}
+      NPM_PASS: ${{ secrets.npm_pass }}
+      NPM_EMAIL: ${{ secrets.npm_email }}
+      NPM_REGISTRY: https://npm.mystiko.network
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - run: npm-cli-login
+      - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
+      - run: lerna bootstrap
+      - run: lerna run build
+      - run: cd packages/mystiko-contracts
+      - run: yarn integration --network="Polygon Testnet" --contracts="MTT,mUSD" --bridge="Loop"
+      - name: Telegram Failure Notification
+        uses: appleboy/telegram-action@master
+        if: failure()
+        with:
+          message: ❗ Integration test failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions)
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      - name: Telegram Success Notification
+        uses: appleboy/telegram-action@master
+        if: success()
+        with:
+          message: Integration test succeeded for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions)
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
