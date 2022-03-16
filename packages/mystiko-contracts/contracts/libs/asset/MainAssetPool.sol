@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.11;
+pragma solidity ^0.8.0;
 
 import "./AssetPool.sol";
 
@@ -19,7 +19,7 @@ abstract contract MainAssetPool is AssetPool {
     require(success, "withdraw failed");
   }
 
-  function assetType() public view override returns (string memory) {
+  function assetType() public pure override returns (string memory) {
     return "main";
   }
 }

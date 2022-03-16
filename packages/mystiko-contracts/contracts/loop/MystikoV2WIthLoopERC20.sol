@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.11;
+pragma solidity ^0.8.0;
 
 import "./MystikoV2WithLoop.sol";
 import "../libs/asset/ERC20AssetPool.sol";
@@ -12,7 +12,6 @@ contract MystikoV2WithLoopERC20 is MystikoV2WithLoop, ERC20AssetPool {
     address _withdrawVerifier,
     address _token
   )
-    public
     MystikoV2WithLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier)
     ERC20AssetPool(_token)
   {}

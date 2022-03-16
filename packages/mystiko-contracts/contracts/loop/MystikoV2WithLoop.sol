@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.11;
+pragma solidity ^0.8.0;
 
 import "./MystikoLoop.sol";
 
@@ -9,7 +9,7 @@ abstract contract MystikoV2WithLoop is MystikoLoop {
     uint32 _rootHistoryLength,
     uint256 _minRollupFee,
     address _withdrawVerifier
-  ) public MystikoLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier) {}
+  ) MystikoLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier) {}
 
   function _processDeposit(
     uint256 amount,
@@ -19,7 +19,7 @@ abstract contract MystikoV2WithLoop is MystikoLoop {
     _enqueueDeposit(commitmentHash, amount, rollupFee);
   }
 
-  function bridgeType() public view override returns (string memory) {
+  function bridgeType() public pure override returns (string memory) {
     return "loop";
   }
 }

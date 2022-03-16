@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IMystikoLoop {
+interface IMystikoBridge {
   function deposit(
     uint256 amount,
     uint256 commitment,
     uint256 hashK,
     uint128 randomS,
     bytes memory encryptedNote,
-    uint256 rollupFee
+    uint256 rollupFee,
+    uint256 bridgeFee
   ) external payable;
 
   function rollup(

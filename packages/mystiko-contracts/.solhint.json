@@ -8,7 +8,8 @@
       }
     ],
     "quotes": ["error", "double"],
-    "compiler-version": ["error", "^0.6.11"]
+    "compiler-version": ["error", "^0.8.0"],
+    "func-visibility": ["warn",{"ignoreConstructors":true}]
   },
   "plugins": ["prettier"]
 }

@@ -66,7 +66,7 @@ module.exports = {
   },
 
   resetDefaultDevelopmentConfig(config) {
-    config.chains[0].hashAddress = '';
+    config.chains[0].rollupAddress = '';
     config.chains[0].verifierAddress = '';
     config.bridges[0].pairs[0][0].address = '';
     config.bridges[0].pairs[0][0].syncStart = '';
@@ -74,10 +74,10 @@ module.exports = {
     this.saveConfig('development', config);
   },
 
-  saveBaseAddressConfig(mystikoNetwork, network, config, hashAddress, verifierAddress) {
+  saveBaseAddressConfig(mystikoNetwork, network, config, rollupAddress, verifierAddress) {
     for (let i = 0; i < config.chains.length; i++) {
       if (config.chains[i].network === network) {
-        config.chains[i].hashAddress = hashAddress;
+        config.chains[i].rollupAddress = rollupAddress;
         config.chains[i].verifierAddress = verifierAddress;
         break;
       }

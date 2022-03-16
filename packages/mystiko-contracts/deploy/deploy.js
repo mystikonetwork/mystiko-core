@@ -1,16 +1,14 @@
-const MystikoWithLoopERC20 = artifacts.require('MystikoWithLoopERC20');
-const MystikoWithLoopMain = artifacts.require('MystikoWithLoopMain');
+const MystikoWithLoopERC20 = artifacts.require('MystikoV2WithLoopERC20');
+const MystikoWithLoopMain = artifacts.require('MystikoV2WithLoopMain');
 const MystikoWithTBridgeERC20 = artifacts.require('MystikoWithTBridgeERC20');
 const MystikoWithTBridgeMain = artifacts.require('MystikoWithTBridgeMain');
-const MystikoWithPolyERC20 = artifacts.require('MystikoWithPolyERC20');
-const MystikoWithPolyMain = artifacts.require('MystikoWithPolyMain');
 const MystikoWithCelerERC20 = artifacts.require('MystikoWithCelerERC20');
 const MystikoWithCelerMain = artifacts.require('MystikoWithCelerMain');
 const MystikoTBridgeProxy = artifacts.require('MystikoTBridgeProxy');
 const TestToken = artifacts.require('TestToken');
 
 const WithdrawVerifier = artifacts.require('WithdrawVerifier');
-const Hasher2 = artifacts.require('Hasher2');
+const Rollup1Verifier = artifacts.require('Rollup1Verifier');
 
 const common = require('./common');
 const coreConfig = require('./coreConfig');
@@ -35,12 +33,6 @@ function getMystikoContract(bridge, bErc20) {
       return MystikoWithCelerERC20;
     } else {
       return MystikoWithCelerMain;
-    }
-  } else if (bridge === 'poly') {
-    if (bErc20 === 'true') {
-      return MystikoWithPolyERC20;
-    } else {
-      return MystikoWithPolyMain;
     }
   } else {
     console.error(common.RED, 'bridge not support');
@@ -92,8 +84,7 @@ async function deployTBridgeProxy() {
 }
 
 async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
-  const { MERKLE_TREE_HEIGHT } = process.env;
-
+  const { MERKLE_TREE_HEIGHT, ROOT_HISTORY_LENGTH, MIN_ROLLUP_FEE, MIN_BRIDGE_FEE } = process.env;
   const srcChain = common.getChainConfig(config, src.network);
   if (srcChain === null) {
     return '';
@@ -124,7 +115,13 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
   let trxHash = '';
   if (bridgeName === 'loop') {
     if (token.erc20 === 'true') {
-      await MystikoCore.new(srcChain.verifierAddress, token.address, srcChain.hashAddress, MERKLE_TREE_HEIGHT)
+      await MystikoCore.new(
+        MERKLE_TREE_HEIGHT,
+        ROOT_HISTORY_LENGTH,
+        MIN_ROLLUP_FEE,
+        srcChain.verifierAddress,
+        token.address,
+      )
         .then((response) => {
           address = response.address;
           trxHash = response.transactionHash;
@@ -134,7 +131,7 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
           process.exit(1);
         });
     } else {
-      await MystikoCore.new(srcChain.verifierAddress, srcChain.hashAddress, MERKLE_TREE_HEIGHT)
+      await MystikoCore.new(MERKLE_TREE_HEIGHT, ROOT_HISTORY_LENGTH, MIN_ROLLUP_FEE, srcChain.verifierAddress)
         .then((response) => {
           address = response.address;
           trxHash = response.transactionHash;
@@ -272,11 +269,12 @@ async function deployStep1() {
     return;
   }
 
-  let hasher2Address = '';
-  console.log('deploy Hasher2');
-  await Hasher2.new()
-    .then((hasher2) => {
-      hasher2Address = hasher2.address;
+  let rollup1VerifierAddress = '';
+  console.log('deploy rollup verifier');
+  //todo support rollup4 rollup16...
+  await Rollup1Verifier.new()
+    .then((verifier) => {
+      rollup1VerifierAddress = verifier.address;
     })
     .catch((err) => {
       console.error(common.RED, err);
@@ -284,7 +282,7 @@ async function deployStep1() {
     });
 
   let withdrawVerifierAddress = '';
-  console.log('deploy WithdrawVerifier');
+  console.log('deploy Withdraw verifier');
   await WithdrawVerifier.new()
     .then((withdrawVerifier) => {
       withdrawVerifierAddress = withdrawVerifier.address;
@@ -294,9 +292,15 @@ async function deployStep1() {
       process.exit(1);
     });
 
-  console.log('hasher2 address: ', hasher2Address);
+  console.log('rollup1 verifier address: ', rollup1VerifierAddress);
   console.log('withdrawVerifier address: ', withdrawVerifierAddress);
-  common.saveBaseAddressConfig(mystikoNetwork, network, config, hasher2Address, withdrawVerifierAddress);
+  common.saveBaseAddressConfig(
+    mystikoNetwork,
+    network,
+    config,
+    rollup1VerifierAddress,
+    withdrawVerifierAddress,
+  );
 }
 
 //deploy mystiko contract and configure peer contract address
@@ -389,7 +393,10 @@ async function deployStep2or3() {
       return;
     }
 
-    await setMystikoPeerAddress(bridgeName, src, dst, config);
+    if (bridgeName !== 'loop') {
+      await setMystikoPeerAddress(bridgeName, src, dst, config);
+    }
+
     coreConfig.savePeerConfig(mystikoNetwork, bridgeName, src, dst, config);
     if (bridgeName === 'tbridge') {
       tbridgeConfig.savePeerConfig(mystikoNetwork, src, dst, proxyAddress, config);

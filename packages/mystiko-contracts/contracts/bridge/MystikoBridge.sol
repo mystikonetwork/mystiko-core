@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../libs/asset/AssetPool.sol";
 import "../interface/IVerifier.sol";
-import "../interface/IMystikoLoop.sol";
+import "../interface/IMystikoBridge.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 struct DepositLeaf {
@@ -16,7 +16,7 @@ struct RollupVerifier {
   bool enabled;
 }
 
-abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
+abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
@@ -26,6 +26,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
 
   // For checking duplicates.
   mapping(uint256 => bool) public depositedCommitments;
+  mapping(uint256 => bool) public relayCommitments;
   mapping(uint256 => bool) public spentSerialNumbers;
 
   // Deposit queue related.
@@ -43,6 +44,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   // Admin related.
   address public operator;
   uint256 public minRollupFee;
+  uint256 public minBridgeFee;
   mapping(address => bool) public rollupWhitelist;
 
   // Some switches.
@@ -50,8 +52,18 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   bool public isVerifierUpdateDisabled;
   bool public isRollupWhitelistDisabled;
 
+  //bridge proxy and peer contract meta
+  address public relayProxyAddress;
+  uint64 public peerChainId;
+  address public peerContractAddress;
+
   modifier onlyOperator() {
     require(msg.sender == operator, "Only operator can call this function.");
+    _;
+  }
+
+  modifier onlyRelayProxyContract() {
+    require(msg.sender == relayProxyAddress, "msg sender is not relay proxy");
     _;
   }
 
@@ -69,9 +81,12 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
 
   constructor(
+    address _relayProxyAddress,
+    uint64 _peerChainId,
     uint32 _treeHeight,
     uint32 _rootHistoryLength,
     uint256 _minRollupFee,
+    uint256 _minBridgeFee,
     address _withdrawVerifier
   ) {
     require(_rootHistoryLength > 0, "_rootHistoryLength should be greater than 0");
@@ -80,9 +95,13 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     operator = msg.sender;
     rootHistoryLength = _rootHistoryLength;
     minRollupFee = _minRollupFee;
+    minBridgeFee = _minBridgeFee;
     treeCapacity = 2**uint256(_treeHeight);
     currentRoot = _zeros(_treeHeight);
     rootHistory[currentRootIndex] = currentRoot;
+    relayProxyAddress = _relayProxyAddress;
+    peerChainId = _peerChainId;
+    peerContractAddress = address(0);
   }
 
   function deposit(
@@ -91,17 +110,20 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     uint256 hashK,
     uint128 randomS,
     bytes memory encryptedNote,
-    uint256 rollupFee
+    uint256 rollupFee,
+    uint256 bridgeFee
   ) external payable override {
+    // todo do rollup at source chain or destination chain ?
+    // how to get rollup fee on destination chain?
     require(!isDepositsDisabled, "deposits are disabled");
-    require(rollupFee >= minRollupFee, "rollup fee too few");
+    require(bridgeFee >= minBridgeFee, "bridge fee too few");
     require(depositIncludedCount + depositQueueSize < treeCapacity, "tree is full");
     require(!depositedCommitments[commitment], "the commitment has been submitted");
     uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
     depositedCommitments[commitment] = true;
-    _processDepositTransfer(amount + rollupFee);
-    _processDeposit(amount, commitment, rollupFee);
+    _processDepositTransfer(amount + bridgeFee);
+    _processDeposit(amount, commitment, bridgeFee);
     emit EncryptedNote(commitment, encryptedNote);
   }
 
@@ -222,8 +244,20 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     minRollupFee = _minRollupFee;
   }
 
+  function setMinBridgeFee(uint256 _minBridgeFee) external onlyOperator {
+    minBridgeFee = _minBridgeFee;
+  }
+
   function changeOperator(address _newOperator) external onlyOperator {
     operator = _newOperator;
+  }
+
+  function setRelayProxyAddress(address _relayProxyAddress) external onlyOperator {
+    relayProxyAddress = _relayProxyAddress;
+  }
+
+  function setPeerContractAddress(address _peerContractAddress) external onlyOperator {
+    peerContractAddress = _peerContractAddress;
   }
 
   function bridgeType() public pure virtual returns (string memory);
