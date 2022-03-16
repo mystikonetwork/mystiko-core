@@ -84,7 +84,7 @@ async function deployTBridgeProxy() {
 }
 
 async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
-  const { MERKLE_TREE_HEIGHT, ROOT_HISTORY_LENGTH, MIN_ROLLUP_FEE, MIN_BRIDGE_FEE } = process.env;
+  const { MERKLE_TREE_HEIGHT, ROOT_HISTORY_LENGTH, MIN_ROLLUP_FEE } = process.env;
   const srcChain = common.getChainConfig(config, src.network);
   if (srcChain === null) {
     return '';
