@@ -59,7 +59,7 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
   }
 
   public get maxTryCount(): number {
-    return this.options.maxTryCount || 2;
+    return this.options.maxTryCount || 1;
   }
 
   private detectNetworkWithRetry(tryCount: number): Promise<ethers.providers.Network> {
