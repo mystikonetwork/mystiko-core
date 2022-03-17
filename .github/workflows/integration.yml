@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       network:
-        description: 'network name'
+        description: 'Network name'
         required: false
         type: choice
         options:
@@ -14,10 +14,10 @@ on:
           - Polygon Testnet
           - Avalanche Testnet
       contracts:
-        description: 'contract symbol name'
+        description: 'Contract symbol name'
         required: false
       bridge:
-        description: 'bridge type used(Loop/TBridge)'
+        description: 'Bridge type used'
         required: false
         type: choice
         options:
