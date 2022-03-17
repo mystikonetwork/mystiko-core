@@ -50,7 +50,10 @@ test('test detectNetwork', async () => {
 
 test('test perform', async () => {
   const server = await buildServer(39736);
-  const provider = new ReconnectingWebSocketProvider('ws://localhost:39736', { timeoutMs: 500, maxTryCount: 2 });
+  const provider = new ReconnectingWebSocketProvider('ws://localhost:39736', {
+    timeoutMs: 500,
+    maxTryCount: 2,
+  });
   expect(await provider.perform('getTransaction', { transactionHash: '0x' })).not.toBe(undefined);
   await provider.destroy();
   expect(await provider.perform('getTransaction', { transactionHash: '0x' })).not.toBe(undefined);
