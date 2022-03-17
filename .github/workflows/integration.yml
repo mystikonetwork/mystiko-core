@@ -14,7 +14,7 @@ on:
         required: false
 
 jobs:
-  bot:
+  integration:
     runs-on: ubuntu-latest
     env:
       PRIVATE_KEY: ${{ secrets.private_key }}
@@ -35,8 +35,9 @@ jobs:
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
       - run: lerna run build
-      - run: cd packages/mystiko-contracts
-      - run: yarn integration --network=${{ github.event.inputs.network }} --contracts=${{ github.event.inputs.contracts }} --bridge=${{ github.event.inputs.bridge }}
+      - name: Run integration test
+        working-directory: ./packages/mystiko-contracts
+        run: yarn integration --network="${{ github.event.inputs.network }}" --contracts="${{ github.event.inputs.contracts }}" --bridge="${{ github.event.inputs.bridge }}"
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()
