@@ -6,12 +6,23 @@ on:
       network:
         description: 'network name'
         required: false
+        type: choice
+        options:
+          - Ethereum Ropsten
+          - Ethereum Goerli
+          - BSC Testnet
+          - Polygon Testnet
+          - Avalanche Testnet
       contracts:
         description: 'contract symbol name'
         required: false
       bridge:
         description: 'bridge type used(Loop/TBridge)'
         required: false
+        type: choice
+        options:
+          - Loop
+          - TBridge
 
 jobs:
   integration:
