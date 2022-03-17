@@ -25,7 +25,8 @@
     "deploy:auroratestnet": "truffle exec deploy/deploy.js --network auroratestnet",
     "deploy:fantomtestnet": "truffle exec deploy/deploy.js --network fantomtestnet",
     "deploy:polygontestnet": "truffle exec deploy/deploy.js --network polygontestnet",
-    "deploy:avalanchetestnet": "truffle exec deploy/deploy.js --network avalanchetestnet"
+    "deploy:avalanchetestnet": "truffle exec deploy/deploy.js --network avalanchetestnet",
+    "deploy:moonbase": "truffle exec deploy/deploy.js --network moonbase"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",

@@ -10,7 +10,7 @@ deploy hash contract and verifier contract, parameter:
 ```
 example:
 
-```yarn deploy:bsctestnet  testnet  step1```
+```yarn deploy:bsctestnet step1```
 
 #### Deploy Step 2
 deploy mystiko core contract, parameter
@@ -23,7 +23,7 @@ deploy mystiko core contract, parameter
 ```
 example:
 
-``` yarn deploy:bsctestnet  testnet  step2 celer goerli ETH```
+``` yarn deploy:bsctestnet step2 celer goerli ETH```
 
 #### Deploy Step 3
 configure peer contract address, parameter:
@@ -37,7 +37,7 @@ configure peer contract address, parameter:
 ```
 example:
 
-``` yarn deploy:bsctestnet  testnet  step3 celer goerli ETH```
+``` yarn deploy:bsctestnet  step3 celer goerli ETH```
 
 ### Test the deployed contract
 We need to update the config file first and execute the following command

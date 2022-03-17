@@ -225,6 +225,38 @@
       ],
       "hashAddress": "0x3d864Ab33e05562Eb3Ae8382865DC7e0E258498b",
       "verifierAddress": "0xD0b4d6Dbc2B8E77A8Fc32e5189dEB7549F75179A"
+    },
+    {
+      "name": "Moonbase Alpha",
+      "network": "moonbase",
+      "chainId": 1287,
+      "tokens": [
+        {
+          "name": "DEV",
+          "assetDecimals": 18,
+          "erc20": "false"
+        },
+        {
+          "name": "MTT",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0xDcdcaBba9DB9e721A140AeF35CB0AC787Dde37D2"
+        },
+        {
+          "name": "mUSD",
+          "erc20": "true",
+          "assetDecimals": 6,
+          "address": "0xa4f5DbEb54831cd8dec1fBC9187619e70d1dDD8a"
+        },
+        {
+          "name": "mBSC",
+          "erc20": "true",
+          "assetDecimals": 18,
+          "address": "0xAc7B79d044393DA2460d9B741B000316Dea5554D"
+        }
+      ],
+      "hashAddress": "0xa885eFbbcBa6F66B9C09eBC27Efda62CD6b1921d",
+      "verifierAddress": "0x9EF74D89EecA4a4a2fF08414a9919A07FF5f5A1C"
     }
   ],
   "bridges": [
@@ -425,7 +457,7 @@
         },
         {
           "network": "bsctestnet",
-          "address": ""
+          "address": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
         },
         {
           "network": "polygontestnet",
@@ -438,6 +470,10 @@
         {
           "network": "auroratestnet",
           "address": "0x029d1cB61F1Fdba240fd03Bf46Bac75b887F2EDC"
+        },
+        {
+          "network": "moonbase",
+          "address": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
         }
       ],
       "pairs": [
@@ -619,6 +655,58 @@
             "network": "auroratestnet",
             "token": "mUSD",
             "address": "0xA33cB8399a362527Be3D5c899FD6819D7cE7Cf74"
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "mUSD",
+            "address": "0x79514194e836e17c95c9bb42b8b1cFF4E0636341",
+            "syncStart": 17634934
+          },
+          {
+            "network": "moonbase",
+            "token": "mUSD",
+            "address": "0x325eDAB94fB2B589ae627272f8feD1949C58f9ad",
+            "syncStart": 1859267
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "MTT",
+            "address": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867",
+            "syncStart": 17635391
+          },
+          {
+            "network": "moonbase",
+            "token": "MTT",
+            "address": "0x083C3808A4a43Fa8a2b19e5b577BE49F280084d0",
+            "syncStart": 1859350
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "mDEV",
+            "address": ""
+          },
+          {
+            "network": "moonbase",
+            "token": "DEV",
+            "address": ""
+          }
+        ],
+        [
+          {
+            "network": "bsctestnet",
+            "token": "BSC",
+            "address": ""
+          },
+          {
+            "network": "moonbase",
+            "token": "mBSC",
+            "address": ""
           }
         ]
       ]

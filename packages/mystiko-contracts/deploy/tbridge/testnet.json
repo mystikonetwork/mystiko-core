@@ -40,6 +40,13 @@
         "https://api.avax-test.network/ext/bc/C/rpc",
         "https://avax.getblock.io/testnet/ext/bc/C/rpc/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
       ]
+    },
+    {
+      "name": "moonbase",
+      "privateKey": "",
+      "providers": [
+        "https://rpc.api.moonbase.moonbeam.network"
+      ]
     }
   ],
   "bridge": {
@@ -234,6 +241,38 @@
           "token": "mETH",
           "mystikoAddress": "0xd5F0E1b5A37A58B26624811514006ceBB961ac1E",
           "relayProxyAddress": "0x62F686F657aae4E8D0e38F7Fa606dE2F02381d2e"
+        }
+      },
+      {
+        "local": {
+          "name": "bsctestnet",
+          "chainId": 97,
+          "token": "mUSD",
+          "mystikoAddress": "0x79514194e836e17c95c9bb42b8b1cFF4E0636341",
+          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        },
+        "remote": {
+          "name": "moonbase",
+          "chainId": 1287,
+          "token": "mUSD",
+          "mystikoAddress": "0x325eDAB94fB2B589ae627272f8feD1949C58f9ad",
+          "relayProxyAddress": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
+        }
+      },
+      {
+        "local": {
+          "name": "bsctestnet",
+          "chainId": 97,
+          "token": "MTT",
+          "mystikoAddress": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867",
+          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+        },
+        "remote": {
+          "name": "moonbase",
+          "chainId": 1287,
+          "token": "MTT",
+          "mystikoAddress": "0x083C3808A4a43Fa8a2b19e5b577BE49F280084d0",
+          "relayProxyAddress": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
         }
       }
     ]

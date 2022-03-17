@@ -191,6 +191,8 @@ async function deployMystiko(bridgeName, src, dst, config, proxyAddress) {
       process.exit(1);
     });
 
+  //todo support set  min gas fee , flasg minGasFee
+  //todo support update contract , flag depositDisabled
   console.log('mystikoCore address ', address, ' block height ', syncStart);
   return { address, syncStart };
 }
