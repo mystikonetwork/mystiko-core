@@ -4,17 +4,28 @@ on:
   workflow_dispatch:
     inputs:
       network:
-        description: 'network name'
+        description: 'Network name'
         required: false
+        type: choice
+        options:
+          - Ethereum Ropsten
+          - Ethereum Goerli
+          - BSC Testnet
+          - Polygon Testnet
+          - Avalanche Testnet
       contracts:
-        description: 'contract symbol name'
+        description: 'Contract symbol name'
         required: false
       bridge:
-        description: 'bridge type used(Loop/TBridge)'
+        description: 'Bridge type used'
         required: false
+        type: choice
+        options:
+          - Loop
+          - TBridge
 
 jobs:
-  bot:
+  integration:
     runs-on: ubuntu-latest
     env:
       PRIVATE_KEY: ${{ secrets.private_key }}
@@ -30,12 +41,14 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
+      - run: npm install --global lerna npm-cli-login
       - run: npm-cli-login
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
       - run: lerna run build
-      - run: cd packages/mystiko-contracts
-      - run: yarn integration --network=${{ github.event.inputs.network }} --contracts=${{ github.event.inputs.contracts }} --bridge=${{ github.event.inputs.bridge }}
+      - name: Run integration test
+        working-directory: ./packages/mystiko-contracts
+        run: yarn integration --network="${{ github.event.inputs.network }}" --contracts="${{ github.event.inputs.contracts }}" --bridge="${{ github.event.inputs.bridge }}"
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()
