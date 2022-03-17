@@ -1,0 +1,54 @@
+name: integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'network name'
+        required: false
+      contracts:
+        description: 'contract symbol name'
+        required: false
+      bridge:
+        description: 'bridge type used(Loop/TBridge)'
+        required: false
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    env:
+      PRIVATE_KEY: ${{ secrets.private_key }}
+      NPM_USER: ${{ secrets.npm_user }}
+      NPM_PASS: ${{ secrets.npm_pass }}
+      NPM_EMAIL: ${{ secrets.npm_email }}
+      NPM_REGISTRY: https://npm.mystiko.network
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - run: npm-cli-login
+      - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
+      - run: lerna bootstrap
+      - run: lerna run build
+      - run: cd packages/mystiko-contracts
+      - run: yarn integration --network=${{ github.event.inputs.network }} --contracts=${{ github.event.inputs.contracts }} --bridge=${{ github.event.inputs.bridge }}
+      - name: Telegram Failure Notification
+        uses: appleboy/telegram-action@master
+        if: failure()
+        with:
+          message: ❗ Integration test failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions)
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      - name: Telegram Success Notification
+        uses: appleboy/telegram-action@master
+        if: success()
+        with:
+          message: Integration test succeeded for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions)
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
