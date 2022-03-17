@@ -1,4 +1,4 @@
-name: integration cron
+name: integration
 
 on:
   workflow_dispatch:
