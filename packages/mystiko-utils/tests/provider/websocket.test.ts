@@ -27,7 +27,7 @@ test('test detectNetwork', async () => {
     public detectNetwork(): Promise<ethers.providers.Network> {
       return new Promise<ethers.providers.Network>((resolve) => {
         setTimeout(resolve, 1000);
-      });
+      }).then(() => Promise.resolve({ name: 'Ropsten', chainId: 3 }));
     }
   }
   class ErrorWebSocketProvider extends ethers.providers.WebSocketProvider {
@@ -38,11 +38,11 @@ test('test detectNetwork', async () => {
   }
   const server = await buildServer(39735);
   const rawProvider1 = new TimeoutWebSocketProvider('ws://localhost:39735');
-  const provider1 = new ReconnectingWebSocketProvider(rawProvider1, { timeoutMs: 500 });
+  const provider1 = new ReconnectingWebSocketProvider(rawProvider1, { timeoutMs: 500, maxTryCount: 2 });
   expect((await provider1.detectNetwork()).chainId).toBe(3);
   await provider1.destroy();
   const rawProvider2 = new ErrorWebSocketProvider('ws://localhost:39735');
-  const provider2 = new ReconnectingWebSocketProvider(rawProvider2, { timeoutMs: 500 });
+  const provider2 = new ReconnectingWebSocketProvider(rawProvider2, { timeoutMs: 500, maxTryCount: 2 });
   await expect(provider2.detectNetwork()).rejects.toThrow();
   await provider2.destroy();
   await closeServer(server);
@@ -50,7 +50,10 @@ test('test detectNetwork', async () => {
 
 test('test perform', async () => {
   const server = await buildServer(39736);
-  const provider = new ReconnectingWebSocketProvider('ws://localhost:39736', { timeoutMs: 500 });
+  const provider = new ReconnectingWebSocketProvider('ws://localhost:39736', {
+    timeoutMs: 500,
+    maxTryCount: 2,
+  });
   expect(await provider.perform('getTransaction', { transactionHash: '0x' })).not.toBe(undefined);
   await provider.destroy();
   expect(await provider.perform('getTransaction', { transactionHash: '0x' })).not.toBe(undefined);
