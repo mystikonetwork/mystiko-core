@@ -249,10 +249,10 @@
           "address": "0xa4f5DbEb54831cd8dec1fBC9187619e70d1dDD8a"
         },
         {
-          "name": "mBSC",
+          "name": "mBNB",
           "erc20": "true",
           "assetDecimals": 18,
-          "address": "0xAc7B79d044393DA2460d9B741B000316Dea5554D"
+          "address": "0x7702CD4Cc4dC777fBfdaE2C1B8bfAe123796110d"
         }
       ],
       "hashAddress": "0xa885eFbbcBa6F66B9C09eBC27Efda62CD6b1921d",
@@ -700,12 +700,12 @@
         [
           {
             "network": "bsctestnet",
-            "token": "BSC",
+            "token": "BNB",
             "address": ""
           },
           {
             "network": "moonbase",
-            "token": "mBSC",
+            "token": "mBNB",
             "address": ""
           }
         ]
