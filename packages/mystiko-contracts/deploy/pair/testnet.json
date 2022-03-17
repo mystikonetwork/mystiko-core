@@ -688,25 +688,15 @@
         [
           {
             "network": "bsctestnet",
-            "token": "mDEV",
-            "address": ""
-          },
-          {
-            "network": "moonbase",
-            "token": "DEV",
-            "address": ""
-          }
-        ],
-        [
-          {
-            "network": "bsctestnet",
             "token": "BNB",
-            "address": ""
+            "address": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897",
+            "syncStart": 17635918
           },
           {
             "network": "moonbase",
             "token": "mBNB",
-            "address": ""
+            "address": "0x2CEE4E20bf2124D0A69048bdD2450F57D87c7768",
+            "syncStart": 1859437
           }
         ]
       ]

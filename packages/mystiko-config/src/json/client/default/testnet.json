@@ -518,6 +518,17 @@
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "peerChainId": 1287,
           "peerContractAddress": "0x083C3808A4a43Fa8a2b19e5b577BE49F280084d0"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeMain",
+          "address": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897",
+          "assetSymbol": "BNB",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "syncStart": 17635918,
+          "peerChainId": 1287,
+          "peerContractAddress": "0x2CEE4E20bf2124D0A69048bdD2450F57D87c7768"
         }
       ]
     },
@@ -737,6 +748,18 @@
           "assetAddress": "0xDcdcaBba9DB9e721A140AeF35CB0AC787Dde37D2",
           "peerChainId": 97,
           "peerContractAddress": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithTBridgeERC20",
+          "address": "0x2CEE4E20bf2124D0A69048bdD2450F57D87c7768",
+          "assetSymbol": "mBNB",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "syncStart": 1859437,
+          "assetAddress": "0x7702CD4Cc4dC777fBfdaE2C1B8bfAe123796110d",
+          "peerChainId": 97,
+          "peerContractAddress": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897"
         }
       ]
     }
