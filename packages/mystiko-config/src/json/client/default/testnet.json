@@ -708,7 +708,8 @@
       "chainId": 1287,
       "explorerUrl": "https://moonbase-blockscout.testnet.moonbeam.network",
       "providers": [
-        "https://rpc.api.moonbase.moonbeam.network"
+        "wss://moonbeam-alpha.api.onfinality.io/ws?apikey=493402f8-6d11-4a9b-a6f7-3428181f5910",
+        "https://moonbeam-alpha.api.onfinality.io/rpc?apikey=493402f8-6d11-4a9b-a6f7-3428181f5910"
       ],
       "signerEndpoint": "https://rpc.api.moonbase.moonbeam.network",
       "syncSize": 1000,
