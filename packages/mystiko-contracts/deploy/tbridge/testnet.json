@@ -287,8 +287,8 @@
           "name": "bsctestnet",
           "chainId": 97,
           "token": "mUSD",
-          "mystikoAddress": "0x79514194e836e17c95c9bb42b8b1cFF4E0636341",
-          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3",
+          "mystikoAddress": "0x2f4650646395d80E1fe186e23cd8b0E15E456852",
+          "relayProxyAddress": "0x7402FB492453c4014460414D2a4Dc2Cfd51195E3",
           "bridgeEnalbe": "true"
         },
         "remote": {
@@ -305,8 +305,8 @@
           "name": "bsctestnet",
           "chainId": 97,
           "token": "MTT",
-          "mystikoAddress": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867",
-          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3",
+          "mystikoAddress": "0x9DE608688345B107E0B57e191Be344650c6d6A1C",
+          "relayProxyAddress": "0x7402FB492453c4014460414D2a4Dc2Cfd51195E3",
           "bridgeEnalbe": "true"
         },
         "remote": {
@@ -331,8 +331,8 @@
           "name": "bsctestnet",
           "chainId": 97,
           "token": "BNB",
-          "mystikoAddress": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897",
-          "relayProxyAddress": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3",
+          "mystikoAddress": "0xF0108Cd32d2B412e8aF51053EaF8c62113aDE917",
+          "relayProxyAddress": "0x7402FB492453c4014460414D2a4Dc2Cfd51195E3",
           "bridgeEnalbe": "true"
         }
       }

@@ -113,8 +113,8 @@
           "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613"
         }
       ],
-      "hashAddress": "0x3B96eAf28D9972F11ED57D7e8DDc5bF42675316E",
-      "verifierAddress": "0x79A98BC35e6c65ef0cb47D9BFFC952FDff1a6E41"
+      "hashAddress": "0xdFB5b19F9Ce01ffA8251Ba9077E8b9e0108eA721",
+      "verifierAddress": "0x9Ca99094fbA9de331C56460DD5c1f9C104679867"
     },
     {
       "name": "Aurora Testnet",
@@ -306,7 +306,8 @@
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": ""
+            "address": "0x0Dc6cef7f74520630C8fAc771CfBE5D324e5aDa5",
+            "syncStart": 17643808
           }
         ],
         [
@@ -457,7 +458,7 @@
         },
         {
           "network": "bsctestnet",
-          "address": "0xFc508d512957c1d13fe1FCd7C29B3423340510d3"
+          "address": "0x7402FB492453c4014460414D2a4Dc2Cfd51195E3"
         },
         {
           "network": "polygontestnet",
@@ -661,8 +662,8 @@
           {
             "network": "bsctestnet",
             "token": "mUSD",
-            "address": "0x79514194e836e17c95c9bb42b8b1cFF4E0636341",
-            "syncStart": 17634934
+            "address": "0x2f4650646395d80E1fe186e23cd8b0E15E456852",
+            "syncStart": 17645445
           },
           {
             "network": "moonbase",
@@ -675,8 +676,8 @@
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867",
-            "syncStart": 17635391
+            "address": "0x9DE608688345B107E0B57e191Be344650c6d6A1C",
+            "syncStart": 17645306
           },
           {
             "network": "moonbase",
@@ -689,8 +690,8 @@
           {
             "network": "bsctestnet",
             "token": "BNB",
-            "address": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897",
-            "syncStart": 17635918
+            "address": "0xF0108Cd32d2B412e8aF51053EaF8c62113aDE917",
+            "syncStart": 17645456
           },
           {
             "network": "moonbase",

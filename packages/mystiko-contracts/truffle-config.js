@@ -89,7 +89,7 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
       timeoutBlocks: 200,
-      networkCheckTimeout: 10000,
+      networkCheckTimeout: 100000000,
     },
     auroratestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.auroratestnet),
@@ -109,7 +109,7 @@ module.exports = {
       skipDryRun: true,
       confirmations: getConfirmation(),
       timeoutBlocks: 200,
-      networkCheckTimeout: 10000,
+      networkCheckTimeout: 100000000,
     },
     fantomtestnet: {
       provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, providers.fantomtestnet),

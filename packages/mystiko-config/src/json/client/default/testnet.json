@@ -498,11 +498,11 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0x79514194e836e17c95c9bb42b8b1cFF4E0636341",
+          "address": "0x2f4650646395d80E1fe186e23cd8b0E15E456852",
           "assetSymbol": "mUSD",
           "assetDecimals": 6,
           "circuits": "circom-1.0",
-          "syncStart": 17634934,
+          "syncStart": 17645445,
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
           "peerChainId": 1287,
           "peerContractAddress": "0x325eDAB94fB2B589ae627272f8feD1949C58f9ad"
@@ -510,11 +510,11 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeERC20",
-          "address": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867",
+          "address": "0x9DE608688345B107E0B57e191Be344650c6d6A1C",
           "assetSymbol": "MTT",
           "assetDecimals": 18,
           "circuits": "circom-1.0",
-          "syncStart": 17635391,
+          "syncStart": 17645306,
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "peerChainId": 1287,
           "peerContractAddress": "0x083C3808A4a43Fa8a2b19e5b577BE49F280084d0"
@@ -522,11 +522,11 @@
         {
           "version": 1,
           "name": "MystikoWithTBridgeMain",
-          "address": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897",
+          "address": "0xF0108Cd32d2B412e8aF51053EaF8c62113aDE917",
           "assetSymbol": "BNB",
           "assetDecimals": 18,
           "circuits": "circom-1.0",
-          "syncStart": 17635918,
+          "syncStart": 17645456,
           "peerChainId": 1287,
           "peerContractAddress": "0x2CEE4E20bf2124D0A69048bdD2450F57D87c7768"
         }
@@ -735,7 +735,7 @@
           "syncStart": 1859267,
           "assetAddress": "0xa4f5DbEb54831cd8dec1fBC9187619e70d1dDD8a",
           "peerChainId": 97,
-          "peerContractAddress": "0x79514194e836e17c95c9bb42b8b1cFF4E0636341"
+          "peerContractAddress": "0x2f4650646395d80E1fe186e23cd8b0E15E456852"
         },
         {
           "version": 1,
@@ -747,7 +747,7 @@
           "syncStart": 1859350,
           "assetAddress": "0xDcdcaBba9DB9e721A140AeF35CB0AC787Dde37D2",
           "peerChainId": 97,
-          "peerContractAddress": "0x31FE564025B231b40363Cf0bc0Ec420bAA48B867"
+          "peerContractAddress": "0x9DE608688345B107E0B57e191Be344650c6d6A1C"
         },
         {
           "version": 1,
@@ -759,7 +759,7 @@
           "syncStart": 1859437,
           "assetAddress": "0x7702CD4Cc4dC777fBfdaE2C1B8bfAe123796110d",
           "peerChainId": 97,
-          "peerContractAddress": "0x95Ee4c541fA8Ba59A82C663B576eF476d9D11897"
+          "peerContractAddress": "0xF0108Cd32d2B412e8aF51053EaF8c62113aDE917"
         }
       ]
     }
