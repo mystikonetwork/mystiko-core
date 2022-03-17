@@ -1,18 +1,6 @@
 name: integration cron
 
 on:
-  schedule:
-    - cron: '0 21 * * *'
-    inputs:
-      network:
-        description: 'network name'
-        required: false
-      contracts:
-        description: 'contract symbol name'
-        required: false
-      bridge:
-        description: 'bridge type used(Loop/TBridge)'
-        required: false
   workflow_dispatch:
     inputs:
       network:
