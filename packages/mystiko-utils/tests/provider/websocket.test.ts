@@ -27,7 +27,7 @@ test('test detectNetwork', async () => {
     public detectNetwork(): Promise<ethers.providers.Network> {
       return new Promise<ethers.providers.Network>((resolve) => {
         setTimeout(resolve, 1000);
-      });
+      }).then(() => Promise.resolve({ name: 'Ropsten', chainId: 3 }));
     }
   }
   class ErrorWebSocketProvider extends ethers.providers.WebSocketProvider {

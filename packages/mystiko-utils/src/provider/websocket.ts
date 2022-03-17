@@ -28,7 +28,7 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
     } else {
       rawProvider = new ethers.providers.WebSocketProvider(urlOrRaw);
     }
-    super(rawProvider.detectNetwork());
+    super(promiseWithTimeout(rawProvider.detectNetwork(), 5000));
     this.url = rawProvider.connection.url;
     this.options = options || {};
     this.logger = rootLogger.getLogger('ReconnectingWebSocketProvider');
@@ -65,7 +65,7 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
   private detectNetworkWithRetry(tryCount: number): Promise<ethers.providers.Network> {
     return promiseWithTimeout(this.rawProvider.detectNetwork(), this.timeoutMs).catch((error: any) => {
       if (error instanceof TimeoutError) {
-        if (tryCount <= this.maxTryCount) {
+        if (tryCount + 1 <= this.maxTryCount) {
           return this.reconnect().then(() => this.detectNetworkWithRetry(tryCount + 1));
         }
       }
@@ -77,7 +77,7 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
     const timeout = method === 'getLogs' ? 30000 : this.timeoutMs;
     return promiseWithTimeout(this.rawProvider.perform(method, params), timeout).catch((error: any) => {
       if (error instanceof TimeoutError) {
-        if (tryCount <= this.maxTryCount) {
+        if (tryCount + 1 <= this.maxTryCount) {
           return this.reconnect().then(() => this.performWithRetry(method, params, tryCount + 1));
         }
       }
@@ -85,9 +85,13 @@ export class ReconnectingWebSocketProvider extends ethers.providers.BaseProvider
     });
   }
 
-  private async reconnect(): Promise<void> {
+  private reconnect(): Promise<void> {
     this.logger.warn(`reconnecting websocket on ${this.url}`);
-    await this.destroy();
-    this.rawProvider = new ethers.providers.WebSocketProvider(this.url);
+    return promiseWithTimeout(
+      this.destroy().then(() => {
+        this.rawProvider = new ethers.providers.WebSocketProvider(this.url);
+      }),
+      this.timeoutMs,
+    );
   }
 }
