@@ -599,6 +599,7 @@
         "https://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet"
       ],
       "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
+      "syncSize": 2000,
       "contracts": [
         {
           "version": 1,
