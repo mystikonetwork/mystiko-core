@@ -727,6 +727,35 @@
       "contracts": [
         {
           "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x74b8e2F724b29bd40886E94C791c418929F5369f",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "syncStart": 1859255,
+          "assetAddress": "0xDcdcaBba9DB9e721A140AeF35CB0AC787Dde37D2"
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopMain",
+          "address": "0x7Dcd4aB7fE69c5c6bc02023e7A1BE4C2776627c8",
+          "assetSymbol": "DEV",
+          "assetDecimals": 18,
+          "circuits": "circom-1.0",
+          "syncStart": 1859434
+        },
+        {
+          "version": 1,
+          "name": "MystikoWithLoopERC20",
+          "address": "0x4778dA9088857Ee2CDC3D4c7325B18264F673557",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "circuits": "circom-1.0",
+          "syncStart": 1859458,
+          "assetAddress": "0xa4f5DbEb54831cd8dec1fBC9187619e70d1dDD8a"
+        },
+        {
+          "version": 1,
           "name": "MystikoWithTBridgeERC20",
           "address": "0x325eDAB94fB2B589ae627272f8feD1949C58f9ad",
           "assetSymbol": "mUSD",

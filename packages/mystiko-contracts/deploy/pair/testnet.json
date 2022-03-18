@@ -365,6 +365,30 @@
             "token": "mUSD",
             "address": "0x06d6c6518955BAB63068E98660f5A58D29B964FF"
           }
+        ],
+        [
+          {
+            "network": "moonbase",
+            "token": "MTT",
+            "address": "0x74b8e2F724b29bd40886E94C791c418929F5369f",
+            "syncStart": 1859255
+          }
+        ],
+        [
+          {
+            "network": "moonbase",
+            "token": "mUSD",
+            "address": "0x4778dA9088857Ee2CDC3D4c7325B18264F673557",
+            "syncStart": 1859458
+          }
+        ],
+        [
+          {
+            "network": "moonbase",
+            "token": "DEV",
+            "address": "0x7Dcd4aB7fE69c5c6bc02023e7A1BE4C2776627c8",
+            "syncStart": 1859434
+          }
         ]
       ]
     },
