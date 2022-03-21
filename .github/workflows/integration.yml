@@ -24,6 +24,10 @@ on:
           - Loop
           - TBridge
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   integration:
     runs-on: ubuntu-latest
