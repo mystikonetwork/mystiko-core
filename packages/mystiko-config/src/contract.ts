@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { check } from '@mystiko/utils';
+import { check } from '@mystikonetwork/utils';
 import { BaseConfig, AssetType, BridgeType } from './base';
 import { ContractMeta, MystikoABI, MystikoContractMeta } from './abi';
 

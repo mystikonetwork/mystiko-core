@@ -1,4 +1,4 @@
-import { check, readJsonFile } from '@mystiko/utils';
+import { check, readJsonFile } from '@mystikonetwork/utils';
 import { BaseConfig, BridgeType, isValidBridgeType } from './base';
 import { ChainConfig, RawChainConfig } from './chain';
 import { BaseBridgeConfig, createBridgeConfig, RawBaseBridgeConfig } from './bridge';

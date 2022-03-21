@@ -1,4 +1,4 @@
-import { toDecimals } from '@mystiko/utils';
+import { toDecimals } from '@mystikonetwork/utils';
 import { v1Protocol } from '../../../src';
 
 test('test zkProveWithdraw', async () => {
@@ -13,9 +13,9 @@ test('test zkProveWithdraw', async () => {
   const commitment2 = await v1Protocol.commitment(pkVerify, pkEnc, amount);
   const treeLeaves = [commitment1.commitmentHash, commitment2.commitmentHash];
   const treeIndex = 1;
-  const wasmFile = 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.wasm.gz';
-  const zkeyFile = 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.zkey.gz';
-  const vkeyFile = 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz';
+  const wasmFile = 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.wasm.gz';
+  const zkeyFile = 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.zkey.gz';
+  const vkeyFile = 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.vkey.json.gz';
   const { proof, publicSignals } = await v1Protocol.zkProveWithdraw(
     pkVerify,
     skVerify,

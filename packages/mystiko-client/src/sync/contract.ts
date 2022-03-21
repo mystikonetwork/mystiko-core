@@ -1,6 +1,6 @@
 import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
-import { errorMessage, logger as rootLogger } from '@mystiko/utils';
+import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
 import { BaseSync, SyncResult } from './base';
 import { TopicSync, TopicSyncStatus } from './topic/base';
 import { Contract } from '../model';

@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 import { ethers } from 'ethers';
-import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystiko/config';
-import { ProviderFactory } from '@mystiko/utils';
+import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystikonetwork/config';
+import { ProviderFactory } from '@mystikonetwork/utils';
 import mystiko from '../src/browser';
 
 test('test window is set', async () => {

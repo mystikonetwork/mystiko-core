@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check, toHex, ProviderConnection } from '@mystiko/utils';
+import { check, toHex, ProviderConnection } from '@mystikonetwork/utils';
 import { BaseConfig, BridgeType } from './base';
 import { ContractConfig, RawContractConfig } from './contract';
 

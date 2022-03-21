@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { MystikoConfig } from '@mystiko/config';
-import { DefaultProviderFactory, ProviderFactory } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { DefaultProviderFactory, ProviderFactory } from '@mystikonetwork/utils';
 
 /**
  * @class ProviderPool

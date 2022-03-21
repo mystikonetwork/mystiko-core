@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { ChainConfig, MystikoConfig } from '@mystiko/config';
-import { check, logger as rootLogger, toHex, toHexNoPrefix } from '@mystiko/utils';
+import { ChainConfig, MystikoConfig } from '@mystikonetwork/config';
+import { check, logger as rootLogger, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { ProviderPool } from '../provider';
 import { BaseSigner } from './base';
 

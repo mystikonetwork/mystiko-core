@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
-import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystiko/config';
+import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystikonetwork/config';
 import Adapter from 'lokijs/src/incremental-indexeddb-adapter';
 import { Mystiko, InitOptions } from './mystiko';
 import { SentryTracer } from './tracing';

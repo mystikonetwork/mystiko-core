@@ -13,8 +13,8 @@ import {
   AssetType,
   BridgeType,
   readFromFile,
-} from '@mystiko/config';
-import * as utils from '@mystiko/utils';
+} from '@mystikonetwork/config';
+import * as utils from '@mystikonetwork/utils';
 import { createDatabase, exportDataAsString, importDataFromJson, importDataFromJsonFile } from './database';
 import * as models from './model';
 import { ProviderPool, ContractPool, MetaMaskSigner, PrivateKeySigner } from './chain';
@@ -227,6 +227,6 @@ export class Mystiko {
       syncInitIntervalMs,
       syncIntervalMs,
     );
-    this.logger.info('@mystiko/client has been successfully initialized, enjoy!');
+    this.logger.info('@mystikonetwork/client has been successfully initialized, enjoy!');
   }
 }

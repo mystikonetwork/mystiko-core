@@ -1,5 +1,5 @@
 import pako from 'pako';
-import * as fastfile from 'fastfile';
+import * as fastfile from '@mystikonetwork/fastfile';
 import { check } from './check';
 
 function readFileRecursively(

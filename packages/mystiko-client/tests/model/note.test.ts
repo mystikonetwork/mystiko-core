@@ -1,5 +1,5 @@
-import { BridgeType, readFromFile } from '@mystiko/config';
-import { toBuff, toDecimals, toHexNoPrefix, toBN } from '@mystiko/utils';
+import { BridgeType, readFromFile } from '@mystikonetwork/config';
+import { toBuff, toDecimals, toHexNoPrefix, toBN } from '@mystikonetwork/utils';
 import { DepositReceipt, PrivateNote, PrivateNoteStatus } from '../../src';
 
 test('Test OffChainNote getters/setters', () => {

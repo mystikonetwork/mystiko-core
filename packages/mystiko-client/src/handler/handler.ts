@@ -1,7 +1,7 @@
 import { Logger } from 'loglevel';
-import { MystikoConfig } from '@mystiko/config';
-import { v1Protocol, V1ProtocolInterface } from '@mystiko/protocol';
-import { logger as rootLogger } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { v1Protocol, V1ProtocolInterface } from '@mystikonetwork/protocol';
+import { logger as rootLogger } from '@mystikonetwork/utils';
 import { MystikoDatabase } from '../database';
 
 /**

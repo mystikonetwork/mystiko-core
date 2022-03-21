@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { ethers } from 'ethers';
-import { ChainConfig, readFromFile } from '@mystiko/config';
-import { ProviderConnection, toHex } from '@mystiko/utils';
+import { ChainConfig, readFromFile } from '@mystikonetwork/config';
+import { ProviderConnection, toHex } from '@mystikonetwork/utils';
 import { BaseSigner, MetaMaskSigner, PrivateKeySigner, checkSigner, ProviderPool } from '../../src';
 
 class MockError extends Error {

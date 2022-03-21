@@ -1,5 +1,5 @@
-import { readFromFile } from '@mystiko/config';
-import { toDecimals, toBN } from '@mystiko/utils';
+import { readFromFile } from '@mystikonetwork/config';
+import { toDecimals, toBN } from '@mystikonetwork/utils';
 import { Withdraw, WithdrawStatus } from '../../src';
 
 test('Test Withdraw getters/setters', async () => {

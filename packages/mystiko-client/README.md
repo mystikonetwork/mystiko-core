@@ -1,4 +1,4 @@
-## @mystiko/client
+## @mystikonetwork/client
 This package contains the Javascript implementation of [Mystiko.Network](https://mystiko.network) core protocol.
 
 ### Developing Guide

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { groth16 } from 'snarkjs';
 import BN from 'bn.js';
-import { check, readCompressedFile, toBN, toFixedLenHexNoPrefix, toHexNoPrefix } from '@mystiko/utils';
+import { check, readCompressedFile, toBN, toFixedLenHexNoPrefix, toHexNoPrefix } from '@mystikonetwork/utils';
 import { FIELD_SIZE } from '../../constants';
 import { MerkleTree } from '../../merkle';
 import { WitnessCalculatorBuilder, WitnessCalculatorInterface } from './common';

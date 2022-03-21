@@ -1,4 +1,4 @@
-import { toBN } from '@mystiko/utils';
+import { toBN } from '@mystikonetwork/utils';
 import { MerkleTree, v1Protocol } from '../../../src';
 
 test('test zkProveRollup1', async () => {
@@ -7,14 +7,14 @@ test('test zkProveRollup1', async () => {
   const { proof, publicSignals } = await v1Protocol.zkProveRollup1(
     tree,
     toBN('1'),
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.wasm.gz',
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.zkey.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.wasm.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.zkey.gz',
   );
   console.timeEnd('zkProveRollup1');
   const verified = await v1Protocol.zkVerify(
     proof,
     publicSignals,
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.vkey.json.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.vkey.json.gz',
   );
   expect(verified).toBe(true);
   expect(tree.elements().length).toBe(4);
@@ -26,14 +26,14 @@ test('test zkProveRollup4', async () => {
   const { proof, publicSignals } = await v1Protocol.zkProveRollup4(
     tree,
     [toBN('1'), toBN('2'), toBN('3'), toBN('4')],
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.wasm.gz',
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.zkey.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.wasm.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.zkey.gz',
   );
   console.timeEnd('zkProveRollup4');
   const verified = await v1Protocol.zkVerify(
     proof,
     publicSignals,
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.vkey.json.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.vkey.json.gz',
   );
   expect(verified).toBe(true);
   expect(tree.elements().length).toBe(8);
@@ -42,8 +42,8 @@ test('test zkProveRollup4', async () => {
     v1Protocol.zkProveRollup4(
       tree,
       [toBN('6'), toBN('7'), toBN('8'), toBN('9')],
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.wasm.gz',
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.zkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.wasm.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.zkey.gz',
     ),
   ).rejects.toThrow();
 });
@@ -88,14 +88,14 @@ test('test zkProveRollup16', async () => {
       toBN('15'),
       toBN('16'),
     ],
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.wasm.gz',
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.zkey.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.wasm.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.zkey.gz',
   );
   console.timeEnd('zkProveRollup16');
   const verified = await v1Protocol.zkVerify(
     proof,
     publicSignals,
-    'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.vkey.json.gz',
+    'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.vkey.json.gz',
   );
   expect(verified).toBe(true);
   expect(tree.elements().length).toBe(32);

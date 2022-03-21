@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check } from '@mystiko/utils';
+import { check } from '@mystikonetwork/utils';
 import { BaseModel } from './common';
 
 export interface RawEvent {

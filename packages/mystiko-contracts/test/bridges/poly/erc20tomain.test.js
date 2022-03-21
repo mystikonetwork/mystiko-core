@@ -1,5 +1,5 @@
-import { MerkleTree, v1Protocol } from '@mystiko/protocol';
-import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix, toBN } from '@mystiko/utils';
+import { MerkleTree, v1Protocol } from '@mystikonetwork/protocol';
+import { toHex, toBuff, toDecimals, toFixedLenHex, toHexNoPrefix, toBN } from '@mystikonetwork/utils';
 
 const MystikoCoreMain = artifacts.require('MystikoWithPolyMain');
 const MystikoCoreERC20 = artifacts.require('MystikoWithPolyERC20');
@@ -187,8 +187,8 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
         privateNote,
         treeLeaves,
         treeIndex,
-        'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.wasm.gz',
-        'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.zkey.gz',
+        'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.wasm.gz',
+        'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.zkey.gz',
       );
       proof = fullProof.proof;
       publicSignals = fullProof.publicSignals;
@@ -201,7 +201,7 @@ contract('MystikoWithPolyERC20ToMain', (accounts) => {
       const result = await v1Protocol.zkVerify(
         proof,
         publicSignals,
-        'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz',
+        'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.vkey.json.gz',
       );
       expect(result).to.equal(true);
     });

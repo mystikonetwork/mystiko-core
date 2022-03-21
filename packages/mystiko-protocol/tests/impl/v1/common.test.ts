@@ -1,4 +1,4 @@
-import { toBN, toBuff, toDecimals, toHex } from '@mystiko/utils';
+import { toBN, toBuff, toDecimals, toHex } from '@mystikonetwork/utils';
 import { FIELD_SIZE, v1Protocol } from '../../../src';
 
 test('test randomBigInt', () => {

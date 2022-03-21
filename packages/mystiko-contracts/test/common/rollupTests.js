@@ -1,5 +1,5 @@
-import { MerkleTree, v1Protocol } from '@mystiko/protocol';
-import { toBN } from '@mystiko/utils';
+import { MerkleTree, v1Protocol } from '@mystikonetwork/protocol';
+import { toBN } from '@mystikonetwork/utils';
 import { expectThrowsAsync } from './utils';
 
 export function testRollup(
@@ -145,22 +145,22 @@ async function _generateProof(commitments, mystikoContract, treeHeight, rollupSi
     proof = await v1Protocol.zkProveRollup1(
       tree,
       newLeaves[0],
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.wasm.gz',
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup1.zkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.wasm.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.zkey.gz',
     );
   } else if (rollupSize === 4) {
     proof = await v1Protocol.zkProveRollup4(
       tree,
       newLeaves,
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.wasm.gz',
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup4.zkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.wasm.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.zkey.gz',
     );
   } else if (rollupSize === 16) {
     proof = await v1Protocol.zkProveRollup16(
       tree,
       newLeaves,
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.wasm.gz',
-      'node_modules/@mystiko/circuits/dist/circom/dev/Rollup16.zkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.wasm.gz',
+      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.zkey.gz',
     );
   }
   expect(proof).to.not.equal(undefined);

@@ -24,8 +24,8 @@ jobs:
       - run: lerna run lint
       - run: lerna run build
       - run: lerna run test
-      - run: lerna run deploy --scope @mystiko/contracts
-      - name: Report @mystiko/utils test coverage
+      - run: lerna run deploy --scope @mystikonetwork/contracts
+      - name: Report @mystikonetwork/utils test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-utils
@@ -33,7 +33,7 @@ jobs:
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           package-manager: yarn
-      - name: Report @mystiko/config test coverage
+      - name: Report @mystikonetwork/config test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-config
@@ -41,7 +41,7 @@ jobs:
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           package-manager: yarn
-      - name: Report @mystiko/protocol test coverage
+      - name: Report @mystikonetwork/protocol test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-protocol
@@ -49,7 +49,7 @@ jobs:
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           package-manager: yarn
-      - name: Report @mystiko/client test coverage
+      - name: Report @mystikonetwork/client test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-client

@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import Loki from 'lokijs';
-import { toBN } from '@mystiko/utils';
+import { toBN } from '@mystikonetwork/utils';
 import { BaseModel, ID_KEY } from '../../src';
 
 interface RawTestModel {

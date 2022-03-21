@@ -1,7 +1,13 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { MystikoConfig, BridgeType, isValidBridgeType, AssetType, isValidAssetType } from '@mystiko/config';
-import { check, fromDecimals, toBuff, toHexNoPrefix, toBN } from '@mystiko/utils';
+import {
+  MystikoConfig,
+  BridgeType,
+  isValidBridgeType,
+  AssetType,
+  isValidAssetType,
+} from '@mystikonetwork/config';
+import { check, fromDecimals, toBuff, toHexNoPrefix, toBN } from '@mystikonetwork/utils';
 import { BaseModel } from './common';
 
 /**

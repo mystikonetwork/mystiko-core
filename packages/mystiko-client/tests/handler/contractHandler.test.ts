@@ -1,4 +1,4 @@
-import { AssetType, BridgeType, MystikoConfig, readFromFile } from '@mystiko/config';
+import { AssetType, BridgeType, MystikoConfig, readFromFile } from '@mystikonetwork/config';
 import { ContractHandler, createDatabase, MystikoDatabase } from '../../src';
 
 let db: MystikoDatabase;

@@ -1,7 +1,7 @@
 import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
-import { MystikoConfig } from '@mystiko/config';
-import { errorMessage, logger as rootLogger } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
 import { ChainSync, ChainSyncStatus } from './chain';
 import { SyncResult } from './base';
 import { ContractHandler, DepositHandler, EventHandler, NoteHandler, WithdrawHandler } from '../handler';

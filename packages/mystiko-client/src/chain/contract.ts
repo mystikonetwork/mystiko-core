@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { ethers, ContractInterface } from 'ethers';
-import { MystikoABI, AssetType } from '@mystiko/config';
-import { toBN } from '@mystiko/utils';
+import { MystikoABI, AssetType } from '@mystikonetwork/config';
+import { toBN } from '@mystikonetwork/utils';
 import { Contract } from '../model';
 
 /**

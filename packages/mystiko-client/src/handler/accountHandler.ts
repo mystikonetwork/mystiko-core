@@ -1,6 +1,6 @@
 import { hdkey } from 'ethereumjs-wallet';
-import { MystikoConfig } from '@mystiko/config';
-import { check, toBuff, toHexNoPrefix, toString, logger as rootLogger } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { check, toBuff, toHexNoPrefix, toString, logger as rootLogger } from '@mystikonetwork/utils';
 import { ID_KEY, Account } from '../model';
 import { Handler } from './handler';
 import { WalletHandler } from './walletHandler';
