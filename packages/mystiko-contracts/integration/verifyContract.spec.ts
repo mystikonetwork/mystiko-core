@@ -22,6 +22,7 @@ const walletMasterSeed: string = 'integration@seed';
 const walletPassword: string = 'integration@psd';
 const accountName: string = 'integration@test';
 const depositAmount: number = 0.1;
+const defaultBridgeType: string = 'Loop';
 
 function parseArgsParameters(arg: string): string | undefined {
   const args = process.argv;
@@ -39,9 +40,12 @@ function parseArgsParameters(arg: string): string | undefined {
 
 function filterContracts(cs: ContractConfig): ContractConfig | undefined {
   const contracts = parseArgsParameters('contracts');
-  const bridge = parseArgsParameters('bridge');
+  let bridge = parseArgsParameters('bridge');
+  if (bridge === undefined || bridge === '') {
+    bridge = defaultBridgeType;
+  }
   if (cs.name.startsWith(`MystikoWith${bridge}`)) {
-    if (contracts === undefined) {
+    if (contracts === undefined || contracts === '') {
       return cs;
     }
     const contractList = contracts.split(',');
@@ -86,7 +90,7 @@ describe('Integration test for verify deployed contract', async () => {
   await mystiko.initialize({ dbAdapter: undefined });
   const network = parseArgsParameters('network');
   configChains =
-    network === undefined
+    network === undefined || network === ''
       ? mystiko.config?.chains
       : mystiko.config?.chains.filter((chain: ChainConfig) => chain.name === network);
 
