@@ -1,4 +1,4 @@
-declare module 'fastfile' {
+declare module '@mystikonetwork/fastfile' {
   export function createNoOverride(o: any, b: any, c: any): any;
 
   export function createOverride(o: any, b: any, c: any): any;

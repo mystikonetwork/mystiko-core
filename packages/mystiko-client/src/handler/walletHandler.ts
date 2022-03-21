@@ -1,5 +1,5 @@
-import { MystikoConfig } from '@mystiko/config';
-import { check, logger as rootLogger } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { check, logger as rootLogger } from '@mystikonetwork/utils';
 import { Handler } from './handler';
 import { ID_KEY, Wallet } from '../model';
 import { VERSION } from '../version';

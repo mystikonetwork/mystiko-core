@@ -1,5 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
-import { AssetType, BridgeType, MystikoABI, MystikoConfig } from '@mystiko/config';
+import { AssetType, BridgeType, MystikoABI, MystikoConfig } from '@mystikonetwork/config';
 import { ProviderPool } from './provider';
 import { Contract } from '../model';
 import { MystikoContract } from './contract';

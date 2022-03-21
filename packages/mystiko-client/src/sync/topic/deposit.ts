@@ -1,6 +1,6 @@
 import { ContractInterface, ethers } from 'ethers';
-import { BridgeType } from '@mystiko/config';
-import { toBN, toHexNoPrefix } from '@mystiko/utils';
+import { BridgeType } from '@mystikonetwork/config';
+import { toBN, toHexNoPrefix } from '@mystikonetwork/utils';
 import { Contract, DepositStatus, RawEvent } from '../../model';
 import { TopicSync } from './base';
 import { ContractHandler, DepositHandler, EventHandler } from '../../handler';

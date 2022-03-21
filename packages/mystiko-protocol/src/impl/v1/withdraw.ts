@@ -1,6 +1,14 @@
 import BN from 'bn.js';
 import { groth16 } from 'snarkjs';
-import { check, logger, readCompressedFile, toBN, toHex, toHexNoPrefix, toString } from '@mystiko/utils';
+import {
+  check,
+  logger,
+  readCompressedFile,
+  toBN,
+  toHex,
+  toHexNoPrefix,
+  toString,
+} from '@mystikonetwork/utils';
 import { MerkleTree } from '../../merkle';
 import {
   buffToBigInt,

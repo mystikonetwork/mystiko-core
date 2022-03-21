@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { BridgeType, MystikoConfig } from '@mystiko/config';
+import { BridgeType, MystikoConfig } from '@mystikonetwork/config';
 import {
   check,
   fromDecimals,
@@ -8,7 +8,7 @@ import {
   toString,
   toBN,
   logger as rootLogger,
-} from '@mystiko/utils';
+} from '@mystikonetwork/utils';
 import { Handler } from './handler';
 import { WalletHandler } from './walletHandler';
 import { AccountHandler } from './accountHandler';

@@ -1,5 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
-import { toBN, toHexNoPrefix } from '@mystiko/utils';
+import { toBN, toHexNoPrefix } from '@mystikonetwork/utils';
 import { TopicSync } from './base';
 import { Contract, DepositStatus, RawEvent } from '../../model';
 import { ContractHandler, NoteHandler, DepositHandler, EventHandler } from '../../handler';

@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { ContractConfig, MystikoConfig } from '@mystiko/config';
-import { check, logger as rootLogger } from '@mystiko/utils';
+import { ContractConfig, MystikoConfig } from '@mystikonetwork/config';
+import { check, logger as rootLogger } from '@mystikonetwork/utils';
 
 import { Handler } from './handler';
 import { Contract } from '../model';

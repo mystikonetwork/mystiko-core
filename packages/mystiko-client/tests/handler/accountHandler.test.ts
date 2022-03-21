@@ -1,5 +1,5 @@
-import { currentProtocol } from '@mystiko/protocol';
-import { toBuff, toHexNoPrefix } from '@mystiko/utils';
+import { currentProtocol } from '@mystikonetwork/protocol';
+import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
 import { AccountHandler, WalletHandler, Wallet, createDatabase, MystikoDatabase } from '../../src';
 
 let db: MystikoDatabase;

@@ -1,4 +1,4 @@
-import { check } from '@mystiko/utils';
+import { check } from '@mystikonetwork/utils';
 import { BaseModel } from './common';
 import { isValidVersion } from '../version';
 

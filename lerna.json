@@ -6,7 +6,7 @@
   "version": "0.0.5",
   "command": {
     "publish": {
-      "registry": "https://npm.mystiko.network"
+      "registry": "https://npm.pkg.github.com"
     }
   }
 }

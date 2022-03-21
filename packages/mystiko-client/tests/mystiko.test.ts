@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystiko/config';
-import { ProviderFactory } from '@mystiko/utils';
+import { DefaultClientTestnetConfig, DefaultClientMainnetConfig } from '@mystikonetwork/config';
+import { ProviderFactory } from '@mystikonetwork/utils';
 import { Mystiko } from '../src';
 
 test('test initialize', async () => {

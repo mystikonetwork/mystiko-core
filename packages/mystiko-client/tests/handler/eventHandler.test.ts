@@ -1,4 +1,4 @@
-import { MystikoConfig, readFromFile } from '@mystiko/config';
+import { MystikoConfig, readFromFile } from '@mystikonetwork/config';
 import { EventHandler, createDatabase, MystikoDatabase } from '../../src';
 
 let db: MystikoDatabase;

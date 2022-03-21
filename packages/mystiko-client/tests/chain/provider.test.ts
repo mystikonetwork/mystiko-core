@@ -1,4 +1,4 @@
-import { readFromFile } from '@mystiko/config';
+import { readFromFile } from '@mystikonetwork/config';
 import { ProviderPool } from '../../src';
 
 test('test connect', async () => {

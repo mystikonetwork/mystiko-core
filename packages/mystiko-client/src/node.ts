@@ -2,7 +2,7 @@ import chalk, { Chalk } from 'chalk';
 import fs from 'fs';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import Adapter from 'lokijs/src/loki-fs-structured-adapter';
-import { MystikoConfig, DefaultClientConfigJson } from '@mystiko/config';
+import { MystikoConfig, DefaultClientConfigJson } from '@mystikonetwork/config';
 import { Mystiko, InitOptions } from './mystiko';
 
 const colors: { [key: string]: Chalk } = {
@@ -21,9 +21,9 @@ const loggingOptions: LoglevelPluginPrefixOptions = {
 const defaultTestnetCircuitsConfig = [
   {
     name: 'circom-1.0',
-    wasmFile: 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.wasm.gz',
-    zkeyFile: 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.zkey.gz',
-    vkeyFile: 'node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz',
+    wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.wasm.gz',
+    zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.zkey.gz',
+    vkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.vkey.json.gz',
   },
 ];
 

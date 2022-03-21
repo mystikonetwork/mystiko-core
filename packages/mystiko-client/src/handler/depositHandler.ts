@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { AssetType, BridgeType, ContractConfig, MystikoConfig } from '@mystiko/config';
+import { AssetType, BridgeType, ContractConfig, MystikoConfig } from '@mystikonetwork/config';
 import {
   check,
   errorMessage,
@@ -11,7 +11,7 @@ import {
   toHex,
   toString,
   waitTransaction,
-} from '@mystiko/utils';
+} from '@mystikonetwork/utils';
 import { Handler } from './handler';
 import { WalletHandler } from './walletHandler';
 import { AccountHandler } from './accountHandler';
