@@ -17,9 +17,9 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.nvmrc
-      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.nvmrc
-      - run: npm install --global ganache-cli
+      - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
+      - run: npm install --global lerna ganache-cli
       - run: ganache-cli --port 7545 > /dev/null &
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
