@@ -2,19 +2,26 @@ import { MerkleTree, v1Protocol } from '@mystiko/protocol';
 import { toBN } from '@mystiko/utils';
 import { expectThrowsAsync } from './utils';
 
+const TestTokenContract = artifacts.require('TestToken');
+
 export function testRollup(
   contractGetter,
   rollupVerifierContractGetter,
   accounts,
-  { commitments, rollupSize, treeHeight = 20, rootHistoryLength = 30 },
+  { commitments, isMainAsset = true, rollupFee, rollupSize, treeHeight = 20, rootHistoryLength = 30 },
 ) {
   let mystikoContract;
   let rollupVerifierContract;
+  let testTokenContract;
   let proof;
+  let balanceBefore;
+  let rollupAccount = accounts[4];
+  let totalGasFee;
   describe(`Test Mystiko rollup ${rollupSize} operation`, () => {
     before(async () => {
       mystikoContract = await contractGetter();
       rollupVerifierContract = await rollupVerifierContractGetter();
+      testTokenContract = await TestTokenContract.deployed();
       await _enableRollupVerifier(mystikoContract, rollupVerifierContract, rollupSize, accounts);
       proof = await _generateProof(commitments, mystikoContract, treeHeight, rollupSize);
     });
@@ -83,7 +90,11 @@ export function testRollup(
       );
     });
     it('should rollup successfully', async () => {
-      await mystikoContract.rollup(
+      balanceBefore = isMainAsset
+        ? await web3.eth.getBalance(rollupAccount)
+        : await testTokenContract.balanceOf(rollupAccount);
+
+      const rollupTx = await mystikoContract.rollup(
         proof.proofA,
         proof.proofB,
         proof.proofC,
@@ -91,10 +102,13 @@ export function testRollup(
         proof.newRoot,
         proof.leafHash,
         {
-          from: accounts[0],
+          from: rollupAccount,
           gas: 1000000,
         },
       );
+
+      const gasPrice = await web3.eth.getGasPrice();
+      totalGasFee = rollupTx.receipt.gasUsed * gasPrice;
       expect((await mystikoContract.depositIncludedCount()).toNumber()).to.equal(
         proof.depositIncludedCount + rollupSize,
       );
@@ -107,6 +121,17 @@ export function testRollup(
         proof.depositQueueSize - rollupSize,
       );
     });
+    it('should get correct rollup fee', async () => {
+      const balanceAfter = isMainAsset
+        ? await web3.eth.getBalance(rollupAccount)
+        : await testTokenContract.balanceOf(rollupAccount);
+
+      const totalRollupFee = isMainAsset?
+        toBN(balanceAfter).add(toBN(totalGasFee)).sub(toBN(balanceBefore)):
+        toBN(balanceAfter).sub(toBN(balanceBefore));
+      const expectRollupFee = toBN(rollupFee).muln(rollupSize).toString();
+      expect(totalRollupFee.toString()).to.equal(expectRollupFee.toString());
+    });
   });
 }
 
@@ -115,7 +140,7 @@ async function _enableRollupVerifier(mystikoContract, rollupVerifierContract, ro
     from: accounts[0],
     gas: 1000000,
   });
-  await mystikoContract.addRollupWhitelist(accounts[0], {
+  await mystikoContract.addRollupWhitelist(accounts[4], {
     from: accounts[0],
     gas: 1000000,
   });

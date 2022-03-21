@@ -5,6 +5,8 @@ import "./MystikoWithTBridge.sol";
 import "../../libs/asset/ERC20AssetPool.sol";
 
 contract MystikoWithTBridgeERC20 is MystikoWithTBridge, ERC20AssetPool {
+  event Received(address, uint256);
+
   constructor(
     address _relayProxyAddress,
     uint64 _peerChainId,
@@ -28,4 +30,8 @@ contract MystikoWithTBridgeERC20 is MystikoWithTBridge, ERC20AssetPool {
     )
     ERC20AssetPool(_token)
   {}
+
+  receive() external payable {
+    emit Received(msg.sender, msg.value);
+  }
 }

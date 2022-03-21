@@ -1,20 +1,41 @@
 import { MerkleTree } from '@mystiko/protocol';
+import { toDecimals } from '@mystiko/utils';
 
 export function testConstructor(
+  contractDeploy,
   contractGetter,
   withdrawVerifierGetter,
-  { treeHeight = 20, rootHistoryLength = 30, minRollupFee },
+  {
+    treeHeight = 20,
+    rootHistoryLength = 30,
+    minBridgeFee = undefined,
+    minExecutorFee = undefined,
+    minRollupFee = undefined,
+  },
 ) {
   describe('Test Mystiko contract constructor', () => {
     let mystikoContract;
     let withdrawVerifierContract;
     before(async () => {
+      if (contractDeploy) {
+        await contractDeploy();
+      }
       mystikoContract = await contractGetter();
       withdrawVerifierContract = await withdrawVerifierGetter();
     });
     it('should initialize withdraw verifier correctly', async () => {
       expect(await mystikoContract.withdrawVerifier()).to.equal(withdrawVerifierContract.address);
     });
+    if (minBridgeFee) {
+      it('should initialize minBridgeFee correctly', async () => {
+        expect((await mystikoContract.minBridgeFee()).toString()).to.equal(minBridgeFee);
+      });
+    }
+    if (minExecutorFee) {
+      it('should initialize minExecutorFee correctly', async () => {
+        expect((await mystikoContract.minExecutorFee()).toString()).to.equal(minExecutorFee);
+      });
+    }
     it('should initialize minRollupFee correctly', async () => {
       expect((await mystikoContract.minRollupFee()).toString()).to.equal(minRollupFee);
     });
