@@ -865,6 +865,11 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@mystikonetwork/fastfile@^0.0.21":
+  version "0.0.21"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/fastfile/0.0.21/b3362f8527fa15a2d745c0b516c92d0a5ca0ceef4c2e103aac2d79305f0c4207#069a0d0d6a28a3f002fe97519456bbbd14880f9c"
+  integrity sha512-o9vr4WoWEGord8+6ADBSulLO9arM2z0R5bOKj+GGPOFY/Zm8bg7alqRfuTvcxzll9TTk/rv7gDM4GnbBHhvyMA==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -2068,11 +2073,6 @@ fast-levenshtein@^2.0.6, fast-levenshtein@~2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
-
-fastfile@^0.0.21:
-  version "0.0.21"
-  resolved "https://npm.mystiko.network/fastfile/-/fastfile-0.0.21.tgz#2824df89d73e5289b6256866c3d6272f7fab9f57"
-  integrity sha512-YIShiaXtbzVXg9cupLoIzA1nr5GKdeHhUGN50j62TtYSCp7hGNI+Ly3y4LTIvPpB92Hni35l/Y0iSvOaTzc10Q==
 
 fastq@^1.6.0:
   version "1.13.0"
