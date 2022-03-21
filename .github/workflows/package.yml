@@ -15,8 +15,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: npm install --global ganache-cli
-      - run: ganache-cli --port 7545 > /dev/null &
       - run: lerna bootstrap
       - run: lerna run build
       - run: lerna publish from-package --yes
