@@ -12,8 +12,9 @@ contract MystikoWithTBridgeMain is MystikoWithTBridge, MainAssetPool {
     uint64 _peerChainId,
     uint32 _treeHeight,
     uint32 _rootHistoryLength,
-    uint256 _minRollupFee,
     uint256 _minBridgeFee,
+    uint256 _minExecutorFee,
+    uint256 _minRollupFee,
     address _withdrawVerifier
   )
     MystikoWithTBridge(
@@ -21,8 +22,9 @@ contract MystikoWithTBridgeMain is MystikoWithTBridge, MainAssetPool {
       _peerChainId,
       _treeHeight,
       _rootHistoryLength,
-      _minRollupFee,
       _minBridgeFee,
+      _minExecutorFee,
+      _minRollupFee,
       _withdrawVerifier
     )
   {}

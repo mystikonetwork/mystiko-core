@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libs/asset/AssetPool.sol";
-import "../interface/IVerifier.sol";
-import "../interface/IMystikoBridge.sol";
+import "../../libs/asset/AssetPool.sol";
+import "../../interface/IVerifier.sol";
+import "../../interface/IMystikoBridge.sol";
+import "./CrossChainDataSerializable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 struct DepositLeaf {
@@ -16,7 +17,7 @@ struct RollupVerifier {
   bool enabled;
 }
 
-abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
+abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSerializable, ReentrancyGuard {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
@@ -29,13 +30,16 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
   mapping(uint256 => bool) public relayCommitments;
   mapping(uint256 => bool) public spentSerialNumbers;
 
+  // Source Deposit transaction counter
+  uint256 public sourceDepositCount = 0;
+
   // Deposit queue related.
   mapping(uint256 => DepositLeaf) public depositQueue;
   uint256 public depositQueueSize = 0;
   uint256 public depositIncludedCount = 0;
 
   // Deposit merkle tree roots;
-  uint256 public treeCapacity;
+  uint256 public immutable treeCapacity;
   mapping(uint32 => uint256) public rootHistory;
   uint256 public currentRoot;
   uint32 public currentRootIndex = 0;
@@ -43,8 +47,9 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
 
   // Admin related.
   address public operator;
-  uint256 public minRollupFee;
   uint256 public minBridgeFee;
+  uint256 public minExecutorFee;
+  uint256 public minRollupFee;
   mapping(address => bool) public rollupWhitelist;
 
   // Some switches.
@@ -76,7 +81,13 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
   }
 
   event EncryptedNote(uint256 indexed commitment, bytes encryptedNote);
-  event DepositQueued(uint256 indexed commitment, uint256 amount, uint256 rollupFee, uint256 leafIndex);
+  event DepositQueued(
+    uint256 indexed commitment,
+    uint256 amount,
+    uint256 executorFee,
+    uint256 rollupFee,
+    uint256 leafIndex
+  );
   event DepositIncluded(uint256 indexed commitment);
   event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
 
@@ -85,17 +96,20 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
     uint64 _peerChainId,
     uint32 _treeHeight,
     uint32 _rootHistoryLength,
-    uint256 _minRollupFee,
     uint256 _minBridgeFee,
+    uint256 _minExecutorFee,
+    uint256 _minRollupFee,
     address _withdrawVerifier
   ) {
     require(_rootHistoryLength > 0, "_rootHistoryLength should be greater than 0");
+    require(_minExecutorFee > 0, "_minExecutorFee should be greater than 0");
     require(_minRollupFee > 0, "_minRollupFee should be greater than 0");
     withdrawVerifier = IWithdrawVerifier(_withdrawVerifier);
     operator = msg.sender;
     rootHistoryLength = _rootHistoryLength;
-    minRollupFee = _minRollupFee;
     minBridgeFee = _minBridgeFee;
+    minExecutorFee = _minExecutorFee;
+    minRollupFee = _minRollupFee;
     treeCapacity = 2**uint256(_treeHeight);
     currentRoot = _zeros(_treeHeight);
     rootHistory[currentRootIndex] = currentRoot;
@@ -110,21 +124,62 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
     uint256 hashK,
     uint128 randomS,
     bytes memory encryptedNote,
-    uint256 rollupFee,
-    uint256 bridgeFee
+    uint256 bridgeFee,
+    uint256 executorFee,
+    uint256 rollupFee
   ) external payable override {
-    // todo do rollup at source chain or destination chain ?
-    // how to get rollup fee on destination chain?
     require(!isDepositsDisabled, "deposits are disabled");
     require(bridgeFee >= minBridgeFee, "bridge fee too few");
-    require(depositIncludedCount + depositQueueSize < treeCapacity, "tree is full");
+    require(executorFee >= minExecutorFee, "executor fee too few");
+    require(rollupFee >= minRollupFee, "rollup fee too few");
+    require(sourceDepositCount < treeCapacity, "tree is full");
     require(!depositedCommitments[commitment], "the commitment has been submitted");
     uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
     depositedCommitments[commitment] = true;
-    _processDepositTransfer(amount + bridgeFee);
-    _processDeposit(amount, commitment, bridgeFee);
+    sourceDepositCount++;
+    _processDepositTransfer(amount + executorFee + rollupFee, bridgeFee);
+    _processDeposit(amount, commitment, bridgeFee, executorFee, rollupFee);
     emit EncryptedNote(commitment, encryptedNote);
+  }
+
+  function _processDeposit(
+    uint256 amount,
+    uint256 commitment,
+    uint256 bridgeFee,
+    uint256 executeFee,
+    uint256 rollupFee
+  ) internal virtual;
+
+  function _syncDeposit(
+    uint64 fromChainId,
+    address fromContractAddr,
+    bytes memory txDataBytes
+  ) internal {
+    require(fromContractAddr == peerContractAddress, "from proxy address not matched");
+    require(fromChainId == peerChainId, "from chain id not matched");
+    CrossChainData memory txData = deserializeTxData(txDataBytes);
+    require(txData.amount > 0, "amount should be greater than 0");
+    require(txData.executorFee >= minExecutorFee, "executor fee too few");
+    require(txData.rollupFee >= minRollupFee, "rollup fee too few");
+    require(depositIncludedCount + depositQueueSize < treeCapacity, "tree is full");
+    require(!relayCommitments[txData.commitment], "The commitment has been submitted");
+    relayCommitments[txData.commitment] = true;
+
+    _enqueueDeposit(txData.commitment, txData.amount, txData.executorFee, txData.rollupFee);
+  }
+
+  function _enqueueDeposit(
+    uint256 commitment,
+    uint256 amount,
+    uint256 executorFee,
+    uint256 rollupFee
+  ) internal {
+    depositQueue[depositQueueSize] = DepositLeaf(commitment, rollupFee);
+    uint256 leafIndex = depositQueueSize + depositIncludedCount;
+    depositQueueSize = depositQueueSize + 1;
+    _processExecutorFeeTransfer(executorFee);
+    emit DepositQueued(commitment, amount, executorFee, rollupFee, leafIndex);
   }
 
   function rollup(
@@ -175,10 +230,13 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
     uint256 rootHash,
     uint256 serialNumber,
     uint256 amount,
-    address recipient
+    address recipient,
+    uint256 relayerFee,
+    address relayerAddress
   ) external payable override nonReentrant {
     require(!spentSerialNumbers[serialNumber], "The note has been already spent");
     require(isKnownRoot(rootHash), "Cannot find your merkle root");
+    //todo circuits support relayer fee
     bool verified = withdrawVerifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
     require(verified, "Invalid withdraw proof");
     spentSerialNumbers[serialNumber] = true;
@@ -239,13 +297,18 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
     rollupWhitelist[roller] = false;
   }
 
+  function setMinBridgeFee(uint256 _minBridgeFee) external onlyOperator {
+    minBridgeFee = _minBridgeFee;
+  }
+
+  function setMinExecutorFee(uint256 _minExecutorFee) external onlyOperator {
+    require(_minExecutorFee > 0, "invalid _minMinExecutorFee");
+    minExecutorFee = _minExecutorFee;
+  }
+
   function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
     require(_minRollupFee > 0, "invalid _minRollupFee");
     minRollupFee = _minRollupFee;
-  }
-
-  function setMinBridgeFee(uint256 _minBridgeFee) external onlyOperator {
-    minBridgeFee = _minBridgeFee;
   }
 
   function changeOperator(address _newOperator) external onlyOperator {
@@ -271,23 +334,6 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, ReentrancyGuard {
     require(randomS < FIELD_SIZE, "randomS should be less than FIELD_SIZE");
     return uint256(sha256(abi.encodePacked(bytes32(hashK), bytes32(amount), bytes16(randomS)))) % FIELD_SIZE;
   }
-
-  function _enqueueDeposit(
-    uint256 commitment,
-    uint256 amount,
-    uint256 rollupFee
-  ) internal {
-    depositQueue[depositQueueSize] = DepositLeaf(commitment, rollupFee);
-    uint256 leafIndex = depositQueueSize + depositIncludedCount;
-    depositQueueSize = depositQueueSize + 1;
-    emit DepositQueued(commitment, amount, rollupFee, leafIndex);
-  }
-
-  function _processDeposit(
-    uint256 amount,
-    uint256 commitment,
-    uint256 rollupFee
-  ) internal virtual;
 
   function _zeros(uint32 nth) internal pure returns (uint256) {
     if (nth == 0) {

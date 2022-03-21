@@ -34,7 +34,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   uint256 public depositIncludedCount = 0;
 
   // Deposit merkle tree roots;
-  uint256 public treeCapacity;
+  uint256 public immutable treeCapacity;
   mapping(uint32 => uint256) public rootHistory;
   uint256 public currentRoot;
   uint32 public currentRootIndex = 0;
@@ -100,8 +100,8 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
     require(commitment == calculatedCommitment, "commitment hash incorrect");
     depositedCommitments[commitment] = true;
-    _processDepositTransfer(amount + rollupFee);
-    _processDeposit(amount, commitment, rollupFee);
+    _processDepositTransfer(amount + rollupFee, 0);
+    _enqueueDeposit(commitment, amount, rollupFee);
     emit EncryptedNote(commitment, encryptedNote);
   }
 
@@ -226,7 +226,9 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     operator = _newOperator;
   }
 
-  function bridgeType() public pure virtual returns (string memory);
+  function bridgeType() public pure returns (string memory) {
+    return "loop";
+  }
 
   function _commitmentHash(
     uint256 hashK,
@@ -248,12 +250,6 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     depositQueueSize = depositQueueSize + 1;
     emit DepositQueued(commitment, amount, rollupFee, leafIndex);
   }
-
-  function _processDeposit(
-    uint256 amount,
-    uint256 commitment,
-    uint256 rollupFee
-  ) internal virtual;
 
   function _zeros(uint32 nth) internal pure returns (uint256) {
     if (nth == 0) {

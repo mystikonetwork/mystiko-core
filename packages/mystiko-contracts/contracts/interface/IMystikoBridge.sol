@@ -8,8 +8,9 @@ interface IMystikoBridge {
     uint256 hashK,
     uint128 randomS,
     bytes memory encryptedNote,
-    uint256 rollupFee,
-    uint256 bridgeFee
+    uint256 bridgeFee,
+    uint256 executorFee,
+    uint256 rollupFee
   ) external payable;
 
   function rollup(
@@ -28,6 +29,8 @@ interface IMystikoBridge {
     uint256 rootHash,
     uint256 serialNumber,
     uint256 amount,
-    address recipient
+    address recipient,
+    uint256 relayerFee,
+    address relayerAddress
   ) external payable;
 }
