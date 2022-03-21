@@ -1,5 +1,5 @@
 {
-  "name": "@mystiko/circuits",
+  "name": "@mystikonetwork/circuits",
   "version": "0.0.8",
   "description": "circom circuits of Mystiko",
   "main": "index.js",

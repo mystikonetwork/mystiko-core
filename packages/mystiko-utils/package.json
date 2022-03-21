@@ -1,5 +1,5 @@
 {
-  "name": "@mystiko/utils",
+  "name": "@mystikonetwork/utils",
   "version": "0.0.8",
   "description": "utilities of mystiko core",
   "main": "build/cjs/index.js",
