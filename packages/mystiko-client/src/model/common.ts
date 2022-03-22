@@ -1,5 +1,5 @@
-import { deepCopy, isBN } from '@mystiko/utils';
-import { v1Protocol, V1ProtocolInterface } from '@mystiko/protocol';
+import { deepCopy, isBN } from '@mystikonetwork/utils';
+import { v1Protocol, V1ProtocolInterface } from '@mystikonetwork/protocol';
 
 /**
  * @memberOf module:mystiko/models

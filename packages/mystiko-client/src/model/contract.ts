@@ -1,7 +1,13 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { check } from '@mystiko/utils';
-import { MystikoABI, AssetType, BridgeType, isValidAssetType, isValidBridgeType } from '@mystiko/config';
+import { check } from '@mystikonetwork/utils';
+import {
+  MystikoABI,
+  AssetType,
+  BridgeType,
+  isValidAssetType,
+  isValidBridgeType,
+} from '@mystikonetwork/config';
 import { BaseModel } from './common';
 
 export interface RawContract {

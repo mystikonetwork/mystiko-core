@@ -1,5 +1,5 @@
-import { AssetType, BridgeType, readFromFile } from '@mystiko/config';
-import { toBN, toBuff, toDecimals, toHexNoPrefix } from '@mystiko/utils';
+import { AssetType, BridgeType, readFromFile } from '@mystikonetwork/config';
+import { toBN, toBuff, toDecimals, toHexNoPrefix } from '@mystikonetwork/utils';
 import { Deposit, DepositStatus } from '../../src';
 
 test('Test Deposit getters/setters', async () => {

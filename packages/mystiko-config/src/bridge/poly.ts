@@ -1,4 +1,4 @@
-import { check, toHexNoPrefix } from '@mystiko/utils';
+import { check, toHexNoPrefix } from '@mystikonetwork/utils';
 import { BaseBridgeConfig, RawBaseBridgeConfig } from './base';
 import { BaseConfig } from '../base';
 import { EXPLORER_TX_PLACEHOLDER } from '../chain';

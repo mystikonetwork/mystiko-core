@@ -1,4 +1,4 @@
-import { toBuff, toHexNoPrefix } from '@mystiko/utils';
+import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
 import { BaseModel } from './common';
 
 export interface RawAccount {

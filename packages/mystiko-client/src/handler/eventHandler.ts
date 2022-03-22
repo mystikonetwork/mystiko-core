@@ -1,5 +1,5 @@
-import { MystikoConfig } from '@mystiko/config';
-import { logger as rootLogger } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { logger as rootLogger } from '@mystikonetwork/utils';
 import { Handler } from './handler';
 import { Event, RawEvent } from '../model';
 import { MystikoDatabase } from '../database';

@@ -594,9 +594,9 @@
       "chainId": 43113,
       "explorerUrl": "https://testnet.snowtrace.io",
       "providers": [
-        "https://api.avax-test.network/ext/bc/C/rpc",
-        "wss://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet/ws",
-        "https://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet"
+        "wss://avax.getblock.io/testnet/ext/bc/C/ws?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0",
+        "https://avax.getblock.io/testnet/ext/bc/C/rpc?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0",
+        "wss://speedy-nodes-nyc.moralis.io/d90e3898aa487ee11a6957b9/avalanche/testnet/ws"
       ],
       "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
       "contracts": [

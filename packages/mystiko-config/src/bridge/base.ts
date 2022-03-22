@@ -1,4 +1,4 @@
-import { check } from '@mystiko/utils';
+import { check } from '@mystikonetwork/utils';
 import { BaseConfig, BridgeType, isValidBridgeType } from '../base';
 
 export interface RawBaseBridgeConfig {

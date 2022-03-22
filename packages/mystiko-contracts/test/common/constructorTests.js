@@ -1,5 +1,5 @@
-import { MerkleTree } from '@mystiko/protocol';
-import { toDecimals } from '@mystiko/utils';
+
+import { MerkleTree } from '@mystikonetwork/protocol';
 
 export function testConstructor(
   contractDeploy,

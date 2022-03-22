@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { MystikoABI, AssetType, BridgeType } from '@mystiko/config';
+import { MystikoABI, AssetType, BridgeType } from '@mystikonetwork/config';
 import { Contract } from '../../src';
 
 test('test Contract getters/setters', () => {

@@ -1,5 +1,5 @@
-import { currentProtocol } from '@mystiko/protocol';
-import { toHexNoPrefix } from '@mystiko/utils';
+import { currentProtocol } from '@mystikonetwork/protocol';
+import { toHexNoPrefix } from '@mystikonetwork/utils';
 import { Account } from '../../src';
 
 test('Test Account getters/setters', () => {

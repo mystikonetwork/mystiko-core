@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { Logger } from 'loglevel';
-import { check, logger as rootLogger, toHex, toString } from '@mystiko/utils';
-import { ChainConfig, MystikoConfig } from '@mystiko/config';
+import { check, logger as rootLogger, toHex, toString } from '@mystikonetwork/utils';
+import { ChainConfig, MystikoConfig } from '@mystikonetwork/config';
 
 /**
  * @class BaseSigner

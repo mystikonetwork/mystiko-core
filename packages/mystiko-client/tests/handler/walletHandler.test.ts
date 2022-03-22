@@ -1,4 +1,4 @@
-import { currentProtocol } from '@mystiko/protocol';
+import { currentProtocol } from '@mystikonetwork/protocol';
 import { WalletHandler, createDatabase, MystikoDatabase } from '../../src';
 
 let handler: WalletHandler;

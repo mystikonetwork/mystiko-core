@@ -5,8 +5,8 @@ import mystiko, {
   PrivateNote,
   WithdrawParams,
   WithdrawStatus,
-} from '@mystiko/client';
-import { BridgeType, ChainConfig, ContractConfig } from '@mystiko/config';
+} from '@mystikonetwork/client';
+import { BridgeType, ChainConfig, ContractConfig } from '@mystikonetwork/config';
 
 require('dotenv').config();
 

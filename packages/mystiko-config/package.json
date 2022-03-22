@@ -1,6 +1,6 @@
 {
-  "name": "@mystiko/config",
-  "version": "0.0.7",
+  "name": "@mystikonetwork/config",
+  "version": "0.0.8",
   "description": "configuration of mystiko-core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -52,7 +52,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystiko/utils": "^0.0.7",
+    "@mystikonetwork/utils": "^0.0.8",
     "bn.js": "^5.2.0",
     "ethers": "^5.5.3"
   }

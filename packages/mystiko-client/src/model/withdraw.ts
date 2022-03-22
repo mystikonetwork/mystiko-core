@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { check, fromDecimals, toBN } from '@mystiko/utils';
-import { MystikoConfig } from '@mystiko/config';
+import { check, fromDecimals, toBN } from '@mystikonetwork/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
 import { BaseModel } from './common';
 
 /**

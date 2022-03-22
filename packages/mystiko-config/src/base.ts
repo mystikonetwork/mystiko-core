@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { check, deepCopy } from '@mystiko/utils';
+import { check, deepCopy } from '@mystikonetwork/utils';
 
 /**
  * @class BaseConfig

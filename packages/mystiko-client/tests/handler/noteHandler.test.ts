@@ -1,8 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { BridgeType, MystikoConfig, readFromFile } from '@mystiko/config';
-import { toDecimals, toHexNoPrefix } from '@mystiko/utils';
+import { BridgeType, MystikoConfig, readFromFile } from '@mystikonetwork/config';
+import { toDecimals, toHexNoPrefix } from '@mystikonetwork/utils';
 import {
   AccountHandler,
   Contract,

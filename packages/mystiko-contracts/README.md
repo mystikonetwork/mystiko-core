@@ -1,4 +1,4 @@
-## @mystiko/contracts
+## @mystikonetwork/contracts
 This package contains the Smart Contract written in Solidity
 
 ### Deploy Smart Contracts

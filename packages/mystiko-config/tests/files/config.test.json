@@ -100,9 +100,9 @@
   "circuits": [
     {
       "name": "circom-1.0",
-      "wasmFile": "node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.wasm.gz",
-      "zkeyFile": "node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.zkey.gz",
-      "vkeyFile": "node_modules/@mystiko/circuits/dist/circom/dev/Withdraw.vkey.json.gz"
+      "wasmFile": "node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.wasm.gz",
+      "zkeyFile": "node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.zkey.gz",
+      "vkeyFile": "node_modules/@mystikonetwork/circuits/dist/circom/dev/Withdraw.vkey.json.gz"
     }
   ]
 }

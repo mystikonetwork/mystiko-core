@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { MystikoConfig } from '@mystiko/config';
-import { check, logger as rootLogger } from '@mystiko/utils';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { check, logger as rootLogger } from '@mystikonetwork/utils';
 import { BaseSigner } from './base';
 
 /**

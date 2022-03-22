@@ -21,7 +21,7 @@ import {
   toFixedLenHexNoPrefix,
   toBN,
   logger,
-} from '@mystiko/utils';
+} from '@mystikonetwork/utils';
 import { FIELD_SIZE } from '../../constants';
 
 /**

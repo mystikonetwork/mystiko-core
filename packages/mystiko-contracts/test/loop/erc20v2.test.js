@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '../../.env' });
 
 import { testConstructor, testAdminOperations, testLoopDeposit, testRollup } from '../common';
-import { toDecimals } from '@mystiko/utils';
+import { toDecimals } from '@mystikonetwork/utils';
 
 const MystikoContract = artifacts.require('MystikoV2WithLoopERC20');
 const WithdrawVerifierContract = artifacts.require('WithdrawVerifier');

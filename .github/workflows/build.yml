@@ -9,11 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NPM_USER: ${{ secrets.npm_user }}
-      NPM_PASS: ${{ secrets.npm_pass }}
-      NPM_EMAIL: ${{ secrets.npm_email }}
-      NPM_REGISTRY: https://npm.mystiko.network
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,16 +17,17 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: npm install --global ganache-cli lerna npm-cli-login
-      - run: npm-cli-login
+      - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
+      - run: npm install --global lerna ganache-cli
       - run: ganache-cli --port 7545 > /dev/null &
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
       - run: lerna run lint
       - run: lerna run build
       - run: lerna run test
-      - run: lerna run deploy --scope @mystiko/contracts
-      - name: Report @mystiko/utils test coverage
+      - run: lerna run deploy --scope @mystikonetwork/contracts
+      - name: Report @mystikonetwork/utils test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-utils
@@ -39,7 +35,7 @@ jobs:
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           package-manager: yarn
-      - name: Report @mystiko/config test coverage
+      - name: Report @mystikonetwork/config test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-config
@@ -47,7 +43,7 @@ jobs:
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           package-manager: yarn
-      - name: Report @mystiko/protocol test coverage
+      - name: Report @mystikonetwork/protocol test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-protocol
@@ -55,7 +51,7 @@ jobs:
           base-coverage-file: ./coverage/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           package-manager: yarn
-      - name: Report @mystiko/client test coverage
+      - name: Report @mystikonetwork/client test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-client

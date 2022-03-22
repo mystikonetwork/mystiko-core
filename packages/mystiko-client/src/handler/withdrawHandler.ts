@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { MystikoConfig } from '@mystiko/config';
+import { MystikoConfig } from '@mystikonetwork/config';
 import {
   check,
   errorMessage,
@@ -10,7 +10,7 @@ import {
   toFixedLenHex,
   toHexNoPrefix,
   waitTransaction,
-} from '@mystiko/utils';
+} from '@mystikonetwork/utils';
 import { Handler } from './handler';
 import { WalletHandler } from './walletHandler';
 import { AccountHandler } from './accountHandler';
