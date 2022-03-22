@@ -3,8 +3,8 @@ import { toHex, toBN, toDecimals } from '@mystikonetwork/utils';
 import { expectThrowsAsync } from './utils.js';
 
 const TestTokenContract = artifacts.require('TestToken');
-const DefaultSourceChainID = 1;
-const DefaultDestinationChainID = 2;
+const DefaultSourceChainID = 1001;
+const DefaultDestinationChainID = 1002;
 const DefaultPoolAmount = toDecimals(5).toString();
 
 export function testBridgeDeposit(
@@ -12,7 +12,7 @@ export function testBridgeDeposit(
   dstContractGetter,
   proxyContractGetter,
   accounts,
-  { depositAmount, isMainAsset = true, numOfCommitments = 4, checkEnqueue = true },
+  { depositAmount, isSrcMainAsset, isDstMainAsset, numOfCommitments = 4, checkEnqueue = true },
 ) {
   let mystikoContract;
   let dstMystikoContract;
@@ -51,18 +51,22 @@ export function testBridgeDeposit(
       minBridgeFee = (await mystikoContract.minBridgeFee()).toString();
       minExecutorFee = (await mystikoContract.minExecutorFee()).toString();
       minRollupFee = (await mystikoContract.minRollupFee()).toString();
+
       const amount = toBN(depositAmount).add(toBN(minExecutorFee)).add(toBN(minRollupFee));
       minTotalAmount = amount.toString();
-      if (isMainAsset) {
+      if (isSrcMainAsset) {
         minTotalValue = amount.add(toBN(minBridgeFee)).toString();
+      } else {
+        minTotalValue = toBN(minBridgeFee).toString();
+      }
 
+      if (isDstMainAsset) {
         await web3.eth.sendTransaction({
           from: accounts[9],
           to: dstMystikoContract.address,
           value: DefaultPoolAmount,
         });
       } else {
-        minTotalValue = toBN(minBridgeFee).toString();
         await testTokenContract.transfer(dstMystikoContract.address, DefaultPoolAmount, {
           from: accounts[0],
         });
@@ -82,7 +86,7 @@ export function testBridgeDeposit(
           minBridgeFee,
           minExecutorFee,
           minRollupFee,
-          { from: accounts[0], value: isMainAsset ? minTotalValue : '0' },
+          { from: accounts[0], value: minTotalValue },
         ),
       );
       await mystikoContract.toggleDeposits(false, { from: accounts[0], gas: estimateGas });
@@ -148,7 +152,7 @@ export function testBridgeDeposit(
       );
     });
     it('should approve asset successfully', async () => {
-      if (!isMainAsset) {
+      if (!isSrcMainAsset) {
         const approveAmount = toBN(minTotalAmount).muln(commitments.length).toString();
         const estimateGas = await testTokenContract.approve.estimateGas(
           mystikoContract.address,
@@ -211,7 +215,7 @@ export function testBridgeDeposit(
 
       //proxy deposit transaction
       for (let i = 0; i < numOfCommitments; i++) {
-        const balanceBefore = isMainAsset
+        const balanceBefore = isDstMainAsset
           ? await web3.eth.getBalance(bridgeAccount)
           : await testTokenContract.balanceOf(bridgeAccount);
 
@@ -224,12 +228,12 @@ export function testBridgeDeposit(
         );
         end = tx.receipt.blockNumber;
 
-        const balanceAfter = isMainAsset
+        const balanceAfter = isDstMainAsset
           ? await web3.eth.getBalance(bridgeAccount)
           : await testTokenContract.balanceOf(bridgeAccount);
 
         const totalGasFee = tx.receipt.gasUsed * (await web3.eth.getGasPrice());
-        if (isMainAsset) {
+        if (isDstMainAsset) {
           expect(minExecutorFee.toString()).to.equal(
             toBN(balanceAfter).add(toBN(totalGasFee)).sub(toBN(balanceBefore)).toString(),
           );
@@ -254,7 +258,7 @@ export function testBridgeDeposit(
       const expectBalance = toBN(minTotalAmount).muln(numOfCommitments).toString();
       const expectBridgeFee = toBN(minBridgeFee).muln(numOfCommitments).toString();
 
-      if (isMainAsset) {
+      if (isSrcMainAsset) {
         expect((await web3.eth.getBalance(mystikoContract.address)).toString()).to.equal(expectBalance);
         expect((await web3.eth.getBalance(proxyContract.address)).toString()).to.equal(expectBridgeFee);
       } else {
@@ -280,7 +284,7 @@ export function testBridgeDeposit(
     });
     it('should deposit revert when tree is full', async () => {
       const mystikoContract2 = await srcContractGetter({ treeHeight: 1 });
-      if (!isMainAsset) {
+      if (!isSrcMainAsset) {
         const approveAmount = toBN(minTotalAmount).muln(3);
         await testTokenContract.approve(mystikoContract2.address, approveAmount.toString(), {
           from: accounts[0],
@@ -325,7 +329,7 @@ export function testBridgeDeposit(
       const mystikoContractDst = await dstContractGetter({ treeHeight: 1 });
       await mystikoContractDst.setPeerContractAddress(mystikoContract.address);
 
-      if (isMainAsset) {
+      if (isDstMainAsset) {
         await web3.eth.sendTransaction({
           from: accounts[9],
           to: mystikoContractDst.address,

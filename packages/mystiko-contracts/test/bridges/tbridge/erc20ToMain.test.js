@@ -9,8 +9,8 @@ const ProxyContract = artifacts.require('MystikoTBridgeProxy');
 
 const WithdrawVerifierContract = artifacts.require('WithdrawVerifier');
 const Rollup1VerifierContract = artifacts.require('Rollup1Verifier');
-// const Rollup4VerifierContract = artifacts.require('Rollup4Verifier');
-// const Rollup16VerifierContract = artifacts.require('Rollup16Verifier');
+const Rollup4VerifierContract = artifacts.require('Rollup4Verifier');
+const Rollup16VerifierContract = artifacts.require('Rollup16Verifier');
 
 const DefaultSourceChainID = 1001;
 const DefaultDestinationChainID = 1002;
@@ -119,8 +119,8 @@ function testTokenPair(src, dst, accounts) {
 
   const withdrawVerifierContractGetter = () => WithdrawVerifierContract.deployed();
   const rollup1VerifierContractGetter = () => Rollup1VerifierContract.deployed();
-  // const rollup4VerifierContractGetter = () => Rollup4VerifierContract.deployed();
-  // const rollup16VerifierContractGetter = () => Rollup16VerifierContract.deployed();
+  const rollup4VerifierContractGetter = () => Rollup4VerifierContract.deployed();
+  const rollup16VerifierContractGetter = () => Rollup16VerifierContract.deployed();
   testConstructor(deployContractPair, getSrcContract, withdrawVerifierContractGetter, {
     minBridgeFee: MIN_BRIDGE_FEE,
     minExecutorFee: MIN_EXECUTOR_FEE,
@@ -132,7 +132,19 @@ function testTokenPair(src, dst, accounts) {
     isSrcMainAsset: srcMainAsset,
     isDstMainAsset: dstMainAsset,
     depositAmount: DefaultDepositAmount,
-    numOfCommitments: 2,
+    numOfCommitments: 21,
+  });
+  testRollup(getDstContract, rollup16VerifierContractGetter, accounts, {
+    commitments: depositContext.commitments,
+    isMainAsset: dstMainAsset,
+    rollupFee: MIN_ROLLUP_FEE,
+    rollupSize: 16,
+  });
+  testRollup(getDstContract, rollup4VerifierContractGetter, accounts, {
+    commitments: depositContext.commitments,
+    isMainAsset: dstMainAsset,
+    rollupFee: MIN_ROLLUP_FEE,
+    rollupSize: 4,
   });
   testRollup(getDstContract, rollup1VerifierContractGetter, accounts, {
     commitments: depositContext.commitments,
@@ -142,6 +154,6 @@ function testTokenPair(src, dst, accounts) {
   });
 }
 
-contract('MystikoWithTBridgeERC20ToERC20', (accounts) => {
-  testTokenPair(false, false, accounts);
+contract('MystikoWithTBridgeERC20ToMain', (accounts) => {
+  testTokenPair(false, true, accounts);
 });
