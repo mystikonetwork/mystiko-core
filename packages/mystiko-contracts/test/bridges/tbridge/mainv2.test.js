@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '../../../.env' });
 import { testConstructor, testAdminOperations, testBridgeDeposit, testRollup } from '../../common';
-import { toDecimals } from '@mystiko/utils';
+import { toDecimals } from '@mystikonetwork/utils';
 
 const MystikoSrcContract = artifacts.require('MystikoWithTBridgeMain');
 const MystikoDstContract = artifacts.require('MystikoWithTBridgeMain');
@@ -58,7 +58,7 @@ async function getDstContract(options = undefined) {
   }
 }
 
-async function getProxyContract(options = undefined) {
+function getProxyContract() {
   return proxyContract;
 }
 

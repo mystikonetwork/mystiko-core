@@ -40,7 +40,7 @@
     "@mystikonetwork/config": "^0.0.8",
     "@mystikonetwork/protocol": "^0.0.8",
     "@mystikonetwork/utils": "^0.0.8",
-    "@openzeppelin/contracts": "^3.4.2",
+    "@openzeppelin/contracts": "^4.5.0",
     "@truffle/contract": "^4.4.9",
     "@truffle/hdwallet-provider": "^2.0.3",
     "@tsconfig/recommended": "^1.0.1",

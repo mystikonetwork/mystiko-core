@@ -1,4 +1,3 @@
-
 import { MerkleTree } from '@mystikonetwork/protocol';
 
 export function testConstructor(

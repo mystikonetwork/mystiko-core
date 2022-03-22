@@ -1,5 +1,5 @@
-import { v1Protocol } from '@mystiko/protocol';
-import { toHex, toBN, toDecimals } from '@mystiko/utils';
+import { v1Protocol } from '@mystikonetwork/protocol';
+import { toHex, toBN, toDecimals } from '@mystikonetwork/utils';
 import { expectThrowsAsync } from './utils.js';
 
 const TestTokenContract = artifacts.require('TestToken');

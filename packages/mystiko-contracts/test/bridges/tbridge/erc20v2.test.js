@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '../../../.env' });
 import { testConstructor, testAdminOperations, testBridgeDeposit, testRollup } from '../../common';
-import { toDecimals } from '@mystiko/utils';
+import { toDecimals } from '@mystikonetwork/utils';
 
 const MystikoSrcContract = artifacts.require('MystikoWithTBridgeERC20');
 const MystikoDstContract = artifacts.require('MystikoWithTBridgeERC20');
@@ -61,7 +61,7 @@ async function getDstContract(options = undefined) {
   }
 }
 
-async function getProxyContract(options = undefined) {
+function getProxyContract() {
   return proxyContract;
 }
 
@@ -111,7 +111,7 @@ contract('MystikoWithTBridgeERC20', (accounts) => {
   testAdminOperations(getSrcContract, accounts);
 
   const depositContext = testBridgeDeposit(getSrcContract, getDstContract, getProxyContract, accounts, {
-    isMainAsset:false,
+    isMainAsset: false,
     depositAmount: DefaultDepositAmount,
     numOfCommitments: 21,
   });

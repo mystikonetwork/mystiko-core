@@ -126,9 +126,9 @@ export function testRollup(
         ? await web3.eth.getBalance(rollupAccount)
         : await testTokenContract.balanceOf(rollupAccount);
 
-      const totalRollupFee = isMainAsset?
-        toBN(balanceAfter).add(toBN(totalGasFee)).sub(toBN(balanceBefore)):
-        toBN(balanceAfter).sub(toBN(balanceBefore));
+      const totalRollupFee = isMainAsset
+        ? toBN(balanceAfter).add(toBN(totalGasFee)).sub(toBN(balanceBefore))
+        : toBN(balanceAfter).sub(toBN(balanceBefore));
       const expectRollupFee = toBN(rollupFee).muln(rollupSize).toString();
       expect(totalRollupFee.toString()).to.equal(expectRollupFee.toString());
     });
