@@ -81,8 +81,8 @@
           "address": "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae"
         }
       ],
-      "hashAddress": "0x6BAF780988066D4744006F6894BCd3A0E181d1b9",
-      "verifierAddress": "0xB0b8f60Fd4a7b8a7B5577FC05d90811a64513C2B"
+      "hashAddress": "0xA5DE86d54AF5E1BD7938C3934480248DfE0f9715",
+      "verifierAddress": "0xfE531774aB31B2733F3544b40e3caA62410b1342"
     },
     {
       "name": "BSC Testnet",
@@ -113,8 +113,8 @@
           "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613"
         }
       ],
-      "hashAddress": "0x3B96eAf28D9972F11ED57D7e8DDc5bF42675316E",
-      "verifierAddress": "0x79A98BC35e6c65ef0cb47D9BFFC952FDff1a6E41"
+      "hashAddress": "0x48aa4E4E19ADDC373B012677dfb4f9fE45D2e056",
+      "verifierAddress": "0x32b08bC4a94d4018b68651727806F55637BAA3Fc"
     },
     {
       "name": "Aurora Testnet",
@@ -341,7 +341,7 @@
       "proxys": [
         {
           "network": "goerli",
-          "address": "0x942E8e0e4b021F55b89660c886146e0Ec57F4b5B"
+          "address": "0xF25170F86E4291a99a9A560032Fe9948b8BcFBB2"
         },
         {
           "network": "bsctestnet",
@@ -369,48 +369,56 @@
           {
             "network": "goerli",
             "token": "ETH",
-            "address": "0x75619A701a4993EbB6f4A5E990adbDE709735145"
+            "address": "0xb4359d3CA903567D6ed88940608952e7A4Cab511",
+            "syncStart": 6619784
           },
           {
             "network": "bsctestnet",
             "token": "mETH",
-            "address": "0x3F727cFF6e7558A17D48a6E3b5Afc264e5d1B63F"
+            "address": "0x1cF3F084635FEa4a455f3165D75697499e8a1C53",
+            "syncStart": 17973230
           }
         ],
         [
           {
             "network": "goerli",
             "token": "MTT",
-            "address": "0xC0bF2e5F03ca15df1b2b30d2024245F6dFd4354A"
+            "address": "0x42c464B8b72dBee3E3Ff12775a721970492576C0",
+            "syncStart": 6619772
           },
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": "0xDdc67fd0a242b637Afc438C6dA7045F05412A4F7"
+            "address": "0xDdCa241E4F3607CDe5AbdfB34879B27a190FEb29",
+            "syncStart": 17973256
           }
         ],
         [
           {
             "network": "goerli",
             "token": "mUSD",
-            "address": "0x66d5E69ce90540b04c9C2e8AfB9838AA38be7Ef5"
+            "address": "0xad196010a9A9C6f024Ab08E9683D58368B8B30B5",
+            "syncStart": 6619777
           },
           {
             "network": "bsctestnet",
             "token": "mUSD",
-            "address": "0x54c2557b9061c1581b4779380Af38BCA4d6bD5fD"
+            "address": "0xF8bf748f400CD064206C216aD91f6BbE2Eca3110",
+            "syncStart": 17973249
           }
         ],
         [
           {
             "network": "goerli",
             "token": "mBNB",
-            "address": "0x0B0DC00755d0deC2a6a0eb45d588C29c0C5A6a4C"
+            "address": "0xB61f02d7bd69D58f0e82FE299253FaBbB7573B96",
+            "syncStart": 6619786
           },
           {
             "network": "bsctestnet",
             "token": "BNB",
-            "address": "0xd46173DB05a6A0577e07B35036134AcCE7837163"
+            "address": "0xb954BD428b2FC10C5C95c3aD2d532aB520960117",
+            "syncStart": 17973239
           }
         ]
       ]
