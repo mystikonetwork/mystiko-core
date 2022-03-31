@@ -121,6 +121,9 @@ const config: HardhatUserConfig = {
     // alwaysGenerateOverloads: true,
     externalArtifacts: ['artifactsExternal/*.json'],
   },
+  mocha: {
+    timeout: 600000
+  }
 };
 
 export default config;
