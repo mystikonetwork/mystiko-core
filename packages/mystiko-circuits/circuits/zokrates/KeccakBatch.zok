@@ -1,0 +1,37 @@
+import "hashes/keccak/256bit.zok" as keccak
+import "utils/casts/u64_from_bits.zok" as u64_from_bits
+import "utils/casts/u64_to_bits.zok" as u64_to_bits
+import "utils/pack/bool/unpack256.zok" as unpack256
+import "utils/pack/bool/pack256" as pack256
+
+def fieldToU64(field value) -> u64[4]:
+  bool[256] bits = unpack256(value)
+  u64[4] result = [\
+    u64_from_bits(bits[0..64]),
+    u64_from_bits(bits[64..128]),
+    u64_from_bits(bits[128..192]),
+    u64_from_bits(bits[192..256])
+  ]
+  return result
+
+def u64ToField(u64[4] value) -> field:
+  bool[256] bits = [\
+    ...(u64_to_bits(value[0])),
+    ...(u64_to_bits(value[1])),
+    ...(u64_to_bits(value[2])),
+    ...(u64_to_bits(value[3]))
+  ]
+  return pack256(bits)
+
+def main<N>(field[N] items) -> field:
+  u64[N * 4] converted = [0; N * 4]
+  for u32 i in 0..N do
+    u64[4] numbers = fieldToU64(items[i])
+    converted[4 * i] = numbers[0]
+    converted[4 * i + 1] = numbers[1]
+    converted[4 * i + 2] = numbers[2]
+    converted[4 * i + 3] = numbers[3]
+  endfor
+  u64[4] hash = keccak(converted)
+  return u64ToField(hash)
+

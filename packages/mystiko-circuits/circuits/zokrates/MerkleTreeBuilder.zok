@@ -1,0 +1,12 @@
+import "hashes/poseidon/poseidon" as poseidon
+
+def main<N, H>(field[N] leaves) -> field:
+  assert(N == (1 << H))
+  field[H + 1][N] layers = [[0; N]; H + 1]
+  layers[0] = leaves
+  for u32 i in 1..(H + 1) do
+    for u32 j in 0..(1 << (H - i)) do
+      layers[i][j] = poseidon([layers[i - 1][2 * j], layers[i - 1][2 * j + 1]])
+    endfor
+  endfor
+  return layers[H][0]

@@ -1,0 +1,97 @@
+{
+  "inputs": [
+    {
+      "name": "root",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "serialNumber",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "sigHash",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "sigPublicKey",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "publicAmount",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "relayerFeeAmount",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "inCommitment",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inAmount",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inRandomP",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inRandomR",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inRandomS",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inSecretKey",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inPublicKey",
+      "public": false,
+      "type": "field"
+    },
+    {
+      "name": "inPathElements",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 20,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inPathIndices",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 20,
+        "type": "bool"
+      }
+    },
+    {
+      "name": "emptyField",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    }
+  ],
+  "outputs": []
+}

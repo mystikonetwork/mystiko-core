@@ -1,0 +1,16 @@
+import"./MerkleTree.zok" as MerkleTree
+import "utils/pack/bool/unpack.zok" as unpack
+
+def main<D>(\
+  field oldLeaf, \
+  field oldRoot, \
+  field newLeaf, \
+  field newRoot, \
+  field pathIndices, \
+  field[D] pathElements) -> bool:
+  bool[D] pathIndicesUnpacked = unpack::<D>(pathIndices)
+  field calcOldRoot = MerkleTree(oldLeaf, pathIndicesUnpacked, pathElements)
+  assert(oldRoot == calcOldRoot)
+  field calcNewRoot = MerkleTree(newLeaf, pathIndicesUnpacked, pathElements)
+  assert(newRoot == calcNewRoot)
+  return true

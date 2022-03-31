@@ -12,9 +12,9 @@ fi
 
 
 BASE=$(cd "$(dirname "$0")";pwd)
-ROOT="${BASE}/.."
-BUILD="${ROOT}/build"
-SRC="${ROOT}/src"
+ROOT="${BASE}/../.."
+BUILD="${ROOT}/build/circom"
+SRC="${ROOT}/circuits/circom"
 DIST="${ROOT}/dist/circom/dev"
 CIRCUIT="$1"
 
@@ -24,8 +24,8 @@ if [ ! -f "${BUILD}/ptau${POWERS_OF_TAU}" ]; then
   curl -L "https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${POWERS_OF_TAU}.ptau" --create-dirs -o "${BUILD}/ptau${POWERS_OF_TAU}"
 fi
 
-echo "Building circuit for ${ROOT}/circuits/${CIRCUIT}.circom"
-circom --r1cs --wasm --sym --output "${BUILD}" "${ROOT}/circuits/${CIRCUIT}.circom"
+echo "Building circuit for ${SRC}/${CIRCUIT}.circom"
+circom --r1cs --wasm --sym --output "${BUILD}" "${SRC}/${CIRCUIT}.circom"
 npx snarkjs groth16 setup "${BUILD}/${CIRCUIT}.r1cs" "${BUILD}/ptau${POWERS_OF_TAU}" "${BUILD}/tmp_${CIRCUIT}.zkey"
 echo "qwe" | npx snarkjs zkey contribute "${BUILD}/tmp_${CIRCUIT}.zkey" "${BUILD}/${CIRCUIT}.zkey"
 npx snarkjs zkey verify "${BUILD}/${CIRCUIT}.r1cs" "${BUILD}/ptau${POWERS_OF_TAU}" "${BUILD}/${CIRCUIT}.zkey"

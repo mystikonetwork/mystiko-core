@@ -1,0 +1,4 @@
+import "hashes/poseidon/poseidon" as poseidon
+
+def main(field secretKey, private field randomP) -> field:
+  return poseidon([randomP, secretKey])
