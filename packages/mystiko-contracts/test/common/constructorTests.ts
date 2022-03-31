@@ -1,42 +1,35 @@
 import { MerkleTree } from '@mystikonetwork/protocol';
+import { WithdrawVerifier } from '../../typechain';
+
+const { expect } = require('chai');
 
 export function testConstructor(
-  contractDeploy,
-  contractGetter,
-  withdrawVerifierGetter,
-  {
-    treeHeight = 20,
-    rootHistoryLength = 30,
-    minBridgeFee = undefined,
-    minExecutorFee = undefined,
-    minRollupFee = undefined,
-  },
+  mystikoContract: any,
+  withdrawVerifierContract: WithdrawVerifier,
+  treeHeight: number,
+  rootHistoryLength: number,
+  minBridgeFee: number | undefined,
+  minExecutorFee: number | undefined,
+  minRollupFee: number,
 ) {
   describe('Test Mystiko contract constructor', () => {
-    let mystikoContract;
-    let withdrawVerifierContract;
-    before(async () => {
-      if (contractDeploy) {
-        await contractDeploy();
-      }
-      mystikoContract = await contractGetter();
-      withdrawVerifierContract = await withdrawVerifierGetter();
-    });
+    before(async () => {});
+
     it('should initialize withdraw verifier correctly', async () => {
       expect(await mystikoContract.withdrawVerifier()).to.equal(withdrawVerifierContract.address);
     });
-    if (minBridgeFee) {
+    if (minBridgeFee !== undefined) {
       it('should initialize minBridgeFee correctly', async () => {
-        expect((await mystikoContract.minBridgeFee()).toString()).to.equal(minBridgeFee);
+        expect(await mystikoContract.minBridgeFee()).to.equal(minBridgeFee);
       });
     }
-    if (minExecutorFee) {
+    if (minExecutorFee !== undefined) {
       it('should initialize minExecutorFee correctly', async () => {
-        expect((await mystikoContract.minExecutorFee()).toString()).to.equal(minExecutorFee);
+        expect(await mystikoContract.minExecutorFee()).to.equal(minExecutorFee);
       });
     }
     it('should initialize minRollupFee correctly', async () => {
-      expect((await mystikoContract.minRollupFee()).toString()).to.equal(minRollupFee);
+      expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
     });
     it('should initialize depositQueue related resources correctly', async () => {
       expect((await mystikoContract.depositQueueSize()).toNumber()).to.equal(0);
@@ -47,9 +40,9 @@ export function testConstructor(
       const zeros = MerkleTree.calcZeros(defaultZero, treeHeight);
       expect((await mystikoContract.treeCapacity()).toNumber()).to.equal(2 ** treeHeight);
       expect((await mystikoContract.currentRoot()).toString()).to.equal(zeros[treeHeight].toString());
-      expect((await mystikoContract.currentRootIndex()).toNumber()).to.equal(0);
+      expect(await mystikoContract.currentRootIndex()).to.equal(0);
       expect((await mystikoContract.rootHistory(0)).toString()).to.equal(zeros[treeHeight].toString());
-      expect((await mystikoContract.rootHistoryLength()).toNumber()).to.equal(rootHistoryLength);
+      expect(await mystikoContract.rootHistoryLength()).to.equal(rootHistoryLength);
     });
     it('should initialize admin related resources correctly', async () => {
       expect(await mystikoContract.isDepositsDisabled()).to.equal(false);

@@ -2,3 +2,4 @@
 .env.test
 contracts/artifacts
 contracts/**/artifacts
+contracts/artifactsExternal
