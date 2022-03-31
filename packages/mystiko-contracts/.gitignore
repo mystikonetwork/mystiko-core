@@ -1,5 +1,6 @@
 .env
 .env.test
-contracts/artifacts
-contracts/**/artifacts
-contracts/artifactsExternal
+artifacts
+artifactsExternal
+cache
+typechain
