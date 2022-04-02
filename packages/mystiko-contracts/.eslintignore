@@ -3,4 +3,3 @@ node_modules/*
 hardhat.config.ts
 typechain
 deploy
-truffle-config.js

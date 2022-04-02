@@ -4,11 +4,27 @@ import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from 'hardhat/types';
 import './scripts/compileHasher.hardhat';
+import { task } from 'hardhat/config';
+import { deploy } from './deploy/deploy';
+
 dotenv.config();
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task('migrate', 'Prints the list of accounts')
+  .addParam('dst', 'ropsten、goerli、bsctestnet')
+  .addParam('step', 'step1、step2、step3、updateProxy')
+  .addParam('bridge', 'loop、tbridge、celer')
+  .addParam('token', 'ETH、BNB、MTT、mUSD')
+  .setAction(async (taskArgs, hre) => {
+    // const accounts = await hre.ethers.getSigners();
+    // const provider = await hre.ethers.getDefaultProvider();
+    taskArgs.src = hre.network.name;
+    await deploy(taskArgs, hre);
+  });
 
 const DEFAULT_ENDPOINT = 'http://localhost:8545';
 const DEFAULT_PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -122,8 +138,8 @@ const config: HardhatUserConfig = {
     externalArtifacts: ['artifactsExternal/*.json'],
   },
   mocha: {
-    timeout: 600000
-  }
+    timeout: 600000,
+  },
 };
 
 export default config;

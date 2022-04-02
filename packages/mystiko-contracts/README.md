@@ -3,41 +3,53 @@ This package contains the Smart Contract written in Solidity
 
 ### Deploy Smart Contracts
 #### Deploy Step 1
-deploy hash contract and verifier contract, parameter:
+deploy verifier contract and rollup contract, parameter:
 
 ```
-   step              : step1
+ step                : step1
+ bridge              : tbridge、celer、poly、loop
+ dst                 : ropsten、bsctestnet ...
+ token               : ETH、MTT、mUSD、BNB...
 ```
 example:
 
-```yarn deploy:bsctestnet  testnet  step1```
+```yarn deploy --network bsctestnet --step step1 --bridge celer --dst goerli --token MTT```
 
 #### Deploy Step 2
 deploy mystiko core contract, parameter
 ```
  step                : step2
- bridge name         : tbridge、celer、poly、loop
- destination network : ropsten、bsctestnet ...
- token name          : ETH、MTT、mUSD、BNB...
-
+ bridge              : tbridge、celer、poly、loop
+ dst                 : ropsten、bsctestnet ...
+ token               : ETH、MTT、mUSD、BNB...
 ```
 example:
 
-``` yarn deploy:bsctestnet  testnet  step2 celer goerli ETH```
+```yarn deploy --network bsctestnet --step step2 --bridge celer --dst goerli --token MTT```
 
 #### Deploy Step 3
 configure peer contract address, parameter:
-
 ```
  step                : step3
- bridge name         : tbridge、celer、poly、loop
- destination network : ropsten、bsctestnet ...
- token name          : ETH、MTT、mUSD、BNB...
-
+ bridge              : tbridge、celer、poly、loop
+ dst                 : ropsten、bsctestnet ...
+ token               : ETH、MTT、mUSD、BNB...
 ```
 example:
 
-``` yarn deploy:bsctestnet  testnet  step3 celer goerli ETH```
+```yarn deploy --network bsctestnet --step step3 --bridge celer --dst goerli --token MTT```
+
+#### update contract bridge proxy
+update contract bridge proxy address, parameter:
+```
+ step                : updateProxy
+ bridge              : tbridge、celer、poly、loop
+ dst                 : ropsten、bsctestnet ...
+ token               : ETH、MTT、mUSD、BNB...
+```
+example:
+
+```yarn deploy --network bsctestnet --step updateProxy --bridge celer --dst goerli --token MTT```
 
 ### Test the deployed contract
 We need to update the config file first and execute the following command
