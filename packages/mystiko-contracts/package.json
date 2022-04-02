@@ -19,7 +19,7 @@
     "build:hasher": "hardhat compile-hasher",
     "build:contract": "hardhat compile",
     "build:typechain": "hardhat typechain",
-    "build": "yarn build:contract && yarn build:typechain && yarn build:hasher",
+    "build": "yarn build:contract && yarn build:hasher && yarn build:typechain",
     "test": "hardhat test",
     "integration": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 600000 --delay --exit",
    "deploy:chain": "hardhat migrate --config hardhat.config.deploy.ts"
