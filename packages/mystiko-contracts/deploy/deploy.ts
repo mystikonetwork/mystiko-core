@@ -442,7 +442,7 @@ export async function deploy(taskArgs: any, hre: any) {
   ethers = hre.ethers;
   await initContractFactory();
 
-  const { step } = taskArgs.step;
+  const { step } = taskArgs;
   if (step === 'step1') {
     await deployStep1(taskArgs);
   } else if (step === 'step2') {

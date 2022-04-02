@@ -19,11 +19,10 @@
     "build:hasher": "hardhat compile-hasher",
     "build:contract": "hardhat compile",
     "build:typechain": "hardhat typechain",
-    "build": "yarn build:hasher && yarn build:contract && yarn build:typechain",
+    "build": "yarn build:contract && yarn build:typechain && yarn build:hasher",
     "test": "hardhat test",
     "integration": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 600000 --delay --exit",
-    "deploy:dev": "truffle exec deploy/deploy.js --network development step1 && truffle exec deploy/deploy.js --network development step2  loop development ETH &&  truffle exec deploy/deploy.js --network development step3  loop development ETH ",
-    "deploy": "hardhat migrate"
+   "deploy:chain": "hardhat migrate --config hardhat.config.deploy.ts"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.8",
