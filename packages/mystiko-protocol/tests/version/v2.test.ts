@@ -258,7 +258,7 @@ test('test zkProveRollup4', async () => {
   ).rejects.toThrow();
 });
 
-test('test zkProveRollup16', async () => {
+test.skip('test zkProveRollup16', async () => {
   const tree = new MerkleTree(
     [
       toBN('100'),
