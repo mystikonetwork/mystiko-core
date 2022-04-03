@@ -1,4 +1,4 @@
-import { MerkleTree } from '@mystikonetwork/protocol';
+import { MerkleTree } from '@mystikonetwork/utils';
 import { WithdrawVerifier } from '../../typechain';
 
 const { expect } = require('chai');

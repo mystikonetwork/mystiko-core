@@ -1,4 +1,4 @@
-import { v1Protocol } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { Wallet } from '@ethersproject/wallet';
 import { TestToken } from '../../typechain';
@@ -28,6 +28,7 @@ export function testBridgeDeposit(
   const numOfCommitments = commitments.length;
   const bridgeAccount = accounts[BridgeAccountIndex];
   const bridgeMessages: any[] = [];
+  const v1Protocol = new MystikoProtocolV1();
 
   describe('Test Mystiko deposit operation', () => {
     before(async () => {

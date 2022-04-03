@@ -49,7 +49,7 @@ def checkOwnerships<N>(\
   field[N] publicKeys, \
   BabyJubJubParams context) -> bool:
   for u32 i in 0..N do
-    bool match = ownershipChecker(secretKeys[i], publicKeys[i], context)
+    bool match = ownershipChecker(publicKeys[i], secretKeys[i], context)
     assert(match)
   endfor
   return true

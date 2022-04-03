@@ -1,4 +1,4 @@
-import { toBN } from '@mystikonetwork/utils';
+import { toBN } from './bignumber';
 
 /* eslint-disable-next-line import/prefer-default-export */
 export const FIELD_SIZE = toBN(

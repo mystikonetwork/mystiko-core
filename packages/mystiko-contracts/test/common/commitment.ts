@@ -1,4 +1,4 @@
-import { v1Protocol } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { toBN } from '@mystikonetwork/utils';
 
 export interface CommitmentInfo {
@@ -7,8 +7,9 @@ export interface CommitmentInfo {
 }
 
 export async function constructCommitment(size: number, depositAmount: string): Promise<CommitmentInfo> {
-  const rawSkVerify = v1Protocol.randomBytes(v1Protocol.VERIFY_SK_SIZE);
-  const rawSkEnc = v1Protocol.randomBytes(v1Protocol.ENCRYPT_SK_SIZE);
+  const v1Protocol = new MystikoProtocolV1();
+  const rawSkVerify = v1Protocol.randomBytes(v1Protocol.verifySkSize);
+  const rawSkEnc = v1Protocol.randomBytes(v1Protocol.encSkSize);
   const pkVerify = v1Protocol.publicKeyForVerification(rawSkVerify);
   // const skVerify = v1Protocol.secretKeyForVerification(rawSkVerify);
   const pkEnc = v1Protocol.publicKeyForEncryption(rawSkEnc);

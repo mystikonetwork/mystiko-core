@@ -2,3 +2,4 @@ build/*
 node_modules/*
 coverage/*
 jest.config.js
+src/types/*.d.ts

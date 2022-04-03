@@ -1,7 +1,9 @@
 import { ethers } from 'ethers';
 import BN from 'bn.js';
 import { poseidon } from 'circomlibjs';
-import { check, toHexNoPrefix, toBN } from '@mystikonetwork/utils';
+import { check } from './check';
+import { toHexNoPrefix } from './convert';
+import { toBN } from './bignumber';
 import { FIELD_SIZE } from './constants';
 
 export interface MerkleTreeOption {

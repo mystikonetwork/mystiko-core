@@ -1,6 +1,6 @@
 import { Wallet } from '@ethersproject/wallet';
-import { MerkleTree, v1Protocol } from '@mystikonetwork/protocol';
-import { toBN } from '@mystikonetwork/utils';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
+import { toBN, MerkleTree } from '@mystikonetwork/utils';
 import { TestToken } from '../../typechain';
 import {
   MerkleTreeHeight,
@@ -31,6 +31,7 @@ async function generateProof(
   treeHeight: number,
   rollupSize: number,
 ) {
+  const v1Protocol = new MystikoProtocolV1();
   const oldLeaves = [];
   const depositsInQueue = [];
   const newLeaves = [];
@@ -51,36 +52,36 @@ async function generateProof(
   expect(tree.root().toString()).to.equal(currentRoot);
   let proof: any;
   if (rollupSize === 1) {
-    proof = await v1Protocol.zkProveRollup1(
+    proof = await v1Protocol.zkProveRollup({
       tree,
-      newLeaves[0],
-      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.wasm.gz',
-      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.zkey.gz',
-    );
+      newLeaves,
+      wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.wasm.gz',
+      zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.zkey.gz',
+    });
   } else if (rollupSize === 4) {
-    proof = await v1Protocol.zkProveRollup4(
+    proof = await v1Protocol.zkProveRollup({
       tree,
       newLeaves,
-      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.wasm.gz',
-      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.zkey.gz',
-    );
+      wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.wasm.gz',
+      zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.zkey.gz',
+    });
   } else if (rollupSize === 16) {
-    proof = await v1Protocol.zkProveRollup16(
+    proof = await v1Protocol.zkProveRollup({
       tree,
       newLeaves,
-      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.wasm.gz',
-      'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.zkey.gz',
-    );
+      wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.wasm.gz',
+      zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.zkey.gz',
+    });
   }
   expect(proof).to.not.equal(undefined);
-  const proofA = [proof.proof.pi_a[0], proof.proof.pi_a[1]];
+  const proofA = [proof.proof.a[0], proof.proof.a[1]];
   const proofB = [
-    [proof.proof.pi_b[0][1], proof.proof.pi_b[0][0]],
-    [proof.proof.pi_b[1][1], proof.proof.pi_b[1][0]],
+    [proof.proof.b[0][1], proof.proof.b[0][0]],
+    [proof.proof.b[1][1], proof.proof.b[1][0]],
   ];
-  const proofC = [proof.proof.pi_c[0], proof.proof.pi_c[1]];
-  const newRoot = proof.publicSignals[1];
-  const leafHash = proof.publicSignals[3];
+  const proofC = [proof.proof.c[0], proof.proof.c[1]];
+  const newRoot = proof.inputs[1];
+  const leafHash = proof.inputs[3];
   return {
     depositIncludedCount,
     currentRoot,
@@ -111,6 +112,7 @@ export function testRollup(
   let proof: any;
   const rollupAccount = accounts[RollupAccountIndex1];
   const rollupAccount2 = accounts[RollupAccountIndex2];
+  const v1Protocol = new MystikoProtocolV1();
 
   describe(`Test Mystiko rollup ${rollupSize} operation`, () => {
     before(async () => {

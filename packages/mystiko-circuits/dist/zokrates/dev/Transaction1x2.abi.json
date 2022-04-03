@@ -6,14 +6,22 @@
       "type": "field"
     },
     {
-      "name": "serialNumber",
+      "name": "serialNumbers",
       "public": true,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
-      "name": "sigHash",
+      "name": "sigHashes",
       "public": true,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "sigPublicKey",
@@ -49,47 +57,79 @@
       }
     },
     {
-      "name": "inCommitment",
+      "name": "inCommitments",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inAmount",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inRandomP",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inRandomR",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inRandomS",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inSecretKey",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inPublicKey",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     },
     {
       "name": "inPathElements",
       "public": false,
       "type": "array",
       "components": {
-        "size": 20,
-        "type": "field"
+        "size": 1,
+        "type": "array",
+        "components": {
+          "size": 20,
+          "type": "field"
+        }
       }
     },
     {
@@ -97,8 +137,12 @@
       "public": false,
       "type": "array",
       "components": {
-        "size": 20,
-        "type": "bool"
+        "size": 1,
+        "type": "array",
+        "components": {
+          "size": 20,
+          "type": "bool"
+        }
       }
     },
     {

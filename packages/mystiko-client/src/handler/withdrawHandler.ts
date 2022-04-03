@@ -5,6 +5,7 @@ import {
   check,
   errorMessage,
   logger as rootLogger,
+  MerkleTree,
   toBN,
   toBuff,
   toFixedLenHex,
@@ -392,37 +393,36 @@ export class WithdrawHandler extends Handler {
     if (!circuitConfig || !circuitConfig.wasmFile || !circuitConfig.zkeyFile || !circuitConfig.vkeyFile) {
       return Promise.reject(new Error('circuit config does not contain all required fields'));
     }
-    const zkProof = await this.protocol.zkProveWithdraw(
+    const merkleTree = new MerkleTree(leaves, { maxLevels: this.protocol.merkleTreeLevels });
+    const { pathIndices, pathElements } = merkleTree.path(leafIndex);
+    const zkProof = await this.protocol.zkProveTransaction({
       pkVerify,
       skVerify,
       pkEnc,
       skEnc,
-      privateNote.amount,
-      withdraw.recipientAddress,
-      privateNote.commitmentHash,
-      privateNote.encryptedOnChainNote,
-      leaves,
-      leafIndex,
-      circuitConfig.wasmFile,
-      circuitConfig.zkeyFile,
-    );
-    const validProof = await this.protocol.zkVerify(
-      zkProof.proof,
-      zkProof.publicSignals,
-      circuitConfig.vkeyFile,
-    );
+      amount: privateNote.amount,
+      recipient: withdraw.recipientAddress,
+      commitmentHash: privateNote.commitmentHash,
+      privateNote: privateNote.encryptedOnChainNote,
+      treeRoot: merkleTree.root(),
+      pathIndices,
+      pathElements,
+      wasmFile: circuitConfig.wasmFile,
+      zkeyFile: circuitConfig.zkeyFile,
+    });
+    const validProof = await this.protocol.zkVerify(zkProof, circuitConfig.vkeyFile);
     check(validProof, 'generated an invalid proof');
     this.logger.info(`successfully generated zkSnark proofs for withdraw(id=${withdraw.id})`);
-    const { proof, publicSignals } = zkProof;
-    const proofA = [proof.pi_a[0], proof.pi_a[1]];
+    const { proof, inputs } = zkProof;
+    const proofA = [proof.a[0], proof.a[1]];
     const proofB = [
-      [proof.pi_b[0][1], proof.pi_b[0][0]],
-      [proof.pi_b[1][1], proof.pi_b[1][0]],
+      [proof.b[0][1], proof.b[0][0]],
+      [proof.b[1][1], proof.b[1][0]],
     ];
-    const proofC = [proof.pi_c[0], proof.pi_c[1]];
-    const rootHash = publicSignals[0];
-    const serialNumber = publicSignals[1];
-    const amount = publicSignals[2];
+    const proofC = [proof.c[0], proof.c[1]];
+    const rootHash = inputs[0];
+    const serialNumber = inputs[1];
+    const amount = inputs[2];
     await this.updateStatus(withdraw, WithdrawStatus.PROOF_GENERATED, statusCallback);
     return { proofA, proofB, proofC, rootHash, serialNumber, amount };
   }

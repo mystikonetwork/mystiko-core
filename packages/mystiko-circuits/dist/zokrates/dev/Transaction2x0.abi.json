@@ -39,6 +39,24 @@
       "type": "field"
     },
     {
+      "name": "outCommitments",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    },
+    {
+      "name": "rollupFeeAmounts",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    },
+    {
       "name": "inCommitments",
       "public": false,
       "type": "array",
@@ -128,7 +146,43 @@
       }
     },
     {
-      "name": "emptyField",
+      "name": "outAmount",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outRandomP",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outRandomR",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outRandomS",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 0,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outPublicKey",
       "public": false,
       "type": "array",
       "components": {

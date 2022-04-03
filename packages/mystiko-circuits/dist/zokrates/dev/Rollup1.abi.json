@@ -30,9 +30,13 @@
       }
     },
     {
-      "name": "leaf",
+      "name": "leaves",
       "public": false,
-      "type": "field"
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
     }
   ],
   "outputs": []

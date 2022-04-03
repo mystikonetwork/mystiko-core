@@ -7,6 +7,8 @@ def main(\
   field sigPublicKey, \
   field publicAmount, \
   field relayerFeeAmount, \
+  field[0] outCommitments, \
+  field[0] rollupFeeAmounts, \
   private field[2] inCommitments, \
   private field[2] inAmount, \
   private field[2] inRandomP, \
@@ -16,7 +18,11 @@ def main(\
   private field[2] inPublicKey, \
   private field[2][20] inPathElements, \
   private bool[2][20] inPathIndices, \
-  private field[0] emptyField):
+  private field[0] outAmount, \
+  private field[0] outRandomP, \
+  private field[0] outRandomR, \
+  private field[0] outRandomS, \
+  private field[0] outPublicKey):
   assert(JoinSplit::<20, 2, 0>(\
     root, \
     serialNumbers, \
@@ -24,8 +30,8 @@ def main(\
     sigPublicKey, \
     publicAmount, \
     relayerFeeAmount, \
-    emptyField, \
-    emptyField, \
+    outCommitments, \
+    rollupFeeAmounts, \
     inCommitments, \
     inAmount, \
     inRandomP, \
@@ -35,9 +41,9 @@ def main(\
     inPublicKey, \
     inPathElements, \
     inPathIndices, \
-    emptyField, \
-    emptyField, \
-    emptyField, \
-    emptyField, \
-    emptyField))
+    outAmount, \
+    outRandomP, \
+    outRandomR, \
+    outRandomS, \
+    outPublicKey))
   return

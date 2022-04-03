@@ -1,4 +1,4 @@
-import { v1Protocol } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { Wallet } from '@ethersproject/wallet';
 import { TestToken } from '../../typechain';
@@ -18,6 +18,7 @@ export function testLoopDeposit(
 ) {
   let minTotalAmount: string;
   let minRollupFee: number;
+  const v1Protocol = new MystikoProtocolV1();
   const { commitments } = cmInfo;
   const { mystikoAddress } = cmInfo;
   const numOfCommitments = commitments.length;

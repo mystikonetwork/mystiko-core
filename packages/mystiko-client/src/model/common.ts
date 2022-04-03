@@ -1,5 +1,5 @@
 import { deepCopy, isBN } from '@mystikonetwork/utils';
-import { v1Protocol, V1ProtocolInterface } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 
 /**
  * @memberOf module:mystiko/models
@@ -22,7 +22,7 @@ export interface RawBaseModel {
 export class BaseModel {
   public readonly data: Object;
 
-  protected readonly protocol: V1ProtocolInterface;
+  protected readonly protocol: MystikoProtocolV1;
 
   constructor(data: Object = {}) {
     if (data instanceof BaseModel) {
@@ -30,7 +30,7 @@ export class BaseModel {
     } else {
       this.data = deepCopy(data);
     }
-    this.protocol = v1Protocol;
+    this.protocol = new MystikoProtocolV1();
   }
 
   /**

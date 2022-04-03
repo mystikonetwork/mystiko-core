@@ -1,4 +1,4 @@
-import { toBN } from '@mystikonetwork/utils';
+import { toBN } from '../src';
 import { MerkleTree } from '../src/merkle';
 
 test('test calcZeros', () => {

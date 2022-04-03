@@ -6,13 +6,13 @@ def main(\
   field leavesHash, \
   field pathIndices, \
   private field[20] pathElements, \
-  private field leaf):
+  private field[1] leaves):
   assert(MerkleTreeBatchUpdater::<20, 20, 1>(\
     oldRoot, \
     newRoot, \
     leavesHash, \
     pathIndices, \
     pathElements, \
-    [leaf] \
+    leaves \
   ))
   return
