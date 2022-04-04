@@ -1,13 +1,11 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { CompilationArtifacts, Proof, VerificationKey, ZoKratesProvider } from 'zokrates-js';
+import { Proof } from 'zokrates-js';
 import {
   check,
   FIELD_SIZE,
   logger,
   MerkleTree,
-  readCompressedFile,
-  readJsonFile,
   toBN,
   toFixedLenHexNoPrefix,
   toHex,
@@ -16,6 +14,7 @@ import {
 } from '@mystikonetwork/utils';
 import { CommitmentV1, CommitmentArgsV1, MystikoProtocolV1 } from './v1';
 import { MystikoProtocol } from '../base';
+import { ZokratesRuntime } from '../runtime';
 
 export interface TransactionV2 {
   numInputs: number;
@@ -59,13 +58,13 @@ export class MystikoProtocolV2 extends MystikoProtocol<
   TransactionV2,
   RollupV2
 > {
-  private readonly zokrates: ZoKratesProvider;
+  private readonly runtime: ZokratesRuntime;
 
   private readonly v1Protocol: MystikoProtocolV1;
 
-  constructor(zokrates: ZoKratesProvider) {
+  constructor(runtime: ZokratesRuntime) {
     super();
-    this.zokrates = zokrates;
+    this.runtime = runtime;
     this.v1Protocol = new MystikoProtocolV1();
   }
 
@@ -157,18 +156,12 @@ export class MystikoProtocolV2 extends MystikoProtocol<
       tx.outRandomSs.map((bn) => bn.toString()),
       tx.outVerifyPks.map((bn) => this.buffToBigInt(bn).toString()),
     ];
-    const program = await readCompressedFile(tx.programFile);
-    const abi = await readJsonFile(tx.abiFile);
-    const artifacts: CompilationArtifacts = { program, abi };
-    const { witness } = this.zokrates.computeWitness(artifacts, inputs);
-    logger.debug('witness calculation is done, start proving...');
-    const provingKey = await readCompressedFile(tx.provingKeyFile);
-    const proof = await this.zokrates.generateProof(program, witness, provingKey);
+    const proof = await this.runtime.prove(tx.programFile, tx.abiFile, tx.provingKeyFile, inputs);
     logger.debug('zkSnark proof is generated successfully');
     return proof;
   }
 
-  public async zkProveRollup(rollup: RollupV2): Promise<Proof> {
+  public zkProveRollup(rollup: RollupV2): Promise<Proof> {
     check(MystikoProtocolV2.isPowerOfTwo(rollup.newLeaves.length), 'newLeaves length should be power of 2');
     const rollupSize = rollup.newLeaves.length;
     const rollupHeight = Math.log2(rollupSize);
@@ -192,18 +185,12 @@ export class MystikoProtocolV2 extends MystikoProtocol<
       pathElements.map((bn) => bn.toString()),
       rollup.newLeaves.map((bn) => bn.toString()),
     ];
-    const program = await readCompressedFile(rollup.programFile);
-    const abi = await readJsonFile(rollup.abiFile);
-    const artifacts: CompilationArtifacts = { program, abi };
-    const { witness } = this.zokrates.computeWitness(artifacts, inputs);
-    const provingKey = await readCompressedFile(rollup.provingKeyFile);
-    return this.zokrates.generateProof(program, witness, provingKey);
+    return this.runtime.prove(rollup.programFile, rollup.abiFile, rollup.provingKeyFile, inputs);
   }
 
   public async zkVerify(proof: Proof, vkeyFile: string | string[]): Promise<boolean> {
-    const vkey: VerificationKey = (await readJsonFile(vkeyFile)) as VerificationKey;
     logger.debug('start verifying generated proofs...');
-    const result = this.zokrates.verify(vkey, proof);
+    const result = await this.runtime.verify(vkeyFile, proof);
     logger.debug(`proof verification is done, result=${result}`);
     return Promise.resolve(result);
   }

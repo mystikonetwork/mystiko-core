@@ -19,6 +19,7 @@ jobs:
           node-version: 14
       - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
+      - run: curl -LSfs get.zokrat.es | sh
       - run: npm install --global lerna ganache-cli
       - run: ganache-cli --port 7545 > /dev/null &
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
