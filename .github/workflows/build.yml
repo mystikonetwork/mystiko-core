@@ -9,8 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      PATH: "$PATH:$HOME/.zokrates/bin"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,6 +20,7 @@ jobs:
       - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
       - run: curl -LSfs get.zokrat.es | sh
+      - run: echo "$HOME/.zokrates/bin" >> $GITHUB_PATH
       - run: npm install --global lerna ganache-cli
       - run: ganache-cli --port 7545 > /dev/null &
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
@@ -30,7 +29,7 @@ jobs:
       - run: lerna run lint
       - run: lerna run test
       - run: lerna run deploy --scope @mystikonetwork/contracts
-      - name: Report @mystikonetwork/utils test coverage
+      - name: Report @mystikone twork/utils test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-utils
