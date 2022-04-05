@@ -1,4 +1,4 @@
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 export function testAdminOperations(mystikoContract: any, accounts: any[]) {
   describe('Test Mystiko admin operations', () => {
@@ -37,20 +37,47 @@ export function testAdminOperations(mystikoContract: any, accounts: any[]) {
       expect(await mystikoContract.isVerifierUpdateDisabled()).to.equal(false);
     });
 
-    it('should setWithdrawVerifier correctly', async () => {
+    it('should enableTransactVerifier correctly', async () => {
       await expect(
         mystikoContract
           .connect(accounts[1])
-          .setWithdrawVerifier('0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f'),
+          .enableTransactVerifier(1, 0, '0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f'),
       ).to.be.revertedWith('Only operator can call this function.');
 
-      await mystikoContract.setWithdrawVerifier('0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f');
-      expect(await mystikoContract.withdrawVerifier()).to.equal('0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f');
+      await expect(
+        mystikoContract.enableTransactVerifier(0, 0, '0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f'),
+      ).to.be.revertedWith('numInputs should > 0');
+
+      await mystikoContract.enableTransactVerifier(1, 0, '0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f');
+      const verifier = await mystikoContract.transactVerifiers(1, 0);
+      expect(verifier.verifier).to.equal('0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f');
+      expect(verifier.enabled).to.equal(true);
 
       await mystikoContract.toggleVerifierUpdate(true);
       await expect(
-        mystikoContract.setWithdrawVerifier('0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f'),
+        mystikoContract.enableTransactVerifier(1, 0, '0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f'),
       ).to.be.revertedWith('Verifier updates have been disabled.');
+      await mystikoContract.toggleVerifierUpdate(false);
+    });
+
+    it('should disableTransactVerifier correctly', async () => {
+      await expect(mystikoContract.connect(accounts[1]).disableTransactVerifier(1, 0)).to.be.revertedWith(
+        'Only operator can call this function.',
+      );
+
+      await expect(mystikoContract.disableTransactVerifier(0, 0)).to.be.revertedWith('numInputs should > 0');
+
+      await mystikoContract.enableTransactVerifier(1, 0, '0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f');
+      await mystikoContract.disableTransactVerifier(1, 0);
+
+      const verifier = await mystikoContract.transactVerifiers(1, 0);
+      expect(verifier.verifier).to.equal('0xfbb61B8b98a59FbC4bD79C23212AddbEFaEB289f');
+      expect(verifier.enabled).to.equal(false);
+
+      await mystikoContract.toggleVerifierUpdate(true);
+      await expect(mystikoContract.disableTransactVerifier(1, 0)).to.be.revertedWith(
+        'Verifier updates have been disabled.',
+      );
       await mystikoContract.toggleVerifierUpdate(false);
     });
 

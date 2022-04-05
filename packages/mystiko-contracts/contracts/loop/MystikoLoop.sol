@@ -8,7 +8,7 @@ import "../interface/IMystikoLoop.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-struct DepositLeaf {
+struct CommitmentLeaf {
   uint256 commitment;
   uint256 rollupFee;
 }
@@ -30,13 +30,13 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   mapping(uint32 => WrappedVerifier) public rollupVerifiers;
 
   // For checking duplicates.
-  mapping(uint256 => bool) public depositedCommitments;
+  mapping(uint256 => bool) public historicCommitments;
   mapping(uint256 => bool) public spentSerialNumbers;
 
-  // Deposit queue related.
-  mapping(uint256 => DepositLeaf) public depositQueue;
-  uint256 public depositQueueSize = 0;
-  uint256 public depositIncludedCount = 0;
+  // Commitment queue related.
+  mapping(uint256 => CommitmentLeaf) public commitmentQueue;
+  uint256 public commitmentQueueSize = 0;
+  uint256 public commitmentIncludedCount = 0;
 
   // Deposit merkle tree roots;
   uint256 public immutable treeCapacity;
@@ -93,11 +93,11 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   function deposit(DepositRequest memory request) external payable override {
     require(!isDepositsDisabled, "deposits are disabled");
     require(request.rollupFee >= minRollupFee, "rollup fee too few");
-    require(depositIncludedCount + depositQueueSize < treeCapacity, "tree is full");
-    require(!depositedCommitments[request.commitment], "the commitment has been submitted");
+    require(commitmentIncludedCount + commitmentQueueSize < treeCapacity, "tree is full");
+    require(!historicCommitments[request.commitment], "the commitment has been submitted");
     uint256 calculatedCommitment = _commitmentHash(request.hashK, request.amount, request.randomS);
     require(request.commitment == calculatedCommitment, "commitment hash incorrect");
-    depositedCommitments[request.commitment] = true;
+    historicCommitments[request.commitment] = true;
     _processDepositTransfer(request.amount + request.rollupFee, 0);
     _enqueueCommitment(request.commitment, request.rollupFee);
     emit EncryptedNote(request.commitment, request.encryptedNote);
@@ -107,21 +107,21 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     require(!isKnownRoot(request.newRoot), "newRoot is duplicated");
     require(
       request.rollupSize > 0 &&
-        request.rollupSize <= depositQueueSize &&
+        request.rollupSize <= commitmentQueueSize &&
         rollupVerifiers[request.rollupSize].enabled,
       "invalid rollupSize"
     );
-    require(depositIncludedCount % request.rollupSize == 0, "invalid rollupSize at current state");
-    uint256 pathIndices = _pathIndices(depositIncludedCount, request.rollupSize);
+    require(commitmentIncludedCount % request.rollupSize == 0, "invalid rollupSize at current state");
+    uint256 pathIndices = _pathIndices(commitmentIncludedCount, request.rollupSize);
     uint256[] memory leaves = new uint256[](request.rollupSize);
     uint256 totalRollupFee = 0;
-    for (uint256 index = depositIncludedCount; index < depositIncludedCount + request.rollupSize; index++) {
-      require(depositQueue[index].commitment != 0, "index out of bound");
-      leaves[index - depositIncludedCount] = depositQueue[index].commitment;
-      totalRollupFee = totalRollupFee + depositQueue[index].rollupFee;
-      delete depositQueue[index];
-      depositQueueSize = depositQueueSize - 1;
-      emit CommitmentIncluded(depositQueue[index].commitment);
+    for (uint256 index = commitmentIncludedCount; index < commitmentIncludedCount + request.rollupSize; index++) {
+      require(commitmentQueue[index].commitment != 0, "index out of bound");
+      leaves[index - commitmentIncludedCount] = commitmentQueue[index].commitment;
+      totalRollupFee = totalRollupFee + commitmentQueue[index].rollupFee;
+      delete commitmentQueue[index];
+      commitmentQueueSize = commitmentQueueSize - 1;
+      emit CommitmentIncluded(commitmentQueue[index].commitment);
     }
     uint256 expectedLeafHash = uint256(keccak256(abi.encodePacked(leaves))) % FIELD_SIZE;
     require(request.leafHash == expectedLeafHash, "invalid leafHash");
@@ -133,7 +133,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     bool verified = rollupVerifiers[request.rollupSize].verifier.verifyTx(request.proof, inputs);
     require(verified, "invalid proof");
     _processRollupFeeTransfer(totalRollupFee);
-    depositIncludedCount = depositIncludedCount + request.rollupSize;
+    commitmentIncludedCount = commitmentIncludedCount + request.rollupSize;
     currentRoot = request.newRoot;
     currentRootIndex = (currentRootIndex + 1) % rootHistoryLength;
     rootHistory[currentRootIndex] = request.newRoot;
@@ -149,11 +149,11 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     uint32 numOutputs = uint32(request.outCommitments.length);
 
     // check input and output lengths.
-    require(transactVerifiers[numInputs][numOutputs].enabled, "invalid input/output length");
+    require(transactVerifiers[numInputs][numOutputs].enabled, "invalid i/o length");
     require(request.sigHashes.length == numInputs, "invalid sigHashes length");
     require(request.outRollupFees.length == numOutputs, "invalid outRollupFees length");
     require(request.outEncryptedNotes.length == numOutputs, "invalid outEncryptedNotes length");
-    require(depositIncludedCount + depositQueueSize + numOutputs <= treeCapacity, "tree is full");
+    require(commitmentIncludedCount + commitmentQueueSize + numOutputs <= treeCapacity, "tree is full");
 
     // check signature
     bytes32 hash = _transactRequestHash(request);
@@ -164,7 +164,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     uint256[] memory inputs = new uint256[](4 + 2 * numInputs + 2 * numOutputs);
 
     // check whether valid root.
-    require(isKnownRoot(request.rootHash), "invalid/outdated merkle tree root");
+    require(isKnownRoot(request.rootHash), "invalid root");
     inputs[0] = request.rootHash;
 
     // check serial numbers.
@@ -179,7 +179,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
 
     // check rollup fees and output commitments.
     for (uint32 i = 0; i < numOutputs; i++) {
-      require(!depositedCommitments[request.outCommitments[i]], "duplicate commitment");
+      require(!historicCommitments[request.outCommitments[i]], "duplicate commitment");
       require(request.outRollupFees[i] >= minRollupFee, "rollup fee too low");
       inputs[2 * numInputs + 4 + i] = request.outCommitments[i];
       inputs[2 * numInputs + numOutputs + 4 + i] = request.outRollupFees[i];
@@ -197,7 +197,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
 
     // enqueue output commitments.
     for (uint32 i = 0; i < numOutputs; i++) {
-      depositedCommitments[request.outCommitments[i]] = true;
+      historicCommitments[request.outCommitments[i]] = true;
       _enqueueCommitment(request.outCommitments[i], request.outRollupFees[i]);
       emit EncryptedNote(request.outCommitments[i], request.outEncryptedNotes[i]);
     }
@@ -305,9 +305,9 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   }
 
   function _enqueueCommitment(uint256 commitment, uint256 rollupFee) internal {
-    depositQueue[depositQueueSize] = DepositLeaf(commitment, rollupFee);
-    uint256 leafIndex = depositQueueSize + depositIncludedCount;
-    depositQueueSize = depositQueueSize + 1;
+    commitmentQueue[commitmentQueueSize] = CommitmentLeaf(commitment, rollupFee);
+    uint256 leafIndex = commitmentQueueSize + commitmentIncludedCount;
+    commitmentQueueSize = commitmentQueueSize + 1;
     emit CommitmentQueued(commitment, rollupFee, leafIndex);
   }
 

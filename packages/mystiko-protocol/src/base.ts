@@ -19,7 +19,7 @@ const ECIES_MAC_LENGTH = 32;
 const ECIES_META_LENGTH = ECIES_IV_LENGTH + ECIES_EPHEM_PK_LENGTH + ECIES_MAC_LENGTH;
 
 // eslint-disable-next-line import/prefer-default-export
-export abstract class MystikoProtocol<CI, CO, T, R = any> {
+export abstract class MystikoProtocol<CI = any, CO = any, T = any, R = any> {
   public get verifyPkSize(): number {
     return 32;
   }

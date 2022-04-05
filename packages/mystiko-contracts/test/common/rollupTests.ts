@@ -1,6 +1,7 @@
+import { expect } from 'chai';
 import { Wallet } from '@ethersproject/wallet';
-import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
-import { toBN, MerkleTree } from '@mystikonetwork/utils';
+import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { toBN, MerkleTree, toHexNoPrefix } from '@mystikonetwork/utils';
 import { TestToken } from '../../typechain';
 import {
   MerkleTreeHeight,
@@ -11,7 +12,6 @@ import {
 } from '../util/constants';
 
 const { waffle } = require('hardhat');
-const { expect } = require('chai');
 
 async function enableRollupVerifier(
   mystikoContract: any,
@@ -26,67 +26,67 @@ async function enableRollupVerifier(
 }
 
 async function generateProof(
-  commitments: any[],
+  protocol: MystikoProtocolV2,
+  commitments: CommitmentV1[],
   mystikoContract: any,
   treeHeight: number,
   rollupSize: number,
 ) {
-  const v1Protocol = new MystikoProtocolV1();
   const oldLeaves = [];
-  const depositsInQueue = [];
+  const commitmentsInQueue = [];
   const newLeaves = [];
-  const depositIncludedCount = (await mystikoContract.depositIncludedCount()).toNumber();
-  for (let i = 0; i < depositIncludedCount; i += 1) {
+  const commitmentIncludedCount = (await mystikoContract.commitmentIncludedCount()).toNumber();
+  for (let i = 0; i < commitmentIncludedCount; i += 1) {
     oldLeaves.push(commitments[i].commitmentHash);
   }
-  const depositQueueSize = (await mystikoContract.depositQueueSize()).toNumber();
-  expect(depositQueueSize).to.gte(rollupSize);
+  const commitmentQueueSize = (await mystikoContract.commitmentQueueSize()).toNumber();
+  expect(commitmentQueueSize).to.gte(rollupSize);
   const currentRootIndex = await mystikoContract.currentRootIndex();
   const currentRoot = (await mystikoContract.currentRoot()).toString();
   expect((await mystikoContract.rootHistory(`${currentRootIndex}`)).toString()).to.equal(currentRoot);
   for (let i = 0; i < rollupSize; i += 1) {
-    depositsInQueue.push(await mystikoContract.depositQueue(`${i + depositIncludedCount}`));
-    newLeaves.push(toBN(depositsInQueue[i].commitment.toString()));
+    commitmentsInQueue.push(await mystikoContract.commitmentQueue(`${i + commitmentIncludedCount}`));
+    newLeaves.push(toBN(commitmentsInQueue[i].commitment.toString()));
   }
   const tree = new MerkleTree(oldLeaves, { maxLevels: treeHeight });
   expect(tree.root().toString()).to.equal(currentRoot);
   let proof: any;
   if (rollupSize === 1) {
-    proof = await v1Protocol.zkProveRollup({
+    proof = await protocol.zkProveRollup({
       tree,
       newLeaves,
-      wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.wasm.gz',
-      zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup1.zkey.gz',
+      programFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.program.gz',
+      abiFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.abi.json',
+      provingKeyFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.pkey.gz',
     });
   } else if (rollupSize === 4) {
-    proof = await v1Protocol.zkProveRollup({
+    proof = await protocol.zkProveRollup({
       tree,
       newLeaves,
-      wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.wasm.gz',
-      zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup4.zkey.gz',
+      programFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.program.gz',
+      abiFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.abi.json',
+      provingKeyFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.pkey.gz',
     });
   } else if (rollupSize === 16) {
-    proof = await v1Protocol.zkProveRollup({
+    proof = await protocol.zkProveRollup({
       tree,
       newLeaves,
-      wasmFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.wasm.gz',
-      zkeyFile: 'node_modules/@mystikonetwork/circuits/dist/circom/dev/Rollup16.zkey.gz',
+      programFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.program.gz',
+      abiFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.abi.json',
+      provingKeyFile: 'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.pkey.gz',
     });
   }
   expect(proof).to.not.equal(undefined);
-  const proofA = [proof.proof.a[0], proof.proof.a[1]];
-  const proofB = [
-    [proof.proof.b[0][1], proof.proof.b[0][0]],
-    [proof.proof.b[1][1], proof.proof.b[1][0]],
-  ];
-  const proofC = [proof.proof.c[0], proof.proof.c[1]];
+  const proofA = proof.proof.a;
+  const proofB = proof.proof.b;
+  const proofC = proof.proof.c;
   const newRoot = proof.inputs[1];
-  const leafHash = proof.inputs[3];
+  const leafHash = proof.inputs[2];
   return {
-    depositIncludedCount,
+    commitmentIncludedCount,
     currentRoot,
     currentRootIndex,
-    depositQueueSize,
+    commitmentQueueSize,
     proofA,
     proofB,
     proofC,
@@ -96,6 +96,7 @@ async function generateProof(
 }
 
 export function testRollup(
+  protocol: MystikoProtocolV2,
   mystikoContract: any,
   rollupVerifierContract: any,
   testTokenContract: TestToken,
@@ -112,7 +113,6 @@ export function testRollup(
   let proof: any;
   const rollupAccount = accounts[RollupAccountIndex1];
   const rollupAccount2 = accounts[RollupAccountIndex2];
-  const v1Protocol = new MystikoProtocolV1();
 
   describe(`Test Mystiko rollup ${rollupSize} operation`, () => {
     before(async () => {
@@ -123,21 +123,19 @@ export function testRollup(
         rollupAccount,
         rollupAccount2,
       );
-      proof = await generateProof(commitments, mystikoContract, treeHeight, rollupSize);
+      proof = await generateProof(protocol, commitments, mystikoContract, treeHeight, rollupSize);
     });
 
     it('should revert known root', async () => {
       await expect(
         mystikoContract
           .connect(rollupAccount)
-          .rollup(
-            proof.proofA,
-            proof.proofB,
-            proof.proofC,
+          .rollup([
+            [proof.proofA, proof.proofB, proof.proofC],
             `${rollupSize}`,
             proof.currentRoot,
             proof.leafHash,
-          ),
+          ]),
       ).to.be.revertedWith('newRoot is duplicated');
     });
 
@@ -145,7 +143,7 @@ export function testRollup(
       expect(
         mystikoContract
           .connect(rollupAccount)
-          .rollup(proof.proofA, proof.proofB, proof.proofC, 1234, proof.newRoot, proof.leafHash),
+          .rollup([[proof.proofA, proof.proofB, proof.proofC], 1234, proof.newRoot, proof.leafHash]),
       ).to.be.revertedWith('invalid rollupSize');
     });
 
@@ -153,14 +151,12 @@ export function testRollup(
       expect(
         mystikoContract
           .connect(rollupAccount)
-          .rollup(
-            proof.proofA,
-            proof.proofB,
-            proof.proofC,
+          .rollup([
+            [proof.proofA, proof.proofB, proof.proofC],
             `${rollupSize}`,
             proof.newRoot,
-            v1Protocol.randomBigInt().toString(),
-          ),
+            protocol.randomBigInt().toString(),
+          ]),
       ).to.be.revertedWith('invalid leafHash');
     });
 
@@ -168,14 +164,12 @@ export function testRollup(
       expect(
         mystikoContract
           .connect(rollupAccount)
-          .rollup(
-            proof.proofA,
-            proof.proofB,
-            proof.proofC,
+          .rollup([
+            [proof.proofA, proof.proofB, proof.proofC],
             `${rollupSize}`,
-            v1Protocol.randomBigInt().toString(),
+            protocol.randomBigInt().toString(),
             proof.leafHash,
-          ),
+          ]),
       ).to.be.revertedWith('invalid proof');
     });
 
@@ -186,7 +180,7 @@ export function testRollup(
 
       const rollupTx = await mystikoContract
         .connect(rollupAccount2)
-        .rollup(proof.proofA, proof.proofB, proof.proofC, `${rollupSize}`, proof.newRoot, proof.leafHash);
+        .rollup([[proof.proofA, proof.proofB, proof.proofC], `${rollupSize}`, proof.newRoot, proof.leafHash]);
 
       const txReceipt = await waffle.provider.getTransactionReceipt(rollupTx.hash);
       const totalGasFee = txReceipt.cumulativeGasUsed.mul(txReceipt.effectiveGasPrice);
@@ -201,16 +195,18 @@ export function testRollup(
       const expectRollupFee = toBN(rollupFee).muln(rollupSize).toString();
       expect(totalRollupFee.toString()).to.equal(expectRollupFee.toString());
 
-      expect((await mystikoContract.depositIncludedCount()).toNumber()).to.equal(
-        proof.depositIncludedCount + rollupSize,
+      expect((await mystikoContract.commitmentIncludedCount()).toNumber()).to.equal(
+        proof.commitmentIncludedCount + rollupSize,
       );
-      expect((await mystikoContract.currentRoot()).toString()).to.equal(proof.newRoot);
+      expect((await mystikoContract.currentRoot()).toString()).to.equal(
+        toBN(toHexNoPrefix(proof.newRoot), 16).toString(),
+      );
       expect(await mystikoContract.currentRootIndex()).to.equal(
         (proof.currentRootIndex + 1) % rootHistoryLength,
       );
       expect(await mystikoContract.isKnownRoot(proof.newRoot)).to.equal(true);
-      expect((await mystikoContract.depositQueueSize()).toNumber()).to.equal(
-        proof.depositQueueSize - rollupSize,
+      expect((await mystikoContract.commitmentQueueSize()).toNumber()).to.equal(
+        proof.commitmentQueueSize - rollupSize,
       );
     });
   });

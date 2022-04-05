@@ -1,11 +1,10 @@
+import { expect } from 'chai';
 import { MerkleTree } from '@mystikonetwork/utils';
-import { WithdrawVerifier } from '../../typechain';
-
-const { expect } = require('chai');
+import { Hasher3 } from '../../typechain';
 
 export function testConstructor(
   mystikoContract: any,
-  withdrawVerifierContract: WithdrawVerifier,
+  hasher3: Hasher3,
   treeHeight: number,
   rootHistoryLength: number,
   minBridgeFee: number | undefined,
@@ -13,10 +12,8 @@ export function testConstructor(
   minRollupFee: number,
 ) {
   describe('Test Mystiko contract constructor', () => {
-    before(async () => {});
-
-    it('should initialize withdraw verifier correctly', async () => {
-      expect(await mystikoContract.withdrawVerifier()).to.equal(withdrawVerifierContract.address);
+    it('should initialize hasher3 correctly', async () => {
+      expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
     });
     if (minBridgeFee !== undefined) {
       it('should initialize minBridgeFee correctly', async () => {
@@ -31,9 +28,9 @@ export function testConstructor(
     it('should initialize minRollupFee correctly', async () => {
       expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
     });
-    it('should initialize depositQueue related resources correctly', async () => {
-      expect((await mystikoContract.depositQueueSize()).toNumber()).to.equal(0);
-      expect((await mystikoContract.depositIncludedCount()).toNumber()).to.equal(0);
+    it('should initialize commitmentQueue related resources correctly', async () => {
+      expect((await mystikoContract.commitmentQueueSize()).toNumber()).to.equal(0);
+      expect((await mystikoContract.commitmentIncludedCount()).toNumber()).to.equal(0);
     });
     it('should initialize tree related resources correctly', async () => {
       const defaultZero = MerkleTree.calcDefaultZeroElement();
