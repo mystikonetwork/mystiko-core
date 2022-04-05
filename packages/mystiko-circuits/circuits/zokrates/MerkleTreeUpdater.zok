@@ -9,8 +9,12 @@ def main<D>(\
   field pathIndices, \
   field[D] pathElements) -> bool:
   bool[D] pathIndicesUnpacked = unpack::<D>(pathIndices)
-  field calcOldRoot = MerkleTree(oldLeaf, pathIndicesUnpacked, pathElements)
+  bool[D] pathIndicesReversed = [false; D]
+  for u32 i in 0..D do
+    pathIndicesReversed[D - i - 1] = pathIndicesUnpacked[i]
+  endfor
+  field calcOldRoot = MerkleTree(oldLeaf, pathIndicesReversed, pathElements)
   assert(oldRoot == calcOldRoot)
-  field calcNewRoot = MerkleTree(newLeaf, pathIndicesUnpacked, pathElements)
+  field calcNewRoot = MerkleTree(newLeaf, pathIndicesReversed, pathElements)
   assert(newRoot == calcNewRoot)
   return true

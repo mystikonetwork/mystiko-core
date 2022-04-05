@@ -247,7 +247,7 @@ export class MystikoProtocolV2 extends MystikoProtocol<
   }
 
   private static pathIndicesNumber(pathIndices: number[]): BN {
-    return toBN(pathIndices.slice().join(''), 2);
+    return toBN(pathIndices.slice().reverse().join(''), 2);
   }
 
   private static calcLeaveHash(leaves: BN[]): BN {
