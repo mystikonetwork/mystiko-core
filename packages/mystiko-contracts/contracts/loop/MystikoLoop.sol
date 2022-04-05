@@ -2,17 +2,19 @@
 pragma solidity ^0.8.0;
 
 import "../libs/asset/AssetPool.sol";
+import "../interface/IHasher3.sol";
 import "../interface/IVerifier.sol";
 import "../interface/IMystikoLoop.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 struct DepositLeaf {
   uint256 commitment;
   uint256 rollupFee;
 }
 
-struct RollupVerifier {
-  IRollupVerifier verifier;
+struct WrappedVerifier {
+  IVerifier verifier;
   bool enabled;
 }
 
@@ -20,9 +22,12 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
+  // Hasher related.
+  IHasher3 public hasher3;
+
   // Verifier related.
-  IWithdrawVerifier public withdrawVerifier;
-  mapping(uint32 => RollupVerifier) public rollupVerifiers;
+  mapping(uint32 => mapping(uint32 => WrappedVerifier)) public transactVerifiers;
+  mapping(uint32 => WrappedVerifier) public rollupVerifiers;
 
   // For checking duplicates.
   mapping(uint256 => bool) public depositedCommitments;
@@ -64,19 +69,19 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   }
 
   event EncryptedNote(uint256 indexed commitment, bytes encryptedNote);
-  event DepositQueued(uint256 indexed commitment, uint256 amount, uint256 rollupFee, uint256 leafIndex);
-  event DepositIncluded(uint256 indexed commitment);
-  event Withdraw(address recipient, uint256 indexed rootHash, uint256 indexed serialNumber);
+  event CommitmentQueued(uint256 indexed commitment, uint256 rollupFee, uint256 leafIndex);
+  event CommitmentIncluded(uint256 indexed commitment);
+  event CommitmentSpent(uint256 indexed rootHash, uint256 indexed serialNumber);
 
   constructor(
     uint32 _treeHeight,
     uint32 _rootHistoryLength,
     uint256 _minRollupFee,
-    address _withdrawVerifier
+    address _hasher3
   ) {
     require(_rootHistoryLength > 0, "_rootHistoryLength should be greater than 0");
     require(_minRollupFee > 0, "_minRollupFee should be greater than 0");
-    withdrawVerifier = IWithdrawVerifier(_withdrawVerifier);
+    hasher3 = IHasher3(_hasher3);
     operator = msg.sender;
     rootHistoryLength = _rootHistoryLength;
     minRollupFee = _minRollupFee;
@@ -85,83 +90,127 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     rootHistory[currentRootIndex] = currentRoot;
   }
 
-  function deposit(
-    uint256 amount,
-    uint256 commitment,
-    uint256 hashK,
-    uint128 randomS,
-    bytes memory encryptedNote,
-    uint256 rollupFee
-  ) external payable override {
+  function deposit(DepositRequest memory request) external payable override {
     require(!isDepositsDisabled, "deposits are disabled");
-    require(rollupFee >= minRollupFee, "rollup fee too few");
+    require(request.rollupFee >= minRollupFee, "rollup fee too few");
     require(depositIncludedCount + depositQueueSize < treeCapacity, "tree is full");
-    require(!depositedCommitments[commitment], "the commitment has been submitted");
-    uint256 calculatedCommitment = _commitmentHash(hashK, amount, randomS);
-    require(commitment == calculatedCommitment, "commitment hash incorrect");
-    depositedCommitments[commitment] = true;
-    _processDepositTransfer(amount + rollupFee, 0);
-    _enqueueDeposit(commitment, amount, rollupFee);
-    emit EncryptedNote(commitment, encryptedNote);
+    require(!depositedCommitments[request.commitment], "the commitment has been submitted");
+    uint256 calculatedCommitment = _commitmentHash(request.hashK, request.amount, request.randomS);
+    require(request.commitment == calculatedCommitment, "commitment hash incorrect");
+    depositedCommitments[request.commitment] = true;
+    _processDepositTransfer(request.amount + request.rollupFee, 0);
+    _enqueueCommitment(request.commitment, request.rollupFee);
+    emit EncryptedNote(request.commitment, request.encryptedNote);
   }
 
-  function rollup(
-    uint256[2] memory proofA,
-    uint256[2][2] memory proofB,
-    uint256[2] memory proofC,
-    uint32 rollupSize,
-    uint256 newRoot,
-    uint256 leafHash
-  ) external override onlyWhitelisted {
-    require(!isKnownRoot(newRoot), "newRoot is duplicated");
+  function rollup(RollupRequest memory request) external override onlyWhitelisted {
+    require(!isKnownRoot(request.newRoot), "newRoot is duplicated");
     require(
-      rollupSize > 0 && rollupSize <= depositQueueSize && rollupVerifiers[rollupSize].enabled,
+      request.rollupSize > 0 &&
+        request.rollupSize <= depositQueueSize &&
+        rollupVerifiers[request.rollupSize].enabled,
       "invalid rollupSize"
     );
-    require(depositIncludedCount % rollupSize == 0, "invalid rollupSize at current state");
-    uint256 pathIndices = _pathIndices(depositIncludedCount, rollupSize);
-    uint256[] memory leaves = new uint256[](rollupSize);
+    require(depositIncludedCount % request.rollupSize == 0, "invalid rollupSize at current state");
+    uint256 pathIndices = _pathIndices(depositIncludedCount, request.rollupSize);
+    uint256[] memory leaves = new uint256[](request.rollupSize);
     uint256 totalRollupFee = 0;
-    for (uint256 index = depositIncludedCount; index < depositIncludedCount + rollupSize; index++) {
+    for (uint256 index = depositIncludedCount; index < depositIncludedCount + request.rollupSize; index++) {
       require(depositQueue[index].commitment != 0, "index out of bound");
       leaves[index - depositIncludedCount] = depositQueue[index].commitment;
       totalRollupFee = totalRollupFee + depositQueue[index].rollupFee;
       delete depositQueue[index];
       depositQueueSize = depositQueueSize - 1;
-      emit DepositIncluded(depositQueue[index].commitment);
+      emit CommitmentIncluded(depositQueue[index].commitment);
     }
-    uint256 expectedLeafHash = uint256(sha256(abi.encodePacked(leaves))) % FIELD_SIZE;
-    require(leafHash == expectedLeafHash, "invalid leafHash");
-    bool verified = rollupVerifiers[rollupSize].verifier.verifyProof(
-      proofA,
-      proofB,
-      proofC,
-      [currentRoot, newRoot, pathIndices, leafHash]
-    );
+    uint256 expectedLeafHash = uint256(keccak256(abi.encodePacked(leaves))) % FIELD_SIZE;
+    require(request.leafHash == expectedLeafHash, "invalid leafHash");
+    uint256[] memory inputs = new uint256[](4);
+    inputs[0] = currentRoot;
+    inputs[1] = request.newRoot;
+    inputs[2] = request.leafHash;
+    inputs[3] = pathIndices;
+    bool verified = rollupVerifiers[request.rollupSize].verifier.verifyTx(request.proof, inputs);
     require(verified, "invalid proof");
     _processRollupFeeTransfer(totalRollupFee);
-    depositIncludedCount = depositIncludedCount + rollupSize;
-    currentRoot = newRoot;
+    depositIncludedCount = depositIncludedCount + request.rollupSize;
+    currentRoot = request.newRoot;
     currentRootIndex = (currentRootIndex + 1) % rootHistoryLength;
-    rootHistory[currentRootIndex] = newRoot;
+    rootHistory[currentRootIndex] = request.newRoot;
   }
 
-  function withdraw(
-    uint256[2] memory proofA,
-    uint256[2][2] memory proofB,
-    uint256[2] memory proofC,
-    uint256 rootHash,
-    uint256 serialNumber,
-    uint256 amount,
-    address recipient
-  ) external payable override nonReentrant {
-    require(!spentSerialNumbers[serialNumber], "The note has been already spent");
-    require(isKnownRoot(rootHash), "Cannot find your merkle root");
-    bool verified = withdrawVerifier.verifyProof(proofA, proofB, proofC, [rootHash, serialNumber, amount]);
-    require(verified, "Invalid withdraw proof");
-    spentSerialNumbers[serialNumber] = true;
-    _processWithdrawTransfer(recipient, amount);
-    emit Withdraw(recipient, rootHash, serialNumber);
+  function transact(TransactRequest memory request, bytes memory signature)
+    external
+    payable
+    override
+    nonReentrant
+  {
+    uint32 numInputs = uint32(request.serialNumbers.length);
+    uint32 numOutputs = uint32(request.outCommitments.length);
+
+    // check input and output lengths.
+    require(transactVerifiers[numInputs][numOutputs].enabled, "invalid input/output length");
+    require(request.sigHashes.length == numInputs, "invalid sigHashes length");
+    require(request.outRollupFees.length == numOutputs, "invalid outRollupFees length");
+    require(request.outEncryptedNotes.length == numOutputs, "invalid outEncryptedNotes length");
+    require(depositIncludedCount + depositQueueSize + numOutputs <= treeCapacity, "tree is full");
+
+    // check signature
+    bytes32 hash = _transactRequestHash(request);
+    address recoveredSigPk = ECDSA.recover(hash, signature);
+    require(address(request.sigPk) == recoveredSigPk, "invalid signature");
+
+    // initialize inputs array for verifying proof.
+    uint256[] memory inputs = new uint256[](4 + 2 * numInputs + 2 * numOutputs);
+
+    // check whether valid root.
+    require(isKnownRoot(request.rootHash), "invalid/outdated merkle tree root");
+    inputs[0] = request.rootHash;
+
+    // check serial numbers.
+    for (uint32 i = 0; i < numInputs; i++) {
+      require(!spentSerialNumbers[request.serialNumbers[i]], "the note has been spent");
+      inputs[i + 1] = request.serialNumbers[i];
+      inputs[i + 1 + numInputs] = request.sigHashes[i];
+    }
+    inputs[2 * numInputs + 1] = uint256(uint160(request.sigPk));
+    inputs[2 * numInputs + 2] = uint256(request.publicAmount);
+    inputs[2 * numInputs + 3] = uint256(request.relayerFeeAmount);
+
+    // check rollup fees and output commitments.
+    for (uint32 i = 0; i < numOutputs; i++) {
+      require(!depositedCommitments[request.outCommitments[i]], "duplicate commitment");
+      require(request.outRollupFees[i] >= minRollupFee, "rollup fee too low");
+      inputs[2 * numInputs + 4 + i] = request.outCommitments[i];
+      inputs[2 * numInputs + numOutputs + 4 + i] = request.outRollupFees[i];
+    }
+
+    // verify proof.
+    bool verified = transactVerifiers[numInputs][numOutputs].verifier.verifyTx(request.proof, inputs);
+    require(verified, "invalid transact proof");
+
+    // set spent flag for serial numbers.
+    for (uint32 i = 0; i < numInputs; i++) {
+      spentSerialNumbers[request.serialNumbers[i]] = true;
+      emit CommitmentSpent(request.rootHash, request.serialNumbers[i]);
+    }
+
+    // enqueue output commitments.
+    for (uint32 i = 0; i < numOutputs; i++) {
+      depositedCommitments[request.outCommitments[i]] = true;
+      _enqueueCommitment(request.outCommitments[i], request.outRollupFees[i]);
+      emit EncryptedNote(request.outCommitments[i], request.outEncryptedNotes[i]);
+    }
+
+    // withdraw tokens to public recipient.
+    if (request.publicAmount > 0) {
+      _processWithdrawTransfer(request.publicRecipient, request.publicAmount);
+    }
+
+    // withdraw tokens to relayer.
+    if (request.relayerFeeAmount > 0) {
+      _processWithdrawTransfer(request.relayerAddress, request.relayerFeeAmount);
+    }
   }
 
   function isKnownRoot(uint256 root) public view returns (bool) {
@@ -190,15 +239,30 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     isVerifierUpdateDisabled = _state;
   }
 
-  function setWithdrawVerifier(address _withdrawVerifier) external onlyOperator {
+  function enableTransactVerifier(
+    uint32 numInputs,
+    uint32 numOutputs,
+    address _transactVerifier
+  ) external onlyOperator {
     require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
-    withdrawVerifier = IWithdrawVerifier(_withdrawVerifier);
+    require(numInputs > 0, "numInputs should > 0");
+    require(numOutputs >= 0, "numOutputs should >= 0");
+    transactVerifiers[numInputs][numOutputs] = WrappedVerifier(IVerifier(_transactVerifier), true);
+  }
+
+  function disableTransactVerifier(uint32 numInputs, uint32 numOutputs) external onlyOperator {
+    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
+    require(numInputs > 0, "numInputs should > 0");
+    require(numOutputs >= 0, "numOutputs should >= 0");
+    if (transactVerifiers[numInputs][numOutputs].enabled) {
+      transactVerifiers[numInputs][numOutputs].enabled = false;
+    }
   }
 
   function enableRollupVerifier(uint32 rollupSize, address _rollupVerifier) external onlyOperator {
-    require(rollupSize > 0, "invalid rollupSize");
     require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
-    rollupVerifiers[rollupSize] = RollupVerifier(IRollupVerifier(_rollupVerifier), true);
+    require(rollupSize > 0, "invalid rollupSize");
+    rollupVerifiers[rollupSize] = WrappedVerifier(IVerifier(_rollupVerifier), true);
   }
 
   function disableRollupVerifier(uint32 rollupSize) external onlyOperator {
@@ -234,21 +298,17 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     uint256 hashK,
     uint256 amount,
     uint128 randomS
-  ) internal pure returns (uint256) {
+  ) internal view returns (uint256) {
     require(hashK < FIELD_SIZE, "hashK should be less than FIELD_SIZE");
-    require(randomS < FIELD_SIZE, "randomS should be less than FIELD_SIZE");
-    return uint256(sha256(abi.encodePacked(bytes32(hashK), bytes32(amount), bytes16(randomS)))) % FIELD_SIZE;
+    require(amount < FIELD_SIZE, "randomS should be less than FIELD_SIZE");
+    return hasher3.poseidon([hashK, amount, uint256(randomS)]);
   }
 
-  function _enqueueDeposit(
-    uint256 commitment,
-    uint256 amount,
-    uint256 rollupFee
-  ) internal {
+  function _enqueueCommitment(uint256 commitment, uint256 rollupFee) internal {
     depositQueue[depositQueueSize] = DepositLeaf(commitment, rollupFee);
     uint256 leafIndex = depositQueueSize + depositIncludedCount;
     depositQueueSize = depositQueueSize + 1;
-    emit DepositQueued(commitment, amount, rollupFee, leafIndex);
+    emit CommitmentQueued(commitment, rollupFee, leafIndex);
   }
 
   function _zeros(uint32 nth) internal pure returns (uint256) {
@@ -329,5 +389,36 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
       rollupSize >>= 1;
     }
     return fullPath;
+  }
+
+  function _transactRequestHash(TransactRequest memory request) internal pure returns (bytes32) {
+    bytes memory requestBytes = abi.encodePacked(
+      request.proof.a.X,
+      request.proof.a.Y,
+      request.proof.b.X,
+      request.proof.b.Y,
+      request.proof.c.X,
+      request.proof.c.Y
+    );
+    requestBytes = abi.encodePacked(
+      requestBytes,
+      request.rootHash,
+      request.serialNumbers,
+      request.publicRecipient,
+      request.publicAmount
+    );
+    requestBytes = abi.encodePacked(
+      requestBytes,
+      request.relayerFeeAmount,
+      request.relayerAddress,
+      request.sigPk,
+      request.sigHashes,
+      request.outCommitments,
+      request.outRollupFees
+    );
+    for (uint32 i = 0; i < request.outEncryptedNotes.length; i++) {
+      requestBytes = abi.encodePacked(requestBytes, request.outEncryptedNotes[i]);
+    }
+    return ECDSA.toEthSignedMessageHash(keccak256(requestBytes));
   }
 }

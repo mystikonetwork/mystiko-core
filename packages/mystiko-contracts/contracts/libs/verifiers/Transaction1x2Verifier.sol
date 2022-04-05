@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-library Rollup16Pairing {
+library Transaction1x2Pairing {
   struct G1Point {
     uint256 X;
     uint256 Y;
@@ -176,76 +176,100 @@ library Rollup16Pairing {
   }
 }
 
-contract Rollup16Verifier {
-  using Rollup16Pairing for *;
+contract Transaction1x2Verifier {
+  using Transaction1x2Pairing for *;
   struct VerifyingKey {
-    Rollup16Pairing.G1Point alpha;
-    Rollup16Pairing.G2Point beta;
-    Rollup16Pairing.G2Point gamma;
-    Rollup16Pairing.G2Point delta;
-    Rollup16Pairing.G1Point[] gamma_abc;
+    Transaction1x2Pairing.G1Point alpha;
+    Transaction1x2Pairing.G2Point beta;
+    Transaction1x2Pairing.G2Point gamma;
+    Transaction1x2Pairing.G2Point delta;
+    Transaction1x2Pairing.G1Point[] gamma_abc;
   }
   struct Proof {
-    Rollup16Pairing.G1Point a;
-    Rollup16Pairing.G2Point b;
-    Rollup16Pairing.G1Point c;
+    Transaction1x2Pairing.G1Point a;
+    Transaction1x2Pairing.G2Point b;
+    Transaction1x2Pairing.G1Point c;
   }
 
   function verifyingKey() internal pure returns (VerifyingKey memory vk) {
-    vk.alpha = Rollup16Pairing.G1Point(
-      uint256(0x132af120ed82afa3df048a36e4ec35d522068162854751a94fb50f443aa75f64),
-      uint256(0x13cd4ff5523b3be6f111b02d5792ce83c02431b467a918865e1559ff40bf4460)
+    vk.alpha = Transaction1x2Pairing.G1Point(
+      uint256(0x2d627bd55b37a7c511fcdec881ca379152e5a1f292747ffae5fabaaea61c6164),
+      uint256(0x148ba55b6a32a02900bab0d6942ead57a34b582c7c312f52e69deaa3d095e3c2)
     );
-    vk.beta = Rollup16Pairing.G2Point(
+    vk.beta = Transaction1x2Pairing.G2Point(
       [
-        uint256(0x2450d816054a1266c849410e1566fb034ca9cb2220bdde012cc786eb7b83cf46),
-        uint256(0x0b4476f6f8b00ef6739b41099199dc83c9586c8bc94b8687ea154bbaa4c00c61)
+        uint256(0x0c416dbb06ea28767b72d14cfd9d3a2b0ca8699b928402d5bd14f95a8048d1b1),
+        uint256(0x05072fe72248a7df6f6520499197ab1f257f03479e4f6631575c04b7c3d261c3)
       ],
       [
-        uint256(0x2e8cc897261f06cebfbf7c3ade122625e3df735b9973b27e3e04c4e24db69096),
-        uint256(0x1fe259b8f9e9d417249457cfce1d3cf2659264159765dbff32c4d177ba8abdec)
+        uint256(0x286c72b00b4a7f477ca563210906453c43d825488c8f4a24d03d28ca439180e1),
+        uint256(0x2433ef5ec7e1db9534054985372efc699448573097c7ca5692fc4c6dd4db49a7)
       ]
     );
-    vk.gamma = Rollup16Pairing.G2Point(
+    vk.gamma = Transaction1x2Pairing.G2Point(
       [
-        uint256(0x02f03259863c50312d3780dba25eb4e828fff6934ced12ffe261891be94a823b),
-        uint256(0x1fb4f0c5492cdb718a6226bcf7d9cc378a5cbc1a4d9888047ed594803ed326c9)
+        uint256(0x2af4ee46d436dc472e61a25c7700ec229cadbf7f8539f337206045f1784ddb1c),
+        uint256(0x048d7c909005ac6b4349990554bb38c155e79e2841afc027858ff6648e8510aa)
       ],
       [
-        uint256(0x2cf3a7e078f5944d90c2ee5b912082921cd87cf27c6f145e807e78cc8f243af1),
-        uint256(0x21278639cd2d931feadfbde4f8ea0513f4fbc1e11610d91c059b4dc83ff26607)
+        uint256(0x04638d941803a267b7c9a2e7d0533a62cf1c9803b2d8f88bfb95c0071616173a),
+        uint256(0x1c3204479bd252fa1e2327fc3087ba220d21429727b1ad286d102948d773b10a)
       ]
     );
-    vk.delta = Rollup16Pairing.G2Point(
+    vk.delta = Transaction1x2Pairing.G2Point(
       [
-        uint256(0x224f6bd9d49a90f98fd0283eae16a198e796030b90cfa7eac41657807be486c7),
-        uint256(0x00c71ccd4267b8b89f64c4a9964fd1adce4c7d2adc104f5fddb958e2edcc3d8f)
+        uint256(0x13bcd5f02a3ab08616b26685849497805d8380bfe95cbc9c7243963f6514c1c2),
+        uint256(0x0bf026533d303c5673cd6403c993bbe11a8d14fc6e43aade51ba1a2c7551ee4a)
       ],
       [
-        uint256(0x109c21edde4a8226360239b7f6b0d66774442d36776d2e076f0fcc08f88df7c9),
-        uint256(0x0efbd6bb75ef22c52075e2a6976d5bd502d9a2612dcb702cdd6b93f76212b1fb)
+        uint256(0x0686eb4906a52de7f31649fa691ec23a4fc56f622f3451272c315d4dbe082758),
+        uint256(0x19ec8f030e5563781056e4da28f8e1200e1e93c095b4c061ac705186f5a4a77e)
       ]
     );
-    vk.gamma_abc = new Rollup16Pairing.G1Point[](5);
-    vk.gamma_abc[0] = Rollup16Pairing.G1Point(
-      uint256(0x13f5bc4d83fe4094beccda534dbf455c5121b17f6aded7871b67c56e8f78ac50),
-      uint256(0x052f2c8cb9d8895bcb094542b6533616f790c573375f047dfb14bd30ef5c494c)
+    vk.gamma_abc = new Transaction1x2Pairing.G1Point[](11);
+    vk.gamma_abc[0] = Transaction1x2Pairing.G1Point(
+      uint256(0x113d9b837db2d36a06cd3566163a9bd9d8e19ba9e230c1185cd203c261d37ac1),
+      uint256(0x068793a8e1af4b4c782f1a3538ddba03fc543757146cb1bde14803341a955257)
     );
-    vk.gamma_abc[1] = Rollup16Pairing.G1Point(
-      uint256(0x111202d0d03729f1a524b9b49b7514da9298b1ef303a21975ec63401bff900bf),
-      uint256(0x2e79907f5202ecc99e9f49dbe5d1d9303b17466115c7250916a222bc00ebe044)
+    vk.gamma_abc[1] = Transaction1x2Pairing.G1Point(
+      uint256(0x173051d26c9051c92fba9905831d5435853e92f41aa9c5fe31fa550fb006c710),
+      uint256(0x2dac2cf5a0d7454d8c9dbbe9623bcf0f89eb8c42b31bbfaa730b3e79092b69ce)
     );
-    vk.gamma_abc[2] = Rollup16Pairing.G1Point(
-      uint256(0x2b62bee7f4dfb6bd17d5b4b19d91d80329c490d948e75880bc3121ce23d907ae),
-      uint256(0x2501fea7cb5d94ae28d963c9f7d751d4ab2ea6b73956622b73dfbca31b55c8db)
+    vk.gamma_abc[2] = Transaction1x2Pairing.G1Point(
+      uint256(0x09d66a8b9bc1c3941f06dda5bd9b72991b0e8eaaddf1c88dd8d70587d207d7fc),
+      uint256(0x19b1985906bafae7f3b5da28bd4656e014438aab37624c548de87d05a19f1eb9)
     );
-    vk.gamma_abc[3] = Rollup16Pairing.G1Point(
-      uint256(0x22f9790c84ce71671b5422e30eaebc664197c8eb13edea28df3faddd8e2a51d8),
-      uint256(0x15cf3d3341bdf954ac80ee9fe9606c14106ba45a7bf035b8d0a5db71bb16655e)
+    vk.gamma_abc[3] = Transaction1x2Pairing.G1Point(
+      uint256(0x21470260d8d78f1aff7b65074042b3bff8e2068628d81c8aaa68ab74ee7c833c),
+      uint256(0x28d8819e40eb1a0aaa8d18c0de827dbfe12ebcadb31aad6def58826b7e1b03b2)
     );
-    vk.gamma_abc[4] = Rollup16Pairing.G1Point(
-      uint256(0x1122b6b6b3ceb5edb553596f6d676280095aa4961a0290186752244a065e62a1),
-      uint256(0x219cd9a2791262ae2a265e9701299278a6d9f5ff81b496bf0d8341776aa92598)
+    vk.gamma_abc[4] = Transaction1x2Pairing.G1Point(
+      uint256(0x0b8194d7902ed1019ee7b6b9bc58ff5f722102fd9bbe42413a194c0dbee12026),
+      uint256(0x03e3057e83453af44703e2968f94cb752dc83692e64d7a2bfd35cb6019172178)
+    );
+    vk.gamma_abc[5] = Transaction1x2Pairing.G1Point(
+      uint256(0x2f30a1118153e69e0e94b1498bfd89a40b32a4dff2d97745af6e13389085c39b),
+      uint256(0x237920d819d1d3548adab2bd4cd5cc80c05399d932b36b979687dfbf3178cfd6)
+    );
+    vk.gamma_abc[6] = Transaction1x2Pairing.G1Point(
+      uint256(0x21c5c0c67a543947f77e1b6bba3efa29999553c28f3496dcd764d90039314a34),
+      uint256(0x02cd40f88d01cbc10d6b31cfa17d779056088094bf7a59346f232ff7296a388e)
+    );
+    vk.gamma_abc[7] = Transaction1x2Pairing.G1Point(
+      uint256(0x1c046f9e00a2fb2be1d42d990dd168797644e69cf1817a998a55554655248952),
+      uint256(0x2244d889bce2a1841e6b92ce53ce028b5cd2be552682838ad06a154c2f045d30)
+    );
+    vk.gamma_abc[8] = Transaction1x2Pairing.G1Point(
+      uint256(0x2497ed50073f8173d9aa0ba43a94145ce65f41a7f2f2ecdefb4b38466f635c86),
+      uint256(0x118f2135b8a2be27eb579191026a23db5346f33097325f6eadac80b354b5b1e4)
+    );
+    vk.gamma_abc[9] = Transaction1x2Pairing.G1Point(
+      uint256(0x09ef6937dd61063285da0dc02790e8dc1b990c58434f66ebe67826aa2f057400),
+      uint256(0x2b5db9989ae18da3dbd8f687d5b4cf6b7b3711937126f68e022eeec909b0d49e)
+    );
+    vk.gamma_abc[10] = Transaction1x2Pairing.G1Point(
+      uint256(0x243fa6b10a2301d392e71733cb0fdb1ff356fe2ad0f57de571babf328942460f),
+      uint256(0x22264d4636ebcd065043cb8878b9c49a44877f0d8f7c77d3a630ed89176125a7)
     );
   }
 
@@ -254,21 +278,24 @@ contract Rollup16Verifier {
     VerifyingKey memory vk = verifyingKey();
     require(input.length + 1 == vk.gamma_abc.length);
     // Compute the linear combination vk_x
-    Rollup16Pairing.G1Point memory vk_x = Rollup16Pairing.G1Point(0, 0);
+    Transaction1x2Pairing.G1Point memory vk_x = Transaction1x2Pairing.G1Point(0, 0);
     for (uint256 i = 0; i < input.length; i++) {
       require(input[i] < snark_scalar_field);
-      vk_x = Rollup16Pairing.addition(vk_x, Rollup16Pairing.scalar_mul(vk.gamma_abc[i + 1], input[i]));
+      vk_x = Transaction1x2Pairing.addition(
+        vk_x,
+        Transaction1x2Pairing.scalar_mul(vk.gamma_abc[i + 1], input[i])
+      );
     }
-    vk_x = Rollup16Pairing.addition(vk_x, vk.gamma_abc[0]);
+    vk_x = Transaction1x2Pairing.addition(vk_x, vk.gamma_abc[0]);
     if (
-      !Rollup16Pairing.pairingProd4(
+      !Transaction1x2Pairing.pairingProd4(
         proof.a,
         proof.b,
-        Rollup16Pairing.negate(vk_x),
+        Transaction1x2Pairing.negate(vk_x),
         vk.gamma,
-        Rollup16Pairing.negate(proof.c),
+        Transaction1x2Pairing.negate(proof.c),
         vk.delta,
-        Rollup16Pairing.negate(vk.alpha),
+        Transaction1x2Pairing.negate(vk.alpha),
         vk.beta
       )
     ) return 1;
@@ -276,7 +303,7 @@ contract Rollup16Verifier {
   }
 
   function verifyTx(Proof memory proof, uint256[] memory input) public view returns (bool r) {
-    require(input.length == 4, "invalid input length");
+    require(input.length == 10, "invalid input length");
     if (verify(input, proof) == 0) {
       return true;
     } else {

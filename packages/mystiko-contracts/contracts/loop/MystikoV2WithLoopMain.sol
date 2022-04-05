@@ -9,6 +9,6 @@ contract MystikoV2WithLoopMain is MystikoLoop, MainAssetPool {
     uint32 _treeHeight,
     uint32 _rootHistoryLength,
     uint256 _minRollupFee,
-    address _withdrawVerifier
-  ) MystikoLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _withdrawVerifier) {}
+    address _hasher3
+  ) MystikoLoop(_treeHeight, _rootHistoryLength, _minRollupFee, _hasher3) {}
 }

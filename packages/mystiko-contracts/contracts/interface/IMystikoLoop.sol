@@ -1,32 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./IVerifier.sol";
+
 interface IMystikoLoop {
-  function deposit(
-    uint256 amount,
-    uint256 commitment,
-    uint256 hashK,
-    uint128 randomS,
-    bytes memory encryptedNote,
-    uint256 rollupFee
-  ) external payable;
+  struct DepositRequest {
+    uint256 amount;
+    uint256 commitment;
+    uint256 hashK;
+    uint128 randomS;
+    bytes encryptedNote;
+    uint256 rollupFee;
+  }
 
-  function rollup(
-    uint256[2] memory proofA,
-    uint256[2][2] memory proofB,
-    uint256[2] memory proofC,
-    uint32 rollupSize,
-    uint256 newRoot,
-    uint256 leafHash
-  ) external;
+  struct RollupRequest {
+    IVerifier.Proof proof;
+    uint32 rollupSize;
+    uint256 newRoot;
+    uint256 leafHash;
+  }
 
-  function withdraw(
-    uint256[2] memory proofA,
-    uint256[2][2] memory proofB,
-    uint256[2] memory proofC,
-    uint256 rootHash,
-    uint256 serialNumber,
-    uint256 amount,
-    address recipient
-  ) external payable;
+  struct TransactRequest {
+    IVerifier.Proof proof;
+    uint256 rootHash;
+    uint256[] serialNumbers;
+    address publicRecipient;
+    uint256 publicAmount;
+    uint256 relayerFeeAmount;
+    address relayerAddress;
+    bytes20 sigPk;
+    uint256[] sigHashes;
+    uint256[] outCommitments;
+    uint256[] outRollupFees;
+    bytes[] outEncryptedNotes;
+  }
+
+  function deposit(DepositRequest memory request) external payable;
+
+  function rollup(RollupRequest memory request) external;
+
+  function transact(TransactRequest memory request, bytes memory signature) external payable;
 }

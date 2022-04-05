@@ -40,6 +40,10 @@ export abstract class MystikoProtocol<CI, CO, T, R = any> {
     return 16;
   }
 
+  public get amountSize(): number {
+    return 32;
+  }
+
   public get merkleTreeLevels(): number {
     return 20;
   }

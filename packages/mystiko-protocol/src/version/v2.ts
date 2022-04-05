@@ -23,7 +23,6 @@ export interface TransactionV2 {
   inVerifySks: Buffer[];
   inEncPks: Buffer[];
   inEncSks: Buffer[];
-  inAmounts: BN[];
   inCommitments: BN[];
   inPrivateNotes: Buffer[];
   pathIndices: number[][];
@@ -89,6 +88,7 @@ export class MystikoProtocolV2 extends MystikoProtocol<
         this.bigIntToBuff(generatedRandomP, this.randomSkSize),
         this.bigIntToBuff(generatedRandomR, this.randomSkSize),
         this.bigIntToBuff(generatedRandomS, this.randomSkSize),
+        this.bigIntToBuff(amount, this.amountSize),
       ]),
     );
     logger.debug(
@@ -113,6 +113,7 @@ export class MystikoProtocolV2 extends MystikoProtocol<
     const inRandomPs: BN[] = [];
     const inRandomRs: BN[] = [];
     const inRandomSs: BN[] = [];
+    const inAmounts: BN[] = [];
     const serialNumbers: BN[] = [];
     const sigHashes: BN[] = [];
     const decryptPromises: Promise<Buffer>[] = [];
@@ -122,13 +123,20 @@ export class MystikoProtocolV2 extends MystikoProtocol<
     const decryptPrivateNotes = await Promise.all(decryptPromises);
     for (let i = 0; i < decryptPrivateNotes.length; i += 1) {
       const decryptPrivateNote = decryptPrivateNotes[i];
-      check(decryptPrivateNote.length === this.randomSkSize * 3, 'decrypted note length is incorrect');
+      check(
+        decryptPrivateNote.length === this.randomSkSize * 3 + this.amountSize,
+        'decrypted note length is incorrect',
+      );
       const randomP = this.buffToBigInt(decryptPrivateNote.slice(0, this.randomSkSize));
       const randomR = this.buffToBigInt(decryptPrivateNote.slice(this.randomSkSize, this.randomSkSize * 2));
-      const randomS = this.buffToBigInt(decryptPrivateNote.slice(this.randomSkSize * 2));
+      const randomS = this.buffToBigInt(
+        decryptPrivateNote.slice(this.randomSkSize * 2, this.randomSkSize * 3),
+      );
+      const amount = this.buffToBigInt(decryptPrivateNote.slice(this.randomSkSize * 3));
       inRandomPs.push(randomP);
       inRandomRs.push(randomR);
       inRandomSs.push(randomS);
+      inAmounts.push(amount);
       serialNumbers.push(this.v1Protocol.serialNumber(tx.inVerifySks[i], inRandomPs[i]));
       sigHashes.push(this.sigPkHash(tx.sigPk, tx.inVerifySks[i]));
     }
@@ -142,7 +150,7 @@ export class MystikoProtocolV2 extends MystikoProtocol<
       tx.outCommitments.map((bn) => bn.toString()),
       tx.rollupFeeAmounts.map((bn) => bn.toString()),
       tx.inCommitments.map((bn) => bn.toString()),
-      tx.inAmounts.map((bn) => bn.toString()),
+      inAmounts.map((bn) => bn.toString()),
       inRandomPs.map((bn) => bn.toString()),
       inRandomRs.map((bn) => bn.toString()),
       inRandomSs.map((bn) => bn.toString()),
@@ -200,7 +208,6 @@ export class MystikoProtocolV2 extends MystikoProtocol<
     check(tx.numInputs === tx.inVerifySks.length, `inVerifySks length does not equal to ${tx.numInputs}`);
     check(tx.numInputs === tx.inEncPks.length, `inEncPks length does not equal to ${tx.numInputs}`);
     check(tx.numInputs === tx.inEncSks.length, `inEncSks length does not equal to ${tx.numInputs}`);
-    check(tx.numInputs === tx.inAmounts.length, `inAmounts length does not equal to ${tx.numInputs}`);
     check(tx.numInputs === tx.inCommitments.length, `inCommitments length does not equal to ${tx.numInputs}`);
     check(
       tx.numInputs === tx.inPrivateNotes.length,
