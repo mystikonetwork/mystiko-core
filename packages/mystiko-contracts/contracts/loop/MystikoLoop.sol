@@ -115,13 +115,18 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     uint256 pathIndices = _pathIndices(commitmentIncludedCount, request.rollupSize);
     uint256[] memory leaves = new uint256[](request.rollupSize);
     uint256 totalRollupFee = 0;
-    for (uint256 index = commitmentIncludedCount; index < commitmentIncludedCount + request.rollupSize; index++) {
+    for (
+      uint256 index = commitmentIncludedCount;
+      index < commitmentIncludedCount + request.rollupSize;
+      index++
+    ) {
       require(commitmentQueue[index].commitment != 0, "index out of bound");
-      leaves[index - commitmentIncludedCount] = commitmentQueue[index].commitment;
+      uint256 commitment = commitmentQueue[index].commitment;
+      leaves[index - commitmentIncludedCount] = commitment;
       totalRollupFee = totalRollupFee + commitmentQueue[index].rollupFee;
       delete commitmentQueue[index];
       commitmentQueueSize = commitmentQueueSize - 1;
-      emit CommitmentIncluded(commitmentQueue[index].commitment);
+      emit CommitmentIncluded(commitment);
     }
     uint256 expectedLeafHash = uint256(keccak256(abi.encodePacked(leaves))) % FIELD_SIZE;
     require(request.leafHash == expectedLeafHash, "invalid leafHash");
@@ -158,7 +163,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     // check signature
     bytes32 hash = _transactRequestHash(request);
     address recoveredSigPk = ECDSA.recover(hash, signature);
-    require(address(request.sigPk) == recoveredSigPk, "invalid signature");
+    require(request.sigPk == bytes32(uint256(uint160(recoveredSigPk))), "invalid signature");
 
     // initialize inputs array for verifying proof.
     uint256[] memory inputs = new uint256[](4 + 2 * numInputs + 2 * numOutputs);
@@ -173,7 +178,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
       inputs[i + 1] = request.serialNumbers[i];
       inputs[i + 1 + numInputs] = request.sigHashes[i];
     }
-    inputs[2 * numInputs + 1] = uint256(uint160(request.sigPk));
+    inputs[2 * numInputs + 1] = uint256(request.sigPk);
     inputs[2 * numInputs + 2] = uint256(request.publicAmount);
     inputs[2 * numInputs + 3] = uint256(request.relayerFeeAmount);
 
@@ -392,30 +397,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
   }
 
   function _transactRequestHash(TransactRequest memory request) internal pure returns (bytes32) {
-    bytes memory requestBytes = abi.encodePacked(
-      request.proof.a.X,
-      request.proof.a.Y,
-      request.proof.b.X,
-      request.proof.b.Y,
-      request.proof.c.X,
-      request.proof.c.Y
-    );
-    requestBytes = abi.encodePacked(
-      requestBytes,
-      request.rootHash,
-      request.serialNumbers,
-      request.publicRecipient,
-      request.publicAmount
-    );
-    requestBytes = abi.encodePacked(
-      requestBytes,
-      request.relayerFeeAmount,
-      request.relayerAddress,
-      request.sigPk,
-      request.sigHashes,
-      request.outCommitments,
-      request.outRollupFees
-    );
+    bytes memory requestBytes = abi.encodePacked(request.publicRecipient, request.relayerAddress);
     for (uint32 i = 0; i < request.outEncryptedNotes.length; i++) {
       requestBytes = abi.encodePacked(requestBytes, request.outEncryptedNotes[i]);
     }

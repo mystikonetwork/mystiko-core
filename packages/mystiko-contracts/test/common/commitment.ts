@@ -5,6 +5,8 @@ export interface CommitmentInfo<C> {
   mystikoAddress: string;
   rawSkVerify: Buffer;
   rawSkEnc: Buffer;
+  pkVerify: Buffer;
+  pkEnc: Buffer;
   commitments: C[];
 }
 
@@ -19,10 +21,10 @@ export async function constructCommitment<C>(
   const pkEnc = protocol.publicKeyForEncryption(rawSkEnc);
   const mystikoAddress = protocol.shieldedAddress(pkVerify, pkEnc);
   const commitments: any[] = [];
-  for (let i = 0; i < 21; i += 1) {
+  for (let i = 0; i < size; i += 1) {
     const commitment = await protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
     commitments.push(commitment);
   }
 
-  return { mystikoAddress, rawSkVerify, rawSkEnc, commitments };
+  return { mystikoAddress, rawSkVerify, rawSkEnc, pkVerify, pkEnc, commitments };
 }

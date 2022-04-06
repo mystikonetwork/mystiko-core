@@ -1,6 +1,6 @@
 import { Wallet } from '@ethersproject/wallet';
 import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
-import { toDecimals } from '@mystikonetwork/utils';
+import { toBN, toDecimals } from '@mystikonetwork/utils';
 import { deployLoopContracts, deployDependContracts, loadFixture } from '../util/common';
 import {
   testConstructor,
@@ -8,6 +8,7 @@ import {
   constructCommitment,
   testLoopDeposit,
   testRollup,
+  testTransact,
 } from '../common';
 import {
   Hasher3,
@@ -133,8 +134,8 @@ describe('Test Mystiko loop', () => {
   });
 
   it('test loop main deposit with rollup', async () => {
-    const depositAmount = toDecimals(10).toString();
-    const cmInfo = await constructCommitment(protocol, 21, depositAmount);
+    const depositAmount = toDecimals(10);
+    const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testLoopDeposit(
       protocol,
@@ -142,18 +143,114 @@ describe('Test Mystiko loop', () => {
       loopMainLimit,
       testToken,
       accounts,
-      depositAmount,
+      depositAmount.toString(),
       true,
       cmInfo,
     );
     testRollup(protocol, loopMain, rollup16, testToken, accounts, cmInfo.commitments, { rollupSize: 16 });
     testRollup(protocol, loopMain, rollup4, testToken, accounts, cmInfo.commitments, { rollupSize: 4 });
     testRollup(protocol, loopMain, rollup1, testToken, accounts, cmInfo.commitments, { rollupSize: 1 });
+
+    testTransact(
+      protocol,
+      loopMain,
+      transaction1x0Verifier,
+      cmInfo,
+      [0],
+      depositAmount,
+      toBN(0),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopMain,
+      transaction1x1Verifier,
+      cmInfo,
+      [1],
+      depositAmount.sub(toDecimals(3)),
+      toDecimals(1),
+      [toDecimals(1)],
+      [toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopMain,
+      transaction1x2Verifier,
+      cmInfo,
+      [2],
+      depositAmount.sub(toDecimals(5)),
+      toDecimals(1),
+      [toDecimals(1), toDecimals(1)],
+      [toDecimals(1), toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopMain,
+      transaction2x0Verifier,
+      cmInfo,
+      [3, 4],
+      depositAmount.add(depositAmount).sub(toDecimals(1)),
+      toDecimals(1),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopMain,
+      transaction2x1Verifier,
+      cmInfo,
+      [5, 6],
+      depositAmount.add(depositAmount).sub(toDecimals(3)),
+      toDecimals(1),
+      [toDecimals(1)],
+      [toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopMain,
+      transaction2x2Verifier,
+      cmInfo,
+      [7, 8],
+      depositAmount.add(depositAmount).sub(toDecimals(5)),
+      toDecimals(1),
+      [toDecimals(1), toDecimals(1)],
+      [toDecimals(1), toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+    );
   });
 
   it('test loop erc20 deposit with rollup', async () => {
-    const depositAmount = toDecimals(100).toString();
-    const cmInfo = await constructCommitment(protocol, 21, depositAmount);
+    const depositAmount = toDecimals(100);
+    const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testLoopDeposit(
       protocol,
@@ -161,7 +258,7 @@ describe('Test Mystiko loop', () => {
       loopERC20Limit,
       testToken,
       accounts,
-      depositAmount,
+      depositAmount.toString(),
       false,
       cmInfo,
     );
@@ -177,5 +274,101 @@ describe('Test Mystiko loop', () => {
       isMainAsset: false,
       rollupSize: 1,
     });
+
+    testTransact(
+      protocol,
+      loopERC20,
+      transaction1x0Verifier,
+      cmInfo,
+      [0],
+      depositAmount,
+      toBN(0),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopERC20,
+      transaction1x1Verifier,
+      cmInfo,
+      [1],
+      depositAmount.sub(toDecimals(3)),
+      toDecimals(1),
+      [toDecimals(1)],
+      [toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopERC20,
+      transaction1x2Verifier,
+      cmInfo,
+      [2],
+      depositAmount.sub(toDecimals(5)),
+      toDecimals(1),
+      [toDecimals(1), toDecimals(1)],
+      [toDecimals(1), toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopERC20,
+      transaction2x0Verifier,
+      cmInfo,
+      [3, 4],
+      depositAmount.add(depositAmount).sub(toDecimals(1)),
+      toDecimals(1),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopERC20,
+      transaction2x1Verifier,
+      cmInfo,
+      [5, 6],
+      depositAmount.add(depositAmount).sub(toDecimals(3)),
+      toDecimals(1),
+      [toDecimals(1)],
+      [toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      loopERC20,
+      transaction2x2Verifier,
+      cmInfo,
+      [7, 8],
+      depositAmount.add(depositAmount).sub(toDecimals(5)),
+      toDecimals(1),
+      [toDecimals(1), toDecimals(1)],
+      [toDecimals(1), toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+    );
   });
 });

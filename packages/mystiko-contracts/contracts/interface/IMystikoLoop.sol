@@ -24,14 +24,14 @@ interface IMystikoLoop {
     IVerifier.Proof proof;
     uint256 rootHash;
     uint256[] serialNumbers;
-    address publicRecipient;
+    uint256[] sigHashes;
+    bytes32 sigPk;
     uint256 publicAmount;
     uint256 relayerFeeAmount;
-    address relayerAddress;
-    bytes20 sigPk;
-    uint256[] sigHashes;
     uint256[] outCommitments;
     uint256[] outRollupFees;
+    address publicRecipient;
+    address relayerAddress;
     bytes[] outEncryptedNotes;
   }
 
