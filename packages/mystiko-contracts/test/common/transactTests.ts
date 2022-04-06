@@ -245,6 +245,11 @@ export function testTransact(
             event.args.serialNumber.toHexString() === sn &&
             event.args.rootHash.toHexString() === rootHash,
         );
+        if (index < 0) {
+          console.log(events);
+          console.log(`sn: ${sn}`);
+          console.log(`rootHash: ${rootHash}`);
+        }
         expect(index).to.gte(0);
       }
       for (let i = 0; i < numOutputs; i += 1) {
