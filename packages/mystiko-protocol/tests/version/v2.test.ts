@@ -77,7 +77,6 @@ async function generateTransaction(
     inVerifyPks,
     inEncSks,
     inEncPks,
-    inAmounts,
     inCommitments,
     inPrivateNotes,
     pathIndices,
