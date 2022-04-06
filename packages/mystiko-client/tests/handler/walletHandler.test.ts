@@ -1,10 +1,12 @@
-import { currentProtocol } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { WalletHandler, createDatabase, MystikoDatabase } from '../../src';
 
+let currentProtocol: MystikoProtocolV1;
 let handler: WalletHandler;
 let db: MystikoDatabase;
 
 beforeEach(async () => {
+  currentProtocol = new MystikoProtocolV1();
   db = await createDatabase('test.db');
   handler = new WalletHandler(db);
 });

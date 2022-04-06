@@ -1,0 +1,121 @@
+from "ecc/babyjubjubParams" import main as buildOwnershipParams
+from "ecc/babyjubjubParams" import BabyJubJubParams
+import "./Commitment.zok" as CommitmentHasher
+import "./SerialNumber.zok" as SerialNumberHasher
+import "./SignatureHash.zok" as signatureHasher
+import "./Ownership.zok" as ownershipChecker
+import "./MerkleTree.zok" as merkleTreeRootHasher
+
+def checkCommitments<N>(\
+  field[N] commitments, \
+  field[N] publicKeys, \
+  field[N] amounts, \
+  field[N] randomPs, \
+  field[N] randomRs, \
+  field[N] randomSs) -> bool:
+  for u32 i in 0..N do
+    field commitment = CommitmentHasher(\
+      amounts[i], \
+      publicKeys[i], \
+      randomPs[i], \
+      randomRs[i], \
+      randomSs[i])
+    assert(commitments[i] == commitment)
+  endfor
+  return true
+
+def checkSerialNumbers<N>(\
+  field[N] serialNumbers, \
+  field[N] inRandomP, \
+  private field[N] inSecretKey) -> bool:
+  for u32 i in 0..N do
+    field sn = SerialNumberHasher(inSecretKey[i], inRandomP[i])
+    assert(serialNumbers[i] == sn)
+  endfor
+  return true
+
+def checkSignatureHash<N>(\
+  field sigPublicKey, \
+  field[N] sigHashes, \
+  field[N] secretKeys) -> bool:
+  for u32 i in 0..N do
+    field sigHash = signatureHasher(secretKeys[i], sigPublicKey)
+    assert(sigHashes[i] == sigHash)
+  endfor
+  return true
+
+def checkOwnerships<N>(\
+  field[N] secretKeys, \
+  field[N] publicKeys, \
+  BabyJubJubParams context) -> bool:
+  for u32 i in 0..N do
+    bool match = ownershipChecker(publicKeys[i], secretKeys[i], context)
+    assert(match)
+  endfor
+  return true
+
+def checkMerklePaths<N, D>(\
+  field root, \
+  field[N] commitments, \
+  field[N][D] pathElements, \
+  bool[N][D] pathIndices) -> bool:
+  for u32 i in 0..N do
+    field expectedRoot = merkleTreeRootHasher(commitments[i], pathIndices[i], pathElements[i])
+    assert(root == expectedRoot)
+  endfor
+  return true
+
+def checkInAndOutAmounts<I, O>(\
+  field[I] inAmount, \
+  field[O] outAmount, \
+  field[O] rollupFeeAmounts, \
+  field publicAmount, \
+  field relayerFeeAmount) -> bool:
+  field inTotal = 0
+  for u32 i in 0..I do
+    assert(inAmount[i] > 0)
+    inTotal = inTotal + inAmount[i]
+  endfor
+  field outTotal = 0
+  for u32 i in 0..O do
+    assert(outAmount[i] > 0)
+    outTotal = outTotal + outAmount[i] + rollupFeeAmounts[i]
+  endfor
+  outTotal = outTotal + publicAmount + relayerFeeAmount
+  assert(inTotal == outTotal)
+  return true
+
+def main<D, I, O>(\
+  field root, \
+  field[I] serialNumbers, \
+  field[I] sigHashes, \
+  field sigPublicKey, \
+  field publicAmount, \
+  field relayerFeeAmount, \
+  field[O] outCommitments, \
+  field[O] rollupFeeAmounts, \
+  private field[I] inCommitments, \
+  private field[I] inAmount, \
+  private field[I] inRandomP, \
+  private field[I] inRandomR, \
+  private field[I] inRandomS, \
+  private field[I] inSecretKey, \
+  private field[I] inPublicKey, \
+  private field[I][D] inPathElements, \
+  private bool[I][D] inPathIndices, \
+  private field[O] outAmount, \
+  private field[O] outRandomP, \
+  private field[O] outRandomR, \
+  private field[O] outRandomS, \
+  private field[O] outPublicKey) -> bool:
+  BabyJubJubParams ownershipParams = buildOwnershipParams()
+  ownershipParams.Gu = 5299619240641551281634865583518297030282874472190772894086521144482721001553
+  ownershipParams.Gv = 16950150798460657717958625567821834550301663161624707787222815936182638968203
+  assert(checkCommitments(inCommitments, inPublicKey, inAmount, inRandomP, inRandomR, inRandomS))
+  assert(checkCommitments(outCommitments, outPublicKey, outAmount, outRandomP, outRandomR, outRandomS))
+  assert(checkSerialNumbers(serialNumbers, inRandomP, inSecretKey))
+  assert(checkSignatureHash(sigPublicKey, sigHashes, inSecretKey))
+  assert(checkOwnerships(inSecretKey, inPublicKey, ownershipParams))
+  assert(checkMerklePaths(root, inCommitments, inPathElements, inPathIndices))
+  assert(checkInAndOutAmounts(inAmount, outAmount, rollupFeeAmounts, publicAmount, relayerFeeAmount))
+  return true

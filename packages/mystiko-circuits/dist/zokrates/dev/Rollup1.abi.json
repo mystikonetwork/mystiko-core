@@ -1,0 +1,43 @@
+{
+  "inputs": [
+    {
+      "name": "oldRoot",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "newRoot",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "leavesHash",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "pathIndices",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "pathElements",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 20,
+        "type": "field"
+      }
+    },
+    {
+      "name": "leaves",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    }
+  ],
+  "outputs": []
+}

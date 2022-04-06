@@ -1,0 +1,9 @@
+import "hashes/poseidon/poseidon" as poseidon
+
+def main(field amount, \
+         field pubKey, \
+         field randomP, \
+         field randomR, \
+         field randomS) -> field:
+  field hashK = poseidon([pubKey, randomP, randomR])
+  return poseidon([hashK, amount, randomS])

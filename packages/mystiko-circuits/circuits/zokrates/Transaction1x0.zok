@@ -1,0 +1,49 @@
+import "./JoinSplit.zok" as JoinSplit
+
+def main(\
+  field root, \
+  field[1] serialNumbers, \
+  field[1] sigHashes, \
+  field sigPublicKey, \
+  field publicAmount, \
+  field relayerFeeAmount, \
+  field[0] outCommitments, \
+  field[0] rollupFeeAmounts, \
+  private field[1] inCommitments, \
+  private field[1] inAmount, \
+  private field[1] inRandomP, \
+  private field[1] inRandomR, \
+  private field[1] inRandomS, \
+  private field[1] inSecretKey, \
+  private field[1] inPublicKey, \
+  private field[1][20] inPathElements, \
+  private bool[1][20] inPathIndices, \
+  private field[0] outAmount, \
+  private field[0] outRandomP, \
+  private field[0] outRandomR, \
+  private field[0] outRandomS, \
+  private field[0] outPublicKey):
+  assert(JoinSplit::<20, 1, 0>(\
+    root, \
+    serialNumbers, \
+    sigHashes, \
+    sigPublicKey, \
+    publicAmount, \
+    relayerFeeAmount, \
+    outCommitments, \
+    rollupFeeAmounts, \
+    inCommitments, \
+    inAmount, \
+    inRandomP, \
+    inRandomR, \
+    inRandomS, \
+    inSecretKey, \
+    inPublicKey, \
+    inPathElements, \
+    inPathIndices, \
+    outAmount, \
+    outRandomP, \
+    outRandomR, \
+    outRandomS, \
+    outPublicKey))
+  return

@@ -1,0 +1,195 @@
+{
+  "inputs": [
+    {
+      "name": "root",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "serialNumbers",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "sigHashes",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "sigPublicKey",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "publicAmount",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "relayerFeeAmount",
+      "public": true,
+      "type": "field"
+    },
+    {
+      "name": "outCommitments",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "rollupFeeAmounts",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inCommitments",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inAmount",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inRandomP",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inRandomR",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inRandomS",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inSecretKey",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inPublicKey",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "inPathElements",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "array",
+        "components": {
+          "size": 20,
+          "type": "field"
+        }
+      }
+    },
+    {
+      "name": "inPathIndices",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "array",
+        "components": {
+          "size": 20,
+          "type": "bool"
+        }
+      }
+    },
+    {
+      "name": "outAmount",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outRandomP",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outRandomR",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outRandomS",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    },
+    {
+      "name": "outPublicKey",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 1,
+        "type": "field"
+      }
+    }
+  ],
+  "outputs": []
+}

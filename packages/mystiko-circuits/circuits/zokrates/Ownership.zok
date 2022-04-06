@@ -1,0 +1,10 @@
+import "ecc/edwardsScalarMult" as multiply
+import "utils/pack/bool/nonStrictUnpack256" as boolUnpack256
+from "ecc/babyjubjubParams" import BabyJubJubParams
+
+def main(field pk, field sk, BabyJubJubParams context) -> bool:
+    field[2] G = [context.Gu, context.Gv]
+    bool[256] skBits = boolUnpack256(sk)
+    field[2] ptExp = multiply(skBits, G, context)
+    bool out = ptExp[0] == pk
+    return out

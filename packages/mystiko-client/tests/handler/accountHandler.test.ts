@@ -1,7 +1,8 @@
-import { currentProtocol } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
 import { AccountHandler, WalletHandler, Wallet, createDatabase, MystikoDatabase } from '../../src';
 
+let currentProtocol: MystikoProtocolV1;
 let db: MystikoDatabase;
 let wallet: Wallet;
 let walletHandler: WalletHandler;
@@ -10,6 +11,7 @@ const walletMasterSeed = 'awesomeMasterSeed';
 const walletPassword = 'P@ssw0rd';
 
 beforeEach(async () => {
+  currentProtocol = new MystikoProtocolV1();
   db = await createDatabase('test.db');
   walletHandler = new WalletHandler(db);
   accountHandler = new AccountHandler(walletHandler, db);

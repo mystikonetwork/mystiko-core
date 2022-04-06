@@ -1,0 +1,9 @@
+import "hashes/poseidon/poseidon" as poseidon
+
+def main<DEPTH>(field leaf, bool[DEPTH] pathIndices, field[DEPTH] pathElements) -> field:
+  field digest = leaf
+  for u32 i in 0..DEPTH do
+    field[2] leaves = if pathIndices[i] then [pathElements[i], digest] else [digest, pathElements[i]] fi
+    digest = poseidon(leaves)
+  endfor
+  return digest

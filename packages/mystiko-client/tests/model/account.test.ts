@@ -1,8 +1,9 @@
-import { currentProtocol } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { toHexNoPrefix } from '@mystikonetwork/utils';
 import { Account } from '../../src';
 
 test('Test Account getters/setters', () => {
+  const protocol = new MystikoProtocolV1();
   const account = new Account();
   expect(account.id).toBe(undefined);
   expect(account.name).toBe(undefined);
@@ -15,9 +16,9 @@ test('Test Account getters/setters', () => {
   expect(account.shieldedAddress).toBe(undefined);
   account.name = 'Test Account #1';
   expect(account.name).toBe('Test Account #1');
-  account.verifyPublicKey = currentProtocol.randomBytes(currentProtocol.VERIFY_PK_SIZE);
+  account.verifyPublicKey = protocol.randomBytes(protocol.verifyPkSize);
   expect(toHexNoPrefix(account.verifyPublicKey)).not.toBe(undefined);
-  account.encPublicKey = currentProtocol.randomBytes(currentProtocol.ENCRYPT_PK_SIZE);
+  account.encPublicKey = protocol.randomBytes(protocol.encPkSize);
   expect(toHexNoPrefix(account.encPublicKey)).not.toBe(undefined);
   account.encryptedVerifySecretKey = 'deaddead';
   expect(account.encryptedVerifySecretKey).toBe('deaddead');

@@ -1,6 +1,6 @@
 import { Logger } from 'loglevel';
 import { MystikoConfig } from '@mystikonetwork/config';
-import { v1Protocol, V1ProtocolInterface } from '@mystikonetwork/protocol';
+import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
 import { logger as rootLogger } from '@mystikonetwork/utils';
 import { MystikoDatabase } from '../database';
 
@@ -13,14 +13,14 @@ export class Handler {
 
   protected readonly db: MystikoDatabase;
 
-  protected readonly protocol: V1ProtocolInterface;
+  protected readonly protocol: MystikoProtocolV1;
 
   protected logger: Logger;
 
   constructor(db: MystikoDatabase, config?: MystikoConfig) {
     this.config = config || new MystikoConfig({ version: '1.0' });
     this.db = db;
-    this.protocol = v1Protocol;
+    this.protocol = new MystikoProtocolV1();
     this.logger = rootLogger.getLogger('Handler');
   }
 

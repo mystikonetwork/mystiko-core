@@ -1,0 +1,44 @@
+import "hashes/sha256/sha256" as sha256
+import "utils/pack/u32/nonStrictUnpack256" as unpack256
+import "utils/pack/u32/pack256" as pack256
+
+def main<N>(field[N] items) -> field:
+  u32 blockNumber = (N >> 1) + (N % 2)
+  u32 blockNumberPadded = blockNumber + (1 - (N % 2))
+  u32[blockNumberPadded][16] blocks = [[0; 16]; blockNumberPadded]
+  for u32 i in 0..blockNumber do
+    u32[8] firstPart = unpack256(items[2 * i])
+    u32[8] dummyPart = [\
+      0x80000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      N * 256
+   ]
+    u32[8] secondPart = (2 * i + 1) >= N ? dummyPart : unpack256(items[2 * i + 1])
+    blocks[i] = [ ...firstPart, ...secondPart ]
+  endfor
+  for u32 i in 0..(1 - (N % 2)) do
+    blocks[blockNumberPadded - 1] = [\
+      0x80000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      0x00000000,
+      N * 256
+   ] 
+  endfor
+  return pack256(sha256(blocks))

@@ -19,15 +19,15 @@ jobs:
           node-version: 14
       - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
-      - run: npm install --global lerna ganache-cli
-      - run: ganache-cli --port 7545 > /dev/null &
+      - run: curl -LSfs get.zokrat.es | sh
+      - run: echo "$HOME/.zokrates/bin" >> $GITHUB_PATH
+      - run: npm install --global lerna
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
-      - run: lerna run lint
       - run: lerna run build
+      - run: lerna run lint
       - run: lerna run test
-      - run: lerna run deploy --scope @mystikonetwork/contracts
-      - name: Report @mystikonetwork/utils test coverage
+      - name: Report @mystikone twork/utils test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:
           working-directory: ./packages/mystiko-utils

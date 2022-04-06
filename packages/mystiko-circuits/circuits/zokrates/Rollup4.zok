@@ -1,0 +1,18 @@
+import "./MerkleTreeBatchUpdater.zok" as MerkleTreeBatchUpdater
+
+def main(\
+  field oldRoot, \
+  field newRoot, \
+  field leavesHash, \
+  field pathIndices, \
+  private field[18] pathElements, \
+  private field[4] leaves):
+  assert(MerkleTreeBatchUpdater::<20, 18, 4>(\
+    oldRoot, \
+    newRoot, \
+    leavesHash, \
+    pathIndices, \
+    pathElements, \
+    leaves \
+  ))
+  return

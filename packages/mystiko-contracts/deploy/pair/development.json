@@ -12,8 +12,8 @@
           "erc20": "false"
         }
       ],
-      "hashAddress": "",
-      "verifierAddress": ""
+      "verifierAddress": "",
+      "rollupAddress": ""
     }
   ],
   "bridges": [

@@ -69,6 +69,7 @@
     "ethers": "^5.5.3",
     "ffjavascript": "^0.2.48",
     "randombytes": "^2.1.0",
-    "snarkjs": "^0.4.12"
+    "snarkjs": "^0.4.12",
+    "zokrates-js": "^1.0.39"
   }
 }

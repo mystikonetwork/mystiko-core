@@ -10,5 +10,8 @@
     "sourceMap": true,
     "outDir": "./build/cjs",
     "typeRoots": ["node_modules/@types", "./src/types"]
+  },
+  "ts-node": {
+    "files": true
   }
 }

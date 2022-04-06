@@ -1,23 +1,22 @@
 {
   "extends": "@tsconfig/recommended/tsconfig.json",
   "include": [
-    "integration/**/*"
+    "integration/**/*",
+    "deploy/**/*",
+    "test/**/*",
+    "scripts/**/*"
   ],
   "compilerOptions": {
-    "lib": [
-      "es6"
-    ],
+    "lib": ["es6"],
     "allowJs": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
+    "sourceRoot": "/",
     "outDir": "./build/cjs",
-    "typeRoots": [
-      "node_modules/@types",
-      "./src/types"
-    ]
+    "typeRoots": ["node_modules/@types", "./src/types"]
   },
   "ts-node": {
     "files": true
