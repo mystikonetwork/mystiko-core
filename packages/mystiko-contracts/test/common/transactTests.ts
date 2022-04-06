@@ -3,10 +3,18 @@ import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { MerkleTree, toBuff, toHex } from '@mystikonetwork/utils';
+import { MerkleTree, toBN, toBuff, toHex } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
+import { TestToken } from '../../typechain';
 
 const { waffle } = require('hardhat');
+
+function getBalance(address: string, testToken: TestToken | undefined): Promise<BN> {
+  if (!testToken) {
+    return waffle.provider.getBalance(address).then((r: any) => toBN(r.toString()));
+  }
+  return testToken.balanceOf(address).then((r: any) => toBN(r.toString()));
+}
 
 function generateSignatureKeys(): { wallet: ethers.Wallet; pk: Buffer; sk: Buffer } {
   const wallet = ethers.Wallet.createRandom();
@@ -149,17 +157,26 @@ export function testTransact(
   abiFile: string,
   provingKeyFile: string,
   vkeyFile: string,
+  testToken: TestToken | undefined = undefined,
 ) {
   const numInputs = inCommitmentsIndices.length;
   const numOutputs = outAmounts.length;
+  const publicRecipientAddress = '0x2Bd6FBfDA256cebAC13931bc3E91F6e0f59A5e23';
+  const relayerAddress = '0xc9192277ea18ff49618E412197C9c9eaCF43A5e3';
+  const signatureKeys = generateSignatureKeys();
+  let recipientBalance: BN;
+  let relayerBalance: BN;
+  let proof: Proof;
+  let outCommitments: CommitmentV1[];
+  let outEncryptedNotes: Buffer[];
+  let signature: string;
+  let commitmentQueueSize: BN;
+  let commitmentIncludedCount: BN;
+  let txReceipt: any;
   describe(`Test Mystiko transaction${numInputs}x${numOutputs}`, () => {
     before(async () => {
       await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
-    });
-
-    it('should transact successfully', async () => {
-      const signatureKeys = generateSignatureKeys();
-      const { proof, outCommitments } = await generateProof(
+      const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
         numOutputs,
@@ -174,16 +191,25 @@ export function testTransact(
         abiFile,
         provingKeyFile,
       );
-      expect(await protocol.zkVerify(proof, vkeyFile)).to.equal(true);
-      const outEncryptedNotes = outCommitments.map((c) => c.privateNote);
-      const publicRecipientAddress = '0x2Bd6FBfDA256cebAC13931bc3E91F6e0f59A5e23';
-      const relayerAddress = '0xc9192277ea18ff49618E412197C9c9eaCF43A5e3';
-      const signature = signRequest(
+      proof = proofWithCommitments.proof;
+      outCommitments = proofWithCommitments.outCommitments;
+      outEncryptedNotes = outCommitments.map((c) => c.privateNote);
+      signature = await signRequest(
         signatureKeys.wallet,
         publicRecipientAddress,
         relayerAddress,
         outEncryptedNotes,
       );
+      recipientBalance = await getBalance(publicRecipientAddress, testToken);
+      relayerBalance = await getBalance(relayerAddress, testToken);
+      commitmentQueueSize = await mystikoContract.commitmentQueueSize().then((r: any) => toBN(r.toString()));
+      commitmentIncludedCount = await mystikoContract
+        .commitmentIncludedCount()
+        .then((r: any) => toBN(r.toString()));
+    });
+
+    it('should transact successfully', async () => {
+      expect(await protocol.zkVerify(proof, vkeyFile)).to.equal(true);
       const request = buildRequest(
         numInputs,
         numOutputs,
@@ -193,9 +219,96 @@ export function testTransact(
         outEncryptedNotes,
       );
       const tx = await mystikoContract.transact(request, signature);
-      const txReceipt = await waffle.provider.getTransactionReceipt(tx.hash);
-      const gasUsed = txReceipt.cumulativeGasUsed.toString();
-      console.log(`gas used: ${gasUsed}`);
+      txReceipt = await waffle.provider.getTransactionReceipt(tx.hash);
+    });
+
+    it('should emit correct events', () => {
+      const events: ethers.utils.LogDescription[] = [];
+      for (let i = 0; i < txReceipt.logs.length; i += 1) {
+        try {
+          const parsedLog: ethers.utils.LogDescription = mystikoContract.interface.parseLog(
+            txReceipt.logs[i],
+          );
+          events.push(parsedLog);
+        } catch (e) {
+          // do nothing
+        }
+      }
+      for (let i = 0; i < numInputs; i += 1) {
+        const sn = proof.inputs[i + 1];
+        const rootHash = proof.inputs[0];
+        const index = events.findIndex(
+          (event) =>
+            event.name === 'CommitmentSpent' &&
+            event.args.serialNumber.toHexString() === sn &&
+            event.args.rootHash.toHexString() === rootHash,
+        );
+        expect(index).to.gte(0);
+      }
+      for (let i = 0; i < numOutputs; i += 1) {
+        const outCommitment = outCommitments[i].commitmentHash;
+        const outEncryptedNote = outEncryptedNotes[i];
+        const leafIndex = commitmentQueueSize.add(commitmentIncludedCount).addn(i);
+        const commitmentIndex = events.findIndex(
+          (event) =>
+            event.name === 'CommitmentQueued' &&
+            event.args.commitment.toString() === outCommitment.toString() &&
+            event.args.rollupFee.toString() === rollupFeeAmounts[i].toString() &&
+            event.args.leafIndex.toString() === leafIndex.toString(),
+        );
+        const encryptedNoteIndex = events.findIndex(
+          (event) =>
+            event.name === 'EncryptedNote' &&
+            event.args.commitment.toString() === outCommitment.toString() &&
+            event.args.encryptedNote === toHex(outEncryptedNote),
+        );
+        expect(commitmentIndex).to.gte(0);
+        expect(encryptedNoteIndex).to.gte(0);
+      }
+    });
+
+    it('should have correct balance', async () => {
+      const newRecipientBalance = await getBalance(publicRecipientAddress, testToken);
+      const newRelayerBalance = await getBalance(relayerAddress, testToken);
+      expect(newRecipientBalance.toString()).to.equal(recipientBalance.add(publicAmount).toString());
+      expect(newRelayerBalance.toString()).to.equal(relayerBalance.add(relayerFeeAmount).toString());
+    });
+
+    it('should set spentSerialNumbers correctly', async () => {
+      const snPromises: Promise<boolean>[] = [];
+      for (let i = 1; i < numInputs + 1; i += 1) {
+        const sn = proof.inputs[i];
+        snPromises.push(mystikoContract.spentSerialNumbers(sn));
+      }
+      const snExists = await Promise.all(snPromises);
+      snExists.forEach((exist) => expect(exist).to.equal(true));
+    });
+
+    it('should set historicCommitments correctly', async () => {
+      const commitmentPromises: Promise<boolean>[] = [];
+      for (let i = 0; i < outCommitments.length; i += 1) {
+        const commitment = outCommitments[i].commitmentHash;
+        commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+      }
+      const commitmentExists = await Promise.all(commitmentPromises);
+      commitmentExists.forEach((exist) => expect(exist).to.equal(true));
+    });
+
+    it('should set commitmentQueue correctly', async () => {
+      const newCommitmentQueueSize: BN = await mystikoContract
+        .commitmentQueueSize()
+        .then((r: any) => toBN(r.toString()));
+      expect(newCommitmentQueueSize.toString()).to.equal(commitmentQueueSize.addn(numOutputs).toString());
+      const commitmentQueuePromises: Promise<void>[] = [];
+      for (let i = 0; i < outCommitments.length; i += 1) {
+        const commitment = outCommitments[i].commitmentHash;
+        commitmentQueuePromises.push(
+          mystikoContract.commitmentQueue(commitmentQueueSize.addn(i).toString()).then((r: any) => {
+            expect(r.commitment.toString()).to.equal(commitment.toString());
+          }),
+        );
+      }
+      await Promise.all(commitmentQueuePromises);
     });
   });
 }
