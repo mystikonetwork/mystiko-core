@@ -9,6 +9,7 @@ import { BridgeAccountIndex, DefaultPoolAmount, DestinationChainID, SourceChainI
 const { waffle } = require('hardhat');
 
 export function testBridgeDeposit(
+  contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
   mystikoDstContract: any,
@@ -30,7 +31,7 @@ export function testBridgeDeposit(
   const bridgeAccount = accounts[BridgeAccountIndex];
   const bridgeMessages: any[] = [];
 
-  describe('Test Mystiko deposit operation', () => {
+  describe(`Test ${contractName} deposit operation`, () => {
     before(async () => {
       minBridgeFee = (await mystikoContract.minBridgeFee()).toString();
       minExecutorFee = (await mystikoContract.minExecutorFee()).toString();

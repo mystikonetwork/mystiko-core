@@ -3,6 +3,7 @@ import { MerkleTree } from '@mystikonetwork/utils';
 import { Hasher3 } from '../../typechain';
 
 export function testConstructor(
+  contractName: string,
   mystikoContract: any,
   hasher3: Hasher3,
   treeHeight: number,
@@ -11,7 +12,7 @@ export function testConstructor(
   minExecutorFee: number | undefined,
   minRollupFee: number,
 ) {
-  describe('Test Mystiko contract constructor', () => {
+  describe(`Test ${contractName} constructor`, () => {
     it('should initialize hasher3 correctly', async () => {
       expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
     });

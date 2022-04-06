@@ -96,6 +96,7 @@ async function generateProof(
 }
 
 export function testRollup(
+  contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
   rollupVerifierContract: any,
@@ -114,7 +115,7 @@ export function testRollup(
   const rollupAccount = accounts[RollupAccountIndex1];
   const rollupAccount2 = accounts[RollupAccountIndex2];
 
-  describe(`Test Mystiko rollup ${rollupSize} operation`, () => {
+  describe(`Test ${contractName} rollup${rollupSize} operation`, () => {
     before(async () => {
       await enableRollupVerifier(
         mystikoContract,

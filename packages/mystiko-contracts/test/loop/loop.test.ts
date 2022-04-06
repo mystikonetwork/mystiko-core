@@ -109,6 +109,7 @@ describe('Test Mystiko loop', () => {
 
   it('test constructor', () => {
     testConstructor(
+      'MystikoV2WithLoopMain',
       loopMain,
       hasher3,
       MerkleTreeHeight,
@@ -118,6 +119,7 @@ describe('Test Mystiko loop', () => {
       MinRollupFee,
     );
     testConstructor(
+      'MystikoV2WithLoopERC20',
       loopERC20,
       hasher3,
       MerkleTreeHeight,
@@ -129,8 +131,8 @@ describe('Test Mystiko loop', () => {
   });
 
   it('test admin operation', () => {
-    testAdminOperations(loopMain, accounts);
-    testAdminOperations(loopERC20, accounts);
+    testAdminOperations('MystikoV2WithLoopMain', loopMain, accounts);
+    testAdminOperations('MystikoV2WithLoopERC20', loopERC20, accounts);
   });
 
   it('test loop main deposit with rollup', async () => {
@@ -138,6 +140,7 @@ describe('Test Mystiko loop', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testLoopDeposit(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       loopMainLimit,
@@ -147,11 +150,39 @@ describe('Test Mystiko loop', () => {
       true,
       cmInfo,
     );
-    testRollup(protocol, loopMain, rollup16, testToken, accounts, cmInfo.commitments, { rollupSize: 16 });
-    testRollup(protocol, loopMain, rollup4, testToken, accounts, cmInfo.commitments, { rollupSize: 4 });
-    testRollup(protocol, loopMain, rollup1, testToken, accounts, cmInfo.commitments, { rollupSize: 1 });
+    testRollup(
+      'MystikoV2WithLoopMain',
+      protocol,
+      loopMain,
+      rollup16,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 16 },
+    );
+    testRollup(
+      'MystikoV2WithLoopMain',
+      protocol,
+      loopMain,
+      rollup4,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 4 },
+    );
+    testRollup(
+      'MystikoV2WithLoopMain',
+      protocol,
+      loopMain,
+      rollup1,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 1 },
+    );
 
     testTransact(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       transaction1x0Verifier,
@@ -168,6 +199,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       transaction1x1Verifier,
@@ -184,6 +216,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       transaction1x2Verifier,
@@ -200,6 +233,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       transaction2x0Verifier,
@@ -216,6 +250,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       transaction2x1Verifier,
@@ -232,6 +267,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopMain',
       protocol,
       loopMain,
       transaction2x2Verifier,
@@ -253,6 +289,7 @@ describe('Test Mystiko loop', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testLoopDeposit(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       loopERC20Limit,
@@ -262,20 +299,48 @@ describe('Test Mystiko loop', () => {
       false,
       cmInfo,
     );
-    testRollup(protocol, loopERC20, rollup16, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 16,
-    });
-    testRollup(protocol, loopERC20, rollup4, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 4,
-    });
-    testRollup(protocol, loopERC20, rollup1, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 1,
-    });
+    testRollup(
+      'MystikoV2WithLoopERC20',
+      protocol,
+      loopERC20,
+      rollup16,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 16,
+      },
+    );
+    testRollup(
+      'MystikoV2WithLoopERC20',
+      protocol,
+      loopERC20,
+      rollup4,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 4,
+      },
+    );
+    testRollup(
+      'MystikoV2WithLoopERC20',
+      protocol,
+      loopERC20,
+      rollup1,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 1,
+      },
+    );
 
     testTransact(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       transaction1x0Verifier,
@@ -293,6 +358,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       transaction1x1Verifier,
@@ -310,6 +376,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       transaction1x2Verifier,
@@ -327,6 +394,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       transaction2x0Verifier,
@@ -344,6 +412,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       transaction2x1Verifier,
@@ -361,6 +430,7 @@ describe('Test Mystiko loop', () => {
     );
 
     testTransact(
+      'MystikoV2WithLoopERC20',
       protocol,
       loopERC20,
       transaction2x2Verifier,

@@ -144,6 +144,7 @@ function buildRequest(
 }
 
 export function testTransact(
+  contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
   transactVerifier: any,
@@ -174,7 +175,7 @@ export function testTransact(
   let commitmentQueueSize: BN;
   let commitmentIncludedCount: BN;
   let txReceipt: any;
-  describe(`Test Mystiko transaction${numInputs}x${numOutputs}`, () => {
+  describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
       const proofWithCommitments = await generateProof(

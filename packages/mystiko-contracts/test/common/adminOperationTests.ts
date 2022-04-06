@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-export function testAdminOperations(mystikoContract: any, accounts: any[]) {
-  describe('Test Mystiko admin operations', () => {
+export function testAdminOperations(contractName: string, mystikoContract: any, accounts: any[]) {
+  describe(`Test ${contractName} admin operations`, () => {
     before(async () => {});
 
     it('should toggle isDepositDisabled correctly', async () => {

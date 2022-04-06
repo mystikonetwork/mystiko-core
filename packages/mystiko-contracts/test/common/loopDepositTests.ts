@@ -8,6 +8,7 @@ import { CommitmentInfo } from './commitment';
 const { waffle } = require('hardhat');
 
 export function testLoopDeposit(
+  contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
   mystikoContractLimit: any,
@@ -23,7 +24,7 @@ export function testLoopDeposit(
   const { mystikoAddress } = cmInfo;
   const numOfCommitments = commitments.length;
 
-  describe('Test Mystiko deposit operation', () => {
+  describe(`Test ${contractName} deposit operations`, () => {
     before(async () => {
       minRollupFee = (await mystikoContract.minRollupFee()).toString();
       minTotalAmount = toBN(depositAmount).add(toBN(minRollupFee)).toString();
