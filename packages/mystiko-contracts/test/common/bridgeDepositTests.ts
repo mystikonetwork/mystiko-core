@@ -96,7 +96,7 @@ export function testBridgeDeposit(
       ).to.be.revertedWith('bridge fee too few');
     });
 
-    it('should revert when rollup fee is too few', async () => {
+    it('should revert when executor fee is too few', async () => {
       await expect(
         mystikoContract.deposit(
           [

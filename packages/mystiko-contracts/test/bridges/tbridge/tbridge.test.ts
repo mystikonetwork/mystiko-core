@@ -175,6 +175,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
@@ -191,6 +193,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
@@ -207,6 +211,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
@@ -223,6 +229,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
@@ -239,6 +247,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
@@ -255,6 +265,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+      undefined,
+      false,
     );
   });
 
@@ -301,6 +313,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
@@ -317,6 +331,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
@@ -333,6 +349,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
@@ -349,6 +367,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
@@ -365,6 +385,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
@@ -381,6 +403,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+      testToken,
+      false,
     );
   });
 

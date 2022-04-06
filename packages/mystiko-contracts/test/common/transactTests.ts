@@ -158,6 +158,7 @@ export function testTransact(
   provingKeyFile: string,
   vkeyFile: string,
   testToken: TestToken | undefined = undefined,
+  isLoop: boolean = true,
 ) {
   const numInputs = inCommitmentsIndices.length;
   const numOutputs = outAmounts.length;
@@ -284,11 +285,15 @@ export function testTransact(
       snExists.forEach((exist) => expect(exist).to.equal(true));
     });
 
-    it('should set historicCommitments correctly', async () => {
+    it('should set historicCommitments/relayCommitments correctly', async () => {
       const commitmentPromises: Promise<boolean>[] = [];
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
-        commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+        if (isLoop) {
+          commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+        } else {
+          commitmentPromises.push(mystikoContract.relayCommitments(commitment.toString()));
+        }
       }
       const commitmentExists = await Promise.all(commitmentPromises);
       commitmentExists.forEach((exist) => expect(exist).to.equal(true));
