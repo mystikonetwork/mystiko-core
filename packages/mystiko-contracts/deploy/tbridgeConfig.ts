@@ -37,12 +37,12 @@ export function savePeerConfig(
   config: any,
 ) {
   const srcChain = common.getChainConfig(config, src.network);
-  if (srcChain === null) {
+  if (srcChain === undefined) {
     return;
   }
 
   const dstChain = common.getChainConfig(config, dst.network);
-  if (dstChain === null) {
+  if (dstChain === undefined) {
     return;
   }
 

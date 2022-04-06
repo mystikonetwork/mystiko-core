@@ -3,4 +3,3 @@ node_modules/*
 hardhat.config.ts
 hardhat.config.deploy.ts
 typechain
-deploy

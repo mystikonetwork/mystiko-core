@@ -10,9 +10,9 @@ import {
 function getConfigFileName(mystikoNetwork: string) {
   let fileNameWithPath = '';
   if (mystikoNetwork === 'testnet') {
-    fileNameWithPath = process.env.CLIENT_CONFIG_FILE_PATH + '/testnet.json';
+    fileNameWithPath = `${process.env.CLIENT_CONFIG_FILE_PATH}/testnet.json`;
   } else if (mystikoNetwork === 'mainnet') {
-    fileNameWithPath = process.env.CLIENT_CONFIG_FILE_PATH + '/mainnet.json';
+    fileNameWithPath = `${process.env.CLIENT_CONFIG_FILE_PATH}/mainnet.json`;
   } else if (mystikoNetwork === 'development') {
     fileNameWithPath = 'config/default/development.json';
   } else {
@@ -43,12 +43,12 @@ function saveConfig(mystikoNetwork: string, data: string) {
   writeJsonFile(fileName, data);
 }
 
-function buildContractName(bridgeContractName: string, bERC20: string) {
+function buildContractName(bridgeContractName: string, bERC20: string): string {
   if (bERC20 === 'true') {
-    return 'MystikoWith' + bridgeContractName + 'ERC20';
+    return `MystikoWith${bridgeContractName}ERC20`;
   }
 
-  return 'MystikoWith' + bridgeContractName + 'Main';
+  return `MystikoWith${bridgeContractName}Main`;
 }
 
 function addNewConfigContractAddress(
@@ -68,23 +68,25 @@ function addNewConfigContractAddress(
 
   for (let i = 0; i < coreConfig.chains.length; i += 1) {
     if (coreConfig.chains[i].name !== chainName) {
+      // eslint-disable-next-line
       continue;
     }
 
+    const name = contractName;
+    const { assetSymbol, assetDecimals } = tokenConfig;
+
     const newContract = {
-      version: version,
-      name: contractName,
-      address: address,
-      assetSymbol: tokenConfig.name,
-      assetDecimals: tokenConfig.assetDecimals,
-      circuits: circuits,
-      syncStart: syncStart,
-      assetAddress: undefined,
-      peerChainId: undefined,
-      peerContractAddress: undefined,
+      version,
+      name,
+      address,
+      assetSymbol,
+      assetDecimals,
+      circuits,
+      syncStart,
     };
 
     if (tokenConfig.erc20 === 'true') {
+      // @ts-ignore
       newContract.assetAddress = tokenConfig.address;
     }
 
@@ -119,6 +121,7 @@ function updateConfigContractAddress(
   const coreConfig = inCoreConfig;
   for (let i = 0; i < coreConfig.chains.length; i += 1) {
     if (coreConfig.chains[i].name !== chainName) {
+      // eslint-disable-next-line
       continue;
     }
 
@@ -127,10 +130,12 @@ function updateConfigContractAddress(
         coreConfig.chains[i].contracts[j].name !== contractName ||
         coreConfig.chains[i].contracts[j].assetSymbol !== tokenConfig.name
       ) {
+        // eslint-disable-next-line
         continue;
       }
 
       if (bridgeName !== 'loop' && coreConfig.chains[i].contracts[j].peerChainId !== peerChainId) {
+        // eslint-disable-next-line
         continue;
       }
 
@@ -172,22 +177,23 @@ function updateConfigContractAddress(
 
 export function savePeerConfig(mystikoNetwork: string, bridgeName: string, src: any, dst: any, config: any) {
   const bridge = getBridgeConfig(config, bridgeName);
-  if (bridge === null) {
+  if (bridge === undefined) {
+    console.error(LOGRED, 'bridge configure not support');
     return;
   }
 
   const srcChain = getChainConfig(config, src.network);
-  if (srcChain === null) {
+  if (srcChain === undefined) {
     return;
   }
 
   const dstChain = getChainConfig(config, dst.network);
-  if (dstChain === null) {
+  if (dstChain === undefined) {
     return;
   }
 
   const srcToken = getChainTokenConfig(srcChain, src.token);
-  if (srcToken === null) {
+  if (srcToken === undefined) {
     return;
   }
 
