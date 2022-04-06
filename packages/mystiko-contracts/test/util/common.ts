@@ -32,20 +32,20 @@ import {
   MystikoV2WithLoopERC20,
   MystikoV2WithLoopMain__factory,
   MystikoV2WithLoopMain,
-  // MystikoWithTBridgeMain__factory,
-  // MystikoTBridgeProxy__factory,
-  // MystikoWithTBridgeERC20__factory,
+  MystikoWithTBridgeMain__factory,
+  MystikoTBridgeProxy__factory,
+  MystikoWithTBridgeERC20__factory,
 } from '../../typechain';
 import {
   MerkleTreeHeight,
   RootHistoryLength,
-  // MinBridgeFee,
-  // MinExecutorFee,
+  MinBridgeFee,
+  MinExecutorFee,
   MinRollupFee,
   UserPrivKeys,
   DefaultTokenAmount,
-  // SourceChainID,
-  // DestinationChainID,
+  SourceChainID,
+  DestinationChainID,
 } from './constants';
 
 // Workaround for https://github.com/nomiclabs/hardhat/issues/849
@@ -54,13 +54,13 @@ export function loadFixture<T>(fixture: Fixture<T>): Promise<T> {
   return waffle.createFixtureLoader(waffle.provider.getWallets(), waffle.provider)(fixture);
 }
 
-// interface CoreBridgeDeploymentInfo {
-//   proxy: any;
-//   localMain: any;
-//   localERC20: any;
-//   remoteMain: any;
-//   remoteERC20: any;
-// }
+interface CoreBridgeDeploymentInfo {
+  proxy: any;
+  localMain: any;
+  localERC20: any;
+  remoteMain: any;
+  remoteERC20: any;
+}
 
 interface CoreLoopDeploymentInfo {
   loopMain: MystikoV2WithLoopMain;
@@ -113,88 +113,88 @@ export async function deployLoopContracts(
   return { loopMain, loopERC20 };
 }
 
-// export async function deployTBridgeContracts(
-//   accounts: Wallet[],
-//   withdrawVerifierAddress: string,
-//   tokenAddress: string,
-//   {
-//     treeHeight = MerkleTreeHeight,
-//     rootHistoryLength = RootHistoryLength,
-//     minBridgeFee = MinBridgeFee,
-//     minExecutorFee = MinExecutorFee,
-//     minRollupFee = MinRollupFee,
-//   },
-// ): Promise<CoreBridgeDeploymentInfo> {
-//   const proxyFactory = (await ethers.getContractFactory(
-//     'MystikoTBridgeProxy',
-//   )) as MystikoTBridgeProxy__factory;
-//   const proxy = await proxyFactory.connect(accounts[0]).deploy();
-//   await proxy.deployed();
-//
-//   const tBridgeMainFactory = (await ethers.getContractFactory(
-//     'MystikoWithTBridgeMain',
-//   )) as MystikoWithTBridgeMain__factory;
-//
-//   const localMain = await tBridgeMainFactory
-//     .connect(accounts[0])
-//     .deploy(
-//       proxy.address,
-//       DestinationChainID,
-//       treeHeight,
-//       rootHistoryLength,
-//       minBridgeFee,
-//       minExecutorFee,
-//       minRollupFee,
-//       withdrawVerifierAddress,
-//     );
-//
-//   const remoteMain = await tBridgeMainFactory
-//     .connect(accounts[0])
-//     .deploy(
-//       proxy.address,
-//       SourceChainID,
-//       treeHeight,
-//       rootHistoryLength,
-//       minBridgeFee,
-//       minExecutorFee,
-//       minRollupFee,
-//       withdrawVerifierAddress,
-//     );
-//
-//   const tBridgeERC20Factory = (await ethers.getContractFactory(
-//     'MystikoWithTBridgeERC20',
-//   )) as MystikoWithTBridgeERC20__factory;
-//
-//   const localERC20 = await tBridgeERC20Factory
-//     .connect(accounts[0])
-//     .deploy(
-//       proxy.address,
-//       DestinationChainID,
-//       treeHeight,
-//       rootHistoryLength,
-//       minBridgeFee,
-//       minExecutorFee,
-//       minRollupFee,
-//       withdrawVerifierAddress,
-//       tokenAddress,
-//     );
-//
-//   const remoteERC20 = await tBridgeERC20Factory
-//     .connect(accounts[0])
-//     .deploy(
-//       proxy.address,
-//       SourceChainID,
-//       treeHeight,
-//       rootHistoryLength,
-//       minBridgeFee,
-//       minExecutorFee,
-//       minRollupFee,
-//       withdrawVerifierAddress,
-//       tokenAddress,
-//     );
-//
-//   return { proxy, localMain, localERC20, remoteMain, remoteERC20 };
-// }
+export async function deployTBridgeContracts(
+  accounts: Wallet[],
+  withdrawVerifierAddress: string,
+  tokenAddress: string,
+  {
+    treeHeight = MerkleTreeHeight,
+    rootHistoryLength = RootHistoryLength,
+    minBridgeFee = MinBridgeFee,
+    minExecutorFee = MinExecutorFee,
+    minRollupFee = MinRollupFee,
+  },
+): Promise<CoreBridgeDeploymentInfo> {
+  const proxyFactory = (await ethers.getContractFactory(
+    'MystikoTBridgeProxy',
+  )) as MystikoTBridgeProxy__factory;
+  const proxy = await proxyFactory.connect(accounts[0]).deploy();
+  await proxy.deployed();
+
+  const tBridgeMainFactory = (await ethers.getContractFactory(
+    'MystikoWithTBridgeMain',
+  )) as MystikoWithTBridgeMain__factory;
+
+  const localMain = await tBridgeMainFactory
+    .connect(accounts[0])
+    .deploy(
+      proxy.address,
+      DestinationChainID,
+      treeHeight,
+      rootHistoryLength,
+      minBridgeFee,
+      minExecutorFee,
+      minRollupFee,
+      withdrawVerifierAddress,
+    );
+
+  const remoteMain = await tBridgeMainFactory
+    .connect(accounts[0])
+    .deploy(
+      proxy.address,
+      SourceChainID,
+      treeHeight,
+      rootHistoryLength,
+      minBridgeFee,
+      minExecutorFee,
+      minRollupFee,
+      withdrawVerifierAddress,
+    );
+
+  const tBridgeERC20Factory = (await ethers.getContractFactory(
+    'MystikoWithTBridgeERC20',
+  )) as MystikoWithTBridgeERC20__factory;
+
+  const localERC20 = await tBridgeERC20Factory
+    .connect(accounts[0])
+    .deploy(
+      proxy.address,
+      DestinationChainID,
+      treeHeight,
+      rootHistoryLength,
+      minBridgeFee,
+      minExecutorFee,
+      minRollupFee,
+      withdrawVerifierAddress,
+      tokenAddress,
+    );
+
+  const remoteERC20 = await tBridgeERC20Factory
+    .connect(accounts[0])
+    .deploy(
+      proxy.address,
+      SourceChainID,
+      treeHeight,
+      rootHistoryLength,
+      minBridgeFee,
+      minExecutorFee,
+      minRollupFee,
+      withdrawVerifierAddress,
+      tokenAddress,
+    );
+
+  return { proxy, localMain, localERC20, remoteMain, remoteERC20 };
+}
 
 export async function deployDependContracts(accounts: Wallet[]): Promise<DependDeploymentInfo> {
   const testTokenFactory = (await ethers.getContractFactory('TestToken')) as TestToken__factory;
