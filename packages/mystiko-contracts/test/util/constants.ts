@@ -14,7 +14,7 @@ export const SourceChainID = 1001;
 export const DestinationChainID = 1002;
 
 export const DefaultTokenAmount = toDecimals(100000).toString();
-export const DefaultPoolAmount = toDecimals(5).toString();
+export const DefaultPoolAmount = toDecimals(100).toString();
 
 export const UserPrivKeys = [
   '0x41b465ba584342fb56d216e21ed8df756e50b277056eb30001984c68aac1be38',

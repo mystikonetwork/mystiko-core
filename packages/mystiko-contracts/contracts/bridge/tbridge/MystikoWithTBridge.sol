@@ -14,7 +14,7 @@ abstract contract MystikoWithTBridge is MystikoBridge {
     uint256 _minBridgeFee,
     uint256 _minExecutorFee,
     uint256 _minRollupFee,
-    address _withdrawVerifier
+    address _hasher3
   )
     MystikoBridge(
       _relayProxyAddress,
@@ -24,7 +24,7 @@ abstract contract MystikoWithTBridge is MystikoBridge {
       _minBridgeFee,
       _minExecutorFee,
       _minRollupFee,
-      _withdrawVerifier
+      _hasher3
     )
   {}
 
@@ -43,7 +43,7 @@ abstract contract MystikoWithTBridge is MystikoBridge {
     });
     bytes memory txDataBytes = serializeTxData(txData);
     ICrossChainProxy relayProxy = ICrossChainProxy(relayProxyAddress);
-    relayProxy.sendMessage{value: bridgeFee}(peerChainId, peerContractAddress, txDataBytes);
+    relayProxy.sendMessage{value: bridgeFee}(peerContractAddress, peerChainId, txDataBytes);
   }
 
   //tbridge interface

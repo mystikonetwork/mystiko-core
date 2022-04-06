@@ -15,7 +15,7 @@ contract MystikoWithTBridgeERC20 is MystikoWithTBridge, ERC20AssetPool {
     uint256 _minBridgeFee,
     uint256 _minExecutorFee,
     uint256 _minRollupFee,
-    address _withdrawVerifier,
+    address _hasher3,
     address _token
   )
     MystikoWithTBridge(
@@ -26,7 +26,7 @@ contract MystikoWithTBridgeERC20 is MystikoWithTBridge, ERC20AssetPool {
       _minBridgeFee,
       _minExecutorFee,
       _minRollupFee,
-      _withdrawVerifier
+      _hasher3
     )
     ERC20AssetPool(_token)
   {}

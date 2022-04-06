@@ -18,8 +18,8 @@ contract MystikoTBridgeProxy is CrossChainDataSerializable, ICrossChainProxy {
   }
 
   function sendMessage(
-    uint64 _toChainId,
     address _toContract,
+    uint256 _toChainId,
     bytes memory _message
   ) external payable override {
     emit TBridgeCrossChainMessage(_toContract, _toChainId, msg.sender, _message);

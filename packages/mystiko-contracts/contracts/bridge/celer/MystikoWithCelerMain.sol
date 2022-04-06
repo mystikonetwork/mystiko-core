@@ -15,7 +15,7 @@ contract MystikoWithCelerMain is MystikoWithCeler, MainAssetPool {
     uint256 _minBridgeFee,
     uint256 _minExecutorFee,
     uint256 _minRollupFee,
-    address _withdrawVerifier
+    address _hasher3
   )
     MystikoWithCeler(
       _relayProxyAddress,
@@ -25,7 +25,7 @@ contract MystikoWithCelerMain is MystikoWithCeler, MainAssetPool {
       _minBridgeFee,
       _minExecutorFee,
       _minRollupFee,
-      _withdrawVerifier
+      _hasher3
     )
   {}
 

@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 interface ICrossChainProxy {
-  event TBridgeCrossChainMessage(address toContract, uint64 toChainId, address fromContract, bytes message);
+  event TBridgeCrossChainMessage(address toContract, uint256 toChainId, address fromContract, bytes message);
 
   function sendMessage(
-    uint64 _toChainId,
     address _toContract,
+    uint256 _toChainId,
     bytes memory _message
   ) external payable;
 }
