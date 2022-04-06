@@ -350,6 +350,38 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
     );
+
+    testTransact(
+      protocol,
+      remoteERC20,
+      transaction2x1Verifier,
+      cmInfo,
+      [5, 6],
+      depositAmount.add(depositAmount).sub(toDecimals(3)),
+      toDecimals(1),
+      [toDecimals(1)],
+      [toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+    );
+
+    testTransact(
+      protocol,
+      remoteERC20,
+      transaction2x2Verifier,
+      cmInfo,
+      [7, 8],
+      depositAmount.add(depositAmount).sub(toDecimals(5)),
+      toDecimals(1),
+      [toDecimals(1), toDecimals(1)],
+      [toDecimals(1), toDecimals(1)],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+    );
   });
 
   it('test bridge erc20 to main deposit with rollup', async () => {
