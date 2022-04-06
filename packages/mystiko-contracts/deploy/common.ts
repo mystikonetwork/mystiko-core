@@ -126,12 +126,12 @@ export function updateTBridgeCrossChainProxyConfig(inConfig: any, network: strin
   }
 
   console.log('add new tbridge cross chain proxy');
-
+  const address = proxyAddress;
   for (let i = 0; i < config.bridges.length; i += 1) {
     if (config.bridges[i].name === 'tbridge') {
       const proxy = {
-        network: network,
-        address: proxyAddress,
+        network,
+        address,
       };
       config.bridges[i].proxys.push(proxy);
       return config;
@@ -142,25 +142,24 @@ export function updateTBridgeCrossChainProxyConfig(inConfig: any, network: strin
   return null;
 }
 
-export function getBridgeConfig(config: any, bridgeName: string) {
-  for (const b of config.bridges) {
+export function getBridgeConfig(config: any, bridgeName: string): any {
+  let bridge;
+  config.bridges.forEach((b: any) => {
     if (b.name === bridgeName) {
-      return b;
+      bridge = b;
     }
-  }
-
-  console.error(LOGRED, 'bridge configure not support');
-  return null;
+  });
+  return bridge;
 }
 
 export function getBridgeProxyAddress(bridge: any, network: string) {
-  for (const p of bridge.proxys) {
+  let address;
+  bridge.proxys.forEach((p: any) => {
     if (p.network === network) {
-      return p.address;
+      address = p.address;
     }
-  }
-
-  return '';
+  });
+  return address;
 }
 
 export function getBridgePairIndexByTokenName(
@@ -168,7 +167,7 @@ export function getBridgePairIndexByTokenName(
   srcNetwork: string,
   dstNetwork: string,
   tokenName: string,
-) {
+): number {
   for (let i = 0; i < bridge.pairs.length; i += 1) {
     if (bridge.pairs[i].length === 1) {
       if (bridge.pairs[i][0].network === srcNetwork && bridge.pairs[i][0].token === tokenName) {
@@ -190,30 +189,28 @@ export function getBridgePairIndexByTokenName(
   return -1;
 }
 
-export function getBridgePairByIndex(bridge: any, index: number) {
+export function getBridgePairByIndex(bridge: any, index: number): any {
   return bridge.pairs[index];
 }
 
-export function getChainConfig(config: any, network: string) {
-  for (const c of config.chains) {
+export function getChainConfig(config: any, network: string): any {
+  let chain;
+  config.chains.forEach((c: any) => {
     if (c.network === network) {
-      return c;
+      chain = c;
     }
-  }
-
-  console.error(LOGRED, 'chain configure not support');
-  return null;
+  });
+  return chain;
 }
 
-export function getChainTokenConfig(chain: any, name: string) {
-  for (const t of chain.tokens) {
+export function getChainTokenConfig(chain: any, name: string): any {
+  let token;
+  chain.tokens.forEach((t: any) => {
     if (t.name === name) {
-      return t;
+      token = t;
     }
-  }
-
-  console.error(LOGRED, 'chain token configure not support');
-  return null;
+  });
+  return token;
 }
 
 export function toDecimals(amount: number, decimals: number) {
