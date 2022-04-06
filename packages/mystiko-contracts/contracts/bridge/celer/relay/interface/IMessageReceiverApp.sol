@@ -63,6 +63,7 @@ interface IMessageReceiverApp {
   function executeMessage(
     address _sender,
     uint64 _srcChainId,
-    bytes calldata _message
+    bytes calldata _message,
+    address _executor
   ) external payable returns (bool);
 }

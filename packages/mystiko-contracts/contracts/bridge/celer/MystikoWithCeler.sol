@@ -15,7 +15,7 @@ abstract contract MystikoWithCeler is MystikoBridge, IMessageReceiverApp {
     uint256 _minBridgeFee,
     uint256 _minExecutorFee,
     uint256 _minRollupFee,
-    address _withdrawVerifier
+    address _hasher3
   )
     MystikoBridge(
       _relayProxyAddress,
@@ -25,7 +25,7 @@ abstract contract MystikoWithCeler is MystikoBridge, IMessageReceiverApp {
       _minBridgeFee,
       _minExecutorFee,
       _minRollupFee,
-      _withdrawVerifier
+      _hasher3
     )
   {}
 
@@ -51,7 +51,8 @@ abstract contract MystikoWithCeler is MystikoBridge, IMessageReceiverApp {
   function executeMessage(
     address _sender,
     uint64 _srcChainId,
-    bytes calldata _message
+    bytes calldata _message,
+    address _executor
   ) external payable override onlyRelayProxyContract returns (bool) {
     _syncDeposit(_srcChainId, _sender, _message);
     return true;
