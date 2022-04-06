@@ -16,7 +16,7 @@ task('compile-hasher', async () => {
 
   const hasher2Contract = {
     contractName: 'Hasher2',
-    sourceName: 'contracts/dummy/Hasher.sol',
+    sourceName: 'contracts/dummy/Hasher2.sol',
     abi: genContract.generateABI(2),
     bytecode: genContract.createCode(2),
     _format: 'hh-sol-artifact-1',
@@ -27,7 +27,7 @@ task('compile-hasher', async () => {
 
   const hasher3Contract = {
     contractName: 'Hasher3',
-    sourceName: 'contracts/dummy/Hasher.sol',
+    sourceName: 'contracts/dummy/Hasher3.sol',
     abi: genContract.generateABI(3),
     bytecode: genContract.createCode(3),
     _format: 'hh-sol-artifact-1',

@@ -1,24 +1,24 @@
-import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
-import { toHex, toBN } from '@mystikonetwork/utils';
+import { expect } from 'chai';
 import { Wallet } from '@ethersproject/wallet';
+import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { toHex, toBN } from '@mystikonetwork/utils';
 import { TestToken } from '../../typechain';
 import { CommitmentInfo } from './commitment';
 
 const { waffle } = require('hardhat');
-const { expect } = require('chai');
 
 export function testLoopDeposit(
+  protocol: MystikoProtocolV2,
   mystikoContract: any,
   mystikoContractLimit: any,
   testTokenContract: TestToken,
   accounts: Wallet[],
   depositAmount: string,
   isMainAsset: boolean,
-  cmInfo: CommitmentInfo,
+  cmInfo: CommitmentInfo<CommitmentV1>,
 ) {
   let minTotalAmount: string;
   let minRollupFee: number;
-  const v1Protocol = new MystikoProtocolV1();
   const { commitments } = cmInfo;
   const { mystikoAddress } = cmInfo;
   const numOfCommitments = commitments.length;
@@ -33,12 +33,14 @@ export function testLoopDeposit(
       await mystikoContract.toggleDeposits(true);
       await expect(
         mystikoContract.deposit(
-          depositAmount,
-          commitments[0].commitmentHash.toString(),
-          commitments[0].k.toString(),
-          commitments[0].randomS.toString(),
-          toHex(commitments[0].privateNote),
-          minRollupFee,
+          [
+            depositAmount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            minRollupFee,
+          ],
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         ),
       ).to.be.revertedWith('deposits are disabled');
@@ -48,12 +50,14 @@ export function testLoopDeposit(
     it('should revert when rollup fee is too few', async () => {
       await expect(
         mystikoContract.deposit(
-          depositAmount,
-          commitments[0].commitmentHash.toString(),
-          commitments[0].k.toString(),
-          commitments[0].randomS.toString(),
-          toHex(commitments[0].privateNote),
-          '0',
+          [
+            depositAmount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            '0',
+          ],
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         ),
       ).to.be.revertedWith('rollup fee too few');
@@ -62,12 +66,14 @@ export function testLoopDeposit(
     it('should revert when commitmentHash is incorrect', async () => {
       await expect(
         mystikoContract.deposit(
-          depositAmount,
-          commitments[0].commitmentHash.toString(),
-          v1Protocol.randomBigInt().toString(),
-          commitments[0].randomS.toString(),
-          toHex(commitments[0].privateNote),
-          minRollupFee,
+          [
+            depositAmount,
+            commitments[0].commitmentHash.toString(),
+            protocol.randomBigInt().toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            minRollupFee,
+          ],
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         ),
       ).to.be.revertedWith('commitment hash incorrect');
@@ -86,29 +92,31 @@ export function testLoopDeposit(
       for (let i = 0; i < numOfCommitments; i += 1) {
         await expect(
           mystikoContract.deposit(
-            depositAmount,
-            commitments[i].commitmentHash.toString(),
-            commitments[i].k.toString(),
-            commitments[i].randomS.toString(),
-            toHex(commitments[i].privateNote),
-            minRollupFee,
+            [
+              depositAmount,
+              commitments[i].commitmentHash.toString(),
+              commitments[i].k.toString(),
+              commitments[i].randomS.toString(),
+              toHex(commitments[i].privateNote),
+              minRollupFee,
+            ],
             { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
           ),
         )
           .to.emit(mystikoContract, 'EncryptedNote')
           .withArgs(commitments[i].commitmentHash, toHex(commitments[i].privateNote))
-          .to.emit(mystikoContract, 'DepositQueued')
-          .withArgs(commitments[i].commitmentHash.toString(), depositAmount, minRollupFee, `${i}`);
+          .to.emit(mystikoContract, 'CommitmentQueued')
+          .withArgs(commitments[i].commitmentHash.toString(), minRollupFee, `${i}`);
 
-        expect(await mystikoContract.depositedCommitments(commitments[i].commitmentHash.toString())).to.equal(
+        expect(await mystikoContract.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
           true,
         );
-        expect((await mystikoContract.depositQueue(`${i}`)).commitment.toString()).to.equal(
+        expect((await mystikoContract.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
           commitments[i].commitmentHash.toString(),
         );
-        expect((await mystikoContract.depositQueue(`${i}`)).rollupFee.toString()).to.equal(minRollupFee);
+        expect((await mystikoContract.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(minRollupFee);
       }
-      expect((await mystikoContract.depositQueueSize()).toString()).to.equal(`${commitments.length}`);
+      expect((await mystikoContract.commitmentQueueSize()).toString()).to.equal(`${commitments.length}`);
     });
 
     it('should have correct balance', async () => {
@@ -125,12 +133,14 @@ export function testLoopDeposit(
     it('should revert with duplicate commitment', async () => {
       await expect(
         mystikoContract.deposit(
-          depositAmount,
-          commitments[0].commitmentHash.toString(),
-          commitments[0].k.toString(),
-          commitments[0].randomS.toString(),
-          toHex(commitments[0].privateNote),
-          minRollupFee,
+          [
+            depositAmount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            minRollupFee,
+          ],
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         ),
       ).to.be.revertedWith('the commitment has been submitted');
@@ -144,30 +154,31 @@ export function testLoopDeposit(
         });
       }
       for (let i = 0; i < 2; i += 1) {
-        const commitment = await v1Protocol.commitmentWithShieldedAddress(
-          mystikoAddress,
-          toBN(depositAmount),
-        );
+        const commitment = await protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
         await mystikoContractLimit.deposit(
-          depositAmount,
-          commitment.commitmentHash.toString(),
-          commitment.k.toString(),
-          commitment.randomS.toString(),
-          toHex(commitment.privateNote),
-          minRollupFee,
+          [
+            depositAmount,
+            commitment.commitmentHash.toString(),
+            commitment.k.toString(),
+            commitment.randomS.toString(),
+            toHex(commitment.privateNote),
+            minRollupFee,
+          ],
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         );
       }
 
-      const commitment = await v1Protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
+      const commitment = await protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
       await expect(
         mystikoContractLimit.deposit(
-          depositAmount,
-          commitment.commitmentHash.toString(),
-          commitment.k.toString(),
-          commitment.randomS.toString(),
-          toHex(commitment.privateNote),
-          minRollupFee,
+          [
+            depositAmount,
+            commitment.commitmentHash.toString(),
+            commitment.k.toString(),
+            commitment.randomS.toString(),
+            toHex(commitment.privateNote),
+            minRollupFee,
+          ],
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         ),
       ).to.be.revertedWith('tree is full');

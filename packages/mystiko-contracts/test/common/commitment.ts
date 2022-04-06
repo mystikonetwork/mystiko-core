@@ -1,25 +1,30 @@
-import { MystikoProtocolV1 } from '@mystikonetwork/protocol';
+import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { toBN } from '@mystikonetwork/utils';
 
-export interface CommitmentInfo {
+export interface CommitmentInfo<C> {
   mystikoAddress: string;
-  commitments: any[];
+  rawSkVerify: Buffer;
+  rawSkEnc: Buffer;
+  pkVerify: Buffer;
+  pkEnc: Buffer;
+  commitments: C[];
 }
 
-export async function constructCommitment(size: number, depositAmount: string): Promise<CommitmentInfo> {
-  const v1Protocol = new MystikoProtocolV1();
-  const rawSkVerify = v1Protocol.randomBytes(v1Protocol.verifySkSize);
-  const rawSkEnc = v1Protocol.randomBytes(v1Protocol.encSkSize);
-  const pkVerify = v1Protocol.publicKeyForVerification(rawSkVerify);
-  // const skVerify = v1Protocol.secretKeyForVerification(rawSkVerify);
-  const pkEnc = v1Protocol.publicKeyForEncryption(rawSkEnc);
-  // const skEnc = v1Protocol.secretKeyForEncryption(rawSkEnc);
-  const mystikoAddress = v1Protocol.shieldedAddress(pkVerify, pkEnc);
+export async function constructCommitment<C>(
+  protocol: MystikoProtocol<any, C>,
+  size: number,
+  depositAmount: string,
+): Promise<CommitmentInfo<C>> {
+  const rawSkVerify = protocol.randomBytes(protocol.verifySkSize);
+  const rawSkEnc = protocol.randomBytes(protocol.encSkSize);
+  const pkVerify = protocol.publicKeyForVerification(rawSkVerify);
+  const pkEnc = protocol.publicKeyForEncryption(rawSkEnc);
+  const mystikoAddress = protocol.shieldedAddress(pkVerify, pkEnc);
   const commitments: any[] = [];
-  for (let i = 0; i < 21; i += 1) {
-    const commitment = await v1Protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
+  for (let i = 0; i < size; i += 1) {
+    const commitment = await protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
     commitments.push(commitment);
   }
 
-  return { mystikoAddress, commitments };
+  return { mystikoAddress, rawSkVerify, rawSkEnc, pkVerify, pkEnc, commitments };
 }

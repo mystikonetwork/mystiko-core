@@ -1,16 +1,10 @@
+// This file is MIT Licensed.
 //
 // Copyright 2017 Christian Reitwiessner
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-// 2019 OKIMS
-//      ported to solidity 0.6
-//      fixed linter warnings
-//      added requiere error messages
-//
-//
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 library Rollup4Pairing {
@@ -31,32 +25,21 @@ library Rollup4Pairing {
 
   /// @return the generator of G2
   function P2() internal pure returns (G2Point memory) {
-    // Original code point
     return
       G2Point(
         [
-          11559732032986387107991004021392285783925812861821192530917403151452391805634,
-          10857046999023057135944570762232829481370756359578518086990519993285655852781
+          10857046999023057135944570762232829481370756359578518086990519993285655852781,
+          11559732032986387107991004021392285783925812861821192530917403151452391805634
         ],
         [
-          4082367875863433681332203403145435568316851327593401208105741076214120093531,
-          8495653923123431417604973247489272438418190587263600148770280649306958101930
+          8495653923123431417604973247489272438418190587263600148770280649306958101930,
+          4082367875863433681332203403145435568316851327593401208105741076214120093531
         ]
       );
-
-    /*
-        // Changed by Jordi point
-        return G2Point(
-            [10857046999023057135944570762232829481370756359578518086990519993285655852781,
-             11559732032986387107991004021392285783925812861821192530917403151452391805634],
-            [8495653923123431417604973247489272438418190587263600148770280649306958101930,
-             4082367875863433681332203403145435568316851327593401208105741076214120093531]
-        );
-*/
   }
 
-  /// @return r the negation of p, i.e. p.addition(p.negate()) should be zero.
-  function negate(G1Point memory p) internal pure returns (G1Point memory r) {
+  /// @return the negation of p, i.e. p.addition(p.negate()) should be zero.
+  function negate(G1Point memory p) internal pure returns (G1Point memory) {
     // The prime q in the base field F_q for G1
     uint256 q = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
     if (p.X == 0 && p.Y == 0) return G1Point(0, 0);
@@ -71,7 +54,6 @@ library Rollup4Pairing {
     input[2] = p2.X;
     input[3] = p2.Y;
     bool success;
-    // solium-disable-next-line security/no-inline-assembly
     assembly {
       success := staticcall(sub(gas(), 2000), 6, input, 0xc0, r, 0x60)
       // Use "invalid" to make gas estimation work
@@ -80,7 +62,7 @@ library Rollup4Pairing {
         invalid()
       }
     }
-    require(success, "pairing-add-failed");
+    require(success);
   }
 
   /// @return r the product of a point on G1 and a scalar, i.e.
@@ -91,7 +73,6 @@ library Rollup4Pairing {
     input[1] = p.Y;
     input[2] = s;
     bool success;
-    // solium-disable-next-line security/no-inline-assembly
     assembly {
       success := staticcall(sub(gas(), 2000), 7, input, 0x80, r, 0x60)
       // Use "invalid" to make gas estimation work
@@ -100,7 +81,7 @@ library Rollup4Pairing {
         invalid()
       }
     }
-    require(success, "pairing-mul-failed");
+    require(success);
   }
 
   /// @return the result of computing the pairing check
@@ -108,21 +89,20 @@ library Rollup4Pairing {
   /// For example pairing([P1(), P1().negate()], [P2(), P2()]) should
   /// return true.
   function pairing(G1Point[] memory p1, G2Point[] memory p2) internal view returns (bool) {
-    require(p1.length == p2.length, "pairing-lengths-failed");
+    require(p1.length == p2.length);
     uint256 elements = p1.length;
     uint256 inputSize = elements * 6;
     uint256[] memory input = new uint256[](inputSize);
     for (uint256 i = 0; i < elements; i++) {
       input[i * 6 + 0] = p1[i].X;
       input[i * 6 + 1] = p1[i].Y;
-      input[i * 6 + 2] = p2[i].X[0];
-      input[i * 6 + 3] = p2[i].X[1];
-      input[i * 6 + 4] = p2[i].Y[0];
-      input[i * 6 + 5] = p2[i].Y[1];
+      input[i * 6 + 2] = p2[i].X[1];
+      input[i * 6 + 3] = p2[i].X[0];
+      input[i * 6 + 4] = p2[i].Y[1];
+      input[i * 6 + 5] = p2[i].Y[0];
     }
     uint256[1] memory out;
     bool success;
-    // solium-disable-next-line security/no-inline-assembly
     assembly {
       success := staticcall(sub(gas(), 2000), 8, add(input, 0x20), mul(inputSize, 0x20), out, 0x20)
       // Use "invalid" to make gas estimation work
@@ -131,7 +111,7 @@ library Rollup4Pairing {
         invalid()
       }
     }
-    require(success, "pairing-opcode-failed");
+    require(success);
     return out[0] != 0;
   }
 
@@ -199,124 +179,105 @@ library Rollup4Pairing {
 contract Rollup4Verifier {
   using Rollup4Pairing for *;
   struct VerifyingKey {
-    Rollup4Pairing.G1Point alfa1;
-    Rollup4Pairing.G2Point beta2;
-    Rollup4Pairing.G2Point gamma2;
-    Rollup4Pairing.G2Point delta2;
-    Rollup4Pairing.G1Point[] IC;
+    Rollup4Pairing.G1Point alpha;
+    Rollup4Pairing.G2Point beta;
+    Rollup4Pairing.G2Point gamma;
+    Rollup4Pairing.G2Point delta;
+    Rollup4Pairing.G1Point[] gamma_abc;
   }
   struct Proof {
-    Rollup4Pairing.G1Point A;
-    Rollup4Pairing.G2Point B;
-    Rollup4Pairing.G1Point C;
+    Rollup4Pairing.G1Point a;
+    Rollup4Pairing.G2Point b;
+    Rollup4Pairing.G1Point c;
   }
 
   function verifyingKey() internal pure returns (VerifyingKey memory vk) {
-    vk.alfa1 = Rollup4Pairing.G1Point(
-      20491192805390485299153009773594534940189261866228447918068658471970481763042,
-      9383485363053290200918347156157836566562967994039712273449902621266178545958
+    vk.alpha = Rollup4Pairing.G1Point(
+      uint256(0x1580bcd09fdfda69480d5389a6bda4791a4abba58a3786cdf43cf38c4aebd2f6),
+      uint256(0x276286a69866ae2802069a78fa1105780a95e03363af6fcdfd8090c72a4cc339)
     );
-
-    vk.beta2 = Rollup4Pairing.G2Point(
+    vk.beta = Rollup4Pairing.G2Point(
       [
-        4252822878758300859123897981450591353533073413197771768651442665752259397132,
-        6375614351688725206403948262868962793625744043794305715222011528459656738731
+        uint256(0x2d4d1b4dde7a55a6a40970f2616cd9768e11002c497d28cacc747cb724a8ad5e),
+        uint256(0x2c751a31268c5281b10bd5f539bfe696e23f59618d523bd5c22edf3bdec29a3d)
       ],
       [
-        21847035105528745403288232691147584728191162732299865338377159692350059136679,
-        10505242626370262277552901082094356697409835680220590971873171140371331206856
+        uint256(0x033dae0485443b344275a226a92dd1266d5356fedd97ab342e03fe80fc82d3c0),
+        uint256(0x2729405948ff151ac7b6522f280417748bce3b8b6889d62e94ddbb169b4187b2)
       ]
     );
-    vk.gamma2 = Rollup4Pairing.G2Point(
+    vk.gamma = Rollup4Pairing.G2Point(
       [
-        11559732032986387107991004021392285783925812861821192530917403151452391805634,
-        10857046999023057135944570762232829481370756359578518086990519993285655852781
+        uint256(0x0f68be9a281ab95764a4084a051dfc86db6312ee5eeeaa4a5e45183da8bbbfb5),
+        uint256(0x02c152527562832f7892b17089f3af834be76a0693b0bb616fd6daff0cb6d327)
       ],
       [
-        4082367875863433681332203403145435568316851327593401208105741076214120093531,
-        8495653923123431417604973247489272438418190587263600148770280649306958101930
+        uint256(0x0a677b625ca403f3300198b450dc851b92729636d9cc20f444fd775e15769720),
+        uint256(0x106df3c4ecd4d4f3c9f1968069ee2a960767c3eaed3e927164a427d5502e930f)
       ]
     );
-    vk.delta2 = Rollup4Pairing.G2Point(
+    vk.delta = Rollup4Pairing.G2Point(
       [
-        10993657839060291434617592650580200219530344902504892045043317014745559754085,
-        14930046593279908916454056784778953628365913116818129967798701144724355545688
+        uint256(0x184353db032b5c89e718343b308471df862708461bbabdf06f8dbf30d0713b1e),
+        uint256(0x002853319478313f0d49a60b738e9903fb9d332ca0cad2844ffa8fda48564f18)
       ],
       [
-        10127422387815423717119705060811810780825105372667202320188304642562974042790,
-        2450233869730965250767065598882891961919838425866054089210843811147216819894
+        uint256(0x299ca633fd54d3c70af9f5ef99a94b959015de23fdfe2ed2d1233ae2d1249f29),
+        uint256(0x12d5a9b81c64184cedf1f155fc1dc31445a9565f9da662454e49cd015066b29f)
       ]
     );
-    vk.IC = new Rollup4Pairing.G1Point[](5);
-
-    vk.IC[0] = Rollup4Pairing.G1Point(
-      8348536701683937843511196903610529758732492647611726007970588434068472777442,
-      7296777298513354570460612938827770791967721749336553760879702041738389044874
+    vk.gamma_abc = new Rollup4Pairing.G1Point[](5);
+    vk.gamma_abc[0] = Rollup4Pairing.G1Point(
+      uint256(0x2de9ce78fa530c4366b1209c0cf1b0f5ec40a01aa7ea05c08a6482c237a6dc2c),
+      uint256(0x227cb0dc9c4558e89403f157b1e19a7cc696f6bbba6f7ddb22fcfbdeb4bca8a4)
     );
-
-    vk.IC[1] = Rollup4Pairing.G1Point(
-      5529774328754727543521330769144110246449437930918964352971496496381656374617,
-      17949808714236064770531535069486309865999100870429967078668070809236274393711
+    vk.gamma_abc[1] = Rollup4Pairing.G1Point(
+      uint256(0x29a9a9d3f057e4bc51fba306cf731651f80d98cc7d21183c8ebf248b0cdc80cd),
+      uint256(0x126ea5f4f2e8170706bde6ce6a39dd09c528d015fed8400514739aa7c76d190f)
     );
-
-    vk.IC[2] = Rollup4Pairing.G1Point(
-      17371954613193087728882638136538508199914232721159461832695648303909175951798,
-      9964822447218754169430673894416563782009815243268210206484994795185328083291
+    vk.gamma_abc[2] = Rollup4Pairing.G1Point(
+      uint256(0x169156adee136df7e05239577ea15f13038e2b23b57f7a72a0acc947c602f5de),
+      uint256(0x08f724c6c21a77d6c5498ec4a8e616275d8907932a7a1ae76eb55f69fad50603)
     );
-
-    vk.IC[3] = Rollup4Pairing.G1Point(
-      21028559490098197768333547609467986270867591441226622202250753508998315937097,
-      19192587446855381906494894224538943925325474314954750920598001521526637429362
+    vk.gamma_abc[3] = Rollup4Pairing.G1Point(
+      uint256(0x0ddb47f9ea85238133cb90432746cfd5571de68df39c404d55652784a76b8251),
+      uint256(0x19ed8c55723a2306f1b944abd5f7e789e76125d8afcae603884e0e6890f2b640)
     );
-
-    vk.IC[4] = Rollup4Pairing.G1Point(
-      1626694773323144624782593495915828370744692895996817301747104944402456031100,
-      9058800396125009063662480457109642973915121112755189660006864113965330548019
+    vk.gamma_abc[4] = Rollup4Pairing.G1Point(
+      uint256(0x05144bfd2254000f7b9e72b248de666eef789870e081ca50d05d86e139f52c58),
+      uint256(0x1879b882bbe4680c0983b9ef4349706a5de35d0c054baf75ffb036d85b9b6964)
     );
   }
 
   function verify(uint256[] memory input, Proof memory proof) internal view returns (uint256) {
     uint256 snark_scalar_field = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     VerifyingKey memory vk = verifyingKey();
-    require(input.length + 1 == vk.IC.length, "verifier-bad-input");
+    require(input.length + 1 == vk.gamma_abc.length);
     // Compute the linear combination vk_x
     Rollup4Pairing.G1Point memory vk_x = Rollup4Pairing.G1Point(0, 0);
     for (uint256 i = 0; i < input.length; i++) {
-      require(input[i] < snark_scalar_field, "verifier-gte-snark-scalar-field");
-      vk_x = Rollup4Pairing.addition(vk_x, Rollup4Pairing.scalar_mul(vk.IC[i + 1], input[i]));
+      require(input[i] < snark_scalar_field);
+      vk_x = Rollup4Pairing.addition(vk_x, Rollup4Pairing.scalar_mul(vk.gamma_abc[i + 1], input[i]));
     }
-    vk_x = Rollup4Pairing.addition(vk_x, vk.IC[0]);
+    vk_x = Rollup4Pairing.addition(vk_x, vk.gamma_abc[0]);
     if (
       !Rollup4Pairing.pairingProd4(
-        Rollup4Pairing.negate(proof.A),
-        proof.B,
-        vk.alfa1,
-        vk.beta2,
-        vk_x,
-        vk.gamma2,
-        proof.C,
-        vk.delta2
+        proof.a,
+        proof.b,
+        Rollup4Pairing.negate(vk_x),
+        vk.gamma,
+        Rollup4Pairing.negate(proof.c),
+        vk.delta,
+        Rollup4Pairing.negate(vk.alpha),
+        vk.beta
       )
     ) return 1;
     return 0;
   }
 
-  /// @return r  bool true if proof is valid
-  function verifyProof(
-    uint256[2] memory a,
-    uint256[2][2] memory b,
-    uint256[2] memory c,
-    uint256[4] memory input
-  ) public view returns (bool r) {
-    Proof memory proof;
-    proof.A = Rollup4Pairing.G1Point(a[0], a[1]);
-    proof.B = Rollup4Pairing.G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
-    proof.C = Rollup4Pairing.G1Point(c[0], c[1]);
-    uint256[] memory inputValues = new uint256[](input.length);
-    for (uint256 i = 0; i < input.length; i++) {
-      inputValues[i] = input[i];
-    }
-    if (verify(inputValues, proof) == 0) {
+  function verifyTx(Proof memory proof, uint256[] memory input) public view returns (bool r) {
+    require(input.length == 4, "invalid input length");
+    if (verify(input, proof) == 0) {
       return true;
     } else {
       return false;
