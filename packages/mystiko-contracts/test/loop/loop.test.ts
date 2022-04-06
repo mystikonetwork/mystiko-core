@@ -289,6 +289,7 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      testToken,
     );
 
     testTransact(
@@ -305,6 +306,7 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+      testToken,
     );
 
     testTransact(
@@ -321,6 +323,7 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+      testToken,
     );
 
     testTransact(
@@ -337,6 +340,7 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+      testToken,
     );
 
     testTransact(
@@ -353,6 +357,7 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+      testToken,
     );
 
     testTransact(
@@ -369,6 +374,7 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+      testToken,
     );
   });
 });
