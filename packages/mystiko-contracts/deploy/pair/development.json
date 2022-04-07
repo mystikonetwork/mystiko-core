@@ -3,8 +3,8 @@
   "circuits": "circom-1.0",
   "chains": [
     {
-      "name": "Ganache",
-      "network": "development",
+      "name": "hardhat",
+      "network": "hardhat",
       "chainId": 0,
       "tokens": [
         {
@@ -12,8 +12,16 @@
           "erc20": "false"
         }
       ],
-      "verifierAddress": "",
-      "rollupAddress": ""
+      "hasher3Address": "",
+      "rollup1Address": "",
+      "rollup4Address": "",
+      "rollup16Address": "",
+      "transaction1x0VerifierAddress": "",
+      "transaction1x1VerifierAddress": "",
+      "transaction1x2VerifierAddress": "",
+      "transaction2x0VerifierAddress": "",
+      "transaction2x1VerifierAddress": "",
+      "transaction2x2VerifierAddress": ""
     }
   ],
   "bridges": [
@@ -22,14 +30,14 @@
       "contractName": "Loop",
       "proxys": [
         {
-          "network": "development",
+          "network": "hardhat",
           "address": ""
         }
       ],
       "pairs": [
         [
           {
-            "network": "development",
+            "network": "hardhat",
             "token": "ETH",
             "address": "",
             "syncStart": ""

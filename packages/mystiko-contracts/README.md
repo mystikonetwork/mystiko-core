@@ -13,7 +13,7 @@ deploy verifier contract and rollup contract, parameter:
 ```
 example:
 
-```yarn deploy:chain --network bsctestnet --step step1 --bridge celer --dst goerli --token MTT```
+```yarn deploy --network bsctestnet --step step1 --bridge celer --dst goerli --token MTT```
 
 #### Deploy Step 2
 deploy mystiko core contract, parameter
@@ -25,7 +25,7 @@ deploy mystiko core contract, parameter
 ```
 example:
 
-```yarn deploy:chain --network bsctestnet --step step2 --bridge celer --dst goerli --token MTT```
+```yarn deploy --network bsctestnet --step step2 --bridge celer --dst goerli --token MTT```
 
 #### Deploy Step 3
 configure peer contract address, parameter:
@@ -37,7 +37,7 @@ configure peer contract address, parameter:
 ```
 example:
 
-```yarn deploy:chain --network bsctestnet --step step3 --bridge celer --dst goerli --token MTT```
+```yarn deploy --network bsctestnet --step step3 --bridge celer --dst goerli --token MTT```
 
 #### update contract bridge proxy
 update contract bridge proxy address, parameter:
@@ -49,7 +49,7 @@ update contract bridge proxy address, parameter:
 ```
 example:
 
-```yarn deploy:chain --network bsctestnet --step updateProxy --bridge celer --dst goerli --token MTT```
+```yarn deploy --network bsctestnet --step updateProxy --bridge celer --dst goerli --token MTT```
 
 ### Test the deployed contract
 We need to update the config file first and execute the following command

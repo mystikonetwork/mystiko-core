@@ -2,13 +2,21 @@ import {
   MystikoTBridgeProxy__factory,
   MystikoV2WithLoopERC20__factory,
   MystikoV2WithLoopMain__factory,
-  MystikoWithCelerERC20__factory,
-  MystikoWithCelerMain__factory,
-  MystikoWithTBridgeERC20__factory,
-  MystikoWithTBridgeMain__factory,
+  MystikoV2WithCelerERC20__factory,
+  MystikoV2WithCelerMain__factory,
+  MystikoV2WithTBridgeERC20__factory,
+  MystikoV2WithTBridgeMain__factory,
+  Transaction1x0Verifier__factory,
+  Transaction1x1Verifier__factory,
+  Transaction1x2Verifier__factory,
+  Transaction2x0Verifier__factory,
+  Transaction2x1Verifier__factory,
+  Transaction2x2Verifier__factory,
   Rollup1Verifier__factory,
+  Rollup4Verifier__factory,
+  Rollup16Verifier__factory,
   TestToken__factory,
-  WithdrawVerifier__factory,
+  Hasher3__factory,
 } from '../typechain';
 
 const common = require('./common');
@@ -16,39 +24,46 @@ const coreConfig = require('./coreConfig');
 const tbridgeConfig = require('./tbridgeConfig');
 
 const mainNetwork = ['bsc', 'ethereum', 'moonbeam'];
-let MystikoWithLoopERC20: MystikoV2WithLoopERC20__factory;
-let MystikoWithLoopMain: MystikoV2WithLoopMain__factory;
-let MystikoWithTBridgeERC20: MystikoWithTBridgeERC20__factory;
-let MystikoWithTBridgeMain: MystikoWithTBridgeMain__factory;
-let MystikoWithCelerERC20: MystikoWithCelerERC20__factory;
-let MystikoWithCelerMain: MystikoWithCelerMain__factory;
+let MystikoV2WithLoopERC20: MystikoV2WithLoopERC20__factory;
+let MystikoV2WithLoopMain: MystikoV2WithLoopMain__factory;
+let MystikoV2WithTBridgeERC20: MystikoV2WithTBridgeERC20__factory;
+let MystikoV2WithTBridgeMain: MystikoV2WithTBridgeMain__factory;
+let MystikoV2WithCelerERC20: MystikoV2WithCelerERC20__factory;
+let MystikoV2WithCelerMain: MystikoV2WithCelerMain__factory;
 let MystikoTBridgeProxy: MystikoTBridgeProxy__factory;
 let TestToken: TestToken__factory;
-let WithdrawVerifier: WithdrawVerifier__factory;
+let Transaction1x0Verifier: Transaction1x0Verifier__factory;
+let Transaction1x1Verifier: Transaction1x1Verifier__factory;
+let Transaction1x2Verifier: Transaction1x2Verifier__factory;
+let Transaction2x0Verifier: Transaction2x0Verifier__factory;
+let Transaction2x1Verifier: Transaction2x1Verifier__factory;
+let Transaction2x2Verifier: Transaction2x2Verifier__factory;
 let Rollup1Verifier: Rollup1Verifier__factory;
-// let Rollup4Verifier: Rollup1Verifier__factory;
-// let Rollup16Verifier: Rollup1Verifier__factory;
+let Rollup4Verifier: Rollup4Verifier__factory;
+let Rollup16Verifier: Rollup16Verifier__factory;
+let Hasher3: Hasher3__factory;
+
 let ethers: any;
 
 function getMystikoContract(bridge: string, bErc20: string) {
   let coreContract: any;
   if (bridge === 'loop') {
     if (bErc20 === 'true') {
-      coreContract = MystikoWithLoopERC20;
+      coreContract = MystikoV2WithLoopERC20;
     } else {
-      coreContract = MystikoWithLoopMain;
+      coreContract = MystikoV2WithLoopMain;
     }
   } else if (bridge === 'tbridge') {
     if (bErc20 === 'true') {
-      coreContract = MystikoWithTBridgeERC20;
+      coreContract = MystikoV2WithTBridgeERC20;
     } else {
-      coreContract = MystikoWithTBridgeMain;
+      coreContract = MystikoV2WithTBridgeMain;
     }
   } else if (bridge === 'celer') {
     if (bErc20 === 'true') {
-      coreContract = MystikoWithCelerERC20;
+      coreContract = MystikoV2WithCelerERC20;
     } else {
-      coreContract = MystikoWithCelerMain;
+      coreContract = MystikoV2WithCelerMain;
     }
   } else {
     console.error(common.LOGRED, 'bridge not support');
@@ -57,7 +72,7 @@ function getMystikoContract(bridge: string, bErc20: string) {
 }
 
 function getMystikoNetwork(network: string) {
-  if (network === 'development') {
+  if (network === 'hardhat') {
     console.log('development network');
     return 'development';
   }
@@ -99,7 +114,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
     return undefined;
   }
 
-  if (srcChain.verifierAddress === '' || srcChain.hashAddress === '') {
+  if (srcChain.hasher3Address === '' || srcChain.hasher3Address === undefined) {
     console.log('should do step1');
     return undefined;
   }
@@ -110,7 +125,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
   }
 
   const token = common.getChainTokenConfig(srcChain, src.token);
-  if (token === null) {
+  if (token === undefined) {
     return undefined;
   }
 
@@ -128,7 +143,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
         MERKLE_TREE_HEIGHT,
         ROOT_HISTORY_LENGTH,
         MIN_ROLLUP_FEE,
-        srcChain.verifierAddress,
+        srcChain.hasher3Address,
         token.address,
       );
     } else {
@@ -137,7 +152,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
         MERKLE_TREE_HEIGHT,
         ROOT_HISTORY_LENGTH,
         MIN_ROLLUP_FEE,
-        srcChain.verifierAddress,
+        srcChain.hasher3Address,
       );
     }
   } else if (token.erc20 === 'true') {
@@ -150,7 +165,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
       MIN_BRIDGE_FEE,
       MIN_EXECUTOR_FEE,
       MIN_ROLLUP_FEE,
-      srcChain.verifierAddress,
+      srcChain.hasher3Address,
       token.address,
     );
   } else {
@@ -163,7 +178,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
       MIN_BRIDGE_FEE,
       MIN_EXECUTOR_FEE,
       MIN_ROLLUP_FEE,
-      srcChain.verifierAddress,
+      srcChain.hasher3Address,
     );
   }
 
@@ -175,6 +190,47 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
   // todo support update contract , flag depositDisabled
   console.log('mystikoCore address ', address, ' block height ', syncStart);
   return { address, syncStart };
+}
+
+async function setMystikoRollupAndTransact(bridgeName: string, src: any, dst: any, config: any) {
+  const srcChain = common.getChainConfig(config, src.network);
+  if (srcChain === undefined) {
+    return;
+  }
+
+  const token = common.getChainTokenConfig(srcChain, src.token);
+  if (token === undefined) {
+    return;
+  }
+
+  const MystikoCore = getMystikoContract(bridgeName, token.erc20);
+  if (MystikoCore === undefined) {
+    return;
+  }
+
+  const mystikoCore = await MystikoCore.attach(src.address);
+  console.log('mystikoCore enable rollup');
+  try {
+    await mystikoCore.enableRollupVerifier(1, srcChain.rollup1Address);
+    await mystikoCore.enableRollupVerifier(4, srcChain.rollup4Address);
+    await mystikoCore.enableRollupVerifier(16, srcChain.rollup16Address);
+  } catch (err: any) {
+    console.error(common.LOGRED, err);
+    process.exit(1);
+  }
+
+  console.log('mystikoCore enable transact');
+  try {
+    await mystikoCore.enableTransactVerifier(1, 0, srcChain.transaction1x0VerifierAddress);
+    await mystikoCore.enableTransactVerifier(1, 1, srcChain.transaction1x1VerifierAddress);
+    await mystikoCore.enableTransactVerifier(1, 2, srcChain.transaction1x2VerifierAddress);
+    await mystikoCore.enableTransactVerifier(2, 0, srcChain.transaction2x0VerifierAddress);
+    await mystikoCore.enableTransactVerifier(2, 1, srcChain.transaction2x1VerifierAddress);
+    await mystikoCore.enableTransactVerifier(2, 2, srcChain.transaction2x2VerifierAddress);
+  } catch (err: any) {
+    console.error(common.LOGRED, err);
+    process.exit(1);
+  }
 }
 
 async function setMystikoPeerAddress(bridgeName: string, src: any, dst: any, config: any) {
@@ -276,29 +332,80 @@ async function deployStep1(taskArgs: any) {
   const mystikoNetwork = getMystikoNetwork(network);
 
   const config = common.loadConfig(mystikoNetwork);
-  if (config === null) {
+  if (config === undefined) {
     return;
   }
 
+  console.log('deploy hasher3');
+  const hasher3 = await Hasher3.deploy();
+  const hasher3Response = await hasher3.deployed();
+  const hasher3Address = hasher3Response.address;
+
   console.log('deploy rollup verifier');
-  // todo support rollup4 rollup16...
   const rollup1 = await Rollup1Verifier.deploy();
   const rollup1Response = await rollup1.deployed();
   const rollup1VerifierAddress = rollup1Response.address;
 
-  console.log('deploy Withdraw verifier');
-  const withdraw = await WithdrawVerifier.deploy();
-  const withdrawResponse = await withdraw.deployed();
-  const withdrawVerifierAddress = withdrawResponse.address;
+  const rollup4 = await Rollup4Verifier.deploy();
+  const rollup4Response = await rollup4.deployed();
+  const rollup4VerifierAddress = rollup4Response.address;
+
+  const rollup16 = await Rollup16Verifier.deploy();
+  const rollup16Response = await rollup16.deployed();
+  const rollup16VerifierAddress = rollup16Response.address;
+
+  console.log('deploy transaction verifier');
+  const transaction1x0Verifier = await Transaction1x0Verifier.deploy();
+  const transaction1x0VerifierRsp = await transaction1x0Verifier.deployed();
+  const transaction1x0VerifierAddress = transaction1x0VerifierRsp.address;
+
+  const transaction1x1Verifier = await Transaction1x1Verifier.deploy();
+  const transaction1x1VerifierRsp = await transaction1x1Verifier.deployed();
+  const transaction1x1VerifierAddress = transaction1x1VerifierRsp.address;
+
+  const transaction1x2Verifier = await Transaction1x2Verifier.deploy();
+  const transaction1x2VerifierRsp = await transaction1x2Verifier.deployed();
+  const transaction1x2VerifierAddress = transaction1x2VerifierRsp.address;
+
+  const transaction2x0Verifier = await Transaction2x0Verifier.deploy();
+  const transaction2x0VerifierRsp = await transaction2x0Verifier.deployed();
+  const transaction2x0VerifierAddress = transaction2x0VerifierRsp.address;
+
+  const transaction2x1Verifier = await Transaction2x1Verifier.deploy();
+  const transaction2x1VerifierRsp = await transaction2x1Verifier.deployed();
+  const transaction2x1VerifierAddress = transaction2x1VerifierRsp.address;
+
+  const transaction2x2Verifier = await Transaction2x2Verifier.deploy();
+  const transaction2x2VerifierRsp = await transaction2x2Verifier.deployed();
+  const transaction2x2VerifierAddress = transaction2x2VerifierRsp.address;
+
+  console.log('hasher3 address: ', hasher3Address);
 
   console.log('rollup1 verifier address: ', rollup1VerifierAddress);
-  console.log('withdrawVerifier address: ', withdrawVerifierAddress);
+  console.log('rollup4 verifier address: ', rollup4VerifierAddress);
+  console.log('rollup16 verifier address: ', rollup16VerifierAddress);
+
+  console.log('transaction1x0 verifier address: ', transaction1x0VerifierAddress);
+  console.log('transaction1x1 verifier address: ', transaction1x1VerifierAddress);
+  console.log('transaction1x2 verifier address: ', transaction1x2VerifierAddress);
+  console.log('transaction2x0 verifier address: ', transaction2x0VerifierAddress);
+  console.log('transaction2x1 verifier address: ', transaction2x1VerifierAddress);
+  console.log('transaction2x2 verifier address: ', transaction2x2VerifierAddress);
+
   common.saveBaseAddressConfig(
     mystikoNetwork,
     network,
     config,
+    hasher3Address,
     rollup1VerifierAddress,
-    withdrawVerifierAddress,
+    rollup4VerifierAddress,
+    rollup16VerifierAddress,
+    transaction1x0VerifierAddress,
+    transaction1x1VerifierAddress,
+    transaction1x2VerifierAddress,
+    transaction2x0VerifierAddress,
+    transaction2x1VerifierAddress,
+    transaction2x2VerifierAddress,
   );
 }
 
@@ -358,7 +465,7 @@ async function deployStep2or3(taskArgs: any) {
         proxyAddress = await deployTBridgeProxy();
         console.log('proxyAddress is ', proxyAddress);
         config = common.updateTBridgeCrossChainProxyConfig(config, pair[i].network, proxyAddress);
-        if (config === null) {
+        if (config === undefined) {
           return;
         }
       } else if (bridge.name !== 'loop') {
@@ -371,6 +478,7 @@ async function deployStep2or3(taskArgs: any) {
     if (contractDeployInfo === undefined) {
       return;
     }
+
     common.saveMystikoAddressConfig(mystikoNetwork, config, bridgeName, pairIndex, i, contractDeployInfo);
   } else if (step === 'step3') {
     if (src.address === undefined || src.address === '') {
@@ -383,13 +491,15 @@ async function deployStep2or3(taskArgs: any) {
       return;
     }
 
+    await setMystikoRollupAndTransact(bridgeName, src, dst, config);
+
     if (bridgeName !== 'loop') {
       await setMystikoPeerAddress(bridgeName, src, dst, config);
     }
 
-    coreConfig.savePeerConfig(mystikoNetwork, bridgeName, src, dst, config);
+    coreConfig.saveContractConfig(mystikoNetwork, bridgeName, src, dst, config);
     if (bridgeName === 'tbridge') {
-      tbridgeConfig.savePeerConfig(mystikoNetwork, src, dst, proxyAddress, config);
+      tbridgeConfig.saveContractConfig(mystikoNetwork, src, dst, proxyAddress, config);
     }
 
     const srcChain = common.getChainConfig(config, src.network);
@@ -421,17 +531,26 @@ async function deployStep2or3(taskArgs: any) {
 }
 
 async function initContractFactory() {
-  MystikoWithLoopERC20 = await ethers.getContractFactory('MystikoV2WithLoopERC20');
-  MystikoWithLoopMain = await ethers.getContractFactory('MystikoV2WithLoopMain');
-  MystikoWithTBridgeERC20 = await ethers.getContractFactory('MystikoWithTBridgeERC20');
-  MystikoWithTBridgeMain = await ethers.getContractFactory('MystikoWithTBridgeMain');
-  MystikoWithCelerERC20 = await ethers.getContractFactory('MystikoWithCelerERC20');
-  MystikoWithCelerMain = await ethers.getContractFactory('MystikoWithCelerMain');
+  MystikoV2WithLoopERC20 = await ethers.getContractFactory('MystikoV2WithLoopERC20');
+  MystikoV2WithLoopMain = await ethers.getContractFactory('MystikoV2WithLoopMain');
+  MystikoV2WithTBridgeERC20 = await ethers.getContractFactory('MystikoV2WithTBridgeERC20');
+  MystikoV2WithTBridgeMain = await ethers.getContractFactory('MystikoV2WithTBridgeMain');
+  MystikoV2WithCelerERC20 = await ethers.getContractFactory('MystikoV2WithCelerERC20');
+  MystikoV2WithCelerMain = await ethers.getContractFactory('MystikoV2WithCelerMain');
 
-  WithdrawVerifier = await ethers.getContractFactory('WithdrawVerifier');
+  const Hasher3Artifact = await common.getArtifact('Hasher3');
+  Hasher3 = (await ethers.getContractFactoryFromArtifact(Hasher3Artifact)) as Hasher3__factory;
+
   Rollup1Verifier = await ethers.getContractFactory('Rollup1Verifier');
-  // Rollup4Verifier = await ethers.getContractFactory('Rollup4Verifier');
-  // Rollup16Verifier = await ethers.getContractFactory('Rollup16Verifier');
+  Rollup4Verifier = await ethers.getContractFactory('Rollup4Verifier');
+  Rollup16Verifier = await ethers.getContractFactory('Rollup16Verifier');
+
+  Transaction1x0Verifier = await ethers.getContractFactory('Transaction1x0Verifier');
+  Transaction1x1Verifier = await ethers.getContractFactory('Transaction1x1Verifier');
+  Transaction1x2Verifier = await ethers.getContractFactory('Transaction1x2Verifier');
+  Transaction2x0Verifier = await ethers.getContractFactory('Transaction2x0Verifier');
+  Transaction2x1Verifier = await ethers.getContractFactory('Transaction2x1Verifier');
+  Transaction2x2Verifier = await ethers.getContractFactory('Transaction2x2Verifier');
 
   MystikoTBridgeProxy = await ethers.getContractFactory('MystikoTBridgeProxy');
   TestToken = await ethers.getContractFactory('TestToken');

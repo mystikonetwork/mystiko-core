@@ -12,7 +12,7 @@
     "build": "lerna run build",
     "lint": "lerna run lint",
     "test": "lerna run test",
-    "deploy": "lerna run deploy"
+    "deploy:dev": "lerna run deploy:dev"
   },
   "devDependencies": {
     "lerna": "^3.20.2"
