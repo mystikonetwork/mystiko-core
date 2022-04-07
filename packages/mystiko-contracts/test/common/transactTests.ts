@@ -175,7 +175,7 @@ export function testTransact(
   let commitmentQueueSize: BN;
   let commitmentIncludedCount: BN;
   let txReceipt: any;
-  let events: ethers.utils.LogDescription[] = [];
+  const events: ethers.utils.LogDescription[] = [];
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
