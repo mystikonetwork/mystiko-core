@@ -221,7 +221,7 @@ export function testTransact(
         outEncryptedNotes,
       );
       const tx = await mystikoContract.transact(request, signature);
-      txReceipt = await waffle.provider.getTransactionReceipt(tx.hash);
+      txReceipt = await tx.wait();
     });
 
     it('should emit correct events', () => {
@@ -236,6 +236,7 @@ export function testTransact(
           // do nothing
         }
       }
+      console.log(events);
       for (let i = 0; i < numInputs; i += 1) {
         const sn = proof.inputs[i + 1];
         const rootHash = proof.inputs[0];
@@ -245,11 +246,6 @@ export function testTransact(
             event.args.serialNumber.toHexString() === sn &&
             event.args.rootHash.toHexString() === rootHash,
         );
-        if (index < 0) {
-          console.log(events);
-          console.log(`sn: ${sn}`);
-          console.log(`rootHash: ${rootHash}`);
-        }
         expect(index).to.gte(0);
       }
       for (let i = 0; i < numOutputs; i += 1) {
