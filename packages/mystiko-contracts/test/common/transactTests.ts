@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { MerkleTree, toBN, toBuff, toHex } from '@mystikonetwork/utils';
+import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
 import { TestToken } from '../../typechain';
 
@@ -233,18 +233,18 @@ export function testTransact(
           // do nothing
         }
       }
-      expect(events.length).to.gt(0);
     });
 
     it('should emit correct events', () => {
+      expect(events.length).to.gt(0);
       for (let i = 0; i < numInputs; i += 1) {
         const sn = proof.inputs[i + 1];
         const rootHash = proof.inputs[0];
         const index = events.findIndex(
           (event) =>
             event.name === 'CommitmentSpent' &&
-            event.args.serialNumber.toHexString() === sn &&
-            event.args.rootHash.toHexString() === rootHash,
+            event.args.serialNumber.toString() === toBN(toHexNoPrefix(sn), 16).toString() &&
+            event.args.rootHash.toString() === toBN(toHexNoPrefix(rootHash), 16).toString(),
         );
         expect(index).to.gte(0);
       }
