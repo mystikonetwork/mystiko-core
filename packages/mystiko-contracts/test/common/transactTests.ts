@@ -175,6 +175,7 @@ export function testTransact(
   let commitmentQueueSize: BN;
   let commitmentIncludedCount: BN;
   let txReceipt: any;
+  let events: ethers.utils.LogDescription[] = [];
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
@@ -222,10 +223,6 @@ export function testTransact(
       );
       const tx = await mystikoContract.transact(request, signature);
       txReceipt = await tx.wait();
-    });
-
-    it('should emit correct events', () => {
-      const events: ethers.utils.LogDescription[] = [];
       for (let i = 0; i < txReceipt.logs.length; i += 1) {
         try {
           const parsedLog: ethers.utils.LogDescription = mystikoContract.interface.parseLog(
@@ -236,7 +233,10 @@ export function testTransact(
           // do nothing
         }
       }
-      console.log(events);
+      expect(events.length).to.gt(0);
+    });
+
+    it('should emit correct events', () => {
       for (let i = 0; i < numInputs; i += 1) {
         const sn = proof.inputs[i + 1];
         const rootHash = proof.inputs[0];
