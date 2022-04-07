@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { MerkleTree, toBN, toBuff, toHex } from '@mystikonetwork/utils';
+import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
 import { TestToken } from '../../typechain';
 
@@ -144,6 +144,7 @@ function buildRequest(
 }
 
 export function testTransact(
+  contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
   transactVerifier: any,
@@ -158,6 +159,7 @@ export function testTransact(
   provingKeyFile: string,
   vkeyFile: string,
   testToken: TestToken | undefined = undefined,
+  isLoop: boolean = true,
 ) {
   const numInputs = inCommitmentsIndices.length;
   const numOutputs = outAmounts.length;
@@ -173,7 +175,8 @@ export function testTransact(
   let commitmentQueueSize: BN;
   let commitmentIncludedCount: BN;
   let txReceipt: any;
-  describe(`Test Mystiko transaction${numInputs}x${numOutputs}`, () => {
+  const events: ethers.utils.LogDescription[] = [];
+  describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
       const proofWithCommitments = await generateProof(
@@ -219,11 +222,7 @@ export function testTransact(
         outEncryptedNotes,
       );
       const tx = await mystikoContract.transact(request, signature);
-      txReceipt = await waffle.provider.getTransactionReceipt(tx.hash);
-    });
-
-    it('should emit correct events', () => {
-      const events: ethers.utils.LogDescription[] = [];
+      txReceipt = await tx.wait();
       for (let i = 0; i < txReceipt.logs.length; i += 1) {
         try {
           const parsedLog: ethers.utils.LogDescription = mystikoContract.interface.parseLog(
@@ -234,14 +233,18 @@ export function testTransact(
           // do nothing
         }
       }
+    });
+
+    it('should emit correct events', () => {
+      expect(events.length).to.gt(0);
       for (let i = 0; i < numInputs; i += 1) {
         const sn = proof.inputs[i + 1];
         const rootHash = proof.inputs[0];
         const index = events.findIndex(
           (event) =>
             event.name === 'CommitmentSpent' &&
-            event.args.serialNumber.toHexString() === sn &&
-            event.args.rootHash.toHexString() === rootHash,
+            event.args.serialNumber.toString() === toBN(toHexNoPrefix(sn), 16).toString() &&
+            event.args.rootHash.toString() === toBN(toHexNoPrefix(rootHash), 16).toString(),
         );
         expect(index).to.gte(0);
       }
@@ -284,11 +287,15 @@ export function testTransact(
       snExists.forEach((exist) => expect(exist).to.equal(true));
     });
 
-    it('should set historicCommitments correctly', async () => {
+    it('should set historicCommitments/relayCommitments correctly', async () => {
       const commitmentPromises: Promise<boolean>[] = [];
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
-        commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+        if (isLoop) {
+          commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+        } else {
+          commitmentPromises.push(mystikoContract.relayCommitments(commitment.toString()));
+        }
       }
       const commitmentExists = await Promise.all(commitmentPromises);
       commitmentExists.forEach((exist) => expect(exist).to.equal(true));

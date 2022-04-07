@@ -117,6 +117,7 @@ describe('Test Mystiko tbridge', () => {
 
   it('test constructor', () => {
     testConstructor(
+      'MystikoWithTBridgeERC20',
       localERC20,
       hasher3,
       MerkleTreeHeight,
@@ -126,6 +127,7 @@ describe('Test Mystiko tbridge', () => {
       MinRollupFee,
     );
     testConstructor(
+      'MystikoWithTBridgeMain',
       localMain,
       hasher3,
       MerkleTreeHeight,
@@ -137,8 +139,8 @@ describe('Test Mystiko tbridge', () => {
   });
 
   it('test admin operation', () => {
-    testAdminOperations(localMain, accounts);
-    testAdminOperations(localERC20, accounts);
+    testAdminOperations('MystikoWithTBridgeMain', localMain, accounts);
+    testAdminOperations('MystikoWithTBridgeERC20', localERC20, accounts);
   });
 
   it('test bridge main to main deposit with rollup', async () => {
@@ -146,6 +148,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
+      'MystikoWithTBridgeMain',
       protocol,
       localMain,
       remoteMain,
@@ -157,11 +160,39 @@ describe('Test Mystiko tbridge', () => {
       true,
       cmInfo,
     );
-    testRollup(protocol, remoteMain, rollup16, testToken, accounts, cmInfo.commitments, { rollupSize: 16 });
-    testRollup(protocol, remoteMain, rollup4, testToken, accounts, cmInfo.commitments, { rollupSize: 4 });
-    testRollup(protocol, remoteMain, rollup1, testToken, accounts, cmInfo.commitments, { rollupSize: 1 });
+    testRollup(
+      'MystikoWithTBridgeMain',
+      protocol,
+      remoteMain,
+      rollup16,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 16 },
+    );
+    testRollup(
+      'MystikoWithTBridgeMain',
+      protocol,
+      remoteMain,
+      rollup4,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 4 },
+    );
+    testRollup(
+      'MystikoWithTBridgeMain',
+      protocol,
+      remoteMain,
+      rollup1,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 1 },
+    );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteMain,
       transaction1x0Verifier,
@@ -175,9 +206,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteMain,
       transaction1x1Verifier,
@@ -191,9 +225,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteMain,
       transaction1x2Verifier,
@@ -207,9 +244,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteMain,
       transaction2x0Verifier,
@@ -223,9 +263,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteMain,
       transaction2x1Verifier,
@@ -239,9 +282,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+      undefined,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteMain,
       transaction2x2Verifier,
@@ -255,6 +301,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+      undefined,
+      false,
     );
   });
 
@@ -263,6 +311,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
+      'MystikoWithTBridgeMain',
       protocol,
       localMain,
       remoteERC20,
@@ -274,20 +323,48 @@ describe('Test Mystiko tbridge', () => {
       false,
       cmInfo,
     );
-    testRollup(protocol, remoteERC20, rollup16, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 16,
-    });
-    testRollup(protocol, remoteERC20, rollup4, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 4,
-    });
-    testRollup(protocol, remoteERC20, rollup1, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 1,
-    });
+    testRollup(
+      'MystikoWithTBridgeMain',
+      protocol,
+      remoteERC20,
+      rollup16,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 16,
+      },
+    );
+    testRollup(
+      'MystikoWithTBridgeMain',
+      protocol,
+      remoteERC20,
+      rollup4,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 4,
+      },
+    );
+    testRollup(
+      'MystikoWithTBridgeMain',
+      protocol,
+      remoteERC20,
+      rollup1,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 1,
+      },
+    );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteERC20,
       transaction1x0Verifier,
@@ -301,9 +378,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteERC20,
       transaction1x1Verifier,
@@ -317,9 +397,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteERC20,
       transaction1x2Verifier,
@@ -333,9 +416,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteERC20,
       transaction2x0Verifier,
@@ -349,9 +435,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteERC20,
       transaction2x1Verifier,
@@ -365,9 +454,12 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
+      testToken,
+      false,
     );
 
     testTransact(
+      'MystikoWithTBridgeMain',
       protocol,
       remoteERC20,
       transaction2x2Verifier,
@@ -381,6 +473,8 @@ describe('Test Mystiko tbridge', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz',
+      testToken,
+      false,
     );
   });
 
@@ -389,6 +483,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
+      'MystikoWithTBridgeERC20',
       protocol,
       localERC20,
       remoteMain,
@@ -400,9 +495,36 @@ describe('Test Mystiko tbridge', () => {
       true,
       cmInfo,
     );
-    testRollup(protocol, remoteMain, rollup16, testToken, accounts, cmInfo.commitments, { rollupSize: 16 });
-    testRollup(protocol, remoteMain, rollup4, testToken, accounts, cmInfo.commitments, { rollupSize: 4 });
-    testRollup(protocol, remoteMain, rollup1, testToken, accounts, cmInfo.commitments, { rollupSize: 1 });
+    testRollup(
+      'MystikoWithTBridgeERC20',
+      protocol,
+      remoteMain,
+      rollup16,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 16 },
+    );
+    testRollup(
+      'MystikoWithTBridgeERC20',
+      protocol,
+      remoteMain,
+      rollup4,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 4 },
+    );
+    testRollup(
+      'MystikoWithTBridgeERC20',
+      protocol,
+      remoteMain,
+      rollup1,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      { rollupSize: 1 },
+    );
   });
 
   it('test bridge erc20 to erc20 deposit with rollup', async () => {
@@ -410,6 +532,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
+      'MystikoWithTBridgeERC20',
       protocol,
       localERC20,
       remoteERC20,
@@ -421,17 +544,44 @@ describe('Test Mystiko tbridge', () => {
       false,
       cmInfo,
     );
-    testRollup(protocol, remoteERC20, rollup16, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 16,
-    });
-    testRollup(protocol, remoteERC20, rollup4, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 4,
-    });
-    testRollup(protocol, remoteERC20, rollup1, testToken, accounts, cmInfo.commitments, {
-      isMainAsset: false,
-      rollupSize: 1,
-    });
+    testRollup(
+      'MystikoWithTBridgeERC20',
+      protocol,
+      remoteERC20,
+      rollup16,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 16,
+      },
+    );
+    testRollup(
+      'MystikoWithTBridgeERC20',
+      protocol,
+      remoteERC20,
+      rollup4,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 4,
+      },
+    );
+    testRollup(
+      'MystikoWithTBridgeERC20',
+      protocol,
+      remoteERC20,
+      rollup1,
+      testToken,
+      accounts,
+      cmInfo.commitments,
+      {
+        isMainAsset: false,
+        rollupSize: 1,
+      },
+    );
   });
 });
