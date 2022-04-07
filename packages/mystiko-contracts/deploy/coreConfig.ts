@@ -110,7 +110,7 @@ function addNewConfigContractAddress(
     // @ts-ignore
     newContract.syncStart = syncStart;
     // @ts-ignore
-    newContract.depositDisabled=false;
+    newContract.depositDisabled = false;
 
     coreConfig.chains[i].contracts.push(newContract);
     return coreConfig;
