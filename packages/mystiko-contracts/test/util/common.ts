@@ -32,9 +32,9 @@ import {
   MystikoV2WithLoopERC20,
   MystikoV2WithLoopMain__factory,
   MystikoV2WithLoopMain,
-  MystikoWithTBridgeMain__factory,
+  MystikoV2WithTBridgeMain__factory,
   MystikoTBridgeProxy__factory,
-  MystikoWithTBridgeERC20__factory,
+  MystikoV2WithTBridgeERC20__factory,
 } from '../../typechain';
 import {
   MerkleTreeHeight,
@@ -132,8 +132,8 @@ export async function deployTBridgeContracts(
   await proxy.deployed();
 
   const tBridgeMainFactory = (await ethers.getContractFactory(
-    'MystikoWithTBridgeMain',
-  )) as MystikoWithTBridgeMain__factory;
+    'MystikoV2WithTBridgeMain',
+  )) as MystikoV2WithTBridgeMain__factory;
 
   const localMain = await tBridgeMainFactory
     .connect(accounts[0])
@@ -162,8 +162,8 @@ export async function deployTBridgeContracts(
     );
 
   const tBridgeERC20Factory = (await ethers.getContractFactory(
-    'MystikoWithTBridgeERC20',
-  )) as MystikoWithTBridgeERC20__factory;
+    'MystikoV2WithTBridgeERC20',
+  )) as MystikoV2WithTBridgeERC20__factory;
 
   const localERC20 = await tBridgeERC20Factory
     .connect(accounts[0])

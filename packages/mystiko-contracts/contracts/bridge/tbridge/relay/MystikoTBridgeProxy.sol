@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./interface/ICrossChainProxy.sol";
 import "../../base/CrossChainDataSerializable.sol";
-import "../MystikoWithTBridge.sol";
+import "../MystikoV2WithTBridge.sol";
 
 contract MystikoTBridgeProxy is CrossChainDataSerializable, ICrossChainProxy {
   address public operator;
@@ -32,7 +32,7 @@ contract MystikoTBridgeProxy is CrossChainDataSerializable, ICrossChainProxy {
     bytes calldata _message
   ) external onlyOperator returns (bool) {
     require(
-      MystikoWithTBridge(_toContractAddress).syncDepositTx(_fromChainId, _fromContractAddress, _message),
+      MystikoV2WithTBridge(_toContractAddress).syncDepositTx(_fromChainId, _fromContractAddress, _message),
       "call syncDepositTx returns error"
     );
     return true;

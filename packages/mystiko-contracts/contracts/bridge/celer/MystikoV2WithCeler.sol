@@ -6,7 +6,7 @@ import "./relay/interface/IMessageReceiverApp.sol";
 import "../base/CrossChainDataSerializable.sol";
 import "../base/MystikoBridge.sol";
 
-abstract contract MystikoWithCeler is MystikoBridge, IMessageReceiverApp {
+abstract contract MystikoV2WithCeler is MystikoBridge, IMessageReceiverApp {
   constructor(
     address _relayProxyAddress,
     uint64 _peerChainId,

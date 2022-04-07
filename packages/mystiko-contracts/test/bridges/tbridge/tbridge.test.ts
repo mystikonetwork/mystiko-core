@@ -12,8 +12,8 @@ import {
 import {
   Hasher3,
   MystikoTBridgeProxy,
-  MystikoWithTBridgeERC20,
-  MystikoWithTBridgeMain,
+  MystikoV2WithTBridgeERC20,
+  MystikoV2WithTBridgeMain,
   Transaction1x0Verifier,
   Transaction1x1Verifier,
   Transaction1x2Verifier,
@@ -73,10 +73,10 @@ describe('Test Mystiko tbridge', () => {
   let accounts: Wallet[];
   let testToken: TestToken;
   let proxy: MystikoTBridgeProxy;
-  let localERC20: MystikoWithTBridgeERC20;
-  let localMain: MystikoWithTBridgeMain;
-  let remoteERC20: MystikoWithTBridgeERC20;
-  let remoteMain: MystikoWithTBridgeMain;
+  let localERC20: MystikoV2WithTBridgeERC20;
+  let localMain: MystikoV2WithTBridgeMain;
+  let remoteERC20: MystikoV2WithTBridgeERC20;
+  let remoteMain: MystikoV2WithTBridgeMain;
   let hasher3: Hasher3;
   let transaction1x0Verifier: Transaction1x0Verifier;
   let transaction1x1Verifier: Transaction1x1Verifier;
@@ -117,7 +117,7 @@ describe('Test Mystiko tbridge', () => {
 
   it('test constructor', () => {
     testConstructor(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       localERC20,
       hasher3,
       MerkleTreeHeight,
@@ -127,7 +127,7 @@ describe('Test Mystiko tbridge', () => {
       MinRollupFee,
     );
     testConstructor(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       localMain,
       hasher3,
       MerkleTreeHeight,
@@ -139,8 +139,8 @@ describe('Test Mystiko tbridge', () => {
   });
 
   it('test admin operation', () => {
-    testAdminOperations('MystikoWithTBridgeMain', localMain, accounts);
-    testAdminOperations('MystikoWithTBridgeERC20', localERC20, accounts);
+    testAdminOperations('MystikoV2WithTBridgeMain', localMain, accounts);
+    testAdminOperations('MystikoV2WithTBridgeERC20', localERC20, accounts);
   });
 
   it('test bridge main to main deposit with rollup', async () => {
@@ -148,7 +148,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       localMain,
       remoteMain,
@@ -161,7 +161,7 @@ describe('Test Mystiko tbridge', () => {
       cmInfo,
     );
     testRollup(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       rollup16,
@@ -171,7 +171,7 @@ describe('Test Mystiko tbridge', () => {
       { rollupSize: 16 },
     );
     testRollup(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       rollup4,
@@ -181,7 +181,7 @@ describe('Test Mystiko tbridge', () => {
       { rollupSize: 4 },
     );
     testRollup(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       rollup1,
@@ -192,7 +192,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       transaction1x0Verifier,
@@ -211,7 +211,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       transaction1x1Verifier,
@@ -230,7 +230,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       transaction1x2Verifier,
@@ -249,7 +249,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       transaction2x0Verifier,
@@ -268,7 +268,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       transaction2x1Verifier,
@@ -287,7 +287,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteMain,
       transaction2x2Verifier,
@@ -311,7 +311,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       localMain,
       remoteERC20,
@@ -324,7 +324,7 @@ describe('Test Mystiko tbridge', () => {
       cmInfo,
     );
     testRollup(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       rollup16,
@@ -337,7 +337,7 @@ describe('Test Mystiko tbridge', () => {
       },
     );
     testRollup(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       rollup4,
@@ -350,7 +350,7 @@ describe('Test Mystiko tbridge', () => {
       },
     );
     testRollup(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       rollup1,
@@ -364,7 +364,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       transaction1x0Verifier,
@@ -383,7 +383,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       transaction1x1Verifier,
@@ -402,7 +402,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       transaction1x2Verifier,
@@ -421,7 +421,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       transaction2x0Verifier,
@@ -440,7 +440,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       transaction2x1Verifier,
@@ -459,7 +459,7 @@ describe('Test Mystiko tbridge', () => {
     );
 
     testTransact(
-      'MystikoWithTBridgeMain',
+      'MystikoV2WithTBridgeMain',
       protocol,
       remoteERC20,
       transaction2x2Verifier,
@@ -483,7 +483,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       localERC20,
       remoteMain,
@@ -496,7 +496,7 @@ describe('Test Mystiko tbridge', () => {
       cmInfo,
     );
     testRollup(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       remoteMain,
       rollup16,
@@ -506,7 +506,7 @@ describe('Test Mystiko tbridge', () => {
       { rollupSize: 16 },
     );
     testRollup(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       remoteMain,
       rollup4,
@@ -516,7 +516,7 @@ describe('Test Mystiko tbridge', () => {
       { rollupSize: 4 },
     );
     testRollup(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       remoteMain,
       rollup1,
@@ -532,7 +532,7 @@ describe('Test Mystiko tbridge', () => {
     const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
 
     await testBridgeDeposit(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       localERC20,
       remoteERC20,
@@ -545,7 +545,7 @@ describe('Test Mystiko tbridge', () => {
       cmInfo,
     );
     testRollup(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       remoteERC20,
       rollup16,
@@ -558,7 +558,7 @@ describe('Test Mystiko tbridge', () => {
       },
     );
     testRollup(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       remoteERC20,
       rollup4,
@@ -571,7 +571,7 @@ describe('Test Mystiko tbridge', () => {
       },
     );
     testRollup(
-      'MystikoWithTBridgeERC20',
+      'MystikoV2WithTBridgeERC20',
       protocol,
       remoteERC20,
       rollup1,
