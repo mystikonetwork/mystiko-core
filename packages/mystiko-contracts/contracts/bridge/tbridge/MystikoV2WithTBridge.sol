@@ -5,7 +5,7 @@ import "../base/MystikoBridge.sol";
 import "../base/CrossChainDataSerializable.sol";
 import "./relay/interface/ICrossChainProxy.sol";
 
-abstract contract MystikoWithTBridge is MystikoBridge {
+abstract contract MystikoV2WithTBridge is MystikoBridge {
   constructor(
     address _relayProxyAddress,
     uint64 _peerChainId,

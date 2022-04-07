@@ -20,21 +20,3 @@ interface IVerifier {
 
   function verifyTx(Proof memory proof, uint256[] memory input) external returns (bool);
 }
-
-interface IWithdrawVerifier {
-  function verifyProof(
-    uint256[2] memory a,
-    uint256[2][2] memory b,
-    uint256[2] memory c,
-    uint256[3] memory input
-  ) external returns (bool);
-}
-
-interface IRollupVerifier {
-  function verifyProof(
-    uint256[2] memory a,
-    uint256[2][2] memory b,
-    uint256[2] memory c,
-    uint256[4] memory input
-  ) external returns (bool);
-}
