@@ -213,6 +213,14 @@ export class ChainConfig extends BaseConfig {
     return this.contractByAddress[address];
   }
 
+  public getContractTopicSyncSize(address: string, topic: string): number {
+    const contractConfig = this.getContract(address);
+    if (contractConfig) {
+      return contractConfig.getSyncSize(topic) || this.syncSize;
+    }
+    return this.syncSize;
+  }
+
   private asRawChainConfig(): RawChainConfig {
     return this.config as RawChainConfig;
   }

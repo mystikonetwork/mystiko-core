@@ -1,5 +1,6 @@
 import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
+import { ChainConfig } from '@mystikonetwork/config';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BaseSync, SyncResult } from '../base';
 import { Contract, RawEvent } from '../../model';
@@ -44,7 +45,7 @@ export abstract class TopicSync implements BaseSync {
     topic: string,
     eventHandler: EventHandler,
     contractHandler: ContractHandler,
-    syncSize: number,
+    config: ChainConfig,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
@@ -56,7 +57,7 @@ export abstract class TopicSync implements BaseSync {
     this.topic = topic;
     this.eventHandler = eventHandler;
     this.contractHandler = contractHandler;
-    this.syncSize = syncSize;
+    this.syncSize = config.getContractTopicSyncSize(contract.address || '', topic);
     this.logger = rootLogger.getLogger('TopicSync');
     this.syncing = false;
     this.storeEvent = storeEvent || false;

@@ -1,5 +1,6 @@
 import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
+import { ChainConfig } from '@mystikonetwork/config';
 import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
 import { BaseSync, SyncResult } from './base';
 import { TopicSync, TopicSyncStatus } from './topic/base';
@@ -32,7 +33,7 @@ export class ContractSync implements BaseSync {
     depositHandler: DepositHandler,
     withdrawHandler: WithdrawHandler,
     noteHandler: NoteHandler,
-    syncSize: number,
+    config: ChainConfig,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
@@ -48,7 +49,7 @@ export class ContractSync implements BaseSync {
         eventHandler,
         contractHandler,
         depositHandler,
-        syncSize,
+        config,
         contractGenerator,
       ),
       new MerkleTreeInsertTopicSync(
@@ -57,7 +58,7 @@ export class ContractSync implements BaseSync {
         contractHandler,
         depositHandler,
         noteHandler,
-        syncSize,
+        config,
         contractGenerator,
       ),
       new WithdrawTopicSync(
@@ -66,7 +67,7 @@ export class ContractSync implements BaseSync {
         contractHandler,
         withdrawHandler,
         noteHandler,
-        syncSize,
+        config,
         contractGenerator,
       ),
     ];

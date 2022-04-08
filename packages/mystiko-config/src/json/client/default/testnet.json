@@ -303,7 +303,10 @@
           "peerContractAddress": "0x54c2557b9061c1581b4779380Af38BCA4d6bD5fD",
           "minBridgeFee": "1000",
           "depositDisabled": true,
-          "syncStart": 6459004
+          "syncStart": 6459004,
+          "syncSize": {
+            "Deposit": 50000
+          }
         },
         {
           "version": 1,

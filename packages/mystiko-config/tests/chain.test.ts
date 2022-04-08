@@ -70,6 +70,7 @@ const contractConfigs = [
     peerContractAddress: '0x7Acfe657cC3eA9066CD748fbEa241cfA138DC879',
     circuits: 'circom-1.0',
     depositDisabled: true,
+    syncSize: { abc: 2000 },
   },
 ];
 
@@ -157,4 +158,6 @@ test('test ChainConfig constructor', () => {
   const rawConfig13 = { ...rawConfig9, syncSize: 1000 };
   const config1 = new ChainConfig(rawConfig13);
   expect(config1.syncSize).toBe(1000);
+  expect(config1.getContractTopicSyncSize('0x110a13fc3efe6a245b50102d2d79b3e76125ae83', 'abc')).toBe(1000);
+  expect(config1.getContractTopicSyncSize('0xc83cc3d27fbe6dc046bb109eadba117e3da06c56', 'abc')).toBe(2000);
 });

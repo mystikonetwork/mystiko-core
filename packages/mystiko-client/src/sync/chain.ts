@@ -1,5 +1,6 @@
 import { ContractInterface, ethers } from 'ethers';
 import { Logger } from 'loglevel';
+import { ChainConfig } from '@mystikonetwork/config';
 import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
 import { BaseSync, SyncResult } from './base';
 import { ContractSync, ContractSyncStatus } from './contract';
@@ -34,7 +35,7 @@ export class ChainSync implements BaseSync {
     depositHandler: DepositHandler,
     withdrawHandler: WithdrawHandler,
     noteHandler: NoteHandler,
-    syncSize: number,
+    config: ChainConfig,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
@@ -56,7 +57,7 @@ export class ChainSync implements BaseSync {
             depositHandler,
             withdrawHandler,
             noteHandler,
-            syncSize,
+            config,
             contractGenerator,
           ),
       );

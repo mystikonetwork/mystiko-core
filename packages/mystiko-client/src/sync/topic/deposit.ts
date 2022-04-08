@@ -1,5 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
-import { BridgeType } from '@mystikonetwork/config';
+import { BridgeType, ChainConfig } from '@mystikonetwork/config';
 import { toBN, toHexNoPrefix } from '@mystikonetwork/utils';
 import { Contract, DepositStatus, RawEvent } from '../../model';
 import { TopicSync } from './base';
@@ -13,14 +13,14 @@ export default class DepositTopicSync extends TopicSync {
     eventHandler: EventHandler,
     contractHandler: ContractHandler,
     depositHandler: DepositHandler,
-    syncSize: number,
+    config: ChainConfig,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
       providerOrSigner: ethers.providers.Provider | ethers.Signer,
     ) => ethers.Contract,
   ) {
-    super(contract, 'Deposit', eventHandler, contractHandler, syncSize, contractGenerator);
+    super(contract, 'Deposit', eventHandler, contractHandler, config, contractGenerator);
     this.depositHandler = depositHandler;
   }
 

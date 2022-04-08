@@ -60,4 +60,9 @@ test('test ContractConfig constructor', () => {
   const rawConfig17 = { ...rawConfig16, depositDisabled: true };
   const conf5 = new ContractConfig(rawConfig17);
   expect(conf5.depositDisabled).toBe(true);
+  expect(conf5.getSyncSize('abc')).toBe(undefined);
+  const rawConfig18 = { ...rawConfig17, syncSize: { def: 123 } };
+  const conf6 = new ContractConfig(rawConfig18);
+  expect(conf6.getSyncSize('abc')).toBe(undefined);
+  expect(conf6.getSyncSize('def')).toBe(123);
 });

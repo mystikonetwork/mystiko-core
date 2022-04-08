@@ -60,7 +60,7 @@ export class FullSync {
         depositHandler,
         withdrawHandler,
         noteHandler,
-        chainConfig.syncSize,
+        chainConfig,
         contractGenerator,
       );
       chainSync.onStatusUpdate(() => this.runCallbacks());

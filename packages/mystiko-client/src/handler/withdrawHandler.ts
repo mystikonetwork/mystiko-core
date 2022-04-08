@@ -491,11 +491,12 @@ export class WithdrawHandler extends Handler {
     const chainConfig = this.config.getChainConfig(withdraw.chainId || 0);
     const contract = this.contractHandler.getContract(withdraw.chainId || 0, etherContract.address);
     if (contract && chainConfig) {
+      const syncSize = chainConfig.getContractTopicSyncSize(contract.address || '', 'MerkleTreeInsert');
       return WithdrawHandler.queryEventsBatch(
         contract,
         etherContract,
         contract.getSyncedTopicBlock('MerkleTreeInsert'),
-        chainConfig.syncSize,
+        syncSize,
       ).then((events) => {
         const storedEvents = this.eventHandler.getEvents({
           filterFunc: (event) =>
@@ -507,28 +508,25 @@ export class WithdrawHandler extends Handler {
         if (WithdrawHandler.validateEvents(allEvents)) {
           return allEvents;
         }
-        return WithdrawHandler.queryEventsBatch(
-          contract,
-          etherContract,
-          contract.syncStart,
-          chainConfig.syncSize,
-        ).then((allEventsAgain) => {
-          const newEvents = this.sortedAndDedupEvents(allEventsAgain);
-          if (WithdrawHandler.validateEvents(newEvents)) {
-            return this.eventHandler
-              .removeEvents(
-                (event) =>
-                  event.chainId === chainConfig.chainId &&
-                  event.contractAddress === etherContract.address &&
-                  event.topic === 'MerkleTreeInsert',
-              )
-              .then(() => this.eventHandler.addEvents(newEvents))
-              .then(() => newEvents);
-          }
-          return Promise.reject(
-            new Error('invalid leaf index, it might be intermediate network issue, please retry later'),
-          );
-        });
+        return WithdrawHandler.queryEventsBatch(contract, etherContract, contract.syncStart, syncSize).then(
+          (allEventsAgain) => {
+            const newEvents = this.sortedAndDedupEvents(allEventsAgain);
+            if (WithdrawHandler.validateEvents(newEvents)) {
+              return this.eventHandler
+                .removeEvents(
+                  (event) =>
+                    event.chainId === chainConfig.chainId &&
+                    event.contractAddress === etherContract.address &&
+                    event.topic === 'MerkleTreeInsert',
+                )
+                .then(() => this.eventHandler.addEvents(newEvents))
+                .then(() => newEvents);
+            }
+            return Promise.reject(
+              new Error('invalid leaf index, it might be intermediate network issue, please retry later'),
+            );
+          },
+        );
       });
     }
     return Promise.reject(

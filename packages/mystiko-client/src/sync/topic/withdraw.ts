@@ -1,4 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
+import { ChainConfig } from '@mystikonetwork/config';
 import { TopicSync } from './base';
 import { Contract, PrivateNoteStatus, RawEvent, WithdrawStatus } from '../../model';
 import { ContractHandler, EventHandler, NoteHandler, WithdrawHandler } from '../../handler';
@@ -14,14 +15,14 @@ export default class WithdrawTopicSync extends TopicSync {
     contractHandler: ContractHandler,
     withdrawHandler: WithdrawHandler,
     noteHandler: NoteHandler,
-    syncSize: number,
+    config: ChainConfig,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
       providerOrSigner: ethers.providers.Provider | ethers.Signer,
     ) => ethers.Contract,
   ) {
-    super(contract, 'Withdraw', eventHandler, contractHandler, syncSize, contractGenerator);
+    super(contract, 'Withdraw', eventHandler, contractHandler, config, contractGenerator);
     this.withdrawHandler = withdrawHandler;
     this.noteHandler = noteHandler;
   }

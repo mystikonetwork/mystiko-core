@@ -1,4 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
+import { ChainConfig } from '@mystikonetwork/config';
 import { toBN, toHexNoPrefix } from '@mystikonetwork/utils';
 import { TopicSync } from './base';
 import { Contract, DepositStatus, RawEvent } from '../../model';
@@ -15,14 +16,14 @@ export default class MerkleTreeInsertTopicSync extends TopicSync {
     contractHandler: ContractHandler,
     depositHandler: DepositHandler,
     noteHandler: NoteHandler,
-    syncSize: number,
+    config: ChainConfig,
     contractGenerator?: (
       address: string,
       abi: ContractInterface,
       providerOrSigner: ethers.providers.Provider | ethers.Signer,
     ) => ethers.Contract,
   ) {
-    super(contract, 'MerkleTreeInsert', eventHandler, contractHandler, syncSize, contractGenerator, true);
+    super(contract, 'MerkleTreeInsert', eventHandler, contractHandler, config, contractGenerator, true);
     this.depositHandler = depositHandler;
     this.noteHandler = noteHandler;
   }

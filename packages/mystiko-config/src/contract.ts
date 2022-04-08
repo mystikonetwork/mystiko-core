@@ -18,6 +18,7 @@ export interface RawContractConfig {
   syncStart?: number;
   circuits: string;
   depositDisabled?: boolean;
+  syncSize?: { [key: string]: number };
 }
 
 /**
@@ -177,6 +178,14 @@ export class ContractConfig extends BaseConfig {
    */
   public get depositDisabled(): boolean {
     return this.asRawContractConfig().depositDisabled || false;
+  }
+
+  public getSyncSize(topic: string): number | undefined {
+    const { syncSize } = this.asRawContractConfig();
+    if (syncSize) {
+      return syncSize[topic];
+    }
+    return undefined;
   }
 
   private checkContractName() {
