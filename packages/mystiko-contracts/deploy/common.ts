@@ -212,9 +212,7 @@ export function getBridgePairIndexByTokenName(
       if (bridge.pairs[i][0].network === srcNetwork && bridge.pairs[i][0].token === tokenName) {
         return i;
       }
-    }
-
-    if (bridge.pairs[i][0].token === tokenName || bridge.pairs[i][1].token === tokenName) {
+    } else if (bridge.pairs[i][0].token === tokenName || bridge.pairs[i][1].token === tokenName) {
       if (
         (bridge.pairs[i][0].network === srcNetwork && bridge.pairs[i][1].network === dstNetwork) ||
         (bridge.pairs[i][1].network === srcNetwork && bridge.pairs[i][0].network === dstNetwork)

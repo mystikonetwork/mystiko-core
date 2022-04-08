@@ -42,9 +42,7 @@
           "assetDecimals": 18,
           "address": "0x52dBf0d445E001371F4f42e6bF1e9E417027a4cB"
         }
-      ],
-      "hashAddress": "0x676eA2Ab02D1e73588e42EdF3C464A6132d91541",
-      "verifierAddress": "0xe7015fb652d132F52b4b22628Bb26e4DC5F1277E"
+      ]
     },
     {
       "name": "Ethereum Goerli",
@@ -81,8 +79,16 @@
           "address": "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae"
         }
       ],
-      "hashAddress": "0xA5DE86d54AF5E1BD7938C3934480248DfE0f9715",
-      "verifierAddress": "0xfE531774aB31B2733F3544b40e3caA62410b1342"
+      "hasher3Address": "0xc5bFDd5c1b0DA143072eF15416db8DF0E4231065",
+      "rollup1Address": "0x2f3DCC66B7588BB88B69Fe4b015A9810C504F404",
+      "rollup4Address": "0x2f3DCC66B7588BB88B69Fe4b015A9810C504F404",
+      "rollup16Address": "0x2f3DCC66B7588BB88B69Fe4b015A9810C504F404",
+      "transaction1x0VerifierAddress": "0xE2A83C3b58df50C97e38c5C07D6FE3C8e1a078B3",
+      "transaction1x1VerifierAddress": "0xfc3ceaC2DDAff74AE5bbFd64CAC33F09B2610BB9",
+      "transaction1x2VerifierAddress": "0xB9c7d20193786Bdc08F3678af8CDfBC03241399d",
+      "transaction2x0VerifierAddress": "0x015d360D5957CD148B6721f3011B62eADb01E950",
+      "transaction2x1VerifierAddress": "0xC208201b4D99312A7C9237a7C8e04E3D03425c17",
+      "transaction2x2VerifierAddress": "0x6754D19dBA034F645eB4eF352B4edF49DAB51434"
     },
     {
       "name": "BSC Testnet",
@@ -113,8 +119,16 @@
           "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613"
         }
       ],
-      "hashAddress": "0x48aa4E4E19ADDC373B012677dfb4f9fE45D2e056",
-      "verifierAddress": "0x32b08bC4a94d4018b68651727806F55637BAA3Fc"
+      "hasher3Address": "0x2D5982534E1B4A42C859a906abe9288D2dA573ea",
+      "rollup1Address": "0xD7fb5F07Dc332Cf6f137B8bC0AEA2A2946aD487f",
+      "rollup4Address": "0xD7fb5F07Dc332Cf6f137B8bC0AEA2A2946aD487f",
+      "rollup16Address": "0xD7fb5F07Dc332Cf6f137B8bC0AEA2A2946aD487f",
+      "transaction1x0VerifierAddress": "0x263Bf7d7A0701a7B73651296F332E3B81b2a66B2",
+      "transaction1x1VerifierAddress": "0x895eb5e0EBf6DC39Ce585F6F80D08657224475D3",
+      "transaction1x2VerifierAddress": "0x68dE0d3cEc025f3A6280e0713f6b451B1F68cfA1",
+      "transaction2x0VerifierAddress": "0x3ecC93513DA40CF9278C2cFC96C2147F1b4583b5",
+      "transaction2x1VerifierAddress": "0xF7B11552F483EC3bc6DDa3f0FDD307414963E1A4",
+      "transaction2x2VerifierAddress": "0x4c4442D71890E69DEa18A7a1Ea8D44fB7229a3ff"
     },
     {
       "name": "Aurora Testnet",
@@ -138,9 +152,7 @@
           "assetDecimals": 6,
           "address": "0x2E34eDA41d0E0DFC8E6fe8Fd032827b20C395aD1"
         }
-      ],
-      "hashAddress": "0x40e1eE77c2D51cfBb0BF7ee733CB65C285517523",
-      "verifierAddress": "0x055F611f9ca3eBf30bdA1f030e37fFB0511464E1"
+      ]
     },
     {
       "name": "Fantom Testnet",
@@ -158,9 +170,7 @@
           "assetDecimals": 18,
           "address": "0x80B46C896E26C1cB7DCdD23019d9e7cca6854864"
         }
-      ],
-      "hashAddress": "0x39d2082dE4FF6ed250f7959A6E9EE441eC2096c4",
-      "verifierAddress": "0xf900322b2D706b35F43B9f8D00dc4617292c2697"
+      ]
     },
     {
       "name": "Polygon Testnet",
@@ -190,9 +200,7 @@
           "assetDecimals": 18,
           "address": "0x2191B259307dDE156074B70aca701B1143c33256"
         }
-      ],
-      "hashAddress": "0xde0222931c3a34Bd97F5e5C663A2f8f34afc12E1",
-      "verifierAddress": "0xA09B5d6A55e79C8A19595cb60248214509Cd05B9"
+      ]
     },
     {
       "name": "Avalanche Testnet",
@@ -222,9 +230,7 @@
           "assetDecimals": 18,
           "address": "0x1AA34153F5166ccb8d385856c7e8cE9F15686585"
         }
-      ],
-      "hashAddress": "0x3d864Ab33e05562Eb3Ae8382865DC7e0E258498b",
-      "verifierAddress": "0xD0b4d6Dbc2B8E77A8Fc32e5189dEB7549F75179A"
+      ]
     }
   ],
   "bridges": [
@@ -267,70 +273,73 @@
           {
             "network": "bsctestnet",
             "token": "BNB",
-            "address": ""
+            "address": "0x4A04C089394A75A3e5d937cEd5864dc36388aD38",
+            "syncStart": 18263967
           }
         ],
         [
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": ""
+            "address": "0x590706d6F46728B77B50DC27900eDe5CAd0Beee8",
+            "syncStart": 18264076
           }
         ],
         [
           {
             "network": "bsctestnet",
             "token": "mUSD",
-            "address": ""
+            "address": "0xA6be56D137B05D7Ca776a9424790557A3cA7E935",
+            "syncStart": 18264086
           }
         ],
         [
           {
             "network": "arbitrumtestnet",
             "token": "ETH",
-            "address": "0xbDe788B88A40a76a16Bff03E5Ab96CB732538bFb"
+            "address": ""
           }
         ],
         [
           {
             "network": "polygontestnet",
             "token": "MATIC",
-            "address": "0x4C36593ca83826c019318e7C83150ef221aA79d7"
+            "address": ""
           }
         ],
         [
           {
             "network": "polygontestnet",
             "token": "MTT",
-            "address": "0x1a56777a35052B0a28558e2fa4f789D1eB9Bc869"
+            "address": ""
           }
         ],
         [
           {
             "network": "polygontestnet",
             "token": "mUSD",
-            "address": "0xE6B8f4eb63D65390F7139388173854A012f504ae"
+            "address": ""
           }
         ],
         [
           {
             "network": "avalanchetestnet",
             "token": "AVAX",
-            "address": "0xA813B9f80667e34A30FABcd24aB1C4c0b19979e1"
+            "address": ""
           }
         ],
         [
           {
             "network": "avalanchetestnet",
             "token": "MTT",
-            "address": "0xaad221534D5110669a3a87816eE56E8FD9b9a22D"
+            "address": ""
           }
         ],
         [
           {
             "network": "avalanchetestnet",
             "token": "mUSD",
-            "address": "0x06d6c6518955BAB63068E98660f5A58D29B964FF"
+            "address": ""
           }
         ]
       ]
@@ -369,56 +378,48 @@
           {
             "network": "goerli",
             "token": "ETH",
-            "address": "0xb4359d3CA903567D6ed88940608952e7A4Cab511",
-            "syncStart": 6619784
+            "address": ""
           },
           {
             "network": "bsctestnet",
             "token": "mETH",
-            "address": "0x1cF3F084635FEa4a455f3165D75697499e8a1C53",
-            "syncStart": 17973230
+            "address": ""
           }
         ],
         [
           {
             "network": "goerli",
             "token": "MTT",
-            "address": "0x42c464B8b72dBee3E3Ff12775a721970492576C0",
-            "syncStart": 6619772
+            "address": ""
           },
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": "0xDdCa241E4F3607CDe5AbdfB34879B27a190FEb29",
-            "syncStart": 17973256
+            "address": ""
           }
         ],
         [
           {
             "network": "goerli",
             "token": "mUSD",
-            "address": "0xad196010a9A9C6f024Ab08E9683D58368B8B30B5",
-            "syncStart": 6619777
+            "address": ""
           },
           {
             "network": "bsctestnet",
             "token": "mUSD",
-            "address": "0xF8bf748f400CD064206C216aD91f6BbE2Eca3110",
-            "syncStart": 17973249
+            "address": ""
           }
         ],
         [
           {
             "network": "goerli",
             "token": "mBNB",
-            "address": "0xB61f02d7bd69D58f0e82FE299253FaBbB7573B96",
-            "syncStart": 6619786
+            "address": ""
           },
           {
             "network": "bsctestnet",
             "token": "BNB",
-            "address": "0xb954BD428b2FC10C5C95c3aD2d532aB520960117",
-            "syncStart": 17973239
+            "address": ""
           }
         ]
       ]
@@ -429,7 +430,7 @@
       "proxys": [
         {
           "network": "ropsten",
-          "address": "0x719E61aa21BE87Ed72a6093F965973cFe1D45c1c"
+          "address": ""
         },
         {
           "network": "bsctestnet",
@@ -437,15 +438,15 @@
         },
         {
           "network": "polygontestnet",
-          "address": "0xB1f5245F19c1911e5d3B8099188A783326626B83"
+          "address": ""
         },
         {
           "network": "avalanchetestnet",
-          "address": "0x62F686F657aae4E8D0e38F7Fa606dE2F02381d2e"
+          "address": ""
         },
         {
           "network": "auroratestnet",
-          "address": "0x029d1cB61F1Fdba240fd03Bf46Bac75b887F2EDC"
+          "address": ""
         }
       ],
       "pairs": [
@@ -501,132 +502,132 @@
           {
             "network": "ropsten",
             "token": "ETH",
-            "address": "0xac9Ee1Dd66885BDbEf56E4641117a53a44b16D09"
+            "address": ""
           },
           {
             "network": "polygontestnet",
             "token": "mETH",
-            "address": "0x6BAF780988066D4744006F6894BCd3A0E181d1b9"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "MTT",
-            "address": "0x381F3Dee6dAf5C1be1749C362396C9414dA64B71"
+            "address": ""
           },
           {
             "network": "polygontestnet",
             "token": "MTT",
-            "address": "0xB0b8f60Fd4a7b8a7B5577FC05d90811a64513C2B"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "mUSD",
-            "address": "0xEa164BED9684A0c2d8ed491E1aC24B58FA424476"
+            "address": ""
           },
           {
             "network": "polygontestnet",
             "token": "mUSD",
-            "address": "0x7Fed9eA345c3e257137359ca1c9A1Cb55A79A061"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "mMATIC",
-            "address": "0xf236459A13bf26CFE11f01e50Ed4A261b43c2b0C"
+            "address": ""
           },
           {
             "network": "polygontestnet",
             "token": "MATIC",
-            "address": "0x0e3Ce6d2a3692d1f638537733bd836f2FCb45A19"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "ETH",
-            "address": "0x4Ca06F314C022b593d287b1b16AB2959620619A2"
+            "address": ""
           },
           {
             "network": "avalanchetestnet",
             "token": "mETH",
-            "address": "0xd5F0E1b5A37A58B26624811514006ceBB961ac1E"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "MTT",
-            "address": "0x84DC8EBD5F614068766c3E7cEc1F5aAD1c18c401"
+            "address": ""
           },
           {
             "network": "avalanchetestnet",
             "token": "MTT",
-            "address": "0xf900322b2D706b35F43B9f8D00dc4617292c2697"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "mUSD",
-            "address": "0x77FE61021cfA27882f68898D6161c9d13bf4ae08"
+            "address": ""
           },
           {
             "network": "avalanchetestnet",
             "token": "mUSD",
-            "address": "0x0e3Ce6d2a3692d1f638537733bd836f2FCb45A19"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "mAVAX",
-            "address": "0x225315Cb57E71282924A6769cDDBc171528Ae4ce"
+            "address": ""
           },
           {
             "network": "avalanchetestnet",
             "token": "AVAX",
-            "address": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "ETH",
-            "address": "0x8f6d6b50aD9F354eb1D7d4E87A77CA4768aC9b45"
+            "address": ""
           },
           {
             "network": "auroratestnet",
             "token": "aETH",
-            "address": "0x42641BE2F80DfC7a74D21991d26283ed360f640d"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "MTT",
-            "address": "0xc06686F28046AE620126a37F399ee9432feeB1f6"
+            "address": ""
           },
           {
             "network": "auroratestnet",
             "token": "MTT",
-            "address": "0xFE1229741a51133DDe078793Cf5B343570961f47"
+            "address": ""
           }
         ],
         [
           {
             "network": "ropsten",
             "token": "mUSD",
-            "address": "0x6D8F3102160B31deDc886de6b93f516825479e7a"
+            "address": ""
           },
           {
             "network": "auroratestnet",
             "token": "mUSD",
-            "address": "0xA33cB8399a362527Be3D5c899FD6819D7cE7Cf74"
+            "address": ""
           }
         ]
       ]
