@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/utils",
-  "version": "0.0.8",
+  "version": "0.0.8-patch1",
   "description": "utilities of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
