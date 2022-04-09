@@ -273,24 +273,24 @@
           {
             "network": "bsctestnet",
             "token": "BNB",
-            "address": "0x4A04C089394A75A3e5d937cEd5864dc36388aD38",
-            "syncStart": 18263967
+            "address": "0x3845eAB5B9c05207C3043aE4aF296c3B58032A90",
+            "syncStart": 18289261
           }
         ],
         [
           {
             "network": "bsctestnet",
             "token": "MTT",
-            "address": "0x590706d6F46728B77B50DC27900eDe5CAd0Beee8",
-            "syncStart": 18264076
+            "address": "0x80525A2C863107210e0208D60e2694949914c26A",
+            "syncStart": 18289247
           }
         ],
         [
           {
             "network": "bsctestnet",
             "token": "mUSD",
-            "address": "0xA6be56D137B05D7Ca776a9424790557A3cA7E935",
-            "syncStart": 18264086
+            "address": "0x67d4a81096dFD5869bC520f16ae2537aF3dE582D",
+            "syncStart": 18289254
           }
         ],
         [

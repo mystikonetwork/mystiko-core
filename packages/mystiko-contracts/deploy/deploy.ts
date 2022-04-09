@@ -512,7 +512,7 @@ async function deployStep2or3(taskArgs: any) {
     }
 
     // transfer token to contract
-    if (mystikoNetwork === 'testnet' && srcToken.erc20 === 'true') {
+    if (bridgeName !== 'loop' && mystikoNetwork === 'testnet' && srcToken.erc20 === 'true') {
       await transferTokneToContract(srcToken.address, src.address);
     }
 
