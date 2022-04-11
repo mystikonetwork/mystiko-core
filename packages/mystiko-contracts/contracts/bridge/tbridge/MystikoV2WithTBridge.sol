@@ -33,13 +33,15 @@ abstract contract MystikoV2WithTBridge is MystikoBridge {
     uint256 commitment,
     uint256 bridgeFee,
     uint256 executorFee,
-    uint256 rollupFee
+    uint256 rollupFee,
+    bytes memory encryptedNote
   ) internal override {
     CrossChainData memory txData = CrossChainData({
       amount: amount,
       commitment: commitment,
       executorFee: executorFee,
-      rollupFee: rollupFee
+      rollupFee: rollupFee,
+      encryptedNote: encryptedNote
     });
     bytes memory txDataBytes = serializeTxData(txData);
     ICrossChainProxy relayProxy = ICrossChainProxy(relayProxyAddress);

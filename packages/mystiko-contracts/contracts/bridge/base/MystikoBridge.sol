@@ -85,8 +85,13 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
     _;
   }
 
-  event EncryptedNote(uint256 indexed commitment, bytes encryptedNote);
-  event CommitmentQueued(uint256 indexed commitment, uint256 rollupFee, uint256 leafIndex);
+  event CommitmentDeposit(uint256 indexed commitment);
+  event CommitmentQueued(
+    uint256 indexed commitment,
+    uint256 rollupFee,
+    uint256 leafIndex,
+    bytes encryptedNote
+  );
   event CommitmentIncluded(uint256 indexed commitment);
   event CommitmentSpent(uint256 indexed rootHash, uint256 indexed serialNumber);
 
@@ -134,9 +139,10 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
       request.commitment,
       request.bridgeFee,
       request.executorFee,
-      request.rollupFee
+      request.rollupFee,
+      request.encryptedNote
     );
-    emit EncryptedNote(request.commitment, request.encryptedNote);
+    emit CommitmentDeposit(request.commitment);
   }
 
   function _processDeposit(
@@ -144,7 +150,8 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
     uint256 commitment,
     uint256 bridgeFee,
     uint256 executeFee,
-    uint256 rollupFee
+    uint256 rollupFee,
+    bytes memory encryptedNote
   ) internal virtual;
 
   function _syncDeposit(
@@ -162,7 +169,7 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
     require(!relayCommitments[txData.commitment], "The commitment has been submitted");
     relayCommitments[txData.commitment] = true;
 
-    _enqueueCommitment(txData.commitment, txData.rollupFee, txData.executorFee);
+    _enqueueCommitment(txData.commitment, txData.rollupFee, txData.executorFee, txData.encryptedNote);
   }
 
   function rollup(RollupRequest memory request) external override onlyWhitelisted {
@@ -265,8 +272,12 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
     // enqueue output commitments.
     for (uint32 i = 0; i < numOutputs; i++) {
       relayCommitments[request.outCommitments[i]] = true;
-      _enqueueCommitment(request.outCommitments[i], request.outRollupFees[i], 0);
-      emit EncryptedNote(request.outCommitments[i], request.outEncryptedNotes[i]);
+      _enqueueCommitment(
+        request.outCommitments[i],
+        request.outRollupFees[i],
+        0,
+        request.outEncryptedNotes[i]
+      );
     }
 
     // withdraw tokens to public recipient.
@@ -389,7 +400,8 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
   function _enqueueCommitment(
     uint256 commitment,
     uint256 rollupFee,
-    uint256 executorFee
+    uint256 executorFee,
+    bytes memory encryptedNote
   ) internal {
     commitmentQueue[commitmentQueueSize] = CommitmentLeaf(commitment, rollupFee);
     uint256 leafIndex = commitmentQueueSize + commitmentIncludedCount;
@@ -397,7 +409,7 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
     if (executorFee > 0) {
       _processExecutorFeeTransfer(executorFee);
     }
-    emit CommitmentQueued(commitment, rollupFee, leafIndex);
+    emit CommitmentQueued(commitment, rollupFee, leafIndex, encryptedNote);
   }
 
   function _zeros(uint32 nth) internal pure returns (uint256) {

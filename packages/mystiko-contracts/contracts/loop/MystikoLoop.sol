@@ -68,8 +68,12 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     _;
   }
 
-  event EncryptedNote(uint256 indexed commitment, bytes encryptedNote);
-  event CommitmentQueued(uint256 indexed commitment, uint256 rollupFee, uint256 leafIndex);
+  event CommitmentQueued(
+    uint256 indexed commitment,
+    uint256 rollupFee,
+    uint256 leafIndex,
+    bytes encryptedNote
+  );
   event CommitmentIncluded(uint256 indexed commitment);
   event CommitmentSpent(uint256 indexed rootHash, uint256 indexed serialNumber);
 
@@ -99,8 +103,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     require(request.commitment == calculatedCommitment, "commitment hash incorrect");
     historicCommitments[request.commitment] = true;
     _processDepositTransfer(request.amount + request.rollupFee, 0);
-    _enqueueCommitment(request.commitment, request.rollupFee);
-    emit EncryptedNote(request.commitment, request.encryptedNote);
+    _enqueueCommitment(request.commitment, request.rollupFee, request.encryptedNote);
   }
 
   function rollup(RollupRequest memory request) external override onlyWhitelisted {
@@ -203,8 +206,7 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     // enqueue output commitments.
     for (uint32 i = 0; i < numOutputs; i++) {
       historicCommitments[request.outCommitments[i]] = true;
-      _enqueueCommitment(request.outCommitments[i], request.outRollupFees[i]);
-      emit EncryptedNote(request.outCommitments[i], request.outEncryptedNotes[i]);
+      _enqueueCommitment(request.outCommitments[i], request.outRollupFees[i], request.outEncryptedNotes[i]);
     }
 
     // withdraw tokens to public recipient.
@@ -309,11 +311,15 @@ abstract contract MystikoLoop is IMystikoLoop, AssetPool, ReentrancyGuard {
     return hasher3.poseidon([hashK, amount, uint256(randomS)]);
   }
 
-  function _enqueueCommitment(uint256 commitment, uint256 rollupFee) internal {
+  function _enqueueCommitment(
+    uint256 commitment,
+    uint256 rollupFee,
+    bytes memory encryptedNote
+  ) internal {
     commitmentQueue[commitmentQueueSize] = CommitmentLeaf(commitment, rollupFee);
     uint256 leafIndex = commitmentQueueSize + commitmentIncludedCount;
     commitmentQueueSize = commitmentQueueSize + 1;
-    emit CommitmentQueued(commitment, rollupFee, leafIndex);
+    emit CommitmentQueued(commitment, rollupFee, leafIndex, encryptedNote);
   }
 
   function _zeros(uint32 nth) internal pure returns (uint256) {

@@ -104,10 +104,13 @@ export function testLoopDeposit(
             { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
           ),
         )
-          .to.emit(mystikoContract, 'EncryptedNote')
-          .withArgs(commitments[i].commitmentHash, toHex(commitments[i].privateNote))
           .to.emit(mystikoContract, 'CommitmentQueued')
-          .withArgs(commitments[i].commitmentHash.toString(), minRollupFee, `${i}`);
+          .withArgs(
+            commitments[i].commitmentHash.toString(),
+            minRollupFee,
+            `${i}`,
+            toHex(commitments[i].privateNote),
+          );
 
         expect(await mystikoContract.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
           true,
