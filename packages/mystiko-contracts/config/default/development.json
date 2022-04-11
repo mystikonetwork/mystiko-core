@@ -2,7 +2,7 @@
   "version": "1.0",
   "chains": [
     {
-      "name": "Ganache",
+      "name": "hardhat",
       "assetSymbol": "ETH",
       "chainId": 0,
       "explorerUrl": "",

@@ -22,6 +22,7 @@
     "build": "yarn build:contract && yarn build:hasher && yarn build:typechain",
     "test": "hardhat test",
     "integration": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 600000 --delay --exit",
+    "deploy": "yarn deploy:chain --network hardhat --step step1 --bridge loop --dst hardhat --token ETH && yarn deploy:chain --network hardhat --step step2 --bridge loop --dst hardhat --token ETH && yarn deploy:chain --network hardhat --step step3 --bridge loop --dst hardhat --token ETH",
     "deploy:chain": "hardhat migrate --config hardhat.config.deploy.ts"
   },
   "devDependencies": {

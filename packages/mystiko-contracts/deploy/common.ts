@@ -1,3 +1,6 @@
+import { Artifact } from 'hardhat/types';
+import { Artifacts } from 'hardhat/internal/artifacts';
+
 const fs = require('fs');
 
 export const DEVELOPMENT_CONFIG_FILE = 'deploy/pair/development.json';
@@ -65,8 +68,16 @@ export function saveConfig(mystikoNetwork: string, data: string) {
 
 export function resetDefaultDevelopmentConfig(inConfig: any) {
   const config = inConfig;
+  config.chains[0].hasher3Address = '';
   config.chains[0].rollup1Address = '';
-  config.chains[0].verifierAddress = '';
+  config.chains[0].rollup4Address = '';
+  config.chains[0].rollup16Address = '';
+  config.chains[0].transaction1x0VerifierAddress = '';
+  config.chains[0].transaction1x1VerifierAddress = '';
+  config.chains[0].transaction1x2VerifierAddress = '';
+  config.chains[0].transaction2x0VerifierAddress = '';
+  config.chains[0].transaction2x1VerifierAddress = '';
+  config.chains[0].transaction2x2VerifierAddress = '';
   config.bridges[0].pairs[0][0].address = '';
   config.bridges[0].pairs[0][0].syncStart = '';
 
@@ -77,14 +88,32 @@ export function saveBaseAddressConfig(
   mystikoNetwork: string,
   network: string,
   inConfig: any,
+  hasher3Address: string,
   rollup1Address: string,
-  verifierAddress: string,
+  rollup4Address: string,
+  rollup16Address: string,
+  transaction1x0VerifierAddress: string,
+  transaction1x1VerifierAddress: string,
+  transaction1x2VerifierAddress: string,
+  transaction2x0VerifierAddress: string,
+  transaction2x1VerifierAddress: string,
+  transaction2x2VerifierAddress: string,
 ) {
   const config = inConfig;
   for (let i = 0; i < config.chains.length; i += 1) {
     if (config.chains[i].network === network) {
+      config.chains[i].hasher3Address = hasher3Address;
+
       config.chains[i].rollup1Address = rollup1Address;
-      config.chains[i].verifierAddress = verifierAddress;
+      config.chains[i].rollup4Address = rollup1Address;
+      config.chains[i].rollup16Address = rollup1Address;
+
+      config.chains[i].transaction1x0VerifierAddress = transaction1x0VerifierAddress;
+      config.chains[i].transaction1x1VerifierAddress = transaction1x1VerifierAddress;
+      config.chains[i].transaction1x2VerifierAddress = transaction1x2VerifierAddress;
+      config.chains[i].transaction2x0VerifierAddress = transaction2x0VerifierAddress;
+      config.chains[i].transaction2x1VerifierAddress = transaction2x1VerifierAddress;
+      config.chains[i].transaction2x2VerifierAddress = transaction2x2VerifierAddress;
       break;
     }
   }
@@ -139,7 +168,7 @@ export function updateTBridgeCrossChainProxyConfig(inConfig: any, network: strin
   }
 
   console.log(LOGRED, 'update new tbridge cross chain proxy error');
-  return null;
+  return undefined;
 }
 
 export function getBridgeConfig(config: any, bridgeName: string): any {
@@ -149,6 +178,11 @@ export function getBridgeConfig(config: any, bridgeName: string): any {
       bridge = b;
     }
   });
+
+  if (bridge === undefined) {
+    console.error(LOGRED, 'bridge configure not exist');
+  }
+
   return bridge;
 }
 
@@ -159,6 +193,11 @@ export function getBridgeProxyAddress(bridge: any, network: string) {
       address = p.address;
     }
   });
+
+  if (address === undefined) {
+    console.error(LOGRED, 'proxy address not exist');
+  }
+
   return address;
 }
 
@@ -173,9 +212,7 @@ export function getBridgePairIndexByTokenName(
       if (bridge.pairs[i][0].network === srcNetwork && bridge.pairs[i][0].token === tokenName) {
         return i;
       }
-    }
-
-    if (bridge.pairs[i][0].token === tokenName || bridge.pairs[i][1].token === tokenName) {
+    } else if (bridge.pairs[i][0].token === tokenName || bridge.pairs[i][1].token === tokenName) {
       if (
         (bridge.pairs[i][0].network === srcNetwork && bridge.pairs[i][1].network === dstNetwork) ||
         (bridge.pairs[i][1].network === srcNetwork && bridge.pairs[i][0].network === dstNetwork)
@@ -200,6 +237,10 @@ export function getChainConfig(config: any, network: string): any {
       chain = c;
     }
   });
+
+  if (chain === undefined) {
+    console.error(LOGRED, 'chain config not exist');
+  }
   return chain;
 }
 
@@ -210,6 +251,10 @@ export function getChainTokenConfig(chain: any, name: string): any {
       token = t;
     }
   });
+
+  if (token === undefined) {
+    console.error(LOGRED, 'token config not exist');
+  }
   return token;
 }
 
@@ -219,4 +264,11 @@ export function toDecimals(amount: number, decimals: number) {
     padDecimals += '0';
   }
   return amount + padDecimals;
+}
+
+export function getArtifact(contract: string): Promise<Artifact> {
+  const artifactsPath: string = './artifactsExternal';
+  // const artifactsPath: string = "./artifacts";
+  const artifacts = new Artifacts(artifactsPath);
+  return artifacts.readArtifact(contract);
 }

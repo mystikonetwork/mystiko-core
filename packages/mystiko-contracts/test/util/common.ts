@@ -115,7 +115,7 @@ export async function deployLoopContracts(
 
 export async function deployTBridgeContracts(
   accounts: Wallet[],
-  withdrawVerifierAddress: string,
+  hasher3Address: string,
   tokenAddress: string,
   {
     treeHeight = MerkleTreeHeight,
@@ -145,7 +145,7 @@ export async function deployTBridgeContracts(
       minBridgeFee,
       minExecutorFee,
       minRollupFee,
-      withdrawVerifierAddress,
+      hasher3Address,
     );
 
   const remoteMain = await tBridgeMainFactory
@@ -158,7 +158,7 @@ export async function deployTBridgeContracts(
       minBridgeFee,
       minExecutorFee,
       minRollupFee,
-      withdrawVerifierAddress,
+      hasher3Address,
     );
 
   const tBridgeERC20Factory = (await ethers.getContractFactory(
@@ -175,7 +175,7 @@ export async function deployTBridgeContracts(
       minBridgeFee,
       minExecutorFee,
       minRollupFee,
-      withdrawVerifierAddress,
+      hasher3Address,
       tokenAddress,
     );
 
@@ -189,7 +189,7 @@ export async function deployTBridgeContracts(
       minBridgeFee,
       minExecutorFee,
       minRollupFee,
-      withdrawVerifierAddress,
+      hasher3Address,
       tokenAddress,
     );
 

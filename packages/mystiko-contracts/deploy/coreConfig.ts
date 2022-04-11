@@ -26,7 +26,6 @@ export function loadConfig(mystikoNetwork: string): any {
   if (fileName === '') {
     return undefined;
   }
-
   return readJsonFile(fileName);
 }
 
@@ -45,10 +44,10 @@ function saveConfig(mystikoNetwork: string, data: string) {
 
 function buildContractName(bridgeContractName: string, bERC20: string): string {
   if (bERC20 === 'true') {
-    return `MystikoWith${bridgeContractName}ERC20`;
+    return `MystikoV2With${bridgeContractName}ERC20`;
   }
 
-  return `MystikoWith${bridgeContractName}Main`;
+  return `MystikoV2With${bridgeContractName}Main`;
 }
 
 function addNewConfigContractAddress(
@@ -63,7 +62,7 @@ function addNewConfigContractAddress(
   peerContractAddress: string,
   version: string,
   circuits: string,
-) {
+): any {
   console.log('core add new contract');
 
   for (let i = 0; i < coreConfig.chains.length; i += 1) {
@@ -73,16 +72,21 @@ function addNewConfigContractAddress(
     }
 
     const name = contractName;
-    const { assetSymbol, assetDecimals } = tokenConfig;
+    const assetSymbol = tokenConfig.name;
+    const { assetDecimals } = tokenConfig;
+    // todo add min bridge fee to configure
+    const { MIN_BRIDGE_FEE, MIN_EXECUTOR_FEE, MIN_ROLLUP_FEE } = process.env;
+    const minBridgeFee = MIN_BRIDGE_FEE;
+    const minExecutorFee = MIN_EXECUTOR_FEE;
+    const minRollupFee = MIN_ROLLUP_FEE;
 
     const newContract = {
-      version,
       name,
+      version,
+      circuits,
       address,
       assetSymbol,
       assetDecimals,
-      circuits,
-      syncStart,
     };
 
     if (tokenConfig.erc20 === 'true') {
@@ -90,19 +94,30 @@ function addNewConfigContractAddress(
       newContract.assetAddress = tokenConfig.address;
     }
 
+    // @ts-ignore
+    newContract.minRollupFee = minRollupFee;
     if (bridgeName !== 'loop') {
+      // @ts-ignore
+      newContract.minBridgeFee = minBridgeFee;
+      // @ts-ignore
+      newContract.minExecutorFee = minExecutorFee;
       // @ts-ignore
       newContract.peerChainId = peerChainId;
       // @ts-ignore
       newContract.peerContractAddress = peerContractAddress;
     }
 
+    // @ts-ignore
+    newContract.syncStart = syncStart;
+    // @ts-ignore
+    newContract.depositDisabled = false;
+
     coreConfig.chains[i].contracts.push(newContract);
     return coreConfig;
   }
 
   console.error(LOGRED, 'core add new contract error, should add chain configure');
-  return null;
+  return undefined;
 }
 
 function updateConfigContractAddress(
@@ -117,7 +132,7 @@ function updateConfigContractAddress(
   peerContractAddress: string,
   version: string,
   circuits: string,
-) {
+): any {
   const coreConfig = inCoreConfig;
   for (let i = 0; i < coreConfig.chains.length; i += 1) {
     if (coreConfig.chains[i].name !== chainName) {
@@ -175,10 +190,15 @@ function updateConfigContractAddress(
   );
 }
 
-export function savePeerConfig(mystikoNetwork: string, bridgeName: string, src: any, dst: any, config: any) {
+export function saveContractConfig(
+  mystikoNetwork: string,
+  bridgeName: string,
+  src: any,
+  dst: any,
+  config: any,
+) {
   const bridge = getBridgeConfig(config, bridgeName);
   if (bridge === undefined) {
-    console.error(LOGRED, 'bridge configure not support');
     return;
   }
 
@@ -199,14 +219,14 @@ export function savePeerConfig(mystikoNetwork: string, bridgeName: string, src: 
 
   const contractName = buildContractName(bridge.contractName, srcToken.erc20);
 
-  let cliCoreConfig = loadConfig(mystikoNetwork);
-  if (cliCoreConfig === null) {
+  let coreConfig = loadConfig(mystikoNetwork);
+  if (coreConfig === undefined) {
     return;
   }
 
-  cliCoreConfig = updateConfigContractAddress(
+  coreConfig = updateConfigContractAddress(
     bridgeName,
-    cliCoreConfig,
+    coreConfig,
     srcChain.name,
     contractName,
     srcToken,
@@ -217,9 +237,9 @@ export function savePeerConfig(mystikoNetwork: string, bridgeName: string, src: 
     config.version,
     config.circuits,
   );
-  if (cliCoreConfig === null) {
+  if (coreConfig === undefined) {
     return;
   }
 
-  saveConfig(mystikoNetwork, cliCoreConfig);
+  saveConfig(mystikoNetwork, coreConfig);
 }

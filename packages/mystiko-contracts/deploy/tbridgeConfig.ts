@@ -29,7 +29,7 @@ export function saveConfig(mystikoNetwork: string, data: string) {
   common.writeJsonFile(fileName, data);
 }
 
-export function savePeerConfig(
+export function saveContractConfig(
   mystikoNetwork: string,
   src: any,
   dst: any,
