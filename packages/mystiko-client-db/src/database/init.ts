@@ -1,8 +1,9 @@
 import { addPouchPlugin, createRxDatabase, getRxStoragePouch, RxDatabaseCreator } from 'rxdb';
-import { walletCollectionMethods } from '../collection';
-import { walletMethods } from '../document';
+import { accountCollectionMethods, walletCollectionMethods } from '../collection';
+import { ACCOUNT_COLLECTION_NAME, WALLET_COLLECTION_NAME } from '../constants';
+import { accountMethods, walletMethods } from '../document';
 import { MystikoClientCollections, MystikoClientDatabase } from './type';
-import { walletSchema } from '../schema';
+import { accountSchema, walletSchema } from '../schema';
 
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoClientDatabase> {
   let dbPromise: Promise<MystikoClientDatabase>;
@@ -18,7 +19,12 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoC
   }
   const db: MystikoClientDatabase = await dbPromise;
   await db.addCollections({
-    wallets: {
+    [ACCOUNT_COLLECTION_NAME]: {
+      schema: accountSchema,
+      methods: accountMethods,
+      statics: accountCollectionMethods,
+    },
+    [WALLET_COLLECTION_NAME]: {
       schema: walletSchema,
       methods: walletMethods,
       statics: walletCollectionMethods,

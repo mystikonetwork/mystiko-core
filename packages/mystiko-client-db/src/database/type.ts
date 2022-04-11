@@ -1,8 +1,10 @@
 import { RxDatabase } from 'rxdb';
-import { WalletCollection } from '../collection';
+import { AccountCollection, WalletCollection } from '../collection';
+import { ACCOUNT_COLLECTION_NAME, WALLET_COLLECTION_NAME } from '../constants';
 
 export type MystikoClientCollections = {
-  wallets: WalletCollection;
+  [ACCOUNT_COLLECTION_NAME]: AccountCollection;
+  [WALLET_COLLECTION_NAME]: WalletCollection;
 };
 
 export type MystikoClientDatabase = RxDatabase<MystikoClientCollections>;

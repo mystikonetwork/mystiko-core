@@ -1,4 +1,5 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
+import { HEX_REGEX } from '../constants';
 
 const walletSchemaLiteral = {
   version: 0,
@@ -11,13 +12,22 @@ const walletSchemaLiteral = {
     id: {
       type: 'string',
       final: true,
-      uniqueItems: true,
+    },
+    createdAt: {
+      type: 'string',
+      final: true,
+      format: 'date-time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
     },
     encryptedMasterSeed: {
       type: 'string',
     },
     hashedPassword: {
       type: 'string',
+      pattern: HEX_REGEX,
     },
     accountNonce: {
       type: 'integer',
@@ -25,7 +35,7 @@ const walletSchemaLiteral = {
       default: 0,
     },
   },
-  required: ['id', 'encryptedMasterSeed', 'hashedPassword', 'accountNonce'],
+  required: ['id', 'createdAt', 'updatedAt', 'encryptedMasterSeed', 'hashedPassword', 'accountNonce'],
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(walletSchemaLiteral);
