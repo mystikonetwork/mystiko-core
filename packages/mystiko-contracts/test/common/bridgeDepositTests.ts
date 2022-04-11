@@ -1,11 +1,11 @@
 import { expect } from 'chai';
+import { ethers } from 'ethers';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import {toHex, toBN, toHexNoPrefix} from '@mystikonetwork/utils';
+import { toHex, toBN } from '@mystikonetwork/utils';
 import { Wallet } from '@ethersproject/wallet';
 import { TestToken } from '../../typechain';
 import { CommitmentInfo } from './commitment';
 import { BridgeAccountIndex, DefaultPoolAmount, DestinationChainID, SourceChainID } from '../util/constants';
-import {ethers} from "ethers";
 
 const { waffle } = require('hardhat');
 
@@ -247,10 +247,10 @@ export function testBridgeDeposit(
           minRollupFee,
         );
 
-        for (let i = 0; i < txReceipt.logs.length; i += 1) {
+        for (let j = 0; j < txReceipt.logs.length; j += 1) {
           try {
             const parsedLog: ethers.utils.LogDescription = mystikoDstContract.interface.parseLog(
-              txReceipt.logs[i],
+              txReceipt.logs[j],
             );
             events.push(parsedLog);
           } catch (e) {
@@ -267,12 +267,13 @@ export function testBridgeDeposit(
 
     it('should emit correct events', () => {
       expect(events.length).to.gt(0);
+      const rollupFee = minRollupFee;
       for (let i = 0; i < numOfCommitments; i += 1) {
         const commitmentIndex = events.findIndex(
           (event) =>
             event.name === 'CommitmentQueued' &&
             event.args.commitment.toString() === commitments[i].commitmentHash.toString() &&
-            event.args.rollupFee.toString() === minRollupFee.toString() &&
+            event.args.rollupFee.toString() === rollupFee.toString() &&
             event.args.leafIndex.toString() === `${i}` &&
             event.args.encryptedNote === toHex(commitments[i].privateNote),
         );
