@@ -85,7 +85,7 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
     _;
   }
 
-  event CommitmentDeposit(uint256 indexed commitment);
+  event CommitmentCrossChain(uint256 indexed commitment);
   event CommitmentQueued(
     uint256 indexed commitment,
     uint256 rollupFee,
@@ -142,7 +142,7 @@ abstract contract MystikoBridge is IMystikoBridge, AssetPool, CrossChainDataSeri
       request.rollupFee,
       request.encryptedNote
     );
-    emit CommitmentDeposit(request.commitment);
+    emit CommitmentCrossChain(request.commitment);
   }
 
   function _processDeposit(

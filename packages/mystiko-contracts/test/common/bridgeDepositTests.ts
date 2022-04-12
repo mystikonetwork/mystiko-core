@@ -178,7 +178,7 @@ export function testBridgeDeposit(
           { from: accounts[0].address, value: minTotalValue },
         );
         expect(depositTx)
-          .to.emit(mystikoContract, 'CommitmentDeposit')
+          .to.emit(mystikoContract, 'CommitmentCrossChain')
           .withArgs(commitments[i].commitmentHash);
 
         expect(await mystikoContract.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
