@@ -34,6 +34,7 @@ test('Test toDecimals', () => {
 test('Test fromDecimals', () => {
   expect(fromDecimals(toBN('1'), 4)).toBe(0.0001);
   expect(fromDecimals(toBN('1000000000000000000'))).toBe(1);
+  expect(fromDecimals('1000000000000000000')).toBe(1);
 });
 
 test('Test toFixedLenHex', () => {

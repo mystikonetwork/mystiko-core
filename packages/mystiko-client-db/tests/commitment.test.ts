@@ -22,7 +22,7 @@ test('test insert', async () => {
     commitmentHash: '1234',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    state: 'pending',
+    status: 'pending',
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
   });
   const commitment = await db.commitments.findOne('1').exec();
@@ -35,7 +35,8 @@ test('test insert', async () => {
     expect(commitment.commitmentHash).toBe('1234');
     expect(commitment.assetSymbol).toBe('ETH');
     expect(commitment.assetDecimals).toBe(18);
-    expect(commitment.state).toBe('pending');
+    expect(commitment.assetAddress).toBe(undefined);
+    expect(commitment.status).toBe('pending');
     expect(commitment.creationTransactionHash).toBe(
       '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     );
@@ -57,7 +58,8 @@ test('test insert full', async () => {
     commitmentHash: '6789',
     assetSymbol: 'mETH',
     assetDecimals: 6,
-    state: 'succeeded',
+    assetAddress: '0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3',
+    status: 'succeeded',
     rollupFeeAmount: toDecimals(2, 6).toString(),
     leafIndex: '34',
     encryptedNote: 'deadbeef',
@@ -68,6 +70,7 @@ test('test insert full', async () => {
     srcChainContractAddress: '0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD',
     srcAssetSymbol: 'ETH',
     srcAssetDecimals: 18,
+    srcAssetAddress: '0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD',
     creationTransactionHash: '0x5b78a656ef8cc070639cdf1cc486ffb7e2cbd8f0354b221a671d2eb17157b8a3',
     relayTransactionHash: '0xe53c1586b284074fab9b062f089efe89c1135fbbb0af68a54c88a886e6b9a4ad',
     spendingTransactionHash: '0x3190d660a6555a36caa841205c1c5140513654f44133ca9dd87d6a1149307e9a',
@@ -83,7 +86,8 @@ test('test insert full', async () => {
     expect(commitment.commitmentHash).toBe('6789');
     expect(commitment.assetSymbol).toBe('mETH');
     expect(commitment.assetDecimals).toBe(6);
-    expect(commitment.state).toBe('succeeded');
+    expect(commitment.assetAddress).toBe('0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3');
+    expect(commitment.status).toBe('succeeded');
     expect(commitment.rollupFeeAmount).toBe(toDecimals(2, 6).toString());
     expect(commitment.rollupFeeSimpleAmount()).toBe(2);
     expect(commitment.leafIndex).toBe('34');
@@ -96,6 +100,7 @@ test('test insert full', async () => {
     expect(commitment.srcChainContractAddress).toBe('0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD');
     expect(commitment.srcAssetSymbol).toBe('ETH');
     expect(commitment.srcAssetDecimals).toBe(18);
+    expect(commitment.srcAssetAddress).toBe('0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD');
     expect(commitment.creationTransactionHash).toBe(
       '0x5b78a656ef8cc070639cdf1cc486ffb7e2cbd8f0354b221a671d2eb17157b8a3',
     );

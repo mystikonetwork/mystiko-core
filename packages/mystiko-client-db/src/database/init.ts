@@ -2,12 +2,26 @@ import { addPouchPlugin, createRxDatabase, getRxStoragePouch, RxDatabaseCreator 
 import {
   accountCollectionMethods,
   commitmentCollectionMethods,
+  depositCollectionMethods,
+  transactionCollectionMethods,
   walletCollectionMethods,
 } from '../collection';
-import { ACCOUNT_COLLECTION_NAME, COMMITMENT_COLLECTION_NAME, WALLET_COLLECTION_NAME } from '../constants';
-import { accountMethods, commitmentMethods, walletMethods } from '../document';
+import {
+  ACCOUNT_COLLECTION_NAME,
+  COMMITMENT_COLLECTION_NAME,
+  DEPOSIT_COLLECTION_NAME,
+  TRANSACTION_COLLECTION_NAME,
+  WALLET_COLLECTION_NAME,
+} from '../constants';
+import {
+  accountMethods,
+  commitmentMethods,
+  depositMethods,
+  transactionMethods,
+  walletMethods,
+} from '../document';
 import { MystikoClientCollections, MystikoClientDatabase } from './type';
-import { accountSchema, commitmentSchema, walletSchema } from '../schema';
+import { accountSchema, commitmentSchema, depositSchema, transactionSchema, walletSchema } from '../schema';
 
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoClientDatabase> {
   let dbPromise: Promise<MystikoClientDatabase>;
@@ -32,6 +46,16 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoC
       schema: commitmentSchema,
       methods: commitmentMethods,
       statics: commitmentCollectionMethods,
+    },
+    [DEPOSIT_COLLECTION_NAME]: {
+      schema: depositSchema,
+      methods: depositMethods,
+      statics: depositCollectionMethods,
+    },
+    [TRANSACTION_COLLECTION_NAME]: {
+      schema: transactionSchema,
+      methods: transactionMethods,
+      statics: transactionCollectionMethods,
     },
     [WALLET_COLLECTION_NAME]: {
       schema: walletSchema,

@@ -5,3 +5,5 @@ export const HEX_REGEX = '^(0[xX])?[A-Fa-f0-9]+$';
 export const WALLET_COLLECTION_NAME = 'wallets';
 export const ACCOUNT_COLLECTION_NAME = 'accounts';
 export const COMMITMENT_COLLECTION_NAME = 'commitments';
+export const DEPOSIT_COLLECTION_NAME = 'deposits';
+export const TRANSACTION_COLLECTION_NAME = 'transactions';

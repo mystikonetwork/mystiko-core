@@ -1,10 +1,16 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
-import { BN_REGEX, ETH_ADDRESS_REGEX, ETH_TX_HASH_REGEX, HEX_REGEX } from '../constants';
+import {
+  BN_REGEX,
+  COMMITMENT_COLLECTION_NAME,
+  ETH_ADDRESS_REGEX,
+  ETH_TX_HASH_REGEX,
+  WALLET_COLLECTION_NAME,
+} from '../constants';
 
-const commitmentSchemaLiteral = {
+const depositSchemaLiteral = {
   version: 0,
-  title: 'commitment schema',
-  description: 'a document contains commitment information',
+  title: 'deposit schema',
+  description: 'a document contains deposit information',
   primaryKey: 'id',
   type: 'object',
   keyCompression: true,
@@ -50,60 +56,67 @@ const commitmentSchemaLiteral = {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
-    status: {
+    bridgeType: {
       type: 'string',
-    },
-    rollupFeeAmount: {
-      type: 'string',
-      pattern: BN_REGEX,
-    },
-    encryptedNote: {
-      type: 'string',
-      pattern: HEX_REGEX,
-    },
-    leafIndex: {
-      type: 'string',
-      pattern: BN_REGEX,
+      final: true,
     },
     amount: {
       type: 'string',
+      final: true,
       pattern: BN_REGEX,
     },
-    serialNumber: {
+    rollupFeeAmount: {
       type: 'string',
+      final: true,
       pattern: BN_REGEX,
     },
-    shieldedAddress: {
+    bridgeFeeAmount: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
+    executorFeeAmount: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
+    shieldedRecipientAddress: {
+      type: 'string',
+      final: true,
+    },
+    status: {
       type: 'string',
     },
-    srcChainId: {
+    errorMessage: {
+      type: 'string',
+    },
+    commitment: {
+      type: 'string',
+      ref: COMMITMENT_COLLECTION_NAME,
+      final: true,
+    },
+    wallet: {
+      type: 'string',
+      ref: WALLET_COLLECTION_NAME,
+      final: true,
+    },
+    dstChainId: {
       type: 'integer',
       minimum: 0,
     },
-    srcChainContractAddress: {
+    dstChainContractAddress: {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
-    srcAssetSymbol: {
+    assetApproveTransactionHash: {
       type: 'string',
+      pattern: ETH_TX_HASH_REGEX,
     },
-    srcAssetDecimals: {
-      type: 'integer',
-      minimum: 1,
-    },
-    srcAssetAddress: {
-      type: 'string',
-      pattern: ETH_ADDRESS_REGEX,
-    },
-    creationTransactionHash: {
+    transactionHash: {
       type: 'string',
       pattern: ETH_TX_HASH_REGEX,
     },
     relayTransactionHash: {
-      type: 'string',
-      pattern: ETH_TX_HASH_REGEX,
-    },
-    spendingTransactionHash: {
       type: 'string',
       pattern: ETH_TX_HASH_REGEX,
     },
@@ -121,24 +134,31 @@ const commitmentSchemaLiteral = {
     'commitmentHash',
     'assetSymbol',
     'assetDecimals',
+    'bridgeType',
+    'amount',
+    'bridgeFeeAmount',
+    'executorFeeAmount',
+    'rollupFeeAmount',
+    'shieldedRecipientAddress',
     'status',
-    'creationTransactionHash',
+    'commitment',
+    'wallet',
   ],
   indexes: [
     'chainId',
     'contractAddress',
     'commitmentHash',
-    'srcChainId',
-    'srcChainContractAddress',
-    'shieldedAddress',
-    'serialNumber',
-    'creationTransactionHash',
-    'spendingTransactionHash',
+    'dstChainId',
+    'dstChainContractAddress',
+    'shieldedRecipientAddress',
+    'assetApproveTransactionHash',
+    'transactionHash',
+    'relayTransactionHash',
     'rollupTransactionHash',
   ],
 } as const;
 
-const schemaTyped = toTypedRxJsonSchema(commitmentSchemaLiteral);
+const schemaTyped = toTypedRxJsonSchema(depositSchemaLiteral);
 
-export type CommitmentType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
-export const commitmentSchema: RxJsonSchema<CommitmentType> = commitmentSchemaLiteral;
+export type DepositType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
+export const depositSchema: RxJsonSchema<DepositType> = depositSchemaLiteral;

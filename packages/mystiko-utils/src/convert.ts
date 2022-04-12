@@ -31,7 +31,7 @@ export function toDecimals(amount: number, decimals: number = 18): BN {
  * @param {number} [decimals=18] number of precision bits of converted big number.
  * @returns {amount} converted simple amount.
  */
-export function fromDecimals(bn: BN, decimals = 18): number {
+export function fromDecimals(bn: BN | string, decimals = 18): number {
   return parseFloat(ethers.utils.formatUnits(toString(bn), decimals));
 }
 
