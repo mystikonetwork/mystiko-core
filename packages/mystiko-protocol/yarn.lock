@@ -6783,7 +6783,7 @@ yargs@^4.8.1:
     y18n "^3.2.1"
     yargs-parser "^2.4.1"
 
-zokrates-js@^1.0.39:
-  version "1.0.39"
-  resolved "https://registry.yarnpkg.com/zokrates-js/-/zokrates-js-1.0.39.tgz#c75cc2f239e603930c0929e6f3e7c6a27bf99484"
-  integrity sha512-gnX0m56w1ilPRwRRg/3tcMc+FghVQEL/yzqeHimESJfYM+SDwPJCljsUt4lhRv6/9W/H+ezyR7OmC0CoWapbfQ==
+zokrates-js@^1.0.41:
+  version "1.0.41"
+  resolved "https://registry.yarnpkg.com/zokrates-js/-/zokrates-js-1.0.41.tgz#6af4630d1e88f1a52208c9649531b01c365c522d"
+  integrity sha512-lTBcmv3Tbk8MPphLP1t3ElRayXxKVMUQHOtCQdnTfVyeERHxcVfdaQ/ymTH3sqafSiiT5+F8zchfdZpC//LXuw==
