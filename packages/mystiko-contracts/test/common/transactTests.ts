@@ -257,16 +257,10 @@ export function testTransact(
             event.name === 'CommitmentQueued' &&
             event.args.commitment.toString() === outCommitment.toString() &&
             event.args.rollupFee.toString() === rollupFeeAmounts[i].toString() &&
-            event.args.leafIndex.toString() === leafIndex.toString(),
-        );
-        const encryptedNoteIndex = events.findIndex(
-          (event) =>
-            event.name === 'EncryptedNote' &&
-            event.args.commitment.toString() === outCommitment.toString() &&
+            event.args.leafIndex.toString() === leafIndex.toString() &&
             event.args.encryptedNote === toHex(outEncryptedNote),
         );
         expect(commitmentIndex).to.gte(0);
-        expect(encryptedNoteIndex).to.gte(0);
       }
     });
 

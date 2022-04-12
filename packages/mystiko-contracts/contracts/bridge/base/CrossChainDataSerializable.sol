@@ -10,6 +10,7 @@ struct CrossChainData {
   uint256 commitment;
   uint256 executorFee;
   uint256 rollupFee;
+  bytes encryptedNote;
 }
 
 abstract contract CrossChainDataSerializable {
@@ -19,7 +20,8 @@ abstract contract CrossChainDataSerializable {
       ZeroCopySink.WriteUint255(data.amount),
       ZeroCopySink.WriteUint255(data.commitment),
       ZeroCopySink.WriteUint255(data.executorFee),
-      ZeroCopySink.WriteUint255(data.rollupFee)
+      ZeroCopySink.WriteUint255(data.rollupFee),
+      ZeroCopySink.WriteVarBytes(data.encryptedNote)
     );
     return buff;
   }
@@ -31,6 +33,7 @@ abstract contract CrossChainDataSerializable {
     (data.commitment, off) = ZeroCopySource.NextUint255(rawData, off);
     (data.executorFee, off) = ZeroCopySource.NextUint255(rawData, off);
     (data.rollupFee, off) = ZeroCopySource.NextUint255(rawData, off);
+    (data.encryptedNote, off) = ZeroCopySource.NextVarBytes(rawData, off);
     return data;
   }
 }

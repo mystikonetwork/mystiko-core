@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { ethers } from 'ethers';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { Wallet } from '@ethersproject/wallet';
@@ -30,6 +31,7 @@ export function testBridgeDeposit(
   const numOfCommitments = commitments.length;
   const bridgeAccount = accounts[BridgeAccountIndex];
   const bridgeMessages: any[] = [];
+  const events: ethers.utils.LogDescription[] = [];
 
   describe(`Test ${contractName} deposit operation`, () => {
     before(async () => {
@@ -176,8 +178,8 @@ export function testBridgeDeposit(
           { from: accounts[0].address, value: minTotalValue },
         );
         expect(depositTx)
-          .to.emit(mystikoContract, 'EncryptedNote')
-          .withArgs(commitments[i].commitmentHash, toHex(commitments[i].privateNote));
+          .to.emit(mystikoContract, 'CommitmentCrossChain')
+          .withArgs(commitments[i].commitmentHash);
 
         expect(await mystikoContract.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
           true,
@@ -245,11 +247,38 @@ export function testBridgeDeposit(
           minRollupFee,
         );
 
+        for (let j = 0; j < txReceipt.logs.length; j += 1) {
+          try {
+            const parsedLog: ethers.utils.LogDescription = mystikoDstContract.interface.parseLog(
+              txReceipt.logs[j],
+            );
+            events.push(parsedLog);
+          } catch (e) {
+            // do nothing
+          }
+        }
+
         // todo check dst contract balance
         // todo proxy parameter check
       }
 
       expect((await mystikoDstContract.commitmentQueueSize()).toString()).to.equal(`${commitments.length}`);
+    });
+
+    it('should emit correct events', () => {
+      expect(events.length).to.gt(0);
+      const rollupFee = minRollupFee;
+      for (let i = 0; i < numOfCommitments; i += 1) {
+        const commitmentIndex = events.findIndex(
+          (event) =>
+            event.name === 'CommitmentQueued' &&
+            event.args.commitment.toString() === commitments[i].commitmentHash.toString() &&
+            event.args.rollupFee.toString() === rollupFee.toString() &&
+            event.args.leafIndex.toString() === `${i}` &&
+            event.args.encryptedNote === toHex(commitments[i].privateNote),
+        );
+        expect(commitmentIndex).to.gte(0);
+      }
     });
 
     it('should source contract have correct balance', async () => {
