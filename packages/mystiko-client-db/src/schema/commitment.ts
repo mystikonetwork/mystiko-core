@@ -39,6 +39,7 @@ const commitmentSchemaLiteral = {
     },
     assetSymbol: {
       type: 'string',
+      minLength: 1,
       final: true,
     },
     assetDecimals: {
@@ -52,6 +53,7 @@ const commitmentSchemaLiteral = {
     },
     status: {
       type: 'string',
+      minLength: 1,
     },
     rollupFeeAmount: {
       type: 'string',
@@ -75,6 +77,7 @@ const commitmentSchemaLiteral = {
     },
     shieldedAddress: {
       type: 'string',
+      minLength: 88,
     },
     srcChainId: {
       type: 'integer',
@@ -86,6 +89,7 @@ const commitmentSchemaLiteral = {
     },
     srcAssetSymbol: {
       type: 'string',
+      minLength: 1,
     },
     srcAssetDecimals: {
       type: 'integer',

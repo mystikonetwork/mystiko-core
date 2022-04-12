@@ -45,6 +45,7 @@ const depositSchemaLiteral = {
     },
     assetSymbol: {
       type: 'string',
+      minLength: 1,
       final: true,
     },
     assetDecimals: {
@@ -86,6 +87,7 @@ const depositSchemaLiteral = {
     },
     status: {
       type: 'string',
+      minLength: 1,
     },
     errorMessage: {
       type: 'string',

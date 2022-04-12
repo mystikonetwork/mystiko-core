@@ -24,6 +24,7 @@ const walletSchemaLiteral = {
     },
     encryptedMasterSeed: {
       type: 'string',
+      minLength: 1,
     },
     hashedPassword: {
       type: 'string',

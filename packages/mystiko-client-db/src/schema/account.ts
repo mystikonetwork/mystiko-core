@@ -24,6 +24,7 @@ const accountSchemaLiteral = {
     },
     name: {
       type: 'string',
+      minLength: 1,
     },
     shieldedAddress: {
       type: 'string',
@@ -36,6 +37,7 @@ const accountSchemaLiteral = {
     },
     encryptedSecretKey: {
       type: 'string',
+      minLength: 1,
     },
     wallet: {
       type: 'string',

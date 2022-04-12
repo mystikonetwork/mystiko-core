@@ -40,6 +40,7 @@ const transactionLiteral = {
     },
     assetSymbol: {
       type: 'string',
+      minLength: 1,
       final: true,
     },
     assetDecimals: {
@@ -53,6 +54,7 @@ const transactionLiteral = {
     },
     proof: {
       type: 'string',
+      minLength: 1,
       final: true,
     },
     rootHash: {
@@ -119,10 +121,12 @@ const transactionLiteral = {
     },
     transactionType: {
       type: 'string',
+      minLength: 1,
       final: true,
     },
     status: {
       type: 'string',
+      minLength: 1,
     },
     errorMessage: {
       type: 'string',

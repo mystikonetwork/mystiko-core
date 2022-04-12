@@ -1,27 +1,45 @@
 import { addPouchPlugin, createRxDatabase, getRxStoragePouch, RxDatabaseCreator } from 'rxdb';
 import {
   accountCollectionMethods,
+  chainCollectionMethods,
+  circuitCollectionMethods,
   commitmentCollectionMethods,
+  contractCollectionMethods,
   depositCollectionMethods,
   transactionCollectionMethods,
   walletCollectionMethods,
 } from '../collection';
 import {
   ACCOUNT_COLLECTION_NAME,
+  CHAIN_COLLECTION_NAME,
+  CIRCUIT_COLLECTION_NAME,
   COMMITMENT_COLLECTION_NAME,
+  CONTRACT_COLLECTION_NAME,
   DEPOSIT_COLLECTION_NAME,
   TRANSACTION_COLLECTION_NAME,
   WALLET_COLLECTION_NAME,
 } from '../constants';
 import {
   accountMethods,
+  chainMethods,
+  circuitMethods,
   commitmentMethods,
+  contractMethods,
   depositMethods,
   transactionMethods,
   walletMethods,
 } from '../document';
 import { MystikoClientCollections, MystikoClientDatabase } from './type';
-import { accountSchema, commitmentSchema, depositSchema, transactionSchema, walletSchema } from '../schema';
+import {
+  accountSchema,
+  chainSchema,
+  circuitSchema,
+  commitmentSchema,
+  contractSchema,
+  depositSchema,
+  transactionSchema,
+  walletSchema,
+} from '../schema';
 
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoClientDatabase> {
   let dbPromise: Promise<MystikoClientDatabase>;
@@ -42,10 +60,25 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoC
       methods: accountMethods,
       statics: accountCollectionMethods,
     },
+    [CHAIN_COLLECTION_NAME]: {
+      schema: chainSchema,
+      methods: chainMethods,
+      statics: chainCollectionMethods,
+    },
+    [CIRCUIT_COLLECTION_NAME]: {
+      schema: circuitSchema,
+      methods: circuitMethods,
+      statics: circuitCollectionMethods,
+    },
     [COMMITMENT_COLLECTION_NAME]: {
       schema: commitmentSchema,
       methods: commitmentMethods,
       statics: commitmentCollectionMethods,
+    },
+    [CONTRACT_COLLECTION_NAME]: {
+      schema: contractSchema,
+      methods: contractMethods,
+      statics: contractCollectionMethods,
     },
     [DEPOSIT_COLLECTION_NAME]: {
       schema: depositSchema,
