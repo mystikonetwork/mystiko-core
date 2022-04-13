@@ -1,14 +1,14 @@
 {
-  "name": "@mystikonetwork/client-db",
-  "version": "0.0.9",
-  "description": "client of mystiko core",
+  "name": "@mystikonetwork/database",
+  "version": "0.0.10",
+  "description": "client database of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
   "types": "build/cjs/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mystikonetwork/mystiko-core",
-    "directory": "packages/mystiko-client-db"
+    "directory": "packages/mystiko-database"
   },
   "author": {
     "name": "Mystiko Network"
@@ -53,8 +53,8 @@
     "zokrates-js": "^1.0.41"
   },
   "dependencies": {
-    "@mystikonetwork/protocol": "^0.0.9",
-    "@mystikonetwork/utils": "^0.0.9",
+    "@mystikonetwork/protocol": "^0.0.10",
+    "@mystikonetwork/utils": "^0.0.10",
     "pouchdb-adapter-memory": "^7.2.2",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5"
