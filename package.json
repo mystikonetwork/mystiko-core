@@ -1,6 +1,6 @@
 {
   "name": "mystiko",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Core Protocol of Mystiko.Network",
   "private": true,
   "module": "src/index.js",
