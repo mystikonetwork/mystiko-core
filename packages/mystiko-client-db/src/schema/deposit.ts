@@ -1,11 +1,5 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
-import {
-  BN_REGEX,
-  COMMITMENT_COLLECTION_NAME,
-  ETH_ADDRESS_REGEX,
-  ETH_TX_HASH_REGEX,
-  WALLET_COLLECTION_NAME,
-} from '../constants';
+import { BN_REGEX, ETH_ADDRESS_REGEX, ETH_TX_HASH_REGEX, WALLET_COLLECTION_NAME } from '../constants';
 
 const depositSchemaLiteral = {
   version: 0,
