@@ -83,6 +83,7 @@ const depositSchemaLiteral = {
     },
     shieldedRecipientAddress: {
       type: 'string',
+      minLength: 1,
       final: true,
     },
     status: {
@@ -91,11 +92,6 @@ const depositSchemaLiteral = {
     },
     errorMessage: {
       type: 'string',
-    },
-    commitment: {
-      type: 'string',
-      ref: COMMITMENT_COLLECTION_NAME,
-      final: true,
     },
     wallet: {
       type: 'string',
@@ -143,7 +139,6 @@ const depositSchemaLiteral = {
     'rollupFeeAmount',
     'shieldedRecipientAddress',
     'status',
-    'commitment',
     'wallet',
   ],
   indexes: [

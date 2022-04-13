@@ -1,5 +1,5 @@
 import { toDecimals } from '@mystikonetwork/utils';
-import { initDatabase, MystikoClientDatabase } from '../src';
+import { CommitmentStatus, initDatabase, MystikoClientDatabase } from '../src';
 
 let db: MystikoClientDatabase;
 
@@ -22,7 +22,7 @@ test('test insert', async () => {
     commitmentHash: '1234',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    status: 'pending',
+    status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
   });
   const commitment = await db.commitments.findOne('1').exec();
@@ -36,7 +36,7 @@ test('test insert', async () => {
     expect(commitment.assetSymbol).toBe('ETH');
     expect(commitment.assetDecimals).toBe(18);
     expect(commitment.assetAddress).toBe(undefined);
-    expect(commitment.status).toBe('pending');
+    expect(commitment.status).toBe(CommitmentStatus.SRC_SUCCEEDED);
     expect(commitment.creationTransactionHash).toBe(
       '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     );
@@ -59,13 +59,14 @@ test('test insert full', async () => {
     assetSymbol: 'mETH',
     assetDecimals: 6,
     assetAddress: '0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3',
-    status: 'succeeded',
+    status: CommitmentStatus.SPENT,
     rollupFeeAmount: toDecimals(2, 6).toString(),
     leafIndex: '34',
     encryptedNote: 'deadbeef',
     amount: toDecimals(10, 6).toString(),
     serialNumber: '343243',
-    shieldedAddress: 'abcdefg',
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     srcChainId: 97,
     srcChainContractAddress: '0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD',
     srcAssetSymbol: 'ETH',
@@ -87,7 +88,7 @@ test('test insert full', async () => {
     expect(commitment.assetSymbol).toBe('mETH');
     expect(commitment.assetDecimals).toBe(6);
     expect(commitment.assetAddress).toBe('0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3');
-    expect(commitment.status).toBe('succeeded');
+    expect(commitment.status).toBe(CommitmentStatus.SPENT);
     expect(commitment.rollupFeeAmount).toBe(toDecimals(2, 6).toString());
     expect(commitment.rollupFeeSimpleAmount()).toBe(2);
     expect(commitment.leafIndex).toBe('34');
@@ -95,7 +96,9 @@ test('test insert full', async () => {
     expect(commitment.amount).toBe(toDecimals(10, 6).toString());
     expect(commitment.simpleAmount()).toBe(10);
     expect(commitment.serialNumber).toBe('343243');
-    expect(commitment.shieldedAddress).toBe('abcdefg');
+    expect(commitment.shieldedAddress).toBe(
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+    );
     expect(commitment.srcChainId).toBe(97);
     expect(commitment.srcChainContractAddress).toBe('0x4C592e609D77E3dB6ba00B6b73d13171D657c5fD');
     expect(commitment.srcAssetSymbol).toBe('ETH');

@@ -87,9 +87,9 @@ const contractSchemaLiteral = {
     circuits: {
       type: 'array',
       minItems: 1,
+      ref: CIRCUIT_COLLECTION_NAME,
       items: {
         type: 'string',
-        ref: CIRCUIT_COLLECTION_NAME,
       },
     },
   },

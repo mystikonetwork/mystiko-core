@@ -77,7 +77,7 @@ const commitmentSchemaLiteral = {
     },
     shieldedAddress: {
       type: 'string',
-      minLength: 88,
+      minLength: 1,
     },
     srcChainId: {
       type: 'integer',

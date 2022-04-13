@@ -5,6 +5,7 @@ import {
   ETH_ADDRESS_REGEX,
   ETH_TX_HASH_REGEX,
   HEX_REGEX,
+  WALLET_COLLECTION_NAME,
 } from '../constants';
 
 const transactionLiteral = {
@@ -67,18 +68,18 @@ const transactionLiteral = {
       final: true,
       minItems: 1,
       uniqueItems: true,
+      ref: COMMITMENT_COLLECTION_NAME,
       items: {
         type: 'string',
-        ref: COMMITMENT_COLLECTION_NAME,
       },
     },
     outputCommitments: {
       type: 'array',
       final: true,
       uniqueItems: true,
+      ref: COMMITMENT_COLLECTION_NAME,
       items: {
         type: 'string',
-        ref: COMMITMENT_COLLECTION_NAME,
       },
     },
     signaturePublicKey: {
@@ -119,7 +120,7 @@ const transactionLiteral = {
       final: true,
       pattern: HEX_REGEX,
     },
-    transactionType: {
+    type: {
       type: 'string',
       minLength: 1,
       final: true,
@@ -134,6 +135,11 @@ const transactionLiteral = {
     transactionHash: {
       type: 'string',
       pattern: ETH_TX_HASH_REGEX,
+    },
+    wallet: {
+      type: 'string',
+      ref: WALLET_COLLECTION_NAME,
+      final: true,
     },
   },
   required: [
@@ -153,8 +159,9 @@ const transactionLiteral = {
     'publicAmount',
     'relayerFeeAmount',
     'signature',
-    'transactionType',
+    'type',
     'status',
+    'wallet',
   ],
   indexes: [
     'chainId',
@@ -163,7 +170,8 @@ const transactionLiteral = {
     'rootHash',
     'relayerAddress',
     'transactionHash',
-    'transactionType',
+    'type',
+    'wallet',
   ],
 } as const;
 

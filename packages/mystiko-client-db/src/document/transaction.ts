@@ -17,8 +17,10 @@ export type Transaction = RxDocument<TransactionType, TransactionMethods>;
 export const transactionMethods: TransactionMethods = {
   inputAmount(this: Transaction): Promise<string> {
     return this.populate('inputCommitments').then((inputCommitments: Commitment[]) => {
-      const sum = toBN(0);
-      inputCommitments.forEach((commitment) => sum.add(toBN(commitment.amount || '0')));
+      let sum = toBN(0);
+      inputCommitments.forEach((commitment) => {
+        sum = sum.add(toBN(commitment.amount || '0'));
+      });
       return sum.toString();
     });
   },
@@ -32,9 +34,11 @@ export const transactionMethods: TransactionMethods = {
     return this.inputAmount().then((amount) => fromDecimals(amount, this.assetDecimals));
   },
   rollupFeeAmount(this: Transaction): Promise<string> {
-    return this.populate('inputCommitments').then((inputCommitments: Commitment[]) => {
-      const sum = toBN(0);
-      inputCommitments.forEach((commitment) => sum.add(toBN(commitment.rollupFeeAmount || '0')));
+    return this.populate('outputCommitments').then((outputCommitments: Commitment[]) => {
+      let sum = toBN(0);
+      outputCommitments.forEach((commitment) => {
+        sum = sum.add(toBN(commitment.rollupFeeAmount || '0'));
+      });
       return sum.toString();
     });
   },

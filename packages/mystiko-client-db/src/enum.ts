@@ -15,6 +15,11 @@ export enum DepositStatus {
   FAILED = 'failed',
 }
 
+export enum TransactionEnum {
+  TRANSFER = 'transfer',
+  WITHDRAW = 'withdraw',
+}
+
 export enum TransactionStatus {
   INIT = 'init',
   PENDING = 'pending',
@@ -22,7 +27,7 @@ export enum TransactionStatus {
   FAILED = 'failed',
 }
 
-export enum CircuitType {
+export enum CircuitEnum {
   TRANSACTION1X0 = 'transaction1x0',
   TRANSACTION1X1 = 'transaction1x1',
   TRANSACTION1X2 = 'transaction1x2',
