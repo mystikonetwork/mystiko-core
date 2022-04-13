@@ -49,11 +49,7 @@ export class WalletHandler extends Handler {
    * @returns {Wallet | undefined} the instance if it exists, otherwise it returns undefined.
    */
   public getCurrentWallet(): Wallet | undefined {
-    const results = this.db.wallets
-      .chain()
-      .where(WalletHandler.versionFilter)
-      .simplesort(ID_KEY, { desc: true })
-      .data();
+    const results = this.db.wallets.chain().simplesort(ID_KEY, { desc: true }).data();
     if (results.length > 0) {
       return new Wallet(results[0]);
     }
@@ -137,9 +133,5 @@ export class WalletHandler extends Handler {
       throw new Error(`Wallet(id=${wallet.id}) does not have encryptedMasterSeed`);
     }
     return this.protocol.decryptSymmetric(walletPassword, wallet.encryptedMasterSeed);
-  }
-
-  private static versionFilter(wallet: Wallet): boolean {
-    return !!wallet.version && wallet.version >= '0.0.2';
   }
 }
