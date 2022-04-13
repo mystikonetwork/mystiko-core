@@ -49,10 +49,7 @@ export class WalletHandler extends Handler {
    * @returns {Wallet | undefined} the instance if it exists, otherwise it returns undefined.
    */
   public getCurrentWallet(): Wallet | undefined {
-    const results = this.db.wallets
-      .chain()
-      .simplesort(ID_KEY, { desc: true })
-      .data();
+    const results = this.db.wallets.chain().simplesort(ID_KEY, { desc: true }).data();
     if (results.length > 0) {
       return new Wallet(results[0]);
     }
