@@ -1,6 +1,5 @@
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
-import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';

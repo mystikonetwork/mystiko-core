@@ -120,7 +120,7 @@ async function deployMystiko(bridgeName: string, src: any, dst: any, config: any
   }
 
   const dstChain = common.getChainConfig(config, dst.network);
-  if (srcChain === undefined) {
+  if (!srcChain) {
     return undefined;
   }
 
