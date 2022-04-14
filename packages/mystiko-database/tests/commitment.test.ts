@@ -22,6 +22,7 @@ test('test insert', async () => {
     commitmentHash: '1234',
     assetSymbol: 'ETH',
     assetDecimals: 18,
+    bridgeType: 'loop',
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
   });
@@ -36,6 +37,7 @@ test('test insert', async () => {
     expect(commitment.assetSymbol).toBe('ETH');
     expect(commitment.assetDecimals).toBe(18);
     expect(commitment.assetAddress).toBe(undefined);
+    expect(commitment.bridgeType).toBe('loop');
     expect(commitment.status).toBe(CommitmentStatus.SRC_SUCCEEDED);
     expect(commitment.creationTransactionHash).toBe(
       '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
@@ -59,6 +61,7 @@ test('test insert full', async () => {
     assetSymbol: 'mETH',
     assetDecimals: 6,
     assetAddress: '0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3',
+    bridgeType: 'loop',
     status: CommitmentStatus.SPENT,
     rollupFeeAmount: toDecimals(2, 6).toString(),
     leafIndex: '34',
@@ -88,6 +91,7 @@ test('test insert full', async () => {
     expect(commitment.assetSymbol).toBe('mETH');
     expect(commitment.assetDecimals).toBe(6);
     expect(commitment.assetAddress).toBe('0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3');
+    expect(commitment.bridgeType).toBe('loop');
     expect(commitment.status).toBe(CommitmentStatus.SPENT);
     expect(commitment.rollupFeeAmount).toBe(toDecimals(2, 6).toString());
     expect(commitment.rollupFeeSimpleAmount()).toBe(2);

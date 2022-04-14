@@ -10,7 +10,13 @@ import {
 } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
-import { AccountBalance, AccountBalanceQuery, AccountHandler, AccountOptions } from './common';
+import {
+  AccountBalance,
+  AccountBalanceQuery,
+  AccountHandler,
+  AccountOptions,
+  MaxTransactionBalanceQuery,
+} from './common';
 import { createErrorPromise, MystikoErrorCode } from '../error';
 import { MystikoHandler } from '../handler';
 import { WalletHandlerV2 } from '../wallet';
@@ -59,6 +65,9 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         };
         if (query.chainId) {
           selector.chainId = query.chainId;
+        }
+        if (query.bridgeType) {
+          selector.bridgeType = query.bridgeType;
         }
         return this.db.commitments.find({ selector }).exec();
       })
@@ -129,15 +138,16 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
       });
   }
 
-  public maxTransactionBalanceOf(chainId: number, assetSymbol: string): Promise<number> {
+  public maxTransactionBalanceOf(query: MaxTransactionBalanceQuery): Promise<number> {
     return this.find()
       .then((accounts) => {
         const shieldedAddresses = accounts.map((account) => account.shieldedAddress);
         const selector = {
           shieldedAddress: { $in: shieldedAddresses },
           status: { $nin: [CommitmentStatus.FAILED, CommitmentStatus.SPENT] },
-          assetSymbol,
-          chainId,
+          assetSymbol: query.assetSymbol,
+          chainId: query.chainId,
+          bridgeType: query.bridgeType,
         };
         return this.db.commitments.find({ selector }).exec();
       })

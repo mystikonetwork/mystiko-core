@@ -1,4 +1,5 @@
 import { Account, DatabaseQuery } from '@mystikonetwork/database';
+import { BridgeType } from '@mystikonetwork/config';
 
 export type AccountOptions = {
   name?: string;
@@ -8,6 +9,13 @@ export type AccountOptions = {
 export type AccountBalanceQuery = {
   query?: DatabaseQuery<Account>;
   chainId?: number;
+  bridgeType?: BridgeType;
+  assetSymbol: string;
+};
+
+export type MaxTransactionBalanceQuery = {
+  chainId: number;
+  bridgeType: BridgeType;
   assetSymbol: string;
 };
 
@@ -26,6 +34,6 @@ export interface AccountHandler<A = AccountOptions, B = AccountBalance> {
   export(identifier: string, walletPassword: string): Promise<string>;
   find(query?: DatabaseQuery<Account>): Promise<Account[]>;
   findOne(identifier: string): Promise<Account | null>;
-  maxTransactionBalanceOf(chainId: number, assetSymbol: string): Promise<number>;
+  maxTransactionBalanceOf(query: MaxTransactionBalanceQuery): Promise<number>;
   update(identifier: string, options: AccountOptions, walletPassword: string): Promise<Account>;
 }

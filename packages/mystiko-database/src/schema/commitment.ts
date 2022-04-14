@@ -51,6 +51,11 @@ const commitmentSchemaLiteral = {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
+    bridgeType: {
+      type: 'string',
+      minLength: 1,
+      final: true,
+    },
     status: {
       type: 'string',
       minLength: 1,
@@ -125,6 +130,7 @@ const commitmentSchemaLiteral = {
     'commitmentHash',
     'assetSymbol',
     'assetDecimals',
+    'bridgeType',
     'status',
     'creationTransactionHash',
   ],
