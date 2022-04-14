@@ -1,15 +1,4 @@
 import { Wallet } from '@ethersproject/wallet';
-import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
-import { toBN, toDecimals } from '@mystikonetwork/utils';
-import { deployLoopContracts, deployDependContracts, loadFixture } from '../util/common';
-import {
-  testConstructor,
-  testAdminOperations,
-  constructCommitment,
-  testLoopDeposit,
-  testRollup,
-  testTransact,
-} from '../common';
 import {
   Hasher3,
   MystikoV2WithLoopERC20,
@@ -24,7 +13,18 @@ import {
   Rollup1Verifier,
   Rollup4Verifier,
   TestToken,
-} from '../../typechain';
+} from '@mystikonetwork/contracts-abi';
+import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
+import { toBN, toDecimals } from '@mystikonetwork/utils';
+import { deployLoopContracts, deployDependContracts, loadFixture } from '../util/common';
+import {
+  testConstructor,
+  testAdminOperations,
+  constructCommitment,
+  testLoopDeposit,
+  testRollup,
+  testTransact,
+} from '../common';
 import { MerkleTreeHeight, RootHistoryLength, MinRollupFee } from '../util/constants';
 
 const { waffle } = require('hardhat');

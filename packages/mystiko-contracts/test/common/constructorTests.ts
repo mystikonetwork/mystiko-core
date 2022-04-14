@@ -1,6 +1,6 @@
 import { expect } from 'chai';
+import { Hasher3 } from '@mystikonetwork/contracts-abi';
 import { MerkleTree } from '@mystikonetwork/utils';
-import { Hasher3 } from '../../typechain';
 
 export function testConstructor(
   contractName: string,

@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { ethers } from 'ethers';
+import { TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { Wallet } from '@ethersproject/wallet';
-import { TestToken } from '../../typechain';
 import { CommitmentInfo } from './commitment';
 import { BridgeAccountIndex, DefaultPoolAmount, DestinationChainID, SourceChainID } from '../util/constants';
 

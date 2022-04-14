@@ -1,6 +1,4 @@
 import { Fixture } from 'ethereum-waffle/dist/esm';
-// @ts-ignore
-import { ethers, waffle } from 'hardhat';
 import { Artifacts } from 'hardhat/internal/artifacts';
 import { Artifact } from 'hardhat/types';
 import { parseUnits } from '@ethersproject/units';
@@ -35,7 +33,7 @@ import {
   MystikoV2WithTBridgeMain__factory,
   MystikoTBridgeProxy__factory,
   MystikoV2WithTBridgeERC20__factory,
-} from '../../typechain';
+} from '@mystikonetwork/contracts-abi';
 import {
   MerkleTreeHeight,
   RootHistoryLength,
@@ -47,6 +45,8 @@ import {
   SourceChainID,
   DestinationChainID,
 } from './constants';
+
+const { ethers, waffle } = require('hardhat');
 
 // Workaround for https://github.com/nomiclabs/hardhat/issues/849
 // TODO: Remove once fixed upstream.
