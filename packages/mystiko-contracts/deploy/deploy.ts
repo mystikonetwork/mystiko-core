@@ -17,7 +17,7 @@ import {
   Rollup16Verifier__factory,
   TestToken__factory,
   Hasher3__factory,
-} from '../typechain';
+} from '@mystikonetwork/contracts-abi';
 
 const common = require('./common');
 const coreConfig = require('./coreConfig');
