@@ -6,6 +6,7 @@ import { AccountType } from '../schema';
 export type AccountMethods = {
   publicKeyForVerification: (protocol: MystikoProtocol) => Buffer;
   publicKeyForEncryption: (protocol: MystikoProtocol) => Buffer;
+  secretKey: (protocol: MystikoProtocol, password: string) => string;
   secretKeyForVerification: (protocol: MystikoProtocol, password: string) => Buffer;
   secretKeyForEncryption: (protocol: MystikoProtocol, password: string) => Buffer;
 };
@@ -21,6 +22,9 @@ export const accountMethods: AccountMethods = {
     const publicKeyBuffer = toBuff(this.publicKey);
     const { pkEnc } = protocol.separatedPublicKeys(publicKeyBuffer);
     return pkEnc;
+  },
+  secretKey(this: Account, protocol: MystikoProtocol, password: string): string {
+    return protocol.decryptSymmetric(password, this.encryptedSecretKey);
   },
   secretKeyForVerification(this: Account, protocol: MystikoProtocol, password: string): Buffer {
     const secretKeyDecrypted = protocol.decryptSymmetric(password, this.encryptedSecretKey);

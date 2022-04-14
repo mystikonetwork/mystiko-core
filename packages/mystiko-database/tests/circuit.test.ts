@@ -1,6 +1,6 @@
-import { CircuitEnum, initDatabase, MystikoClientDatabase } from '../src';
+import { CircuitEnum, initDatabase, MystikoDatabase } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 
 beforeAll(async () => {
   db = await initDatabase();

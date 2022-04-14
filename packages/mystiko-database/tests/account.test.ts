@@ -1,9 +1,9 @@
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { toHexNoPrefix } from '@mystikonetwork/utils';
 import { createProtocol } from './common';
-import { initDatabase, MystikoClientDatabase } from '../src';
+import { initDatabase, MystikoDatabase } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 let protocol: MystikoProtocol;
 
 function generateKeys(password: string): {
@@ -67,6 +67,9 @@ test('test insert', async () => {
     expect(account.wallet).toBe('1');
     expect(toHexNoPrefix(account.publicKeyForVerification(protocol))).toBe(toHexNoPrefix(keys.pkVerify));
     expect(toHexNoPrefix(account.publicKeyForEncryption(protocol))).toBe(toHexNoPrefix(keys.pkEnc));
+    expect(account.secretKey(protocol, password)).toBe(
+      toHexNoPrefix(protocol.fullSecretKey(keys.rawSkVerify, keys.rawSkEnc)),
+    );
     expect(toHexNoPrefix(account.secretKeyForVerification(protocol, password))).toBe(
       toHexNoPrefix(keys.rawSkVerify),
     );

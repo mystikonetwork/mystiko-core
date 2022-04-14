@@ -3,13 +3,13 @@ import {
   Commitment,
   CommitmentStatus,
   initDatabase,
-  MystikoClientDatabase,
+  MystikoDatabase,
   TransactionEnum,
   TransactionStatus,
   Wallet,
 } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 let wallet: Wallet;
 let now: string;
 let commitment1: Commitment;

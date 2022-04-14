@@ -1,7 +1,7 @@
 import { toDecimals } from '@mystikonetwork/utils';
-import { CommitmentStatus, initDatabase, MystikoClientDatabase } from '../src';
+import { CommitmentStatus, initDatabase, MystikoDatabase } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 
 beforeAll(async () => {
   db = await initDatabase();

@@ -1,6 +1,6 @@
-import { initDatabase, MystikoClientDatabase, Wallet } from '../src';
+import { initDatabase, MystikoDatabase, Wallet } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 let wallet: Wallet;
 
 beforeAll(async () => {

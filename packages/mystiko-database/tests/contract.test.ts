@@ -1,6 +1,6 @@
-import { Circuit, CircuitEnum, initDatabase, MystikoClientDatabase } from '../src';
+import { Circuit, CircuitEnum, initDatabase, MystikoDatabase } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 let circuit: Circuit;
 let now: string;
 

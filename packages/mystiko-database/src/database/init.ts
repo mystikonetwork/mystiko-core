@@ -29,7 +29,7 @@ import {
   transactionMethods,
   walletMethods,
 } from '../document';
-import { MystikoClientCollections, MystikoClientDatabase } from './type';
+import { MystikoClientCollections, MystikoDatabase } from './type';
 import {
   accountSchema,
   chainSchema,
@@ -41,8 +41,8 @@ import {
   walletSchema,
 } from '../schema';
 
-export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoClientDatabase> {
-  let dbPromise: Promise<MystikoClientDatabase>;
+export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoDatabase> {
+  let dbPromise: Promise<MystikoDatabase>;
   if (params) {
     dbPromise = createRxDatabase<MystikoClientCollections>(params);
   } else {
@@ -53,7 +53,7 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoC
       storage: getRxStoragePouch('memory'),
     });
   }
-  const db: MystikoClientDatabase = await dbPromise;
+  const db: MystikoDatabase = await dbPromise;
   await db.addCollections({
     [ACCOUNT_COLLECTION_NAME]: {
       schema: accountSchema,

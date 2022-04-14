@@ -1,4 +1,4 @@
-import { RxDatabase } from 'rxdb';
+import { MangoQuery, RxDatabase } from 'rxdb';
 import {
   AccountCollection,
   ChainCollection,
@@ -31,4 +31,6 @@ export type MystikoClientCollections = {
   [WALLET_COLLECTION_NAME]: WalletCollection;
 };
 
-export type MystikoClientDatabase = RxDatabase<MystikoClientCollections>;
+export type MystikoDatabase = RxDatabase<MystikoClientCollections>;
+
+export type DatabaseQuery<T> = MangoQuery<T>;

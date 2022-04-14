@@ -1,9 +1,13 @@
-import { initDatabase, MystikoClientDatabase, Wallet } from '../src';
+import { MystikoProtocol } from '@mystikonetwork/protocol';
+import { initDatabase, MystikoDatabase, Wallet } from '../src';
+import { createProtocol } from './common';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
+let protocol: MystikoProtocol;
 
 beforeAll(async () => {
   db = await initDatabase();
+  protocol = await createProtocol();
 });
 
 afterAll(async () => {
@@ -16,18 +20,18 @@ test('test insert', async () => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     hashedPassword: 'deadbeef',
-    encryptedMasterSeed: 'deadbeef',
+    encryptedMasterSeed: protocol.encryptSymmetric('P@ssw0rd', 'deadbeef'),
     accountNonce: 1,
   });
   expect(wallet.id).toBe('1');
   expect(wallet.hashedPassword).toBe('deadbeef');
-  expect(wallet.encryptedMasterSeed).toBe('deadbeef');
+  expect(wallet.masterSeed(protocol, 'P@ssw0rd')).toBe('deadbeef');
   expect(wallet.accountNonce).toBe(1);
   await expect(
     db.wallets.insert({
       id: '1',
       hashedPassword: 'deadbeef',
-      encryptedMasterSeed: 'deadbeef',
+      encryptedMasterSeed: protocol.encryptSymmetric('P@ssw0rd', 'deadbeef'),
       accountNonce: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -37,7 +41,7 @@ test('test insert', async () => {
     db.wallets.insert({
       id: '2',
       hashedPassword: 'deadbeef',
-      encryptedMasterSeed: 'deadbeef',
+      encryptedMasterSeed: protocol.encryptSymmetric('P@ssw0rd', 'deadbeef'),
       accountNonce: -1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -47,7 +51,7 @@ test('test insert', async () => {
     db.wallets.insert({
       id: '2',
       hashedPassword: 'YYYYY',
-      encryptedMasterSeed: 'deadbeef',
+      encryptedMasterSeed: protocol.encryptSymmetric('P@ssw0rd', 'deadbeef'),
       accountNonce: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

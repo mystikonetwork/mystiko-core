@@ -1,7 +1,7 @@
 import { toDecimals } from '@mystikonetwork/utils';
-import { DepositStatus, initDatabase, MystikoClientDatabase, Wallet } from '../src';
+import { DepositStatus, initDatabase, MystikoDatabase, Wallet } from '../src';
 
-let db: MystikoClientDatabase;
+let db: MystikoDatabase;
 let wallet: Wallet;
 let now: string;
 
