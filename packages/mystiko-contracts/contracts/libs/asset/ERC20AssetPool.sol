@@ -22,8 +22,8 @@ abstract contract ERC20AssetPool is AssetPool {
     asset.safeTransferFrom(msg.sender, commitmentPool, amount);
   }
 
-  function _processExecutorFeeTransfer(uint256 amount) internal override {
-    asset.safeTransfer(tx.origin, amount);
+  function _processExecutorFeeTransfer(address executor, uint256 amount) internal override {
+    asset.safeTransfer(executor, amount);
   }
 
   function _processRollupFeeTransfer(uint256 amount) internal override {

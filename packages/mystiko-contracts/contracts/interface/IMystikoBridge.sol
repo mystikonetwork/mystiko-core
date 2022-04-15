@@ -16,10 +16,4 @@ interface IMystikoBridge {
   }
 
   function deposit(DepositRequest memory _request) external payable;
-
-  function bridgeCommitment(
-    uint256 _fromChainId,
-    address _fromContract,
-    ICommitmentPool.CommitmentRequest memory _request
-  ) external returns (bool);
 }

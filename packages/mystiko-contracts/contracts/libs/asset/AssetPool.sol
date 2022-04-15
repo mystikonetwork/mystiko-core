@@ -8,7 +8,7 @@ abstract contract AssetPool {
     uint256 bridgeFee
   ) internal virtual;
 
-  function _processExecutorFeeTransfer(uint256 amount) internal virtual;
+  function _processExecutorFeeTransfer(address executor, uint256 amount) internal virtual;
 
   function _processRollupFeeTransfer(uint256 amount) internal virtual;
 

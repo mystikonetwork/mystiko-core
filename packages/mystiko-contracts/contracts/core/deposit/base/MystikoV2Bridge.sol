@@ -5,10 +5,11 @@ import "../../../libs/asset/AssetPool.sol";
 import "../../../interface/IMystikoBridge.sol";
 import "../../../interface/IHasher3.sol";
 import "../../../interface/ICommitmentPool.sol";
+import "./CrossChainDataSerializable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool {
+abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSerializable {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
@@ -16,7 +17,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool {
   IHasher3 public hasher3;
 
   address public associatedCommitmentPool;
-  uint256 public peerChainId;
+  uint64 public peerChainId;
   address public peerContract;
 
   //bridge proxy address
@@ -86,7 +87,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool {
     associatedCommitmentPool = _commitmentPoolAddress;
   }
 
-  function setpeerContract(uint256 _peerChainId, address _peerContract) external onlyOperator {
+  function setpeerContract(uint64 _peerChainId, address _peerContract) external onlyOperator {
     peerChainId = _peerChainId;
     peerContract = _peerContract;
   }
@@ -111,31 +112,35 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool {
     require(_request.commitment == calculatedCommitment, "commitment hash incorrect");
 
     // todo check commitment ?
-    _processDeposit(
-      _request.amount,
-      _request.commitment,
-      _request.bridgeFee,
-      _request.executorFee,
-      _request.rollupFee,
-      _request.encryptedNote
+
+    _processDepositTransfer(
+      associatedCommitmentPool,
+      _request.amount + _request.executorFee + _request.rollupFee,
+      _request.bridgeFee
     );
+
+    ICommitmentPool.CommitmentRequest memory cmRequest = ICommitmentPool.CommitmentRequest({
+      amount: _request.amount,
+      commitment: _request.commitment,
+      executorFee: _request.executorFee,
+      rollupFee: _request.rollupFee,
+      encryptedNote: _request.encryptedNote
+    });
+
+    bytes memory cmRequestBytes = serializeTxData(cmRequest);
+
+    _processDeposit(_request.bridgeFee, cmRequestBytes);
     emit CommitmentCrossChain(_request.commitment);
   }
 
-  function _processDeposit(
-    uint256 _amount,
-    uint256 _commitment,
-    uint256 _bridgeFee,
-    uint256 _executeFee,
-    uint256 _rollupFee,
-    bytes memory _encryptedNote
-  ) internal virtual;
+  function _processDeposit(uint256 _bridgeFee, bytes memory _requestBytes) internal virtual;
 
   function bridgeCommitment(
-    uint256 _fromChainId,
+    uint64 _fromChainId,
     address _fromContract,
+    address _executor,
     ICommitmentPool.CommitmentRequest memory _request
-  ) external override onlyBridgeProxy returns (bool) {
+  ) internal {
     require(_fromContract == peerContract, "from proxy address not matched");
     require(_fromChainId == peerChainId, "from chain id not matched");
     require(_request.amount > 0, "amount should be greater than 0");
@@ -143,11 +148,10 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool {
     require(_request.rollupFee >= minRollupFee, "rollup fee too few");
     require(
       ICommitmentPool(associatedCommitmentPool).inputCommitment(_request),
-      "core call inputCommitment error"
+      "call inputCommitment error"
     );
 
-    _processExecutorFeeTransfer(_request.executorFee);
-    return true;
+    _processExecutorFeeTransfer(_executor, _request.executorFee);
   }
 
   function toggleDeposits(bool _state) external onlyOperator {

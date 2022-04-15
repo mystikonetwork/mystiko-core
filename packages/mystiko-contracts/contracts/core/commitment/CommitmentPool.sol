@@ -44,7 +44,6 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
 
   // Admin related.
   address public operator;
-  uint256 public minExecutorFee;
   uint256 public minRollupFee;
   mapping(address => bool) public rollupWhitelist;
   mapping(address => bool) public inputWhitelist;

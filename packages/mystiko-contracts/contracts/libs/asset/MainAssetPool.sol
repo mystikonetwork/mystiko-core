@@ -12,8 +12,8 @@ abstract contract MainAssetPool is AssetPool {
     require(msg.value == amount + bridgeFee, "insufficient token");
   }
 
-  function _processExecutorFeeTransfer(uint256 amount) internal override {
-    (bool success, ) = tx.origin.call{value: amount}("");
+  function _processExecutorFeeTransfer(address executor, uint256 amount) internal override {
+    (bool success, ) = executor.call{value: amount}("");
     require(success, "executor fee transfer failed");
   }
 

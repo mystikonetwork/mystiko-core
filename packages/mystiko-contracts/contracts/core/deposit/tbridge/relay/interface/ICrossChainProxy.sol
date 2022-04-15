@@ -6,7 +6,7 @@ interface ICrossChainProxy {
 
   function sendMessage(
     address _toContract,
-    uint256 _toChainId,
+    uint64 _toChainId,
     bytes memory _message
   ) external payable;
 }

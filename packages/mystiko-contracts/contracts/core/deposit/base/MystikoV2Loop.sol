@@ -82,7 +82,7 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
     // todo 1. try/catch contract call  2. check commitment in queue
     require(
       ICommitmentPool(associatedCommitmentPool).inputCommitment{value: msg.value}(cmRequest),
-      "core call inputCommitment error"
+      "call inputCommitment error"
     );
   }
 
