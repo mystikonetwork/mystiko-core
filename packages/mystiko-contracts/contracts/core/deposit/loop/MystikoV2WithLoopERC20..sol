@@ -5,11 +5,5 @@ import "../base/MystikoV2Loop.sol";
 import "../../../libs/asset/ERC20AssetPool.sol";
 
 contract MystikoV2WithLoopERC20 is MystikoV2Loop, ERC20AssetPool {
-  constructor(
-    uint32 _treeHeight,
-    uint32 _rootHistoryLength,
-    uint256 _minRollupFee,
-    address _hasher3,
-    address _token
-  ) MystikoV2Loop(_hasher3) ERC20AssetPool(_token) {}
+  constructor(address _hasher3, address _token) MystikoV2Loop(_hasher3) ERC20AssetPool(_token) {}
 }

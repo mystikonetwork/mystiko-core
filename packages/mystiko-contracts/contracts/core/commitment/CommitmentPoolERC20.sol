@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./CommitmentPool.sol";
 import "../../libs/asset/ERC20AssetPool.sol";
 
-contract CommitmentERC20Pool is CommitmentPool, ERC20AssetPool {
+contract CommitmentPoolERC20 is CommitmentPool, ERC20AssetPool {
   constructor(
     uint32 _treeHeight,
     uint32 _rootHistoryLength,
