@@ -1,15 +1,5 @@
-import DefaultClientTestnetJson from './json/client/default/testnet.json';
-import DefaultClientMainnetJson from './json/client/default/mainnet.json';
-import { MystikoConfig } from './mystiko';
+import 'reflect-metadata';
 
-export const DefaultClientTestnetConfig = new MystikoConfig(DefaultClientTestnetJson);
-export const DefaultClientMainnetConfig = new MystikoConfig(DefaultClientMainnetJson);
-export const DefaultClientConfigJson = {
-  testnet: DefaultClientTestnetJson,
-  mainnet: DefaultClientMainnetJson,
-};
-
-export * from './abi';
 export * from './base';
 export * from './bridge';
 export * from './chain';

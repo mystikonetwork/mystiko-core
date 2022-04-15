@@ -1,67 +1,38 @@
-import { check } from '@mystikonetwork/utils';
-import { BaseConfig } from './base';
+import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { CircuitType } from './base';
 
-export interface RawCircuitConfig {
-  name: string;
-  wasmFile: string | string[];
-  zkeyFile: string | string[];
-  vkeyFile: string | string[];
-}
+export class CircuitConfig {
+  @Expose()
+  @IsString()
+  @IsNotEmpty()
+  public name: string;
 
-/**
- * @class CircuitConfig
- * @extends BaseConfig
- * @param {Object} rawConfig raw configuration object.
- * @desc configuration class for the zero knowledge proof scheme resources.
- */
-export class CircuitConfig extends BaseConfig {
-  constructor(rawConfig: any) {
-    super(rawConfig);
-    BaseConfig.checkStringOrStringArray(this.config, 'name');
-    BaseConfig.checkStringOrStringArray(this.config, 'wasmFile');
-    check(this.wasmFile.length > 0, 'wasmFile is empty');
-    BaseConfig.checkStringOrStringArray(this.config, 'zkeyFile');
-    check(this.zkeyFile.length > 0, 'zkeyFile is empty');
-    BaseConfig.checkStringOrStringArray(this.config, 'vkeyFile');
-    check(this.vkeyFile.length > 0, 'vkeyFile is empty');
-  }
+  @Expose()
+  @IsEnum(CircuitType)
+  public type: CircuitType;
 
-  /**
-   * @property {string} name
-   * @desc the name of this zkp scheme.
-   */
-  public get name(): string {
-    return this.asRawCircuitConfig().name;
-  }
+  @Expose()
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  public programFile: string[];
 
-  /**
-   * @property {string} wasmFile
-   * @desc URL or file path of the compiled WASM version of zkSnark circuit.
-   */
-  public get wasmFile(): string[] {
-    const raw = this.asRawCircuitConfig().wasmFile;
-    return raw instanceof Array ? raw : [raw];
-  }
+  @Expose()
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  public abiFile: string[];
 
-  /**
-   * @property {string} zkeyFile
-   * @desc URL or file path of the generated public proving keys for the zkSnark circuit after the trusted setup.
-   */
-  public get zkeyFile(): string[] {
-    const raw = this.asRawCircuitConfig().zkeyFile;
-    return raw instanceof Array ? raw : [raw];
-  }
+  @Expose()
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  public provingKeyFile: string[];
 
-  /**
-   * @property {string} vkeyFile
-   * @desc URL or file path of the generated public verifying keys for the zkSnark circuit after the trusted setup.
-   */
-  public get vkeyFile(): string[] {
-    const raw = this.asRawCircuitConfig().vkeyFile;
-    return raw instanceof Array ? raw : [raw];
-  }
-
-  private asRawCircuitConfig(): RawCircuitConfig {
-    return this.config as RawCircuitConfig;
-  }
+  @Expose()
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  public verifyingKeyFile: string[];
 }

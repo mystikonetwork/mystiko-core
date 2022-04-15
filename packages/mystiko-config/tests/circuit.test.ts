@@ -1,24 +1,49 @@
-import { CircuitConfig } from '../src';
+import { validate } from 'class-validator';
+import { CircuitConfig, CircuitType, readConfigFromFile } from '../src';
 
-test('test basic', () => {
-  const rawConfig1 = {};
-  expect(() => new CircuitConfig(rawConfig1)).toThrow();
-  const rawConfig2 = { ...rawConfig1, name: 'circom-1.0' };
-  expect(() => new CircuitConfig(rawConfig2)).toThrow();
-  const rawConfig3 = { ...rawConfig2, wasmFile: 'file.wasm' };
-  expect(() => new CircuitConfig(rawConfig3)).toThrow();
-  const rawConfig4 = { ...rawConfig3, zkeyFile: ['file.zkey', 'file.zkey.2'] };
-  expect(() => new CircuitConfig(rawConfig4)).toThrow();
-  const rawConfig5 = { ...rawConfig4, vkeyFile: 'file.vkey.json' };
-  const config1 = new CircuitConfig(rawConfig5);
-  expect(config1.name).toBe('circom-1.0');
-  expect(config1.wasmFile).toStrictEqual(['file.wasm']);
-  expect(config1.zkeyFile).toStrictEqual(['file.zkey', 'file.zkey.2']);
-  expect(config1.vkeyFile).toStrictEqual(['file.vkey.json']);
-  const rawConfig6 = { ...rawConfig5, vkeyFile: ['file.vkey.json'] };
-  const config2 = new CircuitConfig(rawConfig6);
-  expect(config2.vkeyFile).toStrictEqual(['file.vkey.json']);
-  const rawConfig7 = { ...rawConfig6, wasmFile: ['file.wasm.gz', 'file.wasm'] };
-  const config3 = new CircuitConfig(rawConfig7);
-  expect(config3.wasmFile).toStrictEqual(['file.wasm.gz', 'file.wasm']);
+let config: CircuitConfig;
+
+beforeEach(() => {
+  config = new CircuitConfig();
+  config.name = 'zokrates-1.0-rollup1';
+  config.type = CircuitType.ROLLUP1;
+  config.programFile = ['./Rollup1.program.gz'];
+  config.abiFile = ['./Rollup1.abi.json'];
+  config.provingKeyFile = ['./Rollup1.pkey.gz'];
+  config.verifyingKeyFile = ['./Rollup1.vkey.gz'];
+});
+
+test('test validate success', async () => {
+  expect((await validate(config)).length).toBe(0);
+});
+
+test('test invalid name', async () => {
+  config.name = '';
+  expect((await validate(config)).length).toBeGreaterThan(0);
+});
+
+test('test invalid programFile', async () => {
+  config.programFile = [''];
+  expect((await validate(config)).length).toBeGreaterThan(0);
+});
+
+test('test invalid abiFile', async () => {
+  config.abiFile = [''];
+  expect((await validate(config)).length).toBeGreaterThan(0);
+});
+
+test('test invalid provingKeyFile', async () => {
+  config.provingKeyFile = [''];
+  expect((await validate(config)).length).toBeGreaterThan(0);
+});
+
+test('test invalid verifyingKeyFile', async () => {
+  config.verifyingKeyFile = [''];
+  expect((await validate(config)).length).toBeGreaterThan(0);
+});
+
+test('test import json file', async () => {
+  const fileConfig = await readConfigFromFile(CircuitConfig, 'tests/files/circuit.valid.json');
+  expect(fileConfig).toStrictEqual(config);
+  await expect(readConfigFromFile(CircuitConfig, 'tests/files/circuit.invalid.json')).rejects.toThrow();
 });
