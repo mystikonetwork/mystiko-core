@@ -28,6 +28,7 @@ jobs:
       - run: lerna run lint
       - run: lerna run test
       - run: lerna run deploy --scope @mystikonetwork/contracts
+      - run: git diff --quiet || (echo "some generated files are not included in repo" && exit 1)
       - name: Report @mystikonetwork/utils test coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.0.3
         with:

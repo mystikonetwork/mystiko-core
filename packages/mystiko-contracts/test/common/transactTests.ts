@@ -2,10 +2,10 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
+import { TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
-import { TestToken } from '../../typechain';
 
 const { waffle } = require('hardhat');
 

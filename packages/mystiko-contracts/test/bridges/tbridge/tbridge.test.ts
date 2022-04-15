@@ -1,14 +1,4 @@
 import { Wallet } from '@ethersproject/wallet';
-import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
-import { toBN, toDecimals } from '@mystikonetwork/utils';
-import { deployDependContracts, loadFixture, deployTBridgeContracts } from '../../util/common';
-import {
-  testConstructor,
-  testAdminOperations,
-  constructCommitment,
-  testRollup,
-  testTransact,
-} from '../../common';
 import {
   Hasher3,
   MystikoTBridgeProxy,
@@ -24,7 +14,18 @@ import {
   Rollup1Verifier,
   Rollup4Verifier,
   TestToken,
-} from '../../../typechain';
+} from '@mystikonetwork/contracts-abi';
+import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
+import { toBN, toDecimals } from '@mystikonetwork/utils';
+import { deployDependContracts, loadFixture, deployTBridgeContracts } from '../../util/common';
+import {
+  testConstructor,
+  testAdminOperations,
+  constructCommitment,
+  testRollup,
+  testTransact,
+} from '../../common';
+
 // @ts-ignore
 import {
   MerkleTreeHeight,

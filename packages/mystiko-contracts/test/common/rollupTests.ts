@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { Wallet } from '@ethersproject/wallet';
+import { TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toBN, MerkleTree, toHexNoPrefix } from '@mystikonetwork/utils';
-import { TestToken } from '../../typechain';
 import {
   MerkleTreeHeight,
   MinRollupFee,

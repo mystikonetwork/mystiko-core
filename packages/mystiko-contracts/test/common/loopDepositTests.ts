@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { Wallet } from '@ethersproject/wallet';
+import { TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
-import { TestToken } from '../../typechain';
 import { CommitmentInfo } from './commitment';
 
 const { waffle } = require('hardhat');
