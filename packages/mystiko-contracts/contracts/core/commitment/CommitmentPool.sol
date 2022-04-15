@@ -53,17 +53,17 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
   bool public isRollupWhitelistDisabled;
 
   modifier onlyOperator() {
-    require(msg.sender == operator, "Only operator can call this function.");
+    require(msg.sender == operator, "Only operator.");
     _;
   }
 
   modifier onlyRollupWhitelisted() {
-    require(isRollupWhitelistDisabled || rollupWhitelist[msg.sender], "Only rollup whitelisted.");
+    require(isRollupWhitelistDisabled || rollupWhitelist[msg.sender], "Only whitelisted roller.");
     _;
   }
 
   modifier onlyInputWhitelisted() {
-    require(inputWhitelist[msg.sender], "Only input whitelisted.");
+    require(inputWhitelist[msg.sender], "Only whitelisted input.");
     _;
   }
 
@@ -282,11 +282,11 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
     rollupWhitelist[_roller] = false;
   }
 
-  function addDepositWhitelist(address _actor) external onlyOperator {
+  function addInputWhitelist(address _actor) external onlyOperator {
     inputWhitelist[_actor] = true;
   }
 
-  function removeDepositWhitelist(address _actor) external onlyOperator {
+  function removeInputWhitelist(address _actor) external onlyOperator {
     inputWhitelist[_actor] = false;
   }
 
