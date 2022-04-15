@@ -1,14 +1,14 @@
 import { Equals } from 'class-validator';
-import { BaseBridgeConfig } from './base';
-import { BridgeType } from '../base';
+import { RawBridgeConfig } from './base';
+import { BridgeType } from '../../common';
 
 /**
- * @class CelerBridgeConfig
- * @extends BaseBridgeConfig
+ * @class RawCelerBridgeConfig
+ * @extends RawBridgeConfig
  * @param {Object} rawConfig raw configuration object.
  * @desc configuration class for Celer cross-chain bridge.
  */
-export class CelerBridgeConfig extends BaseBridgeConfig {
+export class RawCelerBridgeConfig extends RawBridgeConfig {
   @Equals(BridgeType.CELER)
   public type: BridgeType = BridgeType.CELER;
 }

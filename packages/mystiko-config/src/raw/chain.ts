@@ -10,12 +10,12 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ProviderConnection } from '@mystikonetwork/utils';
-import { DepositContractConfig, PoolContractConfig } from './contract';
+import { RawDepositContractConfig, RawPoolContractConfig } from './contract';
 
 export const EXPLORER_TX_PLACEHOLDER: string = '%tx%';
 export const EXPLORER_DEFAULT_PREFIX: string = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
 
-export class ChainConfig {
+export class RawChainConfig {
   @IsInt()
   @IsPositive()
   public chainId: number;
@@ -47,11 +47,11 @@ export class ChainConfig {
 
   @ValidateNested()
   @IsArray()
-  public depositContracts: DepositContractConfig[] = [];
+  public depositContracts: RawDepositContractConfig[] = [];
 
   @ValidateNested()
   @IsArray()
-  public poolContracts: PoolContractConfig[] = [];
+  public poolContracts: RawPoolContractConfig[] = [];
 
   @IsInt()
   @IsPositive()

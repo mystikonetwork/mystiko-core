@@ -1,10 +1,10 @@
 import { validate } from 'class-validator';
-import { BaseBridgeConfig, BridgeType, readConfigFromFile } from '../../src';
+import { RawBridgeConfig, BridgeType, readRawConfigFromFile } from '../../../src';
 
-let config: BaseBridgeConfig;
+let config: RawBridgeConfig;
 
 beforeEach(() => {
-  config = new BaseBridgeConfig();
+  config = new RawBridgeConfig();
   config.name = 'Mystiko Testnet Bridge';
   config.type = BridgeType.TBRIDGE;
 });
@@ -19,9 +19,9 @@ test('test invalid name', async () => {
 });
 
 test('test import json file', async () => {
-  const fileConfig = await readConfigFromFile(BaseBridgeConfig, 'tests/files/bridge/base.valid.json');
+  const fileConfig = await readRawConfigFromFile(RawBridgeConfig, 'tests/files/bridge/base.valid.json');
   expect(fileConfig).toStrictEqual(config);
   await expect(
-    readConfigFromFile(BaseBridgeConfig, 'tests/files/bridge/base.invalid.json'),
+    readRawConfigFromFile(RawBridgeConfig, 'tests/files/bridge/base.invalid.json'),
   ).rejects.toThrow();
 });

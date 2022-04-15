@@ -1,8 +1,8 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { BridgeType } from '../base';
+import { BridgeType } from '../../common';
 
-export class BaseBridgeConfig {
+export class RawBridgeConfig {
   @Expose()
   @IsString()
   @IsNotEmpty()

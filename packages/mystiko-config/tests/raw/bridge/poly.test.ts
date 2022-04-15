@@ -1,10 +1,15 @@
 import { validate } from 'class-validator';
-import { BridgeType, EXPLORER_DEFAULT_PREFIX, PolyBridgeConfig, readConfigFromFile } from '../../src';
+import {
+  BridgeType,
+  EXPLORER_DEFAULT_PREFIX,
+  RawPolyBridgeConfig,
+  readRawConfigFromFile,
+} from '../../../src';
 
-let config: PolyBridgeConfig;
+let config: RawPolyBridgeConfig;
 
 beforeEach(() => {
-  config = new PolyBridgeConfig();
+  config = new RawPolyBridgeConfig();
   config.name = 'Poly Bridge';
   config.explorerUrl = 'https://explorer.poly.network';
   config.apiUrl = 'https://explorer.poly.network';
@@ -51,9 +56,9 @@ test('test invalid apiPrefix', async () => {
 });
 
 test('test import json file', async () => {
-  const fileConfig = await readConfigFromFile(PolyBridgeConfig, 'tests/files/bridge/poly.valid.json');
+  const fileConfig = await readRawConfigFromFile(RawPolyBridgeConfig, 'tests/files/bridge/poly.valid.json');
   expect(fileConfig).toStrictEqual(config);
   await expect(
-    readConfigFromFile(PolyBridgeConfig, 'tests/files/bridge/poly.invalid.json'),
+    readRawConfigFromFile(RawPolyBridgeConfig, 'tests/files/bridge/poly.invalid.json'),
   ).rejects.toThrow();
 });

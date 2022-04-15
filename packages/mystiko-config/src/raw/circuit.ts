@@ -1,8 +1,8 @@
 import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { CircuitType } from './base';
+import { CircuitType } from '../common';
 
-export class CircuitConfig {
+export class RawCircuitConfig {
   @Expose()
   @IsString()
   @IsNotEmpty()

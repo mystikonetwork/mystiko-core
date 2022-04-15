@@ -1,10 +1,10 @@
 import { validate } from 'class-validator';
-import { CircuitConfig, CircuitType, readConfigFromFile } from '../src';
+import { RawCircuitConfig, CircuitType, readRawConfigFromFile } from '../../src';
 
-let config: CircuitConfig;
+let config: RawCircuitConfig;
 
 beforeEach(() => {
-  config = new CircuitConfig();
+  config = new RawCircuitConfig();
   config.name = 'zokrates-1.0-rollup1';
   config.type = CircuitType.ROLLUP1;
   config.programFile = ['./Rollup1.program.gz'];
@@ -43,7 +43,7 @@ test('test invalid verifyingKeyFile', async () => {
 });
 
 test('test import json file', async () => {
-  const fileConfig = await readConfigFromFile(CircuitConfig, 'tests/files/circuit.valid.json');
+  const fileConfig = await readRawConfigFromFile(RawCircuitConfig, 'tests/files/circuit.valid.json');
   expect(fileConfig).toStrictEqual(config);
-  await expect(readConfigFromFile(CircuitConfig, 'tests/files/circuit.invalid.json')).rejects.toThrow();
+  await expect(readRawConfigFromFile(RawCircuitConfig, 'tests/files/circuit.invalid.json')).rejects.toThrow();
 });

@@ -9,10 +9,10 @@ import {
   IsString,
 } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { BaseContractConfig } from './base';
-import { ContractType } from '../base';
+import { RawContractConfig } from './base';
+import { ContractType } from '../../common';
 
-export class PoolContractConfig extends BaseContractConfig {
+export class RawPoolContractConfig extends RawContractConfig {
   @Expose()
   @Equals(ContractType.POOL)
   public type: ContractType = ContractType.POOL;

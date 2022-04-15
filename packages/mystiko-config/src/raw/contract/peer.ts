@@ -1,7 +1,7 @@
 import { IsEthereumAddress, IsInt, IsPositive } from 'class-validator';
 import { Expose } from 'class-transformer';
 
-export class PeerContractConfig {
+export class RawPeerContractConfig {
   @Expose()
   @IsInt()
   @IsPositive()

@@ -74,7 +74,10 @@ export function isValidCircuitType(type: CircuitType): boolean {
   return Object.values(CircuitType).includes(type);
 }
 
-export function readConfigFromFile<T extends Object>(cls: ClassConstructor<T>, jsonFile: string): Promise<T> {
+export function readRawConfigFromFile<T extends Object>(
+  cls: ClassConstructor<T>,
+  jsonFile: string,
+): Promise<T> {
   return readJsonFile(jsonFile)
     .then((raw) => plainToInstance(cls, raw, { excludeExtraneousValues: true }))
     .then((config) =>

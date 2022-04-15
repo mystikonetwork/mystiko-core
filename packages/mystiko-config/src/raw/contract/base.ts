@@ -8,9 +8,9 @@ import {
   IsString,
 } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { ContractType } from '../base';
+import { ContractType } from '../../common';
 
-export class BaseContractConfig {
+export class RawContractConfig {
   @Expose()
   @IsInt()
   @IsPositive()

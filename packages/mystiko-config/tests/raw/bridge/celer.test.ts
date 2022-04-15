@@ -1,10 +1,10 @@
 import { validate } from 'class-validator';
-import { BridgeType, CelerBridgeConfig, readConfigFromFile } from '../../src';
+import { BridgeType, RawCelerBridgeConfig, readRawConfigFromFile } from '../../../src';
 
-let config: CelerBridgeConfig;
+let config: RawCelerBridgeConfig;
 
 beforeEach(() => {
-  config = new CelerBridgeConfig();
+  config = new RawCelerBridgeConfig();
   config.name = 'Celer Bridge';
   config.type = BridgeType.CELER;
 });
@@ -20,9 +20,9 @@ test('test invalid type', async () => {
 });
 
 test('test import json file', async () => {
-  const fileConfig = await readConfigFromFile(CelerBridgeConfig, 'tests/files/bridge/celer.valid.json');
+  const fileConfig = await readRawConfigFromFile(RawCelerBridgeConfig, 'tests/files/bridge/celer.valid.json');
   expect(fileConfig).toStrictEqual(config);
   await expect(
-    readConfigFromFile(CelerBridgeConfig, 'tests/files/bridge/celer.invalid.json'),
+    readRawConfigFromFile(RawCelerBridgeConfig, 'tests/files/bridge/celer.invalid.json'),
   ).rejects.toThrow();
 });

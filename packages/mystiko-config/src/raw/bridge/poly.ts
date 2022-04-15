@@ -1,10 +1,10 @@
 import { Contains, Equals, IsUrl } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { BaseBridgeConfig } from './base';
+import { RawBridgeConfig } from './base';
 import { EXPLORER_DEFAULT_PREFIX, EXPLORER_TX_PLACEHOLDER } from '../chain';
-import { BridgeType } from '../base';
+import { BridgeType } from '../../common';
 
-export class PolyBridgeConfig extends BaseBridgeConfig {
+export class RawPolyBridgeConfig extends RawBridgeConfig {
   @Equals(BridgeType.POLY)
   public type: BridgeType = BridgeType.POLY;
 

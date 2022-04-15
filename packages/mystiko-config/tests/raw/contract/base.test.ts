@@ -1,10 +1,10 @@
 import { validate } from 'class-validator';
-import { BaseContractConfig, ContractType } from '../../src';
+import { RawContractConfig, ContractType } from '../../../src';
 
-let config: BaseContractConfig;
+let config: RawContractConfig;
 
 beforeEach(() => {
-  config = new BaseContractConfig();
+  config = new RawContractConfig();
   config.version = 2;
   config.name = 'MystikoWithPolyERC20';
   config.address = '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67';

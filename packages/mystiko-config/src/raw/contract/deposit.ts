@@ -8,11 +8,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { BaseContractConfig } from './base';
-import { BridgeType, ContractType } from '../base';
-import { PeerContractConfig } from './peer';
+import { RawContractConfig } from './base';
+import { BridgeType, ContractType } from '../../common';
+import { RawPeerContractConfig } from './peer';
 
-export class DepositContractConfig extends BaseContractConfig {
+export class RawDepositContractConfig extends RawContractConfig {
   @Expose()
   @Equals(ContractType.DEPOSIT)
   public type: ContractType = ContractType.DEPOSIT;
@@ -32,7 +32,7 @@ export class DepositContractConfig extends BaseContractConfig {
   @Expose()
   @ValidateNested()
   @IsArray()
-  public peerChains: PeerContractConfig[] = [];
+  public peerChains: RawPeerContractConfig[] = [];
 
   @Expose()
   @IsNumberString()
