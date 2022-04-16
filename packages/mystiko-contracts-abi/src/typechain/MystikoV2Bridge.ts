@@ -51,21 +51,16 @@ export declare namespace IMystikoBridge {
   };
 }
 
-export interface MystikoV2WithCelerERC20Interface extends utils.Interface {
-  contractName: 'MystikoV2WithCelerERC20';
+export interface MystikoV2BridgeInterface extends utils.Interface {
+  contractName: 'MystikoV2Bridge';
   functions: {
     'FIELD_SIZE()': FunctionFragment;
-    'asset()': FunctionFragment;
-    'assetDecimals()': FunctionFragment;
-    'assetName()': FunctionFragment;
-    'assetSymbol()': FunctionFragment;
     'assetType()': FunctionFragment;
     'associatedCommitmentPool()': FunctionFragment;
     'bridgeProxyAddress()': FunctionFragment;
     'bridgeType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256,uint256,uint256))': FunctionFragment;
-    'executeMessage(address,uint64,bytes,address)': FunctionFragment;
     'hasher3()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
     'minBridgeFee()': FunctionFragment;
@@ -88,20 +83,12 @@ export interface MystikoV2WithCelerERC20Interface extends utils.Interface {
   };
 
   encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'asset', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'assetDecimals', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'assetName', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'assetSymbol', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'associatedCommitmentPool', values?: undefined): string;
   encodeFunctionData(functionFragment: 'bridgeProxyAddress', values?: undefined): string;
   encodeFunctionData(functionFragment: 'bridgeType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoBridge.DepositRequestStruct]): string;
-  encodeFunctionData(
-    functionFragment: 'executeMessage',
-    values: [string, BigNumberish, BytesLike, string],
-  ): string;
   encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minBridgeFee', values?: undefined): string;
@@ -123,17 +110,12 @@ export interface MystikoV2WithCelerERC20Interface extends utils.Interface {
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'asset', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'assetDecimals', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'assetName', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'assetSymbol', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'associatedCommitmentPool', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'bridgeProxyAddress', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'bridgeType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'executeMessage', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minBridgeFee', data: BytesLike): Result;
@@ -165,13 +147,13 @@ export type CommitmentCrossChainEvent = TypedEvent<[BigNumber], { commitment: Bi
 
 export type CommitmentCrossChainEventFilter = TypedEventFilter<CommitmentCrossChainEvent>;
 
-export interface MystikoV2WithCelerERC20 extends BaseContract {
-  contractName: 'MystikoV2WithCelerERC20';
+export interface MystikoV2Bridge extends BaseContract {
+  contractName: 'MystikoV2Bridge';
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MystikoV2WithCelerERC20Interface;
+  interface: MystikoV2BridgeInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -191,14 +173,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
   functions: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    asset(overrides?: CallOverrides): Promise<[string]>;
-
-    assetDecimals(overrides?: CallOverrides): Promise<[number]>;
-
-    assetName(overrides?: CallOverrides): Promise<[string]>;
-
-    assetSymbol(overrides?: CallOverrides): Promise<[string]>;
-
     assetType(overrides?: CallOverrides): Promise<[string]>;
 
     associatedCommitmentPool(overrides?: CallOverrides): Promise<[string]>;
@@ -214,14 +188,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
 
     deposit(
       _request: IMystikoBridge.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    executeMessage(
-      _sender: string,
-      _srcChainId: BigNumberish,
-      _message: BytesLike,
-      _executor: string,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -294,14 +260,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
 
   FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-  asset(overrides?: CallOverrides): Promise<string>;
-
-  assetDecimals(overrides?: CallOverrides): Promise<number>;
-
-  assetName(overrides?: CallOverrides): Promise<string>;
-
-  assetSymbol(overrides?: CallOverrides): Promise<string>;
-
   assetType(overrides?: CallOverrides): Promise<string>;
 
   associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
@@ -317,14 +275,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
 
   deposit(
     _request: IMystikoBridge.DepositRequestStruct,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  executeMessage(
-    _sender: string,
-    _srcChainId: BigNumberish,
-    _message: BytesLike,
-    _executor: string,
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -397,14 +347,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
   callStatic: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    asset(overrides?: CallOverrides): Promise<string>;
-
-    assetDecimals(overrides?: CallOverrides): Promise<number>;
-
-    assetName(overrides?: CallOverrides): Promise<string>;
-
-    assetSymbol(overrides?: CallOverrides): Promise<string>;
-
     assetType(overrides?: CallOverrides): Promise<string>;
 
     associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
@@ -416,14 +358,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
     changeOperator(_newOperator: string, overrides?: CallOverrides): Promise<void>;
 
     deposit(_request: IMystikoBridge.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
-
-    executeMessage(
-      _sender: string,
-      _srcChainId: BigNumberish,
-      _message: BytesLike,
-      _executor: string,
-      overrides?: CallOverrides,
-    ): Promise<boolean>;
 
     hasher3(overrides?: CallOverrides): Promise<string>;
 
@@ -476,14 +410,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
   estimateGas: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    asset(overrides?: CallOverrides): Promise<BigNumber>;
-
-    assetDecimals(overrides?: CallOverrides): Promise<BigNumber>;
-
-    assetName(overrides?: CallOverrides): Promise<BigNumber>;
-
-    assetSymbol(overrides?: CallOverrides): Promise<BigNumber>;
-
     assetType(overrides?: CallOverrides): Promise<BigNumber>;
 
     associatedCommitmentPool(overrides?: CallOverrides): Promise<BigNumber>;
@@ -499,14 +425,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
 
     deposit(
       _request: IMystikoBridge.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    executeMessage(
-      _sender: string,
-      _srcChainId: BigNumberish,
-      _message: BytesLike,
-      _executor: string,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -580,14 +498,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
   populateTransaction: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    asset(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    assetDecimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    assetName(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    assetSymbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     assetType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     associatedCommitmentPool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -603,14 +513,6 @@ export interface MystikoV2WithCelerERC20 extends BaseContract {
 
     deposit(
       _request: IMystikoBridge.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    executeMessage(
-      _sender: string,
-      _srcChainId: BigNumberish,
-      _message: BytesLike,
-      _executor: string,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 

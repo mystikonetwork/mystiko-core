@@ -146,10 +146,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
     require(_request.amount > 0, "amount should be greater than 0");
     require(_request.executorFee >= minExecutorFee, "executor fee too few");
     require(_request.rollupFee >= minRollupFee, "rollup fee too few");
-    require(
-      ICommitmentPool(associatedCommitmentPool).inputCommitment(_request),
-      "call inputCommitment error"
-    );
+    require(ICommitmentPool(associatedCommitmentPool).enqueue(_request), "call enqueue error");
 
     _processExecutorFeeTransfer(_executor, _request.executorFee);
   }

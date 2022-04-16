@@ -4,7 +4,7 @@
 
 import { Contract, Signer, utils } from 'ethers';
 import { Provider } from '@ethersproject/providers';
-import type { MystikoLoop, MystikoLoopInterface } from '../MystikoLoop';
+import type { CommitmentPool, CommitmentPoolInterface } from '../CommitmentPool';
 
 const _abi = [
   {
@@ -87,7 +87,20 @@ const _abi = [
     inputs: [
       {
         internalType: 'address',
-        name: 'roller',
+        name: '_actor',
+        type: 'address',
+      },
+    ],
+    name: 'addInputWhitelist',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_roller',
         type: 'address',
       },
     ],
@@ -107,19 +120,6 @@ const _abi = [
       },
     ],
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'bridgeType',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'pure',
     type: 'function',
   },
   {
@@ -214,53 +214,8 @@ const _abi = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'amount',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'commitment',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'hashK',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint128',
-            name: 'randomS',
-            type: 'uint128',
-          },
-          {
-            internalType: 'bytes',
-            name: 'encryptedNote',
-            type: 'bytes',
-          },
-          {
-            internalType: 'uint256',
-            name: 'rollupFee',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct IMystikoLoop.DepositRequest',
-        name: 'request',
-        type: 'tuple',
-      },
-    ],
-    name: 'deposit',
-    outputs: [],
-    stateMutability: 'payable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
         internalType: 'uint32',
-        name: 'rollupSize',
+        name: '_rollupSize',
         type: 'uint32',
       },
     ],
@@ -273,12 +228,12 @@ const _abi = [
     inputs: [
       {
         internalType: 'uint32',
-        name: 'numInputs',
+        name: '_numInputs',
         type: 'uint32',
       },
       {
         internalType: 'uint32',
-        name: 'numOutputs',
+        name: '_numOutputs',
         type: 'uint32',
       },
     ],
@@ -291,7 +246,7 @@ const _abi = [
     inputs: [
       {
         internalType: 'uint32',
-        name: 'rollupSize',
+        name: '_rollupSize',
         type: 'uint32',
       },
       {
@@ -309,12 +264,12 @@ const _abi = [
     inputs: [
       {
         internalType: 'uint32',
-        name: 'numInputs',
+        name: '_numInputs',
         type: 'uint32',
       },
       {
         internalType: 'uint32',
-        name: 'numOutputs',
+        name: '_numOutputs',
         type: 'uint32',
       },
       {
@@ -329,16 +284,49 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'hasher3',
-    outputs: [
+    inputs: [
       {
-        internalType: 'contract IHasher3',
-        name: '',
-        type: 'address',
+        components: [
+          {
+            internalType: 'uint256',
+            name: 'amount',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'commitment',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'executorFee',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'rollupFee',
+            type: 'uint256',
+          },
+          {
+            internalType: 'bytes',
+            name: 'encryptedNote',
+            type: 'bytes',
+          },
+        ],
+        internalType: 'struct ICommitmentPool.CommitmentRequest',
+        name: '_request',
+        type: 'tuple',
       },
     ],
-    stateMutability: 'view',
+    name: 'enqueue',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'payable',
     type: 'function',
   },
   {
@@ -361,8 +349,14 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'isDepositsDisabled',
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'inputWhitelist',
     outputs: [
       {
         internalType: 'bool',
@@ -448,7 +442,20 @@ const _abi = [
     inputs: [
       {
         internalType: 'address',
-        name: 'roller',
+        name: '_actor',
+        type: 'address',
+      },
+    ],
+    name: 'removeInputWhitelist',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_roller',
         type: 'address',
       },
     ],
@@ -535,8 +542,8 @@ const _abi = [
             type: 'uint256',
           },
         ],
-        internalType: 'struct IMystikoLoop.RollupRequest',
-        name: 'request',
+        internalType: 'struct ICommitmentPool.RollupRequest',
+        name: '_request',
         type: 'tuple',
       },
     ],
@@ -650,19 +657,6 @@ const _abi = [
       },
     ],
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bool',
-        name: '_state',
-        type: 'bool',
-      },
-    ],
-    name: 'toggleDeposits',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -809,13 +803,13 @@ const _abi = [
             type: 'bytes[]',
           },
         ],
-        internalType: 'struct IMystikoLoop.TransactRequest',
-        name: 'request',
+        internalType: 'struct ICommitmentPool.TransactRequest',
+        name: '_request',
         type: 'tuple',
       },
       {
         internalType: 'bytes',
-        name: 'signature',
+        name: '_signature',
         type: 'bytes',
       },
     ],
@@ -868,12 +862,12 @@ const _abi = [
   },
 ];
 
-export class MystikoLoop__factory {
+export class CommitmentPool__factory {
   static readonly abi = _abi;
-  static createInterface(): MystikoLoopInterface {
-    return new utils.Interface(_abi) as MystikoLoopInterface;
+  static createInterface(): CommitmentPoolInterface {
+    return new utils.Interface(_abi) as CommitmentPoolInterface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): MystikoLoop {
-    return new Contract(address, _abi, signerOrProvider) as MystikoLoop;
+  static connect(address: string, signerOrProvider: Signer | Provider): CommitmentPool {
+    return new Contract(address, _abi, signerOrProvider) as CommitmentPool;
   }
 }

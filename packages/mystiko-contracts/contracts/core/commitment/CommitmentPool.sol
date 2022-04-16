@@ -85,7 +85,7 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
     rootHistory[currentRootIndex] = currentRoot;
   }
 
-  function inputCommitment(CommitmentRequest memory _request)
+  function enqueue(CommitmentRequest memory _request)
     external
     payable
     override
@@ -94,7 +94,8 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
   {
     // todo should do check in upper layer call
     require(commitmentIncludedCount + commitmentQueueSize < treeCapacity, "tree is full");
-    require(!historicCommitments[_request.commitment], "The commitment has been submitted");
+    require(!historicCommitments[_request.commitment], "the commitment has been submitted");
+
     historicCommitments[_request.commitment] = true;
     _enqueueCommitment(_request.commitment, _request.rollupFee, _request.encryptedNote);
     return true;

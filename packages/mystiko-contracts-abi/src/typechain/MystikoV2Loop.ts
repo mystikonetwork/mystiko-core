@@ -38,8 +38,8 @@ export declare namespace IMystikoLoop {
   };
 }
 
-export interface MystikoV2WithLoopMainInterface extends utils.Interface {
-  contractName: 'MystikoV2WithLoopMain';
+export interface MystikoV2LoopInterface extends utils.Interface {
+  contractName: 'MystikoV2Loop';
   functions: {
     'FIELD_SIZE()': FunctionFragment;
     'assetType()': FunctionFragment;
@@ -87,13 +87,13 @@ export interface MystikoV2WithLoopMainInterface extends utils.Interface {
   events: {};
 }
 
-export interface MystikoV2WithLoopMain extends BaseContract {
-  contractName: 'MystikoV2WithLoopMain';
+export interface MystikoV2Loop extends BaseContract {
+  contractName: 'MystikoV2Loop';
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MystikoV2WithLoopMainInterface;
+  interface: MystikoV2LoopInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

@@ -11,7 +11,7 @@ export function testLoopDeposit(
   contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
-  mystikoContractLimit: any,
+  commitmentPoolContract: any,
   testTokenContract: TestToken,
   accounts: Wallet[],
   depositAmount: string,
@@ -21,8 +21,8 @@ export function testLoopDeposit(
   let minTotalAmount: string;
   let minRollupFee: number;
   const { commitments } = cmInfo;
-  const { mystikoAddress } = cmInfo;
   const numOfCommitments = commitments.length;
+  let expectBalance: string;
 
   describe(`Test ${contractName} deposit operations`, () => {
     before(async () => {
@@ -104,7 +104,7 @@ export function testLoopDeposit(
             { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
           ),
         )
-          .to.emit(mystikoContract, 'CommitmentQueued')
+          .to.emit(commitmentPoolContract, 'CommitmentQueued')
           .withArgs(
             commitments[i].commitmentHash.toString(),
             minRollupFee,
@@ -112,25 +112,40 @@ export function testLoopDeposit(
             toHex(commitments[i].privateNote),
           );
 
-        expect(await mystikoContract.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
-          true,
-        );
-        expect((await mystikoContract.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
+        expect(
+          await commitmentPoolContract.historicCommitments(commitments[i].commitmentHash.toString()),
+        ).to.equal(true);
+        expect((await commitmentPoolContract.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
           commitments[i].commitmentHash.toString(),
         );
-        expect((await mystikoContract.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(minRollupFee);
+        expect((await commitmentPoolContract.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(
+          minRollupFee,
+        );
       }
-      expect((await mystikoContract.commitmentQueueSize()).toString()).to.equal(`${commitments.length}`);
+      expect((await commitmentPoolContract.commitmentQueueSize()).toString()).to.equal(
+        `${commitments.length}`,
+      );
     });
 
     it('should have correct balance', async () => {
-      const expectBalance = toBN(minTotalAmount).muln(numOfCommitments).toString();
+      expectBalance = toBN(minTotalAmount).muln(numOfCommitments).toString();
       if (isMainAsset) {
-        expect(await waffle.provider.getBalance(mystikoContract.address)).to.equal(expectBalance);
+        expect(await waffle.provider.getBalance(mystikoContract.address)).to.equal('0');
+        expect(await waffle.provider.getBalance(commitmentPoolContract.address)).to.equal(expectBalance);
       } else {
-        expect((await testTokenContract.balanceOf(mystikoContract.address)).toString()).to.equal(
+        expect((await testTokenContract.balanceOf(mystikoContract.address)).toString()).to.equal('0');
+        expect((await testTokenContract.balanceOf(commitmentPoolContract.address)).toString()).to.equal(
           expectBalance,
         );
+      }
+    });
+
+    it('should approve asset successfully', async () => {
+      if (!isMainAsset) {
+        const approveAmount = toBN(minTotalAmount).muln(commitments.length).toString();
+        await testTokenContract.approve(mystikoContract.address, approveAmount, {
+          from: accounts[0].address,
+        });
       }
     });
 
@@ -150,42 +165,16 @@ export function testLoopDeposit(
       ).to.be.revertedWith('the commitment has been submitted');
     });
 
-    it('should revert when tree is full', async () => {
-      if (!isMainAsset) {
-        const approveAmount = toBN(minTotalAmount).muln(3);
-        await testTokenContract.approve(mystikoContractLimit.address, approveAmount.toString(), {
-          from: accounts[0].address,
-        });
-      }
-      for (let i = 0; i < 2; i += 1) {
-        const commitment = await protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
-        await mystikoContractLimit.deposit(
-          [
-            depositAmount,
-            commitment.commitmentHash.toString(),
-            commitment.k.toString(),
-            commitment.randomS.toString(),
-            toHex(commitment.privateNote),
-            minRollupFee,
-          ],
-          { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
+    it('should have correct balance', async () => {
+      if (isMainAsset) {
+        expect(await waffle.provider.getBalance(mystikoContract.address)).to.equal('0');
+        expect(await waffle.provider.getBalance(commitmentPoolContract.address)).to.equal(expectBalance);
+      } else {
+        expect((await testTokenContract.balanceOf(mystikoContract.address)).toString()).to.equal('0');
+        expect((await testTokenContract.balanceOf(commitmentPoolContract.address)).toString()).to.equal(
+          expectBalance,
         );
       }
-
-      const commitment = await protocol.commitmentWithShieldedAddress(mystikoAddress, toBN(depositAmount));
-      await expect(
-        mystikoContractLimit.deposit(
-          [
-            depositAmount,
-            commitment.commitmentHash.toString(),
-            commitment.k.toString(),
-            commitment.randomS.toString(),
-            toHex(commitment.privateNote),
-            minRollupFee,
-          ],
-          { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
-        ),
-      ).to.be.revertedWith('tree is full');
     });
   });
 }

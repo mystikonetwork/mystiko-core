@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-export function testAdminOperations(contractName: string, mystikoContract: any, accounts: any[]) {
+export function testLoopAdminOperations(contractName: string, mystikoContract: any, accounts: any[]) {
   describe(`Test ${contractName} admin operations`, () => {
     before(async () => {});
 
@@ -14,6 +14,33 @@ export function testAdminOperations(contractName: string, mystikoContract: any, 
       await mystikoContract.toggleDeposits(false);
       expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
     });
+  });
+}
+
+export function testBridgeAdminOperations(contractName: string, mystikoContract: any, accounts: any[]) {
+  describe(`Test ${contractName} admin operations`, () => {
+    before(async () => {});
+
+    it('should toggle isDepositDisabled correctly', async () => {
+      await expect(mystikoContract.connect(accounts[1]).toggleDeposits(true)).to.be.revertedWith(
+        'Only operator can call this function.',
+      );
+
+      await mystikoContract.toggleDeposits(true);
+      expect(await mystikoContract.isDepositsDisabled()).to.equal(true);
+      await mystikoContract.toggleDeposits(false);
+      expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
+    });
+  });
+}
+
+export function testCommitmentPoolAdminOperations(
+  contractName: string,
+  mystikoContract: any,
+  accounts: any[],
+) {
+  describe(`Test ${contractName} admin operations`, () => {
+    before(async () => {});
 
     it('should toggle isRollupWhitelistDisabled correctly', async () => {
       await expect(mystikoContract.connect(accounts[1]).toggleRollupWhitelist(true)).to.be.revertedWith(

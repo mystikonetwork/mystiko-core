@@ -49,308 +49,109 @@ export declare namespace IMystikoBridge {
     executorFee: BigNumber;
     rollupFee: BigNumber;
   };
-
-  export type RollupRequestStruct = {
-    proof: IVerifier.ProofStruct;
-    rollupSize: BigNumberish;
-    newRoot: BigNumberish;
-    leafHash: BigNumberish;
-  };
-
-  export type RollupRequestStructOutput = [IVerifier.ProofStructOutput, number, BigNumber, BigNumber] & {
-    proof: IVerifier.ProofStructOutput;
-    rollupSize: number;
-    newRoot: BigNumber;
-    leafHash: BigNumber;
-  };
-
-  export type TransactRequestStruct = {
-    proof: IVerifier.ProofStruct;
-    rootHash: BigNumberish;
-    serialNumbers: BigNumberish[];
-    sigHashes: BigNumberish[];
-    sigPk: BytesLike;
-    publicAmount: BigNumberish;
-    relayerFeeAmount: BigNumberish;
-    outCommitments: BigNumberish[];
-    outRollupFees: BigNumberish[];
-    publicRecipient: string;
-    relayerAddress: string;
-    outEncryptedNotes: BytesLike[];
-  };
-
-  export type TransactRequestStructOutput = [
-    IVerifier.ProofStructOutput,
-    BigNumber,
-    BigNumber[],
-    BigNumber[],
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber[],
-    BigNumber[],
-    string,
-    string,
-    string[],
-  ] & {
-    proof: IVerifier.ProofStructOutput;
-    rootHash: BigNumber;
-    serialNumbers: BigNumber[];
-    sigHashes: BigNumber[];
-    sigPk: string;
-    publicAmount: BigNumber;
-    relayerFeeAmount: BigNumber;
-    outCommitments: BigNumber[];
-    outRollupFees: BigNumber[];
-    publicRecipient: string;
-    relayerAddress: string;
-    outEncryptedNotes: string[];
-  };
-}
-
-export declare namespace IVerifier {
-  export type G1PointStruct = { X: BigNumberish; Y: BigNumberish };
-
-  export type G1PointStructOutput = [BigNumber, BigNumber] & {
-    X: BigNumber;
-    Y: BigNumber;
-  };
-
-  export type G2PointStruct = {
-    X: [BigNumberish, BigNumberish];
-    Y: [BigNumberish, BigNumberish];
-  };
-
-  export type G2PointStructOutput = [[BigNumber, BigNumber], [BigNumber, BigNumber]] & {
-    X: [BigNumber, BigNumber];
-    Y: [BigNumber, BigNumber];
-  };
-
-  export type ProofStruct = {
-    a: IVerifier.G1PointStruct;
-    b: IVerifier.G2PointStruct;
-    c: IVerifier.G1PointStruct;
-  };
-
-  export type ProofStructOutput = [
-    IVerifier.G1PointStructOutput,
-    IVerifier.G2PointStructOutput,
-    IVerifier.G1PointStructOutput,
-  ] & {
-    a: IVerifier.G1PointStructOutput;
-    b: IVerifier.G2PointStructOutput;
-    c: IVerifier.G1PointStructOutput;
-  };
 }
 
 export interface MystikoV2WithTBridgeMainInterface extends utils.Interface {
   contractName: 'MystikoV2WithTBridgeMain';
   functions: {
     'FIELD_SIZE()': FunctionFragment;
-    'addRollupWhitelist(address)': FunctionFragment;
     'assetType()': FunctionFragment;
+    'associatedCommitmentPool()': FunctionFragment;
+    'bridgeProxyAddress()': FunctionFragment;
     'bridgeType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
-    'commitmentIncludedCount()': FunctionFragment;
-    'commitmentQueue(uint256)': FunctionFragment;
-    'commitmentQueueSize()': FunctionFragment;
-    'currentRoot()': FunctionFragment;
-    'currentRootIndex()': FunctionFragment;
+    'crossChainSyncTx(uint64,address,bytes,address)': FunctionFragment;
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256,uint256,uint256))': FunctionFragment;
-    'disableRollupVerifier(uint32)': FunctionFragment;
-    'disableTransactVerifier(uint32,uint32)': FunctionFragment;
-    'enableRollupVerifier(uint32,address)': FunctionFragment;
-    'enableTransactVerifier(uint32,uint32,address)': FunctionFragment;
     'hasher3()': FunctionFragment;
-    'historicCommitments(uint256)': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
-    'isKnownRoot(uint256)': FunctionFragment;
-    'isRollupWhitelistDisabled()': FunctionFragment;
-    'isVerifierUpdateDisabled()': FunctionFragment;
     'minBridgeFee()': FunctionFragment;
     'minExecutorFee()': FunctionFragment;
     'minRollupFee()': FunctionFragment;
     'operator()': FunctionFragment;
     'peerChainId()': FunctionFragment;
-    'peerContractAddress()': FunctionFragment;
-    'relayCommitments(uint256)': FunctionFragment;
-    'relayProxyAddress()': FunctionFragment;
-    'removeRollupWhitelist(address)': FunctionFragment;
-    'rollup((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint32,uint256,uint256))': FunctionFragment;
-    'rollupVerifiers(uint32)': FunctionFragment;
-    'rollupWhitelist(address)': FunctionFragment;
-    'rootHistory(uint32)': FunctionFragment;
-    'rootHistoryLength()': FunctionFragment;
+    'peerContract()': FunctionFragment;
+    'peerMinExecutorFee()': FunctionFragment;
+    'peerMinRollupFee()': FunctionFragment;
+    'setAssociatedCommitmentPool(address)': FunctionFragment;
+    'setBridgeProxyAddress(address)': FunctionFragment;
     'setMinBridgeFee(uint256)': FunctionFragment;
     'setMinExecutorFee(uint256)': FunctionFragment;
     'setMinRollupFee(uint256)': FunctionFragment;
-    'setPeerContractAddress(address)': FunctionFragment;
-    'setRelayProxyAddress(address)': FunctionFragment;
-    'sourceCommitmentCount()': FunctionFragment;
-    'spentSerialNumbers(uint256)': FunctionFragment;
-    'syncDepositTx(uint64,address,bytes)': FunctionFragment;
+    'setPeerMinExecutorFee(uint256)': FunctionFragment;
+    'setPeerMinRollupFee(uint256)': FunctionFragment;
+    'setpeerContract(uint64,address)': FunctionFragment;
     'toggleDeposits(bool)': FunctionFragment;
-    'toggleRollupWhitelist(bool)': FunctionFragment;
-    'toggleVerifierUpdate(bool)': FunctionFragment;
-    'transact((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint256,uint256[],uint256[],bytes32,uint256,uint256,uint256[],uint256[],address,address,bytes[]),bytes)': FunctionFragment;
-    'transactVerifiers(uint32,uint32)': FunctionFragment;
-    'treeCapacity()': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'addRollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'associatedCommitmentPool', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'bridgeProxyAddress', values?: undefined): string;
   encodeFunctionData(functionFragment: 'bridgeType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
-  encodeFunctionData(functionFragment: 'commitmentIncludedCount', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'commitmentQueue', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'commitmentQueueSize', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'currentRoot', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'currentRootIndex', values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: 'crossChainSyncTx',
+    values: [BigNumberish, string, BytesLike, string],
+  ): string;
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoBridge.DepositRequestStruct]): string;
-  encodeFunctionData(functionFragment: 'disableRollupVerifier', values: [BigNumberish]): string;
-  encodeFunctionData(
-    functionFragment: 'disableTransactVerifier',
-    values: [BigNumberish, BigNumberish],
-  ): string;
-  encodeFunctionData(functionFragment: 'enableRollupVerifier', values: [BigNumberish, string]): string;
-  encodeFunctionData(
-    functionFragment: 'enableTransactVerifier',
-    values: [BigNumberish, BigNumberish, string],
-  ): string;
   encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'historicCommitments', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'isKnownRoot', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'isRollupWhitelistDisabled', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'isVerifierUpdateDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minBridgeFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minExecutorFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
   encodeFunctionData(functionFragment: 'peerChainId', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'peerContractAddress', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'relayCommitments', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'relayProxyAddress', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'removeRollupWhitelist', values: [string]): string;
-  encodeFunctionData(functionFragment: 'rollup', values: [IMystikoBridge.RollupRequestStruct]): string;
-  encodeFunctionData(functionFragment: 'rollupVerifiers', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'rollupWhitelist', values: [string]): string;
-  encodeFunctionData(functionFragment: 'rootHistory', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'rootHistoryLength', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'peerContract', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'peerMinExecutorFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'peerMinRollupFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'setAssociatedCommitmentPool', values: [string]): string;
+  encodeFunctionData(functionFragment: 'setBridgeProxyAddress', values: [string]): string;
   encodeFunctionData(functionFragment: 'setMinBridgeFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinExecutorFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'setPeerContractAddress', values: [string]): string;
-  encodeFunctionData(functionFragment: 'setRelayProxyAddress', values: [string]): string;
-  encodeFunctionData(functionFragment: 'sourceCommitmentCount', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'spentSerialNumbers', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'syncDepositTx', values: [BigNumberish, string, BytesLike]): string;
+  encodeFunctionData(functionFragment: 'setPeerMinExecutorFee', values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'setPeerMinRollupFee', values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'setpeerContract', values: [BigNumberish, string]): string;
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
-  encodeFunctionData(functionFragment: 'toggleRollupWhitelist', values: [boolean]): string;
-  encodeFunctionData(functionFragment: 'toggleVerifierUpdate', values: [boolean]): string;
-  encodeFunctionData(
-    functionFragment: 'transact',
-    values: [IMystikoBridge.TransactRequestStruct, BytesLike],
-  ): string;
-  encodeFunctionData(functionFragment: 'transactVerifiers', values: [BigNumberish, BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'treeCapacity', values?: undefined): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'addRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'associatedCommitmentPool', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'bridgeProxyAddress', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'bridgeType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'commitmentIncludedCount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'commitmentQueue', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'commitmentQueueSize', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'currentRoot', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'currentRootIndex', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'crossChainSyncTx', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'disableRollupVerifier', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'disableTransactVerifier', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'enableRollupVerifier', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'enableTransactVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'historicCommitments', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'isRollupWhitelistDisabled', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'isVerifierUpdateDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'peerChainId', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'peerContractAddress', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'relayCommitments', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'relayProxyAddress', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'removeRollupWhitelist', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rollup', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rollupVerifiers', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rollupWhitelist', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rootHistory', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rootHistoryLength', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'peerContract', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'peerMinExecutorFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'peerMinRollupFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setAssociatedCommitmentPool', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setBridgeProxyAddress', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setPeerContractAddress', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setRelayProxyAddress', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sourceCommitmentCount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'spentSerialNumbers', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'syncDepositTx', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setPeerMinExecutorFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setPeerMinRollupFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setpeerContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'toggleRollupWhitelist', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'toggleVerifierUpdate', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'transact', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'transactVerifiers', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'treeCapacity', data: BytesLike): Result;
 
   events: {
     'CommitmentCrossChain(uint256)': EventFragment;
-    'CommitmentIncluded(uint256)': EventFragment;
-    'CommitmentQueued(uint256,uint256,uint256,bytes)': EventFragment;
-    'CommitmentSpent(uint256,uint256)': EventFragment;
-    'Received(address,uint256)': EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: 'CommitmentCrossChain'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'CommitmentIncluded'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'CommitmentQueued'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'CommitmentSpent'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'Received'): EventFragment;
 }
 
 export type CommitmentCrossChainEvent = TypedEvent<[BigNumber], { commitment: BigNumber }>;
 
 export type CommitmentCrossChainEventFilter = TypedEventFilter<CommitmentCrossChainEvent>;
-
-export type CommitmentIncludedEvent = TypedEvent<[BigNumber], { commitment: BigNumber }>;
-
-export type CommitmentIncludedEventFilter = TypedEventFilter<CommitmentIncludedEvent>;
-
-export type CommitmentQueuedEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber, string],
-  {
-    commitment: BigNumber;
-    rollupFee: BigNumber;
-    leafIndex: BigNumber;
-    encryptedNote: string;
-  }
->;
-
-export type CommitmentQueuedEventFilter = TypedEventFilter<CommitmentQueuedEvent>;
-
-export type CommitmentSpentEvent = TypedEvent<
-  [BigNumber, BigNumber],
-  { rootHash: BigNumber; serialNumber: BigNumber }
->;
-
-export type CommitmentSpentEventFilter = TypedEventFilter<CommitmentSpentEvent>;
-
-export type ReceivedEvent = TypedEvent<[string, BigNumber], { arg0: string; arg1: BigNumber }>;
-
-export type ReceivedEventFilter = TypedEventFilter<ReceivedEvent>;
 
 export interface MystikoV2WithTBridgeMain extends BaseContract {
   contractName: 'MystikoV2WithTBridgeMain';
@@ -378,12 +179,11 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
   functions: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    addRollupWhitelist(
-      roller: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
     assetType(overrides?: CallOverrides): Promise<[string]>;
+
+    associatedCommitmentPool(overrides?: CallOverrides): Promise<[string]>;
+
+    bridgeProxyAddress(overrides?: CallOverrides): Promise<[string]>;
 
     bridgeType(overrides?: CallOverrides): Promise<[string]>;
 
@@ -392,59 +192,22 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    commitmentQueue(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[BigNumber, BigNumber] & { commitment: BigNumber; rollupFee: BigNumber }>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    currentRoot(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<[number]>;
+    crossChainSyncTx(
+      _fromChainId: BigNumberish,
+      _fromContract: string,
+      _message: BytesLike,
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
 
     deposit(
-      request: IMystikoBridge.DepositRequestStruct,
+      _request: IMystikoBridge.DepositRequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    disableRollupVerifier(
-      rollupSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    enableRollupVerifier(
-      rollupSize: BigNumberish,
-      _rollupVerifier: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      _transactVerifier: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     hasher3(overrides?: CallOverrides): Promise<[string]>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
-
     isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
-
-    isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
-
-    isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<[boolean]>;
-
-    isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
     minBridgeFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -456,32 +219,21 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
 
     peerChainId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    peerContractAddress(overrides?: CallOverrides): Promise<[string]>;
+    peerContract(overrides?: CallOverrides): Promise<[string]>;
 
-    relayCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
+    peerMinExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    relayProxyAddress(overrides?: CallOverrides): Promise<[string]>;
+    peerMinRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    removeRollupWhitelist(
-      roller: string,
+    setAssociatedCommitmentPool(
+      _commitmentPoolAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    rollup(
-      request: IMystikoBridge.RollupRequestStruct,
+    setBridgeProxyAddress(
+      _bridgeProxyAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
-
-    rollupVerifiers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<[number]>;
 
     setMinBridgeFee(
       _minBridgeFee: BigNumberish,
@@ -498,24 +250,19 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    setPeerContractAddress(
-      _peerContractAddress: string,
+    setPeerMinExecutorFee(
+      _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    setRelayProxyAddress(
-      _relayProxyAddress: string,
+    setPeerMinRollupFee(
+      _peerMinRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    sourceCommitmentCount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
-
-    syncDepositTx(
-      fromChainId: BigNumberish,
-      fromContractAddr: string,
-      txDataBytes: BytesLike,
+    setpeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -523,40 +270,15 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
-
-    toggleRollupWhitelist(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    toggleVerifierUpdate(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    transactVerifiers(
-      arg0: BigNumberish,
-      arg1: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
   FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-  addRollupWhitelist(
-    roller: string,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
   assetType(overrides?: CallOverrides): Promise<string>;
+
+  associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
+
+  bridgeProxyAddress(overrides?: CallOverrides): Promise<string>;
 
   bridgeType(overrides?: CallOverrides): Promise<string>;
 
@@ -565,59 +287,22 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  commitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  commitmentQueue(
-    arg0: BigNumberish,
-    overrides?: CallOverrides,
-  ): Promise<[BigNumber, BigNumber] & { commitment: BigNumber; rollupFee: BigNumber }>;
-
-  commitmentQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-  currentRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-  currentRootIndex(overrides?: CallOverrides): Promise<number>;
+  crossChainSyncTx(
+    _fromChainId: BigNumberish,
+    _fromContract: string,
+    _message: BytesLike,
+    _executor: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
 
   deposit(
-    request: IMystikoBridge.DepositRequestStruct,
+    _request: IMystikoBridge.DepositRequestStruct,
     overrides?: PayableOverrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  disableRollupVerifier(
-    rollupSize: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  disableTransactVerifier(
-    numInputs: BigNumberish,
-    numOutputs: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  enableRollupVerifier(
-    rollupSize: BigNumberish,
-    _rollupVerifier: string,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  enableTransactVerifier(
-    numInputs: BigNumberish,
-    numOutputs: BigNumberish,
-    _transactVerifier: string,
-    overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   hasher3(overrides?: CallOverrides): Promise<string>;
 
-  historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
   isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-  isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
-  isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-  isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<boolean>;
 
   minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -629,32 +314,21 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
 
   peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
 
-  peerContractAddress(overrides?: CallOverrides): Promise<string>;
+  peerContract(overrides?: CallOverrides): Promise<string>;
 
-  relayCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+  peerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-  relayProxyAddress(overrides?: CallOverrides): Promise<string>;
+  peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-  removeRollupWhitelist(
-    roller: string,
+  setAssociatedCommitmentPool(
+    _commitmentPoolAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  rollup(
-    request: IMystikoBridge.RollupRequestStruct,
+  setBridgeProxyAddress(
+    _bridgeProxyAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
-
-  rollupVerifiers(
-    arg0: BigNumberish,
-    overrides?: CallOverrides,
-  ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-  rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-  rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-  rootHistoryLength(overrides?: CallOverrides): Promise<number>;
 
   setMinBridgeFee(
     _minBridgeFee: BigNumberish,
@@ -671,24 +345,19 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  setPeerContractAddress(
-    _peerContractAddress: string,
+  setPeerMinExecutorFee(
+    _peerMinExecutorFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  setRelayProxyAddress(
-    _relayProxyAddress: string,
+  setPeerMinRollupFee(
+    _peerMinRollupFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  sourceCommitmentCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
-  syncDepositTx(
-    fromChainId: BigNumberish,
-    fromContractAddr: string,
-    txDataBytes: BytesLike,
+  setpeerContract(
+    _peerChainId: BigNumberish,
+    _peerContract: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -697,88 +366,32 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  toggleRollupWhitelist(
-    _state: boolean,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  toggleVerifierUpdate(
-    _state: boolean,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  transact(
-    request: IMystikoBridge.TransactRequestStruct,
-    signature: BytesLike,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  transactVerifiers(
-    arg0: BigNumberish,
-    arg1: BigNumberish,
-    overrides?: CallOverrides,
-  ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-  treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
-
   callStatic: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    addRollupWhitelist(roller: string, overrides?: CallOverrides): Promise<void>;
-
     assetType(overrides?: CallOverrides): Promise<string>;
+
+    associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
+
+    bridgeProxyAddress(overrides?: CallOverrides): Promise<string>;
 
     bridgeType(overrides?: CallOverrides): Promise<string>;
 
     changeOperator(_newOperator: string, overrides?: CallOverrides): Promise<void>;
 
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    commitmentQueue(
-      arg0: BigNumberish,
+    crossChainSyncTx(
+      _fromChainId: BigNumberish,
+      _fromContract: string,
+      _message: BytesLike,
+      _executor: string,
       overrides?: CallOverrides,
-    ): Promise<[BigNumber, BigNumber] & { commitment: BigNumber; rollupFee: BigNumber }>;
+    ): Promise<boolean>;
 
-    commitmentQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<number>;
-
-    deposit(request: IMystikoBridge.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
-
-    disableRollupVerifier(rollupSize: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<void>;
-
-    enableRollupVerifier(
-      rollupSize: BigNumberish,
-      _rollupVerifier: string,
-      overrides?: CallOverrides,
-    ): Promise<void>;
-
-    enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      _transactVerifier: string,
-      overrides?: CallOverrides,
-    ): Promise<void>;
+    deposit(_request: IMystikoBridge.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
 
     hasher3(overrides?: CallOverrides): Promise<string>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
     isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-    isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
-    isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-    isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<boolean>;
 
     minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -790,26 +403,15 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
 
     peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    peerContractAddress(overrides?: CallOverrides): Promise<string>;
+    peerContract(overrides?: CallOverrides): Promise<string>;
 
-    relayCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+    peerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    relayProxyAddress(overrides?: CallOverrides): Promise<string>;
+    peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    removeRollupWhitelist(roller: string, overrides?: CallOverrides): Promise<void>;
+    setAssociatedCommitmentPool(_commitmentPoolAddress: string, overrides?: CallOverrides): Promise<void>;
 
-    rollup(request: IMystikoBridge.RollupRequestStruct, overrides?: CallOverrides): Promise<void>;
-
-    rollupVerifiers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<number>;
+    setBridgeProxyAddress(_bridgeProxyAddress: string, overrides?: CallOverrides): Promise<void>;
 
     setMinBridgeFee(_minBridgeFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -817,84 +419,32 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
 
     setMinRollupFee(_minRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    setPeerContractAddress(_peerContractAddress: string, overrides?: CallOverrides): Promise<void>;
+    setPeerMinExecutorFee(_peerMinExecutorFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    setRelayProxyAddress(_relayProxyAddress: string, overrides?: CallOverrides): Promise<void>;
+    setPeerMinRollupFee(_peerMinRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    sourceCommitmentCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
-    syncDepositTx(
-      fromChainId: BigNumberish,
-      fromContractAddr: string,
-      txDataBytes: BytesLike,
-      overrides?: CallOverrides,
-    ): Promise<boolean>;
-
-    toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
-
-    toggleRollupWhitelist(_state: boolean, overrides?: CallOverrides): Promise<void>;
-
-    toggleVerifierUpdate(_state: boolean, overrides?: CallOverrides): Promise<void>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
+    setpeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
       overrides?: CallOverrides,
     ): Promise<void>;
 
-    transactVerifiers(
-      arg0: BigNumberish,
-      arg1: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+    toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
     'CommitmentCrossChain(uint256)'(commitment?: BigNumberish | null): CommitmentCrossChainEventFilter;
     CommitmentCrossChain(commitment?: BigNumberish | null): CommitmentCrossChainEventFilter;
-
-    'CommitmentIncluded(uint256)'(commitment?: BigNumberish | null): CommitmentIncludedEventFilter;
-    CommitmentIncluded(commitment?: BigNumberish | null): CommitmentIncludedEventFilter;
-
-    'CommitmentQueued(uint256,uint256,uint256,bytes)'(
-      commitment?: BigNumberish | null,
-      rollupFee?: null,
-      leafIndex?: null,
-      encryptedNote?: null,
-    ): CommitmentQueuedEventFilter;
-    CommitmentQueued(
-      commitment?: BigNumberish | null,
-      rollupFee?: null,
-      leafIndex?: null,
-      encryptedNote?: null,
-    ): CommitmentQueuedEventFilter;
-
-    'CommitmentSpent(uint256,uint256)'(
-      rootHash?: BigNumberish | null,
-      serialNumber?: BigNumberish | null,
-    ): CommitmentSpentEventFilter;
-    CommitmentSpent(
-      rootHash?: BigNumberish | null,
-      serialNumber?: BigNumberish | null,
-    ): CommitmentSpentEventFilter;
-
-    'Received(address,uint256)'(arg0?: null, arg1?: null): ReceivedEventFilter;
-    Received(arg0?: null, arg1?: null): ReceivedEventFilter;
   };
 
   estimateGas: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    addRollupWhitelist(
-      roller: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
     assetType(overrides?: CallOverrides): Promise<BigNumber>;
+
+    associatedCommitmentPool(overrides?: CallOverrides): Promise<BigNumber>;
+
+    bridgeProxyAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     bridgeType(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -903,56 +453,22 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    commitmentQueue(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<BigNumber>;
+    crossChainSyncTx(
+      _fromChainId: BigNumberish,
+      _fromContract: string,
+      _message: BytesLike,
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
 
     deposit(
-      request: IMystikoBridge.DepositRequestStruct,
+      _request: IMystikoBridge.DepositRequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    disableRollupVerifier(
-      rollupSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    enableRollupVerifier(
-      rollupSize: BigNumberish,
-      _rollupVerifier: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      _transactVerifier: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     hasher3(overrides?: CallOverrides): Promise<BigNumber>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
     isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
-
-    isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<BigNumber>;
-
-    isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -964,29 +480,21 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
 
     peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    peerContractAddress(overrides?: CallOverrides): Promise<BigNumber>;
+    peerContract(overrides?: CallOverrides): Promise<BigNumber>;
 
-    relayCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    peerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    relayProxyAddress(overrides?: CallOverrides): Promise<BigNumber>;
+    peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    removeRollupWhitelist(
-      roller: string,
+    setAssociatedCommitmentPool(
+      _commitmentPoolAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    rollup(
-      request: IMystikoBridge.RollupRequestStruct,
+    setBridgeProxyAddress(
+      _bridgeProxyAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
-
-    rollupVerifiers(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     setMinBridgeFee(
       _minBridgeFee: BigNumberish,
@@ -1003,24 +511,19 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    setPeerContractAddress(
-      _peerContractAddress: string,
+    setPeerMinExecutorFee(
+      _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    setRelayProxyAddress(
-      _relayProxyAddress: string,
+    setPeerMinRollupFee(
+      _peerMinRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    sourceCommitmentCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    syncDepositTx(
-      fromChainId: BigNumberish,
-      fromContractAddr: string,
-      txDataBytes: BytesLike,
+    setpeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -1028,37 +531,16 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
-
-    toggleRollupWhitelist(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    toggleVerifierUpdate(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    transactVerifiers(arg0: BigNumberish, arg1: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    addRollupWhitelist(
-      roller: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
     assetType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    associatedCommitmentPool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    bridgeProxyAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     bridgeType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1067,56 +549,22 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    commitmentQueue(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    currentRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    crossChainSyncTx(
+      _fromChainId: BigNumberish,
+      _fromContract: string,
+      _message: BytesLike,
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
 
     deposit(
-      request: IMystikoBridge.DepositRequestStruct,
+      _request: IMystikoBridge.DepositRequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    disableRollupVerifier(
-      rollupSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    enableRollupVerifier(
-      rollupSize: BigNumberish,
-      _rollupVerifier: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
-      _transactVerifier: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     hasher3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     minBridgeFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1128,29 +576,21 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
 
     peerChainId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    peerContractAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    peerContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    relayCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    peerMinExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    relayProxyAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    peerMinRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    removeRollupWhitelist(
-      roller: string,
+    setAssociatedCommitmentPool(
+      _commitmentPoolAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    rollup(
-      request: IMystikoBridge.RollupRequestStruct,
+    setBridgeProxyAddress(
+      _bridgeProxyAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
-
-    rollupVerifiers(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setMinBridgeFee(
       _minBridgeFee: BigNumberish,
@@ -1167,24 +607,19 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    setPeerContractAddress(
-      _peerContractAddress: string,
+    setPeerMinExecutorFee(
+      _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    setRelayProxyAddress(
-      _relayProxyAddress: string,
+    setPeerMinRollupFee(
+      _peerMinRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    sourceCommitmentCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    syncDepositTx(
-      fromChainId: BigNumberish,
-      fromContractAddr: string,
-      txDataBytes: BytesLike,
+    setpeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
@@ -1192,29 +627,5 @@ export interface MystikoV2WithTBridgeMain extends BaseContract {
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
-
-    toggleRollupWhitelist(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    toggleVerifierUpdate(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    transactVerifiers(
-      arg0: BigNumberish,
-      arg1: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<PopulatedTransaction>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

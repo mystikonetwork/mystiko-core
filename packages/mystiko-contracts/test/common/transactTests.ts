@@ -146,7 +146,7 @@ function buildRequest(
 export function testTransact(
   contractName: string,
   protocol: MystikoProtocolV2,
-  mystikoContract: any,
+  commitmentPoolContract: any,
   transactVerifier: any,
   commitmentInfo: CommitmentInfo<CommitmentV1>,
   inCommitmentsIndices: number[],
@@ -178,7 +178,7 @@ export function testTransact(
   const events: ethers.utils.LogDescription[] = [];
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
-      await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
+      await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
       const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
@@ -205,8 +205,10 @@ export function testTransact(
       );
       recipientBalance = await getBalance(publicRecipientAddress, testToken);
       relayerBalance = await getBalance(relayerAddress, testToken);
-      commitmentQueueSize = await mystikoContract.commitmentQueueSize().then((r: any) => toBN(r.toString()));
-      commitmentIncludedCount = await mystikoContract
+      commitmentQueueSize = await commitmentPoolContract
+        .commitmentQueueSize()
+        .then((r: any) => toBN(r.toString()));
+      commitmentIncludedCount = await commitmentPoolContract
         .commitmentIncludedCount()
         .then((r: any) => toBN(r.toString()));
     });
@@ -221,11 +223,11 @@ export function testTransact(
         relayerAddress,
         outEncryptedNotes,
       );
-      const tx = await mystikoContract.transact(request, signature);
+      const tx = await commitmentPoolContract.transact(request, signature);
       txReceipt = await tx.wait();
       for (let i = 0; i < txReceipt.logs.length; i += 1) {
         try {
-          const parsedLog: ethers.utils.LogDescription = mystikoContract.interface.parseLog(
+          const parsedLog: ethers.utils.LogDescription = commitmentPoolContract.interface.parseLog(
             txReceipt.logs[i],
           );
           events.push(parsedLog);
@@ -275,7 +277,7 @@ export function testTransact(
       const snPromises: Promise<boolean>[] = [];
       for (let i = 1; i < numInputs + 1; i += 1) {
         const sn = proof.inputs[i];
-        snPromises.push(mystikoContract.spentSerialNumbers(sn));
+        snPromises.push(commitmentPoolContract.spentSerialNumbers(sn));
       }
       const snExists = await Promise.all(snPromises);
       snExists.forEach((exist) => expect(exist).to.equal(true));
@@ -286,9 +288,9 @@ export function testTransact(
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
         if (isLoop) {
-          commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+          commitmentPromises.push(commitmentPoolContract.historicCommitments(commitment.toString()));
         } else {
-          commitmentPromises.push(mystikoContract.relayCommitments(commitment.toString()));
+          commitmentPromises.push(commitmentPoolContract.relayCommitments(commitment.toString()));
         }
       }
       const commitmentExists = await Promise.all(commitmentPromises);
@@ -296,7 +298,7 @@ export function testTransact(
     });
 
     it('should set commitmentQueue correctly', async () => {
-      const newCommitmentQueueSize: BN = await mystikoContract
+      const newCommitmentQueueSize: BN = await commitmentPoolContract
         .commitmentQueueSize()
         .then((r: any) => toBN(r.toString()));
       expect(newCommitmentQueueSize.toString()).to.equal(commitmentQueueSize.addn(numOutputs).toString());
@@ -304,7 +306,7 @@ export function testTransact(
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
         commitmentQueuePromises.push(
-          mystikoContract.commitmentQueue(commitmentQueueSize.addn(i).toString()).then((r: any) => {
+          commitmentPoolContract.commitmentQueue(commitmentQueueSize.addn(i).toString()).then((r: any) => {
             expect(r.commitment.toString()).to.equal(commitment.toString());
           }),
         );

@@ -21,69 +21,6 @@ const _abi = [
     type: 'event',
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'commitment',
-        type: 'uint256',
-      },
-    ],
-    name: 'CommitmentIncluded',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'commitment',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'rollupFee',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'leafIndex',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes',
-        name: 'encryptedNote',
-        type: 'bytes',
-      },
-    ],
-    name: 'CommitmentQueued',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'rootHash',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'serialNumber',
-        type: 'uint256',
-      },
-    ],
-    name: 'CommitmentSpent',
-    type: 'event',
-  },
-  {
     inputs: [],
     name: 'FIELD_SIZE',
     outputs: [
@@ -97,19 +34,6 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'roller',
-        type: 'address',
-      },
-    ],
-    name: 'addRollupWhitelist',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
     inputs: [],
     name: 'assetType',
     outputs: [
@@ -117,6 +41,32 @@ const _abi = [
         internalType: 'string',
         name: '',
         type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'associatedCommitmentPool',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'bridgeProxyAddress',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
       },
     ],
     stateMutability: 'view',
@@ -149,79 +99,37 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'commitmentIncludedCount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
+        internalType: 'uint64',
+        name: '_fromChainId',
+        type: 'uint64',
+      },
+      {
+        internalType: 'address',
+        name: '_fromContract',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: '_message',
+        type: 'bytes',
+      },
+      {
+        internalType: 'address',
+        name: '_executor',
+        type: 'address',
       },
     ],
-    name: 'commitmentQueue',
+    name: 'crossChainSyncTx',
     outputs: [
       {
-        internalType: 'uint256',
-        name: 'commitment',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'rollupFee',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'commitmentQueueSize',
-    outputs: [
-      {
-        internalType: 'uint256',
+        internalType: 'bool',
         name: '',
-        type: 'uint256',
+        type: 'bool',
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'currentRoot',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'currentRootIndex',
-    outputs: [
-      {
-        internalType: 'uint32',
-        name: '',
-        type: 'uint32',
-      },
-    ],
-    stateMutability: 'view',
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -270,85 +178,13 @@ const _abi = [
           },
         ],
         internalType: 'struct IMystikoBridge.DepositRequest',
-        name: 'request',
+        name: '_request',
         type: 'tuple',
       },
     ],
     name: 'deposit',
     outputs: [],
     stateMutability: 'payable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: 'rollupSize',
-        type: 'uint32',
-      },
-    ],
-    name: 'disableRollupVerifier',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: 'numInputs',
-        type: 'uint32',
-      },
-      {
-        internalType: 'uint32',
-        name: 'numOutputs',
-        type: 'uint32',
-      },
-    ],
-    name: 'disableTransactVerifier',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: 'rollupSize',
-        type: 'uint32',
-      },
-      {
-        internalType: 'address',
-        name: '_rollupVerifier',
-        type: 'address',
-      },
-    ],
-    name: 'enableRollupVerifier',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: 'numInputs',
-        type: 'uint32',
-      },
-      {
-        internalType: 'uint32',
-        name: 'numOutputs',
-        type: 'uint32',
-      },
-      {
-        internalType: 'address',
-        name: '_transactVerifier',
-        type: 'address',
-      },
-    ],
-    name: 'enableTransactVerifier',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -365,72 +201,8 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'historicCommitments',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [],
     name: 'isDepositsDisabled',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'root',
-        type: 'uint256',
-      },
-    ],
-    name: 'isKnownRoot',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'isRollupWhitelistDisabled',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'isVerifierUpdateDisabled',
     outputs: [
       {
         internalType: 'bool',
@@ -508,31 +280,12 @@ const _abi = [
   },
   {
     inputs: [],
-    name: 'peerContractAddress',
+    name: 'peerContract',
     outputs: [
       {
         internalType: 'address',
         name: '',
         type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'relayCommitments',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
       },
     ],
     stateMutability: 'view',
@@ -540,170 +293,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: 'relayProxyAddress',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'roller',
-        type: 'address',
-      },
-    ],
-    name: 'removeRollupWhitelist',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            components: [
-              {
-                components: [
-                  {
-                    internalType: 'uint256',
-                    name: 'X',
-                    type: 'uint256',
-                  },
-                  {
-                    internalType: 'uint256',
-                    name: 'Y',
-                    type: 'uint256',
-                  },
-                ],
-                internalType: 'struct IVerifier.G1Point',
-                name: 'a',
-                type: 'tuple',
-              },
-              {
-                components: [
-                  {
-                    internalType: 'uint256[2]',
-                    name: 'X',
-                    type: 'uint256[2]',
-                  },
-                  {
-                    internalType: 'uint256[2]',
-                    name: 'Y',
-                    type: 'uint256[2]',
-                  },
-                ],
-                internalType: 'struct IVerifier.G2Point',
-                name: 'b',
-                type: 'tuple',
-              },
-              {
-                components: [
-                  {
-                    internalType: 'uint256',
-                    name: 'X',
-                    type: 'uint256',
-                  },
-                  {
-                    internalType: 'uint256',
-                    name: 'Y',
-                    type: 'uint256',
-                  },
-                ],
-                internalType: 'struct IVerifier.G1Point',
-                name: 'c',
-                type: 'tuple',
-              },
-            ],
-            internalType: 'struct IVerifier.Proof',
-            name: 'proof',
-            type: 'tuple',
-          },
-          {
-            internalType: 'uint32',
-            name: 'rollupSize',
-            type: 'uint32',
-          },
-          {
-            internalType: 'uint256',
-            name: 'newRoot',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'leafHash',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct IMystikoBridge.RollupRequest',
-        name: 'request',
-        type: 'tuple',
-      },
-    ],
-    name: 'rollup',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: '',
-        type: 'uint32',
-      },
-    ],
-    name: 'rollupVerifiers',
-    outputs: [
-      {
-        internalType: 'contract IVerifier',
-        name: 'verifier',
-        type: 'address',
-      },
-      {
-        internalType: 'bool',
-        name: 'enabled',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    name: 'rollupWhitelist',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: '',
-        type: 'uint32',
-      },
-    ],
-    name: 'rootHistory',
+    name: 'peerMinExecutorFee',
     outputs: [
       {
         internalType: 'uint256',
@@ -716,15 +306,41 @@ const _abi = [
   },
   {
     inputs: [],
-    name: 'rootHistoryLength',
+    name: 'peerMinRollupFee',
     outputs: [
       {
-        internalType: 'uint32',
+        internalType: 'uint256',
         name: '',
-        type: 'uint32',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_commitmentPoolAddress',
+        type: 'address',
+      },
+    ],
+    name: 'setAssociatedCommitmentPool',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_bridgeProxyAddress',
+        type: 'address',
+      },
+    ],
+    name: 'setBridgeProxyAddress',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -769,12 +385,12 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_peerContractAddress',
-        type: 'address',
+        internalType: 'uint256',
+        name: '_peerMinExecutorFee',
+        type: 'uint256',
       },
     ],
-    name: 'setPeerContractAddress',
+    name: 'setPeerMinExecutorFee',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -782,74 +398,31 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_relayProxyAddress',
-        type: 'address',
+        internalType: 'uint256',
+        name: '_peerMinRollupFee',
+        type: 'uint256',
       },
     ],
-    name: 'setRelayProxyAddress',
+    name: 'setPeerMinRollupFee',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'sourceCommitmentCount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'spentSerialNumbers',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'uint64',
-        name: 'fromChainId',
+        name: '_peerChainId',
         type: 'uint64',
       },
       {
         internalType: 'address',
-        name: 'fromContractAddr',
+        name: '_peerContract',
         type: 'address',
       },
-      {
-        internalType: 'bytes',
-        name: 'txDataBytes',
-        type: 'bytes',
-      },
     ],
-    name: 'syncDepositTx',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    name: 'setpeerContract',
+    outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -864,207 +437,6 @@ const _abi = [
     name: 'toggleDeposits',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bool',
-        name: '_state',
-        type: 'bool',
-      },
-    ],
-    name: 'toggleRollupWhitelist',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bool',
-        name: '_state',
-        type: 'bool',
-      },
-    ],
-    name: 'toggleVerifierUpdate',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            components: [
-              {
-                components: [
-                  {
-                    internalType: 'uint256',
-                    name: 'X',
-                    type: 'uint256',
-                  },
-                  {
-                    internalType: 'uint256',
-                    name: 'Y',
-                    type: 'uint256',
-                  },
-                ],
-                internalType: 'struct IVerifier.G1Point',
-                name: 'a',
-                type: 'tuple',
-              },
-              {
-                components: [
-                  {
-                    internalType: 'uint256[2]',
-                    name: 'X',
-                    type: 'uint256[2]',
-                  },
-                  {
-                    internalType: 'uint256[2]',
-                    name: 'Y',
-                    type: 'uint256[2]',
-                  },
-                ],
-                internalType: 'struct IVerifier.G2Point',
-                name: 'b',
-                type: 'tuple',
-              },
-              {
-                components: [
-                  {
-                    internalType: 'uint256',
-                    name: 'X',
-                    type: 'uint256',
-                  },
-                  {
-                    internalType: 'uint256',
-                    name: 'Y',
-                    type: 'uint256',
-                  },
-                ],
-                internalType: 'struct IVerifier.G1Point',
-                name: 'c',
-                type: 'tuple',
-              },
-            ],
-            internalType: 'struct IVerifier.Proof',
-            name: 'proof',
-            type: 'tuple',
-          },
-          {
-            internalType: 'uint256',
-            name: 'rootHash',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256[]',
-            name: 'serialNumbers',
-            type: 'uint256[]',
-          },
-          {
-            internalType: 'uint256[]',
-            name: 'sigHashes',
-            type: 'uint256[]',
-          },
-          {
-            internalType: 'bytes32',
-            name: 'sigPk',
-            type: 'bytes32',
-          },
-          {
-            internalType: 'uint256',
-            name: 'publicAmount',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'relayerFeeAmount',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256[]',
-            name: 'outCommitments',
-            type: 'uint256[]',
-          },
-          {
-            internalType: 'uint256[]',
-            name: 'outRollupFees',
-            type: 'uint256[]',
-          },
-          {
-            internalType: 'address',
-            name: 'publicRecipient',
-            type: 'address',
-          },
-          {
-            internalType: 'address',
-            name: 'relayerAddress',
-            type: 'address',
-          },
-          {
-            internalType: 'bytes[]',
-            name: 'outEncryptedNotes',
-            type: 'bytes[]',
-          },
-        ],
-        internalType: 'struct IMystikoBridge.TransactRequest',
-        name: 'request',
-        type: 'tuple',
-      },
-      {
-        internalType: 'bytes',
-        name: 'signature',
-        type: 'bytes',
-      },
-    ],
-    name: 'transact',
-    outputs: [],
-    stateMutability: 'payable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint32',
-        name: '',
-        type: 'uint32',
-      },
-      {
-        internalType: 'uint32',
-        name: '',
-        type: 'uint32',
-      },
-    ],
-    name: 'transactVerifiers',
-    outputs: [
-      {
-        internalType: 'contract IVerifier',
-        name: 'verifier',
-        type: 'address',
-      },
-      {
-        internalType: 'bool',
-        name: 'enabled',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'treeCapacity',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
     type: 'function',
   },
 ];

@@ -18,23 +18,21 @@ import { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
 import { Listener, Provider } from '@ethersproject/providers';
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 
-export declare namespace IMystikoLoop {
-  export type DepositRequestStruct = {
+export declare namespace ICommitmentPool {
+  export type CommitmentRequestStruct = {
     amount: BigNumberish;
     commitment: BigNumberish;
-    hashK: BigNumberish;
-    randomS: BigNumberish;
-    encryptedNote: BytesLike;
+    executorFee: BigNumberish;
     rollupFee: BigNumberish;
+    encryptedNote: BytesLike;
   };
 
-  export type DepositRequestStructOutput = [BigNumber, BigNumber, BigNumber, BigNumber, string, BigNumber] & {
+  export type CommitmentRequestStructOutput = [BigNumber, BigNumber, BigNumber, BigNumber, string] & {
     amount: BigNumber;
     commitment: BigNumber;
-    hashK: BigNumber;
-    randomS: BigNumber;
-    encryptedNote: string;
+    executorFee: BigNumber;
     rollupFee: BigNumber;
+    encryptedNote: string;
   };
 
   export type RollupRequestStruct = {
@@ -130,32 +128,36 @@ export declare namespace IVerifier {
   };
 }
 
-export interface MystikoLoopInterface extends utils.Interface {
-  contractName: 'MystikoLoop';
+export interface CommitmentPoolERC20Interface extends utils.Interface {
+  contractName: 'CommitmentPoolERC20';
   functions: {
     'FIELD_SIZE()': FunctionFragment;
+    'addInputWhitelist(address)': FunctionFragment;
     'addRollupWhitelist(address)': FunctionFragment;
+    'asset()': FunctionFragment;
+    'assetDecimals()': FunctionFragment;
+    'assetName()': FunctionFragment;
+    'assetSymbol()': FunctionFragment;
     'assetType()': FunctionFragment;
-    'bridgeType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
     'commitmentIncludedCount()': FunctionFragment;
     'commitmentQueue(uint256)': FunctionFragment;
     'commitmentQueueSize()': FunctionFragment;
     'currentRoot()': FunctionFragment;
     'currentRootIndex()': FunctionFragment;
-    'deposit((uint256,uint256,uint256,uint128,bytes,uint256))': FunctionFragment;
     'disableRollupVerifier(uint32)': FunctionFragment;
     'disableTransactVerifier(uint32,uint32)': FunctionFragment;
     'enableRollupVerifier(uint32,address)': FunctionFragment;
     'enableTransactVerifier(uint32,uint32,address)': FunctionFragment;
-    'hasher3()': FunctionFragment;
+    'enqueue((uint256,uint256,uint256,uint256,bytes))': FunctionFragment;
     'historicCommitments(uint256)': FunctionFragment;
-    'isDepositsDisabled()': FunctionFragment;
+    'inputWhitelist(address)': FunctionFragment;
     'isKnownRoot(uint256)': FunctionFragment;
     'isRollupWhitelistDisabled()': FunctionFragment;
     'isVerifierUpdateDisabled()': FunctionFragment;
     'minRollupFee()': FunctionFragment;
     'operator()': FunctionFragment;
+    'removeInputWhitelist(address)': FunctionFragment;
     'removeRollupWhitelist(address)': FunctionFragment;
     'rollup((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint32,uint256,uint256))': FunctionFragment;
     'rollupVerifiers(uint32)': FunctionFragment;
@@ -164,7 +166,6 @@ export interface MystikoLoopInterface extends utils.Interface {
     'rootHistoryLength()': FunctionFragment;
     'setMinRollupFee(uint256)': FunctionFragment;
     'spentSerialNumbers(uint256)': FunctionFragment;
-    'toggleDeposits(bool)': FunctionFragment;
     'toggleRollupWhitelist(bool)': FunctionFragment;
     'toggleVerifierUpdate(bool)': FunctionFragment;
     'transact((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint256,uint256[],uint256[],bytes32,uint256,uint256,uint256[],uint256[],address,address,bytes[]),bytes)': FunctionFragment;
@@ -173,16 +174,19 @@ export interface MystikoLoopInterface extends utils.Interface {
   };
 
   encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'addInputWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'addRollupWhitelist', values: [string]): string;
+  encodeFunctionData(functionFragment: 'asset', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'assetDecimals', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'assetName', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'assetSymbol', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'bridgeType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
   encodeFunctionData(functionFragment: 'commitmentIncludedCount', values?: undefined): string;
   encodeFunctionData(functionFragment: 'commitmentQueue', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'commitmentQueueSize', values?: undefined): string;
   encodeFunctionData(functionFragment: 'currentRoot', values?: undefined): string;
   encodeFunctionData(functionFragment: 'currentRootIndex', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'deposit', values: [IMystikoLoop.DepositRequestStruct]): string;
   encodeFunctionData(functionFragment: 'disableRollupVerifier', values: [BigNumberish]): string;
   encodeFunctionData(
     functionFragment: 'disableTransactVerifier',
@@ -193,55 +197,59 @@ export interface MystikoLoopInterface extends utils.Interface {
     functionFragment: 'enableTransactVerifier',
     values: [BigNumberish, BigNumberish, string],
   ): string;
-  encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'enqueue', values: [ICommitmentPool.CommitmentRequestStruct]): string;
   encodeFunctionData(functionFragment: 'historicCommitments', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'inputWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'isKnownRoot', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isRollupWhitelistDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isVerifierUpdateDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'removeInputWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'removeRollupWhitelist', values: [string]): string;
-  encodeFunctionData(functionFragment: 'rollup', values: [IMystikoLoop.RollupRequestStruct]): string;
+  encodeFunctionData(functionFragment: 'rollup', values: [ICommitmentPool.RollupRequestStruct]): string;
   encodeFunctionData(functionFragment: 'rollupVerifiers', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'rollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'rootHistory', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'rootHistoryLength', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'spentSerialNumbers', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'toggleRollupWhitelist', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'toggleVerifierUpdate', values: [boolean]): string;
   encodeFunctionData(
     functionFragment: 'transact',
-    values: [IMystikoLoop.TransactRequestStruct, BytesLike],
+    values: [ICommitmentPool.TransactRequestStruct, BytesLike],
   ): string;
   encodeFunctionData(functionFragment: 'transactVerifiers', values: [BigNumberish, BigNumberish]): string;
   encodeFunctionData(functionFragment: 'treeCapacity', values?: undefined): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'addInputWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'addRollupWhitelist', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'asset', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'assetDecimals', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'assetName', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'assetSymbol', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'bridgeType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'commitmentIncludedCount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'commitmentQueue', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'commitmentQueueSize', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'currentRoot', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'currentRootIndex', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'disableRollupVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'disableTransactVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enableRollupVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enableTransactVerifier', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'enqueue', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'historicCommitments', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'inputWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isRollupWhitelistDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isVerifierUpdateDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'removeInputWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'removeRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rollup', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rollupVerifiers', data: BytesLike): Result;
@@ -250,7 +258,6 @@ export interface MystikoLoopInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'rootHistoryLength', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'spentSerialNumbers', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleVerifierUpdate', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'transact', data: BytesLike): Result;
@@ -291,13 +298,13 @@ export type CommitmentSpentEvent = TypedEvent<
 
 export type CommitmentSpentEventFilter = TypedEventFilter<CommitmentSpentEvent>;
 
-export interface MystikoLoop extends BaseContract {
-  contractName: 'MystikoLoop';
+export interface CommitmentPoolERC20 extends BaseContract {
+  contractName: 'CommitmentPoolERC20';
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MystikoLoopInterface;
+  interface: CommitmentPoolERC20Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -317,14 +324,25 @@ export interface MystikoLoop extends BaseContract {
   functions: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    addRollupWhitelist(
-      roller: string,
+    addInputWhitelist(
+      _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    assetType(overrides?: CallOverrides): Promise<[string]>;
+    addRollupWhitelist(
+      _roller: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
 
-    bridgeType(overrides?: CallOverrides): Promise<[string]>;
+    asset(overrides?: CallOverrides): Promise<[string]>;
+
+    assetDecimals(overrides?: CallOverrides): Promise<[number]>;
+
+    assetName(overrides?: CallOverrides): Promise<[string]>;
+
+    assetSymbol(overrides?: CallOverrides): Promise<[string]>;
+
+    assetType(overrides?: CallOverrides): Promise<[string]>;
 
     changeOperator(
       _newOperator: string,
@@ -344,40 +362,38 @@ export interface MystikoLoop extends BaseContract {
 
     currentRootIndex(overrides?: CallOverrides): Promise<[number]>;
 
-    deposit(
-      request: IMystikoLoop.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
     disableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     enableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       _rollupVerifier: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       _transactVerifier: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    hasher3(overrides?: CallOverrides): Promise<[string]>;
+    enqueue(
+      _request: ICommitmentPool.CommitmentRequestStruct,
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
 
     historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
-    isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
+    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -389,13 +405,18 @@ export interface MystikoLoop extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<[string]>;
 
+    removeInputWhitelist(
+      _actor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
     removeRollupWhitelist(
-      roller: string,
+      _roller: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     rollup(
-      request: IMystikoLoop.RollupRequestStruct,
+      _request: ICommitmentPool.RollupRequestStruct,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -417,11 +438,6 @@ export interface MystikoLoop extends BaseContract {
 
     spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
-    toggleDeposits(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
     toggleRollupWhitelist(
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -433,8 +449,8 @@ export interface MystikoLoop extends BaseContract {
     ): Promise<ContractTransaction>;
 
     transact(
-      request: IMystikoLoop.TransactRequestStruct,
-      signature: BytesLike,
+      _request: ICommitmentPool.TransactRequestStruct,
+      _signature: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -449,14 +465,25 @@ export interface MystikoLoop extends BaseContract {
 
   FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-  addRollupWhitelist(
-    roller: string,
+  addInputWhitelist(
+    _actor: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  assetType(overrides?: CallOverrides): Promise<string>;
+  addRollupWhitelist(
+    _roller: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
 
-  bridgeType(overrides?: CallOverrides): Promise<string>;
+  asset(overrides?: CallOverrides): Promise<string>;
+
+  assetDecimals(overrides?: CallOverrides): Promise<number>;
+
+  assetName(overrides?: CallOverrides): Promise<string>;
+
+  assetSymbol(overrides?: CallOverrides): Promise<string>;
+
+  assetType(overrides?: CallOverrides): Promise<string>;
 
   changeOperator(
     _newOperator: string,
@@ -476,40 +503,38 @@ export interface MystikoLoop extends BaseContract {
 
   currentRootIndex(overrides?: CallOverrides): Promise<number>;
 
-  deposit(
-    request: IMystikoLoop.DepositRequestStruct,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
   disableRollupVerifier(
-    rollupSize: BigNumberish,
+    _rollupSize: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   disableTransactVerifier(
-    numInputs: BigNumberish,
-    numOutputs: BigNumberish,
+    _numInputs: BigNumberish,
+    _numOutputs: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   enableRollupVerifier(
-    rollupSize: BigNumberish,
+    _rollupSize: BigNumberish,
     _rollupVerifier: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   enableTransactVerifier(
-    numInputs: BigNumberish,
-    numOutputs: BigNumberish,
+    _numInputs: BigNumberish,
+    _numOutputs: BigNumberish,
     _transactVerifier: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  hasher3(overrides?: CallOverrides): Promise<string>;
+  enqueue(
+    _request: ICommitmentPool.CommitmentRequestStruct,
+    overrides?: PayableOverrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
 
   historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
-  isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
+  inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -521,13 +546,18 @@ export interface MystikoLoop extends BaseContract {
 
   operator(overrides?: CallOverrides): Promise<string>;
 
+  removeInputWhitelist(
+    _actor: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
   removeRollupWhitelist(
-    roller: string,
+    _roller: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   rollup(
-    request: IMystikoLoop.RollupRequestStruct,
+    _request: ICommitmentPool.RollupRequestStruct,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -549,11 +579,6 @@ export interface MystikoLoop extends BaseContract {
 
   spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
-  toggleDeposits(
-    _state: boolean,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
   toggleRollupWhitelist(
     _state: boolean,
     overrides?: Overrides & { from?: string | Promise<string> },
@@ -565,8 +590,8 @@ export interface MystikoLoop extends BaseContract {
   ): Promise<ContractTransaction>;
 
   transact(
-    request: IMystikoLoop.TransactRequestStruct,
-    signature: BytesLike,
+    _request: ICommitmentPool.TransactRequestStruct,
+    _signature: BytesLike,
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -581,11 +606,19 @@ export interface MystikoLoop extends BaseContract {
   callStatic: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    addRollupWhitelist(roller: string, overrides?: CallOverrides): Promise<void>;
+    addInputWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
+
+    addRollupWhitelist(_roller: string, overrides?: CallOverrides): Promise<void>;
+
+    asset(overrides?: CallOverrides): Promise<string>;
+
+    assetDecimals(overrides?: CallOverrides): Promise<number>;
+
+    assetName(overrides?: CallOverrides): Promise<string>;
+
+    assetSymbol(overrides?: CallOverrides): Promise<string>;
 
     assetType(overrides?: CallOverrides): Promise<string>;
-
-    bridgeType(overrides?: CallOverrides): Promise<string>;
 
     changeOperator(_newOperator: string, overrides?: CallOverrides): Promise<void>;
 
@@ -602,34 +635,32 @@ export interface MystikoLoop extends BaseContract {
 
     currentRootIndex(overrides?: CallOverrides): Promise<number>;
 
-    deposit(request: IMystikoLoop.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
-
-    disableRollupVerifier(rollupSize: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    disableRollupVerifier(_rollupSize: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       overrides?: CallOverrides,
     ): Promise<void>;
 
     enableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       _rollupVerifier: string,
       overrides?: CallOverrides,
     ): Promise<void>;
 
     enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       _transactVerifier: string,
       overrides?: CallOverrides,
     ): Promise<void>;
 
-    hasher3(overrides?: CallOverrides): Promise<string>;
+    enqueue(_request: ICommitmentPool.CommitmentRequestStruct, overrides?: CallOverrides): Promise<boolean>;
 
     historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
-    isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
+    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -641,9 +672,11 @@ export interface MystikoLoop extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<string>;
 
-    removeRollupWhitelist(roller: string, overrides?: CallOverrides): Promise<void>;
+    removeInputWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
 
-    rollup(request: IMystikoLoop.RollupRequestStruct, overrides?: CallOverrides): Promise<void>;
+    removeRollupWhitelist(_roller: string, overrides?: CallOverrides): Promise<void>;
+
+    rollup(_request: ICommitmentPool.RollupRequestStruct, overrides?: CallOverrides): Promise<void>;
 
     rollupVerifiers(
       arg0: BigNumberish,
@@ -660,15 +693,13 @@ export interface MystikoLoop extends BaseContract {
 
     spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
-    toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
-
     toggleRollupWhitelist(_state: boolean, overrides?: CallOverrides): Promise<void>;
 
     toggleVerifierUpdate(_state: boolean, overrides?: CallOverrides): Promise<void>;
 
     transact(
-      request: IMystikoLoop.TransactRequestStruct,
-      signature: BytesLike,
+      _request: ICommitmentPool.TransactRequestStruct,
+      _signature: BytesLike,
       overrides?: CallOverrides,
     ): Promise<void>;
 
@@ -711,14 +742,25 @@ export interface MystikoLoop extends BaseContract {
   estimateGas: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    addRollupWhitelist(
-      roller: string,
+    addInputWhitelist(
+      _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    assetType(overrides?: CallOverrides): Promise<BigNumber>;
+    addRollupWhitelist(
+      _roller: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
 
-    bridgeType(overrides?: CallOverrides): Promise<BigNumber>;
+    asset(overrides?: CallOverrides): Promise<BigNumber>;
+
+    assetDecimals(overrides?: CallOverrides): Promise<BigNumber>;
+
+    assetName(overrides?: CallOverrides): Promise<BigNumber>;
+
+    assetSymbol(overrides?: CallOverrides): Promise<BigNumber>;
+
+    assetType(overrides?: CallOverrides): Promise<BigNumber>;
 
     changeOperator(
       _newOperator: string,
@@ -735,40 +777,38 @@ export interface MystikoLoop extends BaseContract {
 
     currentRootIndex(overrides?: CallOverrides): Promise<BigNumber>;
 
-    deposit(
-      request: IMystikoLoop.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
     disableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     enableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       _rollupVerifier: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       _transactVerifier: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    hasher3(overrides?: CallOverrides): Promise<BigNumber>;
+    enqueue(
+      _request: ICommitmentPool.CommitmentRequestStruct,
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
 
     historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
+    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -780,13 +820,18 @@ export interface MystikoLoop extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<BigNumber>;
 
+    removeInputWhitelist(
+      _actor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
     removeRollupWhitelist(
-      roller: string,
+      _roller: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     rollup(
-      request: IMystikoLoop.RollupRequestStruct,
+      _request: ICommitmentPool.RollupRequestStruct,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -805,11 +850,6 @@ export interface MystikoLoop extends BaseContract {
 
     spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    toggleDeposits(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
     toggleRollupWhitelist(
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -821,8 +861,8 @@ export interface MystikoLoop extends BaseContract {
     ): Promise<BigNumber>;
 
     transact(
-      request: IMystikoLoop.TransactRequestStruct,
-      signature: BytesLike,
+      _request: ICommitmentPool.TransactRequestStruct,
+      _signature: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -834,14 +874,25 @@ export interface MystikoLoop extends BaseContract {
   populateTransaction: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    addRollupWhitelist(
-      roller: string,
+    addInputWhitelist(
+      _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    assetType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    addRollupWhitelist(
+      _roller: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
 
-    bridgeType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    asset(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    assetDecimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    assetName(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    assetSymbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    assetType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     changeOperator(
       _newOperator: string,
@@ -858,40 +909,38 @@ export interface MystikoLoop extends BaseContract {
 
     currentRootIndex(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    deposit(
-      request: IMystikoLoop.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
     disableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     disableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     enableRollupVerifier(
-      rollupSize: BigNumberish,
+      _rollupSize: BigNumberish,
       _rollupVerifier: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     enableTransactVerifier(
-      numInputs: BigNumberish,
-      numOutputs: BigNumberish,
+      _numInputs: BigNumberish,
+      _numOutputs: BigNumberish,
       _transactVerifier: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    hasher3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    enqueue(
+      _request: ICommitmentPool.CommitmentRequestStruct,
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
 
     historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -903,13 +952,18 @@ export interface MystikoLoop extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    removeInputWhitelist(
+      _actor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
     removeRollupWhitelist(
-      roller: string,
+      _roller: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     rollup(
-      request: IMystikoLoop.RollupRequestStruct,
+      _request: ICommitmentPool.RollupRequestStruct,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
@@ -928,11 +982,6 @@ export interface MystikoLoop extends BaseContract {
 
     spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    toggleDeposits(
-      _state: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
     toggleRollupWhitelist(
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -944,8 +993,8 @@ export interface MystikoLoop extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     transact(
-      request: IMystikoLoop.TransactRequestStruct,
-      signature: BytesLike,
+      _request: ICommitmentPool.TransactRequestStruct,
+      _signature: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 

@@ -32,7 +32,11 @@ import {
   MystikoV2WithLoopMain,
   MystikoV2WithTBridgeMain__factory,
   MystikoTBridgeProxy__factory,
-  MystikoV2WithTBridgeERC20__factory,
+  CommitmentPoolMain,
+  CommitmentPoolMain__factory,
+  CommitmentPoolERC20,
+  CommitmentPoolERC20__factory,
+  MystikoTBridgeProxy,
 } from '@mystikonetwork/contracts-abi';
 import {
   MerkleTreeHeight,
@@ -42,8 +46,6 @@ import {
   MinRollupFee,
   UserPrivKeys,
   DefaultTokenAmount,
-  SourceChainID,
-  DestinationChainID,
 } from './constants';
 
 const { ethers, waffle } = require('hardhat');
@@ -54,17 +56,19 @@ export function loadFixture<T>(fixture: Fixture<T>): Promise<T> {
   return waffle.createFixtureLoader(waffle.provider.getWallets(), waffle.provider)(fixture);
 }
 
-interface CoreBridgeDeploymentInfo {
-  proxy: any;
-  localMain: any;
-  localERC20: any;
-  remoteMain: any;
-  remoteERC20: any;
+interface CommitmentPoolDeploymentInfo {
+  poolMain: CommitmentPoolMain;
+  poolERC20: CommitmentPoolERC20;
 }
 
 interface CoreLoopDeploymentInfo {
-  loopMain: MystikoV2WithLoopMain;
-  loopERC20: MystikoV2WithLoopERC20;
+  coreMain: MystikoV2WithLoopMain;
+  coreERC20: MystikoV2WithLoopERC20;
+}
+
+interface CoreBridgeDeploymentInfo {
+  coreMain: any;
+  coreERC20: any;
 }
 
 interface DependDeploymentInfo {
@@ -79,6 +83,7 @@ interface DependDeploymentInfo {
   rollup1: Rollup1Verifier;
   rollup4: Rollup4Verifier;
   rollup16: Rollup16Verifier;
+  tbridge: MystikoTBridgeProxy;
 }
 
 export function getArtifact(contract: string): Promise<Artifact> {
@@ -88,112 +93,91 @@ export function getArtifact(contract: string): Promise<Artifact> {
   return artifacts.readArtifact(contract);
 }
 
+export async function deployCommitmentPoolContracts(
+  accounts: Wallet[],
+  tokenAddress: string,
+  { treeHeight = MerkleTreeHeight, rootHistoryLength = RootHistoryLength, minRollupFee = MinRollupFee },
+): Promise<CommitmentPoolDeploymentInfo> {
+  const poolMainFactory = (await ethers.getContractFactory(
+    'CommitmentPoolMain',
+  )) as CommitmentPoolMain__factory;
+  const poolMain = await poolMainFactory.connect(accounts[0]).deploy(treeHeight, rootHistoryLength);
+  await poolMain.deployed();
+  await poolMain.setMinRollupFee(minRollupFee);
+
+  const poolERC20Factory = (await ethers.getContractFactory(
+    'CommitmentPoolERC20',
+  )) as CommitmentPoolERC20__factory;
+  const poolERC20 = await poolERC20Factory
+    .connect(accounts[0])
+    .deploy(treeHeight, rootHistoryLength, tokenAddress);
+  await poolERC20.deployed();
+  await poolERC20.setMinRollupFee(minRollupFee);
+
+  return { poolMain, poolERC20 };
+}
+
 export async function deployLoopContracts(
   accounts: Wallet[],
   hasher3Address: string,
   tokenAddress: string,
-  { treeHeight = MerkleTreeHeight, rootHistoryLength = RootHistoryLength, minRollupFee = MinRollupFee },
+  poolMain: CommitmentPoolMain,
+  poolERC20: CommitmentPoolERC20,
+  { minRollupFee = MinRollupFee },
 ): Promise<CoreLoopDeploymentInfo> {
   const loopMainFactory = (await ethers.getContractFactory(
     'MystikoV2WithLoopMain',
   )) as MystikoV2WithLoopMain__factory;
-  const loopMain = await loopMainFactory
-    .connect(accounts[0])
-    .deploy(treeHeight, rootHistoryLength, minRollupFee, hasher3Address);
-  await loopMain.deployed();
+  const coreMain = await loopMainFactory.connect(accounts[0]).deploy(hasher3Address);
+  await coreMain.deployed();
+  await coreMain.setMinRollupFee(minRollupFee);
+  await coreMain.setAssociatedCommitmentPool(poolMain.address);
+  await poolMain.addInputWhitelist(coreMain.address);
 
   const loopERC20Factory = (await ethers.getContractFactory(
     'MystikoV2WithLoopERC20',
   )) as MystikoV2WithLoopERC20__factory;
-  const loopERC20 = await loopERC20Factory
-    .connect(accounts[0])
-    .deploy(treeHeight, rootHistoryLength, minRollupFee, hasher3Address, tokenAddress);
-  await loopERC20.deployed();
+  const coreERC20 = await loopERC20Factory.connect(accounts[0]).deploy(hasher3Address, tokenAddress);
+  await coreERC20.deployed();
+  await coreERC20.setMinRollupFee(minRollupFee);
+  await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
+  await poolERC20.addInputWhitelist(coreERC20.address);
 
-  return { loopMain, loopERC20 };
+  return { coreMain, coreERC20 };
 }
 
 export async function deployTBridgeContracts(
   accounts: Wallet[],
   hasher3Address: string,
   tokenAddress: string,
-  {
-    treeHeight = MerkleTreeHeight,
-    rootHistoryLength = RootHistoryLength,
-    minBridgeFee = MinBridgeFee,
-    minExecutorFee = MinExecutorFee,
-    minRollupFee = MinRollupFee,
-  },
+  tbridgeAddress: string,
+  mainPoolAddress: string,
+  erc20PoolAddress: string,
+  { minBridgeFee = MinBridgeFee, minExecutorFee = MinExecutorFee, minRollupFee = MinRollupFee },
 ): Promise<CoreBridgeDeploymentInfo> {
-  const proxyFactory = (await ethers.getContractFactory(
-    'MystikoTBridgeProxy',
-  )) as MystikoTBridgeProxy__factory;
-  const proxy = await proxyFactory.connect(accounts[0]).deploy();
-  await proxy.deployed();
-
   const tBridgeMainFactory = (await ethers.getContractFactory(
     'MystikoV2WithTBridgeMain',
   )) as MystikoV2WithTBridgeMain__factory;
 
-  const localMain = await tBridgeMainFactory
-    .connect(accounts[0])
-    .deploy(
-      proxy.address,
-      DestinationChainID,
-      treeHeight,
-      rootHistoryLength,
-      minBridgeFee,
-      minExecutorFee,
-      minRollupFee,
-      hasher3Address,
-    );
+  const coreMain = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
+  await coreMain.setAssociatedCommitmentPool(mainPoolAddress);
+  await coreMain.setBridgeProxyAddress(tbridgeAddress);
+  await coreMain.setMinBridgeFee(minBridgeFee);
+  await coreMain.setMinExecutorFee(minExecutorFee);
+  await coreMain.setMinRollupFee(minRollupFee);
+  await coreMain.setPeerMinExecutorFee(minExecutorFee);
+  await coreMain.setPeerMinRollupFee(minRollupFee);
 
-  const remoteMain = await tBridgeMainFactory
-    .connect(accounts[0])
-    .deploy(
-      proxy.address,
-      SourceChainID,
-      treeHeight,
-      rootHistoryLength,
-      minBridgeFee,
-      minExecutorFee,
-      minRollupFee,
-      hasher3Address,
-    );
+  const coreERC20 = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
+  await coreERC20.setAssociatedCommitmentPool(mainPoolAddress);
+  await coreERC20.setBridgeProxyAddress(tbridgeAddress);
+  await coreERC20.setMinBridgeFee(minBridgeFee);
+  await coreERC20.setMinExecutorFee(minExecutorFee);
+  await coreERC20.setMinRollupFee(minRollupFee);
+  await coreERC20.setPeerMinExecutorFee(minExecutorFee);
+  await coreERC20.setPeerMinRollupFee(minRollupFee);
 
-  const tBridgeERC20Factory = (await ethers.getContractFactory(
-    'MystikoV2WithTBridgeERC20',
-  )) as MystikoV2WithTBridgeERC20__factory;
-
-  const localERC20 = await tBridgeERC20Factory
-    .connect(accounts[0])
-    .deploy(
-      proxy.address,
-      DestinationChainID,
-      treeHeight,
-      rootHistoryLength,
-      minBridgeFee,
-      minExecutorFee,
-      minRollupFee,
-      hasher3Address,
-      tokenAddress,
-    );
-
-  const remoteERC20 = await tBridgeERC20Factory
-    .connect(accounts[0])
-    .deploy(
-      proxy.address,
-      SourceChainID,
-      treeHeight,
-      rootHistoryLength,
-      minBridgeFee,
-      minExecutorFee,
-      minRollupFee,
-      hasher3Address,
-      tokenAddress,
-    );
-
-  return { proxy, localMain, localERC20, remoteMain, remoteERC20 };
+  return { coreMain, coreERC20 };
 }
 
 export async function deployDependContracts(accounts: Wallet[]): Promise<DependDeploymentInfo> {
@@ -258,6 +242,12 @@ export async function deployDependContracts(accounts: Wallet[]): Promise<DependD
   const rollup16 = await rollup16Factory.connect(accounts[0]).deploy();
   await rollup16.deployed();
 
+  const proxyFactory = (await ethers.getContractFactory(
+    'MystikoTBridgeProxy',
+  )) as MystikoTBridgeProxy__factory;
+  const tbridge = await proxyFactory.connect(accounts[0]).deploy();
+  await tbridge.deployed();
+
   return {
     testToken,
     hasher3,
@@ -270,6 +260,7 @@ export async function deployDependContracts(accounts: Wallet[]): Promise<DependD
     rollup1,
     rollup4,
     rollup16,
+    tbridge,
   };
 }
 
