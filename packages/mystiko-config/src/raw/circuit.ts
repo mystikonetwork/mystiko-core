@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 import { CircuitType } from '../common';
 
@@ -11,6 +11,10 @@ export class RawCircuitConfig {
   @Expose()
   @IsEnum(CircuitType)
   public type: CircuitType;
+
+  @Expose()
+  @IsBoolean()
+  public isDefault: boolean = false;
 
   @Expose()
   @IsArray()

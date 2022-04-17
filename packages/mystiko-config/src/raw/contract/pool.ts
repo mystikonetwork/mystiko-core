@@ -38,6 +38,5 @@ export class RawPoolContractConfig extends RawContractConfig {
 
   @Expose()
   @IsString({ each: true })
-  @IsNotEmpty({ each: true })
-  public circuits: string[];
+  public circuits: string[] = [];
 }

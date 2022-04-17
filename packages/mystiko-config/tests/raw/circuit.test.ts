@@ -7,6 +7,7 @@ beforeEach(() => {
   config = new RawCircuitConfig();
   config.name = 'zokrates-1.0-rollup1';
   config.type = CircuitType.ROLLUP1;
+  config.isDefault = true;
   config.programFile = ['./Rollup1.program.gz'];
   config.abiFile = ['./Rollup1.abi.json'];
   config.provingKeyFile = ['./Rollup1.pkey.gz'];

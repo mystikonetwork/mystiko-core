@@ -1,4 +1,5 @@
 import {
+  ArrayUnique,
   Equals,
   IsArray,
   IsBoolean,
@@ -32,6 +33,7 @@ export class RawDepositContractConfig extends RawContractConfig {
   @Expose()
   @ValidateNested()
   @IsArray()
+  @ArrayUnique((conf) => `${conf.chainId}/${conf.address}`)
   public peerChains: RawPeerContractConfig[] = [];
 
   @Expose()

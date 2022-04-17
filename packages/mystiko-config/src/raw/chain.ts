@@ -1,5 +1,6 @@
 import {
   ArrayNotEmpty,
+  ArrayUnique,
   Contains,
   IsArray,
   IsInt,
@@ -47,10 +48,12 @@ export class RawChainConfig {
 
   @ValidateNested()
   @IsArray()
+  @ArrayUnique((conf) => conf.address)
   public depositContracts: RawDepositContractConfig[] = [];
 
   @ValidateNested()
   @IsArray()
+  @ArrayUnique((conf) => conf.address)
   public poolContracts: RawPoolContractConfig[] = [];
 
   @IsInt()

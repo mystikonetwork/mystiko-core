@@ -1,7 +1,7 @@
 import { plainToInstance } from 'class-transformer';
+import { ClassConstructor } from 'class-transformer/types/interfaces';
 import { validate } from 'class-validator';
 import { readJsonFile } from '@mystikonetwork/utils';
-import { ClassConstructor } from 'class-transformer/types/interfaces';
 
 /**
  * @enum BridgeType

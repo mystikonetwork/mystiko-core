@@ -1,9 +1,11 @@
-import { IsArray, IsSemVer, ValidateNested } from 'class-validator';
+import { ArrayUnique, IsArray, IsSemVer, ValidateNested } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
 import { RawBridgeConfig, RawCelerBridgeConfig, RawPolyBridgeConfig, RawTBridgeConfig } from './bridge';
 import { RawChainConfig } from './chain';
 import { RawCircuitConfig } from './circuit';
 import { BridgeType } from '../common';
+
+export type RawBridgeConfigType = RawCelerBridgeConfig | RawPolyBridgeConfig | RawTBridgeConfig;
 
 export class RawMystikoConfig {
   @Expose()
@@ -13,11 +15,13 @@ export class RawMystikoConfig {
   @Expose()
   @ValidateNested()
   @IsArray()
+  @ArrayUnique((conf) => conf.chainId)
   public chains: RawChainConfig[] = [];
 
   @Expose()
   @ValidateNested()
   @IsArray()
+  @ArrayUnique((conf) => conf.type)
   @Type(() => RawBridgeConfig, {
     discriminator: {
       property: 'type',
@@ -28,10 +32,11 @@ export class RawMystikoConfig {
       ],
     },
   })
-  public bridges: Array<RawBridgeConfig | RawCelerBridgeConfig | RawPolyBridgeConfig> = [];
+  public bridges: Array<RawBridgeConfigType> = [];
 
   @Expose()
   @ValidateNested()
   @IsArray()
+  @ArrayUnique((conf) => conf.name)
   public circuits: RawCircuitConfig[] = [];
 }

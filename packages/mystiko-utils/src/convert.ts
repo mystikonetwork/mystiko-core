@@ -179,6 +179,6 @@ export function toBuff(strData: string): Buffer {
  * @param {any} object the object to be deeply copied.
  * @returns {any} deeply copied object.
  */
-export function deepCopy(object: any): any {
+export function deepCopy<T>(object: T): T {
   return JSON.parse(JSON.stringify(object));
 }
