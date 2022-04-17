@@ -29,10 +29,11 @@ contract MystikoTBridgeProxy is ICrossChainProxy {
     uint64 _fromChainId,
     address _fromContract,
     address _toContract,
+    address _executor,
     bytes calldata _message
   ) external onlyOperator returns (bool) {
     require(
-      MystikoV2WithTBridge(_toContract).crossChainSyncTx(_fromChainId, _fromContract, _message, msg.sender),
+      MystikoV2WithTBridge(_toContract).crossChainSyncTx(_fromChainId, _fromContract, _message, _executor),
       "call crossChainSyncTx error"
     );
     return true;

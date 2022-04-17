@@ -34,7 +34,7 @@ interface ICommitmentPool {
     bytes[] outEncryptedNotes;
   }
 
-  function enqueue(CommitmentRequest memory _request) external payable returns (bool);
+  function enqueue(CommitmentRequest memory _request, address _executor) external returns (bool);
 
   function rollup(RollupRequest memory _request) external;
 

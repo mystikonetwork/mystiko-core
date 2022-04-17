@@ -151,8 +151,8 @@ export async function deployTBridgeContracts(
   hasher3Address: string,
   tokenAddress: string,
   tbridgeAddress: string,
-  mainPoolAddress: string,
-  erc20PoolAddress: string,
+  poolMain: CommitmentPoolMain,
+  poolERC20: CommitmentPoolERC20,
   { minBridgeFee = MinBridgeFee, minExecutorFee = MinExecutorFee, minRollupFee = MinRollupFee },
 ): Promise<CoreBridgeDeploymentInfo> {
   const tBridgeMainFactory = (await ethers.getContractFactory(
@@ -160,22 +160,24 @@ export async function deployTBridgeContracts(
   )) as MystikoV2WithTBridgeMain__factory;
 
   const coreMain = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
-  await coreMain.setAssociatedCommitmentPool(mainPoolAddress);
+  await coreMain.setAssociatedCommitmentPool(poolMain.address);
   await coreMain.setBridgeProxyAddress(tbridgeAddress);
   await coreMain.setMinBridgeFee(minBridgeFee);
   await coreMain.setMinExecutorFee(minExecutorFee);
   await coreMain.setMinRollupFee(minRollupFee);
   await coreMain.setPeerMinExecutorFee(minExecutorFee);
   await coreMain.setPeerMinRollupFee(minRollupFee);
+  await poolMain.addInputWhitelist(coreMain.address);
 
   const coreERC20 = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
-  await coreERC20.setAssociatedCommitmentPool(mainPoolAddress);
+  await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
   await coreERC20.setBridgeProxyAddress(tbridgeAddress);
   await coreERC20.setMinBridgeFee(minBridgeFee);
   await coreERC20.setMinExecutorFee(minExecutorFee);
   await coreERC20.setMinRollupFee(minRollupFee);
   await coreERC20.setPeerMinExecutorFee(minExecutorFee);
   await coreERC20.setPeerMinRollupFee(minRollupFee);
+  await poolERC20.addInputWhitelist(coreERC20.address);
 
   return { coreMain, coreERC20 };
 }

@@ -8,4 +8,6 @@ contract CommitmentPoolMain is CommitmentPool, MainAssetPool {
   constructor(uint32 _treeHeight, uint32 _rootHistoryLength)
     CommitmentPool(_treeHeight, _rootHistoryLength)
   {}
+
+  receive() external payable {}
 }

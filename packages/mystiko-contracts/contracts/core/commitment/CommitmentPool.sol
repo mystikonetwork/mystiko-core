@@ -46,7 +46,7 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
   address public operator;
   uint256 public minRollupFee;
   mapping(address => bool) public rollupWhitelist;
-  mapping(address => bool) public inputWhitelist;
+  mapping(address => bool) public enqueueWhitelist;
 
   // Some switches.
   bool public isVerifierUpdateDisabled;
@@ -62,8 +62,8 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
     _;
   }
 
-  modifier onlyInputWhitelisted() {
-    require(inputWhitelist[msg.sender], "Only whitelisted input.");
+  modifier onlyEnqueueWhitelisted() {
+    require(enqueueWhitelist[msg.sender], "Only whitelisted input.");
     _;
   }
 
@@ -85,11 +85,10 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
     rootHistory[currentRootIndex] = currentRoot;
   }
 
-  function enqueue(CommitmentRequest memory _request)
+  function enqueue(CommitmentRequest memory _request, address _executor)
     external
-    payable
     override
-    onlyInputWhitelisted
+    onlyEnqueueWhitelisted
     returns (bool)
   {
     // todo should do check in upper layer call
@@ -98,6 +97,10 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
 
     historicCommitments[_request.commitment] = true;
     _enqueueCommitment(_request.commitment, _request.rollupFee, _request.encryptedNote);
+
+    if (_request.executorFee > 0) {
+      _processExecutorFeeTransfer(_executor, _request.executorFee);
+    }
     return true;
   }
 
@@ -284,11 +287,11 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
   }
 
   function addInputWhitelist(address _actor) external onlyOperator {
-    inputWhitelist[_actor] = true;
+    enqueueWhitelist[_actor] = true;
   }
 
   function removeInputWhitelist(address _actor) external onlyOperator {
-    inputWhitelist[_actor] = false;
+    enqueueWhitelist[_actor] = false;
   }
 
   function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {

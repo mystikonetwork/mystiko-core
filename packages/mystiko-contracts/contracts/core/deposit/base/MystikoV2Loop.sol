@@ -80,10 +80,7 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
     });
 
     // todo 1 check commitment in queue
-    require(
-      ICommitmentPool(associatedCommitmentPool).enqueue{value: msg.value}(cmRequest),
-      "call enqueue error"
-    );
+    require(ICommitmentPool(associatedCommitmentPool).enqueue(cmRequest, address(0)), "call enqueue error");
   }
 
   function toggleDeposits(bool _state) external onlyOperator {
