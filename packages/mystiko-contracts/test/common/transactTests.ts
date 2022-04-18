@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
-import { TestToken } from '@mystikonetwork/contracts-abi';
+import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
@@ -312,6 +312,78 @@ export function testTransact(
         );
       }
       await Promise.all(commitmentQueuePromises);
+    });
+  });
+}
+
+export function testTransactRevert(
+  contractName: string,
+  protocol: MystikoProtocolV2,
+  commitmentPoolContract: any,
+  sanctionList: DummySanctionsList,
+  transactVerifier: any,
+  commitmentInfo: CommitmentInfo<CommitmentV1>,
+  inCommitmentsIndices: number[],
+  publicAmount: BN,
+  relayerFeeAmount: BN,
+  outAmounts: BN[],
+  rollupFeeAmounts: BN[],
+  programFile: string,
+  abiFile: string,
+  provingKeyFile: string,
+) {
+  const numInputs = inCommitmentsIndices.length;
+  const numOutputs = outAmounts.length;
+  const publicRecipientAddress = '0x2Bd6FBfDA256cebAC13931bc3E91F6e0f59A5e23';
+  const relayerAddress = '0xc9192277ea18ff49618E412197C9c9eaCF43A5e3';
+  const signatureKeys = generateSignatureKeys();
+  let proof: Proof;
+  let outCommitments: CommitmentV1[];
+  let outEncryptedNotes: Buffer[];
+  let signature: string;
+  describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
+    before(async () => {
+      await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
+      const proofWithCommitments = await generateProof(
+        protocol,
+        numInputs,
+        numOutputs,
+        commitmentInfo,
+        inCommitmentsIndices,
+        signatureKeys.pk,
+        publicAmount,
+        relayerFeeAmount,
+        outAmounts,
+        rollupFeeAmounts,
+        programFile,
+        abiFile,
+        provingKeyFile,
+      );
+      proof = proofWithCommitments.proof;
+      outCommitments = proofWithCommitments.outCommitments;
+      outEncryptedNotes = outCommitments.map((c) => c.privateNote);
+      signature = await signRequest(
+        signatureKeys.wallet,
+        publicRecipientAddress,
+        relayerAddress,
+        outEncryptedNotes,
+      );
+    });
+
+    it('should revert when recipient in sanction list', async () => {
+      await sanctionList.setSanction(publicRecipientAddress);
+      const request = buildRequest(
+        numInputs,
+        numOutputs,
+        proof,
+        publicRecipientAddress,
+        relayerAddress,
+        outEncryptedNotes,
+      );
+
+      await expect(commitmentPoolContract.transact(request, signature)).to.be.revertedWith(
+        'sanctioned address',
+      );
     });
   });
 }

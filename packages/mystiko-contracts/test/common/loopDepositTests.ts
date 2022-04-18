@@ -1,9 +1,10 @@
 import { expect } from 'chai';
 import { Wallet } from '@ethersproject/wallet';
-import { TestToken } from '@mystikonetwork/contracts-abi';
+import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
+import { MinAmount } from '../util/constants';
 
 const { waffle } = require('hardhat');
 
@@ -13,6 +14,7 @@ export function testLoopDeposit(
   mystikoContract: any,
   commitmentPoolContract: any,
   testTokenContract: TestToken,
+  sanctionList: DummySanctionsList,
   accounts: Wallet[],
   depositAmount: string,
   isMainAsset: boolean,
@@ -46,6 +48,58 @@ export function testLoopDeposit(
         ),
       ).to.be.revertedWith('deposits are disabled');
       await mystikoContract.toggleDeposits(false);
+    });
+
+    it('should revert when sender in sanction list', async () => {
+      await sanctionList.setSanction(accounts[0].address);
+      await expect(
+        mystikoContract.deposit(
+          [
+            depositAmount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            minRollupFee,
+          ],
+          { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
+        ),
+      ).to.be.revertedWith('sanctioned address');
+      await sanctionList.setSanction('0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF');
+    });
+
+    it('should revert when amount is too few', async () => {
+      const amount = toBN(MinAmount).sub(toBN(1)).toString();
+      await expect(
+        mystikoContract.deposit(
+          [
+            amount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            '0',
+          ],
+          { from: accounts[0].address, value: isMainAsset ? amount : '0' },
+        ),
+      ).to.be.revertedWith('amount too few');
+    });
+
+    it('should revert when amount is too few', async () => {
+      const amount = toBN(MinAmount).sub(toBN(1)).toString();
+      await expect(
+        mystikoContract.deposit(
+          [
+            amount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            '0',
+          ],
+          { from: accounts[0].address, value: isMainAsset ? amount : '0' },
+        ),
+      ).to.be.revertedWith('amount too few');
     });
 
     it('should revert when rollup fee is too few', async () => {

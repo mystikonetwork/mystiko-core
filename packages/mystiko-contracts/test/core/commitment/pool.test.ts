@@ -14,6 +14,7 @@ import {
   TestToken,
   CommitmentPoolMain,
   CommitmentPoolERC20,
+  DummySanctionsList,
 } from '@mystikonetwork/contracts-abi';
 import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
 import { toBN, toDecimals } from '@mystikonetwork/utils';
@@ -24,6 +25,7 @@ import {
   deployCommitmentPoolContracts,
 } from '../../util/common';
 import { constructCommitment, testLoopDeposit, testRollup, testTransact } from '../../common';
+import { testTransactRevert } from '../../common/transactTests';
 
 const { waffle } = require('hardhat');
 const { initialize } = require('zokrates-js/node');
@@ -42,12 +44,14 @@ describe('Test Mystiko loop', () => {
       rollup1,
       rollup4,
       rollup16,
+      sanctionList,
     } = await deployDependContracts(accounts);
-    const pool = await deployCommitmentPoolContracts(accounts, testToken.address, {});
+    const pool = await deployCommitmentPoolContracts(accounts, testToken.address, sanctionList.address, {});
     const loop = await deployLoopContracts(
       accounts,
       hasher3.address,
       testToken.address,
+      sanctionList.address,
       pool.poolMain,
       pool.poolERC20,
       {},
@@ -66,11 +70,13 @@ describe('Test Mystiko loop', () => {
       rollup16,
       pool,
       loop,
+      sanctionList,
     };
   }
 
   let accounts: Wallet[];
   let testToken: TestToken;
+  let sanctionList: DummySanctionsList;
   let poolMain: CommitmentPoolMain;
   let poolErc20: CommitmentPoolERC20;
   let loopERC20: MystikoV2WithLoopERC20;
@@ -95,6 +101,7 @@ describe('Test Mystiko loop', () => {
 
     const r = await loadFixture(fixture);
     testToken = r.testToken;
+    sanctionList = r.sanctionList;
 
     poolMain = r.pool.poolMain;
     poolErc20 = r.pool.poolERC20;
@@ -121,6 +128,7 @@ describe('Test Mystiko loop', () => {
       loopMain,
       poolMain,
       testToken,
+      sanctionList,
       accounts,
       depositAmount.toString(),
       true,
@@ -136,6 +144,23 @@ describe('Test Mystiko loop', () => {
     testRollup('CommitmentPoolMain', protocol, poolMain, rollup1, testToken, accounts, cmInfo.commitments, {
       rollupSize: 1,
     });
+
+    testTransactRevert(
+      'CommitmentPoolMain',
+      protocol,
+      poolMain,
+      sanctionList,
+      transaction1x0Verifier,
+      cmInfo,
+      [0],
+      depositAmount,
+      toBN(0),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
+    );
 
     testTransact(
       'CommitmentPoolMain',
@@ -250,6 +275,7 @@ describe('Test Mystiko loop', () => {
       loopERC20,
       poolErc20,
       testToken,
+      sanctionList,
       accounts,
       depositAmount.toString(),
       false,

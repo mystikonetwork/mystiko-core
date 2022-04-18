@@ -6,12 +6,16 @@ export function testLoopConstructor(
   contractName: string,
   mystikoContract: any,
   hasher3: Hasher3,
+  minAmount: number,
   minRollupFee: number,
   commitmentPoolAddress: string,
 ) {
   describe(`Test ${contractName} constructor`, () => {
     it('should initialize hasher3 correctly', async () => {
       expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
+    });
+    it('should initialize minAmount correctly', async () => {
+      expect(await mystikoContract.minAmount()).to.equal(minAmount);
     });
     it('should initialize minRollupFee correctly', async () => {
       expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
@@ -29,6 +33,7 @@ export function testBridgeConstructor(
   contractName: string,
   mystikoContract: any,
   hasher3: Hasher3,
+  minAmount: number,
   minBridgeFee: number,
   minExecutorFee: number,
   minRollupFee: number,
@@ -39,6 +44,9 @@ export function testBridgeConstructor(
   describe(`Test ${contractName} constructor`, () => {
     it('should initialize hasher3 correctly', async () => {
       expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
+    });
+    it('should initialize minAmount correctly', async () => {
+      expect(await mystikoContract.minAmount()).to.equal(minAmount);
     });
     it('should initialize minBridgeFee correctly', async () => {
       expect(await mystikoContract.minBridgeFee()).to.equal(minBridgeFee);

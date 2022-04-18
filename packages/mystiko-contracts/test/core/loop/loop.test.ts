@@ -13,7 +13,7 @@ import {
   deployCommitmentPoolContracts,
 } from '../../util/common';
 import { testLoopConstructor, testLoopAdminOperations } from '../../common';
-import { MinRollupFee } from '../../util/constants';
+import { MinAmount, MinRollupFee } from '../../util/constants';
 
 const { waffle } = require('hardhat');
 
@@ -31,12 +31,14 @@ describe('Test Mystiko loop', () => {
       rollup1,
       rollup4,
       rollup16,
+      sanctionList,
     } = await deployDependContracts(accounts);
-    const pool = await deployCommitmentPoolContracts(accounts, testToken.address, {});
+    const pool = await deployCommitmentPoolContracts(accounts, testToken.address, sanctionList.address, {});
     const loop = await deployLoopContracts(
       accounts,
       hasher3.address,
       testToken.address,
+      sanctionList.address,
       pool.poolMain,
       pool.poolERC20,
       {},
@@ -55,6 +57,7 @@ describe('Test Mystiko loop', () => {
       rollup16,
       pool,
       loop,
+      sanctionList,
     };
   }
 
@@ -77,8 +80,22 @@ describe('Test Mystiko loop', () => {
   });
 
   it('test constructor', () => {
-    testLoopConstructor('MystikoV2WithLoopMain', loopMain, hasher3, MinRollupFee, poolMain.address);
-    testLoopConstructor('MystikoV2WithLoopERC20', loopERC20, hasher3, MinRollupFee, poolErc20.address);
+    testLoopConstructor(
+      'MystikoV2WithLoopMain',
+      loopMain,
+      hasher3,
+      MinAmount,
+      MinRollupFee,
+      poolMain.address,
+    );
+    testLoopConstructor(
+      'MystikoV2WithLoopERC20',
+      loopERC20,
+      hasher3,
+      MinAmount,
+      MinRollupFee,
+      poolErc20.address,
+    );
   });
 
   it('test admin operation', () => {

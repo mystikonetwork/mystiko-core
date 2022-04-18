@@ -6,10 +6,11 @@ import "../../../interface/IMystikoBridge.sol";
 import "../../../interface/IHasher3.sol";
 import "../../../interface/ICommitmentPool.sol";
 import "./CrossChainDataSerializable.sol";
+import "../../rule/Sanctions.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSerializable {
+abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSerializable, Sanctions {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
@@ -24,6 +25,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   address public bridgeProxyAddress;
 
   //local chain fee
+  uint256 public minAmount;
   uint256 public minBridgeFee;
   uint256 public minExecutorFee;
   uint256 public minRollupFee;
@@ -57,6 +59,10 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
 
   function setBridgeProxyAddress(address _bridgeProxyAddress) external onlyOperator {
     bridgeProxyAddress = _bridgeProxyAddress;
+  }
+
+  function setMinAmount(uint256 _minAmount) external onlyOperator {
+    minAmount = _minAmount;
   }
 
   function setMinBridgeFee(uint256 _minBridgeFee) external onlyOperator {
@@ -104,12 +110,13 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
 
   function deposit(DepositRequest memory _request) external payable override {
     require(!isDepositsDisabled, "deposits are disabled");
-    require(_request.amount > 0, "amount should be greater than 0");
+    require(_request.amount >= minAmount, "amount too few");
     require(_request.bridgeFee >= minBridgeFee, "bridge fee too few");
     require(_request.executorFee >= peerMinExecutorFee, "executor fee too few");
     require(_request.rollupFee >= peerMinRollupFee, "rollup fee too few");
     uint256 calculatedCommitment = _commitmentHash(_request.hashK, _request.amount, _request.randomS);
     require(_request.commitment == calculatedCommitment, "commitment hash incorrect");
+    require(!isToSanctioned(msg.sender), "sanctioned address");
 
     // todo check commitment ?
 
@@ -155,6 +162,14 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
 
   function changeOperator(address _newOperator) external onlyOperator {
     operator = _newOperator;
+  }
+
+  function updateSanctionCheck(bool _check) external onlyOperator {
+    enableSanctionCheck = _check;
+  }
+
+  function updateSanctionContractAddress(address _sanction) external onlyOperator {
+    sanctionsContract = _sanction;
   }
 
   function bridgeType() public pure virtual returns (string memory);

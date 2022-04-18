@@ -5,6 +5,7 @@ import "../../libs/asset/AssetPool.sol";
 import "../../interface/IHasher3.sol";
 import "../../interface/IVerifier.sol";
 import "../../interface/ICommitmentPool.sol";
+import "../rule/Sanctions.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -18,7 +19,7 @@ struct WrappedVerifier {
   bool enabled;
 }
 
-abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard {
+abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard, Sanctions {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
@@ -160,6 +161,7 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
     require(_request.outRollupFees.length == numOutputs, "invalid outRollupFees length");
     require(_request.outEncryptedNotes.length == numOutputs, "invalid outEncryptedNotes length");
     require(commitmentIncludedCount + commitmentQueueSize + numOutputs <= treeCapacity, "tree is full");
+    require(!isToSanctioned(_request.publicRecipient), "sanctioned address");
 
     // check signature
     bytes32 hash = _transactRequestHash(_request);
@@ -301,6 +303,14 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard 
 
   function changeOperator(address _newOperator) external onlyOperator {
     operator = _newOperator;
+  }
+
+  function updateSanctionCheck(bool _check) external onlyOperator {
+    enableSanctionCheck = _check;
+  }
+
+  function updateSanctionContractAddress(address _sanction) external onlyOperator {
+    sanctionsContract = _sanction;
   }
 
   function _enqueueCommitment(

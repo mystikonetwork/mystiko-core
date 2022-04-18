@@ -5,10 +5,11 @@ import "../../../libs/asset/AssetPool.sol";
 import "../../../interface/IMystikoLoop.sol";
 import "../../../interface/IHasher3.sol";
 import "../../../interface/ICommitmentPool.sol";
+import "../../rule/Sanctions.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
+abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
   uint256 public constant FIELD_SIZE =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
@@ -16,6 +17,7 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
   IHasher3 public hasher3;
 
   address public associatedCommitmentPool;
+  uint256 public minAmount;
   uint256 public minRollupFee;
 
   // Admin related.
@@ -38,6 +40,10 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
     associatedCommitmentPool = _commitmentPoolAddress;
   }
 
+  function setMinAmount(uint256 _minAmount) external onlyOperator {
+    minAmount = _minAmount;
+  }
+
   function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
     require(_minRollupFee > 0, "invalid minimal rollup fee");
     minRollupFee = _minRollupFee;
@@ -55,10 +61,11 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
 
   function deposit(DepositRequest memory _request) external payable override {
     require(!isDepositsDisabled, "deposits are disabled");
-    require(_request.amount > 0, "amount should be greater than 0");
+    require(_request.amount >= minAmount, "amount too few");
     require(_request.rollupFee >= minRollupFee, "rollup fee too few");
     uint256 calculatedCommitment = _commitmentHash(_request.hashK, _request.amount, _request.randomS);
     require(_request.commitment == calculatedCommitment, "commitment hash incorrect");
+    require(!isToSanctioned(msg.sender), "sanctioned address");
 
     _processDeposit(_request.amount, _request.commitment, _request.rollupFee, _request.encryptedNote);
   }
@@ -89,6 +96,14 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool {
 
   function changeOperator(address _newOperator) external onlyOperator {
     operator = _newOperator;
+  }
+
+  function updateSanctionCheck(bool _check) external onlyOperator {
+    enableSanctionCheck = _check;
+  }
+
+  function updateSanctionContractAddress(address _sanction) external onlyOperator {
+    sanctionsContract = _sanction;
   }
 
   function bridgeType() public pure returns (string memory) {
