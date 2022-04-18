@@ -158,19 +158,6 @@ const _abi = [
   },
   {
     inputs: [],
-    name: 'minRollupFee',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'operator',
     outputs: [
       {
@@ -224,19 +211,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '_minRollupFee',
-        type: 'uint256',
-      },
-    ],
-    name: 'setMinRollupFee',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
         internalType: 'bool',
         name: '_state',
         type: 'bool',
@@ -255,7 +229,7 @@ const _abi = [
         type: 'bool',
       },
     ],
-    name: 'updateSanctionCheck',
+    name: 'toggleSanctionCheck',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

@@ -214,6 +214,8 @@ export function testTransact(
     });
 
     it('should transact successfully', async () => {
+      await commitmentPoolContract.toggleSanctionCheck(true);
+
       expect(await protocol.zkVerify(proof, vkeyFile)).to.equal(true);
       const request = buildRequest(
         numInputs,
@@ -371,7 +373,7 @@ export function testTransactRevert(
     });
 
     it('should revert when recipient in sanction list', async () => {
-      await sanctionList.setSanction(publicRecipientAddress);
+      await sanctionList.addToSanctionsList(publicRecipientAddress);
       const request = buildRequest(
         numInputs,
         numOutputs,
@@ -384,7 +386,7 @@ export function testTransactRevert(
       await expect(commitmentPoolContract.transact(request, signature)).to.be.revertedWith(
         'sanctioned address',
       );
-      await sanctionList.setSanction('0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF');
+      await sanctionList.removeToSanctionsList(publicRecipientAddress);
     });
   });
 }

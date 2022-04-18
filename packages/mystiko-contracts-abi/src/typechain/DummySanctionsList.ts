@@ -19,18 +19,21 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 export interface DummySanctionsListInterface extends utils.Interface {
   contractName: 'DummySanctionsList';
   functions: {
+    'addToSanctionsList(address)': FunctionFragment;
     'isSanctioned(address)': FunctionFragment;
-    'sanction()': FunctionFragment;
-    'setSanction(address)': FunctionFragment;
+    'removeToSanctionsList(address)': FunctionFragment;
+    'sanctionsList(address)': FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: 'addToSanctionsList', values: [string]): string;
   encodeFunctionData(functionFragment: 'isSanctioned', values: [string]): string;
-  encodeFunctionData(functionFragment: 'sanction', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'setSanction', values: [string]): string;
+  encodeFunctionData(functionFragment: 'removeToSanctionsList', values: [string]): string;
+  encodeFunctionData(functionFragment: 'sanctionsList', values: [string]): string;
 
+  decodeFunctionResult(functionFragment: 'addToSanctionsList', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isSanctioned', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sanction', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setSanction', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'removeToSanctionsList', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'sanctionsList', data: BytesLike): Result;
 
   events: {};
 }
@@ -59,54 +62,76 @@ export interface DummySanctionsList extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    isSanctioned(addr: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    sanction(overrides?: CallOverrides): Promise<[string]>;
-
-    setSanction(
+    addToSanctionsList(
       addr: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
+
+    isSanctioned(addr: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+    removeToSanctionsList(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
+    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
   };
 
-  isSanctioned(addr: string, overrides?: CallOverrides): Promise<boolean>;
-
-  sanction(overrides?: CallOverrides): Promise<string>;
-
-  setSanction(
+  addToSanctionsList(
     addr: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
+  isSanctioned(addr: string, overrides?: CallOverrides): Promise<boolean>;
+
+  removeToSanctionsList(
+    addr: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
+  sanctionsList(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
   callStatic: {
+    addToSanctionsList(addr: string, overrides?: CallOverrides): Promise<void>;
+
     isSanctioned(addr: string, overrides?: CallOverrides): Promise<boolean>;
 
-    sanction(overrides?: CallOverrides): Promise<string>;
+    removeToSanctionsList(addr: string, overrides?: CallOverrides): Promise<void>;
 
-    setSanction(addr: string, overrides?: CallOverrides): Promise<void>;
+    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<boolean>;
   };
 
   filters: {};
 
   estimateGas: {
-    isSanctioned(addr: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    sanction(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setSanction(
+    addToSanctionsList(
       addr: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
+
+    isSanctioned(addr: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    removeToSanctionsList(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
+    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    isSanctioned(addr: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    sanction(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    setSanction(
+    addToSanctionsList(
       addr: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
+
+    isSanctioned(addr: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    removeToSanctionsList(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
+    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

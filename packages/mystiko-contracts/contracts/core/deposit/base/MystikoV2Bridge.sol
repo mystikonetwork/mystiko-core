@@ -110,7 +110,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
     require(_request.rollupFee >= peerMinRollupFee, "rollup fee too few");
     uint256 calculatedCommitment = _commitmentHash(_request.hashK, _request.amount, _request.randomS);
     require(_request.commitment == calculatedCommitment, "commitment hash incorrect");
-    require(!isToSanctioned(msg.sender), "sanctioned address");
+    require(!isSanctioned(msg.sender), "sanctioned address");
 
     // todo check commitment ?
 
@@ -157,8 +157,8 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
     operator = _newOperator;
   }
 
-  function updateSanctionCheck(bool _check) external onlyOperator {
-    enableSanctionCheck = _check;
+  function toggleSanctionCheck(bool _check) external onlyOperator {
+    isSanctionCheckDisabled = _check;
   }
 
   function updateSanctionContractAddress(address _sanction) external onlyOperator {

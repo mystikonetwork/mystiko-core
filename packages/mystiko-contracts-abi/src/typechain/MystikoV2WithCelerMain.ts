@@ -67,7 +67,6 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
     'minAmount()': FunctionFragment;
     'minBridgeFee()': FunctionFragment;
     'minExecutorFee()': FunctionFragment;
-    'minRollupFee()': FunctionFragment;
     'operator()': FunctionFragment;
     'peerChainId()': FunctionFragment;
     'peerContract()': FunctionFragment;
@@ -79,12 +78,11 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
     'setMinAmount(uint256)': FunctionFragment;
     'setMinBridgeFee(uint256)': FunctionFragment;
     'setMinExecutorFee(uint256)': FunctionFragment;
-    'setMinRollupFee(uint256)': FunctionFragment;
     'setPeerMinExecutorFee(uint256)': FunctionFragment;
     'setPeerMinRollupFee(uint256)': FunctionFragment;
     'setpeerContract(uint64,address)': FunctionFragment;
     'toggleDeposits(bool)': FunctionFragment;
-    'updateSanctionCheck(bool)': FunctionFragment;
+    'toggleSanctionCheck(bool)': FunctionFragment;
     'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
@@ -104,7 +102,6 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minBridgeFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minExecutorFee', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
   encodeFunctionData(functionFragment: 'peerChainId', values?: undefined): string;
   encodeFunctionData(functionFragment: 'peerContract', values?: undefined): string;
@@ -116,12 +113,11 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'setMinAmount', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinBridgeFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinExecutorFee', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setPeerMinExecutorFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setPeerMinRollupFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setpeerContract', values: [BigNumberish, string]): string;
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
-  encodeFunctionData(functionFragment: 'updateSanctionCheck', values: [boolean]): string;
+  encodeFunctionData(functionFragment: 'toggleSanctionCheck', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
@@ -137,7 +133,6 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minExecutorFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'peerChainId', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'peerContract', data: BytesLike): Result;
@@ -149,12 +144,11 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'setMinAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinExecutorFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setPeerMinExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setPeerMinRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setpeerContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'updateSanctionCheck', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'toggleSanctionCheck', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'updateSanctionContractAddress', data: BytesLike): Result;
 
   events: {
@@ -230,8 +224,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     minExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     operator(overrides?: CallOverrides): Promise<[string]>;
 
     peerChainId(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -269,11 +261,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    setMinRollupFee(
-      _minRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
     setPeerMinExecutorFee(
       _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -295,7 +282,7 @@ export interface MystikoV2WithCelerMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    updateSanctionCheck(
+    toggleSanctionCheck(
       _check: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
@@ -344,8 +331,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
   minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-  minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
   operator(overrides?: CallOverrides): Promise<string>;
 
   peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -383,11 +368,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  setMinRollupFee(
-    _minRollupFee: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
   setPeerMinExecutorFee(
     _peerMinExecutorFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
@@ -409,7 +389,7 @@ export interface MystikoV2WithCelerMain extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  updateSanctionCheck(
+  toggleSanctionCheck(
     _check: boolean,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
@@ -452,8 +432,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
     operator(overrides?: CallOverrides): Promise<string>;
 
     peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -476,8 +454,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     setMinExecutorFee(_minExecutorFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    setMinRollupFee(_minRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
     setPeerMinExecutorFee(_peerMinExecutorFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     setPeerMinRollupFee(_peerMinRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
@@ -490,7 +466,7 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
 
-    updateSanctionCheck(_check: boolean, overrides?: CallOverrides): Promise<void>;
+    toggleSanctionCheck(_check: boolean, overrides?: CallOverrides): Promise<void>;
 
     updateSanctionContractAddress(_sanction: string, overrides?: CallOverrides): Promise<void>;
   };
@@ -539,8 +515,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
     operator(overrides?: CallOverrides): Promise<BigNumber>;
 
     peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -578,11 +552,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    setMinRollupFee(
-      _minRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
     setPeerMinExecutorFee(
       _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -604,7 +573,7 @@ export interface MystikoV2WithCelerMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    updateSanctionCheck(
+    toggleSanctionCheck(
       _check: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
@@ -654,8 +623,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     minExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     peerChainId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -693,11 +660,6 @@ export interface MystikoV2WithCelerMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    setMinRollupFee(
-      _minRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
     setPeerMinExecutorFee(
       _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -719,7 +681,7 @@ export interface MystikoV2WithCelerMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    updateSanctionCheck(
+    toggleSanctionCheck(
       _check: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;

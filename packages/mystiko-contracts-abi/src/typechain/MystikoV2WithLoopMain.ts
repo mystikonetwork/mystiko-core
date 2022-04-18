@@ -50,14 +50,12 @@ export interface MystikoV2WithLoopMainInterface extends utils.Interface {
     'hasher3()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
     'minAmount()': FunctionFragment;
-    'minRollupFee()': FunctionFragment;
     'operator()': FunctionFragment;
     'sanctionsContract()': FunctionFragment;
     'setAssociatedCommitmentPool(address)': FunctionFragment;
     'setMinAmount(uint256)': FunctionFragment;
-    'setMinRollupFee(uint256)': FunctionFragment;
     'toggleDeposits(bool)': FunctionFragment;
-    'updateSanctionCheck(bool)': FunctionFragment;
+    'toggleSanctionCheck(bool)': FunctionFragment;
     'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
@@ -70,14 +68,12 @@ export interface MystikoV2WithLoopMainInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
   encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setAssociatedCommitmentPool', values: [string]): string;
   encodeFunctionData(functionFragment: 'setMinAmount', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
-  encodeFunctionData(functionFragment: 'updateSanctionCheck', values: [boolean]): string;
+  encodeFunctionData(functionFragment: 'toggleSanctionCheck', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
@@ -89,14 +85,12 @@ export interface MystikoV2WithLoopMainInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setAssociatedCommitmentPool', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinAmount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'updateSanctionCheck', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'toggleSanctionCheck', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'updateSanctionContractAddress', data: BytesLike): Result;
 
   events: {};
@@ -150,8 +144,6 @@ export interface MystikoV2WithLoopMain extends BaseContract {
 
     minAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     operator(overrides?: CallOverrides): Promise<[string]>;
 
     sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
@@ -166,17 +158,12 @@ export interface MystikoV2WithLoopMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    setMinRollupFee(
-      _minRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
     toggleDeposits(
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    updateSanctionCheck(
+    toggleSanctionCheck(
       _check: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
@@ -211,8 +198,6 @@ export interface MystikoV2WithLoopMain extends BaseContract {
 
   minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-  minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
   operator(overrides?: CallOverrides): Promise<string>;
 
   sanctionsContract(overrides?: CallOverrides): Promise<string>;
@@ -227,17 +212,12 @@ export interface MystikoV2WithLoopMain extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  setMinRollupFee(
-    _minRollupFee: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
   toggleDeposits(
     _state: boolean,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  updateSanctionCheck(
+  toggleSanctionCheck(
     _check: boolean,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
@@ -266,8 +246,6 @@ export interface MystikoV2WithLoopMain extends BaseContract {
 
     minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
     operator(overrides?: CallOverrides): Promise<string>;
 
     sanctionsContract(overrides?: CallOverrides): Promise<string>;
@@ -276,11 +254,9 @@ export interface MystikoV2WithLoopMain extends BaseContract {
 
     setMinAmount(_minAmount: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    setMinRollupFee(_minRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
     toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
 
-    updateSanctionCheck(_check: boolean, overrides?: CallOverrides): Promise<void>;
+    toggleSanctionCheck(_check: boolean, overrides?: CallOverrides): Promise<void>;
 
     updateSanctionContractAddress(_sanction: string, overrides?: CallOverrides): Promise<void>;
   };
@@ -312,8 +288,6 @@ export interface MystikoV2WithLoopMain extends BaseContract {
 
     minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
     operator(overrides?: CallOverrides): Promise<BigNumber>;
 
     sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
@@ -328,17 +302,12 @@ export interface MystikoV2WithLoopMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    setMinRollupFee(
-      _minRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
     toggleDeposits(
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    updateSanctionCheck(
+    toggleSanctionCheck(
       _check: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
@@ -374,8 +343,6 @@ export interface MystikoV2WithLoopMain extends BaseContract {
 
     minAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    minRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -390,17 +357,12 @@ export interface MystikoV2WithLoopMain extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    setMinRollupFee(
-      _minRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
     toggleDeposits(
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    updateSanctionCheck(
+    toggleSanctionCheck(
       _check: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;

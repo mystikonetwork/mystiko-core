@@ -2,17 +2,17 @@
 pragma solidity ^0.8.0;
 
 contract DummySanctionsList {
-  address public sanction = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
+  mapping(address => bool) public sanctionsList;
 
-  function setSanction(address addr) external {
-    sanction = addr;
+  function addToSanctionsList(address addr) external {
+    sanctionsList[addr] = true;
+  }
+
+  function removeToSanctionsList(address addr) external {
+    sanctionsList[addr] = false;
   }
 
   function isSanctioned(address addr) external view returns (bool) {
-    if (addr == sanction) {
-      return true;
-    } else {
-      return false;
-    }
+    return sanctionsList[addr];
   }
 }

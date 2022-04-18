@@ -694,6 +694,19 @@ const _abi = [
     inputs: [
       {
         internalType: 'bool',
+        name: '_check',
+        type: 'bool',
+      },
+    ],
+    name: 'toggleSanctionCheck',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bool',
         name: '_state',
         type: 'bool',
       },
@@ -876,19 +889,6 @@ const _abi = [
       },
     ],
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bool',
-        name: '_check',
-        type: 'bool',
-      },
-    ],
-    name: 'updateSanctionCheck',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function',
   },
   {

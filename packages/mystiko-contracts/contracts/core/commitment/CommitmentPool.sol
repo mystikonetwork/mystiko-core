@@ -162,7 +162,7 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     require(_request.outRollupFees.length == numOutputs, "invalid outRollupFees length");
     require(_request.outEncryptedNotes.length == numOutputs, "invalid outEncryptedNotes length");
     require(commitmentIncludedCount + commitmentQueueSize + numOutputs <= treeCapacity, "tree is full");
-    require(!isToSanctioned(_request.publicRecipient), "sanctioned address");
+    require(!isSanctioned(_request.publicRecipient), "sanctioned address");
 
     // check signature
     bytes32 hash = _transactRequestHash(_request);
@@ -306,8 +306,8 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     operator = _newOperator;
   }
 
-  function updateSanctionCheck(bool _check) external onlyOperator {
-    enableSanctionCheck = _check;
+  function toggleSanctionCheck(bool _check) external onlyOperator {
+    isSanctionCheckDisabled = _check;
   }
 
   function updateSanctionContractAddress(address _sanction) external onlyOperator {

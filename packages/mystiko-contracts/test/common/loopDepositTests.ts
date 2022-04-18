@@ -51,7 +51,7 @@ export function testLoopDeposit(
     });
 
     it('should revert when sender in sanction list', async () => {
-      await sanctionList.setSanction(accounts[0].address);
+      await sanctionList.addToSanctionsList(accounts[0].address);
       await expect(
         mystikoContract.deposit(
           [
@@ -65,7 +65,7 @@ export function testLoopDeposit(
           { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
         ),
       ).to.be.revertedWith('sanctioned address');
-      await sanctionList.setSanction('0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF');
+      await sanctionList.removeToSanctionsList(accounts[0].address);
     });
 
     it('should revert when amount is too few', async () => {
@@ -127,6 +127,9 @@ export function testLoopDeposit(
     });
 
     it('should deposit successfully', async () => {
+      await sanctionList.addToSanctionsList(accounts[0].address);
+      await mystikoContract.toggleSanctionCheck(true);
+
       for (let i = 0; i < numOfCommitments; i += 1) {
         await expect(
           mystikoContract.deposit(
