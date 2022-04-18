@@ -10,47 +10,62 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator';
-import { ProviderConnection } from '@mystikonetwork/utils';
+import { Expose, Type } from 'class-transformer';
 import { RawDepositContractConfig, RawPoolContractConfig } from './contract';
+import { RawProviderConfig } from './provider';
 
 export const EXPLORER_TX_PLACEHOLDER: string = '%tx%';
 export const EXPLORER_DEFAULT_PREFIX: string = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
 
 export class RawChainConfig {
+  @Expose()
   @IsInt()
   @IsPositive()
   public chainId: number;
 
+  @Expose()
   @IsString()
   @IsNotEmpty()
   public name: string;
 
+  @Expose()
   @IsString()
   @IsNotEmpty()
   public assetSymbol: string;
 
+  @Expose()
   @IsInt()
   @IsPositive()
   public assetDecimals: number = 18;
 
+  @Expose()
   @IsUrl()
   public explorerUrl: string;
 
+  @Expose()
   @Contains(EXPLORER_TX_PLACEHOLDER)
   public explorerPrefix: string;
 
+  @Expose()
+  @Type(() => RawProviderConfig)
+  @ValidateNested()
   @ArrayNotEmpty()
   @IsNotEmpty({ each: true })
-  public providers: Array<string | ProviderConnection> = [];
+  public providers: Array<RawProviderConfig> = [];
 
+  @Expose()
   @IsUrl()
   public signerEndpoint: string;
 
+  @Expose()
+  @Type(() => RawDepositContractConfig)
   @ValidateNested()
   @IsArray()
   @ArrayUnique((conf) => conf.address)
   public depositContracts: RawDepositContractConfig[] = [];
 
+  @Expose()
+  @Type(() => RawPoolContractConfig)
   @ValidateNested()
   @IsArray()
   @ArrayUnique((conf) => conf.address)

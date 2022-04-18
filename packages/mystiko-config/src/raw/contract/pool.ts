@@ -1,5 +1,6 @@
 import {
   Equals,
+  IsArray,
   IsEthereumAddress,
   IsInt,
   IsNotEmpty,
@@ -33,10 +34,12 @@ export class RawPoolContractConfig extends RawContractConfig {
   public assetAddress?: string;
 
   @Expose()
-  @IsNumberString()
+  @IsNumberString({ no_symbols: true })
   public minRollupFee: string = '0';
 
   @Expose()
+  @IsArray()
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   public circuits: string[] = [];
 }

@@ -8,7 +8,7 @@ import {
   IsNumberString,
   ValidateNested,
 } from 'class-validator';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { RawContractConfig } from './base';
 import { BridgeType, ContractType } from '../../common';
 import { RawPeerContractConfig } from './peer';
@@ -31,20 +31,21 @@ export class RawDepositContractConfig extends RawContractConfig {
   public disabled: boolean = false;
 
   @Expose()
+  @Type(() => RawPeerContractConfig)
   @ValidateNested()
   @IsArray()
   @ArrayUnique((conf) => `${conf.chainId}/${conf.address}`)
   public peerChains: RawPeerContractConfig[] = [];
 
   @Expose()
-  @IsNumberString()
+  @IsNumberString({ no_symbols: true })
   public minAmount: string = '0';
 
   @Expose()
-  @IsNumberString()
+  @IsNumberString({ no_symbols: true })
   public minBridgeFee: string = '0';
 
   @Expose()
-  @IsNumberString()
+  @IsNumberString({ no_symbols: true })
   public minExecutorFee: string = '0';
 }

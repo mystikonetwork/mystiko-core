@@ -1,9 +1,10 @@
-import { check, ProviderConnection } from '@mystikonetwork/utils';
+import { check } from '@mystikonetwork/utils';
 import { BaseConfig } from './base';
 import { RawChainConfig } from '../raw';
 import { DepositContractConfig, PoolContractConfig } from './contract';
 import { CircuitConfig } from './circuit';
 import { BridgeType, CircuitType } from '../common';
+import { ProviderConfig } from './provider';
 
 export class ChainConfig extends BaseConfig<RawChainConfig> {
   private readonly poolContractConfigs: Map<string, PoolContractConfig>;
@@ -11,6 +12,8 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
   private readonly depositContractConfigs: Map<string, DepositContractConfig>;
 
   private readonly depositConfigsByAssetAndBridge: Map<string, Map<BridgeType, DepositContractConfig>>;
+
+  private readonly providerConfigs: ProviderConfig[];
 
   constructor(
     data: RawChainConfig,
@@ -21,6 +24,7 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     this.poolContractConfigs = this.initPoolContractConfigs(defaultCircuitConfigs, circuitConfigsByName);
     this.depositContractConfigs = this.initDepositContractConfigs(this.poolContractConfigs);
     this.depositConfigsByAssetAndBridge = this.initDepositConfigsByAssetAndBridge();
+    this.providerConfigs = this.data.providers.map((raw) => new ProviderConfig(raw));
   }
 
   public get chainId(): number {
@@ -47,8 +51,8 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     return this.data.explorerPrefix;
   }
 
-  public get providers(): Array<string | ProviderConnection> {
-    return this.data.providers;
+  public get providers(): Array<ProviderConfig> {
+    return this.providerConfigs;
   }
 
   public get signerEndpoint(): string {
@@ -149,6 +153,13 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
 
   public getPoolContractByAddress(address: string): PoolContractConfig | undefined {
     return this.poolContractConfigs.get(address);
+  }
+
+  public getEventFilterSizeByAddress(address: string): number {
+    if (this.depositContractConfigs.has(address)) {
+      return this.getDepositContractByAddress(address)?.eventFilterSize || this.eventFilterSize;
+    }
+    return this.getPoolContractByAddress(address)?.eventFilterSize || this.eventFilterSize;
   }
 
   private initPoolContractConfigs(

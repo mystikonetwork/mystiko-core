@@ -25,6 +25,7 @@ export class RawContractConfig {
   @IsEthereumAddress()
   public address: string;
 
+  @Expose()
   @IsEnum(ContractType)
   public type: ContractType;
 
@@ -37,5 +38,5 @@ export class RawContractConfig {
   @IsInt()
   @IsPositive()
   @IsOptional()
-  public eventFilterSize?: number;
+  public eventFilterSize?: number = undefined;
 }
