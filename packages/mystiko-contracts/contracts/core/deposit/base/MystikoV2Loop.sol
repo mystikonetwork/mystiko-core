@@ -18,7 +18,6 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
 
   address public associatedCommitmentPool;
   uint256 public minAmount;
-  uint256 public minRollupFee;
 
   // Admin related.
   address public operator;
@@ -44,11 +43,6 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
     minAmount = _minAmount;
   }
 
-  function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
-    require(_minRollupFee > 0, "invalid minimal rollup fee");
-    minRollupFee = _minRollupFee;
-  }
-
   function _commitmentHash(
     uint256 _hashK,
     uint256 _amount,
@@ -62,7 +56,6 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
   function deposit(DepositRequest memory _request) external payable override {
     require(!isDepositsDisabled, "deposits are disabled");
     require(_request.amount >= minAmount, "amount too few");
-    require(_request.rollupFee >= minRollupFee, "rollup fee too few");
     uint256 calculatedCommitment = _commitmentHash(_request.hashK, _request.amount, _request.randomS);
     require(_request.commitment == calculatedCommitment, "commitment hash incorrect");
     require(!isToSanctioned(msg.sender), "sanctioned address");

@@ -47,7 +47,7 @@ export function testBridgeDeposit(
     before(async () => {
       minBridgeFee = (await mystikoContract.minBridgeFee()).toString();
       minExecutorFee = (await mystikoContract.minExecutorFee()).toString();
-      minRollupFee = (await mystikoContract.minRollupFee()).toString();
+      minRollupFee = (await commitmentPool.minRollupFee()).toString();
 
       const amount = toBN(depositAmount).add(toBN(minExecutorFee)).add(toBN(minRollupFee));
       minTotalAmount = amount.toString();

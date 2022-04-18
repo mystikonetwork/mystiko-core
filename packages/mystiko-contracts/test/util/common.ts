@@ -131,7 +131,7 @@ export async function deployLoopContracts(
   sanctionListAddress: string,
   poolMain: CommitmentPoolMain,
   poolERC20: CommitmentPoolERC20,
-  { minAmount = MinAmount, minRollupFee = MinRollupFee },
+  { minAmount = MinAmount },
 ): Promise<CoreLoopDeploymentInfo> {
   const loopMainFactory = (await ethers.getContractFactory(
     'MystikoV2WithLoopMain',
@@ -139,7 +139,6 @@ export async function deployLoopContracts(
   const coreMain = await loopMainFactory.connect(accounts[0]).deploy(hasher3Address);
   await coreMain.deployed();
   await coreMain.setMinAmount(minAmount);
-  await coreMain.setMinRollupFee(minRollupFee);
   await coreMain.setAssociatedCommitmentPool(poolMain.address);
   await coreMain.updateSanctionContractAddress(sanctionListAddress);
   await poolMain.addInputWhitelist(coreMain.address);
@@ -150,7 +149,6 @@ export async function deployLoopContracts(
   const coreERC20 = await loopERC20Factory.connect(accounts[0]).deploy(hasher3Address, tokenAddress);
   await coreERC20.deployed();
   await coreERC20.setMinAmount(minAmount);
-  await coreERC20.setMinRollupFee(minRollupFee);
   await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
   await coreERC20.updateSanctionContractAddress(sanctionListAddress);
   await poolERC20.addInputWhitelist(coreERC20.address);
@@ -183,7 +181,6 @@ export async function deployTBridgeContracts(
   await coreMain.setMinAmount(minAmount);
   await coreMain.setMinBridgeFee(minBridgeFee);
   await coreMain.setMinExecutorFee(minExecutorFee);
-  await coreMain.setMinRollupFee(minRollupFee);
   await coreMain.setPeerMinExecutorFee(minExecutorFee);
   await coreMain.setPeerMinRollupFee(minRollupFee);
   await coreMain.updateSanctionContractAddress(sanctionListAddress);
@@ -195,7 +192,6 @@ export async function deployTBridgeContracts(
   await coreERC20.setMinAmount(minAmount);
   await coreERC20.setMinBridgeFee(minBridgeFee);
   await coreERC20.setMinExecutorFee(minExecutorFee);
-  await coreERC20.setMinRollupFee(minRollupFee);
   await coreERC20.setPeerMinExecutorFee(minExecutorFee);
   await coreERC20.setPeerMinRollupFee(minRollupFee);
   await coreERC20.updateSanctionContractAddress(sanctionListAddress);

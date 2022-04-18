@@ -93,6 +93,7 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     returns (bool)
   {
     // todo should do check in upper layer call
+    require(_request.rollupFee >= minRollupFee, "rollup fee too few");
     require(commitmentIncludedCount + commitmentQueueSize < treeCapacity, "tree is full");
     require(!historicCommitments[_request.commitment], "the commitment has been submitted");
 

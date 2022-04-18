@@ -7,7 +7,6 @@ export function testLoopConstructor(
   mystikoContract: any,
   hasher3: Hasher3,
   minAmount: number,
-  minRollupFee: number,
   commitmentPoolAddress: string,
 ) {
   describe(`Test ${contractName} constructor`, () => {
@@ -16,9 +15,6 @@ export function testLoopConstructor(
     });
     it('should initialize minAmount correctly', async () => {
       expect(await mystikoContract.minAmount()).to.equal(minAmount);
-    });
-    it('should initialize minRollupFee correctly', async () => {
-      expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
     });
     it('should initialize admin related resources correctly', async () => {
       expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
@@ -36,7 +32,7 @@ export function testBridgeConstructor(
   minAmount: number,
   minBridgeFee: number,
   minExecutorFee: number,
-  minRollupFee: number,
+  peerMinRoolupFee: number,
   peerChainId: number,
   peerContract: string,
   commitmentPoolAddress: string,
@@ -54,14 +50,11 @@ export function testBridgeConstructor(
     it('should initialize minExecutorFee correctly', async () => {
       expect(await mystikoContract.minExecutorFee()).to.equal(minExecutorFee);
     });
-    it('should initialize minRollupFee correctly', async () => {
-      expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
-    });
     it('should initialize peerMinExecutorFee correctly', async () => {
       expect(await mystikoContract.peerMinExecutorFee()).to.equal(minExecutorFee);
     });
     it('should initialize peerMinRollupFee correctly', async () => {
-      expect(await mystikoContract.peerMinRollupFee()).to.equal(minRollupFee);
+      expect(await mystikoContract.peerMinRollupFee()).to.equal(peerMinRoolupFee);
     });
     it('should initialize peerChainId correctly', async () => {
       expect(await mystikoContract.peerChainId()).to.equal(peerChainId);

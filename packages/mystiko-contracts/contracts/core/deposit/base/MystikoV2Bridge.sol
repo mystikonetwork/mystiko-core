@@ -28,7 +28,6 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   uint256 public minAmount;
   uint256 public minBridgeFee;
   uint256 public minExecutorFee;
-  uint256 public minRollupFee;
 
   //remote chain fee
   uint256 public peerMinExecutorFee;
@@ -72,11 +71,6 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   function setMinExecutorFee(uint256 _minExecutorFee) external onlyOperator {
     require(_minExecutorFee > 0, "invalid minimal executor fee");
     minExecutorFee = _minExecutorFee;
-  }
-
-  function setMinRollupFee(uint256 _minRollupFee) external onlyOperator {
-    require(_minRollupFee > 0, "invalid minimal rollup fee");
-    minRollupFee = _minRollupFee;
   }
 
   function setPeerMinExecutorFee(uint256 _peerMinExecutorFee) external onlyOperator {
@@ -152,7 +146,6 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
     require(_fromChainId == peerChainId, "from chain id not matched");
     require(_request.amount > 0, "amount should be greater than 0");
     require(_request.executorFee >= minExecutorFee, "executor fee too few");
-    require(_request.rollupFee >= minRollupFee, "rollup fee too few");
     require(ICommitmentPool(associatedCommitmentPool).enqueue(_request, _executor), "call enqueue error");
   }
 

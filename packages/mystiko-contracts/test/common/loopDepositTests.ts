@@ -12,7 +12,7 @@ export function testLoopDeposit(
   contractName: string,
   protocol: MystikoProtocolV2,
   mystikoContract: any,
-  commitmentPoolContract: any,
+  commitmentPool: any,
   testTokenContract: TestToken,
   sanctionList: DummySanctionsList,
   accounts: Wallet[],
@@ -28,7 +28,7 @@ export function testLoopDeposit(
 
   describe(`Test ${contractName} deposit operations`, () => {
     before(async () => {
-      minRollupFee = (await mystikoContract.minRollupFee()).toString();
+      minRollupFee = (await commitmentPool.minRollupFee()).toString();
       minTotalAmount = toBN(depositAmount).add(toBN(minRollupFee)).toString();
     });
 
@@ -85,39 +85,6 @@ export function testLoopDeposit(
       ).to.be.revertedWith('amount too few');
     });
 
-    it('should revert when amount is too few', async () => {
-      const amount = toBN(MinAmount).sub(toBN(1)).toString();
-      await expect(
-        mystikoContract.deposit(
-          [
-            amount,
-            commitments[0].commitmentHash.toString(),
-            commitments[0].k.toString(),
-            commitments[0].randomS.toString(),
-            toHex(commitments[0].privateNote),
-            '0',
-          ],
-          { from: accounts[0].address, value: isMainAsset ? amount : '0' },
-        ),
-      ).to.be.revertedWith('amount too few');
-    });
-
-    it('should revert when rollup fee is too few', async () => {
-      await expect(
-        mystikoContract.deposit(
-          [
-            depositAmount,
-            commitments[0].commitmentHash.toString(),
-            commitments[0].k.toString(),
-            commitments[0].randomS.toString(),
-            toHex(commitments[0].privateNote),
-            '0',
-          ],
-          { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
-        ),
-      ).to.be.revertedWith('rollup fee too few');
-    });
-
     it('should revert when commitmentHash is incorrect', async () => {
       await expect(
         mystikoContract.deposit(
@@ -143,6 +110,22 @@ export function testLoopDeposit(
       }
     });
 
+    it('should revert when rollup fee is too few', async () => {
+      await expect(
+        mystikoContract.deposit(
+          [
+            depositAmount,
+            commitments[0].commitmentHash.toString(),
+            commitments[0].k.toString(),
+            commitments[0].randomS.toString(),
+            toHex(commitments[0].privateNote),
+            '0',
+          ],
+          { from: accounts[0].address, value: isMainAsset ? depositAmount : '0' },
+        ),
+      ).to.be.revertedWith('rollup fee too few');
+    });
+
     it('should deposit successfully', async () => {
       for (let i = 0; i < numOfCommitments; i += 1) {
         await expect(
@@ -158,7 +141,7 @@ export function testLoopDeposit(
             { from: accounts[0].address, value: isMainAsset ? minTotalAmount : '0' },
           ),
         )
-          .to.emit(commitmentPoolContract, 'CommitmentQueued')
+          .to.emit(commitmentPool, 'CommitmentQueued')
           .withArgs(
             commitments[i].commitmentHash.toString(),
             minRollupFee,
@@ -166,29 +149,25 @@ export function testLoopDeposit(
             toHex(commitments[i].privateNote),
           );
 
-        expect(
-          await commitmentPoolContract.historicCommitments(commitments[i].commitmentHash.toString()),
-        ).to.equal(true);
-        expect((await commitmentPoolContract.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
+        expect(await commitmentPool.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
+          true,
+        );
+        expect((await commitmentPool.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
           commitments[i].commitmentHash.toString(),
         );
-        expect((await commitmentPoolContract.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(
-          minRollupFee,
-        );
+        expect((await commitmentPool.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(minRollupFee);
       }
-      expect((await commitmentPoolContract.commitmentQueueSize()).toString()).to.equal(
-        `${commitments.length}`,
-      );
+      expect((await commitmentPool.commitmentQueueSize()).toString()).to.equal(`${commitments.length}`);
     });
 
     it('should have correct balance', async () => {
       expectBalance = toBN(minTotalAmount).muln(numOfCommitments).toString();
       if (isMainAsset) {
         expect(await waffle.provider.getBalance(mystikoContract.address)).to.equal('0');
-        expect(await waffle.provider.getBalance(commitmentPoolContract.address)).to.equal(expectBalance);
+        expect(await waffle.provider.getBalance(commitmentPool.address)).to.equal(expectBalance);
       } else {
         expect((await testTokenContract.balanceOf(mystikoContract.address)).toString()).to.equal('0');
-        expect((await testTokenContract.balanceOf(commitmentPoolContract.address)).toString()).to.equal(
+        expect((await testTokenContract.balanceOf(commitmentPool.address)).toString()).to.equal(
           expectBalance,
         );
       }
@@ -222,10 +201,10 @@ export function testLoopDeposit(
     it('should have correct balance', async () => {
       if (isMainAsset) {
         expect(await waffle.provider.getBalance(mystikoContract.address)).to.equal('0');
-        expect(await waffle.provider.getBalance(commitmentPoolContract.address)).to.equal(expectBalance);
+        expect(await waffle.provider.getBalance(commitmentPool.address)).to.equal(expectBalance);
       } else {
         expect((await testTokenContract.balanceOf(mystikoContract.address)).toString()).to.equal('0');
-        expect((await testTokenContract.balanceOf(commitmentPoolContract.address)).toString()).to.equal(
+        expect((await testTokenContract.balanceOf(commitmentPool.address)).toString()).to.equal(
           expectBalance,
         );
       }
