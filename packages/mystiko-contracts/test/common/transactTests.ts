@@ -384,6 +384,7 @@ export function testTransactRevert(
       await expect(commitmentPoolContract.transact(request, signature)).to.be.revertedWith(
         'sanctioned address',
       );
+      await sanctionList.setSanction('0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF');
     });
   });
 }
