@@ -64,7 +64,7 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
   }
 
   modifier onlyEnqueueWhitelisted() {
-    require(enqueueWhitelist[msg.sender], "Only whitelisted input.");
+    require(enqueueWhitelist[msg.sender], "Only whitelisted sender.");
     _;
   }
 
@@ -289,11 +289,11 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     rollupWhitelist[_roller] = false;
   }
 
-  function addInputWhitelist(address _actor) external onlyOperator {
+  function addEnqueueWhitelist(address _actor) external onlyOperator {
     enqueueWhitelist[_actor] = true;
   }
 
-  function removeInputWhitelist(address _actor) external onlyOperator {
+  function removeEnqueueWhitelist(address _actor) external onlyOperator {
     enqueueWhitelist[_actor] = false;
   }
 

@@ -141,7 +141,7 @@ export async function deployLoopContracts(
   await coreMain.setMinAmount(minAmount);
   await coreMain.setAssociatedCommitmentPool(poolMain.address);
   await coreMain.updateSanctionContractAddress(sanctionListAddress);
-  await poolMain.addInputWhitelist(coreMain.address);
+  await poolMain.addEnqueueWhitelist(coreMain.address);
 
   const loopERC20Factory = (await ethers.getContractFactory(
     'MystikoV2WithLoopERC20',
@@ -151,7 +151,7 @@ export async function deployLoopContracts(
   await coreERC20.setMinAmount(minAmount);
   await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
   await coreERC20.updateSanctionContractAddress(sanctionListAddress);
-  await poolERC20.addInputWhitelist(coreERC20.address);
+  await poolERC20.addEnqueueWhitelist(coreERC20.address);
 
   return { coreMain, coreERC20 };
 }
@@ -184,7 +184,7 @@ export async function deployTBridgeContracts(
   await coreMain.setPeerMinExecutorFee(minExecutorFee);
   await coreMain.setPeerMinRollupFee(minRollupFee);
   await coreMain.updateSanctionContractAddress(sanctionListAddress);
-  await poolMain.addInputWhitelist(coreMain.address);
+  await poolMain.addEnqueueWhitelist(coreMain.address);
 
   const coreERC20 = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
   await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
@@ -195,7 +195,7 @@ export async function deployTBridgeContracts(
   await coreERC20.setPeerMinExecutorFee(minExecutorFee);
   await coreERC20.setPeerMinRollupFee(minRollupFee);
   await coreERC20.updateSanctionContractAddress(sanctionListAddress);
-  await poolERC20.addInputWhitelist(coreERC20.address);
+  await poolERC20.addEnqueueWhitelist(coreERC20.address);
 
   return { coreMain, coreERC20 };
 }

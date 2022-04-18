@@ -132,7 +132,7 @@ export interface CommitmentPoolInterface extends utils.Interface {
   contractName: 'CommitmentPool';
   functions: {
     'FIELD_SIZE()': FunctionFragment;
-    'addInputWhitelist(address)': FunctionFragment;
+    'addEnqueueWhitelist(address)': FunctionFragment;
     'addRollupWhitelist(address)': FunctionFragment;
     'assetType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
@@ -153,7 +153,7 @@ export interface CommitmentPoolInterface extends utils.Interface {
     'isVerifierUpdateDisabled()': FunctionFragment;
     'minRollupFee()': FunctionFragment;
     'operator()': FunctionFragment;
-    'removeInputWhitelist(address)': FunctionFragment;
+    'removeEnqueueWhitelist(address)': FunctionFragment;
     'removeRollupWhitelist(address)': FunctionFragment;
     'rollup((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint32,uint256,uint256))': FunctionFragment;
     'rollupVerifiers(uint32)': FunctionFragment;
@@ -173,7 +173,7 @@ export interface CommitmentPoolInterface extends utils.Interface {
   };
 
   encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'addInputWhitelist', values: [string]): string;
+  encodeFunctionData(functionFragment: 'addEnqueueWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'addRollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
@@ -203,7 +203,7 @@ export interface CommitmentPoolInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'isVerifierUpdateDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'removeInputWhitelist', values: [string]): string;
+  encodeFunctionData(functionFragment: 'removeEnqueueWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'removeRollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'rollup', values: [ICommitmentPool.RollupRequestStruct]): string;
   encodeFunctionData(functionFragment: 'rollupVerifiers', values: [BigNumberish]): string;
@@ -225,7 +225,7 @@ export interface CommitmentPoolInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'addInputWhitelist', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'addEnqueueWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'addRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
@@ -246,7 +246,7 @@ export interface CommitmentPoolInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'isVerifierUpdateDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'removeInputWhitelist', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'removeEnqueueWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'removeRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rollup', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rollupVerifiers', data: BytesLike): Result;
@@ -324,7 +324,7 @@ export interface CommitmentPool extends BaseContract {
   functions: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    addInputWhitelist(
+    addEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
@@ -398,7 +398,7 @@ export interface CommitmentPool extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<[string]>;
 
-    removeInputWhitelist(
+    removeEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
@@ -470,7 +470,7 @@ export interface CommitmentPool extends BaseContract {
 
   FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-  addInputWhitelist(
+  addEnqueueWhitelist(
     _actor: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
@@ -544,7 +544,7 @@ export interface CommitmentPool extends BaseContract {
 
   operator(overrides?: CallOverrides): Promise<string>;
 
-  removeInputWhitelist(
+  removeEnqueueWhitelist(
     _actor: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
@@ -616,7 +616,7 @@ export interface CommitmentPool extends BaseContract {
   callStatic: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    addInputWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
+    addEnqueueWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
 
     addRollupWhitelist(_roller: string, overrides?: CallOverrides): Promise<void>;
 
@@ -678,7 +678,7 @@ export interface CommitmentPool extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<string>;
 
-    removeInputWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
+    removeEnqueueWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
 
     removeRollupWhitelist(_roller: string, overrides?: CallOverrides): Promise<void>;
 
@@ -754,7 +754,7 @@ export interface CommitmentPool extends BaseContract {
   estimateGas: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    addInputWhitelist(
+    addEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
@@ -825,7 +825,7 @@ export interface CommitmentPool extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<BigNumber>;
 
-    removeInputWhitelist(
+    removeEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
@@ -891,7 +891,7 @@ export interface CommitmentPool extends BaseContract {
   populateTransaction: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    addInputWhitelist(
+    addEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
@@ -962,7 +962,7 @@ export interface CommitmentPool extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    removeInputWhitelist(
+    removeEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
