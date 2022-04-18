@@ -145,6 +145,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: 'minAmount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'minRollupFee',
     outputs: [
       {
@@ -159,6 +172,19 @@ const _abi = [
   {
     inputs: [],
     name: 'operator',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'sanctionsContract',
     outputs: [
       {
         internalType: 'address',
@@ -186,6 +212,19 @@ const _abi = [
     inputs: [
       {
         internalType: 'uint256',
+        name: '_minAmount',
+        type: 'uint256',
+      },
+    ],
+    name: 'setMinAmount',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
         name: '_minRollupFee',
         type: 'uint256',
       },
@@ -204,6 +243,32 @@ const _abi = [
       },
     ],
     name: 'toggleDeposits',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bool',
+        name: '_check',
+        type: 'bool',
+      },
+    ],
+    name: 'updateSanctionCheck',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_sanction',
+        type: 'address',
+      },
+    ],
+    name: 'updateSanctionContractAddress',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

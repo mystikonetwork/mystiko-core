@@ -149,9 +149,9 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
     'disableTransactVerifier(uint32,uint32)': FunctionFragment;
     'enableRollupVerifier(uint32,address)': FunctionFragment;
     'enableTransactVerifier(uint32,uint32,address)': FunctionFragment;
-    'enqueue((uint256,uint256,uint256,uint256,bytes))': FunctionFragment;
+    'enqueue((uint256,uint256,uint256,uint256,bytes),address)': FunctionFragment;
+    'enqueueWhitelist(address)': FunctionFragment;
     'historicCommitments(uint256)': FunctionFragment;
-    'inputWhitelist(address)': FunctionFragment;
     'isKnownRoot(uint256)': FunctionFragment;
     'isRollupWhitelistDisabled()': FunctionFragment;
     'isVerifierUpdateDisabled()': FunctionFragment;
@@ -164,6 +164,7 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
     'rollupWhitelist(address)': FunctionFragment;
     'rootHistory(uint32)': FunctionFragment;
     'rootHistoryLength()': FunctionFragment;
+    'sanctionsContract()': FunctionFragment;
     'setMinRollupFee(uint256)': FunctionFragment;
     'spentSerialNumbers(uint256)': FunctionFragment;
     'toggleRollupWhitelist(bool)': FunctionFragment;
@@ -171,6 +172,8 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
     'transact((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint256,uint256[],uint256[],bytes32,uint256,uint256,uint256[],uint256[],address,address,bytes[]),bytes)': FunctionFragment;
     'transactVerifiers(uint32,uint32)': FunctionFragment;
     'treeCapacity()': FunctionFragment;
+    'updateSanctionCheck(bool)': FunctionFragment;
+    'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
@@ -197,9 +200,12 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
     functionFragment: 'enableTransactVerifier',
     values: [BigNumberish, BigNumberish, string],
   ): string;
-  encodeFunctionData(functionFragment: 'enqueue', values: [ICommitmentPool.CommitmentRequestStruct]): string;
+  encodeFunctionData(
+    functionFragment: 'enqueue',
+    values: [ICommitmentPool.CommitmentRequestStruct, string],
+  ): string;
+  encodeFunctionData(functionFragment: 'enqueueWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'historicCommitments', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'inputWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'isKnownRoot', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isRollupWhitelistDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isVerifierUpdateDisabled', values?: undefined): string;
@@ -212,6 +218,7 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   encodeFunctionData(functionFragment: 'rollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'rootHistory', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'rootHistoryLength', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'spentSerialNumbers', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'toggleRollupWhitelist', values: [boolean]): string;
@@ -222,6 +229,8 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: 'transactVerifiers', values: [BigNumberish, BigNumberish]): string;
   encodeFunctionData(functionFragment: 'treeCapacity', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'updateSanctionCheck', values: [boolean]): string;
+  encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'addInputWhitelist', data: BytesLike): Result;
@@ -242,8 +251,8 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'enableRollupVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enableTransactVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enqueue', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'enqueueWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'historicCommitments', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'inputWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isRollupWhitelistDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isVerifierUpdateDisabled', data: BytesLike): Result;
@@ -256,6 +265,7 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'rollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rootHistory', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rootHistoryLength', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'spentSerialNumbers', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleRollupWhitelist', data: BytesLike): Result;
@@ -263,6 +273,8 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'transact', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'transactVerifiers', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'treeCapacity', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'updateSanctionCheck', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'updateSanctionContractAddress', data: BytesLike): Result;
 
   events: {
     'CommitmentIncluded(uint256)': EventFragment;
@@ -388,12 +400,13 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     enqueue(
       _request: ICommitmentPool.CommitmentRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
+    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -431,6 +444,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     rootHistoryLength(overrides?: CallOverrides): Promise<[number]>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
+
     setMinRollupFee(
       _minRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -461,6 +476,16 @@ export interface CommitmentPoolERC20 extends BaseContract {
     ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
 
     treeCapacity(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    updateSanctionCheck(
+      _check: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
+    updateSanctionContractAddress(
+      _sanction: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
   };
 
   FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
@@ -529,12 +554,13 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
   enqueue(
     _request: ICommitmentPool.CommitmentRequestStruct,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
+    _executor: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+  enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-  inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+  historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
   isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -572,6 +598,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
   rootHistoryLength(overrides?: CallOverrides): Promise<number>;
 
+  sanctionsContract(overrides?: CallOverrides): Promise<string>;
+
   setMinRollupFee(
     _minRollupFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
@@ -602,6 +630,16 @@ export interface CommitmentPoolERC20 extends BaseContract {
   ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
 
   treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+
+  updateSanctionCheck(
+    _check: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
+  updateSanctionContractAddress(
+    _sanction: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
@@ -656,11 +694,15 @@ export interface CommitmentPoolERC20 extends BaseContract {
       overrides?: CallOverrides,
     ): Promise<void>;
 
-    enqueue(_request: ICommitmentPool.CommitmentRequestStruct, overrides?: CallOverrides): Promise<boolean>;
+    enqueue(
+      _request: ICommitmentPool.CommitmentRequestStruct,
+      _executor: string,
+      overrides?: CallOverrides,
+    ): Promise<boolean>;
+
+    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
-    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -689,6 +731,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     rootHistoryLength(overrides?: CallOverrides): Promise<number>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<string>;
+
     setMinRollupFee(_minRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
@@ -710,6 +754,10 @@ export interface CommitmentPoolERC20 extends BaseContract {
     ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
 
     treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+
+    updateSanctionCheck(_check: boolean, overrides?: CallOverrides): Promise<void>;
+
+    updateSanctionContractAddress(_sanction: string, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -803,12 +851,13 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     enqueue(
       _request: ICommitmentPool.CommitmentRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -843,6 +892,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     rootHistoryLength(overrides?: CallOverrides): Promise<BigNumber>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
+
     setMinRollupFee(
       _minRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -869,6 +920,16 @@ export interface CommitmentPoolERC20 extends BaseContract {
     transactVerifiers(arg0: BigNumberish, arg1: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+
+    updateSanctionCheck(
+      _check: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
+    updateSanctionContractAddress(
+      _sanction: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -935,12 +996,13 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     enqueue(
       _request: ICommitmentPool.CommitmentRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    inputWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -975,6 +1037,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     rootHistoryLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     setMinRollupFee(
       _minRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -1005,5 +1069,15 @@ export interface CommitmentPoolERC20 extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     treeCapacity(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    updateSanctionCheck(
+      _check: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
+    updateSanctionContractAddress(
+      _sanction: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
   };
 }

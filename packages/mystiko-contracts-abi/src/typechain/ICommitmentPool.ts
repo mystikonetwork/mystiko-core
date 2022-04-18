@@ -131,12 +131,15 @@ export declare namespace IVerifier {
 export interface ICommitmentPoolInterface extends utils.Interface {
   contractName: 'ICommitmentPool';
   functions: {
-    'enqueue((uint256,uint256,uint256,uint256,bytes))': FunctionFragment;
+    'enqueue((uint256,uint256,uint256,uint256,bytes),address)': FunctionFragment;
     'rollup((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint32,uint256,uint256))': FunctionFragment;
     'transact((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint256,uint256[],uint256[],bytes32,uint256,uint256,uint256[],uint256[],address,address,bytes[]),bytes)': FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: 'enqueue', values: [ICommitmentPool.CommitmentRequestStruct]): string;
+  encodeFunctionData(
+    functionFragment: 'enqueue',
+    values: [ICommitmentPool.CommitmentRequestStruct, string],
+  ): string;
   encodeFunctionData(functionFragment: 'rollup', values: [ICommitmentPool.RollupRequestStruct]): string;
   encodeFunctionData(
     functionFragment: 'transact',
@@ -176,7 +179,8 @@ export interface ICommitmentPool extends BaseContract {
   functions: {
     enqueue(
       _request: ICommitmentPool.CommitmentRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     rollup(
@@ -193,7 +197,8 @@ export interface ICommitmentPool extends BaseContract {
 
   enqueue(
     _request: ICommitmentPool.CommitmentRequestStruct,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
+    _executor: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   rollup(
@@ -208,7 +213,11 @@ export interface ICommitmentPool extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    enqueue(_request: ICommitmentPool.CommitmentRequestStruct, overrides?: CallOverrides): Promise<boolean>;
+    enqueue(
+      _request: ICommitmentPool.CommitmentRequestStruct,
+      _executor: string,
+      overrides?: CallOverrides,
+    ): Promise<boolean>;
 
     rollup(_request: ICommitmentPool.RollupRequestStruct, overrides?: CallOverrides): Promise<void>;
 
@@ -224,7 +233,8 @@ export interface ICommitmentPool extends BaseContract {
   estimateGas: {
     enqueue(
       _request: ICommitmentPool.CommitmentRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     rollup(
@@ -242,7 +252,8 @@ export interface ICommitmentPool extends BaseContract {
   populateTransaction: {
     enqueue(
       _request: ICommitmentPool.CommitmentRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     rollup(

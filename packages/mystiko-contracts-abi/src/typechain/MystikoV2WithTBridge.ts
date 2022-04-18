@@ -64,6 +64,7 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256,uint256,uint256))': FunctionFragment;
     'hasher3()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
+    'minAmount()': FunctionFragment;
     'minBridgeFee()': FunctionFragment;
     'minExecutorFee()': FunctionFragment;
     'minRollupFee()': FunctionFragment;
@@ -72,8 +73,10 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
     'peerContract()': FunctionFragment;
     'peerMinExecutorFee()': FunctionFragment;
     'peerMinRollupFee()': FunctionFragment;
+    'sanctionsContract()': FunctionFragment;
     'setAssociatedCommitmentPool(address)': FunctionFragment;
     'setBridgeProxyAddress(address)': FunctionFragment;
+    'setMinAmount(uint256)': FunctionFragment;
     'setMinBridgeFee(uint256)': FunctionFragment;
     'setMinExecutorFee(uint256)': FunctionFragment;
     'setMinRollupFee(uint256)': FunctionFragment;
@@ -81,6 +84,8 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
     'setPeerMinRollupFee(uint256)': FunctionFragment;
     'setpeerContract(uint64,address)': FunctionFragment;
     'toggleDeposits(bool)': FunctionFragment;
+    'updateSanctionCheck(bool)': FunctionFragment;
+    'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
@@ -96,6 +101,7 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoBridge.DepositRequestStruct]): string;
   encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minBridgeFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minExecutorFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
@@ -104,8 +110,10 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'peerContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'peerMinExecutorFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'peerMinRollupFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setAssociatedCommitmentPool', values: [string]): string;
   encodeFunctionData(functionFragment: 'setBridgeProxyAddress', values: [string]): string;
+  encodeFunctionData(functionFragment: 'setMinAmount', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinBridgeFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinExecutorFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
@@ -113,6 +121,8 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'setPeerMinRollupFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setpeerContract', values: [BigNumberish, string]): string;
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
+  encodeFunctionData(functionFragment: 'updateSanctionCheck', values: [boolean]): string;
+  encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
@@ -124,6 +134,7 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
@@ -132,8 +143,10 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'peerContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'peerMinExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'peerMinRollupFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setAssociatedCommitmentPool', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setBridgeProxyAddress', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setMinAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
@@ -141,6 +154,8 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'setPeerMinRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setpeerContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'updateSanctionCheck', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'updateSanctionContractAddress', data: BytesLike): Result;
 
   events: {
     'CommitmentCrossChain(uint256)': EventFragment;
@@ -209,6 +224,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
+    minAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     minBridgeFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     minExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -225,6 +242,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     peerMinRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
+
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -232,6 +251,11 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setBridgeProxyAddress(
       _bridgeProxyAddress: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
+    setMinAmount(
+      _minAmount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -270,6 +294,16 @@ export interface MystikoV2WithTBridge extends BaseContract {
       _state: boolean,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
+
+    updateSanctionCheck(
+      _check: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
+    updateSanctionContractAddress(
+      _sanction: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
   };
 
   FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
@@ -304,6 +338,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
   isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+  minAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
   minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
   minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -320,6 +356,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
   peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+  sanctionsContract(overrides?: CallOverrides): Promise<string>;
+
   setAssociatedCommitmentPool(
     _commitmentPoolAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> },
@@ -327,6 +365,11 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
   setBridgeProxyAddress(
     _bridgeProxyAddress: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
+  setMinAmount(
+    _minAmount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -366,6 +409,16 @@ export interface MystikoV2WithTBridge extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
+  updateSanctionCheck(
+    _check: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
+  updateSanctionContractAddress(
+    _sanction: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -393,6 +446,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+    minAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
     minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -409,9 +464,13 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<string>;
+
     setAssociatedCommitmentPool(_commitmentPoolAddress: string, overrides?: CallOverrides): Promise<void>;
 
     setBridgeProxyAddress(_bridgeProxyAddress: string, overrides?: CallOverrides): Promise<void>;
+
+    setMinAmount(_minAmount: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     setMinBridgeFee(_minBridgeFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -430,6 +489,10 @@ export interface MystikoV2WithTBridge extends BaseContract {
     ): Promise<void>;
 
     toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
+
+    updateSanctionCheck(_check: boolean, overrides?: CallOverrides): Promise<void>;
+
+    updateSanctionContractAddress(_sanction: string, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -470,6 +533,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
+    minAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
     minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -486,6 +551,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
+
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -493,6 +560,11 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setBridgeProxyAddress(
       _bridgeProxyAddress: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
+    setMinAmount(
+      _minAmount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -529,6 +601,16 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     toggleDeposits(
       _state: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
+    updateSanctionCheck(
+      _check: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
+    updateSanctionContractAddress(
+      _sanction: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
   };
@@ -566,6 +648,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    minAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     minBridgeFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     minExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -582,6 +666,8 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     peerMinRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -589,6 +675,11 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setBridgeProxyAddress(
       _bridgeProxyAddress: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
+    setMinAmount(
+      _minAmount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
@@ -625,6 +716,16 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     toggleDeposits(
       _state: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
+    updateSanctionCheck(
+      _check: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
+    updateSanctionContractAddress(
+      _sanction: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
   };

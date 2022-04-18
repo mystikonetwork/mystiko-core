@@ -317,6 +317,11 @@ const _abi = [
         name: '_request',
         type: 'tuple',
       },
+      {
+        internalType: 'address',
+        name: '_executor',
+        type: 'address',
+      },
     ],
     name: 'enqueue',
     outputs: [
@@ -326,18 +331,18 @@ const _abi = [
         type: 'bool',
       },
     ],
-    stateMutability: 'payable',
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [
       {
-        internalType: 'uint256',
+        internalType: 'address',
         name: '',
-        type: 'uint256',
+        type: 'address',
       },
     ],
-    name: 'historicCommitments',
+    name: 'enqueueWhitelist',
     outputs: [
       {
         internalType: 'bool',
@@ -351,12 +356,12 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: 'address',
+        internalType: 'uint256',
         name: '',
-        type: 'address',
+        type: 'uint256',
       },
     ],
-    name: 'inputWhitelist',
+    name: 'historicCommitments',
     outputs: [
       {
         internalType: 'bool',
@@ -628,6 +633,19 @@ const _abi = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'sanctionsContract',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'uint256',
@@ -858,6 +876,32 @@ const _abi = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bool',
+        name: '_check',
+        type: 'bool',
+      },
+    ],
+    name: 'updateSanctionCheck',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_sanction',
+        type: 'address',
+      },
+    ],
+    name: 'updateSanctionContractAddress',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
 ];

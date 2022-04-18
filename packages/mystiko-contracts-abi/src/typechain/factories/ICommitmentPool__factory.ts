@@ -41,6 +41,11 @@ const _abi = [
         name: '_request',
         type: 'tuple',
       },
+      {
+        internalType: 'address',
+        name: '_executor',
+        type: 'address',
+      },
     ],
     name: 'enqueue',
     outputs: [
@@ -50,7 +55,7 @@ const _abi = [
         type: 'bool',
       },
     ],
-    stateMutability: 'payable',
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
