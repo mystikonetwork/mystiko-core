@@ -7,12 +7,8 @@
   "bridgeType": "tbridge",
   "poolAddress": "0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d",
   "disabled": "false",
-  "peerChains": [
-    {
-      "chainId": 97,
-      "address": "0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547"
-    }
-  ],
+  "peerChainId":  97,
+  "peerContractAddress": "0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547",
   "minAmount": "1",
   "minBridgeFee": "2",
   "minExecutorFee": "3"

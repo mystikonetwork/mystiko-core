@@ -19,10 +19,14 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     data: RawChainConfig,
     defaultCircuitConfigs: Map<CircuitType, CircuitConfig>,
     circuitConfigsByName: Map<string, CircuitConfig>,
+    depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
   ) {
     super(data);
     this.poolContractConfigs = this.initPoolContractConfigs(defaultCircuitConfigs, circuitConfigsByName);
-    this.depositContractConfigs = this.initDepositContractConfigs(this.poolContractConfigs);
+    this.depositContractConfigs = this.initDepositContractConfigs(
+      this.poolContractConfigs,
+      depositContractGetter,
+    );
     this.depositConfigsByAssetAndBridge = this.initDepositConfigsByAssetAndBridge();
     this.providerConfigs = this.data.providers.map((raw) => new ProviderConfig(raw));
   }
@@ -80,10 +84,8 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     this.depositContracts.forEach((depositContractConfig) => {
       if (depositContractConfig.bridgeType === BridgeType.LOOP) {
         chainIds.add(this.chainId);
-      } else {
-        depositContractConfig.peerContracts.forEach((peerContractConfig) => {
-          chainIds.add(peerContractConfig.chainId);
-        });
+      } else if (depositContractConfig.peerChainId) {
+        chainIds.add(depositContractConfig.peerChainId);
       }
     });
     return Array.from(chainIds);
@@ -97,8 +99,7 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
           assetSymbols.add(depositContractConfig.assetSymbol);
         }
       } else if (depositContractConfig.bridgeType !== BridgeType.LOOP) {
-        const index = depositContractConfig.peerContracts.findIndex((conf) => conf.chainId === peerChainId);
-        if (index >= 0) {
+        if (peerChainId === depositContractConfig.peerChainId) {
           assetSymbols.add(depositContractConfig.assetSymbol);
         }
       }
@@ -110,8 +111,7 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     const bridges: Set<BridgeType> = new Set<BridgeType>();
     this.depositContracts.forEach((depositContractConfig) => {
       if (peerChainId !== this.chainId && depositContractConfig.assetSymbol === assetSymbol) {
-        const index = depositContractConfig.peerContracts.findIndex((conf) => conf.chainId === peerChainId);
-        if (index >= 0) {
+        if (peerChainId === depositContractConfig.peerChainId) {
           bridges.add(depositContractConfig.bridgeType);
         }
       }
@@ -134,8 +134,7 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
         if (peerChainId === this.chainId && bridgeType === BridgeType.LOOP) {
           return depositContractConfig;
         }
-        const index = depositContractConfig.peerContracts.findIndex((conf) => conf.chainId === peerChainId);
-        if (index >= 0) {
+        if (peerChainId === depositContractConfig.peerChainId && bridgeType !== BridgeType.LOOP) {
           return depositContractConfig;
         }
       }
@@ -182,6 +181,7 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
 
   private initDepositContractConfigs(
     poolContractConfigs: Map<string, PoolContractConfig>,
+    depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
   ): Map<string, DepositContractConfig> {
     const depositContractConfigs = new Map<string, DepositContractConfig>();
     this.data.depositContracts.forEach((raw) => {
@@ -189,7 +189,10 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
         !depositContractConfigs.has(raw.address),
         `duplicate deposit contract=${raw.address} definition in configuration`,
       );
-      depositContractConfigs.set(raw.address, new DepositContractConfig(raw, poolContractConfigs));
+      depositContractConfigs.set(
+        raw.address,
+        new DepositContractConfig(raw, poolContractConfigs, depositContractGetter),
+      );
     });
     return depositContractConfigs;
   }

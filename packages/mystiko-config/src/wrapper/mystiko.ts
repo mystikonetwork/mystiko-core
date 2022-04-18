@@ -89,12 +89,23 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     return this.getChainConfig(chainId)?.getDepositContract(peerChainId, assetSymbol, bridgeType);
   }
 
+  public getDepositContractConfigByAddress(
+    chainId: number,
+    address: string,
+  ): DepositContractConfig | undefined {
+    return this.getChainConfig(chainId)?.getDepositContractByAddress(address);
+  }
+
   public getPoolContractConfig(
     chainId: number,
     assetSymbol: string,
     bridgeType: BridgeType,
   ): PoolContractConfig | undefined {
     return this.getChainConfig(chainId)?.getPoolContract(assetSymbol, bridgeType);
+  }
+
+  public getPoolContractConfigByAddress(chainId: number, address: string): PoolContractConfig | undefined {
+    return this.getChainConfig(chainId)?.getPoolContractByAddress(address);
   }
 
   public getBridgeConfig(type: BridgeType): BridgeConfigType | undefined {
@@ -159,7 +170,15 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     const chainConfigs = new Map<number, ChainConfig>();
     this.data.chains.forEach((raw) => {
       check(!chainConfigs.has(raw.chainId), `duplicate chain id=${raw.chainId} definition in configuration`);
-      chainConfigs.set(raw.chainId, new ChainConfig(raw, defaultCircuitConfigs, circuitConfigsByName));
+      chainConfigs.set(
+        raw.chainId,
+        new ChainConfig(
+          raw,
+          defaultCircuitConfigs,
+          circuitConfigsByName,
+          this.getDepositContractConfigByAddress,
+        ),
+      );
     });
     return chainConfigs;
   }
@@ -172,40 +191,37 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
             this.bridgeConfigs.has(depositContractConfig.bridgeType),
             `bridge type=${depositContractConfig.bridgeType} definition does not exist`,
           );
-          depositContractConfig.peerContracts.forEach((peerContractConfig) => {
+          if (depositContractConfig.peerChainId && depositContractConfig.peerContractAddress) {
             check(
-              this.chainConfigs.has(peerContractConfig.chainId),
-              `no corresponding peer chain id=${peerContractConfig.chainId} ` +
+              this.chainConfigs.has(depositContractConfig.peerChainId),
+              `no corresponding peer chain id=${depositContractConfig.peerChainId} ` +
                 `definition for deposit contract ${depositContractConfig.address} ` +
                 'peer chain configuration',
             );
             const peerDepositContractConfig = this.chainConfigs
-              .get(peerContractConfig.chainId)
-              ?.getDepositContractByAddress(peerContractConfig.address);
+              .get(depositContractConfig.peerChainId)
+              ?.getDepositContractByAddress(depositContractConfig.peerContractAddress);
             if (!peerDepositContractConfig) {
               throw new Error(
-                `no corresponding peer deposit contract chain id=${peerContractConfig.chainId} ` +
-                  `and address=${peerContractConfig.address} definition for deposit contract` +
+                `no corresponding peer deposit contract chain id=${depositContractConfig.peerChainId} ` +
+                  `and address=${depositContractConfig.peerContractAddress} definition for deposit contract` +
                   ` address=${depositContractConfig.address} peer chain configuration`,
               );
             }
             check(
               peerDepositContractConfig.bridgeType === depositContractConfig.bridgeType,
-              `bridge type mismatch for chain id=${peerContractConfig.chainId} ` +
-                `address=${peerContractConfig.address} vs chain id=${chainConfig.chainId} ` +
+              `bridge type mismatch for chain id=${depositContractConfig.peerChainId} ` +
+                `address=${depositContractConfig.peerContractAddress} vs chain id=${chainConfig.chainId} ` +
                 `and address=${depositContractConfig.address}`,
             );
-            const index = peerDepositContractConfig.peerContracts.findIndex(
-              (conf) =>
-                conf.chainId === chainConfig.chainId && conf.address === depositContractConfig.address,
-            );
             check(
-              index >= 0,
-              `chain id=${peerContractConfig.chainId} and address=${peerContractConfig.address} ` +
+              peerDepositContractConfig.peerChainId === chainConfig.chainId &&
+                peerDepositContractConfig.peerContractAddress === depositContractConfig.address,
+              `chain id=${depositContractConfig.peerChainId} and address=${peerDepositContractConfig.address} ` +
                 `does not have expected peer chain id=${chainConfig.chainId} and ` +
                 `address=${depositContractConfig.address} configured`,
             );
-          });
+          }
         }
       });
     });

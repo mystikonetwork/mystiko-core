@@ -1,11 +1,5 @@
 import { validate } from 'class-validator';
-import {
-  BridgeType,
-  ContractType,
-  RawDepositContractConfig,
-  RawPeerContractConfig,
-  readRawConfigFromFile,
-} from '../../../src';
+import { BridgeType, ContractType, RawDepositContractConfig, readRawConfigFromFile } from '../../../src';
 
 let config: RawDepositContractConfig;
 
@@ -19,10 +13,8 @@ beforeEach(() => {
   config.bridgeType = BridgeType.TBRIDGE;
   config.poolAddress = '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d';
   config.disabled = true;
-  const peerContractConfig = new RawPeerContractConfig();
-  peerContractConfig.chainId = 97;
-  peerContractConfig.address = '0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547';
-  config.peerChains = [peerContractConfig];
+  config.peerChainId = 97;
+  config.peerContractAddress = '0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547';
   config.minAmount = '1';
   config.minBridgeFee = '2';
   config.minExecutorFee = '3';
@@ -44,14 +36,17 @@ test('test invalid poolAddress', async () => {
   expect((await validate(config)).length).toBeGreaterThan(0);
 });
 
-test('test invalid peerChains', async () => {
-  const peerContractConfig = new RawPeerContractConfig();
-  peerContractConfig.chainId = 97;
-  peerContractConfig.address = '0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547';
-  config.peerChains.push(peerContractConfig);
+test('test invalid peerChainId', async () => {
+  config.peerChainId = -1;
   expect((await validate(config)).length).toBeGreaterThan(0);
-  peerContractConfig.address = '0xdeadbeef';
-  config.peerChains = [peerContractConfig];
+  config.peerChainId = 1.2;
+  expect((await validate(config)).length).toBeGreaterThan(0);
+});
+
+test('test invalid peerContractAddress', async () => {
+  config.peerContractAddress = '';
+  expect((await validate(config)).length).toBeGreaterThan(0);
+  config.peerContractAddress = '0xdeadbeef';
   expect((await validate(config)).length).toBeGreaterThan(0);
 });
 

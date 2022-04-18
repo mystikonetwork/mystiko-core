@@ -4,18 +4,25 @@ import { ContractConfig } from './base';
 import { CircuitConfig } from '../circuit';
 import { BridgeType } from '../../common';
 import { PoolContractConfig } from './pool';
-import { PeerContractConfig } from './peer';
 import { RawDepositContractConfig } from '../../raw';
 
 export class DepositContractConfig extends ContractConfig<RawDepositContractConfig> {
   private readonly poolContractConfig: PoolContractConfig;
 
-  private readonly peerContractConfigs: Map<number, PeerContractConfig>;
+  private readonly depositContractGetter: (
+    chainId: number,
+    address: string,
+  ) => DepositContractConfig | undefined;
 
-  constructor(data: RawDepositContractConfig, poolContractConfigs: Map<string, PoolContractConfig>) {
+  constructor(
+    data: RawDepositContractConfig,
+    poolContractConfigs: Map<string, PoolContractConfig>,
+    depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
+  ) {
     super(data);
+    this.depositContractGetter = depositContractGetter;
     this.poolContractConfig = this.initPoolContractConfig(poolContractConfigs);
-    this.peerContractConfigs = this.initPeerChainConfigs();
+    this.validate();
   }
 
   public get bridgeType(): BridgeType {
@@ -28,10 +35,6 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   public get disabled(): boolean {
     return this.data.disabled;
-  }
-
-  public get peerContracts(): PeerContractConfig[] {
-    return Array.from(this.peerContractConfigs.values());
   }
 
   public get minAmount(): BN {
@@ -82,8 +85,19 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
     return this.poolContractConfig.circuits;
   }
 
-  public getPeerContractConfig(peerChainId: number): PeerContractConfig | undefined {
-    return this.peerContractConfigs.get(peerChainId);
+  public get peerChainId(): number | undefined {
+    return this.data.peerChainId;
+  }
+
+  public get peerContractAddress(): string | undefined {
+    return this.data.peerContractAddress;
+  }
+
+  public get peerContract(): DepositContractConfig | undefined {
+    if (this.peerChainId && this.peerContractAddress) {
+      return this.depositContractGetter(this.peerChainId, this.peerContractAddress);
+    }
+    return undefined;
   }
 
   private initPoolContractConfig(poolContractConfigs: Map<string, PoolContractConfig>): PoolContractConfig {
@@ -94,26 +108,29 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
     throw new Error(`cannot find pool contract=${this.data.poolAddress} in the configuration`);
   }
 
-  private initPeerChainConfigs(): Map<number, PeerContractConfig> {
-    const peerContractConfigs = new Map<number, PeerContractConfig>();
-    this.data.peerChains.forEach((peerChainConfig) => {
-      check(
-        !peerContractConfigs.has(peerChainConfig.chainId),
-        `duplicate peer chain id=${peerChainConfig.chainId} for deposit contract=${this.address}`,
-      );
-      peerContractConfigs.set(peerChainConfig.chainId, new PeerContractConfig(peerChainConfig));
-    });
+  private validate() {
     if (this.bridgeType === BridgeType.LOOP) {
       check(
-        peerContractConfigs.size === 0,
-        `contract=${this.address} bridge type=${BridgeType.LOOP}, but it contains peer chain configurations`,
+        !this.peerChainId,
+        `deposit contract=${this.address} peerChainId should be undefined ` +
+          `when bridge type=${this.bridgeType}`,
+      );
+      check(
+        !this.peerContractAddress,
+        `deposit contract=${this.address} peerContractAddress should be undefined ` +
+          `when bridge type=${this.bridgeType}`,
       );
     } else {
       check(
-        peerContractConfigs.size > 0,
-        `contract=${this.address} bridge type=${this.bridgeType}, but it does not contain peer chain configurations`,
+        !!this.peerChainId,
+        `deposit contract=${this.address} peerChainId should not be undefined ` +
+          `when bridge type=${this.bridgeType}`,
+      );
+      check(
+        !!this.peerContractAddress,
+        `deposit contract=${this.address} peerContractAddress should not be undefined ` +
+          `when bridge type=${this.bridgeType}`,
       );
     }
-    return peerContractConfigs;
   }
 }

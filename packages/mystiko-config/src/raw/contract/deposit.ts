@@ -1,17 +1,16 @@
 import {
-  ArrayUnique,
   Equals,
-  IsArray,
   IsBoolean,
   IsEnum,
   IsEthereumAddress,
+  IsInt,
   IsNumberString,
-  ValidateNested,
+  IsOptional,
+  IsPositive,
 } from 'class-validator';
-import { Expose, Type } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { RawContractConfig } from './base';
 import { BridgeType, ContractType } from '../../common';
-import { RawPeerContractConfig } from './peer';
 
 export class RawDepositContractConfig extends RawContractConfig {
   @Expose()
@@ -31,11 +30,15 @@ export class RawDepositContractConfig extends RawContractConfig {
   public disabled: boolean = false;
 
   @Expose()
-  @Type(() => RawPeerContractConfig)
-  @ValidateNested()
-  @IsArray()
-  @ArrayUnique((conf) => `${conf.chainId}/${conf.address}`)
-  public peerChains: RawPeerContractConfig[] = [];
+  @IsInt()
+  @IsPositive()
+  @IsOptional()
+  public peerChainId?: number = undefined;
+
+  @Expose()
+  @IsEthereumAddress()
+  @IsOptional()
+  public peerContractAddress?: string = undefined;
 
   @Expose()
   @IsNumberString({ no_symbols: true })
