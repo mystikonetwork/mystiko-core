@@ -21,23 +21,13 @@ export interface IMessageSenderAppInterface extends utils.Interface {
   contractName: 'IMessageSenderApp';
   functions: {
     'sendMessage(address,uint256,bytes)': FunctionFragment;
-    'sendMessageWithTransfer(address,address,uint256,uint64,uint64,uint32,bytes,uint8,uint256)': FunctionFragment;
+    'sendMessageWithTransfer(address,uint256,address,bytes32,bytes)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'sendMessage', values: [string, BigNumberish, BytesLike]): string;
   encodeFunctionData(
     functionFragment: 'sendMessageWithTransfer',
-    values: [
-      string,
-      string,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BigNumberish,
-      BigNumberish,
-    ],
+    values: [string, BigNumberish, string, BytesLike, BytesLike],
   ): string;
 
   decodeFunctionResult(functionFragment: 'sendMessage', data: BytesLike): Result;
@@ -79,14 +69,10 @@ export interface IMessageSenderApp extends BaseContract {
 
     sendMessageWithTransfer(
       _receiver: string,
-      _token: string,
-      _amount: BigNumberish,
       _dstChainId: BigNumberish,
-      _nonce: BigNumberish,
-      _maxSlippage: BigNumberish,
+      _srcBridge: string,
+      _srcTransferId: BytesLike,
       _message: BytesLike,
-      _bridgeType: BigNumberish,
-      _fee: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
   };
@@ -100,14 +86,10 @@ export interface IMessageSenderApp extends BaseContract {
 
   sendMessageWithTransfer(
     _receiver: string,
-    _token: string,
-    _amount: BigNumberish,
     _dstChainId: BigNumberish,
-    _nonce: BigNumberish,
-    _maxSlippage: BigNumberish,
+    _srcBridge: string,
+    _srcTransferId: BytesLike,
     _message: BytesLike,
-    _bridgeType: BigNumberish,
-    _fee: BigNumberish,
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -121,14 +103,10 @@ export interface IMessageSenderApp extends BaseContract {
 
     sendMessageWithTransfer(
       _receiver: string,
-      _token: string,
-      _amount: BigNumberish,
       _dstChainId: BigNumberish,
-      _nonce: BigNumberish,
-      _maxSlippage: BigNumberish,
+      _srcBridge: string,
+      _srcTransferId: BytesLike,
       _message: BytesLike,
-      _bridgeType: BigNumberish,
-      _fee: BigNumberish,
       overrides?: CallOverrides,
     ): Promise<void>;
   };
@@ -145,14 +123,10 @@ export interface IMessageSenderApp extends BaseContract {
 
     sendMessageWithTransfer(
       _receiver: string,
-      _token: string,
-      _amount: BigNumberish,
       _dstChainId: BigNumberish,
-      _nonce: BigNumberish,
-      _maxSlippage: BigNumberish,
+      _srcBridge: string,
+      _srcTransferId: BytesLike,
       _message: BytesLike,
-      _bridgeType: BigNumberish,
-      _fee: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
   };
@@ -167,14 +141,10 @@ export interface IMessageSenderApp extends BaseContract {
 
     sendMessageWithTransfer(
       _receiver: string,
-      _token: string,
-      _amount: BigNumberish,
       _dstChainId: BigNumberish,
-      _nonce: BigNumberish,
-      _maxSlippage: BigNumberish,
+      _srcBridge: string,
+      _srcTransferId: BytesLike,
       _message: BytesLike,
-      _bridgeType: BigNumberish,
-      _fee: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
   };

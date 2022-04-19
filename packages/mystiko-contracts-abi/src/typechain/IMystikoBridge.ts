@@ -8,7 +8,6 @@ import {
   BytesLike,
   CallOverrides,
   ContractTransaction,
-  Overrides,
   PayableOverrides,
   PopulatedTransaction,
   Signer,
@@ -49,118 +48,17 @@ export declare namespace IMystikoBridge {
     executorFee: BigNumber;
     rollupFee: BigNumber;
   };
-
-  export type RollupRequestStruct = {
-    proof: IVerifier.ProofStruct;
-    rollupSize: BigNumberish;
-    newRoot: BigNumberish;
-    leafHash: BigNumberish;
-  };
-
-  export type RollupRequestStructOutput = [IVerifier.ProofStructOutput, number, BigNumber, BigNumber] & {
-    proof: IVerifier.ProofStructOutput;
-    rollupSize: number;
-    newRoot: BigNumber;
-    leafHash: BigNumber;
-  };
-
-  export type TransactRequestStruct = {
-    proof: IVerifier.ProofStruct;
-    rootHash: BigNumberish;
-    serialNumbers: BigNumberish[];
-    sigHashes: BigNumberish[];
-    sigPk: BytesLike;
-    publicAmount: BigNumberish;
-    relayerFeeAmount: BigNumberish;
-    outCommitments: BigNumberish[];
-    outRollupFees: BigNumberish[];
-    publicRecipient: string;
-    relayerAddress: string;
-    outEncryptedNotes: BytesLike[];
-  };
-
-  export type TransactRequestStructOutput = [
-    IVerifier.ProofStructOutput,
-    BigNumber,
-    BigNumber[],
-    BigNumber[],
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber[],
-    BigNumber[],
-    string,
-    string,
-    string[],
-  ] & {
-    proof: IVerifier.ProofStructOutput;
-    rootHash: BigNumber;
-    serialNumbers: BigNumber[];
-    sigHashes: BigNumber[];
-    sigPk: string;
-    publicAmount: BigNumber;
-    relayerFeeAmount: BigNumber;
-    outCommitments: BigNumber[];
-    outRollupFees: BigNumber[];
-    publicRecipient: string;
-    relayerAddress: string;
-    outEncryptedNotes: string[];
-  };
-}
-
-export declare namespace IVerifier {
-  export type G1PointStruct = { X: BigNumberish; Y: BigNumberish };
-
-  export type G1PointStructOutput = [BigNumber, BigNumber] & {
-    X: BigNumber;
-    Y: BigNumber;
-  };
-
-  export type G2PointStruct = {
-    X: [BigNumberish, BigNumberish];
-    Y: [BigNumberish, BigNumberish];
-  };
-
-  export type G2PointStructOutput = [[BigNumber, BigNumber], [BigNumber, BigNumber]] & {
-    X: [BigNumber, BigNumber];
-    Y: [BigNumber, BigNumber];
-  };
-
-  export type ProofStruct = {
-    a: IVerifier.G1PointStruct;
-    b: IVerifier.G2PointStruct;
-    c: IVerifier.G1PointStruct;
-  };
-
-  export type ProofStructOutput = [
-    IVerifier.G1PointStructOutput,
-    IVerifier.G2PointStructOutput,
-    IVerifier.G1PointStructOutput,
-  ] & {
-    a: IVerifier.G1PointStructOutput;
-    b: IVerifier.G2PointStructOutput;
-    c: IVerifier.G1PointStructOutput;
-  };
 }
 
 export interface IMystikoBridgeInterface extends utils.Interface {
   contractName: 'IMystikoBridge';
   functions: {
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256,uint256,uint256))': FunctionFragment;
-    'rollup((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint32,uint256,uint256))': FunctionFragment;
-    'transact((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint256,uint256[],uint256[],bytes32,uint256,uint256,uint256[],uint256[],address,address,bytes[]),bytes)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoBridge.DepositRequestStruct]): string;
-  encodeFunctionData(functionFragment: 'rollup', values: [IMystikoBridge.RollupRequestStruct]): string;
-  encodeFunctionData(
-    functionFragment: 'transact',
-    values: [IMystikoBridge.TransactRequestStruct, BytesLike],
-  ): string;
 
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rollup', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'transact', data: BytesLike): Result;
 
   events: {};
 }
@@ -190,84 +88,32 @@ export interface IMystikoBridge extends BaseContract {
 
   functions: {
     deposit(
-      request: IMystikoBridge.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    rollup(
-      request: IMystikoBridge.RollupRequestStruct,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
+      _request: IMystikoBridge.DepositRequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
   };
 
   deposit(
-    request: IMystikoBridge.DepositRequestStruct,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  rollup(
-    request: IMystikoBridge.RollupRequestStruct,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  transact(
-    request: IMystikoBridge.TransactRequestStruct,
-    signature: BytesLike,
+    _request: IMystikoBridge.DepositRequestStruct,
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    deposit(request: IMystikoBridge.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
-
-    rollup(request: IMystikoBridge.RollupRequestStruct, overrides?: CallOverrides): Promise<void>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
-      overrides?: CallOverrides,
-    ): Promise<void>;
+    deposit(_request: IMystikoBridge.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {};
 
   estimateGas: {
     deposit(
-      request: IMystikoBridge.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    rollup(
-      request: IMystikoBridge.RollupRequestStruct,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
+      _request: IMystikoBridge.DepositRequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     deposit(
-      request: IMystikoBridge.DepositRequestStruct,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    rollup(
-      request: IMystikoBridge.RollupRequestStruct,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    transact(
-      request: IMystikoBridge.TransactRequestStruct,
-      signature: BytesLike,
+      _request: IMystikoBridge.DepositRequestStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
   };

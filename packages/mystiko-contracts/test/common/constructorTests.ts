@@ -2,30 +2,83 @@ import { expect } from 'chai';
 import { Hasher3 } from '@mystikonetwork/contracts-abi';
 import { MerkleTree } from '@mystikonetwork/utils';
 
-export function testConstructor(
+export function testLoopConstructor(
   contractName: string,
   mystikoContract: any,
   hasher3: Hasher3,
-  treeHeight: number,
-  rootHistoryLength: number,
-  minBridgeFee: number | undefined,
-  minExecutorFee: number | undefined,
-  minRollupFee: number,
+  minAmount: number,
+  commitmentPoolAddress: string,
 ) {
   describe(`Test ${contractName} constructor`, () => {
     it('should initialize hasher3 correctly', async () => {
       expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
     });
-    if (minBridgeFee !== undefined) {
-      it('should initialize minBridgeFee correctly', async () => {
-        expect(await mystikoContract.minBridgeFee()).to.equal(minBridgeFee);
-      });
-    }
-    if (minExecutorFee !== undefined) {
-      it('should initialize minExecutorFee correctly', async () => {
-        expect(await mystikoContract.minExecutorFee()).to.equal(minExecutorFee);
-      });
-    }
+    it('should initialize minAmount correctly', async () => {
+      expect(await mystikoContract.minAmount()).to.equal(minAmount);
+    });
+    it('should initialize admin related resources correctly', async () => {
+      expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
+    });
+    it('should initialize commitment pool address correctly', async () => {
+      expect(await mystikoContract.associatedCommitmentPool()).to.equal(commitmentPoolAddress);
+    });
+  });
+}
+
+export function testBridgeConstructor(
+  contractName: string,
+  mystikoContract: any,
+  hasher3: Hasher3,
+  minAmount: number,
+  minBridgeFee: number,
+  minExecutorFee: number,
+  peerMinRoolupFee: number,
+  peerChainId: number,
+  peerContract: string,
+  commitmentPoolAddress: string,
+) {
+  describe(`Test ${contractName} constructor`, () => {
+    it('should initialize hasher3 correctly', async () => {
+      expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
+    });
+    it('should initialize minAmount correctly', async () => {
+      expect(await mystikoContract.minAmount()).to.equal(minAmount);
+    });
+    it('should initialize minBridgeFee correctly', async () => {
+      expect(await mystikoContract.minBridgeFee()).to.equal(minBridgeFee);
+    });
+    it('should initialize minExecutorFee correctly', async () => {
+      expect(await mystikoContract.minExecutorFee()).to.equal(minExecutorFee);
+    });
+    it('should initialize peerMinExecutorFee correctly', async () => {
+      expect(await mystikoContract.peerMinExecutorFee()).to.equal(minExecutorFee);
+    });
+    it('should initialize peerMinRollupFee correctly', async () => {
+      expect(await mystikoContract.peerMinRollupFee()).to.equal(peerMinRoolupFee);
+    });
+    it('should initialize peerChainId correctly', async () => {
+      expect(await mystikoContract.peerChainId()).to.equal(peerChainId);
+    });
+    it('should initialize peerContract correctly', async () => {
+      expect(await mystikoContract.peerContract()).to.equal(peerContract);
+    });
+    it('should initialize admin related resources correctly', async () => {
+      expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
+    });
+    it('should initialize commitment pool address correctly', async () => {
+      expect(await mystikoContract.associatedCommitmentPool()).to.equal(commitmentPoolAddress);
+    });
+  });
+}
+
+export function testCommitmentPoolConstructor(
+  contractName: string,
+  mystikoContract: any,
+  treeHeight: number,
+  rootHistoryLength: number,
+  minRollupFee: number,
+) {
+  describe(`Test ${contractName} constructor`, () => {
     it('should initialize minRollupFee correctly', async () => {
       expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
     });
@@ -43,7 +96,6 @@ export function testConstructor(
       expect(await mystikoContract.rootHistoryLength()).to.equal(rootHistoryLength);
     });
     it('should initialize admin related resources correctly', async () => {
-      expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
       expect(await mystikoContract.isVerifierUpdateDisabled()).to.equal(false);
       expect(await mystikoContract.isRollupWhitelistDisabled()).to.equal(false);
     });

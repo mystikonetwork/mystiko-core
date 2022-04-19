@@ -20,7 +20,7 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 export interface ICrossChainProxyInterface extends utils.Interface {
   contractName: 'ICrossChainProxy';
   functions: {
-    'sendMessage(address,uint256,bytes)': FunctionFragment;
+    'sendMessage(address,uint64,bytes)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'sendMessage', values: [string, BigNumberish, BytesLike]): string;

@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
-import { TestToken } from '@mystikonetwork/contracts-abi';
+import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
@@ -146,7 +146,7 @@ function buildRequest(
 export function testTransact(
   contractName: string,
   protocol: MystikoProtocolV2,
-  mystikoContract: any,
+  commitmentPoolContract: any,
   transactVerifier: any,
   commitmentInfo: CommitmentInfo<CommitmentV1>,
   inCommitmentsIndices: number[],
@@ -178,7 +178,7 @@ export function testTransact(
   const events: ethers.utils.LogDescription[] = [];
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
-      await mystikoContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
+      await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
       const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
@@ -205,13 +205,17 @@ export function testTransact(
       );
       recipientBalance = await getBalance(publicRecipientAddress, testToken);
       relayerBalance = await getBalance(relayerAddress, testToken);
-      commitmentQueueSize = await mystikoContract.commitmentQueueSize().then((r: any) => toBN(r.toString()));
-      commitmentIncludedCount = await mystikoContract
+      commitmentQueueSize = await commitmentPoolContract
+        .commitmentQueueSize()
+        .then((r: any) => toBN(r.toString()));
+      commitmentIncludedCount = await commitmentPoolContract
         .commitmentIncludedCount()
         .then((r: any) => toBN(r.toString()));
     });
 
     it('should transact successfully', async () => {
+      await commitmentPoolContract.toggleSanctionCheck(true);
+
       expect(await protocol.zkVerify(proof, vkeyFile)).to.equal(true);
       const request = buildRequest(
         numInputs,
@@ -221,11 +225,11 @@ export function testTransact(
         relayerAddress,
         outEncryptedNotes,
       );
-      const tx = await mystikoContract.transact(request, signature);
+      const tx = await commitmentPoolContract.transact(request, signature);
       txReceipt = await tx.wait();
       for (let i = 0; i < txReceipt.logs.length; i += 1) {
         try {
-          const parsedLog: ethers.utils.LogDescription = mystikoContract.interface.parseLog(
+          const parsedLog: ethers.utils.LogDescription = commitmentPoolContract.interface.parseLog(
             txReceipt.logs[i],
           );
           events.push(parsedLog);
@@ -275,7 +279,7 @@ export function testTransact(
       const snPromises: Promise<boolean>[] = [];
       for (let i = 1; i < numInputs + 1; i += 1) {
         const sn = proof.inputs[i];
-        snPromises.push(mystikoContract.spentSerialNumbers(sn));
+        snPromises.push(commitmentPoolContract.spentSerialNumbers(sn));
       }
       const snExists = await Promise.all(snPromises);
       snExists.forEach((exist) => expect(exist).to.equal(true));
@@ -286,9 +290,9 @@ export function testTransact(
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
         if (isLoop) {
-          commitmentPromises.push(mystikoContract.historicCommitments(commitment.toString()));
+          commitmentPromises.push(commitmentPoolContract.historicCommitments(commitment.toString()));
         } else {
-          commitmentPromises.push(mystikoContract.relayCommitments(commitment.toString()));
+          commitmentPromises.push(commitmentPoolContract.relayCommitments(commitment.toString()));
         }
       }
       const commitmentExists = await Promise.all(commitmentPromises);
@@ -296,7 +300,7 @@ export function testTransact(
     });
 
     it('should set commitmentQueue correctly', async () => {
-      const newCommitmentQueueSize: BN = await mystikoContract
+      const newCommitmentQueueSize: BN = await commitmentPoolContract
         .commitmentQueueSize()
         .then((r: any) => toBN(r.toString()));
       expect(newCommitmentQueueSize.toString()).to.equal(commitmentQueueSize.addn(numOutputs).toString());
@@ -304,12 +308,85 @@ export function testTransact(
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
         commitmentQueuePromises.push(
-          mystikoContract.commitmentQueue(commitmentQueueSize.addn(i).toString()).then((r: any) => {
+          commitmentPoolContract.commitmentQueue(commitmentQueueSize.addn(i).toString()).then((r: any) => {
             expect(r.commitment.toString()).to.equal(commitment.toString());
           }),
         );
       }
       await Promise.all(commitmentQueuePromises);
+    });
+  });
+}
+
+export function testTransactRevert(
+  contractName: string,
+  protocol: MystikoProtocolV2,
+  commitmentPoolContract: any,
+  sanctionList: DummySanctionsList,
+  transactVerifier: any,
+  commitmentInfo: CommitmentInfo<CommitmentV1>,
+  inCommitmentsIndices: number[],
+  publicAmount: BN,
+  relayerFeeAmount: BN,
+  outAmounts: BN[],
+  rollupFeeAmounts: BN[],
+  programFile: string,
+  abiFile: string,
+  provingKeyFile: string,
+) {
+  const numInputs = inCommitmentsIndices.length;
+  const numOutputs = outAmounts.length;
+  const publicRecipientAddress = '0x2Bd6FBfDA256cebAC13931bc3E91F6e0f59A5e23';
+  const relayerAddress = '0xc9192277ea18ff49618E412197C9c9eaCF43A5e3';
+  const signatureKeys = generateSignatureKeys();
+  let proof: Proof;
+  let outCommitments: CommitmentV1[];
+  let outEncryptedNotes: Buffer[];
+  let signature: string;
+  describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
+    before(async () => {
+      await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
+      const proofWithCommitments = await generateProof(
+        protocol,
+        numInputs,
+        numOutputs,
+        commitmentInfo,
+        inCommitmentsIndices,
+        signatureKeys.pk,
+        publicAmount,
+        relayerFeeAmount,
+        outAmounts,
+        rollupFeeAmounts,
+        programFile,
+        abiFile,
+        provingKeyFile,
+      );
+      proof = proofWithCommitments.proof;
+      outCommitments = proofWithCommitments.outCommitments;
+      outEncryptedNotes = outCommitments.map((c) => c.privateNote);
+      signature = await signRequest(
+        signatureKeys.wallet,
+        publicRecipientAddress,
+        relayerAddress,
+        outEncryptedNotes,
+      );
+    });
+
+    it('should revert when recipient in sanction list', async () => {
+      await sanctionList.addToSanctionsList(publicRecipientAddress);
+      const request = buildRequest(
+        numInputs,
+        numOutputs,
+        proof,
+        publicRecipientAddress,
+        relayerAddress,
+        outEncryptedNotes,
+      );
+
+      await expect(commitmentPoolContract.transact(request, signature)).to.be.revertedWith(
+        'sanctioned address',
+      );
+      await sanctionList.removeToSanctionsList(publicRecipientAddress);
     });
   });
 }

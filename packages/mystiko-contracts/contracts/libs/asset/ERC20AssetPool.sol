@@ -13,13 +13,17 @@ abstract contract ERC20AssetPool is AssetPool {
     asset = IERC20Metadata(_assetAddress);
   }
 
-  function _processDepositTransfer(uint256 amount, uint256 bridgeFee) internal virtual override {
+  function _processDepositTransfer(
+    address commitmentPool,
+    uint256 amount,
+    uint256 bridgeFee
+  ) internal virtual override {
     require(msg.value == bridgeFee, "bridge fee mismatch");
-    asset.safeTransferFrom(msg.sender, address(this), amount);
+    asset.safeTransferFrom(msg.sender, commitmentPool, amount);
   }
 
-  function _processExecutorFeeTransfer(uint256 amount) internal override {
-    asset.safeTransfer(tx.origin, amount);
+  function _processExecutorFeeTransfer(address executor, uint256 amount) internal override {
+    asset.safeTransfer(executor, amount);
   }
 
   function _processRollupFeeTransfer(uint256 amount) internal override {
