@@ -1,15 +1,10 @@
-import {
-  RawTBridgeConfig,
-  readRawConfigFromFile,
-  readRawConfigFromObject,
-  TBridgeConfig,
-} from '../../../src';
+import { RawConfig, RawTBridgeConfig, TBridgeConfig } from '../../../src';
 
 let rawConfig: RawTBridgeConfig;
 let config: TBridgeConfig;
 
 beforeEach(async () => {
-  rawConfig = await readRawConfigFromFile(RawTBridgeConfig, 'tests/files/bridge/tbridge.valid.json');
+  rawConfig = await RawConfig.createFromFile(RawTBridgeConfig, 'tests/files/bridge/tbridge.valid.json');
   config = new TBridgeConfig(rawConfig);
 });
 
@@ -24,6 +19,6 @@ test('test copy', () => {
 
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
-  const loadedRawConfig = await readRawConfigFromObject(RawTBridgeConfig, JSON.parse(jsonString));
+  const loadedRawConfig = await RawConfig.createFromObject(RawTBridgeConfig, JSON.parse(jsonString));
   expect(loadedRawConfig).toStrictEqual(rawConfig);
 });

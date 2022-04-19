@@ -1,10 +1,10 @@
-import { ContractConfig, RawContractConfig, readRawConfigFromObject } from '../../../src';
+import { ContractConfig, RawConfig, RawContractConfig } from '../../../src';
 
 let rawConfig: RawContractConfig;
 let config: ContractConfig<RawContractConfig>;
 
 beforeEach(async () => {
-  rawConfig = await readRawConfigFromObject(RawContractConfig, 'tests/files/contract/base.valid.json');
+  rawConfig = await RawConfig.createFromFile(RawContractConfig, 'tests/files/contract/base.valid.json');
   config = new ContractConfig<RawContractConfig>(rawConfig);
 });
 
@@ -13,7 +13,7 @@ test('test equality', () => {
   expect(config.address).toBe(rawConfig.address);
   expect(config.name).toBe(rawConfig.name);
   expect(config.type).toBe(rawConfig.type);
-  expect(config.startBlock).toBe(rawConfig.eventFilterSize);
+  expect(config.startBlock).toBe(rawConfig.startBlock);
   expect(config.eventFilterSize).toBe(rawConfig.eventFilterSize);
 });
 
@@ -23,6 +23,6 @@ test('test copy', () => {
 
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
-  const loadedRawConfig = await readRawConfigFromObject(RawContractConfig, JSON.parse(jsonString));
+  const loadedRawConfig = await RawConfig.createFromObject(RawContractConfig, JSON.parse(jsonString));
   expect(loadedRawConfig).toStrictEqual(rawConfig);
 });

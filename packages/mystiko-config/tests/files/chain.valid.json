@@ -25,9 +25,9 @@
       "disabled": true,
       "peerChainId":  97,
       "peerContractAddress": "0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547",
-      "minAmount": "1",
-      "minBridgeFee": "2",
-      "minExecutorFee": "3"
+      "minAmount": "10000000000000000",
+      "minBridgeFee": "20000000000000000",
+      "minExecutorFee": "30000000000000000"
     }
   ],
   "poolContracts": [
@@ -40,7 +40,7 @@
       "assetSymbol": "MTT",
       "assetDecimals": 16,
       "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a",
-      "minRollupFee": "12345",
+      "minRollupFee": "40000000000000000",
       "circuits": ["circuit-1.0"]
     }
   ]

@@ -189,9 +189,19 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
         !depositContractConfigs.has(raw.address),
         `duplicate deposit contract=${raw.address} definition in configuration`,
       );
+      check(
+        poolContractConfigs.has(raw.poolAddress),
+        `deposit contract=${raw.address} poolAddress definition does not exist`,
+      );
+      if (raw.bridgeType !== BridgeType.LOOP) {
+        check(
+          this.chainId !== raw.peerChainId,
+          `current chain id should be different with peer chain id in contract=${raw.address}`,
+        );
+      }
       depositContractConfigs.set(
         raw.address,
-        new DepositContractConfig(raw, poolContractConfigs, depositContractGetter),
+        new DepositContractConfig(raw, this.getPoolContractByAddress, depositContractGetter),
       );
     });
     return depositContractConfigs;

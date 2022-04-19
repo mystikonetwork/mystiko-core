@@ -1,46 +1,47 @@
-import { validate } from 'class-validator';
-import { RawMystikoConfig, readRawConfigFromFile } from '../../src';
+import { RawConfig, RawMystikoConfig } from '../../src';
 
 let config: RawMystikoConfig;
 
 beforeEach(async () => {
-  config = await readRawConfigFromFile(RawMystikoConfig, 'tests/files/mystiko.valid.json');
+  config = await RawConfig.createFromFile(RawMystikoConfig, 'tests/files/mystiko.valid.json');
 });
 
 test('test invalid version', async () => {
   config.version = '';
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
   config.version = 'wrong version';
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid chains', async () => {
   const chainConfigs = config.chains;
   config.chains = [...chainConfigs, ...chainConfigs];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
   chainConfigs[0].chainId = 1.2;
   config.chains = chainConfigs;
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid bridges', async () => {
   const bridgeConfigs = config.bridges;
   config.bridges = [...bridgeConfigs, ...bridgeConfigs];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
   bridgeConfigs[0].name = '';
   config.bridges = bridgeConfigs;
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid circuits', async () => {
   const circuitConfigs = config.circuits;
   config.circuits = [...circuitConfigs, ...circuitConfigs];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
   circuitConfigs[0].name = '';
   config.circuits = circuitConfigs;
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid json file', async () => {
-  await expect(readRawConfigFromFile(RawMystikoConfig, 'tests/files/mystiko.invalid.json')).rejects.toThrow();
+  await expect(
+    RawConfig.createFromFile(RawMystikoConfig, 'tests/files/mystiko.invalid.json'),
+  ).rejects.toThrow();
 });

@@ -4,10 +4,11 @@ import { RawBridgeConfig, RawCelerBridgeConfig, RawPolyBridgeConfig, RawTBridgeC
 import { RawChainConfig } from './chain';
 import { RawCircuitConfig } from './circuit';
 import { BridgeType } from '../common';
+import { RawConfig } from './base';
 
 export type RawBridgeConfigType = RawCelerBridgeConfig | RawPolyBridgeConfig | RawTBridgeConfig;
 
-export class RawMystikoConfig {
+export class RawMystikoConfig extends RawConfig {
   @Expose()
   @IsSemVer()
   public version: string = '0.1.0';

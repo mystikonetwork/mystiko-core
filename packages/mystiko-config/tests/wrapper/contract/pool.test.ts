@@ -2,10 +2,9 @@ import {
   CircuitConfig,
   CircuitType,
   PoolContractConfig,
+  RawConfig,
   RawMystikoConfig,
   RawPoolContractConfig,
-  readRawConfigFromFile,
-  readRawConfigFromObject,
 } from '../../../src';
 
 let rawConfig: RawPoolContractConfig;
@@ -14,7 +13,7 @@ let circuitConfigsByName: Map<string, CircuitConfig>;
 let config: PoolContractConfig;
 
 async function initCircuitConfigsByName(): Promise<Map<string, CircuitConfig>> {
-  const mystikoConfig = await readRawConfigFromFile(RawMystikoConfig, 'tests/files/mystiko.valid.json');
+  const mystikoConfig = await RawConfig.createFromFile(RawMystikoConfig, 'tests/files/mystiko.valid.json');
   const configs = new Map<string, CircuitConfig>();
   mystikoConfig.circuits.forEach((rawCircuitConfig) => {
     const circuitConfig = new CircuitConfig(rawCircuitConfig);
@@ -36,7 +35,7 @@ function initDefaultCircuitConfigs(): Map<CircuitType, CircuitConfig> {
 beforeEach(async () => {
   circuitConfigsByName = await initCircuitConfigsByName();
   defaultCircuitConfigs = initDefaultCircuitConfigs();
-  rawConfig = await readRawConfigFromFile(RawPoolContractConfig, 'tests/files/contract/pool.valid.json');
+  rawConfig = await RawConfig.createFromFile(RawPoolContractConfig, 'tests/files/contract/pool.valid.json');
   config = new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName);
 });
 
@@ -65,6 +64,6 @@ test('test copy', () => {
 
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
-  const loadedRawConfig = await readRawConfigFromObject(RawPoolContractConfig, JSON.parse(jsonString));
+  const loadedRawConfig = await RawConfig.createFromObject(RawPoolContractConfig, JSON.parse(jsonString));
   expect(loadedRawConfig).toStrictEqual(rawConfig);
 });

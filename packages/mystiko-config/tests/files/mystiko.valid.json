@@ -31,9 +31,9 @@
           "disabled": true,
           "peerChainId": 97,
           "peerContractAddress": "0xd791049D0a154bC7860804e1A18ACD148Eb0afD9",
-          "minAmount": "1",
-          "minBridgeFee": "2",
-          "minExecutorFee": "3"
+          "minAmount": "10000000000000000",
+          "minBridgeFee": "20000000000000000",
+          "minExecutorFee": "30000000000000000"
         }
       ],
       "poolContracts": [
@@ -44,9 +44,9 @@
           "type": "pool",
           "startBlock": 1000000,
           "assetSymbol": "MTT",
-          "assetDecimals": 18,
+          "assetDecimals": 16,
           "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a",
-          "minRollupFee": "12345",
+          "minRollupFee": "40000000000000000",
           "circuits": ["zokrates-2.0-rollup1"]
         }
       ]
@@ -81,9 +81,9 @@
           "disabled": true,
           "peerChainId": 3,
           "peerContractAddress": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
-          "minAmount": "1",
-          "minBridgeFee": "2",
-          "minExecutorFee": "3"
+          "minAmount": "10000000000000000",
+          "minBridgeFee": "20000000000000000",
+          "minExecutorFee": "30000000000000000"
         }
       ],
       "poolContracts": [
@@ -94,7 +94,7 @@
           "type": "pool",
           "startBlock": 1000000,
           "assetSymbol": "MTT",
-          "assetDecimals": 18,
+          "assetDecimals": 16,
           "assetAddress": "0xaA055A9888e414faF9f0DA3F4cb4C56Df8a4bdA9",
           "minRollupFee": "12345"
         }

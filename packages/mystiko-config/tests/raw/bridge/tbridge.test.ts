@@ -1,28 +1,29 @@
-import { validate } from 'class-validator';
-import { BridgeType, readRawConfigFromFile, RawTBridgeConfig } from '../../../src';
+import { BridgeType, RawConfig, RawTBridgeConfig } from '../../../src';
 
 let config: RawTBridgeConfig;
 
-beforeEach(() => {
-  config = new RawTBridgeConfig();
-  config.name = 'Mystiko Testnet Bridge';
-  config.type = BridgeType.TBRIDGE;
+beforeEach(async () => {
+  config = await RawConfig.createFromObject(RawTBridgeConfig, {
+    name: 'Mystiko Testnet Bridge',
+  });
 });
 
-test('test validate success', async () => {
-  expect((await validate(config)).length).toBe(0);
+test('test validate success', () => {
   expect(config.type).toBe(BridgeType.TBRIDGE);
 });
 
 test('test invalid type', async () => {
   config.type = BridgeType.POLY;
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test import json file', async () => {
-  const fileConfig = await readRawConfigFromFile(RawTBridgeConfig, 'tests/files/bridge/tbridge.valid.json');
+  const fileConfig = await RawConfig.createFromFile(
+    RawTBridgeConfig,
+    'tests/files/bridge/tbridge.valid.json',
+  );
   expect(fileConfig).toStrictEqual(config);
   await expect(
-    readRawConfigFromFile(RawTBridgeConfig, 'tests/files/bridge/tbridge.invalid.json'),
+    RawConfig.createFromFile(RawTBridgeConfig, 'tests/files/bridge/tbridge.invalid.json'),
   ).rejects.toThrow();
 });

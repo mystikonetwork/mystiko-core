@@ -1,15 +1,10 @@
-import {
-  CelerBridgeConfig,
-  RawCelerBridgeConfig,
-  readRawConfigFromFile,
-  readRawConfigFromObject,
-} from '../../../src';
+import { CelerBridgeConfig, RawCelerBridgeConfig, RawConfig } from '../../../src';
 
 let rawConfig: RawCelerBridgeConfig;
 let config: CelerBridgeConfig;
 
 beforeEach(async () => {
-  rawConfig = await readRawConfigFromFile(RawCelerBridgeConfig, 'tests/files/bridge/celer.valid.json');
+  rawConfig = await RawConfig.createFromFile(RawCelerBridgeConfig, 'tests/files/bridge/celer.valid.json');
   config = new CelerBridgeConfig(rawConfig);
 });
 
@@ -24,6 +19,6 @@ test('test copy', () => {
 
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
-  const loadedRawConfig = await readRawConfigFromObject(RawCelerBridgeConfig, JSON.parse(jsonString));
+  const loadedRawConfig = await RawConfig.createFromObject(RawCelerBridgeConfig, JSON.parse(jsonString));
   expect(loadedRawConfig).toStrictEqual(rawConfig);
 });

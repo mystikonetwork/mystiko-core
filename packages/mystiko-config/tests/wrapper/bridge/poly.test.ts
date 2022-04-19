@@ -1,15 +1,10 @@
-import {
-  PolyBridgeConfig,
-  RawPolyBridgeConfig,
-  readRawConfigFromFile,
-  readRawConfigFromObject,
-} from '../../../src';
+import { PolyBridgeConfig, RawConfig, RawPolyBridgeConfig } from '../../../src';
 
 let rawConfig: RawPolyBridgeConfig;
 let config: PolyBridgeConfig;
 
 beforeEach(async () => {
-  rawConfig = await readRawConfigFromFile(RawPolyBridgeConfig, 'tests/files/bridge/poly.valid.json');
+  rawConfig = await RawConfig.createFromFile(RawPolyBridgeConfig, 'tests/files/bridge/poly.valid.json');
   config = new PolyBridgeConfig(rawConfig);
 });
 
@@ -28,6 +23,6 @@ test('test copy', () => {
 
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
-  const loadedRawConfig = await readRawConfigFromObject(RawPolyBridgeConfig, JSON.parse(jsonString));
+  const loadedRawConfig = await RawConfig.createFromObject(RawPolyBridgeConfig, JSON.parse(jsonString));
   expect(loadedRawConfig).toStrictEqual(rawConfig);
 });

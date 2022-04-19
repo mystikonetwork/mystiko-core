@@ -13,11 +13,12 @@ import {
 import { Expose, Type } from 'class-transformer';
 import { RawDepositContractConfig, RawPoolContractConfig } from './contract';
 import { RawProviderConfig } from './provider';
+import { RawConfig } from './base';
 
 export const EXPLORER_TX_PLACEHOLDER: string = '%tx%';
 export const EXPLORER_DEFAULT_PREFIX: string = `/tx/${EXPLORER_TX_PLACEHOLDER}`;
 
-export class RawChainConfig {
+export class RawChainConfig extends RawConfig {
   @Expose()
   @IsInt()
   @IsPositive()

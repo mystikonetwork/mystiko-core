@@ -1,50 +1,48 @@
-import { validate } from 'class-validator';
-import { RawCircuitConfig, CircuitType, readRawConfigFromFile } from '../../src';
+import { RawCircuitConfig, CircuitType, RawConfig } from '../../src';
 
 let config: RawCircuitConfig;
 
-beforeEach(() => {
-  config = new RawCircuitConfig();
-  config.name = 'zokrates-1.0-rollup1';
-  config.type = CircuitType.ROLLUP1;
-  config.isDefault = true;
-  config.programFile = ['./Rollup1.program.gz'];
-  config.abiFile = ['./Rollup1.abi.json'];
-  config.provingKeyFile = ['./Rollup1.pkey.gz'];
-  config.verifyingKeyFile = ['./Rollup1.vkey.gz'];
-});
-
-test('test validate success', async () => {
-  expect((await validate(config)).length).toBe(0);
+beforeEach(async () => {
+  config = await RawConfig.createFromObject(RawCircuitConfig, {
+    name: 'zokrates-1.0-rollup1',
+    type: CircuitType.ROLLUP1,
+    isDefault: true,
+    programFile: ['./Rollup1.program.gz'],
+    abiFile: ['./Rollup1.abi.json'],
+    provingKeyFile: ['./Rollup1.pkey.gz'],
+    verifyingKeyFile: ['./Rollup1.vkey.gz'],
+  });
 });
 
 test('test invalid name', async () => {
   config.name = '';
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid programFile', async () => {
   config.programFile = [''];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid abiFile', async () => {
   config.abiFile = [''];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid provingKeyFile', async () => {
   config.provingKeyFile = [''];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test invalid verifyingKeyFile', async () => {
   config.verifyingKeyFile = [''];
-  expect((await validate(config)).length).toBeGreaterThan(0);
+  await expect(config.validate()).rejects.toThrow();
 });
 
 test('test import json file', async () => {
-  const fileConfig = await readRawConfigFromFile(RawCircuitConfig, 'tests/files/circuit.valid.json');
+  const fileConfig = await RawConfig.createFromFile(RawCircuitConfig, 'tests/files/circuit.valid.json');
   expect(fileConfig).toStrictEqual(config);
-  await expect(readRawConfigFromFile(RawCircuitConfig, 'tests/files/circuit.invalid.json')).rejects.toThrow();
+  await expect(
+    RawConfig.createFromFile(RawCircuitConfig, 'tests/files/circuit.invalid.json'),
+  ).rejects.toThrow();
 });

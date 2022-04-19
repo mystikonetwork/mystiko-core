@@ -1,10 +1,10 @@
 import { check } from '@mystikonetwork/utils';
 import { BaseConfig } from './base';
-import { RawCelerBridgeConfig, RawMystikoConfig, RawPolyBridgeConfig } from '../raw';
+import { RawCelerBridgeConfig, RawConfig, RawMystikoConfig, RawPolyBridgeConfig } from '../raw';
 import { CircuitConfig } from './circuit';
 import { ChainConfig } from './chain';
 import { CelerBridgeConfig, PolyBridgeConfig, TBridgeConfig } from './bridge';
-import { BridgeType, CircuitType, readRawConfigFromFile } from '../common';
+import { BridgeType, CircuitType } from '../common';
 import { DepositContractConfig, PoolContractConfig } from './contract';
 
 export type BridgeConfigType = CelerBridgeConfig | PolyBridgeConfig | TBridgeConfig;
@@ -18,7 +18,7 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
 
   private readonly chainConfigs: Map<number, ChainConfig>;
 
-  constructor(data: RawMystikoConfig) {
+  protected constructor(data: RawMystikoConfig) {
     super(data);
     const { defaultCircuitConfigs, circuitConfigsByName } = this.initCircuitConfigs();
     this.defaultCircuitConfigs = defaultCircuitConfigs;
@@ -120,8 +120,12 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     return this.circuitConfigsByName.get(name);
   }
 
-  public static readFromFile(jsonFile: string): Promise<MystikoConfig> {
-    return readRawConfigFromFile(RawMystikoConfig, jsonFile).then((raw) => new MystikoConfig(raw));
+  public static createFromFile(jsonFile: string): Promise<MystikoConfig> {
+    return RawConfig.createFromFile(RawMystikoConfig, jsonFile).then((raw) => new MystikoConfig(raw));
+  }
+
+  public static createFromRaw(raw: RawMystikoConfig): Promise<MystikoConfig> {
+    return raw.validate().then(() => new MystikoConfig(raw));
   }
 
   private initCircuitConfigs() {

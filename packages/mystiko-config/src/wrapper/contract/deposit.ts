@@ -7,7 +7,7 @@ import { PoolContractConfig } from './pool';
 import { RawDepositContractConfig } from '../../raw';
 
 export class DepositContractConfig extends ContractConfig<RawDepositContractConfig> {
-  private readonly poolContractConfig: PoolContractConfig;
+  private readonly poolContractGetter: (address: string) => PoolContractConfig | undefined;
 
   private readonly depositContractGetter: (
     chainId: number,
@@ -16,12 +16,12 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   constructor(
     data: RawDepositContractConfig,
-    poolContractConfigs: Map<string, PoolContractConfig>,
+    poolContractGetter: (address: string) => PoolContractConfig | undefined,
     depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
   ) {
     super(data);
     this.depositContractGetter = depositContractGetter;
-    this.poolContractConfig = this.initPoolContractConfig(poolContractConfigs);
+    this.poolContractGetter = poolContractGetter;
     this.validate();
   }
 
@@ -29,8 +29,16 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
     return this.data.bridgeType;
   }
 
+  public get poolAddress(): string {
+    return this.data.poolAddress;
+  }
+
   public get poolContract(): PoolContractConfig {
-    return this.poolContractConfig;
+    const poolContractConfig = this.poolContractGetter(this.poolAddress);
+    if (poolContractConfig) {
+      return poolContractConfig;
+    }
+    throw new Error(`no poolContract definition found for deposit contract=${this.address}`);
   }
 
   public get disabled(): boolean {
@@ -62,27 +70,27 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
   }
 
   public get assetSymbol(): string {
-    return this.poolContractConfig.assetSymbol;
+    return this.poolContract.assetSymbol;
   }
 
   public get assetDecimals(): number {
-    return this.poolContractConfig.assetDecimals;
+    return this.poolContract.assetDecimals;
   }
 
   public get assetAddress(): string | undefined {
-    return this.poolContractConfig.assetAddress;
+    return this.poolContract.assetAddress;
   }
 
   public get minRollupFee(): BN {
-    return this.poolContractConfig.minRollupFee;
+    return this.poolContract.minRollupFee;
   }
 
   public get minRollupFeeNumber(): number {
-    return this.poolContractConfig.minRollupFeeNumber;
+    return this.poolContract.minRollupFeeNumber;
   }
 
   public get circuits(): CircuitConfig[] {
-    return this.poolContractConfig.circuits;
+    return this.poolContract.circuits;
   }
 
   public get peerChainId(): number | undefined {
@@ -98,14 +106,6 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
       return this.depositContractGetter(this.peerChainId, this.peerContractAddress);
     }
     return undefined;
-  }
-
-  private initPoolContractConfig(poolContractConfigs: Map<string, PoolContractConfig>): PoolContractConfig {
-    const poolContractConfig = poolContractConfigs.get(this.data.poolAddress);
-    if (poolContractConfig) {
-      return poolContractConfig;
-    }
-    throw new Error(`cannot find pool contract=${this.data.poolAddress} in the configuration`);
   }
 
   private validate() {

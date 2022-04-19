@@ -1,7 +1,4 @@
-import { plainToInstance } from 'class-transformer';
-import { ClassConstructor } from 'class-transformer/types/interfaces';
 import { validate } from 'class-validator';
-import { readJsonFile } from '@mystikonetwork/utils';
 
 /**
  * @enum BridgeType
@@ -74,19 +71,11 @@ export function isValidCircuitType(type: CircuitType): boolean {
   return Object.values(CircuitType).includes(type);
 }
 
-export function readRawConfigFromObject<T extends Object>(cls: ClassConstructor<T>, raw: any): Promise<T> {
-  const config = plainToInstance(cls, raw, { excludeExtraneousValues: true, exposeDefaultValues: true });
-  return validate(config, { forbidUnknownValues: true }).then((errors) => {
+export function validateObject<T extends Object>(object: T): Promise<T> {
+  return validate(object, { forbidUnknownValues: true }).then((errors) => {
     if (errors.length > 0) {
       return Promise.reject(new Error(`failed to validate config object:\n ${errors}`));
     }
-    return config;
+    return object;
   });
-}
-
-export function readRawConfigFromFile<T extends Object>(
-  cls: ClassConstructor<T>,
-  jsonFile: string,
-): Promise<T> {
-  return readJsonFile(jsonFile).then((raw) => readRawConfigFromObject(cls, raw));
 }
