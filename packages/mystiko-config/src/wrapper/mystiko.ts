@@ -176,11 +176,8 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
       check(!chainConfigs.has(raw.chainId), `duplicate chain id=${raw.chainId} definition in configuration`);
       chainConfigs.set(
         raw.chainId,
-        new ChainConfig(
-          raw,
-          defaultCircuitConfigs,
-          circuitConfigsByName,
-          this.getDepositContractConfigByAddress,
+        new ChainConfig(raw, defaultCircuitConfigs, circuitConfigsByName, (chainId, address) =>
+          this.getDepositContractConfigByAddress(chainId, address),
         ),
       );
     });
