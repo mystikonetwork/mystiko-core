@@ -13,7 +13,7 @@ beforeEach(() => {
   config.assetSymbol = 'MTT';
   config.assetDecimals = 16;
   config.assetAddress = '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a';
-  config.minRollupFee = '12345';
+  config.minRollupFee = '120000000000000000';
   config.circuits = ['circuit-1.0'];
 });
 

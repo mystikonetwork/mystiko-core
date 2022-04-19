@@ -47,7 +47,7 @@
           "assetDecimals": 18,
           "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a",
           "minRollupFee": "12345",
-          "circuits": ["zokrates-1.0-rollup1"]
+          "circuits": ["zokrates-2.0-rollup1"]
         }
       ]
     },
@@ -128,6 +128,14 @@
       "abiFile": ["./Rollup1.abi.json"],
       "provingKeyFile": ["./Rollup1.pkey.gz"],
       "verifyingKeyFile": ["./Rollup1.vkey.gz"]
+    },
+    {
+      "name": "zokrates-2.0-rollup1",
+      "type": "rollup1",
+      "programFile": ["./v2/Rollup1.program.gz"],
+      "abiFile": ["./v2/Rollup1.abi.json"],
+      "provingKeyFile": ["./v2/Rollup1.pkey.gz"],
+      "verifyingKeyFile": ["./v2/Rollup1.vkey.gz"]
     },
     {
       "name": "zokrates-1.0-rollup4",

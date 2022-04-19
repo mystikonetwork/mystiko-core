@@ -74,18 +74,19 @@ export function isValidCircuitType(type: CircuitType): boolean {
   return Object.values(CircuitType).includes(type);
 }
 
+export function readRawConfigFromObject<T extends Object>(cls: ClassConstructor<T>, raw: any): Promise<T> {
+  const config = plainToInstance(cls, raw, { excludeExtraneousValues: true, exposeDefaultValues: true });
+  return validate(config, { forbidUnknownValues: true }).then((errors) => {
+    if (errors.length > 0) {
+      return Promise.reject(new Error(`failed to validate config object:\n ${errors}`));
+    }
+    return config;
+  });
+}
+
 export function readRawConfigFromFile<T extends Object>(
   cls: ClassConstructor<T>,
   jsonFile: string,
 ): Promise<T> {
-  return readJsonFile(jsonFile)
-    .then((raw) => plainToInstance(cls, raw, { excludeExtraneousValues: true, exposeDefaultValues: true }))
-    .then((config) =>
-      validate(config, { forbidUnknownValues: true }).then((errors) => {
-        if (errors.length > 0) {
-          return Promise.reject(new Error(`failed to validate config object:\n ${errors}`));
-        }
-        return config;
-      }),
-    );
+  return readJsonFile(jsonFile).then((raw) => readRawConfigFromObject(cls, raw));
 }
