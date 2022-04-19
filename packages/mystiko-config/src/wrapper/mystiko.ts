@@ -140,7 +140,6 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
         );
         defaultCircuitConfigs.set(circuitConfig.type, circuitConfig);
       }
-      check(!circuitConfigsByName.has(circuitConfig.name), `duplicate circuit name=${circuitConfig.name}`);
       circuitConfigsByName.set(circuitConfig.name, circuitConfig);
     });
     Object.values(CircuitType).forEach((circuitType) => {
@@ -155,7 +154,6 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
   private initBridgeConfigs(): Map<BridgeType, BridgeConfigType> {
     const bridgeConfigs = new Map<BridgeType, BridgeConfigType>();
     this.data.bridges.forEach((raw) => {
-      check(!bridgeConfigs.has(raw.type), `duplicate bridge type=${raw.type} definition in configuration`);
       if (raw instanceof RawCelerBridgeConfig) {
         bridgeConfigs.set(raw.type, new CelerBridgeConfig(raw));
       } else if (raw instanceof RawPolyBridgeConfig) {
@@ -173,7 +171,6 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
   ): Map<number, ChainConfig> {
     const chainConfigs = new Map<number, ChainConfig>();
     this.data.chains.forEach((raw) => {
-      check(!chainConfigs.has(raw.chainId), `duplicate chain id=${raw.chainId} definition in configuration`);
       chainConfigs.set(
         raw.chainId,
         new ChainConfig(raw, defaultCircuitConfigs, circuitConfigsByName, (chainId, address) =>
@@ -193,15 +190,17 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
             `bridge type=${depositContractConfig.bridgeType} definition does not exist`,
           );
           if (depositContractConfig.peerChainId && depositContractConfig.peerContractAddress) {
-            check(
-              this.chainConfigs.has(depositContractConfig.peerChainId),
-              `no corresponding peer chain id=${depositContractConfig.peerChainId} ` +
-                `definition for deposit contract ${depositContractConfig.address} ` +
-                'peer chain configuration',
+            const peerChainConfig = this.chainConfigs.get(depositContractConfig.peerChainId);
+            if (!peerChainConfig) {
+              throw new Error(
+                `no corresponding peer chain id=${depositContractConfig.peerChainId} ` +
+                  `definition for deposit contract ${depositContractConfig.address} ` +
+                  'peer chain configuration',
+              );
+            }
+            const peerDepositContractConfig = peerChainConfig.getDepositContractByAddress(
+              depositContractConfig.peerContractAddress,
             );
-            const peerDepositContractConfig = this.chainConfigs
-              .get(depositContractConfig.peerChainId)
-              ?.getDepositContractByAddress(depositContractConfig.peerContractAddress);
             if (!peerDepositContractConfig) {
               throw new Error(
                 `no corresponding peer deposit contract chain id=${depositContractConfig.peerChainId} ` +
@@ -218,8 +217,9 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
             check(
               peerDepositContractConfig.peerChainId === chainConfig.chainId &&
                 peerDepositContractConfig.peerContractAddress === depositContractConfig.address,
-              `chain id=${depositContractConfig.peerChainId} and address=${peerDepositContractConfig.address} ` +
-                `does not have expected peer chain id=${chainConfig.chainId} and ` +
+              `chain id=${peerDepositContractConfig.peerChainId} and ` +
+                `address=${peerDepositContractConfig.peerContractAddress} ` +
+                `does not match chain id=${chainConfig.chainId} and ` +
                 `address=${depositContractConfig.address} configured`,
             );
           }
