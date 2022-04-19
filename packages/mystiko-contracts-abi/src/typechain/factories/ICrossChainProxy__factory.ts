@@ -46,9 +46,9 @@ const _abi = [
         type: 'address',
       },
       {
-        internalType: 'uint256',
+        internalType: 'uint64',
         name: '_toChainId',
-        type: 'uint256',
+        type: 'uint64',
       },
       {
         internalType: 'bytes',

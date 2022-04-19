@@ -98,7 +98,7 @@ async function generateProof(
 export function testRollup(
   contractName: string,
   protocol: MystikoProtocolV2,
-  mystikoContract: any,
+  commitmentPoolContract: any,
   rollupVerifierContract: any,
   testTokenContract: TestToken,
   accounts: Wallet[],
@@ -118,18 +118,18 @@ export function testRollup(
   describe(`Test ${contractName} rollup${rollupSize} operation`, () => {
     before(async () => {
       await enableRollupVerifier(
-        mystikoContract,
+        commitmentPoolContract,
         rollupVerifierContract,
         rollupSize,
         rollupAccount,
         rollupAccount2,
       );
-      proof = await generateProof(protocol, commitments, mystikoContract, treeHeight, rollupSize);
+      proof = await generateProof(protocol, commitments, commitmentPoolContract, treeHeight, rollupSize);
     });
 
     it('should revert known root', async () => {
       await expect(
-        mystikoContract
+        commitmentPoolContract
           .connect(rollupAccount)
           .rollup([
             [proof.proofA, proof.proofB, proof.proofC],
@@ -142,7 +142,7 @@ export function testRollup(
 
     it('should revert unsupported rollup Size', () => {
       expect(
-        mystikoContract
+        commitmentPoolContract
           .connect(rollupAccount)
           .rollup([[proof.proofA, proof.proofB, proof.proofC], 1234, proof.newRoot, proof.leafHash]),
       ).to.be.revertedWith('invalid rollupSize');
@@ -150,7 +150,7 @@ export function testRollup(
 
     it('should revert wrong leaf hash', () => {
       expect(
-        mystikoContract
+        commitmentPoolContract
           .connect(rollupAccount)
           .rollup([
             [proof.proofA, proof.proofB, proof.proofC],
@@ -163,7 +163,7 @@ export function testRollup(
 
     it('should revert wrong proof', () => {
       expect(
-        mystikoContract
+        commitmentPoolContract
           .connect(rollupAccount)
           .rollup([
             [proof.proofA, proof.proofB, proof.proofC],
@@ -179,7 +179,7 @@ export function testRollup(
         ? await waffle.provider.getBalance(rollupAccount2.address)
         : await testTokenContract.balanceOf(rollupAccount2.address);
 
-      const rollupTx = await mystikoContract
+      const rollupTx = await commitmentPoolContract
         .connect(rollupAccount2)
         .rollup([[proof.proofA, proof.proofB, proof.proofC], `${rollupSize}`, proof.newRoot, proof.leafHash]);
 
@@ -196,17 +196,17 @@ export function testRollup(
       const expectRollupFee = toBN(rollupFee).muln(rollupSize).toString();
       expect(totalRollupFee.toString()).to.equal(expectRollupFee.toString());
 
-      expect((await mystikoContract.commitmentIncludedCount()).toNumber()).to.equal(
+      expect((await commitmentPoolContract.commitmentIncludedCount()).toNumber()).to.equal(
         proof.commitmentIncludedCount + rollupSize,
       );
-      expect((await mystikoContract.currentRoot()).toString()).to.equal(
+      expect((await commitmentPoolContract.currentRoot()).toString()).to.equal(
         toBN(toHexNoPrefix(proof.newRoot), 16).toString(),
       );
-      expect(await mystikoContract.currentRootIndex()).to.equal(
+      expect(await commitmentPoolContract.currentRootIndex()).to.equal(
         (proof.currentRootIndex + 1) % rootHistoryLength,
       );
-      expect(await mystikoContract.isKnownRoot(proof.newRoot)).to.equal(true);
-      expect((await mystikoContract.commitmentQueueSize()).toNumber()).to.equal(
+      expect(await commitmentPoolContract.isKnownRoot(proof.newRoot)).to.equal(true);
+      expect((await commitmentPoolContract.commitmentQueueSize()).toNumber()).to.equal(
         proof.commitmentQueueSize - rollupSize,
       );
     });

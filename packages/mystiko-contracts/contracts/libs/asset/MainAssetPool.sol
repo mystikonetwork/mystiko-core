@@ -4,12 +4,18 @@ pragma solidity ^0.8.0;
 import "./AssetPool.sol";
 
 abstract contract MainAssetPool is AssetPool {
-  function _processDepositTransfer(uint256 amount, uint256 bridgeFee) internal virtual override {
+  function _processDepositTransfer(
+    address commitmentPool,
+    uint256 amount,
+    uint256 bridgeFee
+  ) internal virtual override {
     require(msg.value == amount + bridgeFee, "insufficient token");
+    (bool success, ) = commitmentPool.call{value: amount}("");
+    require(success, "amount transfer failed");
   }
 
-  function _processExecutorFeeTransfer(uint256 amount) internal override {
-    (bool success, ) = tx.origin.call{value: amount}("");
+  function _processExecutorFeeTransfer(address executor, uint256 amount) internal override {
+    (bool success, ) = executor.call{value: amount}("");
     require(success, "executor fee transfer failed");
   }
 

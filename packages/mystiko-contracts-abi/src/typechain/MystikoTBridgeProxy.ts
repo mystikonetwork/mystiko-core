@@ -22,16 +22,16 @@ export interface MystikoTBridgeProxyInterface extends utils.Interface {
   contractName: 'MystikoTBridgeProxy';
   functions: {
     'changeOperator(address)': FunctionFragment;
-    'crossChainSyncTx(uint64,address,address,bytes)': FunctionFragment;
+    'crossChainSyncTx(uint64,address,address,address,bytes)': FunctionFragment;
     'operator()': FunctionFragment;
-    'sendMessage(address,uint256,bytes)': FunctionFragment;
+    'sendMessage(address,uint64,bytes)': FunctionFragment;
     'withdraw(address)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
   encodeFunctionData(
     functionFragment: 'crossChainSyncTx',
-    values: [BigNumberish, string, string, BytesLike],
+    values: [BigNumberish, string, string, string, BytesLike],
   ): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
   encodeFunctionData(functionFragment: 'sendMessage', values: [string, BigNumberish, BytesLike]): string;
@@ -93,8 +93,9 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     crossChainSyncTx(
       _fromChainId: BigNumberish,
-      _fromContractAddress: string,
-      _toContractAddress: string,
+      _fromContract: string,
+      _toContract: string,
+      _executor: string,
       _message: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
@@ -121,8 +122,9 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
   crossChainSyncTx(
     _fromChainId: BigNumberish,
-    _fromContractAddress: string,
-    _toContractAddress: string,
+    _fromContract: string,
+    _toContract: string,
+    _executor: string,
     _message: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
@@ -146,8 +148,9 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     crossChainSyncTx(
       _fromChainId: BigNumberish,
-      _fromContractAddress: string,
-      _toContractAddress: string,
+      _fromContract: string,
+      _toContract: string,
+      _executor: string,
       _message: BytesLike,
       overrides?: CallOverrides,
     ): Promise<boolean>;
@@ -187,8 +190,9 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     crossChainSyncTx(
       _fromChainId: BigNumberish,
-      _fromContractAddress: string,
-      _toContractAddress: string,
+      _fromContract: string,
+      _toContract: string,
+      _executor: string,
       _message: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
@@ -216,8 +220,9 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     crossChainSyncTx(
       _fromChainId: BigNumberish,
-      _fromContractAddress: string,
-      _toContractAddress: string,
+      _fromContract: string,
+      _toContract: string,
+      _executor: string,
       _message: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
