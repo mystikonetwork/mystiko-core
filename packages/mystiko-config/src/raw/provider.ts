@@ -3,7 +3,7 @@ import { IsInt, IsPositive, IsUrl } from 'class-validator';
 
 export class RawProviderConfig {
   @Expose()
-  @IsUrl({ protocols: ['http', 'https', 'ws', 'wss'] })
+  @IsUrl({ protocols: ['http', 'https', 'ws', 'wss'], require_tld: false })
   public url: string;
 
   @Expose()

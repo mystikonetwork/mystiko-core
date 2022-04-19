@@ -9,7 +9,7 @@ export class RawPolyBridgeConfig extends RawBridgeConfig {
   public type: BridgeType = BridgeType.POLY;
 
   @Expose()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_tld: false })
   public explorerUrl: string;
 
   @Expose()
@@ -17,7 +17,7 @@ export class RawPolyBridgeConfig extends RawBridgeConfig {
   public explorerPrefix: string = EXPLORER_DEFAULT_PREFIX;
 
   @Expose()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_tld: false })
   public apiUrl: string;
 
   @Expose()

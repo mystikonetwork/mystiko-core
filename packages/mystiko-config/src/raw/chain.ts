@@ -39,7 +39,7 @@ export class RawChainConfig {
   public assetDecimals: number = 18;
 
   @Expose()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_tld: false })
   public explorerUrl: string;
 
   @Expose()
@@ -54,7 +54,7 @@ export class RawChainConfig {
   public providers: Array<RawProviderConfig> = [];
 
   @Expose()
-  @IsUrl()
+  @IsUrl({ protocols: ['http', 'https'], require_tld: false })
   public signerEndpoint: string;
 
   @Expose()

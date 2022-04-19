@@ -79,7 +79,7 @@ export function readRawConfigFromFile<T extends Object>(
   jsonFile: string,
 ): Promise<T> {
   return readJsonFile(jsonFile)
-    .then((raw) => plainToInstance(cls, raw, { excludeExtraneousValues: true }))
+    .then((raw) => plainToInstance(cls, raw, { excludeExtraneousValues: true, exposeDefaultValues: true }))
     .then((config) =>
       validate(config, { forbidUnknownValues: true }).then((errors) => {
         if (errors.length > 0) {

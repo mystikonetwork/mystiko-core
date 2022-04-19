@@ -10,9 +10,10 @@ export type RawBridgeConfigType = RawCelerBridgeConfig | RawPolyBridgeConfig | R
 export class RawMystikoConfig {
   @Expose()
   @IsSemVer()
-  public version: string = '2.0';
+  public version: string = '0.1.0';
 
   @Expose()
+  @Type(() => RawChainConfig)
   @ValidateNested()
   @IsArray()
   @ArrayUnique((conf) => conf.chainId)
@@ -31,10 +32,12 @@ export class RawMystikoConfig {
         { value: RawTBridgeConfig, name: BridgeType.TBRIDGE },
       ],
     },
+    keepDiscriminatorProperty: true,
   })
   public bridges: Array<RawBridgeConfigType> = [];
 
   @Expose()
+  @Type(() => RawCircuitConfig)
   @ValidateNested()
   @IsArray()
   @ArrayUnique((conf) => conf.name)

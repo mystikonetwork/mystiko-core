@@ -2,7 +2,7 @@
   "chainId": 3,
   "name": "Ethereum Ropsten",
   "assetSymbol": "ETH",
-  "assetDecimals": 18,
+  "assetDecimals": "18",
   "explorerUrl": "https://ropsten.etherscan.io",
   "explorerPrefix": "/tx/%tx%",
   "providers": [
