@@ -31,22 +31,6 @@ const chainSchemaLiteral = {
       type: 'string',
       minLength: 1,
     },
-    assetSymbol: {
-      type: 'string',
-      minLength: 1,
-    },
-    assetDecimals: {
-      type: 'integer',
-      minimum: 1,
-    },
-    explorerUrl: {
-      type: 'string',
-      minLength: 1,
-    },
-    explorerTxPrefix: {
-      type: 'string',
-      minLength: 1,
-    },
     providers: {
       type: 'array',
       minItems: 1,
@@ -54,10 +38,6 @@ const chainSchemaLiteral = {
         type: 'string',
         minLength: 1,
       },
-    },
-    signerProvider: {
-      type: 'string',
-      minLength: 1,
     },
     syncSize: {
       type: 'integer',
@@ -68,21 +48,7 @@ const chainSchemaLiteral = {
       ref: WALLET_COLLECTION_NAME,
     },
   },
-  required: [
-    'id',
-    'createdAt',
-    'updatedAt',
-    'chainId',
-    'chainName',
-    'assetSymbol',
-    'assetDecimals',
-    'explorerUrl',
-    'explorerTxPrefix',
-    'providers',
-    'signerProvider',
-    'syncSize',
-    'wallet',
-  ],
+  required: ['id', 'createdAt', 'updatedAt', 'chainId', 'chainName', 'providers', 'syncSize', 'wallet'],
   indexes: ['chainId', 'wallet'],
 } as const;
 

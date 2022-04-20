@@ -1,5 +1,5 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
-import { BN_REGEX, CIRCUIT_COLLECTION_NAME, ETH_ADDRESS_REGEX } from '../constants';
+import { ETH_ADDRESS_REGEX } from '../constants';
 
 const contractSchemaLiteral = {
   version: 0,
@@ -30,43 +30,11 @@ const contractSchemaLiteral = {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
-    assetSymbol: {
+    type: {
       type: 'string',
       minLength: 1,
     },
-    assetDecimals: {
-      type: 'integer',
-      minimum: 1,
-    },
-    assetAddress: {
-      type: 'string',
-      pattern: ETH_ADDRESS_REGEX,
-    },
-    bridgeType: {
-      type: 'string',
-      minLength: 1,
-    },
-    peerChainId: {
-      type: 'integer',
-      minimum: 0,
-    },
-    peerContractAddress: {
-      type: 'string',
-      pattern: ETH_ADDRESS_REGEX,
-    },
-    minRollupFeeAmount: {
-      type: 'string',
-      pattern: BN_REGEX,
-    },
-    minBridgeFeeAmount: {
-      type: 'string',
-      pattern: BN_REGEX,
-    },
-    minExecutorFeeAmount: {
-      type: 'string',
-      pattern: BN_REGEX,
-    },
-    depositDisabled: {
+    disabled: {
       type: 'integer',
       default: 0,
       minimum: 0,
@@ -84,33 +52,19 @@ const contractSchemaLiteral = {
       type: 'integer',
       minimum: 0,
     },
-    circuits: {
-      type: 'array',
-      minItems: 1,
-      ref: CIRCUIT_COLLECTION_NAME,
-      items: {
-        type: 'string',
-      },
-    },
   },
   required: [
     'id',
     'createdAt',
     'updatedAt',
+    'type',
     'chainId',
     'contractAddress',
-    'assetSymbol',
-    'assetDecimals',
-    'bridgeType',
-    'minRollupFeeAmount',
-    'minBridgeFeeAmount',
-    'minExecutorFeeAmount',
-    'depositDisabled',
+    'disabled',
     'syncStart',
     'syncedBlockNumber',
-    'circuits',
   ],
-  indexes: ['chainId', 'contractAddress', 'peerChainId', 'peerContractAddress'],
+  indexes: ['chainId', 'contractAddress'],
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(contractSchemaLiteral);

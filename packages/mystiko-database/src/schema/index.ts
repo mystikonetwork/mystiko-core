@@ -1,6 +1,5 @@
 export * from './account';
 export * from './chain';
-export * from './circuit';
 export * from './commitment';
 export * from './contract';
 export * from './deposit';

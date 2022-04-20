@@ -2,7 +2,6 @@ import { addPouchPlugin, createRxDatabase, getRxStoragePouch, RxDatabaseCreator 
 import {
   accountCollectionMethods,
   chainCollectionMethods,
-  circuitCollectionMethods,
   commitmentCollectionMethods,
   contractCollectionMethods,
   depositCollectionMethods,
@@ -12,7 +11,6 @@ import {
 import {
   ACCOUNT_COLLECTION_NAME,
   CHAIN_COLLECTION_NAME,
-  CIRCUIT_COLLECTION_NAME,
   COMMITMENT_COLLECTION_NAME,
   CONTRACT_COLLECTION_NAME,
   DEPOSIT_COLLECTION_NAME,
@@ -22,7 +20,6 @@ import {
 import {
   accountMethods,
   chainMethods,
-  circuitMethods,
   commitmentMethods,
   contractMethods,
   depositMethods,
@@ -33,7 +30,6 @@ import { MystikoClientCollections, MystikoDatabase } from './type';
 import {
   accountSchema,
   chainSchema,
-  circuitSchema,
   commitmentSchema,
   contractSchema,
   depositSchema,
@@ -64,11 +60,6 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoD
       schema: chainSchema,
       methods: chainMethods,
       statics: chainCollectionMethods,
-    },
-    [CIRCUIT_COLLECTION_NAME]: {
-      schema: circuitSchema,
-      methods: circuitMethods,
-      statics: circuitCollectionMethods,
     },
     [COMMITMENT_COLLECTION_NAME]: {
       schema: commitmentSchema,
