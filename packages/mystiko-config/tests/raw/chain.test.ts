@@ -1,4 +1,5 @@
 import {
+  AssetType,
   BridgeType,
   ContractType,
   RawChainConfig,
@@ -46,6 +47,7 @@ function initPoolContractConfig(): Promise<RawPoolContractConfig> {
     address: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
     type: ContractType.POOL,
     startBlock: 1000000,
+    assetType: AssetType.ERC20,
     assetSymbol: 'MTT',
     assetDecimals: 16,
     assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',

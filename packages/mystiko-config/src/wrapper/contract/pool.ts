@@ -1,9 +1,9 @@
 import BN from 'bn.js';
-import { fromDecimals, toBN } from '@mystikonetwork/utils';
+import { check, fromDecimals, toBN } from '@mystikonetwork/utils';
 import { ContractConfig } from './base';
 import { RawPoolContractConfig } from '../../raw';
 import { CircuitConfig } from '../circuit';
-import { CircuitType } from '../../common';
+import { AssetType, CircuitType } from '../../common';
 
 export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
   private readonly circuitConfigs: Map<CircuitType, CircuitConfig> = new Map<CircuitType, CircuitConfig>();
@@ -15,6 +15,11 @@ export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
   ) {
     super(data);
     this.circuitConfigs = this.initCircuitsConfigs(defaultCircuitConfigs, circuitConfigsByName);
+    this.validate();
+  }
+
+  public get assetType(): AssetType {
+    return this.data.assetType;
   }
 
   public get assetSymbol(): string {
@@ -60,5 +65,20 @@ export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
       }
     });
     return circuitConfigs;
+  }
+
+  private validate() {
+    if (this.assetType === AssetType.MAIN) {
+      check(
+        !this.assetAddress,
+        `pool contract=${this.address} asset address should be null when asset type=${this.assetType}`,
+      );
+    } else {
+      check(
+        !!this.assetAddress,
+        `pool contract=${this.address} asset address should not be null ` +
+          `when asset type=${this.assetType}`,
+      );
+    }
   }
 }

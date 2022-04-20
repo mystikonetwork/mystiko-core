@@ -1,4 +1,5 @@
 import {
+  AssetType,
   CircuitConfig,
   CircuitType,
   PoolContractConfig,
@@ -40,12 +41,31 @@ beforeEach(async () => {
 });
 
 test('test equality', () => {
+  expect(config.assetType).toBe(rawConfig.assetType);
   expect(config.assetSymbol).toBe(rawConfig.assetSymbol);
   expect(config.assetDecimals).toBe(rawConfig.assetDecimals);
   expect(config.assetAddress).toBe(rawConfig.assetAddress);
   expect(config.minRollupFee.toString()).toBe(rawConfig.minRollupFee);
   expect(config.minRollupFeeNumber).toBe(12);
   expect(config.circuits.sort()).toEqual(Array.from(defaultCircuitConfigs.values()).sort());
+});
+
+test('test invalid assetType', () => {
+  rawConfig.assetType = AssetType.MAIN;
+  expect(() => new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName)).toThrow(
+    new Error(
+      `pool contract=${rawConfig.address} asset address ` +
+        `should be null when asset type=${rawConfig.assetType}`,
+    ),
+  );
+  rawConfig.assetType = AssetType.ERC20;
+  rawConfig.assetAddress = undefined;
+  expect(() => new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName)).toThrow(
+    new Error(
+      `pool contract=${rawConfig.address} asset address ` +
+        `should not be null when asset type=${rawConfig.assetType}`,
+    ),
+  );
 });
 
 test('test circuit overwrite', () => {

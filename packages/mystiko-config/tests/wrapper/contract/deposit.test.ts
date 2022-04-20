@@ -1,4 +1,5 @@
 import {
+  AssetType,
   BridgeType,
   CircuitConfig,
   CircuitType,
@@ -55,6 +56,7 @@ test('test equality', () => {
   expect(config.minBridgeFeeNumber).toBe(2);
   expect(config.minExecutorFee.toString()).toBe(rawConfig.minExecutorFee);
   expect(config.minExecutorFeeNumber).toBe(3);
+  expect(config.assetType).toBe(AssetType.ERC20);
   expect(config.assetSymbol).toBe('MTT');
   expect(config.assetDecimals).toBe(16);
   expect(config.assetAddress).toBe('0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a');

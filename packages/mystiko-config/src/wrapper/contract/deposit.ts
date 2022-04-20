@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { check, fromDecimals, toBN } from '@mystikonetwork/utils';
 import { ContractConfig } from './base';
 import { CircuitConfig } from '../circuit';
-import { BridgeType } from '../../common';
+import { AssetType, BridgeType } from '../../common';
 import { PoolContractConfig } from './pool';
 import { RawDepositContractConfig } from '../../raw';
 
@@ -67,6 +67,10 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   public get minExecutorFeeNumber(): number {
     return fromDecimals(this.minExecutorFee, this.assetDecimals);
+  }
+
+  public get assetType(): AssetType {
+    return this.poolContract.assetType;
   }
 
   public get assetSymbol(): string {

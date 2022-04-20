@@ -1,6 +1,7 @@
 import {
   Equals,
   IsArray,
+  IsEnum,
   IsEthereumAddress,
   IsInt,
   IsNotEmpty,
@@ -11,12 +12,16 @@ import {
 } from 'class-validator';
 import { Expose } from 'class-transformer';
 import { RawContractConfig } from './base';
-import { ContractType } from '../../common';
+import { AssetType, ContractType } from '../../common';
 
 export class RawPoolContractConfig extends RawContractConfig {
   @Expose()
   @Equals(ContractType.POOL)
   public type: ContractType = ContractType.POOL;
+
+  @Expose()
+  @IsEnum(AssetType)
+  public assetType: AssetType;
 
   @Expose()
   @IsString()
