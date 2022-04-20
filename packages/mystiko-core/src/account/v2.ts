@@ -1,22 +1,9 @@
 import { hdkey } from 'ethereumjs-wallet';
-import {
-  Account,
-  AccountType,
-  Commitment,
-  CommitmentStatus,
-  DatabaseQuery,
-  MystikoDatabase,
-  Wallet,
-} from '@mystikonetwork/database';
+import { MystikoConfig } from '@mystikonetwork/config';
+import { Account, AccountType, DatabaseQuery, MystikoDatabase, Wallet } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
-import {
-  AccountBalance,
-  AccountBalanceQuery,
-  AccountHandler,
-  AccountOptions,
-  MaxTransactionBalanceQuery,
-} from './common';
+import { AccountHandler, AccountOptions } from './common';
 import { createErrorPromise, MystikoErrorCode } from '../error';
 import { MystikoHandler } from '../handler';
 import { WalletHandlerV2 } from '../wallet';
@@ -24,54 +11,14 @@ import { WalletHandlerV2 } from '../wallet';
 export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   private readonly walletHandler: WalletHandlerV2;
 
-  constructor(walletHandler: WalletHandlerV2, db: MystikoDatabase, protocol: MystikoProtocol) {
-    super(db, protocol);
+  constructor(
+    walletHandler: WalletHandlerV2,
+    config: MystikoConfig,
+    db: MystikoDatabase,
+    protocol: MystikoProtocol,
+  ) {
+    super(config, db, protocol);
     this.walletHandler = walletHandler;
-  }
-
-  public balanceAll(query?: DatabaseQuery<Account>): Promise<AccountBalance[]> {
-    return this.find(query)
-      .then((accounts) => {
-        const shieldedAddresses = accounts.map((account) => account.shieldedAddress);
-        const selector = {
-          shieldedAddress: { $in: shieldedAddresses },
-          status: { $nin: [CommitmentStatus.FAILED, CommitmentStatus.SPENT] },
-        };
-        return this.db.commitments.find({ selector }).exec();
-      })
-      .then((commitments) => {
-        const commitmentGroups: { [key: string]: Commitment[] } = {};
-        commitments.forEach((commitment) => {
-          if (commitmentGroups[commitment.assetSymbol]) {
-            commitmentGroups[commitment.assetSymbol].push(commitment);
-          } else {
-            commitmentGroups[commitment.assetSymbol] = [commitment];
-          }
-        });
-        return Object.keys(commitmentGroups).map((assetSymbol) =>
-          this.calculateBalance(assetSymbol, commitmentGroups[assetSymbol]),
-        );
-      });
-  }
-
-  public balanceOf(query: AccountBalanceQuery): Promise<AccountBalance> {
-    return this.find(query.query)
-      .then((accounts) => {
-        const shieldedAddresses = accounts.map((account) => account.shieldedAddress);
-        const selector: any = {
-          shieldedAddress: { $in: shieldedAddresses },
-          status: { $nin: [CommitmentStatus.FAILED, CommitmentStatus.SPENT] },
-          assetSymbol: query.assetSymbol,
-        };
-        if (query.chainId) {
-          selector.chainId = query.chainId;
-        }
-        if (query.bridgeType) {
-          selector.bridgeType = query.bridgeType;
-        }
-        return this.db.commitments.find({ selector }).exec();
-      })
-      .then((commitments) => this.calculateBalance(query.assetSymbol, commitments));
   }
 
   public count(query?: DatabaseQuery<Account>): Promise<number> {
@@ -136,22 +83,6 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         }
         return account;
       });
-  }
-
-  public maxTransactionBalanceOf(query: MaxTransactionBalanceQuery): Promise<number> {
-    return this.find()
-      .then((accounts) => {
-        const shieldedAddresses = accounts.map((account) => account.shieldedAddress);
-        const selector = {
-          shieldedAddress: { $in: shieldedAddresses },
-          status: { $nin: [CommitmentStatus.FAILED, CommitmentStatus.SPENT] },
-          assetSymbol: query.assetSymbol,
-          chainId: query.chainId,
-          bridgeType: query.bridgeType,
-        };
-        return this.db.commitments.find({ selector }).exec();
-      })
-      .then(this.calculateMaxTransactionBalance);
   }
 
   public update(identifier: string, options: AccountOptions, walletPassword: string): Promise<Account> {
@@ -245,28 +176,5 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         return account;
       }),
     );
-  }
-
-  private calculateBalance(assetSymbol: string, commitments: Commitment[]): AccountBalance {
-    const total = commitments
-      .filter((commitment) => commitment.status === CommitmentStatus.INCLUDED)
-      .map((commitment) => commitment.simpleAmount() || 0)
-      .reduce((a, b) => a + b, 0);
-    const pendingTotal = commitments
-      .filter(
-        (commitment) =>
-          commitment.status !== CommitmentStatus.INCLUDED && commitment.status !== CommitmentStatus.SPENT,
-      )
-      .map((commitment) => commitment.simpleAmount() || 0)
-      .reduce((a, b) => a + b, 0);
-    return { assetSymbol, total, pendingTotal };
-  }
-
-  private calculateMaxTransactionBalance(commitments: Commitment[]): number {
-    const amounts = commitments
-      .filter((commitment) => commitment.status === CommitmentStatus.INCLUDED)
-      .map((commitment) => commitment.simpleAmount() || 0)
-      .sort((a, b) => b - a);
-    return amounts.slice(0, 2).reduce((a, b) => a + b, 0);
   }
 }

@@ -1,19 +1,24 @@
+import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { createProtocolV2 } from '../protocol';
 import { createError, MystikoErrorCode, WalletHandlerV2 } from '../../src';
 
+let config: MystikoConfig;
 let db: MystikoDatabase;
 let protocol: MystikoProtocolV2;
 let handler: WalletHandlerV2;
 
 beforeAll(async () => {
+  config = await MystikoConfig.createFromPlain({
+    version: '0.1.0',
+  });
   protocol = await createProtocolV2();
 });
 
 beforeEach(async () => {
   db = await initDatabase();
-  handler = new WalletHandlerV2(db, protocol);
+  handler = new WalletHandlerV2(config, db, protocol);
 });
 
 afterEach(async () => {

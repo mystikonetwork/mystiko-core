@@ -158,7 +158,15 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
       }
       circuitConfigsByName.set(circuitConfig.name, circuitConfig);
     });
-    if (this.data.chains.length > 0) {
+    let hasPoolContracts = false;
+    for (let i = 0; i < this.data.chains.length; i += 1) {
+      const rawChainConfig = this.data.chains[i];
+      if (rawChainConfig.poolContracts.length > 0) {
+        hasPoolContracts = true;
+        break;
+      }
+    }
+    if (hasPoolContracts) {
       Object.values(CircuitType).forEach((circuitType) => {
         check(
           defaultCircuitConfigs.has(circuitType),
