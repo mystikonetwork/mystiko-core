@@ -273,3 +273,11 @@ test('test peerContractAddress mismatch', async () => {
     ),
   );
 });
+
+test('test createDefaultTestnetConfig', async () => {
+  await MystikoConfig.createDefaultTestnetConfig();
+});
+
+test('test createDefaultMainnetConfig', async () => {
+  await MystikoConfig.createDefaultMainnetConfig();
+});

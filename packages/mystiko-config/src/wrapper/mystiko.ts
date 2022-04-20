@@ -6,6 +6,8 @@ import { ChainConfig } from './chain';
 import { CelerBridgeConfig, PolyBridgeConfig, TBridgeConfig } from './bridge';
 import { BridgeType, CircuitType } from '../common';
 import { DepositContractConfig, PoolContractConfig } from './contract';
+import defaultClientTestnetConfig from '../json/client/default/testnet.json';
+import defaultClientMainnetConfig from '../json/client/default/mainnet.json';
 
 export type BridgeConfigType = CelerBridgeConfig | PolyBridgeConfig | TBridgeConfig;
 
@@ -128,6 +130,20 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     return raw.validate().then(() => new MystikoConfig(raw));
   }
 
+  public static createFromPlain(plain: Object): Promise<MystikoConfig> {
+    return RawConfig.createFromObject(RawMystikoConfig, plain).then((raw) =>
+      MystikoConfig.createFromRaw(raw),
+    );
+  }
+
+  public static createDefaultTestnetConfig(): Promise<MystikoConfig> {
+    return MystikoConfig.createFromPlain(defaultClientTestnetConfig);
+  }
+
+  public static createDefaultMainnetConfig(): Promise<MystikoConfig> {
+    return MystikoConfig.createFromPlain(defaultClientMainnetConfig);
+  }
+
   private initCircuitConfigs() {
     const defaultCircuitConfigs = new Map<CircuitType, CircuitConfig>();
     const circuitConfigsByName = new Map<string, CircuitConfig>();
@@ -142,12 +158,14 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
       }
       circuitConfigsByName.set(circuitConfig.name, circuitConfig);
     });
-    Object.values(CircuitType).forEach((circuitType) => {
-      check(
-        defaultCircuitConfigs.has(circuitType),
-        `missing definition of default circuit type=${circuitType}`,
-      );
-    });
+    if (this.data.chains.length > 0) {
+      Object.values(CircuitType).forEach((circuitType) => {
+        check(
+          defaultCircuitConfigs.has(circuitType),
+          `missing definition of default circuit type=${circuitType}`,
+        );
+      });
+    }
     return { defaultCircuitConfigs, circuitConfigsByName };
   }
 

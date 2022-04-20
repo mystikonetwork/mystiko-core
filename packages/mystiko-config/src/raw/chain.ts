@@ -45,7 +45,7 @@ export class RawChainConfig extends RawConfig {
 
   @Expose()
   @Contains(EXPLORER_TX_PLACEHOLDER)
-  public explorerPrefix: string;
+  public explorerPrefix: string = EXPLORER_DEFAULT_PREFIX;
 
   @Expose()
   @Type(() => RawProviderConfig)
