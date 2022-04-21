@@ -73,6 +73,9 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
 
   public updatePassword(oldPassword: string, newPassword: string): Promise<Wallet> {
     return this.checkPassword(oldPassword).then((wallet) => {
+      if (!WalletHandlerV2.validatePassword(newPassword)) {
+        return createErrorPromise(WalletHandlerV2.PASSWORD_HINT, MystikoErrorCode.INVALID_PASSWORD);
+      }
       const masterSeed = this.protocol.decryptSymmetric(oldPassword, wallet.encryptedMasterSeed);
       return wallet.update({
         $set: {

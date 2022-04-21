@@ -7,10 +7,10 @@ export type AccountOptions = {
 
 export interface AccountHandler<A = AccountOptions> {
   count(query?: DatabaseQuery<Account>): Promise<number>;
-  create(options: A, walletPassword: string): Promise<Account>;
+  create(walletPassword: string, options?: A): Promise<Account>;
   encrypt(oldWalletPassword: string, newWalletPassword: string): Promise<void>;
-  export(identifier: string, walletPassword: string): Promise<string>;
+  export(walletPassword: string, identifier: string): Promise<string>;
   find(query?: DatabaseQuery<Account>): Promise<Account[]>;
   findOne(identifier: string): Promise<Account | null>;
-  update(identifier: string, options: AccountOptions, walletPassword: string): Promise<Account>;
+  update(walletPassword: string, identifier: string, options: AccountOptions): Promise<Account>;
 }

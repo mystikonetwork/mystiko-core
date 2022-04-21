@@ -1,10 +1,10 @@
 import { hdkey } from 'ethereumjs-wallet';
 import { Account, AccountType, DatabaseQuery, Wallet } from '@mystikonetwork/database';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
-import { AccountHandler, AccountOptions } from '../../interface';
+import { MystikoContext } from '../../context';
 import { createErrorPromise, MystikoErrorCode } from '../../error';
 import { MystikoHandler } from '../../handler';
-import { MystikoContext } from '../../context';
+import { AccountHandler, AccountOptions } from '../../interface';
 
 export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   constructor(context: MystikoContext) {
@@ -16,22 +16,22 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     return this.find(query).then((accounts) => accounts.length);
   }
 
-  public create(options: AccountOptions, walletPassword: string): Promise<Account> {
+  public create(walletPassword: string, options?: AccountOptions): Promise<Account> {
     return this.context.wallets
       .checkPassword(walletPassword)
       .then((wallet) => {
-        if (!options.name) {
+        if (!options || !options.name || options.name.length === 0) {
           return this.defaultAccountName().then((name) => ({ wallet, name }));
         }
         return { wallet, name: options.name };
       })
-      .then(({ name, wallet }) => this.createRawAccount(wallet, walletPassword, name, options.secretKey))
-      .then(({ wallet, account }) => this.insertAccount(wallet, account, !options.secretKey));
+      .then(({ name, wallet }) => this.createRawAccount(wallet, walletPassword, name, options?.secretKey))
+      .then(({ wallet, account }) => this.insertAccount(wallet, account, !options?.secretKey));
   }
 
   public encrypt(oldWalletPassword: string, newWalletPassword: string): Promise<void> {
     return this.context.wallets
-      .checkPassword(newWalletPassword)
+      .checkPassword(oldWalletPassword)
       .then(() => this.find())
       .then((accounts) =>
         Promise.all(
@@ -49,7 +49,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
       .then(() => {});
   }
 
-  public export(identifier: string, walletPassword: string): Promise<string> {
+  public export(walletPassword: string, identifier: string): Promise<string> {
     return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) =>
       account.secretKey(this.protocol, walletPassword),
     );
@@ -65,18 +65,19 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public findOne(identifier: string): Promise<Account | null> {
-    return this.db.accounts
-      .findOne(identifier)
-      .exec()
-      .then((account) => {
-        if (account === null) {
-          return this.db.accounts.findOne({ selector: { identifier } }).exec();
-        }
-        return account;
-      });
+    return this.context.wallets.checkCurrent().then((wallet) =>
+      this.db.accounts
+        .findOne({
+          selector: {
+            wallet: wallet.id,
+            $or: [{ id: identifier }, { shieldedAddress: identifier }, { publicKey: identifier }],
+          },
+        })
+        .exec(),
+    );
   }
 
-  public update(identifier: string, options: AccountOptions, walletPassword: string): Promise<Account> {
+  public update(walletPassword: string, identifier: string, options: AccountOptions): Promise<Account> {
     return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) => {
       if (options.name && options.name.length > 0) {
         return account.update({ $set: { updatedAt: MystikoHandler.now(), name: options.name } });

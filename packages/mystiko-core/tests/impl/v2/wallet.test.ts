@@ -79,6 +79,9 @@ test('test updatePassword', async () => {
   await expect(handler.updatePassword('wrong password', 'newP@ssword')).rejects.toThrow(
     createError('wrong wallet password', MystikoErrorCode.WRONG_PASSWORD),
   );
+  await expect(handler.updatePassword('P@ssw0rd', 'invalid password')).rejects.toThrow(
+    createError(WalletHandlerV2.PASSWORD_HINT, MystikoErrorCode.INVALID_PASSWORD),
+  );
   await handler.updatePassword('P@ssw0rd', 'newP@ssw0rd');
   await handler.checkPassword('newP@ssw0rd');
   expect(await handler.exportMasterSeed('newP@ssw0rd')).toBe('seed');
