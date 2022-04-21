@@ -3,6 +3,7 @@ import { MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import {
   AccountHandler,
+  AssetHandler,
   ChainHandler,
   CommitmentHandler,
   DepositHandler,
@@ -13,6 +14,7 @@ import { createError, MystikoErrorCode } from './error';
 
 export class MystikoContext<
   A extends AccountHandler = AccountHandler,
+  AS extends AssetHandler = AssetHandler,
   CH extends ChainHandler = ChainHandler,
   CM extends CommitmentHandler = CommitmentHandler,
   D extends DepositHandler = DepositHandler,
@@ -21,6 +23,8 @@ export class MystikoContext<
   P extends MystikoProtocol = MystikoProtocol,
 > {
   private accountHandler?: A;
+
+  private assetHandler?: AS;
 
   private chainHandler?: CH;
 
@@ -53,6 +57,17 @@ export class MystikoContext<
 
   public set accounts(accountHandler: A) {
     this.accountHandler = accountHandler;
+  }
+
+  public get assets(): AS {
+    if (!this.assetHandler) {
+      throw createError('asset handler has not been set', MystikoErrorCode.NO_HANDLER);
+    }
+    return this.assetHandler;
+  }
+
+  public set assets(accountHandler: AS) {
+    this.assetHandler = accountHandler;
   }
 
   public get chains(): CH {

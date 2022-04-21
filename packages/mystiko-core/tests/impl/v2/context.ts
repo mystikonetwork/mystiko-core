@@ -1,14 +1,13 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
-import { MystikoContext } from '../../../src/context';
 import {
-  AccountHandlerV2,
+  AccountHandlerV2, AssetHandlerV2,
   ChainHandlerV2,
   CommitmentHandlerV2,
-  DepositHandlerV2,
+  DepositHandlerV2, MystikoContext,
   TransactionHandlerV2,
-  WalletHandlerV2,
+  WalletHandlerV2
 } from '../../../src';
 
 export async function createTestContext(
@@ -17,6 +16,7 @@ export async function createTestContext(
 ): Promise<
   MystikoContext<
     AccountHandlerV2,
+    AssetHandlerV2,
     ChainHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
