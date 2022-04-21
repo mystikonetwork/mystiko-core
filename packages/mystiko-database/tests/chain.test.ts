@@ -3,7 +3,7 @@ import { initDatabase, MystikoDatabase, Wallet } from '../src';
 let db: MystikoDatabase;
 let wallet: Wallet;
 
-beforeAll(async () => {
+beforeEach(async () => {
   db = await initDatabase();
   wallet = await db.wallets.insert({
     id: '1',
@@ -15,8 +15,8 @@ beforeAll(async () => {
   });
 });
 
-afterAll(async () => {
-  await db.destroy();
+afterEach(async () => {
+  await db.remove();
 });
 
 test('test insert', async () => {
@@ -44,4 +44,21 @@ test('test insert', async () => {
   } else {
     throw new Error('chain not found');
   }
+});
+
+test('test collection clear', async () => {
+  const now = new Date().toISOString();
+  await db.chains.insert({
+    id: '1',
+    createdAt: now,
+    updatedAt: now,
+    chainId: 3,
+    chainName: 'Ethereum Ropsten',
+    providers: ['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
+    syncSize: 200000,
+    wallet: wallet.id,
+  });
+  expect(await db.chains.findOne().exec()).not.toBe(null);
+  await db.chains.clear();
+  expect(await db.chains.findOne().exec()).toBe(null);
 });

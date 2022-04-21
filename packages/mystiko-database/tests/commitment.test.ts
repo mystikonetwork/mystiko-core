@@ -3,12 +3,12 @@ import { CommitmentStatus, initDatabase, MystikoDatabase } from '../src';
 
 let db: MystikoDatabase;
 
-beforeAll(async () => {
+beforeEach(async () => {
   db = await initDatabase();
 });
 
-afterAll(async () => {
-  await db.destroy();
+afterEach(async () => {
+  await db.remove();
 });
 
 test('test insert', async () => {
@@ -123,4 +123,24 @@ test('test insert full', async () => {
   } else {
     throw new Error('cannot find commitment');
   }
+});
+
+test('test collection clear', async () => {
+  const now = new Date().toISOString();
+  await db.commitments.insert({
+    id: '1',
+    createdAt: now,
+    updatedAt: now,
+    chainId: 3,
+    contractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
+    commitmentHash: '1234',
+    assetSymbol: 'ETH',
+    assetDecimals: 18,
+    bridgeType: 'loop',
+    status: CommitmentStatus.SRC_SUCCEEDED,
+    creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
+  });
+  expect(await db.commitments.findOne().exec()).not.toBe(null);
+  await db.commitments.clear();
+  expect(await db.commitments.findOne().exec()).toBe(null);
 });

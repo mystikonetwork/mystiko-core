@@ -1,24 +1,15 @@
 import { hdkey } from 'ethereumjs-wallet';
-import { MystikoConfig } from '@mystikonetwork/config';
-import { Account, AccountType, DatabaseQuery, MystikoDatabase, Wallet } from '@mystikonetwork/database';
-import { MystikoProtocol } from '@mystikonetwork/protocol';
+import { Account, AccountType, DatabaseQuery, Wallet } from '@mystikonetwork/database';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
-import { AccountHandler, AccountOptions } from './common';
-import { createErrorPromise, MystikoErrorCode } from '../error';
-import { MystikoHandler } from '../handler';
-import { WalletHandlerV2 } from '../wallet';
+import { AccountHandler, AccountOptions } from '../../interface';
+import { createErrorPromise, MystikoErrorCode } from '../../error';
+import { MystikoHandler } from '../../handler';
+import { MystikoContext } from '../../context';
 
 export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
-  private readonly walletHandler: WalletHandlerV2;
-
-  constructor(
-    walletHandler: WalletHandlerV2,
-    config: MystikoConfig,
-    db: MystikoDatabase,
-    protocol: MystikoProtocol,
-  ) {
-    super(config, db, protocol);
-    this.walletHandler = walletHandler;
+  constructor(context: MystikoContext) {
+    super(context);
+    this.context.accounts = this;
   }
 
   public count(query?: DatabaseQuery<Account>): Promise<number> {
@@ -26,7 +17,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public create(options: AccountOptions, walletPassword: string): Promise<Account> {
-    return this.walletHandler
+    return this.context.wallets
       .checkPassword(walletPassword)
       .then((wallet) => {
         if (!options.name) {
@@ -39,7 +30,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public encrypt(oldWalletPassword: string, newWalletPassword: string): Promise<void> {
-    return this.walletHandler
+    return this.context.wallets
       .checkPassword(newWalletPassword)
       .then(() => this.find())
       .then((accounts) =>
@@ -65,7 +56,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public find(query?: DatabaseQuery<Account>): Promise<Account[]> {
-    return this.walletHandler.checkCurrent().then((wallet) => {
+    return this.context.wallets.checkCurrent().then((wallet) => {
       const selector: any = query?.selector || {};
       selector.wallet = wallet.id;
       const newQuery = query ? { ...query, selector } : { selector };
@@ -165,7 +156,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   private checkIdentifierAndPassword(identifier: string, walletPassword: string): Promise<Account> {
-    return this.walletHandler.checkPassword(walletPassword).then(() =>
+    return this.context.wallets.checkPassword(walletPassword).then(() =>
       this.findOne(identifier).then((account) => {
         if (account === null) {
           return createErrorPromise(

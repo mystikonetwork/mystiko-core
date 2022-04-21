@@ -6,12 +6,15 @@ let db: MystikoDatabase;
 let protocol: MystikoProtocol;
 
 beforeAll(async () => {
-  db = await initDatabase();
   protocol = await createProtocol();
 });
 
-afterAll(async () => {
-  await db.destroy();
+beforeEach(async () => {
+  db = await initDatabase();
+});
+
+afterEach(async () => {
+  await db.remove();
 });
 
 test('test insert', async () => {
@@ -57,4 +60,18 @@ test('test insert', async () => {
       updatedAt: new Date().toISOString(),
     }),
   ).rejects.toThrow();
+});
+
+test('test collection clear', async () => {
+  await db.wallets.insert({
+    id: '1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    hashedPassword: 'deadbeef',
+    encryptedMasterSeed: protocol.encryptSymmetric('P@ssw0rd', 'deadbeef'),
+    accountNonce: 1,
+  });
+  expect(await db.wallets.findOne().exec()).not.toBe(null);
+  await db.wallets.clear();
+  expect(await db.wallets.findOne().exec()).toBe(null);
 });

@@ -17,7 +17,7 @@ let commitment2: Commitment;
 let commitment3: Commitment;
 let commitment4: Commitment;
 
-beforeAll(async () => {
+beforeEach(async () => {
   now = new Date().toISOString();
   db = await initDatabase();
   wallet = await db.wallets.insert({
@@ -86,8 +86,8 @@ beforeAll(async () => {
   });
 });
 
-afterAll(async () => {
-  await db.destroy();
+afterEach(async () => {
+  await db.remove();
 });
 
 test('test insert', async () => {
@@ -156,4 +156,36 @@ test('test insert', async () => {
   } else {
     throw new Error('transaction not found');
   }
+});
+
+test('test collection clear', async () => {
+  await db.transactions.insert({
+    id: '1',
+    createdAt: now,
+    updatedAt: now,
+    chainId: 3,
+    contractAddress: '0x67d4a81096dFD5869bC520f16ae2537aF3dE582D',
+    assetSymbol: 'MTT',
+    assetDecimals: 18,
+    assetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
+    proof: 'abc',
+    rootHash: '123456',
+    inputCommitments: ['1', '2'],
+    outputCommitments: ['3', '4'],
+    signaturePublicKey: 'deadbeef',
+    signaturePublicKeyHashes: ['12345'],
+    publicAmount: toDecimals(123, 18).toString(),
+    relayerFeeAmount: toDecimals(13, 18).toString(),
+    publicRecipientAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
+    relayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
+    signature: 'baadbeef',
+    type: TransactionEnum.WITHDRAW,
+    status: TransactionStatus.SUCCEEDED,
+    errorMessage: 'error',
+    transactionHash: '0x67709f4ce1e2c1c670b8b87954fad9d1e682da12eba85dd6d5378e8d778ad50b',
+    wallet: wallet.id,
+  });
+  expect(await db.transactions.findOne().exec()).not.toBe(null);
+  await db.transactions.clear();
+  expect(await db.transactions.findOne().exec()).toBe(null);
 });

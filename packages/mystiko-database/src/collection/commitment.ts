@@ -1,8 +1,10 @@
 import { RxCollection } from 'rxdb';
 import { CommitmentType } from '../schema';
-import { CommitmentMethods } from '../document';
+import { Commitment, CommitmentMethods } from '../document';
 
-export type CommitmentCollectionMethods = {};
+export type CommitmentCollectionMethods = {
+  clear: () => Promise<Commitment[]>;
+};
 
 export type CommitmentCollection = RxCollection<
   CommitmentType,
@@ -10,4 +12,17 @@ export type CommitmentCollection = RxCollection<
   CommitmentCollectionMethods
 >;
 
-export const commitmentCollectionMethods: CommitmentCollectionMethods = {};
+export const commitmentCollectionMethods: CommitmentCollectionMethods = {
+  clear(this: CommitmentCollection): Promise<Commitment[]> {
+    return this.find()
+      .exec()
+      .then((all) => this.bulkRemove(all.map((doc) => doc.id)))
+      .then((result) => {
+        /* istanbul ignore next */
+        if (result.error.length > 0) {
+          return Promise.reject(new Error(`clear commitment collection with errors: ${result.error}`));
+        }
+        return result.success;
+      });
+  },
+};

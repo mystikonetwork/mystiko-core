@@ -25,12 +25,15 @@ function generateKeys(password: string): {
 }
 
 beforeAll(async () => {
-  db = await initDatabase();
   protocol = await createProtocol();
 });
 
-afterAll(async () => {
-  await db.destroy();
+beforeEach(async () => {
+  db = await initDatabase();
+});
+
+afterEach(async () => {
+  await db.remove();
 });
 
 test('test insert', async () => {
@@ -80,4 +83,23 @@ test('test insert', async () => {
   } else {
     throw new Error('failed to get account');
   }
+});
+
+test('test collection clear', async () => {
+  const password = 'P@ssw0rd';
+  const keys = generateKeys(password);
+  const now = new Date().toISOString();
+  await db.accounts.insert({
+    id: '1',
+    createdAt: now,
+    updatedAt: now,
+    name: 'account 1',
+    shieldedAddress: protocol.shieldedAddress(keys.pkVerify, keys.pkEnc),
+    publicKey: keys.publicKey,
+    encryptedSecretKey: keys.encryptedSecretKey,
+    wallet: '1',
+  });
+  expect(await db.accounts.findOne().exec()).not.toBe(null);
+  await db.accounts.clear();
+  expect(await db.accounts.findOne().exec()).toBe(null);
 });

@@ -1,29 +1,24 @@
-import { MystikoConfig } from '@mystikonetwork/config';
-import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
-import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { createProtocolV2 } from '../protocol';
-import { createError, MystikoErrorCode, WalletHandlerV2 } from '../../src';
+import { createError, MystikoErrorCode, WalletHandlerV2 } from '../../../src';
+import { MystikoContext } from '../../../src/context';
+import { createTestContext } from './context';
 
-let config: MystikoConfig;
-let db: MystikoDatabase;
-let protocol: MystikoProtocolV2;
+let context: MystikoContext;
 let handler: WalletHandlerV2;
 
 beforeAll(async () => {
-  config = await MystikoConfig.createFromPlain({
-    version: '0.1.0',
-  });
-  protocol = await createProtocolV2();
+  context = await createTestContext();
 });
 
-beforeEach(async () => {
-  db = await initDatabase();
-  handler = new WalletHandlerV2(config, db, protocol);
+beforeEach(() => {
+  handler = new WalletHandlerV2(context);
 });
 
 afterEach(async () => {
-  await db.remove();
-  await db.destroy();
+  await context.db.wallets.clear();
+});
+
+afterAll(async () => {
+  await context.db.remove();
 });
 
 test('test checkCurrent', async () => {
