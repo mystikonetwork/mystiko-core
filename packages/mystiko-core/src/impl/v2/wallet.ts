@@ -77,12 +77,11 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
         return createErrorPromise(WalletHandlerV2.PASSWORD_HINT, MystikoErrorCode.INVALID_PASSWORD);
       }
       const masterSeed = this.protocol.decryptSymmetric(oldPassword, wallet.encryptedMasterSeed);
-      return wallet.update({
-        $set: {
-          encryptedMasterSeed: this.protocol.encryptSymmetric(newPassword, masterSeed),
-          hashedPassword: this.protocol.checkSum(newPassword),
-          updatedAt: MystikoHandler.now(),
-        },
+      return wallet.atomicUpdate((data) => {
+        data.encryptedMasterSeed = this.protocol.encryptSymmetric(newPassword, masterSeed);
+        data.hashedPassword = this.protocol.checkSum(newPassword);
+        data.updatedAt = MystikoHandler.now();
+        return data;
       });
     });
   }

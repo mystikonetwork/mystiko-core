@@ -18,6 +18,7 @@
     "require-await": "error",
     "prettier/prettier": ["error", { "printWidth": 110 }],
     "import/prefer-default-export": "off",
-    "class-methods-use-this": "off"
+    "class-methods-use-this": "off",
+    "no-param-reassign": "off"
   }
 }

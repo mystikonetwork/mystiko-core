@@ -26,9 +26,9 @@ test('test insert', async () => {
     createdAt: now,
     updatedAt: now,
     chainId: 3,
-    chainName: 'Ethereum Ropsten',
+    name: 'Ethereum Ropsten',
     providers: ['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-    syncSize: 200000,
+    eventFilterSize: 200000,
     wallet: wallet.id,
   });
   const chain = await db.chains.findOne('1').exec();
@@ -36,9 +36,9 @@ test('test insert', async () => {
     expect(chain.createdAt).toBe(now);
     expect(chain.updatedAt).toBe(now);
     expect(chain.chainId).toBe(3);
-    expect(chain.chainName).toBe('Ethereum Ropsten');
+    expect(chain.name).toBe('Ethereum Ropsten');
     expect(chain.providers).toStrictEqual(['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161']);
-    expect(chain.syncSize).toBe(200000);
+    expect(chain.eventFilterSize).toBe(200000);
     const populatedWallet: Wallet = await chain.populate('wallet');
     expect(populatedWallet).toStrictEqual(wallet);
   } else {
@@ -53,9 +53,9 @@ test('test collection clear', async () => {
     createdAt: now,
     updatedAt: now,
     chainId: 3,
-    chainName: 'Ethereum Ropsten',
+    name: 'Ethereum Ropsten',
     providers: ['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-    syncSize: 200000,
+    eventFilterSize: 200000,
     wallet: wallet.id,
   });
   expect(await db.chains.findOne().exec()).not.toBe(null);

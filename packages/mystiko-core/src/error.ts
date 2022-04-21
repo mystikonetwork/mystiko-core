@@ -7,6 +7,8 @@ export enum MystikoErrorCode {
   WRONG_PASSWORD = 5,
   DUPLICATE_ACCOUNT = 6,
   NON_EXISTING_ACCOUNT = 7,
+  NON_EXISTING_CHAIN = 8,
+  INVALID_PROVIDER_URL = 9,
 }
 
 export class MystikoError extends Error {

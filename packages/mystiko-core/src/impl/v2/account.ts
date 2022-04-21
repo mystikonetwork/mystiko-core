@@ -37,11 +37,10 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         Promise.all(
           accounts.map((account) => {
             const secretKey = account.secretKey(this.protocol, oldWalletPassword);
-            return account.update({
-              $set: {
-                updatedAt: MystikoHandler.now(),
-                encryptedSecretKey: this.protocol.encryptSymmetric(newWalletPassword, secretKey),
-              },
+            return account.atomicUpdate((data) => {
+              data.updatedAt = MystikoHandler.now();
+              data.encryptedSecretKey = this.protocol.encryptSymmetric(newWalletPassword, secretKey);
+              return data;
             });
           }),
         ),
@@ -78,12 +77,15 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public update(walletPassword: string, identifier: string, options: AccountOptions): Promise<Account> {
-    return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) => {
-      if (options.name && options.name.length > 0) {
-        return account.update({ $set: { updatedAt: MystikoHandler.now(), name: options.name } });
-      }
-      return account;
-    });
+    return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) =>
+      account.atomicUpdate((data) => {
+        if (options.name && options.name.length > 0) {
+          data.updatedAt = MystikoHandler.now();
+          data.name = options.name;
+        }
+        return data;
+      }),
+    );
   }
 
   private defaultAccountName(): Promise<string> {
@@ -144,11 +146,10 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
       }
       if (updateNonce) {
         return wallet
-          .update({
-            $set: {
-              updatedAt: MystikoHandler.now(),
-              accountNonce: wallet.accountNonce + 2,
-            },
+          .atomicUpdate((data) => {
+            data.updatedAt = MystikoHandler.now();
+            data.accountNonce = wallet.accountNonce + 2;
+            return data;
           })
           .then(() => this.db.accounts.insert(account));
       }

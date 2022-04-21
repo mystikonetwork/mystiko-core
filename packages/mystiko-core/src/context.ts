@@ -3,6 +3,7 @@ import { MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import {
   AccountHandler,
+  ChainHandler,
   CommitmentHandler,
   DepositHandler,
   TransactionHandler,
@@ -12,7 +13,8 @@ import { createError, MystikoErrorCode } from './error';
 
 export class MystikoContext<
   A extends AccountHandler = AccountHandler,
-  C extends CommitmentHandler = CommitmentHandler,
+  CH extends ChainHandler = ChainHandler,
+  CM extends CommitmentHandler = CommitmentHandler,
   D extends DepositHandler = DepositHandler,
   T extends TransactionHandler = TransactionHandler,
   W extends WalletHandler = WalletHandler,
@@ -20,7 +22,9 @@ export class MystikoContext<
 > {
   private accountHandler?: A;
 
-  private commitmentHandler?: C;
+  private chainHandler?: CH;
+
+  private commitmentHandler?: CM;
 
   private depositHandler?: D;
 
@@ -51,14 +55,25 @@ export class MystikoContext<
     this.accountHandler = accountHandler;
   }
 
-  public get commitments(): C {
+  public get chains(): CH {
+    if (!this.chainHandler) {
+      throw createError('chain handler has not been set', MystikoErrorCode.NO_HANDLER);
+    }
+    return this.chainHandler;
+  }
+
+  public set chains(commitmentHandler: CH) {
+    this.chainHandler = commitmentHandler;
+  }
+
+  public get commitments(): CM {
     if (!this.commitmentHandler) {
       throw createError('commitment handler has not been set', MystikoErrorCode.NO_HANDLER);
     }
     return this.commitmentHandler;
   }
 
-  public set commitments(commitmentHandler: C) {
+  public set commitments(commitmentHandler: CM) {
     this.commitmentHandler = commitmentHandler;
   }
 

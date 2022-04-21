@@ -27,7 +27,7 @@ const chainSchemaLiteral = {
       final: true,
       minimum: 0,
     },
-    chainName: {
+    name: {
       type: 'string',
       minLength: 1,
     },
@@ -39,7 +39,7 @@ const chainSchemaLiteral = {
         minLength: 1,
       },
     },
-    syncSize: {
+    eventFilterSize: {
       type: 'integer',
       minimum: 1,
     },
@@ -48,7 +48,16 @@ const chainSchemaLiteral = {
       ref: WALLET_COLLECTION_NAME,
     },
   },
-  required: ['id', 'createdAt', 'updatedAt', 'chainId', 'chainName', 'providers', 'syncSize', 'wallet'],
+  required: [
+    'id',
+    'createdAt',
+    'updatedAt',
+    'chainId',
+    'name',
+    'providers',
+    'eventFilterSize',
+    'wallet',
+  ],
   indexes: ['chainId', 'wallet'],
 } as const;
 

@@ -1,7 +1,12 @@
 import { Wallet } from '@mystikonetwork/database';
 import { toHexNoPrefix } from '@mystikonetwork/utils';
-import { MystikoContext } from '../../../src/context';
-import { AccountHandlerV2, createError, MystikoErrorCode, WalletHandlerV2 } from '../../../src';
+import {
+  AccountHandlerV2,
+  createError,
+  MystikoContext,
+  MystikoErrorCode,
+  WalletHandlerV2,
+} from '../../../src';
 import { createTestContext } from './context';
 
 let context: MystikoContext;

@@ -4,6 +4,7 @@ import { MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol
 import { MystikoContext } from '../../../src/context';
 import {
   AccountHandlerV2,
+  ChainHandlerV2,
   CommitmentHandlerV2,
   DepositHandlerV2,
   TransactionHandlerV2,
@@ -16,6 +17,7 @@ export async function createTestContext(
 ): Promise<
   MystikoContext<
     AccountHandlerV2,
+    ChainHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
     TransactionHandlerV2,
@@ -40,6 +42,7 @@ export async function createTestContext(
   const protocol = new MystikoProtocolV2(runtime);
   const context = new MystikoContext<
     AccountHandlerV2,
+    ChainHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
     TransactionHandlerV2,
