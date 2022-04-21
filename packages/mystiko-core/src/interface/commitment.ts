@@ -3,7 +3,7 @@ import { BridgeType } from '@mystikonetwork/config';
 
 export type CommitmentContractQuery = {
   chainId: number;
-  contractAddress: number;
+  contractAddress: string;
   statuses?: CommitmentStatus[];
   shieldedAddresses?: string[];
 };
@@ -30,5 +30,5 @@ export interface CommitmentHandler<
   find(query?: DatabaseQuery<Commitment>): Promise<Commitment[]>;
   findByContract(query: C): Promise<Commitment[]>;
   findByAssetAndBridge(query: AB): Promise<Commitment[]>;
-  findOne(query: Q): Promise<Commitment | undefined>;
+  findOne(query: Q): Promise<Commitment | null>;
 }
