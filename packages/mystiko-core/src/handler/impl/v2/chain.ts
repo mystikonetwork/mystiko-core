@@ -1,9 +1,9 @@
 import { isURL } from 'class-validator';
 import { Chain, DatabaseQuery } from '@mystikonetwork/database';
-import { MystikoContext } from '../../context';
+import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
-import { ChainHandler, ChainOptions } from '../../interface';
-import { createErrorPromise, MystikoErrorCode } from '../../error';
+import { ChainHandler, ChainOptions } from '../../../interface/handler';
+import { createErrorPromise, MystikoErrorCode } from '../../../error';
 
 export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
   constructor(context: MystikoContext) {

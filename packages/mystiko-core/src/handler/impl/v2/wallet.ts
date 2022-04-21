@@ -1,8 +1,8 @@
 import { Wallet, WalletType } from '@mystikonetwork/database';
-import { WalletHandler, WalletOptions } from '../../interface';
-import { createErrorPromise, MystikoErrorCode } from '../../error';
+import { WalletHandler, WalletOptions } from '../../../interface/handler';
+import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../handler';
-import { MystikoContext } from '../../context';
+import { MystikoContext } from '../../../context';
 
 export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
   public static readonly PASSWORD_REGEX = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;

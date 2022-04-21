@@ -6,7 +6,7 @@ import {
   MystikoContext,
   MystikoHandler,
   WalletHandlerV2,
-} from '../../../src';
+} from '../../../../src';
 import { createTestContext } from './context';
 
 function createCommitment(

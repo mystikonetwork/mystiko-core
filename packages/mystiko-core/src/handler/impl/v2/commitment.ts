@@ -1,12 +1,12 @@
 import { Commitment, DatabaseQuery } from '@mystikonetwork/database';
-import { MystikoContext } from '../../context';
+import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
 import {
   CommitmentHandler,
   CommitmentContractQuery,
   CommitmentAssetAndBridgeQuery,
   CommitmentQuery,
-} from '../../interface';
+} from '../../../interface/handler';
 
 export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHandler {
   constructor(context: MystikoContext) {

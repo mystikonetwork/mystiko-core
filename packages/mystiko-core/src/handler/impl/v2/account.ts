@@ -1,10 +1,10 @@
 import { hdkey } from 'ethereumjs-wallet';
 import { Account, AccountType, DatabaseQuery, Wallet } from '@mystikonetwork/database';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
-import { MystikoContext } from '../../context';
-import { createErrorPromise, MystikoErrorCode } from '../../error';
+import { MystikoContext } from '../../../context';
+import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../handler';
-import { AccountHandler, AccountOptions } from '../../interface';
+import { AccountHandler, AccountOptions } from '../../../interface/handler';
 
 export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   constructor(context: MystikoContext) {

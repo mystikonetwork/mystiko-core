@@ -1,5 +1,5 @@
 import { DatabaseQuery, Transaction } from '@mystikonetwork/database';
-import { MystikoContext } from '../../context';
+import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
 import {
   TransactionQuoteOptions,
@@ -9,7 +9,7 @@ import {
   TransactionSummary,
   TransferOptions,
   WithdrawOptions,
-} from '../../interface';
+} from '../../../interface/handler';
 
 export class TransactionHandlerV2 extends MystikoHandler implements TransactionHandler {
   constructor(context: MystikoContext) {

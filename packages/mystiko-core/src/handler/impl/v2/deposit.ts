@@ -1,5 +1,5 @@
 import { DatabaseQuery, Deposit } from '@mystikonetwork/database';
-import { MystikoContext } from '../../context';
+import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
 import {
   DepositHandler,
@@ -8,7 +8,7 @@ import {
   DepositQuote,
   DepositQuoteOptions,
   DepositSummary,
-} from '../../interface';
+} from '../../../interface/handler';
 
 export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
   constructor(context: MystikoContext) {

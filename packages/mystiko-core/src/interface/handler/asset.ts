@@ -22,9 +22,9 @@ export type AssetMultipleBalanceOptions = AssetFilter & {
 };
 
 export interface AssetHandler<B = AssetBalance, O = AssetBalanceOptions, MO = AssetMultipleBalanceOptions> {
+  assets(chainId: number): Promise<string[]>;
   balance(options: O): Promise<B>;
   balances(options?: MO): Promise<Map<string, B>>;
-  chains(): Promise<Chain[]>;
-  assets(chainId: number): Promise<string[]>;
   bridges(chainId: number, assetSymbol: string): Promise<BridgeConfigType[]>;
+  chains(): Promise<Chain[]>;
 }

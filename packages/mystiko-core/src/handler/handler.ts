@@ -4,7 +4,7 @@ import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { logger as rootLogger } from '@mystikonetwork/utils';
-import { MystikoContext } from './context';
+import { MystikoContext } from '../context';
 
 export class MystikoHandler {
   protected readonly context: MystikoContext;

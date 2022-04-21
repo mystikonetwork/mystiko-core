@@ -1,6 +1,12 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { Chain, Wallet } from '@mystikonetwork/database';
-import { ChainHandlerV2, createError, MystikoContext, MystikoErrorCode, WalletHandlerV2 } from '../../../src';
+import {
+  ChainHandlerV2,
+  createError,
+  MystikoContext,
+  MystikoErrorCode,
+  WalletHandlerV2,
+} from '../../../../src';
 import { createTestContext } from './context';
 
 let config: MystikoConfig;

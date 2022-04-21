@@ -6,7 +6,7 @@ import {
   MystikoContext,
   MystikoErrorCode,
   WalletHandlerV2,
-} from '../../../src';
+} from '../../../../src';
 import { createTestContext } from './context';
 
 let context: MystikoContext;

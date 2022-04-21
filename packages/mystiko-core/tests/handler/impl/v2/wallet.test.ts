@@ -1,4 +1,4 @@
-import { createError, MystikoContext, MystikoErrorCode, WalletHandlerV2 } from '../../../src';
+import { createError, MystikoContext, MystikoErrorCode, WalletHandlerV2 } from '../../../../src';
 import { createTestContext } from './context';
 
 let context: MystikoContext;
