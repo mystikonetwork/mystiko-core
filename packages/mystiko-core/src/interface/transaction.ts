@@ -1,8 +1,16 @@
-import { DatabaseQuery, Transaction, TransactionStatus } from '@mystikonetwork/database';
+import { DatabaseQuery, Transaction, TransactionEnum, TransactionStatus } from '@mystikonetwork/database';
+import { BridgeType } from '@mystikonetwork/config';
 
-export type TransferOptions = {
+export type TransactionQuoteOptions = {
+  type: TransactionEnum;
   chainId: number;
   assetSymbol: string;
+  bridgeType: BridgeType;
+  amount?: number;
+  publicAmount?: number;
+};
+
+export type TransferOptions = TransactionQuoteOptions & {
   amount: number;
   rollupFee?: number;
   gasRelayerFee?: number;
@@ -11,9 +19,7 @@ export type TransferOptions = {
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
 };
 
-export type WithdrawOptions = {
-  chainId: number;
-  assetSymbol: string;
+export type WithdrawOptions = TransactionQuoteOptions & {
   publicAmount: number;
   publicRecipient: string;
   rollupFee?: number;
@@ -23,16 +29,47 @@ export type WithdrawOptions = {
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
 };
 
-export type TransactionSummary = {};
+export type TransactionQuote = {
+  valid: boolean;
+  invalidReason?: string;
+  balance: number;
+  poolBalance: number;
+  numOfSplits: number;
+  minRollupFee: number;
+  rollupFeeAssetSymbol: string;
+  maxAmount: number;
+  fixedAmount: boolean;
+  maxGasRelayerFee: number;
+  gasRelayerFeeAssetSymbol: string;
+};
+
+export type TransactionSummary = {
+  previousBalance: number;
+  newBalance: number;
+  spentAmount: number;
+  withdrawingAmount: number;
+  transferringAmount: number;
+  rollupFeeAmount: number;
+  rollupFeeAssetSymbol: string;
+  gasRelayerFeeAmount: number;
+  gasRelayerFeeAssetSymbol: string;
+  gasRelayerAddress?: string;
+};
 
 export type TransactionQuery = string | Transaction;
 
-export interface TransactionHandler<T = TransferOptions, W = WithdrawOptions, S = TransactionSummary> {
+export interface TransactionHandler<
+  T = TransferOptions,
+  W = WithdrawOptions,
+  QO = TransactionQuoteOptions,
+  Q = TransactionQuote,
+  S = TransactionSummary,
+> {
   create(options: T | W): Promise<Transaction>;
-  update(tx: Transaction): Promise<Transaction>;
+  count(query?: DatabaseQuery<Transaction>): Promise<number>;
   findOne(query: TransactionQuery): Promise<Transaction | null>;
   find(query?: DatabaseQuery<Transaction>): Promise<Transaction[]>;
-  count(query?: DatabaseQuery<Transaction>): Promise<number>;
+  quote(options: QO): Promise<Q>;
   summary(options: T | W): Promise<S>;
-  hasRollupFee(options: T | W): Promise<boolean>;
+  update(tx: Transaction): Promise<Transaction>;
 }

@@ -2,8 +2,10 @@ import { DatabaseQuery, Transaction } from '@mystikonetwork/database';
 import { MystikoContext } from '../../context';
 import { MystikoHandler } from '../../handler';
 import {
+  TransactionQuoteOptions,
   TransactionHandler,
   TransactionQuery,
+  TransactionQuote,
   TransactionSummary,
   TransferOptions,
   WithdrawOptions,
@@ -31,7 +33,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     return Promise.reject(new Error('not implemented'));
   }
 
-  public hasRollupFee(options: TransferOptions | WithdrawOptions): Promise<boolean> {
+  public quote(options: TransactionQuoteOptions): Promise<TransactionQuote> {
     return Promise.reject(new Error('not implemented'));
   }
 

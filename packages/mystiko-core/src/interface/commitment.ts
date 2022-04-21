@@ -1,4 +1,20 @@
-import { Commitment, DatabaseQuery } from '@mystikonetwork/database';
+import { Commitment, CommitmentStatus, DatabaseQuery } from '@mystikonetwork/database';
+import { BridgeType } from '@mystikonetwork/config';
+
+export type CommitmentContractQuery = {
+  chainId: number;
+  contractAddress: number;
+  statuses?: CommitmentStatus[];
+  shieldedAddresses?: string[];
+};
+
+export type CommitmentAssetAndBridgeQuery = {
+  chainId: number;
+  assetSymbol: string;
+  bridgeType: BridgeType;
+  statuses?: CommitmentStatus[];
+  shieldedAddresses?: string[];
+};
 
 export type CommitmentQuery = {
   chainId: number;
@@ -6,9 +22,13 @@ export type CommitmentQuery = {
   commitmentHash: string;
 };
 
-export interface CommitmentHandler {
-  upsert(commitments: Commitment[]): Promise<Commitment[]>;
-  findOne(query: CommitmentQuery): Promise<Commitment | undefined>;
+export interface CommitmentHandler<
+  C = CommitmentContractQuery,
+  AB = CommitmentAssetAndBridgeQuery,
+  Q = CommitmentQuery,
+> {
   find(query?: DatabaseQuery<Commitment>): Promise<Commitment[]>;
-  count(query?: DatabaseQuery<Commitment>): Promise<number>;
+  findByContract(query: C): Promise<Commitment[]>;
+  findByAssetAndBridge(query: AB): Promise<Commitment[]>;
+  findOne(query: Q): Promise<Commitment | undefined>;
 }
