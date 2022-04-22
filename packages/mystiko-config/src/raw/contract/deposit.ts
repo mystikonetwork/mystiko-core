@@ -51,4 +51,14 @@ export class RawDepositContractConfig extends RawContractConfig {
   @Expose()
   @IsNumberString({ no_symbols: true })
   public minExecutorFee: string = '0';
+
+  @Expose()
+  @IsOptional()
+  @IsEthereumAddress()
+  public bridgeFeeAssetAddress?: string;
+
+  @Expose()
+  @IsOptional()
+  @IsEthereumAddress()
+  public executorFeeAssetAddress?: string;
 }

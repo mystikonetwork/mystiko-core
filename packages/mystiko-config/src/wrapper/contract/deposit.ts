@@ -1,5 +1,6 @@
 import BN from 'bn.js';
 import { check, fromDecimals, toBN } from '@mystikonetwork/utils';
+import { AssetConfig } from '../asset';
 import { ContractConfig } from './base';
 import { CircuitConfig } from '../circuit';
 import { AssetType, BridgeType } from '../../common';
@@ -14,14 +15,25 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
     address: string,
   ) => DepositContractConfig | undefined;
 
+  private readonly mainAssetConfig: AssetConfig;
+
+  private readonly bridgeFeeAssetConfig?: AssetConfig;
+
+  private readonly executorFeeAssetConfig?: AssetConfig;
+
   constructor(
     data: RawDepositContractConfig,
     poolContractGetter: (address: string) => PoolContractConfig | undefined,
     depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
+    mainAssetConfig: AssetConfig,
+    assetConfigs: Map<string, AssetConfig>,
   ) {
     super(data);
+    this.mainAssetConfig = mainAssetConfig;
     this.depositContractGetter = depositContractGetter;
     this.poolContractGetter = poolContractGetter;
+    this.bridgeFeeAssetConfig = this.initBridgeFeeAssetConfig(assetConfigs);
+    this.executorFeeAssetConfig = this.initExecutorFeeAssetConfig(assetConfigs);
     this.validate();
   }
 
@@ -67,6 +79,10 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   public get minExecutorFeeNumber(): number {
     return fromDecimals(this.minExecutorFee, this.assetDecimals);
+  }
+
+  public get asset(): AssetConfig {
+    return this.poolContract.asset;
   }
 
   public get assetType(): AssetType {
@@ -120,6 +136,14 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
     return undefined;
   }
 
+  public get bridgeFeeAsset(): AssetConfig {
+    return this.bridgeFeeAssetConfig || this.mainAssetConfig;
+  }
+
+  public get executorFeeAsset(): AssetConfig {
+    return this.executorFeeAssetConfig || this.asset;
+  }
+
   private validate() {
     if (this.bridgeType === BridgeType.LOOP) {
       check(
@@ -144,5 +168,33 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
           `when bridge type=${this.bridgeType}`,
       );
     }
+  }
+
+  private initBridgeFeeAssetConfig(assetConfigs: Map<string, AssetConfig>): AssetConfig | undefined {
+    if (this.data.bridgeFeeAssetAddress) {
+      const assetConfig = assetConfigs.get(this.data.bridgeFeeAssetAddress);
+      if (!assetConfig) {
+        throw new Error(
+          `bridge fee asset address=${this.data.bridgeFeeAssetAddress} config ` +
+            `has not been defined for deposit contract address=${this.data.address}`,
+        );
+      }
+      return assetConfig;
+    }
+    return undefined;
+  }
+
+  private initExecutorFeeAssetConfig(assetConfigs: Map<string, AssetConfig>): AssetConfig | undefined {
+    if (this.data.executorFeeAssetAddress) {
+      const assetConfig = assetConfigs.get(this.data.executorFeeAssetAddress);
+      if (!assetConfig) {
+        throw new Error(
+          `executor fee asset address=${this.data.executorFeeAssetAddress} config ` +
+            `has not been defined for deposit contract address=${this.data.address}`,
+        );
+      }
+      return assetConfig;
+    }
+    return undefined;
   }
 }

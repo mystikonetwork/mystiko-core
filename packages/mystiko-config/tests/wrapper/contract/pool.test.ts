@@ -1,22 +1,27 @@
 import {
+  AssetConfig,
   AssetType,
   CircuitConfig,
   CircuitType,
   PoolContractConfig,
+  RawAssetConfig,
   RawConfig,
   RawMystikoConfig,
   RawPoolContractConfig,
 } from '../../../src';
 
+let rawMystikoConfig: RawMystikoConfig;
 let rawConfig: RawPoolContractConfig;
 let defaultCircuitConfigs: Map<CircuitType, CircuitConfig>;
 let circuitConfigsByName: Map<string, CircuitConfig>;
 let config: PoolContractConfig;
+let mainAssetConfig: AssetConfig;
+let assetConfigs: Map<string, AssetConfig>;
 
 async function initCircuitConfigsByName(): Promise<Map<string, CircuitConfig>> {
-  const mystikoConfig = await RawConfig.createFromFile(RawMystikoConfig, 'tests/files/mystiko.valid.json');
+  rawMystikoConfig = await RawConfig.createFromFile(RawMystikoConfig, 'tests/files/mystiko.valid.json');
   const configs = new Map<string, CircuitConfig>();
-  mystikoConfig.circuits.forEach((rawCircuitConfig) => {
+  rawMystikoConfig.circuits.forEach((rawCircuitConfig) => {
     const circuitConfig = new CircuitConfig(rawCircuitConfig);
     configs.set(rawCircuitConfig.name, circuitConfig);
   });
@@ -37,35 +42,68 @@ beforeEach(async () => {
   circuitConfigsByName = await initCircuitConfigsByName();
   defaultCircuitConfigs = initDefaultCircuitConfigs();
   rawConfig = await RawConfig.createFromFile(RawPoolContractConfig, 'tests/files/contract/pool.valid.json');
-  config = new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName);
+  mainAssetConfig = new AssetConfig({
+    assetType: AssetType.MAIN,
+    assetSymbol: rawMystikoConfig.chains[0].assetSymbol,
+    assetDecimals: rawMystikoConfig.chains[0].assetDecimals,
+    assetAddress: '0x0000000000000000000000000000000000000000',
+    recommendedAmounts: rawMystikoConfig.chains[0].recommendedAmounts,
+  } as RawAssetConfig);
+  assetConfigs = new Map<string, AssetConfig>([
+    [
+      rawMystikoConfig.chains[0].assets[0].assetAddress,
+      new AssetConfig(rawMystikoConfig.chains[0].assets[0]),
+    ],
+  ]);
+  config = new PoolContractConfig(
+    rawConfig,
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    mainAssetConfig,
+    assetConfigs,
+  );
 });
 
 test('test equality', () => {
-  expect(config.assetType).toBe(rawConfig.assetType);
-  expect(config.assetSymbol).toBe(rawConfig.assetSymbol);
-  expect(config.assetDecimals).toBe(rawConfig.assetDecimals);
+  expect(config.asset).toStrictEqual(assetConfigs.get('0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a'));
+  expect(config.assetType).toBe(config.asset.assetType);
+  expect(config.assetSymbol).toBe(config.asset.assetSymbol);
+  expect(config.assetDecimals).toBe(config.asset.assetDecimals);
   expect(config.assetAddress).toBe(rawConfig.assetAddress);
-  expect(config.recommendedAmounts.map((a) => a.toString())).toStrictEqual(rawConfig.recommendedAmounts);
-  expect(config.recommendedAmountsNumber).toStrictEqual([1, 10]);
+  expect(config.recommendedAmounts).toStrictEqual(config.asset.recommendedAmounts);
+  expect(config.recommendedAmountsNumber).toStrictEqual(config.asset.recommendedAmountsNumber);
   expect(config.minRollupFee.toString()).toBe(rawConfig.minRollupFee);
   expect(config.minRollupFeeNumber).toBe(12);
   expect(config.circuits.sort()).toEqual(Array.from(defaultCircuitConfigs.values()).sort());
 });
 
-test('test invalid assetType', () => {
-  rawConfig.assetType = AssetType.MAIN;
-  expect(() => new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName)).toThrow(
-    new Error(
-      `pool contract=${rawConfig.address} asset address ` +
-        `should be null when asset type=${rawConfig.assetType}`,
-    ),
-  );
-  rawConfig.assetType = AssetType.ERC20;
+test('test assetAddress is undefined', () => {
   rawConfig.assetAddress = undefined;
-  expect(() => new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName)).toThrow(
+  config = new PoolContractConfig(
+    rawConfig,
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    mainAssetConfig,
+    assetConfigs,
+  );
+  expect(config.asset).toStrictEqual(mainAssetConfig);
+});
+
+test('test assetAddress is not found', () => {
+  rawConfig.assetAddress = '0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9';
+  expect(
+    () =>
+      new PoolContractConfig(
+        rawConfig,
+        defaultCircuitConfigs,
+        circuitConfigsByName,
+        mainAssetConfig,
+        assetConfigs,
+      ),
+  ).toThrow(
     new Error(
-      `pool contract=${rawConfig.address} asset address ` +
-        `should not be null when asset type=${rawConfig.assetType}`,
+      'asset address=0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9 config ' +
+        `has not been defined for pool contract address=${rawConfig.address}`,
     ),
   );
 });
@@ -73,14 +111,26 @@ test('test invalid assetType', () => {
 test('test circuit overwrite', () => {
   expect(config.getCircuitConfig(CircuitType.ROLLUP1)?.name).toBe('zokrates-1.0-rollup1');
   rawConfig.circuits = ['zokrates-2.0-rollup1'];
-  config = new PoolContractConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName);
+  config = new PoolContractConfig(
+    rawConfig,
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    mainAssetConfig,
+    assetConfigs,
+  );
   expect(config.getCircuitConfig(CircuitType.ROLLUP1)?.name).toBe('zokrates-2.0-rollup1');
   expect(config.getCircuitConfig(CircuitType.ROLLUP4)?.name).toBe('zokrates-1.0-rollup4');
 });
 
 test('test copy', () => {
   expect(
-    new PoolContractConfig(config.copyData(), defaultCircuitConfigs, circuitConfigsByName),
+    new PoolContractConfig(
+      config.copyData(),
+      defaultCircuitConfigs,
+      circuitConfigsByName,
+      mainAssetConfig,
+      assetConfigs,
+    ),
   ).toStrictEqual(config);
 });
 

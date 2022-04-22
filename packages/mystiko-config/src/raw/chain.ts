@@ -5,12 +5,14 @@ import {
   IsArray,
   IsInt,
   IsNotEmpty,
+  IsNumberString,
   IsPositive,
   IsString,
   IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
+import { RawAssetConfig } from './asset';
 import { RawDepositContractConfig, RawPoolContractConfig } from './contract';
 import { RawProviderConfig } from './provider';
 import { RawConfig } from './base';
@@ -40,6 +42,12 @@ export class RawChainConfig extends RawConfig {
   public assetDecimals: number = 18;
 
   @Expose()
+  @IsArray()
+  @ArrayUnique()
+  @IsNumberString({ no_symbols: true }, { each: true })
+  public recommendedAmounts: string[] = [];
+
+  @Expose()
   @IsUrl({ protocols: ['http', 'https'], require_tld: false })
   public explorerUrl: string;
 
@@ -58,6 +66,10 @@ export class RawChainConfig extends RawConfig {
   @IsUrl({ protocols: ['http', 'https'], require_tld: false })
   public signerEndpoint: string;
 
+  @IsInt()
+  @IsPositive()
+  public eventFilterSize: number = 200000;
+
   @Expose()
   @Type(() => RawDepositContractConfig)
   @ValidateNested()
@@ -72,7 +84,10 @@ export class RawChainConfig extends RawConfig {
   @ArrayUnique((conf) => conf.address)
   public poolContracts: RawPoolContractConfig[] = [];
 
-  @IsInt()
-  @IsPositive()
-  public eventFilterSize: number = 200000;
+  @Expose()
+  @Type(() => RawAssetConfig)
+  @ValidateNested()
+  @IsArray()
+  @ArrayUnique((conf) => conf.assetAddress)
+  public assets: RawAssetConfig[] = [];
 }

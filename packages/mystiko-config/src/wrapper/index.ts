@@ -1,3 +1,4 @@
+export * from './asset';
 export * from './bridge';
 export * from './contract';
 export * from './chain';

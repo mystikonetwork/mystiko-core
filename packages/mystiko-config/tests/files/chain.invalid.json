@@ -3,6 +3,7 @@
   "name": "Ethereum Ropsten",
   "assetSymbol": "ETH",
   "assetDecimals": "18",
+  "recommendedAmounts": ["10000000000000000", "100000000000000000"],
   "explorerUrl": "https://ropsten.etherscan.io",
   "explorerPrefix": "/tx/%tx%",
   "providers": [
@@ -37,12 +38,17 @@
       "address": "0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d",
       "type": "pool",
       "startBlock": 1000000,
-      "assetType": "erc20",
-      "assetSymbol": "MTT",
-      "assetDecimals": 16,
       "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a",
       "minRollupFee": "12345",
       "circuits": ["circuit-1.0"]
+    }
+  ],
+  "assets": [
+    {
+      "assetType": "erc20",
+      "assetSymbol": "MTT",
+      "assetDecimals": 16,
+      "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a"
     }
   ]
 }

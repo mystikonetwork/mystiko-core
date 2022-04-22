@@ -1,4 +1,4 @@
-import { AssetType, ContractType, RawConfig, RawPoolContractConfig } from '../../../src';
+import { ContractType, RawConfig, RawPoolContractConfig } from '../../../src';
 
 let config: RawPoolContractConfig;
 
@@ -8,11 +8,7 @@ beforeEach(async () => {
     name: 'CommitmentPool',
     address: '0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
     startBlock: 1000000,
-    assetType: AssetType.ERC20,
-    assetSymbol: 'MTT',
-    assetDecimals: 16,
     assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
-    recommendedAmounts: ['10000000000000000', '100000000000000000'],
     minRollupFee: '120000000000000000',
     circuits: ['circuit-1.0'],
   });
@@ -27,34 +23,6 @@ test('test validate success', async () => {
 
 test('test invalid type', async () => {
   config.type = ContractType.DEPOSIT;
-  await expect(config.validate()).rejects.toThrow();
-});
-
-test('test invalid assetSymbol', async () => {
-  config.assetSymbol = '';
-  await expect(config.validate()).rejects.toThrow();
-});
-
-test('test invalid assetDecimals', async () => {
-  config.assetDecimals = -1;
-  await expect(config.validate()).rejects.toThrow();
-  config.assetDecimals = 16.5;
-  await expect(config.validate()).rejects.toThrow();
-});
-
-test('test invalid assetAddress', async () => {
-  config.assetAddress = '';
-  await expect(config.validate()).rejects.toThrow();
-  config.assetAddress = '0xdeadbeef';
-  await expect(config.validate()).rejects.toThrow();
-});
-
-test('test invalid recommendedAmounts', async () => {
-  config.recommendedAmounts = [''];
-  await expect(config.validate()).rejects.toThrow();
-  config.recommendedAmounts = ['abcd'];
-  await expect(config.validate()).rejects.toThrow();
-  config.recommendedAmounts = ['1', '1'];
   await expect(config.validate()).rejects.toThrow();
 });
 

@@ -1,3 +1,4 @@
+import { toBN } from '@mystikonetwork/utils';
 import {
   AssetType,
   BridgeType,
@@ -38,6 +39,11 @@ test('test equality', () => {
   expect(config.name).toBe(rawConfig.name);
   expect(config.assetSymbol).toBe(rawConfig.assetSymbol);
   expect(config.assetDecimals).toBe(rawConfig.assetDecimals);
+  expect(config.recommendedAmounts).toStrictEqual([
+    toBN('1000000000000000000'),
+    toBN('10000000000000000000'),
+  ]);
+  expect(config.recommendedAmountsNumber).toStrictEqual([1, 10]);
   expect(config.explorerUrl).toBe(rawConfig.explorerUrl);
   expect(config.explorerPrefix).toBe(rawConfig.explorerPrefix);
   expect(config.signerEndpoint).toBe(rawConfig.signerEndpoint);
@@ -52,6 +58,7 @@ test('test equality', () => {
   expect(config.depositContractsWithDisabled.map((conf) => conf.address).sort()).toStrictEqual(
     rawConfig.depositContracts.map((conf) => conf.address).sort(),
   );
+  expect(config.assets.length).toBe(1);
 });
 
 test('test peerChainIds', async () => {
@@ -412,6 +419,13 @@ test('test different bridge with same pool address', async () => {
         'cannot share same pool address=0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
     ),
   );
+});
+
+test('test getAssetConfigByAddress', () => {
+  expect(config.getAssetConfigByAddress('0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a')?.assetDecimals).toBe(
+    16,
+  );
+  expect(config.getAssetConfigByAddress('0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9')).toBe(undefined);
 });
 
 test('test copy', () => {

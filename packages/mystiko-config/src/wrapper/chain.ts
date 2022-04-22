@@ -1,9 +1,11 @@
 import { check } from '@mystikonetwork/utils';
+import BN from 'bn.js';
+import { AssetType, BridgeType, CircuitType } from '../common';
+import { RawAssetConfig, RawChainConfig } from '../raw';
+import { AssetConfig, MAIN_ASSET_ADDRESS } from './asset';
 import { BaseConfig } from './base';
-import { RawChainConfig } from '../raw';
-import { DepositContractConfig, PoolContractConfig } from './contract';
 import { CircuitConfig } from './circuit';
-import { BridgeType, CircuitType } from '../common';
+import { DepositContractConfig, PoolContractConfig } from './contract';
 import { ProviderConfig } from './provider';
 
 export class ChainConfig extends BaseConfig<RawChainConfig> {
@@ -15,6 +17,10 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
 
   private readonly depositConfigsByPoolContract: Map<string, DepositContractConfig[]>;
 
+  private readonly mainAssetConfig: AssetConfig;
+
+  private readonly assetConfigs: Map<string, AssetConfig>;
+
   private readonly providerConfigs: ProviderConfig[];
 
   constructor(
@@ -24,6 +30,8 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
   ) {
     super(data);
+    this.mainAssetConfig = this.initMainAssetConfig();
+    this.assetConfigs = this.initAssetConfigs();
     this.poolContractConfigs = this.initPoolContractConfigs(defaultCircuitConfigs, circuitConfigsByName);
     this.depositContractConfigs = this.initDepositContractConfigs(
       this.poolContractConfigs,
@@ -43,11 +51,19 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
   }
 
   public get assetSymbol(): string {
-    return this.data.assetSymbol;
+    return this.mainAssetConfig.assetSymbol;
   }
 
   public get assetDecimals(): number {
-    return this.data.assetDecimals;
+    return this.mainAssetConfig.assetDecimals;
+  }
+
+  public get recommendedAmounts(): BN[] {
+    return this.mainAssetConfig.recommendedAmounts;
+  }
+
+  public get recommendedAmountsNumber(): number[] {
+    return this.mainAssetConfig.recommendedAmountsNumber;
   }
 
   public get explorerUrl(): string {
@@ -80,6 +96,10 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
 
   public get depositContractsWithDisabled(): DepositContractConfig[] {
     return Array.from(this.depositContractConfigs.values());
+  }
+
+  public get assets(): AssetConfig[] {
+    return Array.from(this.assetConfigs.values());
   }
 
   public get peerChainIds(): number[] {
@@ -174,6 +194,10 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     return this.getPoolContractByAddress(address)?.eventFilterSize || this.eventFilterSize;
   }
 
+  public getAssetConfigByAddress(assetAddress: string): AssetConfig | undefined {
+    return this.assetConfigs.get(assetAddress);
+  }
+
   private initPoolContractConfigs(
     defaultCircuitConfigs: Map<CircuitType, CircuitConfig>,
     circuitConfigsByName: Map<string, CircuitConfig>,
@@ -186,7 +210,13 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
       );
       poolContractConfigs.set(
         raw.address,
-        new PoolContractConfig(raw, defaultCircuitConfigs, circuitConfigsByName),
+        new PoolContractConfig(
+          raw,
+          defaultCircuitConfigs,
+          circuitConfigsByName,
+          this.mainAssetConfig,
+          this.assetConfigs,
+        ),
       );
     });
     return poolContractConfigs;
@@ -218,6 +248,8 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
           raw,
           (address) => this.getPoolContractByAddress(address),
           depositContractGetter,
+          this.mainAssetConfig,
+          this.assetConfigs,
         ),
       );
     });
@@ -262,5 +294,23 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
       }
     });
     return depositConfigsByPoolContract;
+  }
+
+  private initMainAssetConfig(): AssetConfig {
+    return new AssetConfig({
+      assetType: AssetType.MAIN,
+      assetSymbol: this.data.assetSymbol,
+      assetDecimals: this.data.assetDecimals,
+      assetAddress: MAIN_ASSET_ADDRESS,
+      recommendedAmounts: this.data.recommendedAmounts,
+    } as RawAssetConfig);
+  }
+
+  private initAssetConfigs(): Map<string, AssetConfig> {
+    const assetConfigs = new Map<string, AssetConfig>();
+    this.data.assets.forEach((assetConfig) => {
+      assetConfigs.set(assetConfig.assetAddress, new AssetConfig(assetConfig));
+    });
+    return assetConfigs;
   }
 }

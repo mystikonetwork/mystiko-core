@@ -2,6 +2,7 @@ import {
   AssetType,
   BridgeType,
   ContractType,
+  RawAssetConfig,
   RawChainConfig,
   RawConfig,
   RawDepositContractConfig,
@@ -13,6 +14,7 @@ let config: RawChainConfig;
 let providerConfig: RawProviderConfig;
 let depositContractConfig: RawDepositContractConfig;
 let poolContractConfig: RawPoolContractConfig;
+let assetConfig: RawAssetConfig;
 
 function initProviderConfig(): Promise<RawProviderConfig> {
   return RawConfig.createFromObject(RawProviderConfig, {
@@ -47,12 +49,18 @@ function initPoolContractConfig(): Promise<RawPoolContractConfig> {
     address: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
     type: ContractType.POOL,
     startBlock: 1000000,
+    assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
+    minRollupFee: '40000000000000000',
+    circuits: ['circuit-1.0'],
+  });
+}
+
+function initAssetsConfig(): Promise<RawAssetConfig> {
+  return RawConfig.createFromObject(RawAssetConfig, {
     assetType: AssetType.ERC20,
     assetSymbol: 'MTT',
     assetDecimals: 16,
     assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
-    minRollupFee: '40000000000000000',
-    circuits: ['circuit-1.0'],
   });
 }
 
@@ -60,17 +68,20 @@ beforeEach(async () => {
   providerConfig = await initProviderConfig();
   depositContractConfig = await initDepositContractConfig();
   poolContractConfig = await initPoolContractConfig();
+  assetConfig = await initAssetsConfig();
   config = await RawConfig.createFromObject(RawChainConfig, {
     chainId: 3,
     name: 'Ethereum Ropsten',
     assetSymbol: 'ETH',
     assetDecimals: 18,
+    recommendedAmounts: ['1000000000000000000', '10000000000000000000'],
     explorerUrl: 'https://ropsten.etherscan.io',
     explorerPrefix: '/tx/%tx%',
     providers: [providerConfig],
     signerEndpoint: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
     depositContracts: [depositContractConfig],
     poolContracts: [poolContractConfig],
+    assets: [assetConfig],
   });
 });
 
@@ -95,6 +106,15 @@ test('test invalid assetDecimals', async () => {
   config.assetDecimals = 0;
   await expect(config.validate()).rejects.toThrow();
   config.assetDecimals = 23.4;
+  await expect(config.validate()).rejects.toThrow();
+});
+
+test('test invalid recommendedAmounts', async () => {
+  config.recommendedAmounts = [''];
+  await expect(config.validate()).rejects.toThrow();
+  config.recommendedAmounts = ['abcd'];
+  await expect(config.validate()).rejects.toThrow();
+  config.recommendedAmounts = ['1', '1'];
   await expect(config.validate()).rejects.toThrow();
 });
 
@@ -129,10 +149,17 @@ test('test invalid signerEndpoint', async () => {
   await expect(config.validate()).rejects.toThrow();
 });
 
+test('test invalid eventFilterSize', async () => {
+  config.eventFilterSize = 0;
+  await expect(config.validate()).rejects.toThrow();
+  config.eventFilterSize = 2.3;
+  await expect(config.validate()).rejects.toThrow();
+});
+
 test('test invalid poolContracts', async () => {
   config.poolContracts = [poolContractConfig, poolContractConfig];
   await expect(config.validate()).rejects.toThrow();
-  poolContractConfig.assetDecimals = 1.2;
+  poolContractConfig.assetAddress = '0xdeadbeef';
   config.poolContracts = [poolContractConfig];
   await expect(config.validate()).rejects.toThrow();
 });
@@ -145,10 +172,11 @@ test('test invalid depositContracts', async () => {
   await expect(config.validate()).rejects.toThrow();
 });
 
-test('test invalid eventFilterSize', async () => {
-  config.eventFilterSize = 0;
+test('test invalid assets', async () => {
+  config.assets = [assetConfig, assetConfig];
   await expect(config.validate()).rejects.toThrow();
-  config.eventFilterSize = 2.3;
+  assetConfig.assetDecimals = 1.2;
+  config.assets = [assetConfig];
   await expect(config.validate()).rejects.toThrow();
 });
 

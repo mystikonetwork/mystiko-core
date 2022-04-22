@@ -1,33 +1,46 @@
-import BN from 'bn.js';
 import { check, fromDecimals, toBN } from '@mystikonetwork/utils';
-import { ContractConfig } from './base';
-import { RawPoolContractConfig } from '../../raw';
-import { CircuitConfig } from '../circuit';
+import BN from 'bn.js';
 import { AssetType, CircuitType } from '../../common';
+import { RawPoolContractConfig } from '../../raw';
+import { AssetConfig } from '../asset';
+import { CircuitConfig } from '../circuit';
+import { ContractConfig } from './base';
 
 export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
   private readonly circuitConfigs: Map<CircuitType, CircuitConfig> = new Map<CircuitType, CircuitConfig>();
+
+  private readonly mainAssetConfig: AssetConfig;
+
+  private readonly assetConfig?: AssetConfig;
 
   constructor(
     data: RawPoolContractConfig,
     defaultCircuitConfigs: Map<CircuitType, CircuitConfig>,
     circuitConfigsByName: Map<string, CircuitConfig>,
+    mainAssetConfig: AssetConfig,
+    assetConfigs: Map<string, AssetConfig>,
   ) {
     super(data);
     this.circuitConfigs = this.initCircuitsConfigs(defaultCircuitConfigs, circuitConfigsByName);
+    this.assetConfig = this.initAssetConfig(assetConfigs);
+    this.mainAssetConfig = mainAssetConfig;
     this.validate();
   }
 
+  public get asset(): AssetConfig {
+    return this.assetConfig || this.mainAssetConfig;
+  }
+
   public get assetType(): AssetType {
-    return this.data.assetType;
+    return this.asset.assetType;
   }
 
   public get assetSymbol(): string {
-    return this.data.assetSymbol;
+    return this.asset.assetSymbol;
   }
 
   public get assetDecimals(): number {
-    return this.data.assetDecimals;
+    return this.asset.assetDecimals;
   }
 
   public get assetAddress(): string | undefined {
@@ -35,11 +48,11 @@ export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
   }
 
   public get recommendedAmounts(): BN[] {
-    return this.data.recommendedAmounts.map((amount) => toBN(amount));
+    return this.asset.recommendedAmounts.map((amount) => toBN(amount));
   }
 
   public get recommendedAmountsNumber(): number[] {
-    return this.data.recommendedAmounts.map((amount) => fromDecimals(amount, this.assetDecimals));
+    return this.asset.recommendedAmounts.map((amount) => fromDecimals(amount, this.assetDecimals));
   }
 
   public get minRollupFee(): BN {
@@ -73,6 +86,20 @@ export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
       }
     });
     return circuitConfigs;
+  }
+
+  private initAssetConfig(assetConfigs: Map<string, AssetConfig>): AssetConfig | undefined {
+    if (this.data.assetAddress) {
+      const assetConfig = assetConfigs.get(this.data.assetAddress);
+      if (!assetConfig) {
+        throw new Error(
+          `asset address=${this.data.assetAddress} config ` +
+            `has not been defined for pool contract address=${this.data.address}`,
+        );
+      }
+      return assetConfig;
+    }
+    return undefined;
   }
 
   private validate() {
