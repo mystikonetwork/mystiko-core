@@ -54,12 +54,12 @@
     "zokrates-js": "^1.0.41"
   },
   "dependencies": {
-    "@mystikonetwork/config": "^0.0.10",
-    "@mystikonetwork/contracts-abi": "^0.0.10",
+    "@mystikonetwork/config": "^0.1.0",
+    "@mystikonetwork/contracts-abi": "^0.1.0",
     "@mystikonetwork/database": "^0.1.0",
     "@mystikonetwork/ethers": "^0.1.0",
-    "@mystikonetwork/protocol": "^0.0.10",
-    "@mystikonetwork/utils": "^0.0.10",
+    "@mystikonetwork/protocol": "^0.1.0",
+    "@mystikonetwork/utils": "^0.1.0",
     "class-validator": "^0.13.2",
     "ethereumjs-wallet": "^1.0.2",
     "ethers": "^5.5.3",
