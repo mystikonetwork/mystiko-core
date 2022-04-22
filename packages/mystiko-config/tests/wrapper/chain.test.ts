@@ -65,12 +65,24 @@ test('test peerChainIds', async () => {
     address: '0x2f0Fe3154C281Cb25D6a615bf524230e57A462e1',
     startBlock: 1000000,
     bridgeType: BridgeType.LOOP,
-    poolAddress: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    poolAddress: '0x20Eb345870059E688c59e89523442ade33C7c813',
     minAmount: '10000000000000000',
     minBridgeFee: '20000000000000000',
     minExecutorFee: '30000000000000000',
   });
+  const poolContractConfig = await RawConfig.createFromObject(RawPoolContractConfig, {
+    version: 2,
+    name: 'CommitmentPool',
+    address: '0x20Eb345870059E688c59e89523442ade33C7c813',
+    startBlock: 1000000,
+    assetType: AssetType.ERC20,
+    assetSymbol: 'MTT',
+    assetDecimals: 16,
+    assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
+    minRollupFee: '40000000000000000',
+  });
   rawConfig.depositContracts.push(loopDepositContractConfig);
+  rawConfig.poolContracts.push(poolContractConfig);
   config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
   expect(config.peerChainIds.sort()).toStrictEqual([3, 97]);
 });
@@ -80,10 +92,20 @@ test('test getAssetSymbols', async () => {
   rawConfig.depositContracts[0].disabled = false;
   config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
   expect(config.getAssetSymbols(97)).toStrictEqual(['MTT']);
-  const poolContractConfig = await RawConfig.createFromObject(RawPoolContractConfig, {
+  const poolContractConfig1 = await RawConfig.createFromObject(RawPoolContractConfig, {
     version: 2,
     name: 'CommitmentPool',
     address: '0x954c6c78A2F93E6E19Ff1DE538F720311414530c',
+    startBlock: 1000000,
+    assetType: AssetType.MAIN,
+    assetSymbol: 'ETH',
+    assetDecimals: 16,
+    minRollupFee: '40000000000000000',
+  });
+  const poolContractConfig2 = await RawConfig.createFromObject(RawPoolContractConfig, {
+    version: 2,
+    name: 'CommitmentPool',
+    address: '0x20Eb345870059E688c59e89523442ade33C7c813',
     startBlock: 1000000,
     assetType: AssetType.MAIN,
     assetSymbol: 'ETH',
@@ -107,7 +129,7 @@ test('test getAssetSymbols', async () => {
     address: '0x0b1d6565d88f9bf6473e21c2ab58d28a495d7bb5',
     bridgeType: BridgeType.TBRIDGE,
     startBlock: 1000000,
-    poolAddress: '0x954c6c78A2F93E6E19Ff1DE538F720311414530c',
+    poolAddress: '0x20Eb345870059E688c59e89523442ade33C7c813',
     peerChainId: 97,
     peerContractAddress: '0x390de26d772d2e2005c6d1d24afc902bae37a4bb',
     minAmount: '10000000000000000',
@@ -116,7 +138,8 @@ test('test getAssetSymbols', async () => {
   });
   rawConfig.depositContracts.push(loopDepositContractConfig1);
   rawConfig.depositContracts.push(loopDepositContractConfig2);
-  rawConfig.poolContracts.push(poolContractConfig);
+  rawConfig.poolContracts.push(poolContractConfig1);
+  rawConfig.poolContracts.push(poolContractConfig2);
   config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
   expect(config.getAssetSymbols(97).sort()).toStrictEqual(['ETH', 'MTT']);
   expect(config.getAssetSymbols(3)).toStrictEqual(['ETH']);
@@ -133,12 +156,24 @@ test('test getBridges', async () => {
     address: '0x2f0Fe3154C281Cb25D6a615bf524230e57A462e1',
     startBlock: 1000000,
     bridgeType: BridgeType.LOOP,
-    poolAddress: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    poolAddress: '0x6b8a4ea37c72f1992626eb9bd48d4aa6aa077c47',
     minAmount: '10000000000000000',
     minBridgeFee: '20000000000000000',
     minExecutorFee: '30000000000000000',
   });
+  const poolContractConfig1 = await RawConfig.createFromObject(RawPoolContractConfig, {
+    version: 2,
+    name: 'CommitmentPool',
+    address: '0x6b8a4ea37c72f1992626eb9bd48d4aa6aa077c47',
+    startBlock: 1000000,
+    assetType: AssetType.ERC20,
+    assetSymbol: 'MTT',
+    assetDecimals: 16,
+    assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
+    minRollupFee: '40000000000000000',
+  });
   rawConfig.depositContracts.push(loopDepositContractConfig);
+  rawConfig.poolContracts.push(poolContractConfig1);
   config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
   expect(config.getBridges(3, 'MTT')).toStrictEqual([]);
   const celerDepositContractConfig = await RawConfig.createFromObject(RawDepositContractConfig, {
@@ -147,14 +182,26 @@ test('test getBridges', async () => {
     address: '0x4c55C41Bd839B3552fb2AbecaCFdF4a5D2879Cb9',
     startBlock: 1000000,
     bridgeType: BridgeType.CELER,
-    poolAddress: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    poolAddress: '0x20Eb345870059E688c59e89523442ade33C7c813',
     peerChainId: 97,
     peerContractAddress: '0x390de26d772d2e2005c6d1d24afc902bae37a4bb',
     minAmount: '10000000000000000',
     minBridgeFee: '20000000000000000',
     minExecutorFee: '30000000000000000',
   });
+  const poolContractConfig2 = await RawConfig.createFromObject(RawPoolContractConfig, {
+    version: 2,
+    name: 'CommitmentPool',
+    address: '0x20Eb345870059E688c59e89523442ade33C7c813',
+    startBlock: 1000000,
+    assetType: AssetType.ERC20,
+    assetSymbol: 'MTT',
+    assetDecimals: 16,
+    assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
+    minRollupFee: '40000000000000000',
+  });
   rawConfig.depositContracts.push(celerDepositContractConfig);
+  rawConfig.poolContracts.push(poolContractConfig2);
   config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
   expect(config.getBridges(97, 'MTT').sort()).toStrictEqual([BridgeType.CELER, BridgeType.TBRIDGE]);
 });
@@ -180,13 +227,25 @@ test('test getDepositContract', async () => {
     address: '0x2f0Fe3154C281Cb25D6a615bf524230e57A462e1',
     startBlock: 1000000,
     bridgeType: BridgeType.LOOP,
-    poolAddress: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    poolAddress: '0x20Eb345870059E688c59e89523442ade33C7c813',
     minAmount: '10000000000000000',
     minBridgeFee: '20000000000000000',
     minExecutorFee: '30000000000000000',
   });
+  const poolContractConfig = await RawConfig.createFromObject(RawPoolContractConfig, {
+    version: 2,
+    name: 'CommitmentPool',
+    address: '0x20Eb345870059E688c59e89523442ade33C7c813',
+    startBlock: 1000000,
+    assetType: AssetType.ERC20,
+    assetSymbol: 'MTT',
+    assetDecimals: 16,
+    assetAddress: '0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a',
+    minRollupFee: '40000000000000000',
+  });
   rawConfig.depositContracts.push(tbridgeDepositContractConfig);
   rawConfig.depositContracts.push(loopDepositContractConfig);
+  rawConfig.poolContracts.push(poolContractConfig);
   config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
   expect(config.getDepositContract(97, 'MTT', BridgeType.TBRIDGE)?.address).toBe(
     '0x4c55C41Bd839B3552fb2AbecaCFdF4a5D2879Cb9',
@@ -195,7 +254,7 @@ test('test getDepositContract', async () => {
     '0x2f0Fe3154C281Cb25D6a615bf524230e57A462e1',
   );
   expect(config.getDepositContractByAddress('0x2f0Fe3154C281Cb25D6a615bf524230e57A462e1')?.poolAddress).toBe(
-    '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    '0x20Eb345870059E688c59e89523442ade33C7c813',
   );
   expect(config.getDepositContractByAddress('0x5380442d3c4ec4f5777f551f5edd2fa0f691a27c')).toBe(undefined);
 });
@@ -252,6 +311,13 @@ test('test getPoolContract', async () => {
     'ETH',
   );
   expect(config.getPoolContractByAddress('0x5380442d3c4ec4f5777f551f5edd2fa0f691a27c')).toBe(undefined);
+});
+
+test('test getPoolContractBridgeType', () => {
+  expect(config.getPoolContractBridgeType('0x721d424047d3a8dd20f7a88f2eadad16fd2fab51')).toBe(undefined);
+  expect(config.getPoolContractBridgeType('0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d')).toBe(
+    BridgeType.TBRIDGE,
+  );
 });
 
 test('test getEventFilterSizeByAddress', () => {
@@ -319,6 +385,33 @@ test('test duplicate bridge and asset', async () => {
   expect(
     () => new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined),
   ).toThrow(new Error(`only one pool address allowed for asset MTT and bridge type ${BridgeType.TBRIDGE}`));
+});
+
+test('test different bridge with same pool address', async () => {
+  expect(config.peerChainIds).toStrictEqual([]);
+  rawConfig.depositContracts[0].disabled = false;
+  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  expect(config.peerChainIds).toStrictEqual([97]);
+  const loopDepositContractConfig = await RawConfig.createFromObject(RawDepositContractConfig, {
+    version: 2,
+    name: 'MystikoWithPolyERC20',
+    address: '0x2f0Fe3154C281Cb25D6a615bf524230e57A462e1',
+    startBlock: 1000000,
+    bridgeType: BridgeType.LOOP,
+    poolAddress: '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    minAmount: '10000000000000000',
+    minBridgeFee: '20000000000000000',
+    minExecutorFee: '30000000000000000',
+  });
+  rawConfig.depositContracts.push(loopDepositContractConfig);
+  expect(
+    () => new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined),
+  ).toThrow(
+    new Error(
+      'deposit contract with different bridge type ' +
+        'cannot share same pool address=0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
+    ),
+  );
 });
 
 test('test copy', () => {

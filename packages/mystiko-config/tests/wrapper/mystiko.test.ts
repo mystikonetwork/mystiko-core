@@ -105,7 +105,7 @@ test('test getDepositContractConfig', () => {
 
 test('test getPoolContractConfig', () => {
   expect(config.getPoolContractConfig(3, 'MTT', BridgeType.CELER)).toStrictEqual(
-    config.getPoolContractConfigByAddress(3, '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d'),
+    config.getPoolContractConfigByAddress(3, '0x20Eb345870059E688c59e89523442ade33C7c813'),
   );
   expect(config.getPoolContractConfig(3, 'MTT', BridgeType.TBRIDGE)).toStrictEqual(
     config.getPoolContractConfigByAddress(3, '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d'),
@@ -114,7 +114,7 @@ test('test getPoolContractConfig', () => {
     config.getPoolContractConfigByAddress(3, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
   );
   expect(config.getPoolContractConfig(97, 'MTT', BridgeType.CELER)).toStrictEqual(
-    config.getPoolContractConfigByAddress(97, '0xBe2C9c8a00951662dF3a978b25F448968F0595AE'),
+    config.getPoolContractConfigByAddress(97, '0x6B8a4ea37C72F1992626eb9bD48d4aA6aa077c47'),
   );
   expect(config.getPoolContractConfig(97, 'MTT', BridgeType.TBRIDGE)).toStrictEqual(
     config.getPoolContractConfigByAddress(97, '0xBe2C9c8a00951662dF3a978b25F448968F0595AE'),
@@ -245,11 +245,11 @@ test('test invalid peerChainAddress', async () => {
 });
 
 test('test bridgeType mismatch', async () => {
-  rawConfig.chains[0].depositContracts[1].bridgeType = BridgeType.POLY;
+  rawConfig.chains[0].depositContracts[2].bridgeType = BridgeType.POLY;
   await expect(MystikoConfig.createFromRaw(rawConfig)).rejects.toThrow(
     new Error(
-      'bridge type mismatch for chain id=97 address=0x9C33eaCc2F50E39940D3AfaF2c7B8246B681A374 ' +
-        'vs chain id=3 and address=0xbF5605f5Ed6d18ed957cBA80dbA8838dFcb9A69f',
+      'bridge type mismatch for chain id=97 address=0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D ' +
+        'vs chain id=3 and address=0xe6394a06905d83B19Dbd51804Ca84677a2054FA6',
     ),
   );
 });

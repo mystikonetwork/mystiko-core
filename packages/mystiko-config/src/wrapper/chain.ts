@@ -13,6 +13,8 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
 
   private readonly depositContractConfigs: Map<string, DepositContractConfig>;
 
+  private readonly depositConfigsByPoolContract: Map<string, DepositContractConfig[]>;
+
   private readonly providerConfigs: ProviderConfig[];
 
   constructor(
@@ -28,6 +30,7 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
       depositContractGetter,
     );
     this.poolConfigsByAssetAndBridge = this.initPoolConfigsByAssetAndBridge();
+    this.depositConfigsByPoolContract = this.initDepositConfigsByPoolContract();
     this.providerConfigs = this.data.providers.map((raw) => new ProviderConfig(raw));
   }
 
@@ -154,6 +157,15 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     return this.poolContractConfigs.get(address);
   }
 
+  public getPoolContractLinkedDepositContracts(address: string): DepositContractConfig[] {
+    return this.depositConfigsByPoolContract.get(address) || [];
+  }
+
+  public getPoolContractBridgeType(address: string): BridgeType | undefined {
+    const depositConfigs = this.getPoolContractLinkedDepositContracts(address);
+    return depositConfigs.length > 0 ? depositConfigs[0].bridgeType : undefined;
+  }
+
   public getEventFilterSizeByAddress(address: string): number {
     const depositContractConfig = this.depositContractConfigs.get(address);
     if (depositContractConfig) {
@@ -231,5 +243,24 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
       poolConfigsByAssetAndBridge.set(depositContractConfig.assetSymbol, bridges);
     });
     return poolConfigsByAssetAndBridge;
+  }
+
+  private initDepositConfigsByPoolContract(): Map<string, DepositContractConfig[]> {
+    const depositConfigsByPoolContract = new Map<string, DepositContractConfig[]>();
+    this.depositContractConfigs.forEach((depositContractConfig) => {
+      const depositContracts = depositConfigsByPoolContract.get(depositContractConfig.poolAddress);
+      if (depositContracts) {
+        const lastDepositContractConfig = depositContracts[depositContracts.length - 1];
+        check(
+          lastDepositContractConfig.bridgeType === depositContractConfig.bridgeType,
+          'deposit contract with different bridge type ' +
+            `cannot share same pool address=${depositContractConfig.poolAddress}`,
+        );
+        depositContracts.push(depositContractConfig);
+      } else {
+        depositConfigsByPoolContract.set(depositContractConfig.poolAddress, [depositContractConfig]);
+      }
+    });
+    return depositConfigsByPoolContract;
   }
 }
