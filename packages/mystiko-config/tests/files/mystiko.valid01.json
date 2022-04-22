@@ -87,6 +87,7 @@
           "assetSymbol": "MTT",
           "assetDecimals": 16,
           "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a",
+          "recommendedAmounts": ["1000000000000000000", "10000000000000000000"],
           "minRollupFee": "40000000000000000",
           "circuits": ["zokrates-2.0-rollup1"]
         },
