@@ -1,4 +1,5 @@
 import {
+  ArrayUnique,
   Equals,
   IsArray,
   IsEnum,
@@ -37,6 +38,12 @@ export class RawPoolContractConfig extends RawContractConfig {
   @IsOptional()
   @IsEthereumAddress()
   public assetAddress?: string;
+
+  @Expose()
+  @IsArray()
+  @ArrayUnique()
+  @IsNumberString({ no_symbols: true }, { each: true })
+  public recommendedAmounts: string[] = [];
 
   @Expose()
   @IsNumberString({ no_symbols: true })

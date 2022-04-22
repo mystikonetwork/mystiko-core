@@ -45,6 +45,8 @@ test('test equality', () => {
   expect(config.assetSymbol).toBe(rawConfig.assetSymbol);
   expect(config.assetDecimals).toBe(rawConfig.assetDecimals);
   expect(config.assetAddress).toBe(rawConfig.assetAddress);
+  expect(config.recommendedAmounts.map((a) => a.toString())).toStrictEqual(rawConfig.recommendedAmounts);
+  expect(config.recommendedAmountsNumber).toStrictEqual([1, 10]);
   expect(config.minRollupFee.toString()).toBe(rawConfig.minRollupFee);
   expect(config.minRollupFeeNumber).toBe(12);
   expect(config.circuits.sort()).toEqual(Array.from(defaultCircuitConfigs.values()).sort());

@@ -34,6 +34,14 @@ export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
     return this.data.assetAddress;
   }
 
+  public get recommendedAmounts(): BN[] {
+    return this.data.recommendedAmounts.map((amount) => toBN(amount));
+  }
+
+  public get recommendedAmountsNumber(): number[] {
+    return this.data.recommendedAmounts.map((amount) => fromDecimals(amount, this.assetDecimals));
+  }
+
   public get minRollupFee(): BN {
     return toBN(this.data.minRollupFee);
   }

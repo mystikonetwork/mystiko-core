@@ -85,6 +85,14 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
     return this.poolContract.assetAddress;
   }
 
+  public get recommendedAmounts(): BN[] {
+    return this.poolContract.recommendedAmounts;
+  }
+
+  public get recommendedAmountsNumber(): number[] {
+    return this.poolContract.recommendedAmountsNumber;
+  }
+
   public get minRollupFee(): BN {
     return this.poolContract.minRollupFee;
   }

@@ -60,6 +60,11 @@ test('test equality', () => {
   expect(config.assetSymbol).toBe('MTT');
   expect(config.assetDecimals).toBe(16);
   expect(config.assetAddress).toBe('0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a');
+  expect(config.recommendedAmounts.map((a) => a.toString())).toStrictEqual([
+    '10000000000000000',
+    '100000000000000000',
+  ]);
+  expect(config.recommendedAmountsNumber).toStrictEqual([1, 10]);
   expect(config.minRollupFee.toString()).toBe('40000000000000000');
   expect(config.minRollupFeeNumber).toBe(4);
   expect(config.circuits.map((conf) => conf.name)).toContain('zokrates-2.0-rollup1');
