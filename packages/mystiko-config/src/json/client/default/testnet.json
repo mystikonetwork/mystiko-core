@@ -22,7 +22,8 @@
       ],
       "signerEndpoint": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "depositContracts": [],
-      "poolContracts": []
+      "poolContracts": [],
+      "assets": []
     },
     {
       "name": "Ethereum Goerli",
@@ -45,7 +46,8 @@
       ],
       "signerEndpoint": "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "depositContracts": [],
-      "poolContracts": []
+      "poolContracts": [],
+      "assets": []
     },
     {
       "name": "BSC Testnet",
@@ -69,7 +71,8 @@
       "signerEndpoint": "https://data-seed-prebsc-2-s2.binance.org:8545",
       "eventFilterSize": 100000,
       "depositContracts": [],
-      "poolContracts": []
+      "poolContracts": [],
+      "assets": []
     },
     {
       "name": "Polygon Testnet",
@@ -92,7 +95,8 @@
       ],
       "signerEndpoint": "https://rpc-mumbai.maticvigil.com",
       "depositContracts": [],
-      "poolContracts": []
+      "poolContracts": [],
+      "assets": []
     },
     {
       "name": "Avalanche Testnet",
@@ -112,7 +116,8 @@
       ],
       "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
       "depositContracts": [],
-      "poolContracts": []
+      "poolContracts": [],
+      "assets": []
     }
   ],
   "bridges": [
