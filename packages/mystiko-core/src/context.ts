@@ -1,7 +1,8 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
+import { ProviderPool } from '@mystikonetwork/ethers';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
-import { DefaultExecutorFactory } from './executor';
+import { createError, MystikoErrorCode } from './error';
 import {
   AccountHandler,
   AssetHandler,
@@ -13,7 +14,6 @@ import {
   TransactionHandler,
   WalletHandler,
 } from './interface';
-import { createError, MystikoErrorCode } from './error';
 
 export class MystikoContext<
   A extends AccountHandler = AccountHandler,
@@ -40,25 +40,20 @@ export class MystikoContext<
 
   private walletHandler?: W;
 
+  private executorFactory?: ExecutorFactory;
+
+  private providerPool?: ProviderPool;
+
   public config: MystikoConfig;
 
   public db: MystikoDatabase;
 
   public protocol: P;
 
-  public executors: ExecutorFactory;
-
-  constructor(config: MystikoConfig, db: MystikoDatabase, protocol: P, executors?: ExecutorFactory) {
+  constructor(config: MystikoConfig, db: MystikoDatabase, protocol: P) {
     this.config = config;
     this.db = db;
     this.protocol = protocol;
-    if (executors) {
-      this.executors = executors;
-    } else {
-      const defaultExecutorFactory = new DefaultExecutorFactory();
-      defaultExecutorFactory.context = this;
-      this.executors = defaultExecutorFactory;
-    }
   }
 
   public get accounts(): A {
@@ -136,5 +131,27 @@ export class MystikoContext<
 
   public set wallets(walletHandler: W) {
     this.walletHandler = walletHandler;
+  }
+
+  public get executors(): ExecutorFactory {
+    if (!this.executorFactory) {
+      throw createError('executor factory has not been set', MystikoErrorCode.NO_EXECUTOR);
+    }
+    return this.executorFactory;
+  }
+
+  public set executors(factory: ExecutorFactory) {
+    this.executorFactory = factory;
+  }
+
+  public get providers(): ProviderPool {
+    if (!this.providerPool) {
+      throw createError('provider pool has not been set', MystikoErrorCode.NO_PROVIDER_POOL);
+    }
+    return this.providerPool;
+  }
+
+  public set providers(pool: ProviderPool) {
+    this.providerPool = pool;
   }
 }

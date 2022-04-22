@@ -1,11 +1,13 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
+import { ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
 import {
   AccountHandlerV2,
   AssetHandlerV2,
   ChainHandlerV2,
   CommitmentHandlerV2,
+  DefaultExecutorFactory,
   DepositHandlerV2,
   MystikoContext,
   TransactionHandlerV2,
@@ -52,5 +54,8 @@ export async function createTestContext(
     WalletHandlerV2,
     MystikoProtocolV2
   >(wrappedConfig, wrappedDb, protocol);
+  context.executors = new DefaultExecutorFactory();
+  context.providers = new ProviderPoolImpl(config);
+  context.providers.connect();
   return Promise.resolve(context);
 }

@@ -55,7 +55,9 @@
   },
   "dependencies": {
     "@mystikonetwork/config": "^0.0.10",
+    "@mystikonetwork/contracts-abi": "^0.0.10",
     "@mystikonetwork/database": "^0.0.10",
+    "@mystikonetwork/ethers": "^0.0.10",
     "@mystikonetwork/protocol": "^0.0.10",
     "@mystikonetwork/utils": "^0.0.10",
     "class-validator": "^0.13.2",

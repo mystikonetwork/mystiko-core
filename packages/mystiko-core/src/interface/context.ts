@@ -1,5 +1,6 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
+import { ProviderPool } from '@mystikonetwork/ethers';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { ExecutorFactory } from './executor';
 import {
@@ -44,4 +45,6 @@ export interface MystikoContextInterface<
   set wallets(handler: W);
   get executors(): ExecutorFactory;
   set executors(factory: ExecutorFactory);
+  get providers(): ProviderPool;
+  set providers(pool: ProviderPool);
 }
