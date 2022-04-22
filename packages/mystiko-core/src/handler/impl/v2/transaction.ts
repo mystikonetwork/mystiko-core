@@ -27,7 +27,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
 
   public create(options: TransferOptions | WithdrawOptions): Promise<TransactionResponse> {
     return this.getPoolContractConfig(options).then((poolContractConfig) =>
-      this.context.executors.getTransactionExecutor(poolContractConfig).execute(options),
+      this.context.executors.getTransactionExecutor(poolContractConfig).execute(options, poolContractConfig),
     );
   }
 
@@ -63,13 +63,13 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
 
   public quote(options: TransactionQuoteOptions): Promise<TransactionQuote> {
     return this.getPoolContractConfig(options).then((poolContractConfig) =>
-      this.context.executors.getTransactionExecutor(poolContractConfig).quote(options),
+      this.context.executors.getTransactionExecutor(poolContractConfig).quote(options, poolContractConfig),
     );
   }
 
   public summary(options: TransferOptions | WithdrawOptions): Promise<TransactionSummary> {
     return this.getPoolContractConfig(options).then((poolContractConfig) =>
-      this.context.executors.getTransactionExecutor(poolContractConfig).summary(options),
+      this.context.executors.getTransactionExecutor(poolContractConfig).summary(options, poolContractConfig),
     );
   }
 

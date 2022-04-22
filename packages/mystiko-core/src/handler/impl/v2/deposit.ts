@@ -26,7 +26,9 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
 
   public create(options: DepositOptions): Promise<DepositResponse> {
     return this.getDepositContractConfig(options).then((depositContractConfig) =>
-      this.context.executors.getDepositExecutor(depositContractConfig).execute(options),
+      this.context.executors
+        .getDepositExecutor(depositContractConfig)
+        .execute(options, depositContractConfig),
     );
   }
 
@@ -65,7 +67,7 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
 
   public quote(options: DepositQuoteOptions): Promise<DepositQuote> {
     return this.getDepositContractConfig(options).then((depositContractConfig) =>
-      this.context.executors.getDepositExecutor(depositContractConfig).quote(options),
+      this.context.executors.getDepositExecutor(depositContractConfig).quote(options, depositContractConfig),
     );
   }
 
@@ -113,7 +115,9 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
 
   public summary(options: DepositOptions): Promise<DepositSummary> {
     return this.getDepositContractConfig(options).then((depositContractConfig) =>
-      this.context.executors.getDepositExecutor(depositContractConfig).summary(options),
+      this.context.executors
+        .getDepositExecutor(depositContractConfig)
+        .summary(options, depositContractConfig),
     );
   }
 

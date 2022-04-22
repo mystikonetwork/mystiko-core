@@ -1,5 +1,5 @@
 import { ERC20, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
-import { toBN, toDecimals } from '@mystikonetwork/utils';
+import { toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { AssetExecutor, AssetExecutorApproveOptions, AssetExecutorBalanceOptions } from '../../../interface';
@@ -15,17 +15,16 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
     }
     const { signer } = options.signer;
     const contract = MystikoContractFactory.connect<ERC20>('ERC20', options.assetAddress, signer);
-    const amount = toDecimals(options.amount, options.assetDecimals);
     return signer
       .getAddress()
       .then((account) => contract.allowance(account, options.spender))
       .then((approvedAmount) => {
-        if (toBN(approvedAmount.toString()).lt(amount)) {
+        if (toBN(approvedAmount.toString()).lt(toBN(options.amount))) {
           this.logger.info(
             'started submitting asset approving transaction ' +
               `chain id=${options.chainId}, asset=${options.assetSymbol}, amount=${options.amount}`,
           );
-          return contract.approve(options.spender, amount.toString());
+          return contract.approve(options.spender, options.amount);
         }
         return undefined;
       })
@@ -37,7 +36,18 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
       });
   }
 
-  public balance(options: AssetExecutorBalanceOptions): Promise<number> {
-    return Promise.reject(new Error('not implemented'));
+  public balance(options: AssetExecutorBalanceOptions): Promise<string> {
+    const provider = this.context.providers.getProvider(options.chainId);
+    if (!provider) {
+      return createErrorPromise(
+        `no provider configured for chain id=${options.chainId}`,
+        MystikoErrorCode.NON_EXISTING_PROVIDER,
+      );
+    }
+    if (options.assetAddress) {
+      const contract = MystikoContractFactory.connect<ERC20>('ERC20', options.assetAddress, provider);
+      return contract.balanceOf(options.address).then((b) => b.toString());
+    }
+    return provider.getBalance(options.address).then((b) => b.toString());
   }
 }

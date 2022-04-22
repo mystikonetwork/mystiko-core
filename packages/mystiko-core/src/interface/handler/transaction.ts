@@ -11,7 +11,6 @@ export type TransactionQuoteOptions = {
 };
 
 export type TransferOptions = TransactionQuoteOptions & {
-  amount: number;
   rollupFee?: number;
   gasRelayerFee?: number;
   gasRelayerAddress?: string;

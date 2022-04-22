@@ -30,6 +30,9 @@ test('test insert', async () => {
     chainId: 3,
     contractAddress: '0x67d4a81096dFD5869bC520f16ae2537aF3dE582D',
     commitmentHash: '1234',
+    hashK: '9876',
+    randomS: '4567',
+    encryptedNote: '0xdeadbeef',
     assetSymbol: 'MTT',
     assetDecimals: 18,
     assetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
@@ -57,6 +60,9 @@ test('test insert', async () => {
     expect(deposit.chainId).toBe(3);
     expect(deposit.contractAddress).toBe('0x67d4a81096dFD5869bC520f16ae2537aF3dE582D');
     expect(deposit.commitmentHash).toBe('1234');
+    expect(deposit.hashK).toBe('9876');
+    expect(deposit.randomS).toBe('4567');
+    expect(deposit.encryptedNote).toBe('0xdeadbeef');
     expect(deposit.assetSymbol).toBe('MTT');
     expect(deposit.assetDecimals).toBe(18);
     expect(deposit.assetAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
@@ -103,6 +109,9 @@ test('test collection clear', async () => {
     chainId: 3,
     contractAddress: '0x67d4a81096dFD5869bC520f16ae2537aF3dE582D',
     commitmentHash: '1234',
+    hashK: '9876',
+    randomS: '4567',
+    encryptedNote: '0xdeadbeef',
     assetSymbol: 'MTT',
     assetDecimals: 18,
     assetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',

@@ -1,3 +1,4 @@
+import { PoolContractConfig } from '@mystikonetwork/config';
 import {
   TransactionQuote,
   TransactionQuoteOptions,
@@ -15,7 +16,7 @@ export interface TransactionExecutor<
   S = TransactionSummary,
   R = TransactionResponse,
 > {
-  execute(options: T | W): Promise<R>;
-  quote(options: QO): Promise<Q>;
-  summary(options: T | W): Promise<S>;
+  execute(options: T | W, config: PoolContractConfig): Promise<R>;
+  quote(options: QO, config: PoolContractConfig): Promise<Q>;
+  summary(options: T | W, config: PoolContractConfig): Promise<S>;
 }

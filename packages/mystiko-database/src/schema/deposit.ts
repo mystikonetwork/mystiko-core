@@ -1,5 +1,11 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
-import { BN_REGEX, ETH_ADDRESS_REGEX, ETH_TX_HASH_REGEX, WALLET_COLLECTION_NAME } from '../constants';
+import {
+  BN_REGEX,
+  ETH_ADDRESS_REGEX,
+  ETH_TX_HASH_REGEX,
+  HEX_REGEX,
+  WALLET_COLLECTION_NAME,
+} from '../constants';
 
 const depositSchemaLiteral = {
   version: 0,
@@ -36,6 +42,21 @@ const depositSchemaLiteral = {
       type: 'string',
       final: true,
       pattern: BN_REGEX,
+    },
+    hashK: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
+    randomS: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
+    encryptedNote: {
+      type: 'string',
+      final: true,
+      pattern: HEX_REGEX,
     },
     assetSymbol: {
       type: 'string',
@@ -124,6 +145,9 @@ const depositSchemaLiteral = {
     'chainId',
     'contractAddress',
     'commitmentHash',
+    'hashK',
+    'randomS',
+    'encryptedNote',
     'assetSymbol',
     'assetDecimals',
     'bridgeType',

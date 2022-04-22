@@ -8,6 +8,8 @@ export enum CommitmentStatus {
 
 export enum DepositStatus {
   INIT = 'init',
+  ASSET_APPROVING = 'assetApproving',
+  ASSET_APPROVED = 'assetApproved',
   SRC_PENDING = 'srcPending',
   SRC_SUCCEEDED = 'srcSucceeded',
   QUEUED = 'queued',

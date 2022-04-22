@@ -48,16 +48,7 @@ const chainSchemaLiteral = {
       ref: WALLET_COLLECTION_NAME,
     },
   },
-  required: [
-    'id',
-    'createdAt',
-    'updatedAt',
-    'chainId',
-    'name',
-    'providers',
-    'eventFilterSize',
-    'wallet',
-  ],
+  required: ['id', 'createdAt', 'updatedAt', 'chainId', 'name', 'providers', 'eventFilterSize', 'wallet'],
   indexes: ['chainId', 'wallet'],
 } as const;
 

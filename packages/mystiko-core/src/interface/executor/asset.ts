@@ -9,7 +9,7 @@ export type AssetExecutorOptions = {
 };
 
 export type AssetExecutorApproveOptions = AssetExecutorOptions & {
-  amount: number;
+  amount: string;
   spender: string;
   signer: MystikoSigner;
 };
@@ -20,5 +20,5 @@ export type AssetExecutorBalanceOptions = AssetExecutorOptions & {
 
 export interface AssetExecutor<A = AssetExecutorApproveOptions, B = AssetExecutorBalanceOptions> {
   approve(options: A): Promise<ethers.ContractTransaction | undefined>;
-  balance(options: B): Promise<number>;
+  balance(options: B): Promise<string>;
 }

@@ -1,3 +1,4 @@
+import { PoolContractConfig } from '@mystikonetwork/config';
 import {
   TransactionExecutor,
   TransactionQuote,
@@ -10,15 +11,21 @@ import {
 import { MystikoExecutor } from '../../executor';
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
-  public execute(options: TransferOptions | WithdrawOptions): Promise<TransactionResponse> {
+  public execute(
+    options: TransferOptions | WithdrawOptions,
+    config: PoolContractConfig,
+  ): Promise<TransactionResponse> {
     return Promise.reject(new Error('not implemented'));
   }
 
-  public quote(options: TransactionQuoteOptions): Promise<TransactionQuote> {
+  public quote(options: TransactionQuoteOptions, config: PoolContractConfig): Promise<TransactionQuote> {
     return Promise.reject(new Error('not implemented'));
   }
 
-  public summary(options: TransferOptions | WithdrawOptions): Promise<TransactionSummary> {
+  public summary(
+    options: TransferOptions | WithdrawOptions,
+    config: PoolContractConfig,
+  ): Promise<TransactionSummary> {
     return Promise.reject(new Error('not implemented'));
   }
 }

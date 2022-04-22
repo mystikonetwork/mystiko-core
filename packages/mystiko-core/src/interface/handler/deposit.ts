@@ -1,5 +1,6 @@
 import { BridgeType } from '@mystikonetwork/config';
 import { DatabaseQuery, Deposit, DepositStatus } from '@mystikonetwork/database';
+import { MystikoSigner } from '@mystikonetwork/ethers';
 
 export type DepositQuoteOptions = {
   srcChainId: number;
@@ -19,6 +20,7 @@ export type DepositQuote = {
 };
 
 export type DepositOptions = {
+  signer: MystikoSigner;
   srcChainId: number;
   dstChainId: number;
   assetSymbol: string;
@@ -32,12 +34,17 @@ export type DepositOptions = {
 };
 
 export type DepositSummary = {
+  srcChainId: number;
+  dstChainId: number;
+  assetSymbol: string;
+  bridge: BridgeType;
   amount: number;
-  rollupFeeAmount: number;
+  shieldedAddress: string;
+  rollupFee: number;
   rollupFeeAssetSymbol: string;
-  bridgeFeeAmount: number;
+  bridgeFee: number;
   bridgeFeeAssetSymbol: string;
-  executorFeeAmount: number;
+  executorFee: number;
   executorFeeAssetSymbol: string;
   totals: { [key: string]: number };
 };
