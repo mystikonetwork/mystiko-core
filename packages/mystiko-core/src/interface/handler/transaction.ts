@@ -61,21 +61,34 @@ export type TransactionResponse = {
   transactionPromise: Promise<Transaction>;
 };
 
-export type TransactionQuery = string | Transaction;
+export type TransactionQuery = {
+  id?: string;
+  chainId?: number;
+  contractAddress?: number;
+  transactionHash?: number;
+};
+
+export type TransactionUpdate = {
+  status?: TransactionStatus;
+  errorMessage?: string;
+  transactionHash?: string;
+};
 
 export interface TransactionHandler<
   T = TransferOptions,
   W = WithdrawOptions,
+  Q = TransactionQuery,
   QO = TransactionQuoteOptions,
-  Q = TransactionQuote,
+  QUO = TransactionQuote,
   S = TransactionSummary,
   R = TransactionResponse,
+  U = TransactionUpdate,
 > {
   create(options: T | W): Promise<R>;
   count(query?: DatabaseQuery<Transaction>): Promise<number>;
-  findOne(query: TransactionQuery): Promise<Transaction | null>;
+  findOne(query: string | Q): Promise<Transaction | null>;
   find(query?: DatabaseQuery<Transaction>): Promise<Transaction[]>;
-  quote(options: QO): Promise<Q>;
+  quote(options: QO): Promise<QUO>;
   summary(options: T | W): Promise<S>;
-  update(tx: Transaction): Promise<Transaction>;
+  update(query: string | Q, data: U): Promise<Transaction>;
 }

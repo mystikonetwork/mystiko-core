@@ -47,20 +47,37 @@ export type DepositResponse = {
   depositPromise: Promise<Deposit>;
 };
 
-export type DepositQuery = string | Deposit;
+export type DepositQuery = {
+  id?: string;
+  chainId?: number;
+  contractAddress?: string;
+  commitmentHash?: string;
+  transactionHash?: string;
+};
+
+export type DepositUpdate = {
+  status?: DepositStatus;
+  errorMessage?: string;
+  transactionHash?: string;
+  assetApproveTransactionHash?: string;
+  relayTransactionHash?: string;
+  rollupTransactionHash?: string;
+};
 
 export interface DepositHandler<
   D = DepositOptions,
   QO = DepositQuoteOptions,
-  Q = DepositQuote,
+  QUO = DepositQuote,
+  Q = DepositQuery,
   S = DepositSummary,
   R = DepositResponse,
+  U = DepositUpdate,
 > {
   count(query?: DatabaseQuery<Deposit>): Promise<number>;
   create(options: D): Promise<R>;
-  findOne(query: DepositQuery): Promise<Deposit | null>;
+  findOne(query: string | Q): Promise<Deposit | null>;
   find(query?: DatabaseQuery<Deposit>): Promise<Deposit[]>;
-  quote(options: QO): Promise<Q>;
+  quote(options: QO): Promise<QUO>;
   summary(options: D): Promise<S>;
-  update(deposit: Deposit): Promise<Deposit>;
+  update(query: string | Q, data: U): Promise<Deposit>;
 }

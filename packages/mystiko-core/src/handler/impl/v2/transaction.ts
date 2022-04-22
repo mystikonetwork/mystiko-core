@@ -1,16 +1,19 @@
+import { PoolContractConfig } from '@mystikonetwork/config';
 import { DatabaseQuery, Transaction } from '@mystikonetwork/database';
-import { MystikoHandler } from '../../handler';
+import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import {
-  TransactionQuoteOptions,
+  MystikoContextInterface,
   TransactionHandler,
   TransactionQuery,
   TransactionQuote,
+  TransactionQuoteOptions,
+  TransactionResponse,
   TransactionSummary,
+  TransactionUpdate,
   TransferOptions,
   WithdrawOptions,
-  TransactionResponse,
-  MystikoContextInterface,
 } from '../../../interface';
+import { MystikoHandler } from '../../handler';
 
 export class TransactionHandlerV2 extends MystikoHandler implements TransactionHandler {
   constructor(context: MystikoContextInterface) {
@@ -19,30 +22,101 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
   }
 
   public count(query?: DatabaseQuery<Transaction>): Promise<number> {
-    return Promise.reject(new Error('not implemented'));
+    return this.find(query).then((transactions) => transactions.length);
   }
 
   public create(options: TransferOptions | WithdrawOptions): Promise<TransactionResponse> {
-    return Promise.reject(new Error('not implemented'));
+    return this.getPoolContractConfig(options).then((poolContractConfig) =>
+      this.context.executors.getTransactionExecutor(poolContractConfig).execute(options),
+    );
   }
 
   public find(query?: DatabaseQuery<Transaction>): Promise<Transaction[]> {
-    return Promise.reject(new Error('not implemented'));
+    return this.context.wallets.checkCurrent().then((wallet) => {
+      const selector: any = query?.selector || {};
+      selector.wallet = wallet.id;
+      const databaseQuery = query ? { ...query, selector } : { selector };
+      return this.db.transactions.find(databaseQuery).exec();
+    });
   }
 
-  public findOne(query: TransactionQuery): Promise<Transaction | null> {
-    return Promise.reject(new Error('not implemented'));
+  public findOne(query: string | TransactionQuery): Promise<Transaction | null> {
+    const selector: any = {};
+    if (typeof query === 'string') {
+      selector.id = query;
+    } else {
+      if (query.id) {
+        selector.id = query.id;
+      }
+      if (query.chainId) {
+        selector.chainId = query.chainId;
+      }
+      if (query.contractAddress) {
+        selector.contractAddress = query.contractAddress;
+      }
+      if (query.transactionHash) {
+        selector.transactionHash = query.transactionHash;
+      }
+    }
+    return this.db.transactions.findOne({ selector }).exec();
   }
 
   public quote(options: TransactionQuoteOptions): Promise<TransactionQuote> {
-    return Promise.reject(new Error('not implemented'));
+    return this.getPoolContractConfig(options).then((poolContractConfig) =>
+      this.context.executors.getTransactionExecutor(poolContractConfig).quote(options),
+    );
   }
 
   public summary(options: TransferOptions | WithdrawOptions): Promise<TransactionSummary> {
-    return Promise.reject(new Error('not implemented'));
+    return this.getPoolContractConfig(options).then((poolContractConfig) =>
+      this.context.executors.getTransactionExecutor(poolContractConfig).summary(options),
+    );
   }
 
-  public update(tx: Transaction): Promise<Transaction> {
-    return Promise.reject(new Error('not implemented'));
+  public update(query: string | TransactionQuery, data: TransactionUpdate): Promise<Transaction> {
+    return this.findOne(query).then((transaction) => {
+      if (!transaction) {
+        return createErrorPromise(
+          `no transaction found for query ${query}`,
+          MystikoErrorCode.NON_EXISTING_TRANSACTION,
+        );
+      }
+      return transaction.atomicUpdate((oldData) => {
+        let hasUpdate = false;
+        if (data.status) {
+          oldData.status = data.status;
+          hasUpdate = true;
+        }
+        if (data.errorMessage) {
+          oldData.errorMessage = data.errorMessage;
+          hasUpdate = true;
+        }
+        if (data.transactionHash) {
+          oldData.transactionHash = data.transactionHash;
+          hasUpdate = true;
+        }
+        if (hasUpdate) {
+          oldData.updatedAt = MystikoHandler.now();
+        }
+        return oldData;
+      });
+    });
+  }
+
+  private getPoolContractConfig(
+    options: TransferOptions | WithdrawOptions | TransactionQuoteOptions,
+  ): Promise<PoolContractConfig> {
+    const poolContractConfig = this.config.getPoolContractConfig(
+      options.chainId,
+      options.assetSymbol,
+      options.bridgeType,
+    );
+    if (!poolContractConfig) {
+      return createErrorPromise(
+        `invalid transaction options ${options}, no corresponding contract found`,
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    return Promise.resolve(poolContractConfig);
   }
 }

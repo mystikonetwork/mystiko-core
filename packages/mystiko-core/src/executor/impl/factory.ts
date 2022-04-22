@@ -1,4 +1,4 @@
-import { Contract } from '@mystikonetwork/database';
+import { DepositContractConfig, PoolContractConfig } from '@mystikonetwork/config';
 import { createError, MystikoErrorCode } from '../../error';
 import {
   AssetExecutor,
@@ -12,8 +12,7 @@ import { AssetExecutorV2, DepositExecutorV2, TransactionExecutorV2 } from './v2'
 export class DefaultExecutorFactory implements ExecutorFactory {
   public context?: MystikoContextInterface;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public getAssetExecutor(contract: Contract): AssetExecutor {
+  public getAssetExecutor(): AssetExecutor {
     if (this.context) {
       return new AssetExecutorV2(this.context);
     }
@@ -21,7 +20,7 @@ export class DefaultExecutorFactory implements ExecutorFactory {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public getDepositExecutor(contract: Contract): DepositExecutor {
+  public getDepositExecutor(config: DepositContractConfig): DepositExecutor {
     if (this.context) {
       return new DepositExecutorV2(this.context);
     }
@@ -29,7 +28,7 @@ export class DefaultExecutorFactory implements ExecutorFactory {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public getTransactionExecutor(contract: Contract): TransactionExecutor {
+  public getTransactionExecutor(config: PoolContractConfig): TransactionExecutor {
     if (this.context) {
       return new TransactionExecutorV2(this.context);
     }
