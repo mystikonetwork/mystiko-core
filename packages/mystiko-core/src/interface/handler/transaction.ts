@@ -56,6 +56,11 @@ export type TransactionSummary = {
   gasRelayerAddress?: string;
 };
 
+export type TransactionResponse = {
+  transaction: Transaction;
+  transactionPromise: Promise<Transaction>;
+};
+
 export type TransactionQuery = string | Transaction;
 
 export interface TransactionHandler<
@@ -64,8 +69,9 @@ export interface TransactionHandler<
   QO = TransactionQuoteOptions,
   Q = TransactionQuote,
   S = TransactionSummary,
+  R = TransactionResponse,
 > {
-  create(options: T | W): Promise<Transaction>;
+  create(options: T | W): Promise<R>;
   count(query?: DatabaseQuery<Transaction>): Promise<number>;
   findOne(query: TransactionQuery): Promise<Transaction | null>;
   find(query?: DatabaseQuery<Transaction>): Promise<Transaction[]>;

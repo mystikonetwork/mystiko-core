@@ -1,17 +1,17 @@
 import { BridgeConfigType, BridgeType } from '@mystikonetwork/config';
 import { Chain, Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import { fromDecimals } from '@mystikonetwork/utils';
-import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
 import {
   AssetBalance,
   AssetBalanceOptions,
   AssetHandler,
   AssetMultipleBalanceOptions,
-} from '../../../interface/handler';
+  MystikoContextInterface,
+} from '../../../interface';
 
 export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
-  constructor(context: MystikoContext) {
+  constructor(context: MystikoContextInterface) {
     super(context);
     this.context.assets = this;
   }

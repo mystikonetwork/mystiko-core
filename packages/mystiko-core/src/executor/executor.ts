@@ -1,12 +1,11 @@
-import { Logger } from 'loglevel';
-import { v4 as uuid } from 'uuid';
 import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { logger as rootLogger } from '@mystikonetwork/utils';
+import { Logger } from 'loglevel';
 import { MystikoContextInterface } from '../interface';
 
-export class MystikoHandler {
+export class MystikoExecutor {
   protected readonly context: MystikoContextInterface;
 
   protected readonly logger: Logger;
@@ -26,13 +25,5 @@ export class MystikoHandler {
 
   public get protocol(): MystikoProtocol {
     return this.context.protocol;
-  }
-
-  public static generateId(): string {
-    return uuid();
-  }
-
-  public static now(): string {
-    return new Date().toISOString();
   }
 }

@@ -1,8 +1,7 @@
 import { Wallet, WalletType } from '@mystikonetwork/database';
-import { WalletHandler, WalletOptions } from '../../../interface/handler';
+import { MystikoContextInterface, WalletHandler, WalletOptions } from '../../../interface';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../handler';
-import { MystikoContext } from '../../../context';
 
 export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
   public static readonly PASSWORD_REGEX = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
@@ -15,7 +14,7 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
     'one special character in [#?!@$%^&*-], ' +
     'and the length should be as least 8';
 
-  constructor(context: MystikoContext) {
+  constructor(context: MystikoContextInterface) {
     super(context);
     this.context.wallets = this;
   }

@@ -1,5 +1,4 @@
 import { DatabaseQuery, Deposit } from '@mystikonetwork/database';
-import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
 import {
   DepositHandler,
@@ -7,11 +6,13 @@ import {
   DepositQuery,
   DepositQuote,
   DepositQuoteOptions,
+  DepositResponse,
   DepositSummary,
-} from '../../../interface/handler';
+  MystikoContextInterface,
+} from '../../../interface';
 
 export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
-  constructor(context: MystikoContext) {
+  constructor(context: MystikoContextInterface) {
     super(context);
     this.context.deposits = this;
   }
@@ -20,7 +21,7 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
     return Promise.reject(new Error('not implemented'));
   }
 
-  public create(options: DepositOptions): Promise<Deposit> {
+  public create(options: DepositOptions): Promise<DepositResponse> {
     return Promise.reject(new Error('not implemented'));
   }
 

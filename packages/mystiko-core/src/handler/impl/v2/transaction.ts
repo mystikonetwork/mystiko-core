@@ -1,5 +1,4 @@
 import { DatabaseQuery, Transaction } from '@mystikonetwork/database';
-import { MystikoContext } from '../../../context';
 import { MystikoHandler } from '../../handler';
 import {
   TransactionQuoteOptions,
@@ -9,10 +8,12 @@ import {
   TransactionSummary,
   TransferOptions,
   WithdrawOptions,
-} from '../../../interface/handler';
+  TransactionResponse,
+  MystikoContextInterface,
+} from '../../../interface';
 
 export class TransactionHandlerV2 extends MystikoHandler implements TransactionHandler {
-  constructor(context: MystikoContext) {
+  constructor(context: MystikoContextInterface) {
     super(context);
     this.context.transactions = this;
   }
@@ -21,7 +22,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     return Promise.reject(new Error('not implemented'));
   }
 
-  public create(options: TransferOptions | WithdrawOptions): Promise<Transaction> {
+  public create(options: TransferOptions | WithdrawOptions): Promise<TransactionResponse> {
     return Promise.reject(new Error('not implemented'));
   }
 

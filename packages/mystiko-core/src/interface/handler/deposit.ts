@@ -42,6 +42,11 @@ export type DepositSummary = {
   totals: { [key: string]: number };
 };
 
+export type DepositResponse = {
+  deposit: Deposit;
+  depositPromise: Promise<Deposit>;
+};
+
 export type DepositQuery = string | Deposit;
 
 export interface DepositHandler<
@@ -49,9 +54,10 @@ export interface DepositHandler<
   QO = DepositQuoteOptions,
   Q = DepositQuote,
   S = DepositSummary,
+  R = DepositResponse,
 > {
   count(query?: DatabaseQuery<Deposit>): Promise<number>;
-  create(options: D): Promise<Deposit>;
+  create(options: D): Promise<R>;
   findOne(query: DepositQuery): Promise<Deposit | null>;
   find(query?: DatabaseQuery<Deposit>): Promise<Deposit[]>;
   quote(options: QO): Promise<Q>;

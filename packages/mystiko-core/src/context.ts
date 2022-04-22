@@ -1,12 +1,15 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
+import { DefaultExecutorFactory } from './executor';
 import {
   AccountHandler,
   AssetHandler,
   ChainHandler,
   CommitmentHandler,
   DepositHandler,
+  ExecutorFactory,
+  MystikoContextInterface,
   TransactionHandler,
   WalletHandler,
 } from './interface';
@@ -21,7 +24,8 @@ export class MystikoContext<
   T extends TransactionHandler = TransactionHandler,
   W extends WalletHandler = WalletHandler,
   P extends MystikoProtocol = MystikoProtocol,
-> {
+> implements MystikoContextInterface<A, AS, CH, CM, D, T, W, P>
+{
   private accountHandler?: A;
 
   private assetHandler?: AS;
@@ -42,10 +46,19 @@ export class MystikoContext<
 
   public protocol: P;
 
-  constructor(config: MystikoConfig, db: MystikoDatabase, protocol: P) {
+  public executors: ExecutorFactory;
+
+  constructor(config: MystikoConfig, db: MystikoDatabase, protocol: P, executors?: ExecutorFactory) {
     this.config = config;
     this.db = db;
     this.protocol = protocol;
+    if (executors) {
+      this.executors = executors;
+    } else {
+      const defaultExecutorFactory = new DefaultExecutorFactory();
+      defaultExecutorFactory.context = this;
+      this.executors = defaultExecutorFactory;
+    }
   }
 
   public get accounts(): A {
