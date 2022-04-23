@@ -26,6 +26,7 @@ test('Test toBuff', () => {
 });
 
 test('Test toDecimals', () => {
+  expect(toDecimals(0).toNumber()).toBe(0);
   expect(toDecimals(2, 4).toString()).toBe('20000');
   expect(toDecimals(0.1, 2).toString()).toBe('10');
   expect(toDecimals(0.01, 4).toString()).toBe('100');
@@ -80,6 +81,7 @@ test('Test toFixedLenHexNoPrefix', () => {
 test('Test toString', () => {
   expect(toString(undefined)).toBe('');
   expect(toString(null)).toBe('');
+  expect(toString(0)).toBe('0');
   expect(toString(1)).toBe('1');
   expect(toString(new Error('msg'))).toBe('Error: msg');
 });

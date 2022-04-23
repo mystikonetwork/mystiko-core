@@ -32,6 +32,7 @@ export type TransactionQuote = {
   numOfSplits: number;
   minRollupFee: number;
   rollupFeeAssetSymbol: string;
+  minAmount: number;
   maxAmount: number;
   fixedAmount: boolean;
   maxGasRelayerFee: number;

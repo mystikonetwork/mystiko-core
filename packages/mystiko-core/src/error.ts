@@ -22,6 +22,8 @@ export enum MystikoErrorCode {
   INSUFFICIENT_BALANCE = 20,
   DUPLICATE_DEPOSIT_COMMITMENT = 21,
   DUPLICATE_COMMITMENT = 22,
+  MISSING_COMMITMENT_DATA = 23,
+  CORRUPTED_COMMITMENT_DATA = 24,
 }
 
 export class MystikoError extends Error {
