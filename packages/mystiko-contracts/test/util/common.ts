@@ -39,6 +39,7 @@ import {
   MystikoTBridgeProxy,
   DummySanctionsList,
   DummySanctionsList__factory,
+  MystikoV2WithTBridgeERC20__factory,
 } from '@mystikonetwork/contracts-abi';
 import {
   MerkleTreeHeight,
@@ -49,6 +50,7 @@ import {
   UserPrivKeys,
   DefaultTokenAmount,
   MinAmount,
+  BridgeAccountIndex,
 } from './constants';
 
 const { ethers, waffle } = require('hardhat');
@@ -176,6 +178,7 @@ export async function deployTBridgeContracts(
   )) as MystikoV2WithTBridgeMain__factory;
 
   const coreMain = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
+  await coreMain.deployed();
   await coreMain.setAssociatedCommitmentPool(poolMain.address);
   await coreMain.setBridgeProxyAddress(tbridgeAddress);
   await coreMain.setMinAmount(minAmount);
@@ -186,7 +189,12 @@ export async function deployTBridgeContracts(
   await coreMain.updateSanctionContractAddress(sanctionListAddress);
   await poolMain.addEnqueueWhitelist(coreMain.address);
 
-  const coreERC20 = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
+  const tBridgeERC20Factory = (await ethers.getContractFactory(
+    'MystikoV2WithTBridgeERC20',
+  )) as MystikoV2WithTBridgeERC20__factory;
+
+  const coreERC20 = await tBridgeERC20Factory.connect(accounts[0]).deploy(hasher3Address, tokenAddress);
+  await coreERC20.deployed();
   await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
   await coreERC20.setBridgeProxyAddress(tbridgeAddress);
   await coreERC20.setMinAmount(minAmount);
@@ -267,6 +275,7 @@ export async function deployDependContracts(accounts: Wallet[]): Promise<DependD
   )) as MystikoTBridgeProxy__factory;
   const tbridge = await proxyFactory.connect(accounts[0]).deploy();
   await tbridge.deployed();
+  await tbridge.addExecutorWhitelist(accounts[BridgeAccountIndex].address);
 
   const sanctionListFactory = (await ethers.getContractFactory(
     'DummySanctionsList',
