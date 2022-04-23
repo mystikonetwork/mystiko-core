@@ -263,7 +263,7 @@ export function testBridgeDeposit(
         }
       }
     });
-    
+
     it('should revert on in executor white list', async () => {
       await expect(
         bridgeContract
