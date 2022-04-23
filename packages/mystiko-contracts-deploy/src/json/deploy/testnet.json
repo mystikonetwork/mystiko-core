@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "circuits": "circom-1.0",
+  "chains": [
+  ],
+  "bridges": [
+  ]
+}

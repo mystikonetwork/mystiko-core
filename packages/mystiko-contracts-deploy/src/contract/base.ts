@@ -1,0 +1,114 @@
+import {
+  Transaction1x0Verifier__factory,
+  Transaction1x1Verifier__factory,
+  Transaction1x2Verifier__factory,
+  Transaction2x0Verifier__factory,
+  Transaction2x1Verifier__factory,
+  Transaction2x2Verifier__factory,
+  Rollup1Verifier__factory,
+  Rollup4Verifier__factory,
+  Rollup16Verifier__factory,
+  Hasher3__factory,
+} from '@mystikonetwork/contracts-abi';
+import { getArtifact } from '../common/utils';
+import { saveBaseAddressConfig } from '../config/config';
+
+let Transaction1x0Verifier: Transaction1x0Verifier__factory;
+let Transaction1x1Verifier: Transaction1x1Verifier__factory;
+let Transaction1x2Verifier: Transaction1x2Verifier__factory;
+let Transaction2x0Verifier: Transaction2x0Verifier__factory;
+let Transaction2x1Verifier: Transaction2x1Verifier__factory;
+let Transaction2x2Verifier: Transaction2x2Verifier__factory;
+let Rollup1Verifier: Rollup1Verifier__factory;
+let Rollup4Verifier: Rollup4Verifier__factory;
+let Rollup16Verifier: Rollup16Verifier__factory;
+let Hasher3: Hasher3__factory;
+
+export async function initBaseContractFactory(ethers: any) {
+  Rollup1Verifier = await ethers.getContractFactory('Rollup1Verifier');
+  Rollup4Verifier = await ethers.getContractFactory('Rollup4Verifier');
+  Rollup16Verifier = await ethers.getContractFactory('Rollup16Verifier');
+
+  Transaction1x0Verifier = await ethers.getContractFactory('Transaction1x0Verifier');
+  Transaction1x1Verifier = await ethers.getContractFactory('Transaction1x1Verifier');
+  Transaction1x2Verifier = await ethers.getContractFactory('Transaction1x2Verifier');
+  Transaction2x0Verifier = await ethers.getContractFactory('Transaction2x0Verifier');
+  Transaction2x1Verifier = await ethers.getContractFactory('Transaction2x1Verifier');
+  Transaction2x2Verifier = await ethers.getContractFactory('Transaction2x2Verifier');
+
+  const Hasher3Artifact = await getArtifact('Hasher3');
+  Hasher3 = (await ethers.getContractFactoryFromArtifact(Hasher3Artifact)) as Hasher3__factory;
+}
+
+// deploy hasher and verifier
+export async function deployBaseContract(network: string) {
+  console.log('deploy hasher3');
+  const hasher3 = await Hasher3.deploy();
+  const hasher3Response = await hasher3.deployed();
+  const hasher3Address = hasher3Response.address;
+
+  console.log('deploy rollup verifier');
+  const rollup1 = await Rollup1Verifier.deploy();
+  const rollup1Response = await rollup1.deployed();
+  const rollup1VerifierAddress = rollup1Response.address;
+
+  const rollup4 = await Rollup4Verifier.deploy();
+  const rollup4Response = await rollup4.deployed();
+  const rollup4VerifierAddress = rollup4Response.address;
+
+  const rollup16 = await Rollup16Verifier.deploy();
+  const rollup16Response = await rollup16.deployed();
+  const rollup16VerifierAddress = rollup16Response.address;
+
+  console.log('deploy transaction verifier');
+  const transaction1x0Verifier = await Transaction1x0Verifier.deploy();
+  const transaction1x0VerifierRsp = await transaction1x0Verifier.deployed();
+  const transaction1x0VerifierAddress = transaction1x0VerifierRsp.address;
+
+  const transaction1x1Verifier = await Transaction1x1Verifier.deploy();
+  const transaction1x1VerifierRsp = await transaction1x1Verifier.deployed();
+  const transaction1x1VerifierAddress = transaction1x1VerifierRsp.address;
+
+  const transaction1x2Verifier = await Transaction1x2Verifier.deploy();
+  const transaction1x2VerifierRsp = await transaction1x2Verifier.deployed();
+  const transaction1x2VerifierAddress = transaction1x2VerifierRsp.address;
+
+  const transaction2x0Verifier = await Transaction2x0Verifier.deploy();
+  const transaction2x0VerifierRsp = await transaction2x0Verifier.deployed();
+  const transaction2x0VerifierAddress = transaction2x0VerifierRsp.address;
+
+  const transaction2x1Verifier = await Transaction2x1Verifier.deploy();
+  const transaction2x1VerifierRsp = await transaction2x1Verifier.deployed();
+  const transaction2x1VerifierAddress = transaction2x1VerifierRsp.address;
+
+  const transaction2x2Verifier = await Transaction2x2Verifier.deploy();
+  const transaction2x2VerifierRsp = await transaction2x2Verifier.deployed();
+  const transaction2x2VerifierAddress = transaction2x2VerifierRsp.address;
+
+  console.log('hasher3 address: ', hasher3Address);
+
+  console.log('rollup1 verifier address: ', rollup1VerifierAddress);
+  console.log('rollup4 verifier address: ', rollup4VerifierAddress);
+  console.log('rollup16 verifier address: ', rollup16VerifierAddress);
+
+  console.log('transaction1x0 verifier address: ', transaction1x0VerifierAddress);
+  console.log('transaction1x1 verifier address: ', transaction1x1VerifierAddress);
+  console.log('transaction1x2 verifier address: ', transaction1x2VerifierAddress);
+  console.log('transaction2x0 verifier address: ', transaction2x0VerifierAddress);
+  console.log('transaction2x1 verifier address: ', transaction2x1VerifierAddress);
+  console.log('transaction2x2 verifier address: ', transaction2x2VerifierAddress);
+
+  saveBaseAddressConfig(
+    network,
+    hasher3Address,
+    rollup1VerifierAddress,
+    rollup4VerifierAddress,
+    rollup16VerifierAddress,
+    transaction1x0VerifierAddress,
+    transaction1x1VerifierAddress,
+    transaction1x2VerifierAddress,
+    transaction2x0VerifierAddress,
+    transaction2x1VerifierAddress,
+    transaction2x2VerifierAddress,
+  );
+}

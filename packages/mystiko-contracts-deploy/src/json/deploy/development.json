@@ -1,0 +1,125 @@
+{
+  "version": 2,
+  "circuits": [
+    "zokrates-2.0-rollup1"
+  ],
+  "chains": [
+    {
+      "name": "hardhat",
+      "network": "hardhat",
+      "chainId": 9999999,
+      "minBridgeFee": "1000",
+      "tokens": [
+        {
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "1000",
+          "minExecutorFee": "1000",
+          "minRollupFee": "1000",
+          "recommendedAmounts": [
+            "1000",
+            "2000",
+            "3000",
+            "4000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "erc20": true,
+          "minAmount": "2000",
+          "minExecutorFee": "2000",
+          "minRollupFee": "2000",
+          "address": "0xf900322b2d706b35f43b9f8d00dc4617292c2697",
+          "recommendedAmounts": [
+            "1000",
+            "2000",
+            "3000",
+            "4000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "erc20": true,
+          "minAmount": "2000",
+          "minExecutorFee": "2000",
+          "minRollupFee": "2000",
+          "address": "0xfc508d512957c1d13fe1fcd7c29b3423340510d3",
+          "recommendedAmounts": [
+            "1000",
+            "2000",
+            "3000",
+            "4000"
+          ]
+        }
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "name": "loop",
+      "contractName": "Loop",
+      "proxys": [],
+      "commitmentPools": [
+        {
+          "network": "hardhat",
+          "token": "ETH"
+        }
+      ],
+      "pairs": [
+        {
+          "pair": [
+            {
+              "network": "hardhat",
+              "token": "ETH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tbridge",
+      "contractName": "TBridge",
+      "proxys": [
+        {
+          "network": "hardhat"
+        }
+      ],
+      "commitmentPools": [
+        {
+          "network": "hardhat",
+          "token": "MTT"
+        },
+        {
+          "network": "hardhat",
+          "token": "mUSD"
+        }
+      ],
+      "pairs": [
+        {
+          "pair": [
+            {
+              "network": "hardhat",
+              "token": "MTT"
+            },
+            {
+              "network": "hardhat",
+              "token": "mUSD"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "operator": {
+    "admin": "0xEc1c50a3EF4ED959934Ec482aA70cD7453F96F95",
+    "executors": [
+      "0x457584165DDc698feeB70A546e78B912E79fB94F"
+    ],
+    "rollers": [
+      "0x0710f785E1835E1713fF6d9ccD0Aca2Ad2013022"
+    ]
+  }
+}
