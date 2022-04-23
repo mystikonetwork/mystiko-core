@@ -1,9 +1,15 @@
-import { AssetType, BridgeType, ChainConfig, DepositContractConfig } from '@mystikonetwork/config';
+import {
+  AssetConfig,
+  AssetType,
+  BridgeType,
+  ChainConfig,
+  DepositContractConfig,
+} from '@mystikonetwork/config';
 import { MystikoContractFactory, MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
 import { CommitmentStatus, CommitmentType, Deposit, DepositStatus } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
+import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
 import { ContractTransaction } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
@@ -18,28 +24,36 @@ import {
 } from '../../../interface';
 import { MystikoExecutor } from '../../executor';
 
+type AssetTotal = {
+  asset: AssetConfig;
+  total: string;
+  totalNumber: number;
+};
+
+type ExecutionContext = {
+  options: DepositOptions;
+  contractConfig: DepositContractConfig;
+  chainConfig: ChainConfig;
+  amount: string;
+  rollupFee: string;
+  bridgeFee: string;
+  executorFee: string;
+  assetTotals: Map<string, AssetTotal>;
+  mainAssetTotal: string;
+};
+
+type ExecutionContextWithDeposit = ExecutionContext & {
+  deposit: Deposit;
+};
+
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
-    return this.getChainConfig(options)
-      .then((chainConfig) => this.validateOptions(options, config, chainConfig).then(() => chainConfig))
-      .then((chainConfig) => this.validateSigner(options).then(() => chainConfig))
-      .then((chainConfig) => this.validateBalance(options, config, chainConfig).then(() => chainConfig))
-      .then((chainConfig) =>
-        this.createDeposit(options, config, chainConfig).then((deposit) => ({ deposit, chainConfig })),
-      )
-      .then(({ deposit, chainConfig }) => {
-        const depositPromise = this.assetApprove(options, config, chainConfig, deposit)
-          .then((newDeposit) => this.sendDeposit(options, config, chainConfig, newDeposit))
-          .then((newDeposit) => this.createCommitment(options, config, chainConfig, newDeposit))
-          .catch((error) => {
-            const errorMsg = errorMessage(error);
-            this.logger.error(`deposit id=${deposit.id} failed: ${errorMsg}`);
-            return this.updateDepositStatus(options, deposit, DepositStatus.FAILED, {
-              errorMessage: errorMsg,
-            });
-          });
-        return { deposit, depositPromise };
-      });
+    return this.buildExecutionContext(options, config)
+      .then((context) => this.validateOptions(context))
+      .then((context) => this.validateSigner(context))
+      .then((context) => this.validateBalance(context))
+      .then((context) => this.createDeposit(context))
+      .then((context) => ({ deposit: context.deposit, depositPromise: this.executeDeposit(context) }));
   }
 
   public quote(options: DepositQuoteOptions, config: DepositContractConfig): Promise<DepositQuote> {
@@ -55,17 +69,10 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   public summary(options: DepositOptions, config: DepositContractConfig): Promise<DepositSummary> {
-    return this.getChainConfig(options)
-      .then((chainConfig) => this.validateOptions(options, config, chainConfig).then(() => chainConfig))
-      .then((chainConfig) => {
-        const totals: { [key: string]: number } = {
-          [config.assetSymbol]: options.amount + options.rollupFee + (options.executorFee || 0),
-        };
-        if (chainConfig.assetSymbol === config.assetSymbol) {
-          totals[config.assetSymbol] += options.bridgeFee || 0;
-        } else {
-          totals[chainConfig.assetSymbol] = options.bridgeFee || 0;
-        }
+    return this.buildExecutionContext(options, config)
+      .then((context) => this.validateOptions(context))
+      .then((context) => {
+        const { assetTotals } = context;
         return {
           srcChainId: options.srcChainId,
           dstChainId: options.dstChainId,
@@ -76,10 +83,13 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           rollupFee: options.rollupFee,
           rollupFeeAssetSymbol: config.assetSymbol,
           bridgeFee: options.bridgeFee || 0,
-          bridgeFeeAssetSymbol: chainConfig.assetSymbol,
+          bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
           executorFee: options.executorFee || 0,
-          executorFeeAssetSymbol: config.assetSymbol,
-          totals,
+          executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
+          totals: Array.from(assetTotals.values()).map((assetTotal) => ({
+            assetSymbol: assetTotal.asset.assetSymbol,
+            total: assetTotal.totalNumber,
+          })),
         };
       });
   }
@@ -95,136 +105,145 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     return Promise.resolve(chainConfig);
   }
 
-  private validateOptions(
+  private buildExecutionContext(
     options: DepositOptions,
-    config: DepositContractConfig,
-    chainConfig: ChainConfig,
-  ): Promise<void> {
+    contractConfig: DepositContractConfig,
+  ): Promise<ExecutionContext> {
+    return this.getChainConfig(options).then((chainConfig) => {
+      let mainAssetTotal = toBN(0);
+      const amount = toDecimals(options.amount, contractConfig.assetDecimals).toString();
+      const rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).toString();
+      const bridgeFee = toDecimals(
+        options.bridgeFee || 0,
+        contractConfig.bridgeFeeAsset.assetDecimals,
+      ).toString();
+      const executorFee = toDecimals(
+        options.executorFee || 0,
+        contractConfig.executorFeeAsset.assetDecimals,
+      ).toString();
+      const assetTotals = new Map<string, AssetTotal>();
+      const assets: Array<{ asset: AssetConfig; amount: string }> = [
+        { asset: contractConfig.asset, amount },
+        { asset: contractConfig.asset, amount: rollupFee },
+        { asset: contractConfig.bridgeFeeAsset, amount: bridgeFee },
+        { asset: contractConfig.executorFeeAsset, amount: executorFee },
+      ];
+      assets.forEach((assetWithAmount) => {
+        const { asset } = assetWithAmount;
+        const amountBN = toBN(assetWithAmount.amount);
+        if (asset.assetType === AssetType.MAIN) {
+          mainAssetTotal = mainAssetTotal.add(amountBN);
+        }
+        const assetTotal = assetTotals.get(assetWithAmount.asset.assetAddress);
+        if (assetTotal) {
+          assetTotal.total = toBN(assetTotal.total).add(amountBN).toString();
+          assetTotal.totalNumber += fromDecimals(assetWithAmount.amount, asset.assetDecimals);
+        } else {
+          assetTotals.set(assetWithAmount.asset.assetAddress, {
+            asset: assetWithAmount.asset,
+            total: assetWithAmount.amount,
+            totalNumber: fromDecimals(assetWithAmount.amount, asset.assetDecimals),
+          });
+        }
+      });
+      return {
+        options,
+        contractConfig,
+        chainConfig,
+        amount,
+        rollupFee,
+        bridgeFee,
+        executorFee,
+        assetTotals,
+        mainAssetTotal: mainAssetTotal.toString(),
+      };
+    });
+  }
+
+  private validateOptions(executionContext: ExecutionContext): Promise<ExecutionContext> {
+    const { options, contractConfig, amount, rollupFee, bridgeFee, executorFee } = executionContext;
     if (!this.context.protocol.isShieldedAddress(options.shieldedAddress)) {
       return createErrorPromise(
         `address ${options.shieldedAddress} is an invalid Mystiko address`,
         MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
       );
     }
-    if (toDecimals(options.amount, config.assetDecimals).lt(config.minAmount)) {
+    if (toBN(amount).lt(contractConfig.minAmount)) {
       return createErrorPromise(
-        `deposit amount cannot be less than ${config.minAmountNumber}`,
+        `deposit amount cannot be less than ${contractConfig.minAmountNumber}`,
         MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
       );
     }
-    if (toDecimals(options.rollupFee, config.assetDecimals).lt(config.minRollupFee)) {
+    if (toBN(rollupFee).lt(contractConfig.minRollupFee)) {
       return createErrorPromise(
-        `rollup fee cannot be less than ${config.minRollupFeeNumber}`,
+        `rollup fee cannot be less than ${contractConfig.minRollupFeeNumber}`,
         MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
       );
     }
     if (options.bridge !== BridgeType.LOOP) {
-      if (toDecimals(options.bridgeFee || 0, chainConfig.assetDecimals).lt(config.minBridgeFee)) {
+      if (toBN(bridgeFee).lt(contractConfig.minBridgeFee)) {
         return createErrorPromise(
-          `bridge fee cannot be less than ${config.minBridgeFeeNumber}`,
+          `bridge fee cannot be less than ${contractConfig.minBridgeFeeNumber}`,
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
-      if (toDecimals(options.executorFee || 0, chainConfig.assetDecimals).lt(config.minExecutorFee)) {
+      if (toBN(executorFee).lt(contractConfig.minExecutorFee)) {
         return createErrorPromise(
-          `executor fee cannot be less than ${config.minExecutorFeeNumber}`,
+          `executor fee cannot be less than ${contractConfig.minExecutorFeeNumber}`,
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
     }
-    return Promise.resolve();
+    return Promise.resolve(executionContext);
   }
 
-  private validateSigner(options: DepositOptions): Promise<void> {
-    return checkSigner(options.signer, options.srcChainId, this.config);
+  private validateSigner(executionContext: ExecutionContext): Promise<ExecutionContext> {
+    const { options } = executionContext;
+    return checkSigner(options.signer, options.srcChainId, this.config).then(() => executionContext);
   }
 
-  private validateBalance(
-    options: DepositOptions,
-    config: DepositContractConfig,
-    chainConfig: ChainConfig,
-  ): Promise<void> {
+  private validateBalance(executionContext: ExecutionContext): Promise<ExecutionContext> {
+    const { options, assetTotals, chainConfig } = executionContext;
     const { signer } = options.signer;
-    return signer.getAddress().then((address) => {
-      let mainAssetBalance = toBN(0);
-      let depositAssetBalance = toBN(0);
-      if (config.assetType === AssetType.ERC20) {
-        depositAssetBalance = depositAssetBalance
-          .add(toDecimals(options.amount, config.assetDecimals))
-          .add(toDecimals(options.rollupFee, config.assetDecimals))
-          .add(toDecimals(options.executorFee || 0, config.assetDecimals));
-        mainAssetBalance = mainAssetBalance.add(
-          toDecimals(options.bridgeFee || 0, chainConfig.assetDecimals),
-        );
-      } else {
-        depositAssetBalance = depositAssetBalance
-          .add(toDecimals(options.amount, config.assetDecimals))
-          .add(toDecimals(options.rollupFee, config.assetDecimals))
-          .add(toDecimals(options.executorFee || 0, config.assetDecimals))
-          .add(toDecimals(options.bridgeFee || 0, chainConfig.assetDecimals));
-      }
+    return signer.getAddress().then((signerAddress) => {
       const balancePromises: Promise<void>[] = [];
-      if (mainAssetBalance.gtn(0)) {
-        balancePromises.push(
-          this.context.executors
-            .getAssetExecutor()
-            .balance({
-              chainId: options.srcChainId,
-              assetSymbol: chainConfig.assetSymbol,
-              assetDecimals: chainConfig.assetDecimals,
-              address,
-            })
-            .then((balance) => {
-              if (mainAssetBalance.gt(toBN(balance))) {
-                return createErrorPromise(
-                  `insufficient balance of asset ${chainConfig.assetSymbol}`,
-                  MystikoErrorCode.INSUFFICIENT_BALANCE,
-                );
-              }
-              return Promise.resolve();
-            }),
-        );
-      }
-      if (depositAssetBalance.gtn(0)) {
-        balancePromises.push(
-          this.context.executors
-            .getAssetExecutor()
-            .balance({
-              chainId: options.srcChainId,
-              assetAddress: config.assetAddress,
-              assetSymbol: chainConfig.assetSymbol,
-              assetDecimals: chainConfig.assetDecimals,
-              address,
-            })
-            .then((balance) => {
-              if (depositAssetBalance.gt(toBN(balance))) {
-                return createErrorPromise(
-                  `insufficient balance of asset ${config.assetSymbol}`,
-                  MystikoErrorCode.INSUFFICIENT_BALANCE,
-                );
-              }
-              return Promise.resolve();
-            }),
-        );
-      }
-      return Promise.all(balancePromises).then(() => {});
+      assetTotals.forEach((assetTotal) => {
+        const { asset, total } = assetTotal;
+        const balancePromise: Promise<void> = this.context.executors
+          .getAssetExecutor()
+          .balance({
+            chainId: chainConfig.chainId,
+            assetAddress: asset.assetType !== AssetType.MAIN ? asset.assetAddress : undefined,
+            assetSymbol: asset.assetSymbol,
+            assetDecimals: asset.assetDecimals,
+            address: signerAddress,
+          })
+          .then((balance) => {
+            if (toBN(balance).lt(toBN(total))) {
+              return createErrorPromise(
+                `insufficient balance of asset=${asset.assetSymbol} on chain id=${chainConfig.chainId}`,
+                MystikoErrorCode.INSUFFICIENT_BALANCE,
+              );
+            }
+            return Promise.resolve();
+          });
+        balancePromises.push(balancePromise);
+      });
+      return Promise.all(balancePromises).then(() => executionContext);
     });
   }
 
-  private createDeposit(
-    options: DepositOptions,
-    config: DepositContractConfig,
-    chainConfig: ChainConfig,
-  ): Promise<Deposit> {
-    const amount = toDecimals(options.amount, config.assetDecimals);
+  private createDeposit(executionContext: ExecutionContext): Promise<ExecutionContextWithDeposit> {
+    const { options, contractConfig, chainConfig, amount, rollupFee, bridgeFee, executorFee } =
+      executionContext;
     return this.context.wallets.checkCurrent().then((wallet) =>
       (this.protocol as MystikoProtocolV2)
-        .commitmentWithShieldedAddress(options.shieldedAddress, amount)
+        .commitmentWithShieldedAddress(options.shieldedAddress, toBN(amount))
         .then((commitment) =>
           this.context.deposits
             .findOne({
               chainId: chainConfig.chainId,
-              contractAddress: config.address,
+              contractAddress: contractConfig.address,
               commitmentHash: commitment.commitmentHash.toString(),
             })
             .then((existingDeposit) => {
@@ -233,7 +252,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
               }
               return createErrorPromise(
                 `duplicate deposit commitment ${commitment.commitmentHash.toString()} ` +
-                  `of chain id=${chainConfig.chainId} contract address=${config.address}`,
+                  `of chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
                 MystikoErrorCode.DUPLICATE_DEPOSIT_COMMITMENT,
               );
             }),
@@ -245,83 +264,72 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             createdAt: now,
             updatedAt: now,
             chainId: chainConfig.chainId,
-            contractAddress: config.address,
+            contractAddress: contractConfig.address,
             commitmentHash: commitment.commitmentHash.toString(),
             hashK: commitment.k.toString(),
             randomS: commitment.randomS.toString(),
             encryptedNote: toHex(commitment.privateNote),
-            assetSymbol: config.assetSymbol,
-            assetDecimals: config.assetDecimals,
-            assetAddress: config.assetAddress,
-            bridgeType: config.bridgeType,
-            amount: amount.toString(),
-            rollupFeeAmount: toDecimals(options.rollupFee, config.assetDecimals).toString(),
-            bridgeFeeAmount: toDecimals(options.bridgeFee || 0, chainConfig.assetDecimals).toString(),
-            executorFeeAmount: toDecimals(options.executorFee || 0, config.assetDecimals).toString(),
+            assetSymbol: contractConfig.assetSymbol,
+            assetDecimals: contractConfig.assetDecimals,
+            assetAddress: contractConfig.assetAddress,
+            bridgeType: contractConfig.bridgeType,
+            amount,
+            rollupFeeAmount: rollupFee,
+            bridgeFeeAmount: bridgeFee,
+            bridgeFeeAssetAddress: contractConfig.bridgeFeeAsset.assetAddress,
+            executorFeeAmount: executorFee,
+            executorFeeAssetAddress: contractConfig.executorFeeAsset.assetAddress,
             shieldedRecipientAddress: options.shieldedAddress,
             status: DepositStatus.INIT,
             wallet: wallet.id,
           });
-        }),
-    );
-  }
-
-  private assetApprove(
-    options: DepositOptions,
-    config: DepositContractConfig,
-    chainConfig: ChainConfig,
-    deposit: Deposit,
-  ): Promise<Deposit> {
-    let promise: Promise<Deposit>;
-    if (config.assetType !== AssetType.MAIN && config.assetAddress) {
-      const approveAmount = toDecimals(options.amount, config.assetDecimals)
-        .add(toDecimals(options.rollupFee, config.assetDecimals))
-        .add(toDecimals(options.executorFee || 0, config.assetDecimals));
-      promise = this.context.executors
-        .getAssetExecutor()
-        .approve({
-          chainId: chainConfig.chainId,
-          assetAddress: config.assetAddress,
-          assetSymbol: config.assetSymbol,
-          assetDecimals: config.assetDecimals,
-          amount: approveAmount.toString(),
-          spender: config.address,
-          signer: options.signer,
         })
-        .then((resp) => {
-          if (resp) {
-            return this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVING, {
-              assetApproveTransactionHash: resp.hash,
-            }).then((depositWithHash) => waitTransaction(resp).then(() => depositWithHash));
-          }
-          return deposit;
-        });
-    } else {
-      promise = Promise.resolve(deposit);
-    }
-    return promise.then((depositApproved) =>
-      this.updateDepositStatus(options, depositApproved, DepositStatus.ASSET_APPROVED),
+        .then((deposit) => ({ ...executionContext, deposit })),
     );
   }
 
-  private sendDeposit(
-    options: DepositOptions,
-    config: DepositContractConfig,
-    chainConfig: ChainConfig,
-    deposit: Deposit,
-  ): Promise<Deposit> {
-    let mainAssetAmount = toDecimals(options.bridgeFee || 0, chainConfig.assetDecimals);
-    if (config.assetType === AssetType.MAIN) {
-      mainAssetAmount = mainAssetAmount
-        .add(toDecimals(options.amount, config.assetDecimals))
-        .add(toDecimals(options.rollupFee, config.assetDecimals))
-        .add(toDecimals(options.executorFee || 0, config.assetDecimals));
-    }
+  private assetApprove(executionContext: ExecutionContextWithDeposit): Promise<ExecutionContextWithDeposit> {
+    const { options, contractConfig, chainConfig, deposit, assetTotals } = executionContext;
+    const approvePromises: Promise<void>[] = [];
+    assetTotals.forEach((assetTotal) => {
+      const { asset, total } = assetTotal;
+      if (asset.assetType !== AssetType.ERC20) {
+        const approvePromise = this.context.executors
+          .getAssetExecutor()
+          .approve({
+            chainId: chainConfig.chainId,
+            assetAddress: asset.assetAddress,
+            assetSymbol: asset.assetSymbol,
+            assetDecimals: asset.assetDecimals,
+            spender: contractConfig.address,
+            signer: options.signer,
+            amount: total,
+          })
+          .then((resp) =>
+            this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVING, {
+              transactionHash: resp?.hash,
+            }).then(() => {
+              if (resp) {
+                return waitTransaction(resp).then(() => {});
+              }
+              return Promise.resolve();
+            }),
+          );
+        approvePromises.push(approvePromise);
+      }
+    });
+    return Promise.all(approvePromises)
+      .then(() => this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED))
+      .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
+  }
+
+  private sendDeposit(executionContext: ExecutionContextWithDeposit): Promise<ExecutionContextWithDeposit> {
+    const { options, contractConfig, chainConfig, deposit, mainAssetTotal } = executionContext;
     let promise: Promise<ContractTransaction>;
-    if (config.bridgeType === BridgeType.LOOP) {
+    if (contractConfig.bridgeType === BridgeType.LOOP) {
       const contract = MystikoContractFactory.connect<MystikoV2Loop>(
         'MystikoV2Loop',
-        config.address,
+        contractConfig.address,
         options.signer.signer,
       );
       promise = contract.deposit(
@@ -333,12 +341,12 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           encryptedNote: deposit.encryptedNote,
           rollupFee: deposit.rollupFeeAmount,
         },
-        { value: mainAssetAmount.toString() },
+        { value: mainAssetTotal },
       );
     } else {
       const contract = MystikoContractFactory.connect<MystikoV2Bridge>(
         'MystikoV2Bridge',
-        config.address,
+        contractConfig.address,
         options.signer.signer,
       );
       promise = contract.deposit(
@@ -352,7 +360,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           bridgeFee: deposit.bridgeFeeAmount,
           executorFee: deposit.executorFeeAmount,
         },
-        { value: mainAssetAmount.toString() },
+        { value: mainAssetTotal },
       );
     }
     this.logger.info(`submitting transaction of deposit id=${deposit.id} options=${JSON.stringify(options)}`);
@@ -364,7 +372,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         }).then((newDeposit) => waitTransaction(resp).then(() => newDeposit));
       })
       .then((newDeposit) => {
-        if (config.bridgeType === BridgeType.LOOP) {
+        if (contractConfig.bridgeType === BridgeType.LOOP) {
           this.logger.info(
             `transaction of deposit id=${newDeposit.id} ` +
               `has been confirmed on source chain id=${chainConfig.chainId}`,
@@ -376,55 +384,71 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             `has been queued on chain id=${chainConfig.chainId}`,
         );
         return this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED);
+      })
+      .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
+  }
+
+  private executeDeposit(executionContext: ExecutionContextWithDeposit): Promise<Deposit> {
+    const { options, deposit } = executionContext;
+    return this.assetApprove(executionContext)
+      .then((newContext) => this.sendDeposit(newContext))
+      .then((newContext) => this.createCommitment(newContext))
+      .then((newContext) => newContext.deposit)
+      .catch((error) => {
+        const errorMsg = errorMessage(error);
+        this.logger.error(`deposit id=${deposit.id} failed: ${errorMsg}`);
+        return this.updateDepositStatus(options, deposit, DepositStatus.FAILED, {
+          errorMessage: errorMsg,
+        });
       });
   }
 
   private createCommitment(
-    options: DepositOptions,
-    config: DepositContractConfig,
-    chainConfig: ChainConfig,
-    deposit: Deposit,
-  ): Promise<Deposit> {
+    executionContext: ExecutionContextWithDeposit,
+  ): Promise<ExecutionContextWithDeposit> {
+    const { options, contractConfig, chainConfig, deposit } = executionContext;
     const now = MystikoHandler.now();
     const rawCommitment: CommitmentType = {
       id: MystikoHandler.generateId(),
       createdAt: now,
       updatedAt: now,
       chainId: options.dstChainId,
-      contractAddress: config.peerContractAddress || config.address,
-      assetSymbol: config.peerContract?.assetSymbol || config.assetSymbol,
-      assetDecimals: config.peerContract?.assetDecimals || config.assetDecimals,
-      assetAddress: config.peerContract?.assetAddress || config.assetAddress,
-      bridgeType: config.bridgeType,
+      contractAddress: contractConfig.peerContractAddress || contractConfig.address,
+      assetSymbol: contractConfig.peerContract?.assetSymbol || contractConfig.assetSymbol,
+      assetDecimals: contractConfig.peerContract?.assetDecimals || contractConfig.assetDecimals,
+      assetAddress: contractConfig.peerContract?.assetAddress || contractConfig.assetAddress,
+      bridgeType: contractConfig.bridgeType,
       status:
-        config.bridgeType === BridgeType.LOOP ? CommitmentStatus.QUEUED : CommitmentStatus.SRC_SUCCEEDED,
+        contractConfig.bridgeType === BridgeType.LOOP
+          ? CommitmentStatus.QUEUED
+          : CommitmentStatus.SRC_SUCCEEDED,
       commitmentHash: deposit.commitmentHash,
       rollupFeeAmount: deposit.rollupFeeAmount,
       encryptedNote: deposit.encryptedNote,
       amount: deposit.amount,
       shieldedAddress: deposit.shieldedRecipientAddress,
       srcChainId: chainConfig.chainId,
-      srcChainContractAddress: config.address,
-      srcAssetSymbol: config.assetSymbol,
-      srcAssetDecimals: config.assetDecimals,
-      srcAssetAddress: config.assetAddress,
+      srcChainContractAddress: contractConfig.address,
+      srcAssetSymbol: contractConfig.assetSymbol,
+      srcAssetDecimals: contractConfig.assetDecimals,
+      srcAssetAddress: contractConfig.assetAddress,
       creationTransactionHash: deposit.transactionHash,
     };
     return this.context.commitments
       .findOne({
         chainId: options.dstChainId,
-        contractAddress: config.peerContractAddress || config.address,
+        contractAddress: contractConfig.peerContractAddress || contractConfig.address,
         commitmentHash: deposit.commitmentHash,
       })
       .then((commitment) => {
         if (!commitment) {
-          return this.db.commitments.insert(rawCommitment).then(() => deposit);
+          return this.db.commitments.insert(rawCommitment).then(() => executionContext);
         }
-        return deposit;
+        return executionContext;
       })
       .catch((error) => {
         this.logger.warn(`failed to insert commitment for deposit id=${deposit.id}: ${errorMessage(error)}`);
-        return deposit;
+        return executionContext;
       });
   }
 

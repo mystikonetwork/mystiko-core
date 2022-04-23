@@ -40,7 +40,9 @@ test('test insert', async () => {
     amount: toDecimals(123, 18).toString(),
     rollupFeeAmount: toDecimals(1, 18).toString(),
     bridgeFeeAmount: toDecimals(2, 18).toString(),
+    bridgeFeeAssetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     executorFeeAmount: toDecimals(3, 18).toString(),
+    executorFeeAssetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     shieldedRecipientAddress:
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     status: DepositStatus.QUEUED,
@@ -73,8 +75,10 @@ test('test insert', async () => {
     expect(deposit.rollupFeeSimpleAmount()).toBe(1);
     expect(deposit.bridgeFeeAmount).toBe(toDecimals(2, 18).toString());
     expect(deposit.bridgeFeeSimpleAmount()).toBe(2);
+    expect(deposit.bridgeFeeAssetAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
     expect(deposit.executorFeeAmount).toBe(toDecimals(3, 18).toString());
     expect(deposit.executorFeeSimpleAmount()).toBe(3);
+    expect(deposit.executorFeeAssetAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
     expect(deposit.shieldedRecipientAddress).toBe(
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     );

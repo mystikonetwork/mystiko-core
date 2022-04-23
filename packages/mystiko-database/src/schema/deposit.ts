@@ -91,10 +91,18 @@ const depositSchemaLiteral = {
       final: true,
       pattern: BN_REGEX,
     },
+    bridgeFeeAssetAddress: {
+      type: 'string',
+      pattern: ETH_ADDRESS_REGEX,
+    },
     executorFeeAmount: {
       type: 'string',
       final: true,
       pattern: BN_REGEX,
+    },
+    executorFeeAssetAddress: {
+      type: 'string',
+      pattern: ETH_ADDRESS_REGEX,
     },
     shieldedRecipientAddress: {
       type: 'string',
