@@ -1,5 +1,6 @@
 import { DatabaseQuery, Transaction, TransactionEnum, TransactionStatus } from '@mystikonetwork/database';
 import { BridgeType } from '@mystikonetwork/config';
+import { MystikoSigner } from '@mystikonetwork/ethers';
 
 export type TransactionQuoteOptions = {
   type: TransactionEnum;
@@ -11,6 +12,8 @@ export type TransactionQuoteOptions = {
 };
 
 export type TransferOptions = TransactionQuoteOptions & {
+  walletPassword: string;
+  signer: MystikoSigner;
   rollupFee?: number;
   gasRelayerFee?: number;
   gasRelayerAddress?: string;
@@ -18,21 +21,14 @@ export type TransferOptions = TransactionQuoteOptions & {
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
 };
 
-export type WithdrawOptions = TransactionQuoteOptions & {
-  publicAmount: number;
+export type WithdrawOptions = TransferOptions & {
   publicRecipient: string;
-  rollupFee?: number;
-  gasRelayerFee?: number;
-  gasRelayerAddress?: string;
-  gasRelayerEndpoint?: string;
-  statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
 };
 
 export type TransactionQuote = {
   valid: boolean;
   invalidReason?: string;
   balance: number;
-  poolBalance: number;
   numOfSplits: number;
   minRollupFee: number;
   rollupFeeAssetSymbol: string;
