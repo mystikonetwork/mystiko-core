@@ -139,7 +139,7 @@ function addPoolContractConfig(
   }
   // @ts-ignore
   newPoolContract.minRollupFee = minRollupFee;
-  if (circuits.length>0){
+  if (circuits.length > 0) {
     // @ts-ignore
     newPoolContract.circuits = circuits;
   }
