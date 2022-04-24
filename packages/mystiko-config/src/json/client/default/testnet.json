@@ -70,8 +70,30 @@
       ],
       "signerEndpoint": "https://data-seed-prebsc-2-s2.binance.org:8545",
       "eventFilterSize": 100000,
-      "depositContracts": [],
-      "poolContracts": [],
+      "depositContracts": [
+        {
+          "version": 2,
+          "name": "MystikoV2WithLoopMain",
+          "address": "0x84D9DDfa3B98F4d8a0EF1aC355F50e49e99F90bD",
+          "startBlock": 18721479,
+          "bridgeType": "loop",
+          "poolAddress": "0x2f10df1D56F5009662E8FcEd7cdc46c65A04451B",
+          "disabled": false,
+          "type": "deposit",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000"
+        }
+      ],
+      "poolContracts": [
+        {
+          "version": 2,
+          "name": "CommitmentPool",
+          "address": "0x2f10df1D56F5009662E8FcEd7cdc46c65A04451B",
+          "startBlock": 18721475,
+          "type": "pool",
+          "minRollupFee": "10000000000000000"
+        }
+      ],
       "assets": []
     },
     {
