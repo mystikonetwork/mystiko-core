@@ -44,6 +44,10 @@ function addTokenConfig(
 ): any {
   const coreConfig = inCoreConfig;
 
+  if (!isERC20) {
+    return coreConfig;
+  }
+
   let i = 0;
   for (i = 0; i < coreConfig.chains.length; i += 1) {
     if (coreConfig.chains[i].chainId === chainId) {
