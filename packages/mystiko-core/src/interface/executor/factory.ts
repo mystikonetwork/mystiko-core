@@ -3,8 +3,12 @@ import { AssetExecutor } from './asset';
 import { DepositExecutor } from './deposit';
 import { TransactionExecutor } from './transaction';
 
-export interface ExecutorFactory {
-  getAssetExecutor(): AssetExecutor;
-  getDepositExecutor(config: DepositContractConfig): DepositExecutor;
-  getTransactionExecutor(config: PoolContractConfig): TransactionExecutor;
+export interface ExecutorFactory<
+  A extends AssetExecutor = AssetExecutor,
+  D extends DepositExecutor = DepositExecutor,
+  T extends TransactionExecutor = TransactionExecutor,
+> {
+  getAssetExecutor(): A;
+  getDepositExecutor(config: DepositContractConfig): D;
+  getTransactionExecutor(config: PoolContractConfig): T;
 }

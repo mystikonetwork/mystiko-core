@@ -6,21 +6,17 @@ import { initLogger, logger, ProviderFactory } from '@mystikonetwork/utils';
 import { Logger, LogLevelDesc } from 'loglevel';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import { RxDatabaseCreator } from 'rxdb';
-import { MystikoContext } from './context';
-import { DefaultExecutorFactory } from './executor';
-import {
-  AccountHandlerV2,
-  AssetHandlerV2,
-  CommitmentHandlerV2,
-  DepositHandlerV2,
-  TransactionHandlerV2,
-  WalletHandlerV2,
-} from './handler';
+import { DefaultContextFactory } from './context';
+import { ExecutorFactoryV2 } from './executor';
+import { HandlerFactoryV2 } from './handler';
 import {
   AccountHandler,
   AssetHandler,
   CommitmentHandler,
+  ContextFactory,
   DepositHandler,
+  ExecutorFactory,
+  HandlerFactory,
   MystikoContextInterface,
   TransactionHandler,
   WalletHandler,
@@ -32,10 +28,11 @@ export interface InitOptions {
   dbParams?: RxDatabaseCreator;
   loggingLevel?: LogLevelDesc;
   loggingOptions?: LoglevelPluginPrefixOptions;
+  protocol?: MystikoProtocol;
+  contextFactory?: ContextFactory;
   providerFactory?: ProviderFactory;
-  tracingEndpoint?: string;
-  tracingVersion?: string;
-  tracingSampleRate?: number;
+  handlerFactory?: HandlerFactory;
+  executorFactory?: ExecutorFactory;
 }
 
 export abstract class Mystiko {
@@ -59,7 +56,7 @@ export abstract class Mystiko {
 
   public signers?: { metaMask: MetaMaskSigner; privateKey: PrivateKeySigner };
 
-  private providerPool?: ProviderPool;
+  private providers?: ProviderPool;
 
   private protocol?: MystikoProtocol;
 
@@ -72,7 +69,11 @@ export abstract class Mystiko {
       dbParams,
       loggingLevel = 'warn',
       loggingOptions,
+      protocol,
+      contextFactory,
       providerFactory,
+      handlerFactory,
+      executorFactory,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
@@ -88,23 +89,23 @@ export abstract class Mystiko {
     initLogger(loggingOptions);
     this.logger = logger;
     this.logger.setLevel(loggingLevel);
-    this.providerPool = new ProviderPoolImpl(this.config, providerFactory);
-    this.providerPool.connect();
-    this.protocol = new MystikoProtocolV2(await this.zokratesRuntime());
-    this.context = new MystikoContext(this.config, this.db, this.protocol);
-    const executors = new DefaultExecutorFactory();;
-    executors.context = this.context;
-    this.context.providers = this.providerPool;
-    this.context.executors = executors;
-    this.wallets = new WalletHandlerV2(this.context);
-    this.accounts = new AccountHandlerV2(this.context);
-    this.assets = new AssetHandlerV2(this.context);
-    this.commitments = new CommitmentHandlerV2(this.context);
-    this.deposits = new DepositHandlerV2(this.context);
-    this.transactions = new TransactionHandlerV2(this.context);
+    this.providers = new ProviderPoolImpl(this.config, providerFactory);
+    this.providers.connect();
+    this.protocol = protocol || new MystikoProtocolV2(await this.zokratesRuntime());
+    const contexts = contextFactory || new DefaultContextFactory(this.config, this.db, this.protocol);
+    this.context = contexts.createContext();
+    this.context.providers = this.providers;
+    this.context.executors = executorFactory || new ExecutorFactoryV2(this.context);
+    const handlers = handlerFactory || new HandlerFactoryV2(this.context);
+    this.wallets = handlers.createWalletHandler();
+    this.accounts = handlers.createAccountHandler();
+    this.assets = handlers.createAssetHandler();
+    this.commitments = handlers.createCommitmentHandler();
+    this.deposits = handlers.createDepositHandler();
+    this.transactions = handlers.createTransactionHandler();
     this.signers = {
       metaMask: new MetaMaskSigner(this.config),
-      privateKey: new PrivateKeySigner(this.config, this.providerPool),
+      privateKey: new PrivateKeySigner(this.config, this.providers),
     };
     this.logger.info('@mystikonetwork/client has been successfully initialized, enjoy!');
   }

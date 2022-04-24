@@ -2,7 +2,7 @@ import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
-import { createError, MystikoErrorCode } from './error';
+import { createError, MystikoErrorCode } from '../error';
 import {
   AccountHandler,
   AssetHandler,
@@ -13,7 +13,7 @@ import {
   MystikoContextInterface,
   TransactionHandler,
   WalletHandler,
-} from './interface';
+} from '../interface';
 
 export class MystikoContext<
   A extends AccountHandler = AccountHandler,

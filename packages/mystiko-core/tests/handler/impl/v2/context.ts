@@ -7,8 +7,8 @@ import {
   AssetHandlerV2,
   ChainHandlerV2,
   CommitmentHandlerV2,
-  DefaultExecutorFactory,
   DepositHandlerV2,
+  ExecutorFactoryV2,
   MystikoContext,
   TransactionHandlerV2,
   WalletHandlerV2,
@@ -54,8 +54,8 @@ export async function createTestContext(
     WalletHandlerV2,
     MystikoProtocolV2
   >(wrappedConfig, wrappedDb, protocol);
-  context.executors = new DefaultExecutorFactory();
-  context.providers = new ProviderPoolImpl(config);
+  context.executors = new ExecutorFactoryV2(context);
+  context.providers = new ProviderPoolImpl(wrappedConfig);
   context.providers.connect();
   return Promise.resolve(context);
 }
