@@ -56,7 +56,6 @@ const transactionLiteral = {
     proof: {
       type: 'string',
       minLength: 1,
-      final: true,
     },
     rootHash: {
       type: 'string',
@@ -97,21 +96,35 @@ const transactionLiteral = {
         pattern: BN_REGEX,
       },
     },
+    amount: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
     publicAmount: {
       type: 'string',
       final: true,
       pattern: BN_REGEX,
     },
-    relayerFeeAmount: {
+    rollupFeeAmount: {
       type: 'string',
       final: true,
       pattern: BN_REGEX,
     },
-    publicRecipientAddress: {
+    gasRelayerFeeAmount: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
+    shieldedAddress: {
+      type: 'string',
+      minLength: 1,
+    },
+    publicAddress: {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
-    relayerAddress: {
+    gasRelayerAddress: {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
@@ -150,15 +163,11 @@ const transactionLiteral = {
     'contractAddress',
     'assetSymbol',
     'assetDecimals',
-    'proof',
-    'rootHash',
     'inputCommitments',
-    'outputCommitments',
-    'signaturePublicKey',
-    'signaturePublicKeyHashes',
+    'amount',
     'publicAmount',
-    'relayerFeeAmount',
-    'signature',
+    'rollupFeeAmount',
+    'gasRelayerFeeAmount',
     'type',
     'status',
     'wallet',
@@ -168,7 +177,8 @@ const transactionLiteral = {
     'contractAddress',
     'signaturePublicKey',
     'rootHash',
-    'relayerAddress',
+    'shieldedAddress',
+    'publicAddress',
     'transactionHash',
     'type',
     'wallet',

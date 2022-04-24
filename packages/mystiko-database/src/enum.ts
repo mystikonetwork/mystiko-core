@@ -1,4 +1,5 @@
 export enum CommitmentStatus {
+  INIT = 'init',
   SRC_SUCCEEDED = 'srcSucceeded',
   QUEUED = 'queued',
   INCLUDED = 'included',
@@ -24,6 +25,8 @@ export enum TransactionEnum {
 
 export enum TransactionStatus {
   INIT = 'init',
+  PROOF_GENERATING = 'proofGenerating',
+  PROOF_GENERATED = 'proofGenerated',
   PENDING = 'pending',
   SUCCEEDED = 'succeeded',
   FAILED = 'failed',

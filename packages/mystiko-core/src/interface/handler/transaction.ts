@@ -11,18 +11,16 @@ export type TransactionQuoteOptions = {
   publicAmount?: number;
 };
 
-export type TransferOptions = TransactionQuoteOptions & {
+export type TransactionOptions = TransactionQuoteOptions & {
   walletPassword: string;
+  shieldedAddress?: string;
+  publicAddress?: string;
   signer: MystikoSigner;
   rollupFee?: number;
   gasRelayerFee?: number;
   gasRelayerAddress?: string;
   gasRelayerEndpoint?: string;
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
-};
-
-export type WithdrawOptions = TransferOptions & {
-  publicRecipient: string;
 };
 
 export type TransactionQuote = {
@@ -42,7 +40,6 @@ export type TransactionQuote = {
 export type TransactionSummary = {
   previousBalance: number;
   newBalance: number;
-  spentAmount: number;
   withdrawingAmount: number;
   transferringAmount: number;
   rollupFeeAmount: number;
@@ -71,8 +68,7 @@ export type TransactionUpdate = {
 };
 
 export interface TransactionHandler<
-  T = TransferOptions,
-  W = WithdrawOptions,
+  T = TransactionOptions,
   Q = TransactionQuery,
   QO = TransactionQuoteOptions,
   QUO = TransactionQuote,
@@ -80,11 +76,11 @@ export interface TransactionHandler<
   R = TransactionResponse,
   U = TransactionUpdate,
 > {
-  create(options: T | W): Promise<R>;
+  create(options: T): Promise<R>;
   count(query?: DatabaseQuery<Transaction>): Promise<number>;
   findOne(query: string | Q): Promise<Transaction | null>;
   find(query?: DatabaseQuery<Transaction>): Promise<Transaction[]>;
   quote(options: QO): Promise<QUO>;
-  summary(options: T | W): Promise<S>;
+  summary(options: T): Promise<S>;
   update(query: string | Q, data: U): Promise<Transaction>;
 }

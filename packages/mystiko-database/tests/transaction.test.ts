@@ -38,6 +38,10 @@ beforeEach(async () => {
     assetSymbol: 'ETH',
     assetDecimals: 18,
     bridgeType: 'loop',
+    srcChainId: 3,
+    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
+    srcAssetSymbol: 'ETH',
+    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     rollupFeeAmount: toDecimals(1, 18).toString(),
@@ -52,6 +56,10 @@ beforeEach(async () => {
     assetSymbol: 'ETH',
     assetDecimals: 18,
     bridgeType: 'loop',
+    srcChainId: 3,
+    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
+    srcAssetSymbol: 'ETH',
+    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     amount: toDecimals(10, 18).toString(),
@@ -66,6 +74,10 @@ beforeEach(async () => {
     assetSymbol: 'ETH',
     assetDecimals: 18,
     bridgeType: 'loop',
+    srcChainId: 3,
+    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
+    srcAssetSymbol: 'ETH',
+    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     rollupFeeAmount: toDecimals(2, 18).toString(),
@@ -80,6 +92,10 @@ beforeEach(async () => {
     assetSymbol: 'ETH',
     assetDecimals: 18,
     bridgeType: 'loop',
+    srcChainId: 3,
+    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
+    srcAssetSymbol: 'ETH',
+    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     amount: toDecimals(20, 18).toString(),
@@ -106,10 +122,14 @@ test('test insert', async () => {
     outputCommitments: ['3', '4'],
     signaturePublicKey: 'deadbeef',
     signaturePublicKeyHashes: ['12345'],
+    amount: toDecimals(234, 18).toString(),
     publicAmount: toDecimals(123, 18).toString(),
-    relayerFeeAmount: toDecimals(13, 18).toString(),
-    publicRecipientAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
-    relayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
+    rollupFeeAmount: toDecimals(15, 18).toString(),
+    gasRelayerFeeAmount: toDecimals(13, 18).toString(),
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+    publicAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
+    gasRelayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     signature: 'baadbeef',
     type: TransactionEnum.WITHDRAW,
     status: TransactionStatus.SUCCEEDED,
@@ -132,14 +152,19 @@ test('test insert', async () => {
     expect(transaction.signaturePublicKeyHashes).toStrictEqual(['12345']);
     expect(await transaction.inputAmount()).toBe(toDecimals(10, 18).toString());
     expect(await transaction.inputSimpleAmount()).toBe(10);
-    expect(await transaction.rollupFeeAmount()).toBe(toDecimals(2, 18).toString());
-    expect(await transaction.rollupFeeSimpleAmount()).toBe(2);
+    expect(transaction.rollupFeeAmount).toBe(toDecimals(15, 18).toString());
+    expect(transaction.simpleRollupFeeAmount()).toBe(15);
+    expect(transaction.amount).toBe(toDecimals(234, 18).toString());
+    expect(transaction.simpleAmount()).toBe(234);
     expect(transaction.publicAmount).toBe(toDecimals(123, 18).toString());
-    expect(transaction.publicSimpleAmount()).toBe(123);
-    expect(transaction.relayerFeeAmount).toBe(toDecimals(13, 18).toString());
-    expect(transaction.relayerFeeSimpleAmount()).toBe(13);
-    expect(transaction.publicRecipientAddress).toBe('0x80525A2C863107210e0208D60e2694949914c26A');
-    expect(transaction.relayerAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
+    expect(transaction.simplePublicAmount()).toBe(123);
+    expect(transaction.gasRelayerFeeAmount).toBe(toDecimals(13, 18).toString());
+    expect(transaction.simpleGasRelayerFeeAmount()).toBe(13);
+    expect(transaction.shieldedAddress).toBe(
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+    );
+    expect(transaction.publicAddress).toBe('0x80525A2C863107210e0208D60e2694949914c26A');
+    expect(transaction.gasRelayerAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
     expect(transaction.signature).toBe('baadbeef');
     expect(transaction.type).toBe(TransactionEnum.WITHDRAW);
     expect(transaction.status).toBe(TransactionStatus.SUCCEEDED);
@@ -174,10 +199,14 @@ test('test collection clear', async () => {
     outputCommitments: ['3', '4'],
     signaturePublicKey: 'deadbeef',
     signaturePublicKeyHashes: ['12345'],
+    amount: toDecimals(234, 18).toString(),
     publicAmount: toDecimals(123, 18).toString(),
-    relayerFeeAmount: toDecimals(13, 18).toString(),
-    publicRecipientAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
-    relayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
+    rollupFeeAmount: toDecimals(15, 18).toString(),
+    gasRelayerFeeAmount: toDecimals(13, 18).toString(),
+    shieldedAddress:
+      'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
+    publicAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
+    gasRelayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     signature: 'baadbeef',
     type: TransactionEnum.WITHDRAW,
     status: TransactionStatus.SUCCEEDED,

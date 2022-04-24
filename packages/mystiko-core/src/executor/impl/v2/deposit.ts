@@ -464,7 +464,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {
       if (options.statusCallback) {
         try {
-          options.statusCallback(deposit, oldStatus, newStatus);
+          options.statusCallback(newDeposit, oldStatus, newStatus);
         } catch (error) {
           this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
         }
