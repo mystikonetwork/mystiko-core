@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: ['master']
+    branches: ['master', 'fitch-dev']
   pull_request:
     branches: ['*']
 
@@ -29,38 +29,10 @@ jobs:
       - run: lerna run test
       - run: lerna run deploy --scope @mystikonetwork/contracts
       - run: git diff --quiet || (echo "some generated files are not included in repo" && exit 1)
-      - name: Report @mystikonetwork/utils test coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
+      - uses: codecov/codecov-action@v2
         with:
-          working-directory: ./packages/mystiko-utils
-          coverage-file: ./coverage/report.json
-          base-coverage-file: ./coverage/report.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          package-manager: yarn
-      - name: Report @mystikonetwork/config test coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
-        with:
-          working-directory: ./packages/mystiko-config
-          coverage-file: ./coverage/report.json
-          base-coverage-file: ./coverage/report.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          package-manager: yarn
-      - name: Report @mystikonetwork/protocol test coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
-        with:
-          working-directory: ./packages/mystiko-protocol
-          coverage-file: ./coverage/report.json
-          base-coverage-file: ./coverage/report.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          package-manager: yarn
-      - name: Report @mystikonetwork/client test coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2.0.3
-        with:
-          working-directory: ./packages/mystiko-client
-          coverage-file: ./coverage/report.json
-          base-coverage-file: ./coverage/report.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          package-manager: yarn
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
         if: failure()

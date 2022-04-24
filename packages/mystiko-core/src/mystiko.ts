@@ -107,7 +107,7 @@ export abstract class Mystiko {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
-    this.logger.info('@mystikonetwork/client has been successfully initialized, enjoy!');
+    this.logger.info('@mystikonetwork/core has been successfully initialized, enjoy!');
   }
 
   protected abstract zokratesRuntime(): Promise<ZokratesRuntime>;
