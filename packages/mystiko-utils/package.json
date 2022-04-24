@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@mystikonetwork/fastfile": "^0.0.21",
+    "axios": "^0.26.1",
     "bn.js": "^5.2.0",
     "circomlibjs": "^0.0.8",
     "ethers": "^5.5.3",

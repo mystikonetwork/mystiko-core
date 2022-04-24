@@ -1,6 +1,23 @@
+import axios from 'axios';
 import pako from 'pako';
 import * as fastfile from '@mystikonetwork/fastfile';
 import { check } from './check';
+
+function readRawFile(path: string, cacheSize?: number, pageSize?: number): Promise<Buffer> {
+  if (path.startsWith('http') || path.startsWith('https')) {
+    return axios({
+      url: path,
+      method: 'get',
+      responseType: 'arraybuffer',
+    }).then((resp) => Buffer.from(resp.data));
+  }
+  return fastfile.readExisting(path, cacheSize, pageSize).then((fd: any) =>
+    fd.read(fd.totalSize).then((data: any) => {
+      fd.close();
+      return Buffer.from(data);
+    }),
+  );
+}
 
 function readFileRecursively(
   possiblePaths: string[],
@@ -10,17 +27,13 @@ function readFileRecursively(
   isCompressed?: (path: string) => boolean,
 ): Promise<Buffer> {
   const path = possiblePaths[index];
-  return fastfile
-    .readExisting(path, cacheSize, pageSize)
-    .then((fd: any) =>
-      fd.read(fd.totalSize).then((data: any) => {
-        fd.close();
-        if (isCompressed && isCompressed(path)) {
-          return Buffer.from(pako.inflate(Buffer.from(data)));
-        }
-        return Buffer.from(data);
-      }),
-    )
+  return readRawFile(path, cacheSize, pageSize)
+    .then((data) => {
+      if (isCompressed && isCompressed(path)) {
+        return Buffer.from(pako.inflate(data));
+      }
+      return data;
+    })
     .catch((error: any) => {
       if (possiblePaths.length > index + 1) {
         return readFileRecursively(possiblePaths, index + 1, cacheSize, pageSize);

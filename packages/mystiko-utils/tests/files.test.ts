@@ -2,7 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pako from 'pako';
-import { readCompressedFile, readJsonFile } from '../src';
+import { readCompressedFile, readFile, readJsonFile } from '../src';
+
+test('Test readFile', async () => {
+  const data = await readFile('https://google.com');
+  expect(data.length).toBeGreaterThan(0);
+});
 
 test('Test readCompressedFile', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'utilsTest'));
