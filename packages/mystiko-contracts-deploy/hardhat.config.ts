@@ -7,19 +7,31 @@ import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from 'hardhat/types';
 import { task } from 'hardhat/config';
 import { deploy } from './src/deploy';
+import { update } from './src/update';
 
 dotenv.config();
 
-task('migrate', 'Prints the list of accounts')
-  .addParam('dst', 'ropsten、goerli、bsctestnet')
+task('migrate', 'deploy contract')
   .addParam('step', 'step1、step2、step3、updateProxy')
   .addParam('bridge', 'loop、tbridge、celer')
+  .addParam('dst', 'ropsten、goerli、bsctestnet')
   .addParam('token', 'ETH、BNB、MTT、mUSD')
   .setAction(async (taskArgs, hre) => {
     // const accounts = await hre.ethers.getSigners();
     // const provider = await hre.ethers.getDefaultProvider();
     taskArgs.src = hre.network.name;
     await deploy(taskArgs, hre);
+  });
+
+task('update', 'update contract configure')
+  .addParam('bridge', 'loop、tbridge、celer')
+  .addParam('dst', 'ropsten、goerli、bsctestnet')
+  .addParam('token', 'ETH、BNB、MTT、mUSD')
+  .addParam('func', 'updateProxy、toggleSaction')
+  .addParam('param', 'parameter')
+  .setAction(async (taskArgs, hre) => {
+    taskArgs.src = hre.network.name;
+    await update(taskArgs, hre);
   });
 
 const DEFAULT_ENDPOINT = 'http://localhost:8545';

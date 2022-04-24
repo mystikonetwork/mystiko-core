@@ -1,7 +1,7 @@
 import { MystikoTBridgeProxy__factory } from '@mystikonetwork/contracts-abi';
 import { BridgeConfig } from '../config/bridge';
 import { OperatorConfig } from '../config/operator';
-import { LOGRED } from '../common/constant';
+import { BridgeLoop, BridgeTBridge, LOGRED } from '../common/constant';
 import { BridgeProxyConfig } from '../config/bridgeProxy';
 
 let MystikoTBridgeProxy: MystikoTBridgeProxy__factory;
@@ -40,11 +40,11 @@ export async function getOrDeployTBridgeProxy(
   operatorCfg: OperatorConfig,
   chainNetwork: string,
 ) {
-  if (bridgeCfg.name === 'loop') {
+  if (bridgeCfg.name === BridgeLoop) {
     return '';
   }
 
-  if (bridgeCfg.name === 'tbridge') {
+  if (bridgeCfg.name === BridgeTBridge) {
     if (bridgeProxyCfg === undefined) {
       console.log('tbridge proxy not exist, deploy');
 

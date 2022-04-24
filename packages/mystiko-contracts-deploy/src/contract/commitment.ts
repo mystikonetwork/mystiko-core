@@ -3,7 +3,13 @@ import { ChainConfig } from '../config/chain';
 import { ChainTokenConfig } from '../config/chainToken';
 import { OperatorConfig } from '../config/operator';
 import { ContractDeployConfig } from '../config/bridgeDeploy';
-import { LOGRED, MerkleTreeHeight, RootHistoryLength } from '../common/constant';
+import {
+  LOGRED,
+  MerkleTreeHeight,
+  MystikoDevelopment,
+  MystikoTestnet,
+  RootHistoryLength,
+} from '../common/constant';
 import { BridgeConfig } from '../config/bridge';
 
 let CommitmentPoolMain: CommitmentPoolMain__factory;
@@ -64,6 +70,20 @@ async function deployCommitmentPool(
   return pool.address;
 }
 
+export async function togglePoolSanctionCheck(addr: string, check: boolean) {
+  console.log('toggle pool sanction check');
+  const poolContract = await CommitmentPoolMain.attach(addr);
+
+  try {
+    console.log('toggle pool sanction check 1');
+
+    await poolContract.toggleSanctionCheck(check);
+  } catch (err: any) {
+    console.error(LOGRED, err);
+    process.exit(1);
+  }
+}
+
 export async function addRollupWhitelist(addr: string, rollers: string[]) {
   console.log('add roller whitelist');
   const pool = await CommitmentPoolMain.attach(addr);
@@ -93,6 +113,7 @@ export async function addEnqueueWhitelist(addr: string, enqueueContractAddress: 
 }
 
 export async function getOrDeployCommitPool(
+  mystikoNetwork: string,
   bridgeCfg: BridgeConfig,
   chainCfg: ChainConfig,
   chainTokenCfg: ChainTokenConfig,
@@ -109,10 +130,15 @@ export async function getOrDeployCommitPool(
     console.log('commitment pool not exist, deploy');
     const commitmentPoolAddress = await deployCommitmentPool(newPairPoolCfg, chainCfg, chainTokenCfg);
     await addRollupWhitelist(commitmentPoolAddress, operatorCfg.rollers);
+
+    if (mystikoNetwork === MystikoTestnet) {
+      togglePoolSanctionCheck(commitmentPoolAddress, true);
+    }
+
     return commitmentPoolAddress;
   }
 
-  if (chainCfg.network === 'hardhat') {
+  if (mystikoNetwork === MystikoDevelopment) {
     const commitmentPoolAddress = await deployCommitmentPool(pairSrcPoolCfg, chainCfg, chainTokenCfg);
     await addRollupWhitelist(commitmentPoolAddress, operatorCfg.rollers);
     return commitmentPoolAddress;

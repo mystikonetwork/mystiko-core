@@ -31,7 +31,8 @@
     "deploy:loop": "yarn deploy:chain --network hardhat --step step1 --bridge loop --dst hardhat --token ETH && yarn deploy:chain --network hardhat --step step2 --bridge loop --dst hardhat --token ETH && yarn deploy:chain --network hardhat --step step3 --bridge loop --dst hardhat --token ETH",
     "deploy:bridge": "yarn deploy:chain --network hardhat --step step1 --bridge tbridge --dst hardhat --token MTT && yarn deploy:chain --network hardhat --step step2 --bridge tbridge --dst hardhat --token MTT && yarn deploy:chain --network hardhat --step step2 --bridge tbridge --dst hardhat --token mUSD && yarn deploy:chain --network hardhat --step step3 --bridge tbridge --dst hardhat --token MTT && yarn deploy:chain --network hardhat --step step3 --bridge tbridge --dst hardhat --token mUSD",
     "deploy": "yarn deploy:loop && yarn deploy:bridge",
-    "deploy:chain": "hardhat migrate"
+    "deploy:chain": "hardhat migrate",
+    "update": "hardhat update"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

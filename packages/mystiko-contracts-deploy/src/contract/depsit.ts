@@ -10,7 +10,7 @@ import { BridgeConfig } from '../config/bridge';
 import { ChainConfig } from '../config/chain';
 import { ChainTokenConfig } from '../config/chainToken';
 import { ContractDeployConfig } from '../config/bridgeDeploy';
-import { LOGRED } from '../common/constant';
+import { BridgeCeler, BridgeLoop, BridgeTBridge, LOGRED, MystikoTestnet } from '../common/constant';
 
 let MystikoV2WithLoopERC20: MystikoV2WithLoopERC20__factory;
 let MystikoV2WithLoopMain: MystikoV2WithLoopMain__factory;
@@ -34,19 +34,19 @@ export async function initDepositContractFactory(eth: any) {
 
 export function getMystikoDeployContract(bridge: string, bErc20: boolean) {
   let coreContract: any;
-  if (bridge === 'loop') {
+  if (bridge === BridgeLoop) {
     if (bErc20) {
       coreContract = MystikoV2WithLoopERC20;
     } else {
       coreContract = MystikoV2WithLoopMain;
     }
-  } else if (bridge === 'tbridge') {
+  } else if (bridge === BridgeTBridge) {
     if (bErc20) {
       coreContract = MystikoV2WithTBridgeERC20;
     } else {
       coreContract = MystikoV2WithTBridgeMain;
     }
-  } else if (bridge === 'celer') {
+  } else if (bridge === BridgeCeler) {
     if (bErc20) {
       coreContract = MystikoV2WithCelerERC20;
     } else {
@@ -58,7 +58,20 @@ export function getMystikoDeployContract(bridge: string, bErc20: boolean) {
   return coreContract;
 }
 
+export async function toggleDepositSanctionCheck(addr: string, check: boolean) {
+  console.log('toggle deposit sanction check');
+  const coreContract = await MystikoV2WithTBridgeMain.attach(addr);
+
+  try {
+    await coreContract.toggleSanctionCheck(check);
+  } catch (err: any) {
+    console.error(LOGRED, err);
+    process.exit(1);
+  }
+}
+
 export async function deployDepositContract(
+  mystikoNetwork: string,
   bridgeCfg: BridgeConfig,
   srcChainCfg: ChainConfig,
   srcChainTokenCfg: ChainTokenConfig,
@@ -84,7 +97,7 @@ export async function deployDepositContract(
   }
   await coreContract.deployed();
 
-  if (bridgeCfg.name !== 'loop') {
+  if (bridgeCfg.name !== BridgeLoop) {
     await coreContract.setBridgeProxyAddress(bridgeProxyAddress);
     await coreContract.setMinBridgeFee(bridgeCfg.getBridgeFeeConfig(srcChainCfg.network).minimal);
     await coreContract.setMinExecutorFee(srcChainTokenCfg.minExecutorFee);
@@ -95,6 +108,10 @@ export async function deployDepositContract(
 
   await coreContract.setMinAmount(srcChainTokenCfg.minAmount);
   await coreContract.setAssociatedCommitmentPool(commitmentPoolAddress);
+
+  if (mystikoNetwork === MystikoTestnet) {
+    toggleDepositSanctionCheck(commitmentPoolAddress, true);
+  }
 
   const syncStart = await ethers.provider.getBlockNumber();
 

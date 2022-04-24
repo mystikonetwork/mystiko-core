@@ -1,18 +1,18 @@
 import { Artifact } from 'hardhat/types';
 import { Artifacts } from 'hardhat/internal/artifacts';
-import { LOGRED, MainNetwork } from './constant';
+import { LOGRED, MainNetwork, MystikoDevelopment, MystikoMainnet, MystikoTestnet } from './constant';
 
 const fs = require('fs');
 
 export function getMystikoNetwork(chainNetwork: string) {
   if (chainNetwork === 'hardhat') {
     console.log('development network');
-    return 'development';
+    return MystikoDevelopment;
   }
-  let networkType = 'testnet';
+  let networkType = MystikoTestnet;
   MainNetwork.forEach((n: any) => {
     if (n === chainNetwork) {
-      networkType = 'mainnet';
+      networkType = MystikoMainnet;
     }
   });
 

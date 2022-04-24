@@ -218,8 +218,8 @@ export async function deployDependContracts(accounts: Wallet[]): Promise<DependD
   }
 
   const hasher3Artifact = await getArtifact('Hasher3');
-  const Hasher3Factory = (await ethers.getContractFactoryFromArtifact(hasher3Artifact)) as Hasher3__factory;
-  const hasher3 = (await Hasher3Factory.deploy()) as Hasher3;
+  const hasher3Factory = (await ethers.getContractFactoryFromArtifact(hasher3Artifact)) as Hasher3__factory;
+  const hasher3 = await hasher3Factory.deploy();
   await hasher3.deployed();
 
   const transaction1x0VerifierFactory = (await ethers.getContractFactory(

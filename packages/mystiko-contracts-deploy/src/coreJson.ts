@@ -1,13 +1,13 @@
-import { LOGRED } from './common/constant';
+import { LOGRED, MystikoTestnet, MystikoMainnet, MystikoDevelopment, BridgeLoop } from './common/constant';
 import { readJsonFile, writeJsonFile } from './common/utils';
 
 function getCoreConfigFileName(mystikoNetwork: string) {
   let fileNameWithPath = '';
-  if (mystikoNetwork === 'testnet') {
+  if (mystikoNetwork === MystikoTestnet) {
     fileNameWithPath = './src/json/core/testnet.json';
-  } else if (mystikoNetwork === 'mainnet') {
+  } else if (mystikoNetwork === MystikoMainnet) {
     fileNameWithPath = `${process.env.CLIENT_CONFIG_FILE_PATH}/mainnet.json`;
-  } else if (mystikoNetwork === 'development') {
+  } else if (mystikoNetwork === MystikoDevelopment) {
     fileNameWithPath = './src/json/core/development.json';
   } else {
     console.error(LOGRED, 'load config network not support');
@@ -210,7 +210,7 @@ function addNewDepositContractConfig(
   // @ts-ignore
   newContract.type = 'deposit';
 
-  if (bridgeType !== 'loop') {
+  if (bridgeType !== BridgeLoop) {
     // @ts-ignore
     newContract.peerChainId = peerChainId;
     // @ts-ignore
@@ -219,7 +219,7 @@ function addNewDepositContractConfig(
   // @ts-ignore
   newContract.minAmount = minAmount;
 
-  if (bridgeType !== 'loop') {
+  if (bridgeType !== BridgeLoop) {
     // @ts-ignore
     newContract.minBridgeFee = minBridgeFee;
     // @ts-ignore

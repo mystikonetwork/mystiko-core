@@ -1,15 +1,15 @@
 import { readJsonFile, writeJsonFile } from './common/utils';
-import { LOGRED } from './common/constant';
+import { LOGRED, MystikoTestnet, MystikoDevelopment } from './common/constant';
 
 export const tbridgeTestnetConfigFile = './src/json/bridge/tbridge/testnet.json';
 export const tbridgeDevelopmentConfigFile = './src/json/bridge/tbridge/development.json';
 
 function getConfigFileName(mystikoNetwork: string) {
-  if (mystikoNetwork === 'testnet') {
+  if (mystikoNetwork === MystikoTestnet) {
     return tbridgeTestnetConfigFile;
   }
 
-  if (mystikoNetwork === 'development') {
+  if (mystikoNetwork === MystikoDevelopment) {
     return tbridgeDevelopmentConfigFile;
   }
 

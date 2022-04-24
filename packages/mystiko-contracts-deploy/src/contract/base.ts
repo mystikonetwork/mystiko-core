@@ -46,46 +46,46 @@ export async function deployBaseContract(cfg: ChainConfig) {
 
   console.log('deploy hasher3');
   const hasher3 = await Hasher3.deploy();
-  const hasher3Response = await hasher3.deployed();
-  const hasher3Address = hasher3Response.address;
+  await hasher3.deployed();
+  const hasher3Address = hasher3.address;
 
   console.log('deploy rollup verifier');
   const rollup1 = await Rollup1Verifier.deploy();
-  const rollup1Response = await rollup1.deployed();
-  const rollup1VerifierAddress = rollup1Response.address;
+  await rollup1.deployed();
+  const rollup1VerifierAddress = rollup1.address;
 
   const rollup4 = await Rollup4Verifier.deploy();
-  const rollup4Response = await rollup4.deployed();
-  const rollup4VerifierAddress = rollup4Response.address;
+  await rollup4.deployed();
+  const rollup4VerifierAddress = rollup4.address;
 
   const rollup16 = await Rollup16Verifier.deploy();
-  const rollup16Response = await rollup16.deployed();
-  const rollup16VerifierAddress = rollup16Response.address;
+  await rollup16.deployed();
+  const rollup16VerifierAddress = rollup16.address;
 
   console.log('deploy transaction verifier');
   const transaction1x0Verifier = await Transaction1x0Verifier.deploy();
-  const transaction1x0VerifierRsp = await transaction1x0Verifier.deployed();
-  const transaction1x0VerifierAddress = transaction1x0VerifierRsp.address;
+  await transaction1x0Verifier.deployed();
+  const transaction1x0VerifierAddress = transaction1x0Verifier.address;
 
   const transaction1x1Verifier = await Transaction1x1Verifier.deploy();
-  const transaction1x1VerifierRsp = await transaction1x1Verifier.deployed();
-  const transaction1x1VerifierAddress = transaction1x1VerifierRsp.address;
+  await transaction1x1Verifier.deployed();
+  const transaction1x1VerifierAddress = transaction1x1Verifier.address;
 
   const transaction1x2Verifier = await Transaction1x2Verifier.deploy();
-  const transaction1x2VerifierRsp = await transaction1x2Verifier.deployed();
-  const transaction1x2VerifierAddress = transaction1x2VerifierRsp.address;
+  await transaction1x2Verifier.deployed();
+  const transaction1x2VerifierAddress = transaction1x2Verifier.address;
 
   const transaction2x0Verifier = await Transaction2x0Verifier.deploy();
-  const transaction2x0VerifierRsp = await transaction2x0Verifier.deployed();
-  const transaction2x0VerifierAddress = transaction2x0VerifierRsp.address;
+  await transaction2x0Verifier.deployed();
+  const transaction2x0VerifierAddress = transaction2x0Verifier.address;
 
   const transaction2x1Verifier = await Transaction2x1Verifier.deploy();
-  const transaction2x1VerifierRsp = await transaction2x1Verifier.deployed();
-  const transaction2x1VerifierAddress = transaction2x1VerifierRsp.address;
+  await transaction2x1Verifier.deployed();
+  const transaction2x1VerifierAddress = transaction2x1Verifier.address;
 
   const transaction2x2Verifier = await Transaction2x2Verifier.deploy();
-  const transaction2x2VerifierRsp = await transaction2x2Verifier.deployed();
-  const transaction2x2VerifierAddress = transaction2x2VerifierRsp.address;
+  await transaction2x2Verifier.deployed();
+  const transaction2x2VerifierAddress = transaction2x2Verifier.address;
 
   console.log('hasher3 address: ', hasher3Address);
 
