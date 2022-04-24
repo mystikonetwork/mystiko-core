@@ -10,7 +10,7 @@ import { CommitmentStatus, CommitmentType, Deposit, DepositStatus } from '@mysti
 import { checkSigner } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
-import { ContractTransaction } from 'ethers';
+import { ContractTransaction, ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -290,7 +290,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
 
   private assetApprove(executionContext: ExecutionContextWithDeposit): Promise<ExecutionContextWithDeposit> {
     const { options, contractConfig, chainConfig, deposit, assetTotals } = executionContext;
-    const approvePromises: Promise<void>[] = [];
+    const approvePromises: Promise<ethers.providers.TransactionReceipt | undefined>[] = [];
     assetTotals.forEach((assetTotal) => {
       const { asset, total } = assetTotal;
       if (asset.assetType !== AssetType.ERC20) {
@@ -310,16 +310,26 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
               transactionHash: resp?.hash,
             }).then(() => {
               if (resp) {
-                return waitTransaction(resp).then(() => {});
+                return waitTransaction(resp);
               }
-              return Promise.resolve();
+              return Promise.resolve(undefined);
             }),
           );
         approvePromises.push(approvePromise);
       }
     });
     return Promise.all(approvePromises)
-      .then(() => this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED))
+      .then((receipts) => {
+        let transactionHash: string | undefined;
+        for (let i = 0; i < receipts.length; i += 1) {
+          const receipt = receipts[i];
+          if (receipt) {
+            transactionHash = receipt.transactionHash;
+            break;
+          }
+        }
+        return this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED, { transactionHash });
+      })
       .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
   }
 
@@ -369,21 +379,25 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         this.logger.info(`transaction of deposit id=${deposit.id} has been submitted`);
         return this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
           transactionHash: resp.hash,
-        }).then((newDeposit) => waitTransaction(resp).then(() => newDeposit));
+        }).then((newDeposit) => waitTransaction(resp).then((receipt) => ({ newDeposit, receipt })));
       })
-      .then((newDeposit) => {
+      .then(({ newDeposit, receipt }) => {
         if (contractConfig.bridgeType === BridgeType.LOOP) {
           this.logger.info(
             `transaction of deposit id=${newDeposit.id} ` +
               `has been confirmed on source chain id=${chainConfig.chainId}`,
           );
-          return this.updateDepositStatus(options, newDeposit, DepositStatus.QUEUED);
+          return this.updateDepositStatus(options, newDeposit, DepositStatus.QUEUED, {
+            transactionHash: receipt.transactionHash,
+          });
         }
         this.logger.info(
           `transaction of deposit id=${newDeposit.id} ` +
             `has been queued on chain id=${chainConfig.chainId}`,
         );
-        return this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED);
+        return this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED, {
+          transactionHash: receipt.transactionHash,
+        });
       })
       .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
   }
@@ -459,17 +473,20 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     updateOptions?: DepositUpdate,
   ): Promise<Deposit> {
     const oldStatus = deposit.status as DepositStatus;
-    const wrappedUpdateOptions = updateOptions || {};
-    wrappedUpdateOptions.status = newStatus;
-    return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {
-      if (options.statusCallback) {
-        try {
-          options.statusCallback(newDeposit, oldStatus, newStatus);
-        } catch (error) {
-          this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
+    if (oldStatus !== newStatus && !updateOptions) {
+      const wrappedUpdateOptions: DepositUpdate = updateOptions || {};
+      wrappedUpdateOptions.status = newStatus;
+      return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {
+        if (options.statusCallback && oldStatus !== newStatus) {
+          try {
+            options.statusCallback(newDeposit, oldStatus, newStatus);
+          } catch (error) {
+            this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
+          }
         }
-      }
-      return newDeposit;
-    });
+        return newDeposit;
+      });
+    }
+    return Promise.resolve(deposit);
   }
 }

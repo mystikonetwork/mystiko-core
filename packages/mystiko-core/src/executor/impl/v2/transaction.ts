@@ -1,5 +1,13 @@
-import { ChainConfig, PoolContractConfig } from '@mystikonetwork/config';
 import {
+  ChainConfig,
+  CircuitConfig,
+  CircuitType,
+  MAIN_ASSET_ADDRESS,
+  PoolContractConfig,
+} from '@mystikonetwork/config';
+import { CommitmentPool, ICommitmentPool, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
+import {
+  Account,
   Commitment,
   CommitmentStatus,
   CommitmentType,
@@ -9,10 +17,21 @@ import {
   Wallet,
 } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
-import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, fromDecimals, MerkleTree, toBN, toDecimals, toHex } from '@mystikonetwork/utils';
+import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import {
+  errorMessage,
+  fromDecimals,
+  MerkleTree,
+  toBN,
+  toBuff,
+  toDecimals,
+  toHex,
+  waitTransaction,
+} from '@mystikonetwork/utils';
 import BN from 'bn.js';
 import { isEthereumAddress } from 'class-validator';
+import { ethers } from 'ethers';
+import { Proof } from 'zokrates-js';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -41,11 +60,19 @@ type ExecutionContext = {
   publicAmount: BN;
   rollupFee: BN;
   gasRelayerFee: BN;
-  outputCommitments?: Commitment[];
+  outputCommitments?: Array<{ commitment: Commitment; info: CommitmentV1 }>;
 };
 
 type ExecutionContextWithTransaction = ExecutionContext & {
   transaction: Transaction;
+};
+
+type ExecutionContextWithProof = ExecutionContextWithTransaction & {
+  numInputs: number;
+  numOutputs: number;
+  outputEncryptedNotes: Buffer[];
+  proof: Proof;
+  randomEtherWallet: ethers.Wallet;
 };
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
@@ -58,7 +85,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then((executionContext) => this.createTransaction(executionContext))
       .then((executionContext) => ({
         transaction: executionContext.transaction,
-        transactionPromise: Promise.resolve(executionContext.transaction),
+        transactionPromise: this.executeTransaction(executionContext),
       }));
   }
 
@@ -277,8 +304,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const { options, selectedCommitments, amount, publicAmount, rollupFee, gasRelayerFee } = executionContext;
     if (selectedCommitments.length > 0) {
       const inputSum = CommitmentUtils.sum(selectedCommitments);
-      const commitmentPromises: Promise<Commitment>[] = [];
-      let remainingAmount = toBN(0);
+      const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentV1 }>[] = [];
+      let remainingAmount;
       if (options.type === TransactionEnum.TRANSFER && options.shieldedAddress) {
         remainingAmount = inputSum.sub(amount);
         const transferringAmount = amount.sub(rollupFee).sub(gasRelayerFee);
@@ -310,7 +337,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     executionContext: ExecutionContext,
     shieldedAddress: string,
     amount: BN,
-  ): Promise<Commitment> {
+  ): Promise<{ commitment: Commitment; info: CommitmentV1 }> {
     const { options, contractConfig } = executionContext;
     return (this.protocol as MystikoProtocolV2)
       .commitmentWithShieldedAddress(shieldedAddress, amount)
@@ -339,7 +366,9 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           srcAssetDecimals: contractConfig.assetDecimals,
           srcAssetAddress: contractConfig.assetAddress,
         };
-        return this.db.commitments.insert(rawCommitment);
+        return this.db.commitments
+          .insert(rawCommitment)
+          .then((commitment) => ({ commitment, info: commitmentInfo }));
       });
   }
 
@@ -375,7 +404,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         assetAddress: contractConfig.assetAddress,
         assetDecimals: contractConfig.assetDecimals,
         inputCommitments: selectedCommitments.map((c) => c.id),
-        outputCommitments: outputCommitments ? outputCommitments.map((c) => c.id) : [],
+        outputCommitments: outputCommitments ? outputCommitments.map((c) => c.commitment.id) : [],
         amount: receivingAmount.toString(),
         publicAmount: receivingPublicAmount.toString(),
         rollupFeeAmount: rollupFee.toString(),
@@ -390,8 +419,180 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then((transaction) => ({ ...executionContext, transaction }));
   }
 
-  private buildMerkleTree(context: ExecutionContext): Promise<MerkleTree> {
-    const { options, contractConfig } = context;
+  private executeTransaction(executionContext: ExecutionContextWithTransaction): Promise<Transaction> {
+    const { options, selectedCommitments, transaction, outputCommitments } = executionContext;
+    const outCommitments = outputCommitments ? outputCommitments.map((c) => c.commitment) : [];
+    return this.generateProof(executionContext)
+      .then((ec) => this.sendTransaction(ec))
+      .then(() => {
+        const promises: Promise<void>[] = [];
+        promises.push(
+          TransactionExecutorV2.updateCommitmentsStatus(selectedCommitments, CommitmentStatus.SPENT),
+        );
+        promises.push(TransactionExecutorV2.updateCommitmentsStatus(outCommitments, CommitmentStatus.QUEUED));
+        return Promise.all(promises).then(() => transaction);
+      })
+      .catch((error) => {
+        const errorMsg = errorMessage(error);
+        this.logger.error(`transaction id=${transaction.id} failed: ${errorMsg}`);
+        const promises: Promise<any>[] = [];
+        promises.push(
+          this.updateTransactionStatus(options, transaction, TransactionStatus.FAILED, {
+            errorMessage: errorMsg,
+          }).then(() => {}),
+        );
+        promises.push(TransactionExecutorV2.updateCommitmentsStatus(outCommitments, CommitmentStatus.FAILED));
+        return Promise.all(promises).then(() => transaction);
+      });
+  }
+
+  private generateProof(
+    executionContext: ExecutionContextWithTransaction,
+  ): Promise<ExecutionContextWithProof> {
+    const { options, transaction } = executionContext;
+    this.logger.info(`generating proof for transaction id=${transaction.id}`);
+    return this.updateTransactionStatus(options, transaction, TransactionStatus.PROOF_GENERATING).then(
+      (newTransaction) =>
+        this.buildMerkleTree(executionContext)
+          .then((merkleTree) =>
+            this.getInputAccounts(executionContext).then((accounts) => ({ merkleTree, accounts })),
+          )
+          .then(({ merkleTree, accounts }) => {
+            const { contractConfig, selectedCommitments, outputCommitments, publicAmount, gasRelayerFee } =
+              executionContext;
+            const numInputs = selectedCommitments.length;
+            const numOutputs = outputCommitments?.length || 0;
+            const circuitConfig = TransactionExecutorV2.getCircuitConfig(
+              numOutputs,
+              numOutputs,
+              contractConfig,
+            );
+            if (!circuitConfig) {
+              return createErrorPromise(
+                `missing circuit config with number of inputs=${numInputs} ` +
+                  `and number of outputs=${numOutputs}`,
+                MystikoErrorCode.NON_EXISTING_CIRCUIT_CONFIG,
+              );
+            }
+            const randomEtherWallet = ethers.Wallet.createRandom();
+            const sigPk = toBuff(randomEtherWallet.address);
+            const inVerifyPks: Buffer[] = [];
+            const inVerifySks: Buffer[] = [];
+            const inEncPks: Buffer[] = [];
+            const inEncSks: Buffer[] = [];
+            const inCommitments: BN[] = [];
+            const inPrivateNotes: Buffer[] = [];
+            const pathIndices: number[][] = [];
+            const pathElements: BN[][] = [];
+            const outVerifyPks: Buffer[] = [];
+            const outCommitments: BN[] = [];
+            const outRandomPs: BN[] = [];
+            const outRandomRs: BN[] = [];
+            const outRandomSs: BN[] = [];
+            const outAmounts: BN[] = [];
+            const outputEncryptedNotes: Buffer[] = [];
+            const rollupFeeAmounts: BN[] = [];
+            for (let i = 0; i < selectedCommitments.length; i += 1) {
+              const commitment = selectedCommitments[i];
+              const account = accounts[0];
+              const { commitmentHash, leafIndex, encryptedNote } = commitment;
+              if (!encryptedNote || !leafIndex) {
+                return createErrorPromise(
+                  `missing required data of input commitment=${commitmentHash}`,
+                  MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+                );
+              }
+              inVerifyPks.push(account.publicKeyForVerification(this.protocol));
+              inVerifySks.push(account.secretKeyForVerification(this.protocol, options.walletPassword));
+              inEncPks.push(account.publicKeyForEncryption(this.protocol));
+              inEncSks.push(account.secretKeyForEncryption(this.protocol, options.walletPassword));
+              inCommitments.push(toBN(commitmentHash));
+              inPrivateNotes.push(toBuff(encryptedNote));
+              const merklePath = merkleTree.path(toBN(leafIndex).toNumber());
+              pathIndices.push(merklePath.pathIndices);
+              pathElements.push(merklePath.pathElements);
+            }
+            if (outputCommitments) {
+              for (let i = 0; i < outputCommitments.length; i += 1) {
+                const { commitment, info } = outputCommitments[i];
+                const { shieldedAddress, amount, rollupFeeAmount } = commitment;
+                const { randomP, randomR, randomS, commitmentHash, privateNote } = info;
+                if (!shieldedAddress || !amount) {
+                  return createErrorPromise(
+                    `missing required data of output commitment=${commitmentHash.toString()}`,
+                    MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+                  );
+                }
+                const { pkVerify } = this.protocol.publicKeysFromShieldedAddress(shieldedAddress);
+                outVerifyPks.push(pkVerify);
+                outCommitments.push(commitmentHash);
+                outRandomPs.push(randomP);
+                outRandomRs.push(randomR);
+                outRandomSs.push(randomS);
+                outAmounts.push(toBN(amount));
+                rollupFeeAmounts.push(toBN(rollupFeeAmount || 0));
+                outputEncryptedNotes.push(privateNote);
+              }
+            }
+            return (this.protocol as MystikoProtocolV2)
+              .zkProveTransaction({
+                numInputs,
+                numOutputs,
+                inVerifyPks,
+                inVerifySks,
+                inEncPks,
+                inEncSks,
+                inCommitments,
+                inPrivateNotes,
+                pathIndices,
+                pathElements,
+                sigPk,
+                treeRoot: merkleTree.root(),
+                publicAmount,
+                relayerFeeAmount: gasRelayerFee,
+                rollupFeeAmounts,
+                outVerifyPks,
+                outAmounts,
+                outCommitments,
+                outRandomPs,
+                outRandomRs,
+                outRandomSs,
+                programFile: circuitConfig.programFile,
+                provingKeyFile: circuitConfig.provingKeyFile,
+                abiFile: circuitConfig.abiFile,
+              })
+              .then((proof) =>
+                (this.protocol as MystikoProtocolV2)
+                  .zkVerify(proof, circuitConfig.verifyingKeyFile)
+                  .then((proofValid) => {
+                    if (!proofValid) {
+                      return createErrorPromise(
+                        'generated an invalid proof',
+                        MystikoErrorCode.INVALID_ZKP_PROOF,
+                      );
+                    }
+                    this.logger.info(`proof is generated successfully for transaction id=${transaction.id}`);
+                    return proof;
+                  }),
+              )
+              .then((proof) =>
+                this.updateTransactionStatus(options, newTransaction, TransactionStatus.PROOF_GENERATED).then(
+                  (tx) => ({
+                    ...executionContext,
+                    numInputs,
+                    numOutputs,
+                    outputEncryptedNotes,
+                    proof,
+                    transaction: tx,
+                  }),
+                ),
+              );
+          }),
+    );
+  }
+
+  private buildMerkleTree(executionContext: ExecutionContext): Promise<MerkleTree> {
+    const { options, contractConfig } = executionContext;
     return this.context.commitments
       .findByContract({
         chainId: options.chainId,
@@ -421,24 +622,215 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       });
   }
 
+  private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithProof> {
+    const { options, contractConfig, transaction } = executionContext;
+    const { signer } = options;
+    const contract = MystikoContractFactory.connect<CommitmentPool>(
+      'CommitmentPool',
+      contractConfig.address,
+      signer.signer,
+    );
+    const request = TransactionExecutorV2.buildTransactionRequest(executionContext);
+    return TransactionExecutorV2.validateRequest(executionContext, request, contract).then(() =>
+      TransactionExecutorV2.signRequest(executionContext, request)
+        .then((signature) => contract.transact(request, signature))
+        .then((resp) =>
+          this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
+            transactionHash: resp.hash,
+          }).then((tx) => ({ tx, resp })),
+        )
+        .then(({ tx, resp }) =>
+          waitTransaction(resp).then((receipt) =>
+            this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+              transactionHash: receipt.transactionHash,
+            }),
+          ),
+        )
+        .then((tx) => ({ ...executionContext, transaction: tx })),
+    );
+  }
+
   private updateTransactionStatus(
     options: TransactionOptions,
     transaction: Transaction,
     newStatus: TransactionStatus,
-    extraData: TransactionUpdate,
+    extraData?: TransactionUpdate,
   ): Promise<Transaction> {
     const oldStatus = transaction.status as TransactionStatus;
-    const wrappedData = extraData || {};
-    wrappedData.status = newStatus;
-    return this.context.transactions.update(transaction.id, extraData).then((newTransaction) => {
-      if (options.statusCallback) {
-        try {
-          options.statusCallback(newTransaction, oldStatus, newStatus);
-        } catch (error) {
-          this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
+    if (oldStatus !== newStatus && !extraData) {
+      const wrappedData: TransactionUpdate = extraData || {};
+      wrappedData.status = newStatus;
+      return this.context.transactions.update(transaction.id, wrappedData).then((newTransaction) => {
+        if (options.statusCallback && oldStatus !== newStatus) {
+          try {
+            options.statusCallback(newTransaction, oldStatus, newStatus);
+          } catch (error) {
+            this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
+          }
         }
+        return newTransaction;
+      });
+    }
+    return Promise.resolve(transaction);
+  }
+
+  private static validateRequest(
+    executionContext: ExecutionContextWithProof,
+    request: ICommitmentPool.TransactRequestStruct,
+    contract: CommitmentPool,
+  ): Promise<ExecutionContextWithProof> {
+    return contract
+      .isKnownRoot(request.rootHash)
+      .then((validRoot) => {
+        if (!validRoot) {
+          return createErrorPromise(
+            'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
+            MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+          );
+        }
+        return Promise.resolve();
+      })
+      .then(() => TransactionExecutorV2.validateSerialNumbers(executionContext, request, contract));
+  }
+
+  private static validateSerialNumbers(
+    executionContext: ExecutionContextWithProof,
+    request: ICommitmentPool.TransactRequestStruct,
+    contract: CommitmentPool,
+  ): Promise<ExecutionContextWithProof> {
+    const { selectedCommitments } = executionContext;
+    const { serialNumbers } = request;
+    if (serialNumbers.length !== selectedCommitments.length) {
+      return createErrorPromise(
+        'number of serial numbers is not equal to number of input commitments',
+        MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+      );
+    }
+    const serialNumberPromises: Promise<boolean>[] = [];
+    for (let i = 0; i < serialNumbers.length; i += 1) {
+      const commitment = selectedCommitments[i];
+      const serialNumber = serialNumbers[i];
+      serialNumberPromises.push(
+        contract.spentSerialNumbers(serialNumber).then((spent) => {
+          if (spent) {
+            return commitment
+              .atomicUpdate((data) => {
+                data.status = CommitmentStatus.SPENT;
+                return data;
+              })
+              .then(() => spent);
+          }
+          return spent;
+        }),
+      );
+    }
+    return Promise.all(serialNumberPromises).then((spentFlags) => {
+      const doubleSpent = spentFlags.filter((spent) => spent).length > 0;
+      if (doubleSpent) {
+        return createErrorPromise(
+          'some commitments hava already been spent',
+          MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+        );
       }
-      return newTransaction;
+      return Promise.resolve(executionContext);
     });
+  }
+
+  private static updateCommitmentsStatus(commitments: Commitment[], status: CommitmentStatus): Promise<void> {
+    const updatePromises: Promise<Commitment>[] = [];
+    for (let i = 0; i < commitments.length; i += 1) {
+      const commitment = commitments[i];
+      updatePromises.push(
+        commitment.atomicUpdate((data) => {
+          data.status = status;
+          data.updatedAt = MystikoHandler.now();
+          return data;
+        }),
+      );
+    }
+    return Promise.all(updatePromises).then(() => {});
+  }
+
+  private static buildTransactionRequest(
+    executionContext: ExecutionContextWithProof,
+  ): ICommitmentPool.TransactRequestStruct {
+    const { options, proof, numInputs, numOutputs, outputEncryptedNotes } = executionContext;
+    return {
+      proof: {
+        a: { X: proof.proof.a[0], Y: proof.proof.a[1] },
+        b: { X: proof.proof.b[0], Y: proof.proof.b[1] },
+        c: { X: proof.proof.c[0], Y: proof.proof.c[1] },
+      },
+      rootHash: proof.inputs[0],
+      serialNumbers: proof.inputs.slice(1, 1 + numInputs),
+      sigHashes: proof.inputs.slice(1 + numInputs, 1 + 2 * numInputs),
+      sigPk: proof.inputs[1 + 2 * numInputs],
+      publicAmount: proof.inputs[2 + 2 * numInputs],
+      relayerFeeAmount: proof.inputs[3 + 2 * numInputs],
+      outCommitments: proof.inputs.slice(4 + 2 * numInputs, 4 + 2 * numInputs + numOutputs),
+      outRollupFees: proof.inputs.slice(4 + 2 * numInputs + numOutputs, 4 + 2 * numInputs + 2 * numOutputs),
+      publicRecipient: options.publicAddress || MAIN_ASSET_ADDRESS,
+      relayerAddress: options.gasRelayerAddress || MAIN_ASSET_ADDRESS,
+      outEncryptedNotes: outputEncryptedNotes.map(toHex),
+    };
+  }
+
+  private static signRequest(
+    executionContext: ExecutionContextWithProof,
+    request: ICommitmentPool.TransactRequestStruct,
+  ): Promise<string> {
+    const { publicRecipient, relayerAddress } = request;
+    const { randomEtherWallet, outputEncryptedNotes } = executionContext;
+    const bytes = Buffer.concat([toBuff(publicRecipient), toBuff(relayerAddress), ...outputEncryptedNotes]);
+    return randomEtherWallet.signMessage(toBuff(ethers.utils.keccak256(bytes)));
+  }
+
+  private getInputAccounts(executionContext: ExecutionContext): Promise<Account[]> {
+    const { selectedCommitments } = executionContext;
+    const accountPromises: Promise<Account>[] = [];
+    for (let i = 0; i < selectedCommitments.length; i += 1) {
+      const commitment = selectedCommitments[i];
+      const { commitmentHash, shieldedAddress } = commitment;
+      if (!shieldedAddress) {
+        return createErrorPromise(
+          `missing required data of input commitment=${commitmentHash}`,
+          MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+        );
+      }
+      accountPromises.push(
+        this.context.accounts.findOne(shieldedAddress).then((account) => {
+          if (account === null) {
+            return createErrorPromise(
+              `account with mystiko address=${shieldedAddress} does not exist in your wallet`,
+              MystikoErrorCode.NON_EXISTING_ACCOUNT,
+            );
+          }
+          return account;
+        }),
+      );
+    }
+    return Promise.all(accountPromises);
+  }
+
+  private static getCircuitConfig(
+    numInputs: number,
+    numOutputs: number,
+    contractConfig: PoolContractConfig,
+  ): CircuitConfig | undefined {
+    let config: CircuitConfig | undefined;
+    if (numInputs === 1 && numOutputs === 0) {
+      config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION1x0);
+    } else if (numInputs === 1 && numOutputs === 1) {
+      config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION1x1);
+    } else if (numInputs === 1 && numOutputs === 2) {
+      config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION1x2);
+    } else if (numInputs === 2 && numOutputs === 0) {
+      config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION2x0);
+    } else if (numInputs === 2 && numOutputs === 1) {
+      config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION2x1);
+    } else if (numInputs === 2 && numOutputs === 2) {
+      config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION2x2);
+    }
+    return config;
   }
 }
