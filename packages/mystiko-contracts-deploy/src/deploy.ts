@@ -108,7 +108,7 @@ function parseCfg(taskArgs: any) {
 // deploy hasher and verifier
 async function deployStep1(taskArgs: any) {
   const c = parseCfg(taskArgs);
-  await deployBaseContract(c);
+  await deployBaseContract(c.srcChainCfg);
   saveConfig(c.mystikoNetwork, c.cfg);
 }
 
