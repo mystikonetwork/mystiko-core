@@ -92,14 +92,20 @@ export abstract class Mystiko {
     this.providerPool.connect();
     this.protocol = new MystikoProtocolV2(await this.zokratesRuntime());
     this.context = new MystikoContext(this.config, this.db, this.protocol);
+    const executors = new DefaultExecutorFactory();;
+    executors.context = this.context;
     this.context.providers = this.providerPool;
-    this.context.executors = new DefaultExecutorFactory();
+    this.context.executors = executors;
     this.wallets = new WalletHandlerV2(this.context);
     this.accounts = new AccountHandlerV2(this.context);
     this.assets = new AssetHandlerV2(this.context);
     this.commitments = new CommitmentHandlerV2(this.context);
     this.deposits = new DepositHandlerV2(this.context);
     this.transactions = new TransactionHandlerV2(this.context);
+    this.signers = {
+      metaMask: new MetaMaskSigner(this.config),
+      privateKey: new PrivateKeySigner(this.config, this.providerPool),
+    };
     this.logger.info('@mystikonetwork/client has been successfully initialized, enjoy!');
   }
 

@@ -657,7 +657,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     extraData?: TransactionUpdate,
   ): Promise<Transaction> {
     const oldStatus = transaction.status as TransactionStatus;
-    if (oldStatus !== newStatus && !extraData) {
+    if (oldStatus !== newStatus && extraData) {
       const wrappedData: TransactionUpdate = extraData || {};
       wrappedData.status = newStatus;
       return this.context.transactions.update(transaction.id, wrappedData).then((newTransaction) => {

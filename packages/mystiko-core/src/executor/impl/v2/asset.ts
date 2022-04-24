@@ -1,5 +1,5 @@
 import { ERC20, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
-import { toBN } from '@mystikonetwork/utils';
+import { fromDecimals, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { AssetExecutor, AssetExecutorApproveOptions, AssetExecutorBalanceOptions } from '../../../interface';
@@ -20,9 +20,10 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
       .then((account) => contract.allowance(account, options.spender))
       .then((approvedAmount) => {
         if (toBN(approvedAmount.toString()).lt(toBN(options.amount))) {
+          const amountNumber = fromDecimals(options.amount, options.assetDecimals);
           this.logger.info(
             'started submitting asset approving transaction ' +
-              `chain id=${options.chainId}, asset=${options.assetSymbol}, amount=${options.amount}`,
+              `chain id=${options.chainId}, asset=${options.assetSymbol}, amount=${amountNumber}`,
           );
           return contract.approve(options.spender, options.amount);
         }

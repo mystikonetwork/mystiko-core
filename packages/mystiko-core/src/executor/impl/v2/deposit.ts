@@ -293,7 +293,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     const approvePromises: Promise<ethers.providers.TransactionReceipt | undefined>[] = [];
     assetTotals.forEach((assetTotal) => {
       const { asset, total } = assetTotal;
-      if (asset.assetType !== AssetType.ERC20) {
+      if (asset.assetType !== AssetType.MAIN) {
         const approvePromise = this.context.executors
           .getAssetExecutor()
           .approve({
@@ -307,7 +307,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           })
           .then((resp) =>
             this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVING, {
-              transactionHash: resp?.hash,
+              assetApproveTransactionHash: resp?.hash,
             }).then(() => {
               if (resp) {
                 return waitTransaction(resp);
@@ -328,7 +328,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             break;
           }
         }
-        return this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED, { transactionHash });
+        return this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED, {
+          assetApproveTransactionHash: transactionHash,
+        });
       })
       .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
   }
@@ -373,7 +375,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         { value: mainAssetTotal },
       );
     }
-    this.logger.info(`submitting transaction of deposit id=${deposit.id} options=${JSON.stringify(options)}`);
+    this.logger.info(`submitting transaction of deposit id=${deposit.id}`);
     return promise
       .then((resp) => {
         this.logger.info(`transaction of deposit id=${deposit.id} has been submitted`);
@@ -473,7 +475,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     updateOptions?: DepositUpdate,
   ): Promise<Deposit> {
     const oldStatus = deposit.status as DepositStatus;
-    if (oldStatus !== newStatus && !updateOptions) {
+    if (oldStatus !== newStatus && updateOptions) {
       const wrappedUpdateOptions: DepositUpdate = updateOptions || {};
       wrappedUpdateOptions.status = newStatus;
       return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {

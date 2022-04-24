@@ -56,9 +56,6 @@
       "explorerUrl": "https://testnet.bscscan.com",
       "providers": [
         {
-          "url": "wss://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
-        },
-        {
           "url": "https://bsc.getblock.io/testnet/?api_key=71722c7c-f748-4ea3-bacd-6edc2900c4f0"
         },
         {
@@ -82,6 +79,28 @@
           "type": "deposit",
           "minAmount": "100000000000000000",
           "minExecutorFee": "5000000000000000"
+        },
+        {
+          "version": 2,
+          "name": "MystikoV2WithLoopERC20",
+          "address": "0xDc9d408C32222307A6Bc021B8CFE7a1A635A412C",
+          "startBlock": 18723385,
+          "bridgeType": "loop",
+          "poolAddress": "0xB2416832bCF9Fb529E166A9468facf8527cBCC33",
+          "disabled": false,
+          "type": "deposit",
+          "minAmount": "100000"
+        },
+        {
+          "version": 2,
+          "name": "MystikoV2WithLoopERC20",
+          "address": "0x89A054bfaF90B19664008cae7F99F3E25Fff1e0f",
+          "startBlock": 18723345,
+          "bridgeType": "loop",
+          "poolAddress": "0x6DA226228156a9Ec38985C1E4c940cFc75eE7370",
+          "disabled": false,
+          "type": "deposit",
+          "minAmount": "100000000000000000"
         }
       ],
       "poolContracts": [
@@ -92,9 +111,50 @@
           "startBlock": 18721475,
           "type": "pool",
           "minRollupFee": "10000000000000000"
+        },
+        {
+          "version": 2,
+          "name": "CommitmentPool",
+          "address": "0xB2416832bCF9Fb529E166A9468facf8527cBCC33",
+          "startBlock": 18723380,
+          "type": "pool",
+          "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
+          "minRollupFee": "10000"
+        },
+        {
+          "version": 2,
+          "name": "CommitmentPool",
+          "address": "0x6DA226228156a9Ec38985C1E4c940cFc75eE7370",
+          "startBlock": 18723340,
+          "type": "pool",
+          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
+          "minRollupFee": "10000000000000000"
         }
       ],
-      "assets": []
+      "assets": [
+        {
+          "assetType": "erc20",
+          "assetSymbol": "mUSD",
+          "assetDecimals": 6,
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ],
+          "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88"
+        },
+        {
+          "assetType": "erc20",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ],
+          "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0"
+        }
+      ]
     },
     {
       "name": "Polygon Testnet",
