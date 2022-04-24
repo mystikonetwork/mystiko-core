@@ -1,8 +1,6 @@
 {
   "version": 2,
-  "circuits": [
-    "zokrates-2.0-rollup1"
-  ],
+  "circuits": [],
   "chains": [
     {
       "name": "hardhat",

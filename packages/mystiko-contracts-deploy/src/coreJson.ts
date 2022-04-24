@@ -139,8 +139,10 @@ function addPoolContractConfig(
   }
   // @ts-ignore
   newPoolContract.minRollupFee = minRollupFee;
-  // @ts-ignore
-  newPoolContract.circuits = circuits;
+  if (circuits.length>0){
+    // @ts-ignore
+    newPoolContract.circuits = circuits;
+  }
 
   coreConfig.chains[i].poolContracts.push(newPoolContract);
   return coreConfig;
@@ -216,10 +218,9 @@ function addNewDepositContractConfig(
   if (bridgeType !== 'loop') {
     // @ts-ignore
     newContract.minBridgeFee = minBridgeFee;
+    // @ts-ignore
+    newContract.minExecutorFee = minExecutorFee;
   }
-
-  // @ts-ignore
-  newContract.minExecutorFee = minExecutorFee;
 
   coreConfig.chains[i].depositContracts.push(newContract);
   return coreConfig;
