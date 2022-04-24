@@ -2,9 +2,9 @@
   "eth": {
     "gas": 5000000
   },
-  "networks": [
+  "chains": [
     {
-      "name": "hardhat",
+      "network": "hardhat",
       "privateKey": "",
       "providers": []
     }

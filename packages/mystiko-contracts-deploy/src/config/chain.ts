@@ -5,7 +5,6 @@ export interface RawChainConfig {
   name: string;
   network: string;
   chainId: number;
-  minBridgeFee: string;
   tokens: RawChainTokenConfig[];
   wrappedTokens: ChainTokenConfig[];
   hasher3Address: string;
@@ -28,7 +27,6 @@ export class ChainConfig extends BaseConfig {
     BaseConfig.checkString(this.config, 'name');
     BaseConfig.checkString(this.config, 'network');
     BaseConfig.checkNumber(this.config, 'chainId');
-    BaseConfig.checkString(this.config, 'minBridgeFee');
     BaseConfig.checkEthAddress(this.config, 'hasher3Address', false);
     BaseConfig.checkEthAddress(this.config, 'rollup1Address', false);
     BaseConfig.checkEthAddress(this.config, 'rollup4Address', false);
@@ -58,10 +56,6 @@ export class ChainConfig extends BaseConfig {
 
   public get chainId(): number {
     return this.asRawChainConfig().chainId;
-  }
-
-  public get minBridgeFee(): string {
-    return this.asRawChainConfig().minBridgeFee;
   }
 
   public getToken(assertSymbol: string): ChainTokenConfig | undefined {

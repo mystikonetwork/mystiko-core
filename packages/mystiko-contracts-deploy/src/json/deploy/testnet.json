@@ -1,8 +1,906 @@
 {
   "version": 2,
-  "circuits": "circom-1.0",
+  "circuits": [
+    "zokrates-2.0-rollup1"
+  ],
   "chains": [
+    {
+      "name": "Ethereum Ropsten",
+      "network": "ropsten",
+      "chainId": 3,
+      "tokens": [
+        {
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x39e68dd41AF6Fd870f27a6B77cBcfFA64626b0f3",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "erc20": true,
+          "assetDecimals": 6,
+          "address": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD",
+          "minAmount": "100000",
+          "minExecutorFee": "5000",
+          "minRollupFee": "10000",
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ]
+        },
+        {
+          "assetSymbol": "mBNB",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x2f1306362422e341e08e656d656719d5e8facdc7",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mMATIC",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x10E8262dECf54EF16E5a5D0c53A6Af1323A5351C",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mAVAX",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x52dBf0d445E001371F4f42e6bF1e9E417027a4cB",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ethereum Goerli",
+      "network": "goerli",
+      "chainId": 5,
+      "tokens": [
+        {
+          "assetSymbol": "ETH",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0xf900322b2D706b35F43B9f8D00dc4617292c2697",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "erc20": true,
+          "assetDecimals": 6,
+          "address": "0xA008e806e53872DC8C2e60D1Ba8302ccfFA795fB",
+          "minAmount": "100000",
+          "minExecutorFee": "5000",
+          "minRollupFee": "10000",
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ]
+        },
+        {
+          "assetSymbol": "mBNB",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0xbCE3B10a6aE55CD2fa36F847fd0e829de8f6964b",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MATIC",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BSC Testnet",
+      "network": "bsctestnet",
+      "chainId": 97,
+      "tokens": [
+        {
+          "assetSymbol": "BNB",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "erc20": true,
+          "assetDecimals": 6,
+          "address": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
+          "minAmount": "100000",
+          "minExecutorFee": "5000",
+          "minRollupFee": "10000",
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ]
+        },
+        {
+          "assetSymbol": "mETH",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0xc714b6884d66a7D2618c820D86f58A01b789f613",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        }
+      ],
+      "hasher3Address": "0x5fE5278A8376CED30c74746ae7ACc3daA8ACa75E",
+      "rollup1Address": "0xb8f560756610Ffc2C01819BEda0E61fFF03f55eb",
+      "rollup4Address": "0xe61c8e582ec8d2D5F373182f2b8EC3c488308588",
+      "rollup16Address": "0xB1F9C0c751f2C980b87766ECC6e09E6Cb699F779",
+      "transaction1x0VerifierAddress": "0x922856095A6efC33a12fB4D417898931eb4787ed",
+      "transaction1x1VerifierAddress": "0xE12B0baA3959C31F99f0E974094c3473B716531c",
+      "transaction1x2VerifierAddress": "0xD5f01b6dec58CF4cc4840d3b725d911d94117D1c",
+      "transaction2x0VerifierAddress": "0xe7618c67F9205A4aB7e3d7c3FD475E112B6D9d08",
+      "transaction2x1VerifierAddress": "0xA71F77B24D622C3DC9E63d5912c65c6c771972E6",
+      "transaction2x2VerifierAddress": "0x50c8A6230B203D9Dab9fEF09399A3846F1cb2cc1"
+    },
+    {
+      "name": "Aurora Testnet",
+      "network": "auroratestnet",
+      "chainId": 1313161555,
+      "tokens": [
+        {
+          "assetSymbol": "aETH",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x8bF9752F8c9195b603d534038BCb9F6c0C26351E",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "erc20": true,
+          "assetDecimals": 6,
+          "address": "0x2E34eDA41d0E0DFC8E6fe8Fd032827b20C395aD1",
+          "minAmount": "100000",
+          "minExecutorFee": "5000",
+          "minRollupFee": "10000",
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fantom Testnet",
+      "network": "fantomtestnet",
+      "chainId": 4002,
+      "tokens": [
+        {
+          "assetSymbol": "FTM",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x80B46C896E26C1cB7DCdD23019d9e7cca6854864",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Polygon Testnet",
+      "network": "polygontestnet",
+      "chainId": 80001,
+      "tokens": [
+        {
+          "assetSymbol": "MATIC",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "erc20": true,
+          "assetDecimals": 6,
+          "address": "0x749931bcb3830F5792B5F5e74a4622e146E9F75b",
+          "minAmount": "100000",
+          "minExecutorFee": "5000",
+          "minRollupFee": "10000",
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ]
+        },
+        {
+          "assetSymbol": "mETH",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x2191B259307dDE156074B70aca701B1143c33256",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Avalanche Testnet",
+      "network": "avalanchetestnet",
+      "chainId": 43113,
+      "tokens": [
+        {
+          "assetSymbol": "AVAX",
+          "assetDecimals": 18,
+          "erc20": false,
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "MTT",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0xc905017B7218Cab43B60f4aBA2F3189f7F00E5CB",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        },
+        {
+          "assetSymbol": "mUSD",
+          "erc20": true,
+          "assetDecimals": 6,
+          "address": "0xD386e6bE9C093ebA4cB064C79eFf44A7AbBAd149",
+          "minAmount": "100000",
+          "minExecutorFee": "5000",
+          "minRollupFee": "10000",
+          "recommendedAmounts": [
+            "100000",
+            "200000",
+            "300000"
+          ]
+        },
+        {
+          "assetSymbol": "mETH",
+          "erc20": true,
+          "assetDecimals": 18,
+          "address": "0x1AA34153F5166ccb8d385856c7e8cE9F15686585",
+          "minAmount": "100000000000000000",
+          "minExecutorFee": "5000000000000000",
+          "minRollupFee": "10000000000000000",
+          "recommendedAmounts": [
+            "100000000000000000",
+            "200000000000000000",
+            "300000000000000000"
+          ]
+        }
+      ]
+    }
   ],
   "bridges": [
-  ]
+    {
+      "name": "loop",
+      "contractName": "Loop",
+      "proxys": [],
+      "fees": [],
+      "commitmentPools": [
+        {
+          "network": "bsctestnet",
+          "assetSymbol": "BNB",
+          "address": "0x2f10df1D56F5009662E8FcEd7cdc46c65A04451B",
+          "syncStart": 18721475
+        }
+      ],
+      "pairs": [
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "ETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "BNB",
+              "address": "0x84D9DDfa3B98F4d8a0EF1aC355F50e49e99F90bD",
+              "syncStart": 18721479
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "arbitrumtestnet",
+              "assetSymbol": "ETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "MATIC"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "AVAX"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "celer",
+      "contractName": "Celer",
+      "proxys": [
+        {
+          "network": "goerli",
+          "address": "0xF25170F86E4291a99a9A560032Fe9948b8BcFBB2"
+        },
+        {
+          "network": "bsctestnet",
+          "address": "0xAd204986D6cB67A5Bc76a3CB8974823F43Cb9AAA"
+        },
+        {
+          "network": "fantomtestnet",
+          "address": "0xb92d6933A024bcca9A21669a480C236Cbc973110"
+        },
+        {
+          "network": "arbitrumtestnet",
+          "address": "0x7d43AABC515C356145049227CeE54B608342c0ad"
+        },
+        {
+          "network": "polygonmumbai",
+          "address": "0x7d43AABC515C356145049227CeE54B608342c0ad"
+        },
+        {
+          "network": "avalanchefuji",
+          "address": "0xE9533976C590200E32d95C53f06AE12d292cFc47"
+        }
+      ],
+      "fees": [
+        {
+          "network": "ropsten",
+          "minimal": "1000"
+        },
+        {
+          "network": "goerli",
+          "minimal": "1000"
+        },
+        {
+          "network": "bsctestnet",
+          "minimal": "1000"
+        },
+        {
+          "network": "polygontestnet",
+          "minimal": "1000"
+        },
+        {
+          "network": "avalanchetestnet",
+          "minimal": "1000"
+        },
+        {
+          "network": "auroratestnet",
+          "minimal": "1000"
+        }
+      ],
+      "commitmentPools": [],
+      "pairs": [
+        {
+          "pair": [
+            {
+              "network": "goerli",
+              "assetSymbol": "ETH"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "mETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "goerli",
+              "assetSymbol": "MTT"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "goerli",
+              "assetSymbol": "mUSD"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "goerli",
+              "assetSymbol": "mBNB"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "BNB"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tbridge",
+      "contractName": "TBridge",
+      "proxys": [],
+      "fees": [
+        {
+          "network": "ropsten",
+          "minimal": "1000"
+        },
+        {
+          "network": "goerli",
+          "minimal": "1000"
+        },
+        {
+          "network": "bsctestnet",
+          "minimal": "1000"
+        },
+        {
+          "network": "polygontestnet",
+          "minimal": "1000"
+        },
+        {
+          "network": "avalanchetestnet",
+          "minimal": "1000"
+        },
+        {
+          "network": "auroratestnet",
+          "minimal": "1000"
+        }
+      ],
+      "commitmentPools": [],
+      "pairs": [
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "ETH"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "mETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "MTT"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mUSD"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mBNB"
+            },
+            {
+              "network": "bsctestnet",
+              "assetSymbol": "BNB"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "ETH"
+            },
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "mETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "MTT"
+            },
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mUSD"
+            },
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mMATIC"
+            },
+            {
+              "network": "polygontestnet",
+              "assetSymbol": "MATIC"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "ETH"
+            },
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "mETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "MTT"
+            },
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mUSD"
+            },
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mAVAX"
+            },
+            {
+              "network": "avalanchetestnet",
+              "assetSymbol": "AVAX"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "ETH"
+            },
+            {
+              "network": "auroratestnet",
+              "assetSymbol": "aETH"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "MTT"
+            },
+            {
+              "network": "auroratestnet",
+              "assetSymbol": "MTT"
+            }
+          ]
+        },
+        {
+          "pair": [
+            {
+              "network": "ropsten",
+              "assetSymbol": "mUSD"
+            },
+            {
+              "network": "auroratestnet",
+              "assetSymbol": "mUSD"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "operator": {
+    "admin": "0xEc1c50a3EF4ED959934Ec482aA70cD7453F96F95",
+    "executors": [
+      "0x457584165DDc698feeB70A546e78B912E79fB94F"
+    ],
+    "rollers": [
+      "0x0710f785E1835E1713fF6d9ccD0Aca2Ad2013022"
+    ]
+  }
 }

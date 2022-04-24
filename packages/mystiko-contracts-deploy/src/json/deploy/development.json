@@ -8,7 +8,6 @@
       "name": "hardhat",
       "network": "hardhat",
       "chainId": 9999999,
-      "minBridgeFee": "1000",
       "tokens": [
         {
           "assetSymbol": "ETH",
@@ -62,18 +61,14 @@
       "name": "loop",
       "contractName": "Loop",
       "proxys": [],
-      "commitmentPools": [
-        {
-          "network": "hardhat",
-          "token": "ETH"
-        }
-      ],
+      "fees": [],
+      "commitmentPools": [],
       "pairs": [
         {
           "pair": [
             {
               "network": "hardhat",
-              "token": "ETH"
+              "assetSymbol": "ETH"
             }
           ]
         }
@@ -82,31 +77,24 @@
     {
       "name": "tbridge",
       "contractName": "TBridge",
-      "proxys": [
-        {
-          "network": "hardhat"
-        }
-      ],
-      "commitmentPools": [
+      "proxys": [],
+      "fees": [
         {
           "network": "hardhat",
-          "token": "MTT"
-        },
-        {
-          "network": "hardhat",
-          "token": "mUSD"
+          "minimal": "1000"
         }
       ],
+      "commitmentPools": [],
       "pairs": [
         {
           "pair": [
             {
               "network": "hardhat",
-              "token": "MTT"
+              "assetSymbol": "MTT"
             },
             {
               "network": "hardhat",
-              "token": "mUSD"
+              "assetSymbol": "mUSD"
             }
           ]
         }

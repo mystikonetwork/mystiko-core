@@ -11,7 +11,7 @@ import {
   Hasher3__factory,
 } from '@mystikonetwork/contracts-abi';
 import { getArtifact } from '../common/utils';
-import { saveBaseAddressConfig } from '../config/config';
+import { ChainConfig } from '../config/chain';
 
 let Transaction1x0Verifier: Transaction1x0Verifier__factory;
 let Transaction1x1Verifier: Transaction1x1Verifier__factory;
@@ -41,7 +41,9 @@ export async function initBaseContractFactory(ethers: any) {
 }
 
 // deploy hasher and verifier
-export async function deployBaseContract(network: string) {
+export async function deployBaseContract(cfg: ChainConfig) {
+  const chainCfg = cfg;
+
   console.log('deploy hasher3');
   const hasher3 = await Hasher3.deploy();
   const hasher3Response = await hasher3.deployed();
@@ -98,17 +100,14 @@ export async function deployBaseContract(network: string) {
   console.log('transaction2x1 verifier address: ', transaction2x1VerifierAddress);
   console.log('transaction2x2 verifier address: ', transaction2x2VerifierAddress);
 
-  saveBaseAddressConfig(
-    network,
-    hasher3Address,
-    rollup1VerifierAddress,
-    rollup4VerifierAddress,
-    rollup16VerifierAddress,
-    transaction1x0VerifierAddress,
-    transaction1x1VerifierAddress,
-    transaction1x2VerifierAddress,
-    transaction2x0VerifierAddress,
-    transaction2x1VerifierAddress,
-    transaction2x2VerifierAddress,
-  );
+  chainCfg.hasher3Address = hasher3Address;
+  chainCfg.rollup1Address = rollup1VerifierAddress;
+  chainCfg.rollup4Address = rollup4VerifierAddress;
+  chainCfg.rollup16Address = rollup16VerifierAddress;
+  chainCfg.transaction1x0VerifierAddress = transaction1x0VerifierAddress;
+  chainCfg.transaction1x1VerifierAddress = transaction1x1VerifierAddress;
+  chainCfg.transaction1x2VerifierAddress = transaction1x2VerifierAddress;
+  chainCfg.transaction2x0VerifierAddress = transaction2x0VerifierAddress;
+  chainCfg.transaction2x1VerifierAddress = transaction2x1VerifierAddress;
+  chainCfg.transaction2x2VerifierAddress = transaction2x2VerifierAddress;
 }

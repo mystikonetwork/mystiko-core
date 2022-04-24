@@ -86,7 +86,7 @@ export async function deployDepositContract(
 
   if (bridgeCfg.name !== 'loop') {
     await coreContract.setBridgeProxyAddress(bridgeProxyAddress);
-    await coreContract.setMinBridgeFee(srcChainCfg.minBridgeFee);
+    await coreContract.setMinBridgeFee(bridgeCfg.getBridgeFeeConfig(srcChainCfg.network).minimal);
     await coreContract.setMinExecutorFee(srcChainTokenCfg.minExecutorFee);
 
     await coreContract.setPeerMinExecutorFee(dstChainTokenCfg.minExecutorFee);

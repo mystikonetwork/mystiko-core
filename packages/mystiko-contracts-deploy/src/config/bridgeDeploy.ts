@@ -2,7 +2,7 @@ import { BaseConfig } from './base';
 
 export interface RawContractDeployConfig {
   network: string;
-  token: string;
+  assetSymbol: string;
   address?: string;
   syncStart?: number;
 }
@@ -11,7 +11,7 @@ export class ContractDeployConfig extends BaseConfig {
   constructor(rawConfig: any) {
     super(rawConfig);
     BaseConfig.checkString(this.config, 'network');
-    BaseConfig.checkString(this.config, 'token');
+    BaseConfig.checkString(this.config, 'assetSymbol');
     BaseConfig.checkNumber(this.config, 'syncStart', false);
     BaseConfig.checkEthAddress(this.config, 'address', false);
   }
@@ -20,8 +20,16 @@ export class ContractDeployConfig extends BaseConfig {
     return this.asRawContractDeployConfig().network;
   }
 
-  public get token(): string {
-    return this.asRawContractDeployConfig().token;
+  public set network(net: string) {
+    this.asRawContractDeployConfig().network = net;
+  }
+
+  public get assetSymbol(): string {
+    return this.asRawContractDeployConfig().assetSymbol;
+  }
+
+  public set assetSymbol(asset) {
+    this.asRawContractDeployConfig().assetSymbol = asset;
   }
 
   public get address(): string {

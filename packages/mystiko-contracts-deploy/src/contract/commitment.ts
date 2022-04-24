@@ -4,6 +4,7 @@ import { ChainTokenConfig } from '../config/chainToken';
 import { OperatorConfig } from '../config/operator';
 import { ContractDeployConfig } from '../config/bridgeDeploy';
 import { LOGRED, MerkleTreeHeight, RootHistoryLength } from '../common/constant';
+import { BridgeConfig } from '../config/bridge';
 
 let CommitmentPoolMain: CommitmentPoolMain__factory;
 let CommitmentPoolERC20: CommitmentPoolERC20__factory;
@@ -92,17 +93,30 @@ export async function addEnqueueWhitelist(addr: string, enqueueContractAddress: 
 }
 
 export async function getOrDeployCommitPool(
+  bridgeCfg: BridgeConfig,
   chainCfg: ChainConfig,
   chainTokenCfg: ChainTokenConfig,
-  pairSrcPoolCfg: ContractDeployConfig,
+  pairSrcPoolCfg: ContractDeployConfig | undefined,
   operatorCfg: OperatorConfig,
 ) {
-  if (chainCfg.network === 'hardhat' || pairSrcPoolCfg.address === '') {
+  if (pairSrcPoolCfg === undefined) {
+    const newPairPoolCfg = bridgeCfg.addNewPoolDeployConfig(
+      chainCfg.network,
+      chainTokenCfg.assetSymbol,
+      '',
+      0,
+    );
     console.log('commitment pool not exist, deploy');
-    const commitmentPoolAddress = await deployCommitmentPool(pairSrcPoolCfg, chainCfg, chainTokenCfg);
-
+    const commitmentPoolAddress = await deployCommitmentPool(newPairPoolCfg, chainCfg, chainTokenCfg);
     await addRollupWhitelist(commitmentPoolAddress, operatorCfg.rollers);
     return commitmentPoolAddress;
   }
+
+  if (chainCfg.network === 'hardhat') {
+    const commitmentPoolAddress = await deployCommitmentPool(pairSrcPoolCfg, chainCfg, chainTokenCfg);
+    await addRollupWhitelist(commitmentPoolAddress, operatorCfg.rollers);
+    return commitmentPoolAddress;
+  }
+
   return pairSrcPoolCfg.address;
 }

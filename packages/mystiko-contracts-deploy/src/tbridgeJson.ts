@@ -44,9 +44,9 @@ export function saveTBridgeJson(c: any) {
   for (let i = 0; i < tbridgeConfig.bridge.pairs.length; i += 1) {
     const pair = tbridgeConfig.bridge.pairs[i];
     if (
-      pair.local.name === c.pairSrcDepositCfg.network &&
-      pair.local.token === c.pairSrcDepositCfg.token &&
-      pair.remote.name === c.pairDstDepositCfg.network
+      pair.local.network === c.pairSrcDepositCfg.network &&
+      pair.local.assetSymbol === c.pairSrcDepositCfg.assetSymbol &&
+      pair.remote.network === c.pairDstDepositCfg.network
     ) {
       tbridgeConfig.bridge.pairs[i].local.mystikoAddress = c.pairSrcDepositCfg.address;
       tbridgeConfig.bridge.pairs[i].local.relayProxyAddress = c.proxyCfg.address;
@@ -56,9 +56,9 @@ export function saveTBridgeJson(c: any) {
     }
 
     if (
-      pair.remote.name === c.pairSrcDepositCfg.network &&
-      pair.remote.token === c.pairSrcDepositCfg.token &&
-      pair.local.name === c.pairDstDepositCfg.network
+      pair.remote.network === c.pairSrcDepositCfg.network &&
+      pair.remote.assetSymbol === c.pairSrcDepositCfg.assetSymbol &&
+      pair.local.network === c.pairDstDepositCfg.network
     ) {
       tbridgeConfig.bridge.pairs[i].remote.mystikoAddress = c.pairSrcDepositCfg.address;
       tbridgeConfig.bridge.pairs[i].remote.relayProxyAddress = c.proxyCfg.address;
@@ -71,16 +71,16 @@ export function saveTBridgeJson(c: any) {
 
   const pair = {
     local: {
-      name: c.pairSrcDepositCfg.network,
+      network: c.pairSrcDepositCfg.network,
       chainId: c.srcChainCfg.chainId,
-      token: c.srcTokenCfg.assetSymbol,
+      assetSymbol: c.srcTokenCfg.assetSymbol,
       mystikoAddress: c.pairSrcDepositCfg.address,
       relayProxyAddress: c.proxyCfg.address,
     },
     remote: {
-      name: c.pairDstDepositCfg.network,
+      network: c.pairDstDepositCfg.network,
       chainId: c.dstChainCfg.chainId,
-      token: c.dstTokenCfg.assetSymbol,
+      assetSymbol: c.dstTokenCfg.assetSymbol,
     },
   };
 

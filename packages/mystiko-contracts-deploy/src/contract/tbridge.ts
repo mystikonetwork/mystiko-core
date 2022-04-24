@@ -2,6 +2,7 @@ import { MystikoTBridgeProxy__factory } from '@mystikonetwork/contracts-abi';
 import { BridgeConfig } from '../config/bridge';
 import { OperatorConfig } from '../config/operator';
 import { LOGRED } from '../common/constant';
+import { BridgeProxyConfig } from '../config/bridgeProxy';
 
 let MystikoTBridgeProxy: MystikoTBridgeProxy__factory;
 
@@ -35,6 +36,7 @@ async function addExecutorWhitelist(addr: string, executors: string[]) {
 
 export async function getOrDeployTBridgeProxy(
   bridgeCfg: BridgeConfig,
+  bridgeProxyCfg: BridgeProxyConfig | undefined,
   operatorCfg: OperatorConfig,
   chainNetwork: string,
 ) {
@@ -42,27 +44,24 @@ export async function getOrDeployTBridgeProxy(
     return '';
   }
 
-  const bridgeProxyCfg = bridgeCfg.getBridgeProxyConfig(chainNetwork);
-  if (bridgeProxyCfg === undefined) {
-    console.error(LOGRED, 'bridge proxy not exist');
-    process.exit(-1);
-  }
-
   if (bridgeCfg.name === 'tbridge') {
-    if (bridgeProxyCfg.address === undefined || bridgeProxyCfg.address === '') {
+    if (bridgeProxyCfg === undefined) {
       console.log('tbridge proxy not exist, deploy');
+
+      const addBridgeCfg = bridgeCfg.addBridgeProxyConfig(chainNetwork, '');
       const bridgeProxyAddress = await deployTBridgeProxy();
       console.log('bridgeProxy address is ', bridgeProxyAddress);
-      bridgeProxyCfg.address = bridgeProxyAddress;
+      addBridgeCfg.address = bridgeProxyAddress;
       await addExecutorWhitelist(bridgeProxyAddress, operatorCfg.executors);
       return bridgeProxyAddress;
     }
     return bridgeProxyCfg.address;
   }
 
-  if (bridgeProxyCfg.address === undefined || bridgeProxyCfg.address === '') {
+  if (bridgeProxyCfg === undefined || bridgeProxyCfg.address === undefined || bridgeProxyCfg.address === '') {
     console.error(LOGRED, 'bridge proxy address not configure');
     process.exit(-1);
   }
+
   return bridgeProxyCfg.address;
 }

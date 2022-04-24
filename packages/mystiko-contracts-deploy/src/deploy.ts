@@ -11,16 +11,11 @@ import { saveTBridgeJson } from './tbridgeJson';
 
 let ethers: any;
 
-// deploy hasher and verifier
-async function deployStep1(taskArgs: any) {
-  await deployBaseContract(taskArgs.src);
-}
-
 function parseCfg(taskArgs: any) {
   const srcNetwork = taskArgs.src;
   const dstNetwork = taskArgs.dst;
   const bridgeName = taskArgs.bridge;
-  const tokenSymbol = taskArgs.token;
+  const assetSymbol = taskArgs.token;
 
   const mystikoNetwork = getMystikoNetwork(srcNetwork);
 
@@ -47,31 +42,27 @@ function parseCfg(taskArgs: any) {
     process.exit(-1);
   }
 
-  const srcTokenCfg = srcChainCfg.getToken(tokenSymbol);
+  const srcTokenCfg = srcChainCfg.getToken(assetSymbol);
   if (srcTokenCfg === undefined) {
     console.error(LOGRED, 'chain token not configure');
     process.exit(-1);
   }
 
-  const depositPairCfg = bridgeCfg.getBridgeTokenPair(srcNetwork, tokenSymbol, dstNetwork);
+  const depositPairCfg = bridgeCfg.getBridgeTokenPair(srcNetwork, assetSymbol, dstNetwork);
   if (depositPairCfg === undefined) {
     console.log(LOGRED, 'bridge token pair configure not exist');
     process.exit(-1);
   }
 
-  const pairSrcDepositCfg = depositPairCfg.getPairDepositCfg(srcNetwork, tokenSymbol);
+  const pairSrcDepositCfg = depositPairCfg.getPairDepositCfg(srcNetwork, assetSymbol);
   if (pairSrcDepositCfg === undefined) {
     console.log(LOGRED, 'src deposit pair not exist');
     process.exit(-1);
   }
 
-  const pairSrcPoolCfg = bridgeCfg.getBridgeCommitmentPool(srcNetwork, tokenSymbol);
-  if (pairSrcPoolCfg === undefined) {
-    console.error(LOGRED, 'commitment pool not configure');
-    process.exit(-1);
-  }
+  const pairSrcPoolCfg = bridgeCfg.getBridgeCommitmentPool(srcNetwork, assetSymbol);
 
-  const pairDstDepositCfg = depositPairCfg.getPairPeerDepositCfg(srcNetwork, tokenSymbol, dstNetwork);
+  const pairDstDepositCfg = depositPairCfg.getPairPeerDepositCfg(srcNetwork, assetSymbol, dstNetwork);
   if (pairDstDepositCfg === undefined) {
     console.log(LOGRED, 'dst deposit pair  not exist');
     process.exit(-1);
@@ -83,7 +74,7 @@ function parseCfg(taskArgs: any) {
     process.exit(-1);
   }
 
-  const dstTokenName = pairDstDepositCfg.token;
+  const dstTokenName = pairDstDepositCfg.assetSymbol;
   const dstTokenCfg = dstChainCfg.getToken(dstTokenName);
   if (dstTokenCfg === undefined) {
     console.error(LOGRED, 'chain token not configure');
@@ -114,6 +105,13 @@ function parseCfg(taskArgs: any) {
   };
 }
 
+// deploy hasher and verifier
+async function deployStep1(taskArgs: any) {
+  const c = parseCfg(taskArgs);
+  await deployBaseContract(c);
+  saveConfig(c.mystikoNetwork, c.cfg);
+}
+
 // deploy mystiko contract and config contract
 async function deployStep2(taskArgs: any) {
   const c = parseCfg(taskArgs);
@@ -123,8 +121,14 @@ async function deployStep2(taskArgs: any) {
     process.exit(-1);
   }
 
-  const bridgeProxyAddress = await getOrDeployTBridgeProxy(c.bridgeCfg, c.operatorCfg, c.srcChainCfg.network);
+  const bridgeProxyAddress = await getOrDeployTBridgeProxy(
+    c.bridgeCfg,
+    c.proxyCfg,
+    c.operatorCfg,
+    c.srcChainCfg.network,
+  );
   const commitmentPoolAddress = await getOrDeployCommitPool(
+    c.bridgeCfg,
     c.srcChainCfg,
     c.srcTokenCfg,
     c.pairSrcPoolCfg,
@@ -167,10 +171,6 @@ async function deployStep3(taskArgs: any) {
   if (c.bridgeCfg.name === 'tbridge') {
     saveTBridgeJson(c);
   }
-
-  // if (mystikoNetwork === 'development') {
-  //   resetDefaultDevelopmentConfig(cfg);
-  // }
 }
 
 export async function deploy(taskArgs: any, hre: any) {

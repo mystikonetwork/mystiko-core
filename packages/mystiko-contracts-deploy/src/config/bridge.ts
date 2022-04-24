@@ -3,20 +3,26 @@ import { BridgeProxyConfig, RawBridgeProxyConfig } from './bridgeProxy';
 import { ContractDeployConfig, RawContractDeployConfig } from './bridgeDeploy';
 import { BridgeDepositPairConfig, RawBridgeDepositPairConfig } from './bridgePair';
 import { BaseConfig } from './base';
+import { BridgeFeeConfig, RawBridgeFeeConfig } from './bridgeFee';
+import { LOGRED } from '../common/constant';
 
 export interface RawBridgeConfig {
   name: string;
   contractName: string;
   proxys: RawBridgeProxyConfig[];
+  fees: RawBridgeFeeConfig[];
   commitmentPools: RawContractDeployConfig[];
   pairs: RawBridgeDepositPairConfig[];
   wrappedProxys: BridgeProxyConfig[];
+  wrappedFees: BridgeFeeConfig[];
   wrappedCommitmentPools: ContractDeployConfig[];
   wrappedPairs: BridgeDepositPairConfig[];
 }
 
 export class BridgeConfig extends BaseConfig {
   private readonly proxyByNetwork: { [key: string]: BridgeProxyConfig };
+
+  private readonly feesByNetwork: { [key: string]: BridgeFeeConfig };
 
   // first key is network, second key is token
   // private readonly poolByNetworkAndToken: { [key: string]: { [key: string]: ContractDeployConfig } };
@@ -37,9 +43,16 @@ export class BridgeConfig extends BaseConfig {
       return proxyConfig;
     });
 
+    this.feesByNetwork = {};
+    this.asRawBridgeConfig().wrappedFees = this.asRawBridgeConfig().fees.map((fee) => {
+      const feeConfig = new BridgeFeeConfig(fee);
+      this.feesByNetwork[fee.network] = feeConfig;
+      return feeConfig;
+    });
+
     this.asRawBridgeConfig().wrappedCommitmentPools = this.asRawBridgeConfig().commitmentPools.map((pool) => {
       const poolConfig = new ContractDeployConfig(pool);
-      this.insertPoolConfig(pool.network, pool.token, poolConfig);
+      this.insertPoolConfig(poolConfig);
       return poolConfig;
     });
 
@@ -49,27 +62,47 @@ export class BridgeConfig extends BaseConfig {
 
       const src = pairCfg.pairTokens[0];
       if (pairCfg.pairTokens.length === 1) {
-        this.insertPairConfig(src.network, src.token, src.network, pairCfg);
+        this.insertPairConfig(src.network, src.assetSymbol, src.network, pairCfg);
       } else {
         const dst = pairCfg.pairTokens[1];
-        this.insertPairConfig(src.network, src.token, dst.network, pairCfg);
-        this.insertPairConfig(dst.network, dst.token, src.network, pairCfg);
+        check(this.getBridgeFeeConfig(src.network) !== undefined, 'bridge minimal fee not exist');
+        check(this.getBridgeFeeConfig(dst.network) !== undefined, 'bridge minimal fee not exist');
+        this.insertPairConfig(src.network, src.assetSymbol, dst.network, pairCfg);
+        this.insertPairConfig(dst.network, dst.assetSymbol, src.network, pairCfg);
       }
 
       return pairCfg;
     });
   }
 
-  insertPoolConfig(network: string, token: string, poolConfig: ContractDeployConfig) {
-    let m1 = this.poolByNetworkAndToken.get(network);
+  insertPoolConfig(poolConfig: ContractDeployConfig) {
+    let m1 = this.poolByNetworkAndToken.get(poolConfig.network);
     if (m1 === undefined) {
       m1 = new Map();
-      m1.set(token, poolConfig);
-      this.poolByNetworkAndToken.set(network, m1);
+      m1.set(poolConfig.assetSymbol, poolConfig);
+      this.poolByNetworkAndToken.set(poolConfig.network, m1);
     } else {
-      check(m1.get(token) === undefined, 'pool configure duplicate');
-      m1.set(token, poolConfig);
+      check(m1.get(poolConfig.assetSymbol) === undefined, 'pool configure duplicate');
+      m1.set(poolConfig.assetSymbol, poolConfig);
     }
+  }
+
+  public addNewPoolDeployConfig(network: string, assetSymbol: string, address: string, syncStart: number) {
+    if (this.getBridgeCommitmentPool(network, assetSymbol) !== undefined) {
+      console.log(LOGRED, 'commitment pool configure already exist');
+      process.exit(-1);
+    }
+
+    const rawPoolCfg = {
+      network,
+      assetSymbol,
+      address,
+      syncStart,
+    };
+    const poolCfg = new ContractDeployConfig(rawPoolCfg);
+    this.asRawBridgeConfig().commitmentPools.push(rawPoolCfg);
+    this.insertPoolConfig(poolCfg);
+    return poolCfg;
   }
 
   public insertPairConfig(
@@ -106,12 +139,32 @@ export class BridgeConfig extends BaseConfig {
     return this.asRawBridgeConfig().contractName;
   }
 
+  public addBridgeProxyConfig(network: string, address: string): BridgeProxyConfig {
+    if (this.getBridgeProxyConfig(network) !== undefined) {
+      console.log(LOGRED, 'bridge proxy already exist');
+      process.exit(-1);
+    }
+
+    const rawBridgeProxyCfg = {
+      network,
+      address,
+    };
+    const bridgeCfg = new BridgeProxyConfig(rawBridgeProxyCfg);
+    this.asRawBridgeConfig().proxys.push(rawBridgeProxyCfg);
+    this.proxyByNetwork[network] = bridgeCfg;
+    return bridgeCfg;
+  }
+
   public getBridgeProxyConfig(network: string): BridgeProxyConfig | undefined {
     return this.proxyByNetwork[network];
   }
 
-  public getBridgeCommitmentPool(network: string, token: string): ContractDeployConfig | undefined {
-    return this.poolByNetworkAndToken.get(network)?.get(token);
+  public getBridgeFeeConfig(network: string): BridgeFeeConfig {
+    return this.feesByNetwork[network];
+  }
+
+  public getBridgeCommitmentPool(network: string, assetSymbol: string): ContractDeployConfig | undefined {
+    return this.poolByNetworkAndToken.get(network)?.get(assetSymbol);
   }
 
   public getBridgeTokenPair(
