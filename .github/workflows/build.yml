@@ -27,7 +27,6 @@ jobs:
       - run: lerna run build
       - run: lerna run lint
       - run: lerna run test
-      - run: lerna run deploy --scope @mystikonetwork/contracts
       - run: git diff --quiet || (echo "some generated files are not included in repo" && exit 1)
       - uses: codecov/codecov-action@v2
         with:
