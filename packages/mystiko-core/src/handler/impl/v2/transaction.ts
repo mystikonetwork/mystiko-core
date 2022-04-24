@@ -4,14 +4,13 @@ import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import {
   MystikoContextInterface,
   TransactionHandler,
+  TransactionOptions,
   TransactionQuery,
   TransactionQuote,
   TransactionQuoteOptions,
   TransactionResponse,
   TransactionSummary,
   TransactionUpdate,
-  TransferOptions,
-  WithdrawOptions,
 } from '../../../interface';
 import { MystikoHandler } from '../../handler';
 
@@ -25,7 +24,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     return this.find(query).then((transactions) => transactions.length);
   }
 
-  public create(options: TransferOptions | WithdrawOptions): Promise<TransactionResponse> {
+  public create(options: TransactionOptions): Promise<TransactionResponse> {
     return this.getPoolContractConfig(options).then((poolContractConfig) =>
       this.context.executors.getTransactionExecutor(poolContractConfig).execute(options, poolContractConfig),
     );
@@ -67,7 +66,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     );
   }
 
-  public summary(options: TransferOptions | WithdrawOptions): Promise<TransactionSummary> {
+  public summary(options: TransactionOptions): Promise<TransactionSummary> {
     return this.getPoolContractConfig(options).then((poolContractConfig) =>
       this.context.executors.getTransactionExecutor(poolContractConfig).summary(options, poolContractConfig),
     );
@@ -104,7 +103,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
   }
 
   private getPoolContractConfig(
-    options: TransferOptions | WithdrawOptions | TransactionQuoteOptions,
+    options: TransactionOptions | TransactionQuoteOptions,
   ): Promise<PoolContractConfig> {
     const poolContractConfig = this.config.getPoolContractConfig(
       options.chainId,
