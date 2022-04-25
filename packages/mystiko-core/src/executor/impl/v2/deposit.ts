@@ -422,7 +422,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   private createCommitment(
     executionContext: ExecutionContextWithDeposit,
   ): Promise<ExecutionContextWithDeposit> {
-    const { options, contractConfig, chainConfig, deposit } = executionContext;
+    const { options, contractConfig, deposit } = executionContext;
     const now = MystikoHandler.now();
     const rawCommitment: CommitmentType = {
       id: MystikoHandler.generateId(),
@@ -433,7 +433,6 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       assetSymbol: contractConfig.peerContract?.assetSymbol || contractConfig.assetSymbol,
       assetDecimals: contractConfig.peerContract?.assetDecimals || contractConfig.assetDecimals,
       assetAddress: contractConfig.peerContract?.assetAddress || contractConfig.assetAddress,
-      bridgeType: contractConfig.bridgeType,
       status:
         contractConfig.bridgeType === BridgeType.LOOP
           ? CommitmentStatus.QUEUED
@@ -443,12 +442,6 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       encryptedNote: deposit.encryptedNote,
       amount: deposit.amount,
       shieldedAddress: deposit.shieldedRecipientAddress,
-      srcChainId: chainConfig.chainId,
-      srcChainContractAddress: contractConfig.poolAddress,
-      srcAssetSymbol: contractConfig.assetSymbol,
-      srcAssetDecimals: contractConfig.assetDecimals,
-      srcAssetAddress: contractConfig.assetAddress,
-      creationTransactionHash: deposit.transactionHash,
     };
     return this.context.commitments
       .findOne({

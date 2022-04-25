@@ -51,11 +51,6 @@ const commitmentSchemaLiteral = {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
-    bridgeType: {
-      type: 'string',
-      minLength: 1,
-      final: true,
-    },
     status: {
       type: 'string',
       minLength: 1,
@@ -84,26 +79,6 @@ const commitmentSchemaLiteral = {
       type: 'string',
       minLength: 1,
     },
-    srcChainId: {
-      type: 'integer',
-      minimum: 0,
-    },
-    srcChainContractAddress: {
-      type: 'string',
-      pattern: ETH_ADDRESS_REGEX,
-    },
-    srcAssetSymbol: {
-      type: 'string',
-      minLength: 1,
-    },
-    srcAssetDecimals: {
-      type: 'integer',
-      minimum: 1,
-    },
-    srcAssetAddress: {
-      type: 'string',
-      pattern: ETH_ADDRESS_REGEX,
-    },
     creationTransactionHash: {
       type: 'string',
       pattern: ETH_TX_HASH_REGEX,
@@ -129,11 +104,6 @@ const commitmentSchemaLiteral = {
     'contractAddress',
     'assetSymbol',
     'assetDecimals',
-    'bridgeType',
-    'srcChainId',
-    'srcChainContractAddress',
-    'srcAssetSymbol',
-    'srcAssetDecimals',
     'commitmentHash',
     'status',
   ],
@@ -141,8 +111,6 @@ const commitmentSchemaLiteral = {
     'chainId',
     'contractAddress',
     'commitmentHash',
-    'srcChainId',
-    'srcChainContractAddress',
     'shieldedAddress',
     'serialNumber',
     'creationTransactionHash',

@@ -6,6 +6,7 @@ import {
   CommitmentAssetAndBridgeQuery,
   CommitmentQuery,
   MystikoContextInterface,
+  CommitmentImport,
 } from '../../../interface';
 
 export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHandler {
@@ -58,5 +59,9 @@ export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHan
       selector.shieldedAddress = { $in: query.shieldedAddresses };
     }
     return this.find({ selector });
+  }
+
+  public import(options: CommitmentImport): Promise<Commitment[]> {
+    return this.context.executors.getCommitmentExecutor().import(options);
   }
 }

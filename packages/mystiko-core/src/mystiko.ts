@@ -12,6 +12,7 @@ import { HandlerFactoryV2 } from './handler';
 import {
   AccountHandler,
   AssetHandler,
+  ChainHandler,
   CommitmentHandler,
   ContextFactory,
   DepositHandler,
@@ -41,6 +42,8 @@ export abstract class Mystiko {
   public logger?: Logger;
 
   public db?: MystikoDatabase;
+
+  public chains?: ChainHandler;
 
   public wallets?: WalletHandler;
 
@@ -97,6 +100,7 @@ export abstract class Mystiko {
     this.context.providers = this.providers;
     this.context.executors = executorFactory || new ExecutorFactoryV2(this.context);
     const handlers = handlerFactory || new HandlerFactoryV2(this.context);
+    this.chains = handlers.createChainHandler();
     this.wallets = handlers.createWalletHandler();
     this.accounts = handlers.createAccountHandler();
     this.assets = handlers.createAssetHandler();

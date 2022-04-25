@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { ethers } from 'ethers';
-import { MerkleTree, toDecimals, toHexNoPrefix } from '@mystikonetwork/utils';
-import { CommitmentV1, MystikoProtocolV2, TransactionV2, ZokratesCliRuntime } from '../../src';
+import { MerkleTree, toBN, toDecimals, toHexNoPrefix } from '@mystikonetwork/utils';
+import { CommitmentV2, MystikoProtocolV2, TransactionV2, ZokratesCliRuntime } from '../../src';
 
 async function generateTransaction(
   protocol: MystikoProtocolV2,
@@ -25,7 +25,7 @@ async function generateTransaction(
     inEncPks.push(protocol.publicKeyForEncryption(rawEncSk));
     inAmounts.push(toDecimals(200));
   }
-  const inCommitmentsPromises: Promise<CommitmentV1>[] = [];
+  const inCommitmentsPromises: Promise<CommitmentV2>[] = [];
   for (let i = 0; i < numInputs; i += 1) {
     inCommitmentsPromises.push(protocol.commitment(inVerifyPks[i], inEncPks[i], inAmounts[i]));
   }
@@ -56,7 +56,7 @@ async function generateTransaction(
     outAmounts.push(toDecimals(50));
     rollupFeeAmounts.push(toDecimals(10));
   }
-  const outCommitmentPromises: Promise<CommitmentV1>[] = [];
+  const outCommitmentPromises: Promise<CommitmentV2>[] = [];
   for (let i = 0; i < numOutputs; i += 1) {
     outCommitmentPromises.push(protocol.commitment(outVerifyPks[i], outEncPks[i], outAmounts[i]));
   }
@@ -106,6 +106,21 @@ beforeAll(async () => {
   const zokrates = await initialize();
   const runtime = new ZokratesCliRuntime(zokrates);
   protocol = new MystikoProtocolV2(runtime);
+});
+
+test('test commitment', async () => {
+  const skVerify = protocol.randomBytes();
+  const skEnc = protocol.randomBytes();
+  const pkVerify = protocol.publicKeyForVerification(skVerify);
+  const pkEnc = protocol.publicKeyForEncryption(skEnc);
+  const { privateNote, commitmentHash } = await protocol.commitment(pkVerify, pkEnc, toBN(10));
+  const c2 = await protocol.commitmentFromEncryptedNote(pkVerify, pkEnc, skEnc, privateNote);
+  expect(c2.commitmentHash.toString()).toBe(commitmentHash.toString());
+  const c1: CommitmentV2 | undefined = await protocol
+    .commitmentFromEncryptedNote(pkVerify, pkEnc, protocol.randomBytes(), privateNote)
+    .then((c3) => (c3.commitmentHash.toString() !== commitmentHash.toString() ? undefined : c3))
+    .catch(() => undefined);
+  expect(c1).toBe(undefined);
 });
 
 test('test Transaction1x0', async () => {

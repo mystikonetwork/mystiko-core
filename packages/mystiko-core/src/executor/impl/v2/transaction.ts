@@ -17,7 +17,7 @@ import {
   Wallet,
 } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
-import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import {
   errorMessage,
   fromDecimals,
@@ -60,7 +60,7 @@ type ExecutionContext = {
   publicAmount: BN;
   rollupFee: BN;
   gasRelayerFee: BN;
-  outputCommitments?: Array<{ commitment: Commitment; info: CommitmentV1 }>;
+  outputCommitments?: Array<{ commitment: Commitment; info: CommitmentV2 }>;
 };
 
 type ExecutionContextWithTransaction = ExecutionContext & {
@@ -73,6 +73,18 @@ type ExecutionContextWithProof = ExecutionContextWithTransaction & {
   outputEncryptedNotes: Buffer[];
   proof: Proof;
   randomEtherWallet: ethers.Wallet;
+};
+
+type ExecutionContextWithRequest = ExecutionContextWithProof & {
+  request: ICommitmentPool.TransactRequestStruct;
+};
+
+type CommitmentUpdate = {
+  commitment: Commitment;
+  status?: CommitmentStatus;
+  creationTransactionHash?: string;
+  spentTransactionHash?: string;
+  serialNumber?: string;
 };
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
@@ -255,7 +267,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
-    if (!isEthereumAddress(options.gasRelayerAddress)) {
+    if (options.gasRelayerAddress && !isEthereumAddress(options.gasRelayerAddress)) {
       return createErrorPromise(
         'invalid ethereum address for gas relayer',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
@@ -304,7 +316,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const { options, selectedCommitments, amount, publicAmount, rollupFee, gasRelayerFee } = executionContext;
     if (selectedCommitments.length > 0) {
       const inputSum = CommitmentUtils.sum(selectedCommitments);
-      const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentV1 }>[] = [];
+      const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentV2 }>[] = [];
       let remainingAmount;
       if (options.type === TransactionEnum.TRANSFER && options.shieldedAddress) {
         remainingAmount = inputSum.sub(amount);
@@ -337,7 +349,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     executionContext: ExecutionContext,
     shieldedAddress: string,
     amount: BN,
-  ): Promise<{ commitment: Commitment; info: CommitmentV1 }> {
+  ): Promise<{ commitment: Commitment; info: CommitmentV2 }> {
     const { options, contractConfig } = executionContext;
     return (this.protocol as MystikoProtocolV2)
       .commitmentWithShieldedAddress(shieldedAddress, amount)
@@ -353,18 +365,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           assetSymbol: contractConfig.assetSymbol,
           assetDecimals: contractConfig.assetDecimals,
           assetAddress: contractConfig.assetAddress,
-          bridgeType: options.bridgeType,
           status: CommitmentStatus.INIT,
           commitmentHash: commitmentHash.toString(),
           rollupFeeAmount: toDecimals(options.rollupFee || 0, contractConfig.assetDecimals).toString(),
           encryptedNote: toHex(privateNote),
           amount: amount.toString(),
           shieldedAddress,
-          srcChainId: options.chainId,
-          srcChainContractAddress: contractConfig.address,
-          srcAssetSymbol: contractConfig.assetSymbol,
-          srcAssetDecimals: contractConfig.assetDecimals,
-          srcAssetAddress: contractConfig.assetAddress,
         };
         return this.db.commitments
           .insert(rawCommitment)
@@ -424,12 +430,28 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const outCommitments = outputCommitments ? outputCommitments.map((c) => c.commitment) : [];
     return this.generateProof(executionContext)
       .then((ec) => this.sendTransaction(ec))
-      .then(() => {
+      .then((ec) => {
         const promises: Promise<void>[] = [];
-        promises.push(
-          TransactionExecutorV2.updateCommitmentsStatus(selectedCommitments, CommitmentStatus.SPENT),
-        );
-        promises.push(TransactionExecutorV2.updateCommitmentsStatus(outCommitments, CommitmentStatus.QUEUED));
+        const selectedCommitmentsUpdate: CommitmentUpdate[] = [];
+        const outCommitmentsUpdate: CommitmentUpdate[] = [];
+        for (let i = 0; i < selectedCommitments.length; i += 1) {
+          const commitment = selectedCommitments[i];
+          selectedCommitmentsUpdate.push({
+            commitment,
+            spentTransactionHash: ec.transaction.transactionHash,
+            status: CommitmentStatus.SPENT,
+          });
+        }
+        for (let i = 0; i < outCommitments.length; i += 1) {
+          const commitment = outCommitments[i];
+          outCommitmentsUpdate.push({
+            commitment,
+            creationTransactionHash: ec.transaction.transactionHash,
+            status: CommitmentStatus.QUEUED,
+          });
+        }
+        promises.push(TransactionExecutorV2.updateCommitments(selectedCommitmentsUpdate));
+        promises.push(TransactionExecutorV2.updateCommitments(outCommitmentsUpdate));
         return Promise.all(promises).then(() => transaction);
       })
       .catch((error) => {
@@ -441,7 +463,11 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             errorMessage: errorMsg,
           }).then(() => {}),
         );
-        promises.push(TransactionExecutorV2.updateCommitmentsStatus(outCommitments, CommitmentStatus.FAILED));
+        promises.push(
+          TransactionExecutorV2.updateCommitments(
+            outCommitments.map((commitment) => ({ commitment, status: CommitmentStatus.FAILED })),
+          ),
+        );
         return Promise.all(promises).then(() => transaction);
       });
   }
@@ -458,12 +484,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             this.getInputAccounts(executionContext).then((accounts) => ({ merkleTree, accounts })),
           )
           .then(({ merkleTree, accounts }) => {
-            const { contractConfig, selectedCommitments, outputCommitments, publicAmount, gasRelayerFee } =
+            const { contractConfig, selectedCommitments, outputCommitments, gasRelayerFee } =
               executionContext;
             const numInputs = selectedCommitments.length;
             const numOutputs = outputCommitments?.length || 0;
             const circuitConfig = TransactionExecutorV2.getCircuitConfig(
-              numOutputs,
+              numInputs,
               numOutputs,
               contractConfig,
             );
@@ -503,7 +529,11 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                 );
               }
               inVerifyPks.push(account.publicKeyForVerification(this.protocol));
-              inVerifySks.push(account.secretKeyForVerification(this.protocol, options.walletPassword));
+              inVerifySks.push(
+                this.protocol.secretKeyForVerification(
+                  account.secretKeyForVerification(this.protocol, options.walletPassword),
+                ),
+              );
               inEncPks.push(account.publicKeyForEncryption(this.protocol));
               inEncSks.push(account.secretKeyForEncryption(this.protocol, options.walletPassword));
               inCommitments.push(toBN(commitmentHash));
@@ -548,7 +578,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                 pathElements,
                 sigPk,
                 treeRoot: merkleTree.root(),
-                publicAmount,
+                publicAmount: toBN(transaction.publicAmount),
                 relayerFeeAmount: gasRelayerFee,
                 rollupFeeAmounts,
                 outVerifyPks,
@@ -584,6 +614,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                     outputEncryptedNotes,
                     proof,
                     transaction: tx,
+                    randomEtherWallet,
                   }),
                 ),
               );
@@ -600,7 +631,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         statuses: [CommitmentStatus.INCLUDED, CommitmentStatus.SPENT],
       })
       .then((commitments) => {
-        const sorted = CommitmentUtils.sortByLeafIndex(commitments);
+        const sorted = CommitmentUtils.sortByLeafIndex(commitments, false);
         const commitmentHashes: BN[] = [];
         for (let i = 0; i < sorted.length; i += 1) {
           const { leafIndex, encryptedNote, commitmentHash } = sorted[i];
@@ -612,7 +643,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           }
           if (!toBN(leafIndex).eqn(i)) {
             return createErrorPromise(
-              `leafIndex is not correct of commitment=${commitmentHash}`,
+              `leafIndex is not correct of commitment=${commitmentHash}, expected=${i} vs actual=${leafIndex}`,
               MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
             );
           }
@@ -622,8 +653,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       });
   }
 
-  private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithProof> {
-    const { options, contractConfig, transaction } = executionContext;
+  private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithRequest> {
+    const { options, contractConfig, chainConfig, transaction } = executionContext;
     const { signer } = options;
     const contract = MystikoContractFactory.connect<CommitmentPool>(
       'CommitmentPool',
@@ -633,20 +664,35 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const request = TransactionExecutorV2.buildTransactionRequest(executionContext);
     return TransactionExecutorV2.validateRequest(executionContext, request, contract).then(() =>
       TransactionExecutorV2.signRequest(executionContext, request)
-        .then((signature) => contract.transact(request, signature))
-        .then((resp) =>
-          this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
+        .then((signature) => {
+          this.logger.info(
+            `submitting transaction id=${transaction.id} to ` +
+              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}`,
+          );
+          return contract.transact(request, signature);
+        })
+        .then((resp) => {
+          this.logger.info(
+            `successfully submitted transaction id=${transaction.id} to ` +
+              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}`,
+          );
+          return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
             transactionHash: resp.hash,
-          }).then((tx) => ({ tx, resp })),
-        )
+          }).then((tx) => ({ tx, resp }));
+        })
         .then(({ tx, resp }) =>
-          waitTransaction(resp).then((receipt) =>
-            this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+          waitTransaction(resp).then((receipt) => {
+            this.logger.info(
+              `transaction id=${transaction.id} to ` +
+                `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
+                ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
+            );
+            return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
               transactionHash: receipt.transactionHash,
-            }),
-          ),
+            });
+          }),
         )
-        .then((tx) => ({ ...executionContext, transaction: tx })),
+        .then((tx) => ({ ...executionContext, transaction: tx, request })),
     );
   }
 
@@ -713,37 +759,60 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       serialNumberPromises.push(
         contract.spentSerialNumbers(serialNumber).then((spent) => {
           if (spent) {
-            return commitment
-              .atomicUpdate((data) => {
-                data.status = CommitmentStatus.SPENT;
-                return data;
-              })
-              .then(() => spent);
+            return this.updateCommitments([{ commitment, status: CommitmentStatus.SPENT }]).then(() => spent);
           }
           return spent;
         }),
       );
     }
-    return Promise.all(serialNumberPromises).then((spentFlags) => {
-      const doubleSpent = spentFlags.filter((spent) => spent).length > 0;
-      if (doubleSpent) {
-        return createErrorPromise(
-          'some commitments hava already been spent',
-          MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+    return Promise.all(serialNumberPromises)
+      .then((spentFlags) => {
+        const doubleSpent = spentFlags.filter((spent) => spent).length > 0;
+        if (doubleSpent) {
+          return createErrorPromise(
+            'some commitments hava already been spent',
+            MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+          );
+        }
+        return Promise.resolve(executionContext);
+      })
+      .then((ec) => {
+        const selectedCommitmentsUpdate: CommitmentUpdate[] = selectedCommitments.map(
+          (commitment, index) => ({
+            commitment,
+            serialNumber: ethers.BigNumber.from(serialNumbers[index]).toString(),
+          }),
         );
-      }
-      return Promise.resolve(executionContext);
-    });
+        return this.updateCommitments(selectedCommitmentsUpdate).then(() => ec);
+      });
   }
 
-  private static updateCommitmentsStatus(commitments: Commitment[], status: CommitmentStatus): Promise<void> {
+  private static updateCommitments(commitments: CommitmentUpdate[]): Promise<void> {
     const updatePromises: Promise<Commitment>[] = [];
     for (let i = 0; i < commitments.length; i += 1) {
-      const commitment = commitments[i];
+      const commitmentUpdate = commitments[i];
       updatePromises.push(
-        commitment.atomicUpdate((data) => {
-          data.status = status;
-          data.updatedAt = MystikoHandler.now();
+        commitmentUpdate.commitment.atomicUpdate((data) => {
+          let hasUpdate = false;
+          if (commitmentUpdate.status) {
+            data.status = commitmentUpdate.status;
+            hasUpdate = true;
+          }
+          if (commitmentUpdate.creationTransactionHash) {
+            data.creationTransactionHash = commitmentUpdate.creationTransactionHash;
+            hasUpdate = true;
+          }
+          if (commitmentUpdate.spentTransactionHash) {
+            data.spendingTransactionHash = commitmentUpdate.spentTransactionHash;
+            hasUpdate = true;
+          }
+          if (commitmentUpdate.serialNumber) {
+            data.serialNumber = commitmentUpdate.serialNumber;
+            hasUpdate = true;
+          }
+          if (hasUpdate) {
+            data.updatedAt = MystikoHandler.now();
+          }
           return data;
         }),
       );
@@ -780,9 +849,22 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     request: ICommitmentPool.TransactRequestStruct,
   ): Promise<string> {
     const { publicRecipient, relayerAddress } = request;
-    const { randomEtherWallet, outputEncryptedNotes } = executionContext;
+    const { randomEtherWallet, outputEncryptedNotes, transaction, proof } = executionContext;
     const bytes = Buffer.concat([toBuff(publicRecipient), toBuff(relayerAddress), ...outputEncryptedNotes]);
-    return randomEtherWallet.signMessage(toBuff(ethers.utils.keccak256(bytes)));
+    return randomEtherWallet.signMessage(toBuff(ethers.utils.keccak256(bytes))).then((signature) =>
+      transaction
+        .atomicUpdate((data) => {
+          data.proof = JSON.stringify(proof);
+          data.rootHash = ethers.BigNumber.from(request.rootHash).toString();
+          data.signature = signature;
+          data.signaturePublicKey = ethers.utils.hexlify(request.sigPk);
+          data.signaturePublicKeyHashes = request.sigHashes.map((h) => ethers.BigNumber.from(h).toString());
+          data.serialNumbers = request.serialNumbers.map((sn) => ethers.BigNumber.from(sn).toString());
+          data.updatedAt = MystikoHandler.now();
+          return data;
+        })
+        .then(() => signature),
+    );
   }
 
   private getInputAccounts(executionContext: ExecutionContext): Promise<Account[]> {

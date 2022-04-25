@@ -59,7 +59,6 @@ const transactionLiteral = {
     },
     rootHash: {
       type: 'string',
-      final: true,
       pattern: BN_REGEX,
     },
     inputCommitments: {
@@ -81,16 +80,21 @@ const transactionLiteral = {
         type: 'string',
       },
     },
+    serialNumbers: {
+      type: 'array',
+      minItems: 1,
+      uniqueItems: true,
+      items: {
+        type: 'string',
+      },
+    },
     signaturePublicKey: {
       type: 'string',
-      final: true,
       pattern: HEX_REGEX,
     },
     signaturePublicKeyHashes: {
       type: 'array',
-      final: true,
       minItems: 1,
-      uniqueItems: true,
       items: {
         type: 'string',
         pattern: BN_REGEX,
@@ -130,7 +134,6 @@ const transactionLiteral = {
     },
     signature: {
       type: 'string',
-      final: true,
       pattern: HEX_REGEX,
     },
     type: {

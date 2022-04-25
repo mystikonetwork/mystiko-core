@@ -25,7 +25,11 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         return { wallet, name: options.name };
       })
       .then(({ name, wallet }) => this.createRawAccount(wallet, walletPassword, name, options?.secretKey))
-      .then(({ wallet, account }) => this.insertAccount(wallet, account, !options?.secretKey));
+      .then(({ wallet, account }) => this.insertAccount(wallet, account, !options?.secretKey))
+      .then((account) => {
+        this.logger.info(`account address=${account.shieldedAddress} has been created successfully`);
+        return account;
+      });
   }
 
   public encrypt(oldWalletPassword: string, newWalletPassword: string): Promise<void> {

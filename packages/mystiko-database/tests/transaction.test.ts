@@ -37,11 +37,6 @@ beforeEach(async () => {
     commitmentHash: '1234',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    bridgeType: 'loop',
-    srcChainId: 3,
-    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
-    srcAssetSymbol: 'ETH',
-    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     rollupFeeAmount: toDecimals(1, 18).toString(),
@@ -55,11 +50,6 @@ beforeEach(async () => {
     commitmentHash: '2345',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    bridgeType: 'loop',
-    srcChainId: 3,
-    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
-    srcAssetSymbol: 'ETH',
-    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     amount: toDecimals(10, 18).toString(),
@@ -73,11 +63,6 @@ beforeEach(async () => {
     commitmentHash: '3456',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    bridgeType: 'loop',
-    srcChainId: 3,
-    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
-    srcAssetSymbol: 'ETH',
-    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     rollupFeeAmount: toDecimals(2, 18).toString(),
@@ -91,11 +76,6 @@ beforeEach(async () => {
     commitmentHash: '4567',
     assetSymbol: 'ETH',
     assetDecimals: 18,
-    bridgeType: 'loop',
-    srcChainId: 3,
-    srcChainContractAddress: '0xF90F38aE5c12442e8A3DAc8FD310F15D2A75A707',
-    srcAssetSymbol: 'ETH',
-    srcAssetDecimals: 18,
     status: CommitmentStatus.SRC_SUCCEEDED,
     creationTransactionHash: '0xb39b0bd04360c17ba5ff321b0f4a3a0724d5cb2b126add5e4afbed3bcd08f4a5',
     amount: toDecimals(20, 18).toString(),
@@ -120,6 +100,7 @@ test('test insert', async () => {
     rootHash: '123456',
     inputCommitments: ['1', '2'],
     outputCommitments: ['3', '4'],
+    serialNumbers: ['444', '555'],
     signaturePublicKey: 'deadbeef',
     signaturePublicKeyHashes: ['12345'],
     amount: toDecimals(234, 18).toString(),
@@ -148,6 +129,7 @@ test('test insert', async () => {
     expect(transaction.assetAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
     expect(transaction.proof).toBe('abc');
     expect(transaction.rootHash).toBe('123456');
+    expect(transaction.serialNumbers).toStrictEqual(['444', '555']);
     expect(transaction.signaturePublicKey).toBe('deadbeef');
     expect(transaction.signaturePublicKeyHashes).toStrictEqual(['12345']);
     expect(await transaction.inputAmount()).toBe(toDecimals(10, 18).toString());

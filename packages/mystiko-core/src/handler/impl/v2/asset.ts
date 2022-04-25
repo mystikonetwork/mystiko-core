@@ -1,4 +1,4 @@
-import { BridgeConfigType, BridgeType } from '@mystikonetwork/config';
+import { BridgeType } from '@mystikonetwork/config';
 import { Chain, Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import { fromDecimals } from '@mystikonetwork/utils';
 import { MystikoHandler } from '../../handler';
@@ -68,18 +68,20 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
     });
   }
 
-  public bridges(chainId: number, assetSymbol: string): Promise<BridgeConfigType[]> {
+  public bridges(chainId: number, assetSymbol: string): Promise<BridgeType[]> {
     return this.getCommitments([CommitmentStatus.INCLUDED], { assets: [assetSymbol], chainId }).then(
       (commitments) => {
-        const bridgeTypes = new Set<BridgeType>(commitments.map((c) => c.bridgeType as BridgeType));
-        const bridgeConfigs: BridgeConfigType[] = [];
-        bridgeTypes.forEach((bridgeType) => {
-          const bridgeConfig = this.config.getBridgeConfig(bridgeType);
-          if (bridgeConfig) {
-            bridgeConfigs.push(bridgeConfig);
+        const bridgeTypes = new Set<BridgeType>();
+        for (let i = 0; i < commitments.length; i += 1) {
+          const commitment = commitments[i];
+          const bridgeType = this.config
+            .getChainConfig(commitment.chainId)
+            ?.getPoolContractBridgeType(commitment.contractAddress);
+          if (bridgeType) {
+            bridgeTypes.add(bridgeType);
           }
-        });
-        return bridgeConfigs;
+        }
+        return Array.from(bridgeTypes.values());
       },
     );
   }

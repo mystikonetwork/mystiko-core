@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Wallet } from '@ethersproject/wallet';
 import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
-import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
 import { MinAmount } from '../util/constants';
@@ -18,7 +18,7 @@ export function testLoopDeposit(
   accounts: Wallet[],
   depositAmount: string,
   isMainAsset: boolean,
-  cmInfo: CommitmentInfo<CommitmentV1>,
+  cmInfo: CommitmentInfo<CommitmentV2>,
 ) {
   let minTotalAmount: string;
   let minRollupFee: number;
