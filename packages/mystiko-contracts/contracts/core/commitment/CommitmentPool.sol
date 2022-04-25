@@ -319,8 +319,8 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     uint256 _rollupFee,
     bytes memory _encryptedNote
   ) internal {
-    commitmentQueue[commitmentQueueSize] = CommitmentLeaf(_commitment, _rollupFee);
     uint256 leafIndex = commitmentQueueSize + commitmentIncludedCount;
+    commitmentQueue[leafIndex] = CommitmentLeaf(_commitment, _rollupFee);
     commitmentQueueSize = commitmentQueueSize + 1;
     emit CommitmentQueued(_commitment, _rollupFee, leafIndex, _encryptedNote);
   }

@@ -27,6 +27,7 @@ async function generateProof(
   numOutputs: number,
   commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
+  includedCount: BN,
   sigPk: Buffer,
   publicAmount: BN,
   relayerFeeAmount: BN,
@@ -36,8 +37,9 @@ async function generateProof(
   abiFile: string,
   provingKeyFile: string,
 ): Promise<{ proof: Proof; outCommitments: CommitmentV2[] }> {
+  const commitments = commitmentInfo.commitments.slice(0, includedCount.toNumber());
   const merkleTree = new MerkleTree(
-    commitmentInfo.commitments.map((c) => c.commitmentHash),
+    commitments.map((c) => c.commitmentHash),
     { maxLevels: protocol.merkleTreeLevels },
   );
   const inVerifyPks: Buffer[] = [];
@@ -53,8 +55,8 @@ async function generateProof(
     inVerifySks.push(protocol.secretKeyForVerification(commitmentInfo.rawSkVerify));
     inEncPks.push(commitmentInfo.pkEnc);
     inEncSks.push(protocol.secretKeyForEncryption(commitmentInfo.rawSkEnc));
-    inCommitments.push(commitmentInfo.commitments[inCommitmentsIndices[i]].commitmentHash);
-    inPrivateNotes.push(commitmentInfo.commitments[inCommitmentsIndices[i]].privateNote);
+    inCommitments.push(commitments[inCommitmentsIndices[i]].commitmentHash);
+    inPrivateNotes.push(commitments[inCommitmentsIndices[i]].privateNote);
     const fullPath = merkleTree.path(inCommitmentsIndices[i]);
     pathIndices.push(fullPath.pathIndices);
     pathElements.push(fullPath.pathElements);
@@ -179,12 +181,14 @@ export function testTransact(
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
+      const includedCount = await commitmentPoolContract.commitmentIncludedCount();
       const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
         numOutputs,
         commitmentInfo,
         inCommitmentsIndices,
+        includedCount,
         signatureKeys.pk,
         publicAmount,
         relayerFeeAmount,
@@ -303,14 +307,17 @@ export function testTransact(
       const newCommitmentQueueSize: BN = await commitmentPoolContract
         .commitmentQueueSize()
         .then((r: any) => toBN(r.toString()));
+
       expect(newCommitmentQueueSize.toString()).to.equal(commitmentQueueSize.addn(numOutputs).toString());
       const commitmentQueuePromises: Promise<void>[] = [];
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
         commitmentQueuePromises.push(
-          commitmentPoolContract.commitmentQueue(commitmentQueueSize.addn(i).toString()).then((r: any) => {
-            expect(r.commitment.toString()).to.equal(commitment.toString());
-          }),
+          commitmentPoolContract
+            .commitmentQueue(commitmentIncludedCount.add(commitmentQueueSize).addn(i).toString())
+            .then((r: any) => {
+              expect(r.commitment.toString()).to.equal(commitment.toString());
+            }),
         );
       }
       await Promise.all(commitmentQueuePromises);
@@ -346,12 +353,14 @@ export function testTransactRevert(
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
+      const includedCount = await commitmentPoolContract.commitmentIncludedCount();
       const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
         numOutputs,
         commitmentInfo,
         inCommitmentsIndices,
+        includedCount,
         signatureKeys.pk,
         publicAmount,
         relayerFeeAmount,
