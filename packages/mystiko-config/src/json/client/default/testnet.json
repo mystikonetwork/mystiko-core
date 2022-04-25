@@ -75,8 +75,6 @@
           "startBlock": 18759788,
           "bridgeType": "loop",
           "poolAddress": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
-          "disabled": false,
-          "type": "deposit",
           "minAmount": "100000"
         },
         {
@@ -86,8 +84,6 @@
           "startBlock": 18759760,
           "bridgeType": "loop",
           "poolAddress": "0xfbb1A6Da247b1D3a261Dbdb425295d29177cf47A",
-          "disabled": false,
-          "type": "deposit",
           "minAmount": "100000000000000000"
         },
         {
@@ -97,8 +93,6 @@
           "startBlock": 18759687,
           "bridgeType": "loop",
           "poolAddress": "0xae5009F4B58E6eF25Fee71174A827042c543ac46",
-          "disabled": false,
-          "type": "deposit",
           "minAmount": "100000000000000000"
         }
       ],
@@ -108,7 +102,6 @@
           "name": "CommitmentPool",
           "address": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
           "startBlock": 18759778,
-          "type": "pool",
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
           "minRollupFee": "10000"
         },
@@ -117,7 +110,6 @@
           "name": "CommitmentPool",
           "address": "0xfbb1A6Da247b1D3a261Dbdb425295d29177cf47A",
           "startBlock": 18759747,
-          "type": "pool",
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "minRollupFee": "10000000000000000"
         },
@@ -126,7 +118,6 @@
           "name": "CommitmentPool",
           "address": "0xae5009F4B58E6eF25Fee71174A827042c543ac46",
           "startBlock": 18759678,
-          "type": "pool",
           "minRollupFee": "10000000000000000"
         }
       ],
