@@ -412,4 +412,68 @@ describe('Test Mystiko loop', () => {
       testToken,
     );
   });
+
+  it('test loop erc20 [ rollup + transact ]', async () => {
+    const depositAmount = toDecimals(100);
+    const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
+
+    await testLoopDeposit(
+      'MystikoV2WithLoopERC20',
+      protocol,
+      loopERC20,
+      poolErc20,
+      testToken,
+      sanctionList,
+      accounts,
+      depositAmount.toString(),
+      false,
+      cmInfo,
+    );
+
+    testRollup('CommitmentPoolERC20', protocol, poolErc20, rollup1, testToken, accounts, cmInfo.commitments, {
+      isMainAsset: false,
+      rollupSize: 1,
+    });
+
+    testTransact(
+      'CommitmentPoolERC20',
+      protocol,
+      poolErc20,
+      transaction1x0Verifier,
+      cmInfo,
+      [0],
+      depositAmount,
+      toBN(0),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      testToken,
+    );
+
+    testRollup('CommitmentPoolERC20', protocol, poolErc20, rollup1, testToken, accounts, cmInfo.commitments, {
+      isMainAsset: false,
+      rollupSize: 1,
+    });
+
+    testTransact(
+      'CommitmentPoolERC20',
+      protocol,
+      poolErc20,
+      transaction1x0Verifier,
+      cmInfo,
+      [1],
+      depositAmount,
+      toBN(0),
+      [],
+      [],
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.program.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz',
+      'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
+      testToken,
+    );
+  });
 });
