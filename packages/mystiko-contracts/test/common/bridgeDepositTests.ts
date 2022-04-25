@@ -67,8 +67,8 @@ export function testBridgeDeposit(
       }
 
       await bridgeContract.changeOperator(bridgeAccount.address);
-      await mystikoContract.setpeerContract(DestinationChainID, peerMystikoContract.address);
-      await peerMystikoContract.setpeerContract(SourceChainID, mystikoContract.address);
+      await mystikoContract.setPeerContract(DestinationChainID, peerMystikoContract.address);
+      await peerMystikoContract.setPeerContract(SourceChainID, mystikoContract.address);
     });
 
     it('should revert when deposit is disabled', async () => {
@@ -262,6 +262,20 @@ export function testBridgeDeposit(
           );
         }
       }
+    });
+
+    it('should revert on in executor white list', async () => {
+      await expect(
+        bridgeContract
+          .connect(accounts[0])
+          .crossChainSyncTx(
+            SourceChainID,
+            mystikoContract.address,
+            peerMystikoContract.address,
+            bridgeAccount.address,
+            bridgeMessages[0],
+          ),
+      ).revertedWith('Only whitelisted executor.');
     });
 
     it('should bridge deposit transaction success', async () => {

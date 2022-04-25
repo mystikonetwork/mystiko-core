@@ -398,6 +398,24 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: 'uint64',
+        name: '_peerChainId',
+        type: 'uint64',
+      },
+      {
+        internalType: 'address',
+        name: '_peerContract',
+        type: 'address',
+      },
+    ],
+    name: 'setPeerContract',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'uint256',
         name: '_peerMinExecutorFee',
         type: 'uint256',
@@ -417,24 +435,6 @@ const _abi = [
       },
     ],
     name: 'setPeerMinRollupFee',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint64',
-        name: '_peerChainId',
-        type: 'uint64',
-      },
-      {
-        internalType: 'address',
-        name: '_peerContract',
-        type: 'address',
-      },
-    ],
-    name: 'setpeerContract',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
