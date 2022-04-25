@@ -186,7 +186,9 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }
         let rollupFee = toBN(0);
         if (options.rollupFee && quote.valid) {
-          rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).muln(quote.numOfSplits);
+          rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).mul(
+            toBN(quote.numOfSplits),
+          );
         }
         let gasRelayerFee = toBN(0);
         if (options.gasRelayerFee && quote.valid) {
@@ -237,7 +239,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
-    if (rollupFee.lt(contractConfig.minRollupFee.muln(quote.numOfSplits))) {
+    if (rollupFee.lt(contractConfig.minRollupFee.mul(toBN(quote.numOfSplits)))) {
       return createErrorPromise(
         'rollupFee is too small to pay rollup service',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,

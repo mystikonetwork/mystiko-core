@@ -75,6 +75,6 @@
     "pouchdb-adapter-idb": "^7.0.0",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5",
-    "zokrates-js": "^1.0.41"
+    "zokrates-js": "1.0.41"
   }
 }

@@ -11816,7 +11816,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zokrates-js@^1.0.41:
+zokrates-js@1.0.41:
   version "1.0.41"
   resolved "https://registry.yarnpkg.com/zokrates-js/-/zokrates-js-1.0.41.tgz#6af4630d1e88f1a52208c9649531b01c365c522d"
   integrity sha512-lTBcmv3Tbk8MPphLP1t3ElRayXxKVMUQHOtCQdnTfVyeERHxcVfdaQ/ymTH3sqafSiiT5+F8zchfdZpC//LXuw==

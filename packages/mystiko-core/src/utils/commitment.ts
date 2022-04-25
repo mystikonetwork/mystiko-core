@@ -76,8 +76,9 @@ export class CommitmentUtils {
     const inputMax = this.inputMax(commitments, numInputs);
     const balance = this.sum(commitments);
     const maxNumOfSplits = options.type === TransactionEnum.TRANSFER ? 2 : 1;
-    const minAmount = options.type === TransactionEnum.TRANSFER ? minRollupFee.muln(maxNumOfSplits) : toBN(0);
-    const fixedAmount = inputMax.lte(minRollupFee.muln(maxNumOfSplits));
+    const totalMinRollupFee = minRollupFee.mul(toBN(maxNumOfSplits));
+    const minAmount = options.type === TransactionEnum.TRANSFER ? totalMinRollupFee : toBN(0);
+    const fixedAmount = inputMax.lte(totalMinRollupFee);
     const transactionQuote: TransactionQuote = {
       valid: true,
       balance: fromDecimals(balance, assetDecimals),
@@ -90,7 +91,7 @@ export class CommitmentUtils {
       maxGasRelayerFee: 0,
       gasRelayerFeeAssetSymbol: assetSymbol,
     };
-    if (inputMax.lte(minRollupFee.muln(maxNumOfSplits - 1))) {
+    if (inputMax.lte(minRollupFee.mul(toBN(maxNumOfSplits - 1)))) {
       transactionQuote.valid = false;
       transactionQuote.invalidReason = 'asset balance is too small to transfer';
       return transactionQuote;
@@ -111,7 +112,7 @@ export class CommitmentUtils {
     if (amount.eq(inputMax)) {
       transactionQuote.numOfSplits = maxNumOfSplits - 1;
       transactionQuote.maxGasRelayerFee = fromDecimals(
-        amount.sub(minRollupFee.muln(maxNumOfSplits - 1)),
+        amount.sub(minRollupFee.mul(toBN(maxNumOfSplits - 1))),
         assetDecimals,
       );
       return transactionQuote;
@@ -130,7 +131,7 @@ export class CommitmentUtils {
     const selectedSum = this.sum(selected);
     transactionQuote.numOfSplits = selectedSum.eq(amount) ? maxNumOfSplits - 1 : maxNumOfSplits;
     transactionQuote.maxGasRelayerFee = fromDecimals(
-      amount.sub(minRollupFee.muln(transactionQuote.numOfSplits)),
+      amount.sub(minRollupFee.mul(toBN(transactionQuote.numOfSplits))),
       assetDecimals,
     );
     return transactionQuote;

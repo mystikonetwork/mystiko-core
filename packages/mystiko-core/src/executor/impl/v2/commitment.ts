@@ -104,12 +104,15 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
     );
     return this.importCommitmentQueuedEvents(importContext).then((queuedCommitments) =>
-      this.importCommitmentIncludedEvents(importContext).then((includedCommitments) => {
-        const commitments = new Map<string, Commitment>();
-        queuedCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
-        includedCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
-        return Array.from(commitments.values());
-      }),
+      this.importCommitmentIncludedEvents(importContext).then((includedCommitments) =>
+        this.importCommitmentSpentEvents(importContext).then((spentCommitments) => {
+          const commitments = new Map<string, Commitment>();
+          queuedCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
+          includedCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
+          spentCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
+          return Array.from(commitments.values());
+        }),
+      ),
     );
   }
 
@@ -174,6 +177,30 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         );
         return Promise.all(promises);
       });
+  }
+
+  private importCommitmentSpentEvents(importContext: ImportContractContext): Promise<Commitment[]> {
+    const { options, chainConfig, contractConfig } = importContext;
+    if (contractConfig instanceof DepositContractConfig) {
+      return Promise.resolve([]);
+    }
+    this.logger.info(
+      'importing CommitmentSpent event from ' +
+        `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
+    );
+    const startBlock = options.startBlock || contractConfig.startBlock;
+    const { toBlock } = options;
+    const contract = CommitmentExecutorV2.connectPoolContract(importContext);
+    return contract.queryFilter(contract.filters.CommitmentSpent(), startBlock, toBlock).then((rawEvents) => {
+      this.logger.info(
+        `fetched ${rawEvents.length} CommitmentSpent event(s) from contract ` +
+          `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
+      );
+      const promises: Promise<Commitment[]>[] = rawEvents.map((rawEvent) =>
+        this.handleCommitmentSpentEvent(rawEvent.args.serialNumber, rawEvent.transactionHash, importContext),
+      );
+      return Promise.all(promises).then((commitments) => commitments.flat());
+    });
   }
 
   private handleCommitmentQueuedEvent(
@@ -268,6 +295,34 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       .then((commitment) => this.updateDepositStatus(commitment, DepositStatus.INCLUDED));
   }
 
+  private handleCommitmentSpentEvent(
+    serialNumber: ethers.BigNumber,
+    transactionHash: string,
+    importContext: ImportContractContext,
+  ): Promise<Commitment[]> {
+    const { chainConfig, contractConfig } = importContext;
+    return this.context.commitments
+      .find({
+        selector: {
+          chainId: chainConfig.chainId,
+          contractAddress: contractConfig.address,
+          serialNumber: serialNumber.toString(),
+        },
+      })
+      .then((commitments) => {
+        const promises: Promise<Commitment>[] = commitments.map((commitment) =>
+          commitment.atomicUpdate((data) => {
+            if (data.status !== CommitmentStatus.FAILED) {
+              data.status = CommitmentStatus.SPENT;
+            }
+            data.spendingTransactionHash = transactionHash;
+            return data;
+          }),
+        );
+        return Promise.all(promises);
+      });
+  }
+
   private tryDecryptCommitment(commitment: Commitment, walletPassword: string): Promise<Commitment> {
     const { encryptedNote } = commitment;
     if (encryptedNote) {
@@ -281,8 +336,11 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
               toBuff(encryptedNote),
             )
             .then((decryptedCommitment) => {
-              const { amount } = decryptedCommitment;
+              const { amount, randomP } = decryptedCommitment;
               return commitment.atomicUpdate((data) => {
+                const rawSk = account.secretKeyForVerification(this.protocol, walletPassword);
+                const sk = this.protocol.secretKeyForVerification(rawSk);
+                data.serialNumber = (this.protocol as MystikoProtocolV2).serialNumber(sk, randomP).toString();
                 data.amount = amount.toString();
                 data.shieldedAddress = account.shieldedAddress;
                 data.updatedAt = MystikoHandler.now();
