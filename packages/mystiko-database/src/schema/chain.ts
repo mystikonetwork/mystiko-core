@@ -1,5 +1,4 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
-import { WALLET_COLLECTION_NAME } from '../constants';
 
 const chainSchemaLiteral = {
   version: 0,
@@ -43,13 +42,9 @@ const chainSchemaLiteral = {
       type: 'integer',
       minimum: 1,
     },
-    wallet: {
-      type: 'string',
-      ref: WALLET_COLLECTION_NAME,
-    },
   },
-  required: ['id', 'createdAt', 'updatedAt', 'chainId', 'name', 'providers', 'eventFilterSize', 'wallet'],
-  indexes: ['chainId', 'wallet'],
+  required: ['id', 'createdAt', 'updatedAt', 'chainId', 'name', 'providers', 'eventFilterSize'],
+  indexes: ['chainId'],
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(chainSchemaLiteral);

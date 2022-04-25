@@ -56,13 +56,10 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
       encryptedMasterSeed: this.protocol.encryptSymmetric(options.password, options.masterSeed),
       accountNonce: 0,
     };
-    return this.db.wallets
-      .insert(rawWallet)
-      .then((wallet) => {
-        this.logger.info(`successfully created a wallet(id=${wallet.id})`);
-        return wallet;
-      })
-      .then((wallet) => this.context.chains.init().then(() => wallet));
+    return this.db.wallets.insert(rawWallet).then((wallet) => {
+      this.logger.info(`successfully created a wallet(id=${wallet.id})`);
+      return wallet;
+    });
   }
 
   public current(): Promise<Wallet | null> {

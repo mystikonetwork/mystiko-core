@@ -3,7 +3,6 @@ import { MystikoHandler } from '../../handler';
 import {
   CommitmentHandler,
   CommitmentContractQuery,
-  CommitmentAssetAndBridgeQuery,
   CommitmentQuery,
   MystikoContextInterface,
   CommitmentImport,
@@ -17,15 +16,6 @@ export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHan
 
   public find(query?: DatabaseQuery<Commitment>): Promise<Commitment[]> {
     return this.db.commitments.find(query).exec();
-  }
-
-  public findByAssetAndBridge(query: CommitmentAssetAndBridgeQuery): Promise<Commitment[]> {
-    const selector: any = {
-      chainId: query.chainId,
-      assetSymbol: query.assetSymbol,
-      bridgeType: query.bridgeType,
-    };
-    return this.findByCommonFilter(selector, query);
   }
 
   public findByContract(query: CommitmentContractQuery): Promise<Commitment[]> {
@@ -48,10 +38,7 @@ export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHan
       .exec();
   }
 
-  private findByCommonFilter(
-    selector: any,
-    query: CommitmentAssetAndBridgeQuery | CommitmentContractQuery,
-  ): Promise<Commitment[]> {
+  private findByCommonFilter(selector: any, query: CommitmentContractQuery): Promise<Commitment[]> {
     if (query.statuses && query.statuses.length > 0) {
       selector.status = { $in: query.statuses };
     }

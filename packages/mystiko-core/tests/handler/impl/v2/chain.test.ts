@@ -1,19 +1,11 @@
 import { MystikoConfig } from '@mystikonetwork/config';
-import { Chain, Wallet } from '@mystikonetwork/database';
-import {
-  ChainHandlerV2,
-  createError,
-  MystikoContext,
-  MystikoErrorCode,
-  WalletHandlerV2,
-} from '../../../../src';
+import { Chain } from '@mystikonetwork/database';
+import { ChainHandlerV2, createError, MystikoContext, MystikoErrorCode } from '../../../../src';
 import { createTestContext } from './context';
 
 let config: MystikoConfig;
 let context: MystikoContext;
 let handler: ChainHandlerV2;
-let wallet: Wallet;
-let walletHandler: WalletHandlerV2;
 
 beforeAll(async () => {
   config = await MystikoConfig.createFromPlain({
@@ -48,14 +40,11 @@ beforeAll(async () => {
   context = await createTestContext(undefined, config);
 });
 
-beforeEach(async () => {
-  walletHandler = new WalletHandlerV2(context);
+beforeEach(() => {
   handler = new ChainHandlerV2(context);
-  wallet = await walletHandler.create({ masterSeed: 'masterSeed', password: 'P@ssw0rd' });
 });
 
 afterEach(async () => {
-  await context.db.wallets.clear();
   await context.db.chains.clear();
 });
 
@@ -74,7 +63,6 @@ test('test find', async () => {
   expect(chains[0].name).toBe(config.getChainConfig(5)?.name);
   expect(chains[0].eventFilterSize).toBe(config.getChainConfig(5)?.eventFilterSize);
   expect(chains[0].providers).toStrictEqual(config.getChainConfig(5)?.providers.map((p) => p.url));
-  expect(chains[0].wallet).toBe(wallet.id);
   chains = await handler.find({
     selector: { chainId: 3 },
   });
@@ -82,26 +70,12 @@ test('test find', async () => {
   expect(chains[0].name).toBe(config.getChainConfig(3)?.name);
   expect(chains[0].eventFilterSize).toBe(config.getChainConfig(3)?.eventFilterSize);
   expect(chains[0].providers).toStrictEqual(config.getChainConfig(3)?.providers.map((p) => p.url));
-  expect(chains[0].wallet).toBe(wallet.id);
-  chains = await handler.find({
-    selector: { wallet: 'wrong wallet id' },
-  });
-  expect(chains.length).toBe(2);
-  const wallet1 = await walletHandler.create({ masterSeed: 'masterSeed', password: 'P@ssw0rd' });
-  expect((await handler.find()).length).toBe(0);
-  await handler.init();
-  chains = await handler.find({
-    selector: { chainId: 3 },
-  });
-  expect(chains[0].wallet).toBe(wallet1.id);
 });
 
 test('test findOne', async () => {
   await handler.init();
   expect(await handler.findOne(10)).toBe(null);
   expect((await handler.findOne(3))?.name).toBe(config.getChainConfig(3)?.name);
-  await walletHandler.create({ masterSeed: 'masterSeed', password: 'P@ssw0rd' });
-  expect(await handler.findOne(5)).toBe(null);
 });
 
 test('test init', async () => {

@@ -1,18 +1,9 @@
-import { initDatabase, MystikoDatabase, Wallet } from '../src';
+import { initDatabase, MystikoDatabase } from '../src';
 
 let db: MystikoDatabase;
-let wallet: Wallet;
 
 beforeEach(async () => {
   db = await initDatabase();
-  wallet = await db.wallets.insert({
-    id: '1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    hashedPassword: 'deadbeef',
-    encryptedMasterSeed: 'deadbeef',
-    accountNonce: 1,
-  });
 });
 
 afterEach(async () => {
@@ -29,7 +20,6 @@ test('test insert', async () => {
     name: 'Ethereum Ropsten',
     providers: ['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
     eventFilterSize: 200000,
-    wallet: wallet.id,
   });
   const chain = await db.chains.findOne('1').exec();
   if (chain) {
@@ -39,8 +29,6 @@ test('test insert', async () => {
     expect(chain.name).toBe('Ethereum Ropsten');
     expect(chain.providers).toStrictEqual(['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161']);
     expect(chain.eventFilterSize).toBe(200000);
-    const populatedWallet: Wallet = await chain.populate('wallet');
-    expect(populatedWallet).toStrictEqual(wallet);
   } else {
     throw new Error('chain not found');
   }
@@ -56,7 +44,6 @@ test('test collection clear', async () => {
     name: 'Ethereum Ropsten',
     providers: ['https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
     eventFilterSize: 200000,
-    wallet: wallet.id,
   });
   expect(await db.chains.findOne().exec()).not.toBe(null);
   await db.chains.clear();

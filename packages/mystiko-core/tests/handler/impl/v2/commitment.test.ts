@@ -1,4 +1,3 @@
-import { BridgeType } from '@mystikonetwork/config';
 import { Account, Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import {
   AccountHandlerV2,
@@ -15,11 +14,7 @@ function createCommitment(
   assetSymbol: string,
   commitmentHash: string,
   shieldedAddress?: string,
-  bridgeType?: BridgeType,
   status?: CommitmentStatus,
-  srcChainId?: number,
-  srcContractAddress?: string,
-  srcAssetSymbol?: string,
 ): Commitment {
   const now = MystikoHandler.now();
   return {
@@ -30,13 +25,8 @@ function createCommitment(
     contractAddress,
     assetSymbol,
     assetDecimals: 18,
-    bridgeType: bridgeType || BridgeType.LOOP,
     commitmentHash,
     status: status || CommitmentStatus.SRC_SUCCEEDED,
-    srcChainId: srcChainId || chainId,
-    srcChainContractAddress: srcContractAddress || contractAddress,
-    srcAssetSymbol: srcAssetSymbol || assetSymbol,
-    srcAssetDecimals: 18,
     shieldedAddress,
   } as Commitment;
 }
@@ -69,7 +59,6 @@ beforeEach(async () => {
       'MTT',
       '2',
       account1.shieldedAddress,
-      BridgeType.LOOP,
       CommitmentStatus.QUEUED,
     ),
     createCommitment(
@@ -78,10 +67,7 @@ beforeEach(async () => {
       'MTT',
       '3',
       account1.shieldedAddress,
-      BridgeType.CELER,
       CommitmentStatus.SPENT,
-      97,
-      '0x809Ec2d363e9969b9725657FbED1c79FbC92de6B',
     ),
     createCommitment(
       97,
@@ -89,11 +75,7 @@ beforeEach(async () => {
       'BNB',
       '4',
       account2.shieldedAddress,
-      BridgeType.TBRIDGE,
       CommitmentStatus.INCLUDED,
-      3,
-      '0x1d462FA75d1526014f4Ceaf170Cc286309AC759E',
-      'mBNB',
     ),
   ]);
 });
@@ -150,37 +132,6 @@ test('test findByContract', async () => {
     statuses: [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED],
   });
   expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['2']);
-});
-
-test('test findByAssetAndBridge', async () => {
-  let commitments = await handler.findByAssetAndBridge({
-    chainId: 3,
-    assetSymbol: 'MTT',
-    bridgeType: BridgeType.LOOP,
-  });
-  expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['2']);
-  commitments = await handler.findByAssetAndBridge({
-    chainId: 3,
-    assetSymbol: 'ETH',
-    bridgeType: BridgeType.LOOP,
-    shieldedAddresses: [account1.shieldedAddress, account2.shieldedAddress],
-  });
-  expect(commitments.length).toBe(0);
-  commitments = await handler.findByAssetAndBridge({
-    chainId: 97,
-    assetSymbol: 'BNB',
-    bridgeType: BridgeType.TBRIDGE,
-    statuses: [CommitmentStatus.INCLUDED],
-  });
-  expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['4']);
-  commitments = await handler.findByAssetAndBridge({
-    chainId: 97,
-    assetSymbol: 'BNB',
-    bridgeType: BridgeType.TBRIDGE,
-    shieldedAddresses: [account1.shieldedAddress, account2.shieldedAddress],
-    statuses: [CommitmentStatus.INCLUDED],
-  });
-  expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['4']);
 });
 
 test('test findOne', async () => {

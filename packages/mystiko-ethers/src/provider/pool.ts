@@ -22,7 +22,7 @@ export class ProviderPoolImpl implements ProviderPool {
     this.pool = new Map<number, ethers.providers.Provider>();
   }
 
-  connect(): void {
+  public connect(): void {
     this.config.chains.forEach((chainConfig) => {
       const connections = chainConfig.providers.map((providerConfig) => ({
         url: providerConfig.url,
@@ -34,15 +34,15 @@ export class ProviderPoolImpl implements ProviderPool {
     });
   }
 
-  getProvider(chainId: number): ethers.providers.Provider | undefined {
+  public getProvider(chainId: number): ethers.providers.Provider | undefined {
     return this.pool.get(chainId);
   }
 
-  setProvider(chainId: number, provider: ethers.providers.Provider): void {
+  public setProvider(chainId: number, provider: ethers.providers.Provider): void {
     this.pool.set(chainId, provider);
   }
 
-  setProviderFactory(factory: ProviderFactory): void {
+  public setProviderFactory(factory: ProviderFactory): void {
     this.providerFactory = factory;
   }
 }

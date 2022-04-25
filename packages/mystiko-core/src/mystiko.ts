@@ -111,6 +111,7 @@ export abstract class Mystiko {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
+    await this.chains.init();
     this.logger.info('@mystikonetwork/core has been successfully initialized, enjoy!');
   }
 

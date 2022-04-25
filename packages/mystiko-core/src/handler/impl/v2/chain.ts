@@ -11,46 +11,36 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
   }
 
   public find(query?: DatabaseQuery<Chain>): Promise<Chain[]> {
-    return this.context.wallets.checkCurrent().then((wallet) => {
-      const selector: any = query?.selector || {};
-      selector.wallet = wallet.id;
-      const newQuery = query ? { ...query, selector } : { selector };
-      return this.db.chains.find(newQuery).exec();
-    });
+    return this.db.chains.find(query).exec();
   }
 
   public findOne(chainId: number): Promise<Chain | null> {
-    return this.context.wallets
-      .checkCurrent()
-      .then((wallet) => this.db.chains.findOne({ selector: { wallet: wallet.id, chainId } }).exec());
+    return this.db.chains.findOne({ selector: { chainId } }).exec();
   }
 
   public init(): Promise<Chain[]> {
-    return this.context.wallets.checkCurrent().then((wallet) => {
-      const chainPromises: Promise<Chain>[] = this.config.chains.map((chainConfig) =>
-        this.findOne(chainConfig.chainId).then((existingChain) => {
-          const now = MystikoHandler.now();
-          if (!existingChain) {
-            return this.db.chains.insert({
-              id: MystikoHandler.generateId(),
-              createdAt: now,
-              updatedAt: now,
-              chainId: chainConfig.chainId,
-              name: chainConfig.name,
-              providers: chainConfig.providers.map((p) => p.url),
-              eventFilterSize: chainConfig.eventFilterSize,
-              wallet: wallet.id,
-            });
-          }
-          return existingChain.atomicUpdate((data) => {
-            data.eventFilterSize = chainConfig.eventFilterSize;
-            data.updatedAt = now;
-            return data;
+    const chainPromises: Promise<Chain>[] = this.config.chains.map((chainConfig) =>
+      this.findOne(chainConfig.chainId).then((existingChain) => {
+        const now = MystikoHandler.now();
+        if (!existingChain) {
+          return this.db.chains.insert({
+            id: MystikoHandler.generateId(),
+            createdAt: now,
+            updatedAt: now,
+            chainId: chainConfig.chainId,
+            name: chainConfig.name,
+            providers: chainConfig.providers.map((p) => p.url),
+            eventFilterSize: chainConfig.eventFilterSize,
           });
-        }),
-      );
-      return Promise.all(chainPromises);
-    });
+        }
+        return existingChain.atomicUpdate((data) => {
+          data.eventFilterSize = chainConfig.eventFilterSize;
+          data.updatedAt = now;
+          return data;
+        });
+      }),
+    );
+    return Promise.all(chainPromises);
   }
 
   public update(chainId: number, options: ChainOptions): Promise<Chain | null> {
