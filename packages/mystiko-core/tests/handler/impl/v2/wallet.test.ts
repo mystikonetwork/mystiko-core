@@ -1,15 +1,44 @@
-import { createError, MystikoContext, MystikoErrorCode, WalletHandlerV2 } from '../../../../src';
+import { MystikoConfig } from '@mystikonetwork/config';
+import {
+  ChainHandlerV2,
+  createError,
+  MystikoContext,
+  MystikoErrorCode,
+  WalletHandlerV2,
+} from '../../../../src';
 import { createTestContext } from './context';
 
 let context: MystikoContext;
 let handler: WalletHandlerV2;
+let chainHandler: ChainHandlerV2;
 
 beforeAll(async () => {
-  context = await createTestContext();
+  context = await createTestContext(
+    undefined,
+    await MystikoConfig.createFromPlain({
+      version: '0.1.0',
+      chains: [
+        {
+          chainId: 3,
+          name: 'Ethereum Ropsten',
+          assetSymbol: 'ETH',
+          assetDecimals: 18,
+          explorerUrl: 'https://ropsten.etherscan.io',
+          signerEndpoint: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+          providers: [
+            {
+              url: 'http://localhost:8545',
+            },
+          ],
+        },
+      ],
+    }),
+  );
 });
 
 beforeEach(() => {
   handler = new WalletHandlerV2(context);
+  chainHandler = new ChainHandlerV2(context);
 });
 
 afterEach(async () => {
@@ -49,6 +78,7 @@ test('test create', async () => {
   );
   const wallet = await handler.create({ masterSeed: 'seed', password: 'P@ssw0rd' });
   expect(wallet.accountNonce).toBe(0);
+  expect((await chainHandler.find()).length).toBe(1);
 });
 
 test('test current', async () => {

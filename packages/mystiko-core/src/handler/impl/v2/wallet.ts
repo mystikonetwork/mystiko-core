@@ -62,12 +62,7 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
         this.logger.info(`successfully created a wallet(id=${wallet.id})`);
         return wallet;
       })
-      .then((wallet) => {
-        if (this.context.chains) {
-          return this.context.chains.init().then(() => wallet);
-        }
-        return wallet;
-      });
+      .then((wallet) => this.context.chains.init().then(() => wallet));
   }
 
   public current(): Promise<Wallet | null> {
