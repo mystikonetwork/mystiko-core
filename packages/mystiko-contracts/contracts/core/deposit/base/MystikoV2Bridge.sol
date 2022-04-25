@@ -87,7 +87,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
     associatedCommitmentPool = _commitmentPoolAddress;
   }
 
-  function setpeerContract(uint64 _peerChainId, address _peerContract) external onlyOperator {
+  function setPeerContract(uint64 _peerChainId, address _peerContract) external onlyOperator {
     peerChainId = _peerChainId;
     peerContract = _peerContract;
   }

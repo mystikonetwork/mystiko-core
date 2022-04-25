@@ -78,9 +78,9 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
     'setMinAmount(uint256)': FunctionFragment;
     'setMinBridgeFee(uint256)': FunctionFragment;
     'setMinExecutorFee(uint256)': FunctionFragment;
+    'setPeerContract(uint64,address)': FunctionFragment;
     'setPeerMinExecutorFee(uint256)': FunctionFragment;
     'setPeerMinRollupFee(uint256)': FunctionFragment;
-    'setpeerContract(uint64,address)': FunctionFragment;
     'toggleDeposits(bool)': FunctionFragment;
     'toggleSanctionCheck(bool)': FunctionFragment;
     'updateSanctionContractAddress(address)': FunctionFragment;
@@ -113,9 +113,9 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'setMinAmount', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinBridgeFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setMinExecutorFee', values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'setPeerContract', values: [BigNumberish, string]): string;
   encodeFunctionData(functionFragment: 'setPeerMinExecutorFee', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'setPeerMinRollupFee', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'setpeerContract', values: [BigNumberish, string]): string;
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'toggleSanctionCheck', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
@@ -144,9 +144,9 @@ export interface MystikoV2WithTBridgeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'setMinAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinExecutorFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'setPeerContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setPeerMinExecutorFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setPeerMinRollupFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'setpeerContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleSanctionCheck', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'updateSanctionContractAddress', data: BytesLike): Result;
@@ -261,6 +261,12 @@ export interface MystikoV2WithTBridge extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
+    setPeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
     setPeerMinExecutorFee(
       _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -268,12 +274,6 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setPeerMinRollupFee(
       _peerMinRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<ContractTransaction>;
-
-    setpeerContract(
-      _peerChainId: BigNumberish,
-      _peerContract: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -368,6 +368,12 @@ export interface MystikoV2WithTBridge extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
+  setPeerContract(
+    _peerChainId: BigNumberish,
+    _peerContract: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
   setPeerMinExecutorFee(
     _peerMinExecutorFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
@@ -375,12 +381,6 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
   setPeerMinRollupFee(
     _peerMinRollupFee: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
-  ): Promise<ContractTransaction>;
-
-  setpeerContract(
-    _peerChainId: BigNumberish,
-    _peerContract: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -454,15 +454,15 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setMinExecutorFee(_minExecutorFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    setPeerMinExecutorFee(_peerMinExecutorFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    setPeerMinRollupFee(_peerMinRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    setpeerContract(
+    setPeerContract(
       _peerChainId: BigNumberish,
       _peerContract: string,
       overrides?: CallOverrides,
     ): Promise<void>;
+
+    setPeerMinExecutorFee(_peerMinExecutorFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+    setPeerMinRollupFee(_peerMinRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     toggleDeposits(_state: boolean, overrides?: CallOverrides): Promise<void>;
 
@@ -552,6 +552,12 @@ export interface MystikoV2WithTBridge extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
+    setPeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
     setPeerMinExecutorFee(
       _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -559,12 +565,6 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setPeerMinRollupFee(
       _peerMinRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<BigNumber>;
-
-    setpeerContract(
-      _peerChainId: BigNumberish,
-      _peerContract: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -660,6 +660,12 @@ export interface MystikoV2WithTBridge extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
+    setPeerContract(
+      _peerChainId: BigNumberish,
+      _peerContract: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
     setPeerMinExecutorFee(
       _peerMinExecutorFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -667,12 +673,6 @@ export interface MystikoV2WithTBridge extends BaseContract {
 
     setPeerMinRollupFee(
       _peerMinRollupFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
-    ): Promise<PopulatedTransaction>;
-
-    setpeerContract(
-      _peerChainId: BigNumberish,
-      _peerContract: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 

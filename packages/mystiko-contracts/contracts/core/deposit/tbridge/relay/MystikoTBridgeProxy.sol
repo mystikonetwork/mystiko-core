@@ -7,6 +7,7 @@ import "../MystikoV2WithTBridge.sol";
 
 contract MystikoTBridgeProxy is ICrossChainProxy {
   address public operator;
+  mapping(address => bool) public executorWhitelist;
 
   constructor() {
     operator = msg.sender;
@@ -14,6 +15,11 @@ contract MystikoTBridgeProxy is ICrossChainProxy {
 
   modifier onlyOperator() {
     require(msg.sender == operator, "Only operator.");
+    _;
+  }
+
+  modifier onlyExecutorWhitelisted() {
+    require(executorWhitelist[msg.sender], "Only whitelisted executor.");
     _;
   }
 
@@ -31,7 +37,7 @@ contract MystikoTBridgeProxy is ICrossChainProxy {
     address _toContract,
     address _executor,
     bytes calldata _message
-  ) external onlyOperator returns (bool) {
+  ) external onlyExecutorWhitelisted returns (bool) {
     require(
       MystikoV2WithTBridge(_toContract).crossChainSyncTx(_fromChainId, _fromContract, _message, _executor),
       "call crossChainSyncTx error"
@@ -41,6 +47,14 @@ contract MystikoTBridgeProxy is ICrossChainProxy {
 
   function changeOperator(address _newOperator) external onlyOperator {
     operator = _newOperator;
+  }
+
+  function addExecutorWhitelist(address _executor) external onlyOperator {
+    executorWhitelist[_executor] = true;
+  }
+
+  function removeExecutorWhitelist(address _executor) external onlyOperator {
+    executorWhitelist[_executor] = false;
   }
 
   function withdraw(address _recipient) external payable onlyOperator {
