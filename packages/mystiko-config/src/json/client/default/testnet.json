@@ -70,23 +70,11 @@
       "depositContracts": [
         {
           "version": 2,
-          "name": "MystikoV2WithLoopMain",
-          "address": "0x84D9DDfa3B98F4d8a0EF1aC355F50e49e99F90bD",
-          "startBlock": 18721479,
-          "bridgeType": "loop",
-          "poolAddress": "0x2f10df1D56F5009662E8FcEd7cdc46c65A04451B",
-          "disabled": false,
-          "type": "deposit",
-          "minAmount": "100000000000000000",
-          "minExecutorFee": "5000000000000000"
-        },
-        {
-          "version": 2,
           "name": "MystikoV2WithLoopERC20",
-          "address": "0xDc9d408C32222307A6Bc021B8CFE7a1A635A412C",
-          "startBlock": 18723385,
+          "address": "0xb7857e14fD5AC013AdF21EF870c0eE09ce6BEFd8",
+          "startBlock": 18759788,
           "bridgeType": "loop",
-          "poolAddress": "0xB2416832bCF9Fb529E166A9468facf8527cBCC33",
+          "poolAddress": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
           "disabled": false,
           "type": "deposit",
           "minAmount": "100000"
@@ -94,10 +82,21 @@
         {
           "version": 2,
           "name": "MystikoV2WithLoopERC20",
-          "address": "0x89A054bfaF90B19664008cae7F99F3E25Fff1e0f",
-          "startBlock": 18723345,
+          "address": "0x059BC35cB89421f53bB8163d151E8879075edc05",
+          "startBlock": 18759760,
           "bridgeType": "loop",
-          "poolAddress": "0x6DA226228156a9Ec38985C1E4c940cFc75eE7370",
+          "poolAddress": "0xfbb1A6Da247b1D3a261Dbdb425295d29177cf47A",
+          "disabled": false,
+          "type": "deposit",
+          "minAmount": "100000000000000000"
+        },
+        {
+          "version": 2,
+          "name": "MystikoV2WithLoopMain",
+          "address": "0x4471873169EA7cd3f45beA9105f567Bdc8608240",
+          "startBlock": 18759687,
+          "bridgeType": "loop",
+          "poolAddress": "0xae5009F4B58E6eF25Fee71174A827042c543ac46",
           "disabled": false,
           "type": "deposit",
           "minAmount": "100000000000000000"
@@ -107,16 +106,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
-          "address": "0x2f10df1D56F5009662E8FcEd7cdc46c65A04451B",
-          "startBlock": 18721475,
-          "type": "pool",
-          "minRollupFee": "10000000000000000"
-        },
-        {
-          "version": 2,
-          "name": "CommitmentPool",
-          "address": "0xB2416832bCF9Fb529E166A9468facf8527cBCC33",
-          "startBlock": 18723380,
+          "address": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
+          "startBlock": 18759778,
           "type": "pool",
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
           "minRollupFee": "10000"
@@ -124,10 +115,18 @@
         {
           "version": 2,
           "name": "CommitmentPool",
-          "address": "0x6DA226228156a9Ec38985C1E4c940cFc75eE7370",
-          "startBlock": 18723340,
+          "address": "0xfbb1A6Da247b1D3a261Dbdb425295d29177cf47A",
+          "startBlock": 18759747,
           "type": "pool",
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
+          "minRollupFee": "10000000000000000"
+        },
+        {
+          "version": 2,
+          "name": "CommitmentPool",
+          "address": "0xae5009F4B58E6eF25Fee71174A827042c543ac46",
+          "startBlock": 18759678,
+          "type": "pool",
           "minRollupFee": "10000000000000000"
         }
       ],
