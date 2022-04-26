@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/contracts-deploy",
-  "version": "0.0.11",
+  "version": "0.1.0-alpha.0",
   "description": "contracts deploy of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -35,15 +35,15 @@
     "update": "hardhat update"
   },
   "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@tsconfig/recommended": "^1.0.1",
+    "@typechain/ethers-v5": "^9.0.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.21",
     "@types/uuid": "^8.3.4",
-    "@typechain/ethers-v5": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
-    "@nomiclabs/hardhat-ethers": "^2.0.5",
-    "@nomiclabs/hardhat-waffle": "^2.0.3",
     "dotenv": "^10.0.0",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-typescript": "^16.1.0",
