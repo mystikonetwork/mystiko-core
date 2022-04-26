@@ -62,14 +62,18 @@ test('test find', async () => {
   expect(chains.length).toBe(1);
   expect(chains[0].name).toBe(config.getChainConfig(5)?.name);
   expect(chains[0].eventFilterSize).toBe(config.getChainConfig(5)?.eventFilterSize);
-  expect(chains[0].providers).toStrictEqual(config.getChainConfig(5)?.providers.map((p) => p.url));
+  expect(chains[0].providers.map((p) => p.url)).toStrictEqual(
+    config.getChainConfig(5)?.providers.map((p) => p.url),
+  );
   chains = await handler.find({
     selector: { chainId: 3 },
   });
   expect(chains.length).toBe(1);
   expect(chains[0].name).toBe(config.getChainConfig(3)?.name);
   expect(chains[0].eventFilterSize).toBe(config.getChainConfig(3)?.eventFilterSize);
-  expect(chains[0].providers).toStrictEqual(config.getChainConfig(3)?.providers.map((p) => p.url));
+  expect(chains[0].providers.map((p) => p.url)).toStrictEqual(
+    config.getChainConfig(3)?.providers.map((p) => p.url),
+  );
 });
 
 test('test findOne', async () => {
@@ -107,15 +111,32 @@ test('test update', async () => {
   expect(chain?.name).toBe(name);
   expect(chain?.updatedAt).toBe(updatedAt);
   expect(chain?.providers).toStrictEqual(providers);
-  await handler.update(3, { name: 'New Chain Name', providers: ['http://localhost:12345'] });
+  await handler.update(3, {
+    name: 'New Chain Name',
+    providers: [
+      {
+        url: 'http://localhost:12345',
+      },
+      {
+        url: 'http://localhost:34567',
+        maxTryCount: 4,
+        timeoutMs: 1000,
+      },
+    ],
+  });
   expect(chain?.name).toBe('New Chain Name');
   expect(chain?.updatedAt).not.toBe(updatedAt);
-  expect(chain?.providers).toStrictEqual(['http://localhost:12345']);
+  expect(chain?.providers.map((p) => p.url)).toStrictEqual([
+    'http://localhost:12345',
+    'http://localhost:34567',
+  ]);
+  expect(chain?.providers.map((p) => p.timeoutMs)).toStrictEqual([undefined, 1000]);
+  expect(chain?.providers.map((p) => p.maxTryCount)).toStrictEqual([undefined, 4]);
 });
 
 test('test update invalid url', async () => {
   await handler.init();
-  await expect(handler.update(3, { providers: ['http://localhost:12345', 'not_a_url'] })).rejects.toThrow(
-    createError('invalid provider url not_a_url', MystikoErrorCode.INVALID_PROVIDER_URL),
-  );
+  await expect(
+    handler.update(3, { providers: [{ url: 'http://localhost:12345' }, { url: 'not_a_url' }] }),
+  ).rejects.toThrow(createError('invalid provider url not_a_url', MystikoErrorCode.INVALID_PROVIDER_URL));
 });

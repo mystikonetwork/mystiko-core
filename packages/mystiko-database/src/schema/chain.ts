@@ -1,4 +1,5 @@
-import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from 'rxdb';
+import { RxJsonSchema } from 'rxdb';
+import { URL_REGEX } from '../constants';
 
 const chainSchemaLiteral = {
   version: 0,
@@ -34,8 +35,21 @@ const chainSchemaLiteral = {
       type: 'array',
       minItems: 1,
       items: {
-        type: 'string',
-        minLength: 1,
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            pattern: URL_REGEX,
+          },
+          timeoutMs: {
+            type: 'integer',
+            minimum: 0,
+          },
+          maxTryCount: {
+            type: 'integer',
+            minimum: 0,
+          },
+        },
       },
     },
     eventFilterSize: {
@@ -47,7 +61,19 @@ const chainSchemaLiteral = {
   indexes: ['chainId'],
 } as const;
 
-const schemaTyped = toTypedRxJsonSchema(chainSchemaLiteral);
+export type ProviderType = {
+  url: string;
+  timeoutMs?: number;
+  maxTryCount?: number;
+};
 
-export type ChainType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
+export type ChainType = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  chainId: number;
+  name: string;
+  providers: ProviderType[];
+  eventFilterSize: number;
+};
 export const chainSchema: RxJsonSchema<ChainType> = chainSchemaLiteral;

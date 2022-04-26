@@ -1,44 +1,79 @@
 import { ethers } from 'ethers';
 import { MystikoConfig } from '@mystikonetwork/config';
-import { DefaultProviderFactory, ProviderFactory } from '@mystikonetwork/utils';
+import { DefaultProviderFactory, ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
+
+type EtherProvider = ethers.providers.Provider;
+type ProviderConfigGetter = (chain: number) => Promise<ProviderConnection[]>;
 
 export interface ProviderPool {
-  connect(): void;
+  hasProvider(chainId: number): boolean;
+  clearProvider(chainId: number): void;
+  getProvider(chainId: number): Promise<EtherProvider | undefined>;
+  setProvider(chainId: number, provider: EtherProvider): void;
   setProviderFactory(factory: ProviderFactory): void;
-  getProvider(chainId: number): ethers.providers.Provider | undefined;
-  setProvider(chainId: number, provider: ethers.providers.Provider): void;
 }
 
 export class ProviderPoolImpl implements ProviderPool {
   private readonly config: MystikoConfig;
 
+  private readonly providerConfigGetter?: ProviderConfigGetter;
+
   private providerFactory: ProviderFactory;
 
-  private readonly pool: Map<number, ethers.providers.Provider>;
+  private readonly pool: Map<number, EtherProvider>;
 
-  constructor(config: MystikoConfig, providerFactory?: ProviderFactory) {
+  constructor(
+    config: MystikoConfig,
+    providerConfigGetter?: ProviderConfigGetter,
+    providerFactory?: ProviderFactory,
+  ) {
     this.config = config;
+    this.providerConfigGetter = providerConfigGetter;
     this.providerFactory = providerFactory || new DefaultProviderFactory();
     this.pool = new Map<number, ethers.providers.Provider>();
   }
 
-  public connect(): void {
-    this.config.chains.forEach((chainConfig) => {
-      const connections = chainConfig.providers.map((providerConfig) => ({
-        url: providerConfig.url,
-        timeout: providerConfig.timeoutMs,
-        maxTryCount: providerConfig.maxTryCount,
-      }));
-      const provider = this.providerFactory.createProvider(connections);
-      this.pool.set(chainConfig.chainId, provider);
-    });
+  public clearProvider(chainId: number) {
+    if (this.pool.has(chainId)) {
+      this.pool.delete(chainId);
+    }
   }
 
-  public getProvider(chainId: number): ethers.providers.Provider | undefined {
-    return this.pool.get(chainId);
+  public getProvider(chainId: number): Promise<EtherProvider | undefined> {
+    const provider = this.pool.get(chainId);
+    if (provider) {
+      return Promise.resolve(provider);
+    }
+    if (this.providerConfigGetter) {
+      return this.providerConfigGetter(chainId).then((connections) => {
+        if (connections.length === 0) {
+          return undefined;
+        }
+        const newProvider = this.providerFactory.createProvider(connections);
+        this.pool.set(chainId, newProvider);
+        return newProvider;
+      });
+    }
+    const chainConfig = this.config.getChainConfig(chainId);
+    if (chainConfig) {
+      const newProvider = this.providerFactory.createProvider(
+        chainConfig.providers.map((p) => ({
+          url: p.url,
+          timeout: p.timeoutMs,
+          maxTryCount: p.maxTryCount,
+        })),
+      );
+      this.pool.set(chainId, newProvider);
+      return Promise.resolve(newProvider);
+    }
+    return Promise.resolve(undefined);
   }
 
-  public setProvider(chainId: number, provider: ethers.providers.Provider): void {
+  public hasProvider(chainId: number): boolean {
+    return this.pool.has(chainId);
+  }
+
+  public setProvider(chainId: number, provider: EtherProvider): void {
     this.pool.set(chainId, provider);
   }
 

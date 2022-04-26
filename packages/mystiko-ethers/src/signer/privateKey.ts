@@ -41,10 +41,11 @@ export class PrivateKeySigner extends BaseSigner {
   public switchChain(chainId: number, chainConfig: ChainConfig): Promise<void> {
     check(chainId === chainConfig.chainId, `${chainId} !== ${chainConfig.chainId} chain id mismatch`);
     check(this.provider, 'you should call setPrivateKey before calling switchChain');
-    const jsonRpcProvider = this.providerPool.getProvider(chainId);
-    this.provider = this.provider.connect(jsonRpcProvider);
-    this.logger.info(`successfully switched to chain ${chainId}`);
-    return Promise.resolve();
+    return this.providerPool.getProvider(chainId).then((jsonRpcProvider) => {
+      this.provider = this.provider.connect(jsonRpcProvider);
+      this.logger.info(`successfully switched to chain ${chainId}`);
+      return Promise.resolve();
+    });
   }
 
   public get signer(): ethers.Signer {

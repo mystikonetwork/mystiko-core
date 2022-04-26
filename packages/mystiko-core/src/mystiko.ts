@@ -2,7 +2,7 @@ import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MetaMaskSigner, PrivateKeySigner, ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { MystikoProtocol, MystikoProtocolV2, ZokratesRuntime } from '@mystikonetwork/protocol';
-import { initLogger, logger, ProviderFactory } from '@mystikonetwork/utils';
+import { initLogger, logger, ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
 import { Logger, LogLevelDesc } from 'loglevel';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import { RxDatabaseCreator } from 'rxdb';
@@ -92,12 +92,9 @@ export abstract class Mystiko {
     initLogger(loggingOptions);
     this.logger = logger;
     this.logger.setLevel(loggingLevel);
-    this.providers = new ProviderPoolImpl(this.config, providerFactory);
-    this.providers.connect();
     this.protocol = protocol || new MystikoProtocolV2(await this.zokratesRuntime());
     const contexts = contextFactory || new DefaultContextFactory(this.config, this.db, this.protocol);
     this.context = contexts.createContext();
-    this.context.providers = this.providers;
     this.context.executors = executorFactory || new ExecutorFactoryV2(this.context);
     const handlers = handlerFactory || new HandlerFactoryV2(this.context);
     this.chains = handlers.createChainHandler();
@@ -107,12 +104,34 @@ export abstract class Mystiko {
     this.commitments = handlers.createCommitmentHandler();
     this.deposits = handlers.createDepositHandler();
     this.transactions = handlers.createTransactionHandler();
+    this.providers = new ProviderPoolImpl(
+      this.config,
+      (chainId) => this.getChainConfig(chainId),
+      providerFactory,
+    );
+    this.context.providers = this.providers;
     this.signers = {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
     await this.chains.init();
     this.logger.info('@mystikonetwork/core has been successfully initialized, enjoy!');
+  }
+
+  protected getChainConfig(chainId: number): Promise<ProviderConnection[]> {
+    if (this.chains) {
+      return this.chains.findOne(chainId).then((chain) => {
+        if (chain) {
+          return chain.providers.map((p) => ({
+            url: p.url,
+            timeout: p.timeoutMs,
+            maxTryCount: p.maxTryCount,
+          }));
+        }
+        return [];
+      });
+    }
+    return Promise.resolve([]);
   }
 
   protected abstract zokratesRuntime(): Promise<ZokratesRuntime>;

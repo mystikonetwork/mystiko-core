@@ -378,7 +378,10 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     this.logger.info(`submitting transaction of deposit id=${deposit.id}`);
     return promise
       .then((resp) => {
-        this.logger.info(`transaction of deposit id=${deposit.id} has been submitted`);
+        this.logger.info(
+          `transaction of deposit id=${deposit.id} on chain id=${chainConfig.chainId} ` +
+            `has been submitted, transaction hash=${resp.hash}`,
+        );
         return this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
           transactionHash: resp.hash,
         }).then((newDeposit) => waitTransaction(resp).then((receipt) => ({ newDeposit, receipt })));

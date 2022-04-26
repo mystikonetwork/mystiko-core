@@ -29,7 +29,11 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
             updatedAt: now,
             chainId: chainConfig.chainId,
             name: chainConfig.name,
-            providers: chainConfig.providers.map((p) => p.url),
+            providers: chainConfig.providers.map((p) => ({
+              url: p.url,
+              timeoutMs: p.timeoutMs,
+              maxTryCount: p.maxTryCount,
+            })),
             eventFilterSize: chainConfig.eventFilterSize,
           });
         }
@@ -46,9 +50,10 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
   public update(chainId: number, options: ChainOptions): Promise<Chain | null> {
     if (options.providers) {
       for (let i = 0; i < options.providers.length; i += 1) {
-        if (!isURL(options.providers[i], { protocols: ['http', 'https', 'ws', 'wss'], require_tld: false })) {
+        const provider = options.providers[i];
+        if (!isURL(provider.url, { protocols: ['http', 'https', 'ws', 'wss'], require_tld: false })) {
           return createErrorPromise(
-            `invalid provider url ${options.providers[i]}`,
+            `invalid provider url ${provider.url}`,
             MystikoErrorCode.INVALID_PROVIDER_URL,
           );
         }

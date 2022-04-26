@@ -35,35 +35,33 @@ beforeEach(async () => {
   });
 });
 
-test('test connect', () => {
+test('test getProvider', async () => {
   const providerPool = new ProviderPoolImpl(config);
-  providerPool.connect();
-  expect(providerPool.getProvider(3)).not.toBe(undefined);
-  expect(providerPool.getProvider(5)).not.toBe(undefined);
+  expect(await providerPool.getProvider(300)).toBe(undefined);
+  expect(await providerPool.getProvider(3)).not.toBe(undefined);
+  expect(await providerPool.getProvider(5)).not.toBe(undefined);
 });
 
-test('test setProvider', () => {
+test('test setProvider', async () => {
   const providerPool = new ProviderPoolImpl(config);
-  providerPool.connect();
   const newProvider = new ethers.providers.JsonRpcProvider(
     'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   );
   providerPool.setProvider(3, newProvider);
-  expect(providerPool.getProvider(3)).toStrictEqual(newProvider);
+  expect(await providerPool.getProvider(3)).toStrictEqual(newProvider);
 });
 
-test('test different providerFactory', () => {
-  const providerPool = new ProviderPoolImpl(config, {
+test('test different providerFactory', async () => {
+  const providerPool = new ProviderPoolImpl(config, undefined, {
     createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider {
       const urls = connections.map((conn) => (typeof conn === 'string' ? conn : conn.url));
       return new ethers.providers.JsonRpcProvider(urls[0]);
     },
   });
-  providerPool.connect();
-  expect(providerPool.getProvider(3) instanceof ethers.providers.JsonRpcProvider).toBe(true);
+  expect((await providerPool.getProvider(3)) instanceof ethers.providers.JsonRpcProvider).toBe(true);
 });
 
-test('test setProviderFactory', () => {
+test('test setProviderFactory', async () => {
   const providerPool = new ProviderPoolImpl(config);
   providerPool.setProviderFactory({
     createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider {
@@ -71,6 +69,37 @@ test('test setProviderFactory', () => {
       return new ethers.providers.JsonRpcProvider(urls[0]);
     },
   });
-  providerPool.connect();
-  expect(providerPool.getProvider(3) instanceof ethers.providers.JsonRpcProvider).toBe(true);
+  expect((await providerPool.getProvider(3)) instanceof ethers.providers.JsonRpcProvider).toBe(true);
+});
+
+test('test providerConfigGetter', async () => {
+  const providerPool = new ProviderPoolImpl(
+    config,
+    (chainId) => {
+      if (chainId === 3) {
+        return Promise.resolve([{ url: 'http://localhost:8080' }]);
+      }
+      return Promise.resolve([]);
+    },
+    {
+      createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider {
+        const urls = connections.map((conn) => (typeof conn === 'string' ? conn : conn.url));
+        return new ethers.providers.JsonRpcProvider(urls[0]);
+      },
+    },
+  );
+  const provider = await providerPool.getProvider(3);
+  expect((provider as ethers.providers.JsonRpcProvider).connection.url).toBe('http://localhost:8080');
+  expect(providerPool.hasProvider(3)).toBe(true);
+  expect(await providerPool.getProvider(5)).toBe(undefined);
+  expect(providerPool.hasProvider(5)).toBe(false);
+});
+
+test('test clearProvider/hasProvider', async () => {
+  const providerPool = new ProviderPoolImpl(config);
+  expect(await providerPool.getProvider(3)).not.toBe(undefined);
+  expect(providerPool.hasProvider(3)).toBe(true);
+  providerPool.clearProvider(3);
+  providerPool.clearProvider(300);
+  expect(providerPool.hasProvider(3)).toBe(false);
 });

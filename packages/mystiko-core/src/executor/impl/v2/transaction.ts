@@ -687,7 +687,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             this.logger.info(
               `transaction id=${transaction.id} to ` +
                 `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
-                ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
+                ` is confirmed on chain, transaction has${resp.hash} gas used=${receipt.gasUsed.toString()}`,
             );
             return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
               transactionHash: receipt.transactionHash,

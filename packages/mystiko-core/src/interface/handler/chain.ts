@@ -1,8 +1,8 @@
-import { Chain, DatabaseQuery } from '@mystikonetwork/database';
+import { Chain, DatabaseQuery, ProviderType } from '@mystikonetwork/database';
 
 export type ChainOptions = {
   name?: string;
-  providers?: string[];
+  providers?: ProviderType[];
 };
 
 export interface ChainHandler<C = ChainOptions> {

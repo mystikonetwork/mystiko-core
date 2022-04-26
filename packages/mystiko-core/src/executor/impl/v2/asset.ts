@@ -38,17 +38,18 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
   }
 
   public balance(options: AssetExecutorBalanceOptions): Promise<string> {
-    const provider = this.context.providers.getProvider(options.chainId);
-    if (!provider) {
-      return createErrorPromise(
-        `no provider configured for chain id=${options.chainId}`,
-        MystikoErrorCode.NON_EXISTING_PROVIDER,
-      );
-    }
-    if (options.assetAddress) {
-      const contract = MystikoContractFactory.connect<ERC20>('ERC20', options.assetAddress, provider);
-      return contract.balanceOf(options.address).then((b) => b.toString());
-    }
-    return provider.getBalance(options.address).then((b) => b.toString());
+    return this.context.providers.getProvider(options.chainId).then((provider) => {
+      if (!provider) {
+        return createErrorPromise(
+          `no provider configured for chain id=${options.chainId}`,
+          MystikoErrorCode.NON_EXISTING_PROVIDER,
+        );
+      }
+      if (options.assetAddress) {
+        const contract = MystikoContractFactory.connect<ERC20>('ERC20', options.assetAddress, provider);
+        return contract.balanceOf(options.address).then((b) => b.toString());
+      }
+      return provider.getBalance(options.address).then((b) => b.toString());
+    });
   }
 }

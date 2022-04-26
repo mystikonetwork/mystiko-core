@@ -171,10 +171,9 @@ test('test metamask signer', async () => {
 });
 
 test('test private key signer', async () => {
-  const providerPool = new ProviderPoolImpl(config, {
+  const providerPool = new ProviderPoolImpl(config, undefined, {
     createProvider: (connections) => new MockEtherProvider(connections[0], 3),
   });
-  providerPool.connect();
   const signer = new PrivateKeySigner(config, providerPool);
   expect(await signer.installed()).toBe(true);
   expect(await signer.connected()).toBe(false);

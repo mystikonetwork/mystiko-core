@@ -56,6 +56,5 @@ export async function createTestContext(
   >(wrappedConfig, wrappedDb, protocol);
   context.executors = new ExecutorFactoryV2(context);
   context.providers = new ProviderPoolImpl(wrappedConfig);
-  context.providers.connect();
   return Promise.resolve(context);
 }

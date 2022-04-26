@@ -33,40 +33,41 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return this.context.wallets.checkPassword(options.walletPassword).then(() => {
       if (options && options.chainId) {
         const chainConfig = this.config.getChainConfig(options.chainId);
-        const provider = this.context.providers.getProvider(options.chainId);
-        if (!chainConfig) {
-          return createErrorPromise(
-            `no such chain id=${options.chainId} configured`,
-            MystikoErrorCode.NON_EXISTING_CHAIN,
-          );
-        }
-        if (!provider) {
-          return createErrorPromise(
-            `no such provider configured for chain id=${options.chainId}`,
-            MystikoErrorCode.NON_EXISTING_PROVIDER,
-          );
-        }
-        if (options.contractAddress) {
-          if (options.contractAddress === ContractType.DEPOSIT) {
-            const contractConfig = chainConfig.getDepositContractByAddress(options.contractAddress);
+        return this.context.providers.getProvider(options.chainId).then((provider) => {
+          if (!chainConfig) {
+            return createErrorPromise(
+              `no such chain id=${options.chainId} configured`,
+              MystikoErrorCode.NON_EXISTING_CHAIN,
+            );
+          }
+          if (!provider) {
+            return createErrorPromise(
+              `no such provider configured for chain id=${options.chainId}`,
+              MystikoErrorCode.NON_EXISTING_PROVIDER,
+            );
+          }
+          if (options.contractAddress) {
+            if (options.contractAddress === ContractType.DEPOSIT) {
+              const contractConfig = chainConfig.getDepositContractByAddress(options.contractAddress);
+              if (!contractConfig) {
+                return createErrorPromise(
+                  `no such deposit contract address=${options.contractAddress} on chain id=${options.chainId}`,
+                  MystikoErrorCode.NON_EXISTING_CONTRACT,
+                );
+              }
+              return this.importContract({ options, chainConfig, provider, contractConfig });
+            }
+            const contractConfig = chainConfig.getPoolContractByAddress(options.contractAddress);
             if (!contractConfig) {
               return createErrorPromise(
-                `no such deposit contract address=${options.contractAddress} on chain id=${options.chainId}`,
+                `no such pool contract address=${options.contractAddress} on chain id=${options.chainId}`,
                 MystikoErrorCode.NON_EXISTING_CONTRACT,
               );
             }
             return this.importContract({ options, chainConfig, provider, contractConfig });
           }
-          const contractConfig = chainConfig.getPoolContractByAddress(options.contractAddress);
-          if (!contractConfig) {
-            return createErrorPromise(
-              `no such pool contract address=${options.contractAddress} on chain id=${options.chainId}`,
-              MystikoErrorCode.NON_EXISTING_CONTRACT,
-            );
-          }
-          return this.importContract({ options, chainConfig, provider, contractConfig });
-        }
-        return this.importChain({ options, chainConfig, provider });
+          return this.importChain({ options, chainConfig, provider });
+        });
       }
       return this.importAll({ options: options || {} });
     });
@@ -76,10 +77,14 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     const promises: Promise<Commitment[]>[] = [];
     for (let i = 0; i < this.config.chains.length; i += 1) {
       const chainConfig = this.config.chains[i];
-      const provider = this.context.providers.getProvider(chainConfig.chainId);
-      if (provider) {
-        promises.push(this.importChain({ ...importContext, chainConfig, provider }));
-      }
+      promises.push(
+        this.context.providers.getProvider(chainConfig.chainId).then((provider) => {
+          if (provider) {
+            return this.importChain({ ...importContext, chainConfig, provider });
+          }
+          return [];
+        }),
+      );
     }
     return Promise.all(promises).then((commitments) => commitments.flat());
   }
@@ -87,7 +92,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   private importChain(importContext: ImportChainContext): Promise<Commitment[]> {
     const promises: Promise<Commitment[]>[] = [];
     const { chainConfig } = importContext;
-    this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
+    this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
     chainConfig.poolContracts.forEach((contractConfig) => {
       promises.push(this.importContract({ ...importContext, contractConfig }));
     });
@@ -99,7 +104,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
 
   private importContract(importContext: ImportContractContext): Promise<Commitment[]> {
     const { chainConfig, contractConfig } = importContext;
-    this.logger.info(
+    this.logger.debug(
       'importing commitment related events from ' +
         `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
     );
@@ -121,7 +126,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
-    this.logger.info(
+    this.logger.debug(
       'importing CommitmentQueued event from ' +
         `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
     );
@@ -154,7 +159,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
-    this.logger.info(
+    this.logger.debug(
       'importing CommitmentIncluded event from ' +
         `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
     );
@@ -184,7 +189,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
-    this.logger.info(
+    this.logger.debug(
       'importing CommitmentSpent event from ' +
         `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
     );
