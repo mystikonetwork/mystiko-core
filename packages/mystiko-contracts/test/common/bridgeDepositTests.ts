@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
-import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { Wallet } from '@ethersproject/wallet';
 import { CommitmentInfo } from './commitment';
@@ -30,7 +30,7 @@ export function testBridgeDeposit(
   depositAmount: string,
   isMainAsset: boolean,
   isDstMainAsset: boolean,
-  cmInfo: CommitmentInfo<CommitmentV1>,
+  cmInfo: CommitmentInfo<CommitmentV2>,
 ) {
   let minBridgeFee: number;
   let minRollupFee: number;

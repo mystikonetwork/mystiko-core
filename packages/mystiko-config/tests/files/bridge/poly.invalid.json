@@ -1,0 +1,8 @@
+{
+  "name": "Poly Bridge",
+  "type": "poly",
+  "explorerUrl": 123,
+  "explorerPrefix": "/testnet/tx/%tx%",
+  "apiUrl": "https://explorer.poly.network",
+  "apiPrefix": "/testnet/api/v1/getcrosstx?txhash=%tx%"
+}

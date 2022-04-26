@@ -12,9 +12,25 @@ import {
   toHexNoPrefix,
   toString,
 } from '@mystikonetwork/utils';
-import { CommitmentV1, CommitmentArgsV1, MystikoProtocolV1 } from './v1';
 import { MystikoProtocol } from '../base';
 import { ZokratesRuntime } from '../runtime';
+
+export interface CommitmentArgsV2 {
+  randomP?: BN;
+  randomR?: BN;
+  randomS?: BN;
+}
+
+export interface CommitmentV2 {
+  privateNote: Buffer;
+  amount: BN;
+  shieldedAddress: string;
+  randomP: BN;
+  randomR: BN;
+  randomS: BN;
+  commitmentHash: BN;
+  k: BN;
+}
 
 export interface TransactionV2 {
   numInputs: number;
@@ -52,19 +68,20 @@ export interface RollupV2 {
 }
 
 export class MystikoProtocolV2 extends MystikoProtocol<
-  CommitmentArgsV1,
-  CommitmentV1,
+  CommitmentArgsV2,
+  CommitmentV2,
   TransactionV2,
   RollupV2
 > {
   private readonly runtime: ZokratesRuntime;
 
-  private readonly v1Protocol: MystikoProtocolV1;
-
   constructor(runtime: ZokratesRuntime) {
     super();
     this.runtime = runtime;
-    this.v1Protocol = new MystikoProtocolV1();
+  }
+
+  public serialNumber(skVerify: Buffer, randomP: BN): BN {
+    return this.poseidonHash([randomP, this.buffToBigInt(skVerify)]);
   }
 
   public sigPkHash(sigPk: Buffer, secretKey: Buffer) {
@@ -75,8 +92,8 @@ export class MystikoProtocolV2 extends MystikoProtocol<
     pkVerify: Buffer,
     pkEnc: Buffer,
     amount: BN,
-    args?: CommitmentArgsV1,
-  ): Promise<CommitmentV1> {
+    args?: CommitmentArgsV2,
+  ): Promise<CommitmentV2> {
     const generatedRandomP = args?.randomP || this.randomBigInt(this.randomSkSize);
     const generatedRandomR = args?.randomR || this.randomBigInt(this.randomSkSize);
     const generatedRandomS = args?.randomS || this.randomBigInt(this.randomSkSize);
@@ -99,12 +116,31 @@ export class MystikoProtocolV2 extends MystikoProtocol<
     );
     return Promise.resolve({
       commitmentHash,
+      amount,
+      shieldedAddress: this.shieldedAddress(pkVerify, pkEnc),
       k,
       randomP: generatedRandomP,
       randomR: generatedRandomR,
       randomS: generatedRandomS,
       privateNote,
     });
+  }
+
+  public async commitmentFromEncryptedNote(
+    pkVerify: Buffer,
+    pkEnc: Buffer,
+    skEnc: Buffer,
+    encryptedNote: Buffer,
+  ): Promise<CommitmentV2> {
+    const decryptedNote = await this.decryptAsymmetric(skEnc, encryptedNote);
+    if (decryptedNote.length !== this.randomSkSize * 3 + this.amountSize) {
+      return Promise.reject(new Error('wrong decrypted data from encrypted note, maybe secret key is wrong'));
+    }
+    const randomP = this.buffToBigInt(decryptedNote.slice(0, this.randomSkSize));
+    const randomR = this.buffToBigInt(decryptedNote.slice(this.randomSkSize, this.randomSkSize * 2));
+    const randomS = this.buffToBigInt(decryptedNote.slice(this.randomSkSize * 2, this.randomSkSize * 3));
+    const amount = this.buffToBigInt(decryptedNote.slice(this.randomSkSize * 3));
+    return this.commitment(pkVerify, pkEnc, amount, { randomP, randomR, randomS });
   }
 
   public async zkProveTransaction(tx: TransactionV2): Promise<Proof> {
@@ -137,7 +173,7 @@ export class MystikoProtocolV2 extends MystikoProtocol<
       inRandomRs.push(randomR);
       inRandomSs.push(randomS);
       inAmounts.push(amount);
-      serialNumbers.push(this.v1Protocol.serialNumber(tx.inVerifySks[i], inRandomPs[i]));
+      serialNumbers.push(this.serialNumber(tx.inVerifySks[i], inRandomPs[i]));
       sigHashes.push(this.sigPkHash(tx.sigPk, tx.inVerifySks[i]));
     }
     const inputs: any[] = [

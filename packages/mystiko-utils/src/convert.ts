@@ -9,7 +9,7 @@ import { isBN, toBN } from './bignumber';
  * @returns {string} converted string.
  */
 export function toString(object: any): string {
-  return object ? object.toString() : '';
+  return object !== undefined && object !== null ? object.toString() : '';
 }
 
 /**
@@ -20,7 +20,7 @@ export function toString(object: any): string {
  * @returns {BN} a instance of {@link BN}
  */
 export function toDecimals(amount: number, decimals: number = 18): BN {
-  const converted = ethers.utils.parseUnits(toString(amount), decimals);
+  const converted = ethers.utils.parseUnits(`${amount}`, decimals);
   return toBN(toString(converted));
 }
 
@@ -31,7 +31,7 @@ export function toDecimals(amount: number, decimals: number = 18): BN {
  * @param {number} [decimals=18] number of precision bits of converted big number.
  * @returns {amount} converted simple amount.
  */
-export function fromDecimals(bn: BN, decimals = 18): number {
+export function fromDecimals(bn: BN | string, decimals = 18): number {
   return parseFloat(ethers.utils.formatUnits(toString(bn), decimals));
 }
 
@@ -179,6 +179,6 @@ export function toBuff(strData: string): Buffer {
  * @param {any} object the object to be deeply copied.
  * @returns {any} deeply copied object.
  */
-export function deepCopy(object: any): any {
+export function deepCopy<T>(object: T): T {
   return JSON.parse(JSON.stringify(object));
 }

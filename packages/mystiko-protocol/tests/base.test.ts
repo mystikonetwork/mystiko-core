@@ -17,6 +17,15 @@ class TestProtocol extends MystikoProtocol<any, any, any, any> {
   public zkVerify(proof: Proof, vkeyFile: string): Promise<boolean> {
     return Promise.reject(new Error('not implemented'));
   }
+
+  public commitmentFromEncryptedNote(
+    pkVerify: Buffer,
+    pkEnc: Buffer,
+    skEnc: Buffer,
+    encryptedNote: Buffer,
+  ): Promise<any> {
+    return Promise.reject(new Error('not implemented'));
+  }
 }
 
 const testProtocol = new TestProtocol();

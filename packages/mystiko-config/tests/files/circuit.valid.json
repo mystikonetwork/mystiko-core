@@ -1,0 +1,9 @@
+{
+  "name": "zokrates-1.0-rollup1",
+  "type": "rollup1",
+  "isDefault": true,
+  "programFile": ["./Rollup1.program.gz"],
+  "abiFile": ["./Rollup1.abi.json"],
+  "provingKeyFile": ["./Rollup1.pkey.gz"],
+  "verifyingKeyFile": ["./Rollup1.vkey.gz"]
+}

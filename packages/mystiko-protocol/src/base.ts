@@ -232,6 +232,13 @@ export abstract class MystikoProtocol<CI = any, CO = any, T = any, R = any> {
     return Promise.reject(new Error('not implemented'));
   }
 
+  public abstract commitmentFromEncryptedNote(
+    pkVerify: Buffer,
+    pkEnc: Buffer,
+    skEnc: Buffer,
+    encryptedNote: Buffer,
+  ): Promise<CO>;
+
   public abstract commitment(pkVerify: Buffer, pkEnc: Buffer, amount: BN, args?: CI): Promise<CO>;
 
   public abstract zkProveTransaction(tx: T): Promise<Proof>;

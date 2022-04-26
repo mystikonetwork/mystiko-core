@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/config",
-  "version": "0.0.11",
+  "version": "0.1.0-alpha.0",
   "description": "configuration of mystiko-core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -27,7 +27,7 @@
     "build:cjs": "tsc -p ./tsconfig.json",
     "build:esm": "tsc -p ./tsconfig.esm.json",
     "build": "rm -rf build && yarn build:cjs && yarn build:esm",
-    "test": "jest --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json",
+    "test": "jest --coverage",
     "lint": "eslint --ext .js,.ts .",
     "prettier:check": "prettier --check \"./**/*.{js,ts}\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.{js,ts}\" --config .prettierrc",
@@ -52,8 +52,11 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/utils": "^0.0.11",
+    "@mystikonetwork/utils": "^0.1.0-alpha.0",
     "bn.js": "^5.2.0",
-    "ethers": "^5.5.3"
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "ethers": "^5.5.3",
+    "reflect-metadata": "^0.1.13"
   }
 }

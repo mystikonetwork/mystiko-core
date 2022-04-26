@@ -1,0 +1,54 @@
+{
+  "chainId": 3,
+  "name": "Ethereum Ropsten",
+  "assetSymbol": "ETH",
+  "assetDecimals": 18,
+  "recommendedAmounts": ["1000000000000000000", "10000000000000000000"],
+  "explorerUrl": "https://ropsten.etherscan.io",
+  "explorerPrefix": "/tx/%tx%",
+  "providers": [
+    {
+      "url": "wss://ropsten.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      "timeoutMs": 5000,
+      "maxTryCount": 5
+    }
+  ],
+  "signerEndpoint": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  "depositContracts": [
+    {
+      "version": 2,
+      "name": "MystikoWithPolyERC20",
+      "address": "0x961f315a836542e603a3df2e0dd9d4ecd06ebc67",
+      "type": "deposit",
+      "startBlock": 1000000,
+      "bridgeType": "tbridge",
+      "poolAddress": "0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d",
+      "disabled": true,
+      "peerChainId":  97,
+      "peerContractAddress": "0x98bF2d9e3bA2A8515E660BD4104432ce3e2D7547",
+      "minAmount": "10000000000000000",
+      "minBridgeFee": "20000000000000000",
+      "minExecutorFee": "30000000000000000"
+    }
+  ],
+  "poolContracts": [
+    {
+      "version": 2,
+      "name": "CommitmentPool",
+      "address": "0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d",
+      "type": "pool",
+      "startBlock": 1000000,
+      "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a",
+      "minRollupFee": "40000000000000000",
+      "circuits": ["circuit-1.0"]
+    }
+  ],
+  "assets": [
+    {
+      "assetType": "erc20",
+      "assetSymbol": "MTT",
+      "assetDecimals": 16,
+      "assetAddress": "0xEC1d5CfB0bf18925aB722EeeBCB53Dc636834e8a"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
-import { CommitmentV1, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
 
@@ -25,7 +25,7 @@ async function generateProof(
   protocol: MystikoProtocolV2,
   numInputs: number,
   numOutputs: number,
-  commitmentInfo: CommitmentInfo<CommitmentV1>,
+  commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
   includedCount: BN,
   sigPk: Buffer,
@@ -36,7 +36,7 @@ async function generateProof(
   programFile: string,
   abiFile: string,
   provingKeyFile: string,
-): Promise<{ proof: Proof; outCommitments: CommitmentV1[] }> {
+): Promise<{ proof: Proof; outCommitments: CommitmentV2[] }> {
   const commitments = commitmentInfo.commitments.slice(0, includedCount.toNumber());
   const merkleTree = new MerkleTree(
     commitments.map((c) => c.commitmentHash),
@@ -63,11 +63,11 @@ async function generateProof(
   }
   const outVerifyPks: Buffer[] = [];
   const outCommitments: BN[] = [];
-  const outFullCommitments: CommitmentV1[] = [];
+  const outFullCommitments: CommitmentV2[] = [];
   const outRandomPs: BN[] = [];
   const outRandomRs: BN[] = [];
   const outRandomSs: BN[] = [];
-  const outCommitmentsPromises: Promise<CommitmentV1>[] = [];
+  const outCommitmentsPromises: Promise<CommitmentV2>[] = [];
   for (let i = 0; i < numOutputs; i += 1) {
     outVerifyPks.push(commitmentInfo.pkVerify);
     outCommitmentsPromises.push(
@@ -150,7 +150,7 @@ export function testTransact(
   protocol: MystikoProtocolV2,
   commitmentPoolContract: any,
   transactVerifier: any,
-  commitmentInfo: CommitmentInfo<CommitmentV1>,
+  commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
   publicAmount: BN,
   relayerFeeAmount: BN,
@@ -171,7 +171,7 @@ export function testTransact(
   let recipientBalance: BN;
   let relayerBalance: BN;
   let proof: Proof;
-  let outCommitments: CommitmentV1[];
+  let outCommitments: CommitmentV2[];
   let outEncryptedNotes: Buffer[];
   let signature: string;
   let commitmentQueueSize: BN;
@@ -331,7 +331,7 @@ export function testTransactRevert(
   commitmentPoolContract: any,
   sanctionList: DummySanctionsList,
   transactVerifier: any,
-  commitmentInfo: CommitmentInfo<CommitmentV1>,
+  commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
   publicAmount: BN,
   relayerFeeAmount: BN,
@@ -347,7 +347,7 @@ export function testTransactRevert(
   const relayerAddress = '0xc9192277ea18ff49618E412197C9c9eaCF43A5e3';
   const signatureKeys = generateSignatureKeys();
   let proof: Proof;
-  let outCommitments: CommitmentV1[];
+  let outCommitments: CommitmentV2[];
   let outEncryptedNotes: Buffer[];
   let signature: string;
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {

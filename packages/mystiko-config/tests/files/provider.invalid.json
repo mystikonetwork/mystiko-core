@@ -1,0 +1,5 @@
+{
+  "url": "wrong_schema://localhost:8545",
+  "timeoutMs": 100000,
+  "maxTryCount": 5
+}
