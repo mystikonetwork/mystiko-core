@@ -58,7 +58,7 @@ export type TransactionQuery = {
   id?: string;
   chainId?: number;
   contractAddress?: number;
-  transactionHash?: number;
+  transactionHash?: string;
 };
 
 export type TransactionUpdate = {

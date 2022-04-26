@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/contracts-abi",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-0.1.0-alpha.1.0",
   "description": "contracts abi of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",

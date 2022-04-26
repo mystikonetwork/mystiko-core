@@ -126,7 +126,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         if (options.type === TransactionEnum.TRANSFER) {
           transferringAmount = fromDecimals(amount.sub(rollupFee).sub(gasRelayerFee), config.assetDecimals);
         }
-        const newBalance = previousBalance - withdrawingAmount - transferringAmount;
+        const newBalance =
+          previousBalance - withdrawingAmount - transferringAmount - rollupFeeAmount - gasRelayerFeeAmount;
         return {
           previousBalance,
           newBalance,
@@ -416,7 +417,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         amount: receivingAmount.toString(),
         publicAmount: receivingPublicAmount.toString(),
         rollupFeeAmount: rollupFee.toString(),
-        gasRelayerFeeAmount: rollupFee.toString(),
+        gasRelayerFeeAmount: gasRelayerFee.toString(),
         gasRelayerAddress: options.gasRelayerAddress,
         shieldedAddress: options.shieldedAddress,
         publicAddress: options.publicAddress,
@@ -522,7 +523,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             const rollupFeeAmounts: BN[] = [];
             for (let i = 0; i < selectedCommitments.length; i += 1) {
               const commitment = selectedCommitments[i];
-              const account = accounts[0];
+              const account = accounts[i];
               const { commitmentHash, leafIndex, encryptedNote } = commitment;
               if (!encryptedNote || !leafIndex) {
                 return createErrorPromise(
