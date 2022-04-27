@@ -1,7 +1,9 @@
 import { MystikoConfig } from '@mystikonetwork/config';
+import { MystikoContractFactory, SupportedContractType } from '@mystikonetwork/contracts-abi';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
+import { ethers } from 'ethers';
 import { createError, MystikoErrorCode } from '../error';
 import {
   AccountHandler,
@@ -11,6 +13,7 @@ import {
   DepositHandler,
   ExecutorFactory,
   MystikoContextInterface,
+  MystikoContractConnector,
   TransactionHandler,
   WalletHandler,
 } from '../interface';
@@ -50,10 +53,21 @@ export class MystikoContext<
 
   public protocol: P;
 
+  public contractConnector: MystikoContractConnector;
+
   constructor(config: MystikoConfig, db: MystikoDatabase, protocol: P) {
     this.config = config;
     this.db = db;
     this.protocol = protocol;
+    this.contractConnector = {
+      connect<CT extends SupportedContractType>(
+        contractName: string,
+        address: string,
+        signerOrProvider: ethers.Signer | ethers.providers.Provider,
+      ): CT {
+        return MystikoContractFactory.connect<CT>(contractName, address, signerOrProvider);
+      },
+    };
   }
 
   public get accounts(): A {

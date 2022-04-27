@@ -1,7 +1,9 @@
 import { MystikoConfig } from '@mystikonetwork/config';
+import { SupportedContractType } from '@mystikonetwork/contracts-abi';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
+import { ethers } from 'ethers';
 import { ExecutorFactory } from '../executor';
 import {
   AccountHandler,
@@ -12,6 +14,14 @@ import {
   TransactionHandler,
   WalletHandler,
 } from '../handler';
+
+export interface MystikoContractConnector {
+  connect<T extends SupportedContractType>(
+    contractName: string,
+    address: string,
+    signerOrProvider: ethers.Signer | ethers.providers.Provider,
+  ): T;
+}
 
 export interface MystikoContextInterface<
   A extends AccountHandler = AccountHandler,
@@ -47,4 +57,6 @@ export interface MystikoContextInterface<
   set executors(factory: ExecutorFactory);
   get providers(): ProviderPool;
   set providers(pool: ProviderPool);
+  get contractConnector(): MystikoContractConnector;
+  set contractConnector(connector: MystikoContractConnector);
 }

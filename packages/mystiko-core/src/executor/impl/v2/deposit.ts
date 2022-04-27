@@ -5,7 +5,7 @@ import {
   ChainConfig,
   DepositContractConfig,
 } from '@mystikonetwork/config';
-import { MystikoContractFactory, MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
+import { MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
 import { CommitmentStatus, CommitmentType, Deposit, DepositStatus } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
@@ -339,7 +339,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     const { options, contractConfig, chainConfig, deposit, mainAssetTotal } = executionContext;
     let promise: Promise<ContractTransaction>;
     if (contractConfig.bridgeType === BridgeType.LOOP) {
-      const contract = MystikoContractFactory.connect<MystikoV2Loop>(
+      const contract = this.context.contractConnector.connect<MystikoV2Loop>(
         'MystikoV2Loop',
         contractConfig.address,
         options.signer.signer,
@@ -356,7 +356,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         { value: mainAssetTotal },
       );
     } else {
-      const contract = MystikoContractFactory.connect<MystikoV2Bridge>(
+      const contract = this.context.contractConnector.connect<MystikoV2Bridge>(
         'MystikoV2Bridge',
         contractConfig.address,
         options.signer.signer,

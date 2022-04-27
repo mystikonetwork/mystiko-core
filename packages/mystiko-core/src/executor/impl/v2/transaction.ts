@@ -5,7 +5,7 @@ import {
   MAIN_ASSET_ADDRESS,
   PoolContractConfig,
 } from '@mystikonetwork/config';
-import { CommitmentPool, ICommitmentPool, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
+import { CommitmentPool, ICommitmentPool } from '@mystikonetwork/contracts-abi';
 import {
   Account,
   Commitment,
@@ -659,7 +659,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithRequest> {
     const { options, contractConfig, chainConfig, transaction } = executionContext;
     const { signer } = options;
-    const contract = MystikoContractFactory.connect<CommitmentPool>(
+    const contract = this.context.contractConnector.connect<CommitmentPool>(
       'CommitmentPool',
       contractConfig.address,
       signer.signer,

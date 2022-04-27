@@ -5,7 +5,7 @@ import {
   DepositContractConfig,
   PoolContractConfig,
 } from '@mystikonetwork/config';
-import { CommitmentPool, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
+import { CommitmentPool } from '@mystikonetwork/contracts-abi';
 import { Commitment, CommitmentStatus, CommitmentType, DepositStatus } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toBuff } from '@mystikonetwork/utils';
@@ -132,7 +132,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     );
     const startBlock = options.startBlock || contractConfig.startBlock;
     const { toBlock } = options;
-    const contract = CommitmentExecutorV2.connectPoolContract(importContext);
+    const contract = this.connectPoolContract(importContext);
     return contract
       .queryFilter(contract.filters.CommitmentQueued(), startBlock, toBlock)
       .then((rawEvents) => {
@@ -165,7 +165,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     );
     const startBlock = options.startBlock || contractConfig.startBlock;
     const { toBlock } = options;
-    const contract = CommitmentExecutorV2.connectPoolContract(importContext);
+    const contract = this.connectPoolContract(importContext);
     return contract
       .queryFilter(contract.filters.CommitmentIncluded(), startBlock, toBlock)
       .then((rawEvents) => {
@@ -195,7 +195,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     );
     const startBlock = options.startBlock || contractConfig.startBlock;
     const { toBlock } = options;
-    const contract = CommitmentExecutorV2.connectPoolContract(importContext);
+    const contract = this.connectPoolContract(importContext);
     return contract.queryFilter(contract.filters.CommitmentSpent(), startBlock, toBlock).then((rawEvents) => {
       this.logger.info(
         `fetched ${rawEvents.length} CommitmentSpent event(s) from contract ` +
@@ -388,8 +388,12 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       });
   }
 
-  private static connectPoolContract(importContext: ImportContractContext): CommitmentPool {
+  private connectPoolContract(importContext: ImportContractContext): CommitmentPool {
     const { contractConfig, provider } = importContext;
-    return MystikoContractFactory.connect<CommitmentPool>('CommitmentPool', contractConfig.address, provider);
+    return this.context.contractConnector.connect<CommitmentPool>(
+      'CommitmentPool',
+      contractConfig.address,
+      provider,
+    );
   }
 }
