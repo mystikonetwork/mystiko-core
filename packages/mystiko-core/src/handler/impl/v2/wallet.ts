@@ -1,4 +1,5 @@
 import { Wallet, WalletType } from '@mystikonetwork/database';
+import { isHexadecimal } from 'class-validator';
 import { MystikoContextInterface, WalletHandler, WalletOptions } from '../../../interface';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../handler';
@@ -41,8 +42,11 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
   }
 
   public create(options: WalletOptions): Promise<Wallet> {
-    if (options.masterSeed.length < 1) {
-      return createErrorPromise('masterSeed cannot be empty string', MystikoErrorCode.INVALID_MASTER_SEED);
+    if (!isHexadecimal(options.masterSeed)) {
+      return createErrorPromise(
+        'masterSeed should be a valid hexadecimal string',
+        MystikoErrorCode.INVALID_MASTER_SEED,
+      );
     }
     if (!WalletHandlerV2.validatePassword(options.password)) {
       return createErrorPromise(WalletHandlerV2.PASSWORD_HINT, MystikoErrorCode.INVALID_PASSWORD);

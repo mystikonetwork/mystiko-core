@@ -3,6 +3,7 @@ import { AccountHandlerV2 } from './account';
 import { AssetHandlerV2 } from './asset';
 import { ChainHandlerV2 } from './chain';
 import { CommitmentHandlerV2 } from './commitment';
+import { ContractHandlerV2 } from './contracts';
 import { DepositHandlerV2 } from './deposit';
 import { TransactionHandlerV2 } from './transaction';
 import { WalletHandlerV2 } from './wallet';
@@ -11,6 +12,7 @@ type HandlerFactoryV2Interface = HandlerFactory<
   AccountHandlerV2,
   AssetHandlerV2,
   ChainHandlerV2,
+  ContractHandlerV2,
   CommitmentHandlerV2,
   DepositHandlerV2,
   TransactionHandlerV2,
@@ -34,6 +36,10 @@ export class HandlerFactoryV2 implements HandlerFactoryV2Interface {
 
   public createChainHandler(): ChainHandlerV2 {
     return new ChainHandlerV2(this.context);
+  }
+
+  public createContractHandler(): ContractHandlerV2 {
+    return new ContractHandlerV2(this.context);
   }
 
   public createCommitmentHandler(): CommitmentHandlerV2 {

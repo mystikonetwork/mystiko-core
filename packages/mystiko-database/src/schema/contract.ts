@@ -62,6 +62,7 @@ const contractSchemaLiteral = {
     'contractAddress',
     'disabled',
     'syncStart',
+    'syncSize',
     'syncedBlockNumber',
   ],
   indexes: ['chainId', 'contractAddress'],

@@ -18,9 +18,6 @@ export type CommitmentImport = {
   walletPassword: string;
   chainId?: number;
   contractAddress?: string;
-  contractType?: ContractType;
-  startBlock?: number;
-  toBlock?: number;
 };
 
 export interface CommitmentHandler<C = CommitmentContractQuery, Q = CommitmentQuery, CI = CommitmentImport> {

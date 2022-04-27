@@ -10,6 +10,7 @@ import {
   AssetHandler,
   ChainHandler,
   CommitmentHandler,
+  ContractHandler,
   DepositHandler,
   ExecutorFactory,
   MystikoContextInterface,
@@ -22,18 +23,21 @@ export class MystikoContext<
   A extends AccountHandler = AccountHandler,
   AS extends AssetHandler = AssetHandler,
   CH extends ChainHandler = ChainHandler,
+  CO extends ContractHandler = ContractHandler,
   CM extends CommitmentHandler = CommitmentHandler,
   D extends DepositHandler = DepositHandler,
   T extends TransactionHandler = TransactionHandler,
   W extends WalletHandler = WalletHandler,
   P extends MystikoProtocol = MystikoProtocol,
-> implements MystikoContextInterface<A, AS, CH, CM, D, T, W, P>
+> implements MystikoContextInterface<A, AS, CH, CO, CM, D, T, W, P>
 {
   private accountHandler?: A;
 
   private assetHandler?: AS;
 
   private chainHandler?: CH;
+
+  private contractHandler?: CO;
 
   private commitmentHandler?: CM;
 
@@ -101,6 +105,17 @@ export class MystikoContext<
 
   public set chains(commitmentHandler: CH) {
     this.chainHandler = commitmentHandler;
+  }
+
+  public get contracts(): CO {
+    if (!this.contractHandler) {
+      throw createError('contract handler has not been set', MystikoErrorCode.NO_HANDLER);
+    }
+    return this.contractHandler;
+  }
+
+  public set contracts(contractHandler: CO) {
+    this.contractHandler = contractHandler;
   }
 
   public get commitments(): CM {

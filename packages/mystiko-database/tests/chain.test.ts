@@ -26,6 +26,7 @@ test('test insert', async () => {
       },
     ],
     eventFilterSize: 200000,
+    syncedBlockNumber: 100,
   });
   const chain = await db.chains.findOne('1').exec();
   if (chain) {
@@ -41,6 +42,7 @@ test('test insert', async () => {
       },
     ]);
     expect(chain.eventFilterSize).toBe(200000);
+    expect(chain.syncedBlockNumber).toBe(100);
   } else {
     throw new Error('chain not found');
   }
@@ -62,6 +64,7 @@ test('test collection clear', async () => {
       },
     ],
     eventFilterSize: 200000,
+    syncedBlockNumber: 100,
   });
   expect(await db.chains.findOne().exec()).not.toBe(null);
   await db.chains.clear();

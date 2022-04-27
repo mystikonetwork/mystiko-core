@@ -15,6 +15,7 @@ import {
   TransactionHandlerV2,
   WalletHandlerV2,
 } from '../../src';
+import { ContractHandlerV2 } from '../../src/handler/impl/v2/contracts';
 
 export type TestContextOptions = {
   db?: MystikoDatabase;
@@ -31,6 +32,7 @@ export async function createTestContext(
     AccountHandlerV2,
     AssetHandlerV2,
     ChainHandlerV2,
+    ContractHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
     TransactionHandlerV2,
@@ -58,6 +60,7 @@ export async function createTestContext(
     AccountHandlerV2,
     AssetHandlerV2,
     ChainHandlerV2,
+    ContractHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
     TransactionHandlerV2,
