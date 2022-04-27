@@ -341,16 +341,21 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
               toBuff(encryptedNote),
             )
             .then((decryptedCommitment) => {
-              const { amount, randomP } = decryptedCommitment;
-              return commitment.atomicUpdate((data) => {
-                const rawSk = account.secretKeyForVerification(this.protocol, walletPassword);
-                const sk = this.protocol.secretKeyForVerification(rawSk);
-                data.serialNumber = (this.protocol as MystikoProtocolV2).serialNumber(sk, randomP).toString();
-                data.amount = amount.toString();
-                data.shieldedAddress = account.shieldedAddress;
-                data.updatedAt = MystikoHandler.now();
-                return data;
-              });
+              const { amount, randomP, commitmentHash } = decryptedCommitment;
+              if (commitmentHash.toString() === commitment.commitmentHash) {
+                return commitment.atomicUpdate((data) => {
+                  const rawSk = account.secretKeyForVerification(this.protocol, walletPassword);
+                  const sk = this.protocol.secretKeyForVerification(rawSk);
+                  data.serialNumber = (this.protocol as MystikoProtocolV2)
+                    .serialNumber(sk, randomP)
+                    .toString();
+                  data.amount = amount.toString();
+                  data.shieldedAddress = account.shieldedAddress;
+                  data.updatedAt = MystikoHandler.now();
+                  return data;
+                });
+              }
+              return undefined;
             })
             .catch(() => undefined),
         );

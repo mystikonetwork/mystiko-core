@@ -114,7 +114,7 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
   }
 
   private getCommitments(
-    statues?: CommitmentStatus[],
+    statuses?: CommitmentStatus[],
     options?: AssetMultipleBalanceOptions,
   ): Promise<Commitment[]> {
     return this.defaultShieldedAddresses().then((defaultShieldedAddresses) => {
@@ -128,8 +128,7 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
             shieldedAddresses.push(address);
           }
         });
-      }
-      if (shieldedAddresses.length === 0) {
+      } else {
         shieldedAddresses = defaultShieldedAddresses;
       }
       const commitmentSelector: any = {
@@ -159,8 +158,8 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
           commitmentSelector.contractAddress = options.contractAddress;
         }
       }
-      if (statues && statues.length > 0) {
-        commitmentSelector.status = { $in: statues };
+      if (statuses && statuses.length > 0) {
+        commitmentSelector.status = { $in: statuses };
       }
       return this.context.commitments.find({ selector: commitmentSelector });
     });

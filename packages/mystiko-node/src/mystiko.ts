@@ -1,6 +1,7 @@
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
-import { ZokratesCliRuntime, ZokratesRuntime } from '@mystikonetwork/protocol';
+import { ZokratesCliRuntime, ZokratesRuntime, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
 import chalk, { Chalk } from 'chalk';
+import commandExists from 'command-exists';
 import * as fs from 'fs';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
@@ -57,7 +58,9 @@ export class MystikoInNode extends Mystiko {
   protected async zokratesRuntime(): Promise<ZokratesRuntime> {
     const { initialize } = require('zokrates-js/node');
     const zokrates = await initialize();
-    return new ZokratesCliRuntime(zokrates);
+    return commandExists('zokrates')
+      .then(() => new ZokratesCliRuntime(zokrates))
+      .catch(() => new ZokratesWasmRuntime(zokrates));
   }
 }
 
