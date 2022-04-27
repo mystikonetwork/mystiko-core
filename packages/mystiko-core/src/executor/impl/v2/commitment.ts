@@ -62,19 +62,24 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         );
       }
     }
-    return Promise.all(promises).then((commitments) => commitments.flat());
+    return Promise.all(promises)
+      .then((commitments) => commitments.flat())
+      .then((commitments) => {
+        this.logger.info(`import is done, imported ${commitments.length} commitments`);
+        return commitments;
+      });
   }
 
   private importChain(importContext: ImportChainContext): Promise<Commitment[]> {
     const promises: Promise<Commitment[]>[] = [];
     const { chainConfig, currentBlock } = importContext;
     const { contractAddress } = importContext.options;
-    this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
     const { poolContracts, depositContracts } = chainConfig;
     const contracts: Array<PoolContractConfig | DepositContractConfig> = [
       ...poolContracts,
       ...depositContracts,
     ];
+    this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
     for (let i = 0; i < contracts.length; i += 1) {
       const contractConfig = contracts[i];
       if (!contractAddress || contractAddress === contractConfig.address) {
@@ -144,7 +149,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private importCommitmentQueuedEvents(importContext: ImportContractContext): Promise<Commitment[]> {
-    const { chainConfig, contractConfig } = importContext;
+    const { contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
@@ -155,10 +160,6 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       'CommitmentQueued',
       etherContract.filters.CommitmentQueued(),
     ).then((rawEvents) => {
-      this.logger.info(
-        `fetched ${rawEvents.length} CommitmentQueued event(s) from contract ` +
-          `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
-      );
       const promises: Promise<Commitment>[] = rawEvents.map((rawEvent) =>
         this.handleCommitmentQueuedEvent(
           rawEvent.args.commitment,
@@ -174,7 +175,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private importCommitmentIncludedEvents(importContext: ImportContractContext): Promise<Commitment[]> {
-    const { chainConfig, contractConfig } = importContext;
+    const { contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
@@ -185,10 +186,6 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       'CommitmentIncluded',
       etherContract.filters.CommitmentIncluded(),
     ).then((rawEvents) => {
-      this.logger.info(
-        `fetched ${rawEvents.length} CommitmentIncluded event(s) from contract ` +
-          `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
-      );
       const promises: Promise<Commitment>[] = rawEvents.map((rawEvent) =>
         this.handleCommitmentIncludedEvent(rawEvent.args.commitment, rawEvent.transactionHash, importContext),
       );
@@ -197,7 +194,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private importCommitmentSpentEvents(importContext: ImportContractContext): Promise<Commitment[]> {
-    const { chainConfig, contractConfig } = importContext;
+    const { contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
@@ -208,10 +205,6 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       'CommitmentSpent',
       etherContract.filters.CommitmentSpent(),
     ).then((rawEvents) => {
-      this.logger.info(
-        `fetched ${rawEvents.length} CommitmentSpent event(s) from contract ` +
-          `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
-      );
       const promises: Promise<Commitment[]>[] = rawEvents.map((rawEvent) =>
         this.handleCommitmentSpentEvent(rawEvent.args.serialNumber, rawEvent.transactionHash, importContext),
       );
@@ -360,11 +353,17 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
           `chain id=${chainConfig.chainId} contract address=${contract.contractAddress}` +
           ` fromBlock=${from}, toBlock=${to}`,
       );
-      return etherContract.queryFilter(filter, from, to).then((rawEvents) =>
-        this.importCommitmentEvents(importContext, etherContract, eventName, filter, to + 1)
-          .then()
-          .then((moreRawEvents) => [...rawEvents, ...moreRawEvents]),
-      );
+      return etherContract.queryFilter(filter, from, to).then((rawEvents) => {
+        if (rawEvents.length > 0) {
+          this.logger.info(
+            `fetched ${rawEvents.length} ${eventName} event(s) from contract ` +
+              `chain id=${chainConfig.chainId} contract address=${contract.contractAddress}`,
+          );
+        }
+        return this.importCommitmentEvents(importContext, etherContract, eventName, filter, to + 1).then(
+          (moreRawEvents) => [...rawEvents, ...moreRawEvents],
+        );
+      });
     }
     return Promise.resolve([]);
   }

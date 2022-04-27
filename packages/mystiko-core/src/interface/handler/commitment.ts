@@ -1,5 +1,4 @@
 import { Commitment, CommitmentStatus, DatabaseQuery } from '@mystikonetwork/database';
-import { ContractType } from '@mystikonetwork/config';
 
 export type CommitmentContractQuery = {
   chainId: number;
