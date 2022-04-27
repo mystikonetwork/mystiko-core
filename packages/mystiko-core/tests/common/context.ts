@@ -2,6 +2,7 @@ import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
+import { ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
 import {
   AccountHandlerV2,
   AssetHandlerV2,
@@ -10,13 +11,21 @@ import {
   DepositHandlerV2,
   ExecutorFactoryV2,
   MystikoContext,
+  MystikoContractConnector,
   TransactionHandlerV2,
   WalletHandlerV2,
-} from '../../../../src';
+} from '../../src';
+
+export type TestContextOptions = {
+  db?: MystikoDatabase;
+  config?: MystikoConfig;
+  providerConfigGetter?: (chain: number) => Promise<ProviderConnection[]>;
+  providerFactory?: ProviderFactory;
+  contractConnector?: MystikoContractConnector;
+};
 
 export async function createTestContext(
-  db?: MystikoDatabase,
-  config?: MystikoConfig,
+  options?: TestContextOptions,
 ): Promise<
   MystikoContext<
     AccountHandlerV2,
@@ -29,6 +38,7 @@ export async function createTestContext(
     MystikoProtocolV2
   >
 > {
+  const { db, config, providerConfigGetter, providerFactory, contractConnector } = options || {};
   let wrappedConfig = config;
   if (!wrappedConfig) {
     wrappedConfig = await MystikoConfig.createFromPlain({
@@ -55,6 +65,9 @@ export async function createTestContext(
     MystikoProtocolV2
   >(wrappedConfig, wrappedDb, protocol);
   context.executors = new ExecutorFactoryV2(context);
-  context.providers = new ProviderPoolImpl(wrappedConfig);
+  context.providers = new ProviderPoolImpl(wrappedConfig, providerConfigGetter, providerFactory);
+  if (contractConnector) {
+    context.contractConnector = contractConnector;
+  }
   return Promise.resolve(context);
 }

@@ -8,12 +8,12 @@ export interface ProviderConnection extends ethers.utils.ConnectionInfo {
 }
 
 export interface ProviderFactory {
-  createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider;
+  createProvider(connections: Array<string | ProviderConnection>): ethers.providers.Provider;
 }
 
 export class DefaultProviderFactory implements ProviderFactory {
   // eslint-disable-next-line class-methods-use-this
-  public createProvider(connections: Array<string | ProviderConnection>): ethers.providers.BaseProvider {
+  public createProvider(connections: Array<string | ProviderConnection>): ethers.providers.Provider {
     check(connections.length > 0, 'urls cannot be an empty array');
     const providers: ethers.providers.BaseProvider[] = [];
     connections.forEach((connection) => {

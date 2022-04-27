@@ -13,7 +13,7 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
         MystikoErrorCode.INVALID_ASSET_APPROVE_OPTIONS,
       );
     }
-    const { signer } = options.signer;
+    const { signer } = options;
     const contract = this.context.contractConnector.connect<ERC20>('ERC20', options.assetAddress, signer);
     return signer
       .getAddress()

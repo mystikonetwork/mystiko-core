@@ -214,8 +214,6 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           .balance({
             chainId: chainConfig.chainId,
             assetAddress: asset.assetType !== AssetType.MAIN ? asset.assetAddress : undefined,
-            assetSymbol: asset.assetSymbol,
-            assetDecimals: asset.assetDecimals,
             address: signerAddress,
           })
           .then((balance) => {
@@ -302,7 +300,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             assetSymbol: asset.assetSymbol,
             assetDecimals: asset.assetDecimals,
             spender: contractConfig.address,
-            signer: options.signer,
+            signer: options.signer.signer,
             amount: total,
           })
           .then((resp) =>

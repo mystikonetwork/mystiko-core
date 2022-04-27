@@ -6,7 +6,7 @@ import {
   MystikoHandler,
   WalletHandlerV2,
 } from '../../../../src';
-import { createTestContext } from './context';
+import { createTestContext } from '../../../common/context';
 
 function createCommitment(
   chainId: number,

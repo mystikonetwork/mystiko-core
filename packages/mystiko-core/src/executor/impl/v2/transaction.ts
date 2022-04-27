@@ -89,16 +89,18 @@ type CommitmentUpdate = {
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
   public execute(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionResponse> {
-    return this.buildExecutionContext(options, config)
-      .then((executionContext) => this.validateOptions(executionContext))
-      .then((executionContext) => this.validatePoolBalance(executionContext))
-      .then((executionContext) => this.validateSigner(executionContext))
-      .then((executionContext) => this.createOutputCommitments(executionContext))
-      .then((executionContext) => this.createTransaction(executionContext))
-      .then((executionContext) => ({
-        transaction: executionContext.transaction,
-        transactionPromise: this.executeTransaction(executionContext),
-      }));
+    return this.context.wallets.checkPassword(options.walletPassword).then(() =>
+      this.buildExecutionContext(options, config)
+        .then((executionContext) => this.validateOptions(executionContext))
+        .then((executionContext) => this.validatePoolBalance(executionContext))
+        .then((executionContext) => this.validateSigner(executionContext))
+        .then((executionContext) => this.createOutputCommitments(executionContext))
+        .then((executionContext) => this.createTransaction(executionContext))
+        .then((executionContext) => ({
+          transaction: executionContext.transaction,
+          transactionPromise: this.executeTransaction(executionContext),
+        })),
+    );
   }
 
   public quote(options: TransactionQuoteOptions, config: PoolContractConfig): Promise<TransactionQuote> {
@@ -293,8 +295,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         .balance({
           chainId: options.chainId,
           assetAddress: contractConfig.assetAddress,
-          assetSymbol: contractConfig.assetSymbol,
-          assetDecimals: contractConfig.assetDecimals,
           address: contractConfig.address,
         })
         .then((poolBalance) => {
