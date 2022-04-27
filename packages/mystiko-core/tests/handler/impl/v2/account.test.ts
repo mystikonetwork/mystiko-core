@@ -12,7 +12,7 @@ import { createTestContext } from '../../../common/context';
 let context: MystikoContext;
 let handler: AccountHandlerV2;
 let wallet: Wallet;
-const walletMasterSeed = 'masterSeed';
+const walletMasterSeed = 'deadbeef';
 const walletPassword = 'P@ssw0rd';
 
 beforeAll(async () => {

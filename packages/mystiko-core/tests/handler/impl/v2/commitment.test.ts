@@ -37,7 +37,7 @@ let walletHandler: WalletHandlerV2;
 let accountHandler: AccountHandlerV2;
 let account1: Account;
 let account2: Account;
-const walletMasterSeed = 'masterSeed';
+const walletMasterSeed = '0xdeadbeef';
 const walletPassword = 'P@ssw0rd';
 
 beforeAll(async () => {
