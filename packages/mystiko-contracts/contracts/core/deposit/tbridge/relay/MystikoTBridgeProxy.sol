@@ -8,6 +8,7 @@ import "../MystikoV2WithTBridge.sol";
 contract MystikoTBridgeProxy is ICrossChainProxy {
   address public operator;
   mapping(address => bool) public executorWhitelist;
+  mapping(address => bool) public registerWhitelist;
 
   constructor() {
     operator = msg.sender;
@@ -23,11 +24,16 @@ contract MystikoTBridgeProxy is ICrossChainProxy {
     _;
   }
 
+  modifier onlyRegisterWhitelisted() {
+    require(registerWhitelist[msg.sender], "Only register.");
+    _;
+  }
+
   function sendMessage(
     address _toContract,
     uint64 _toChainId,
     bytes memory _message
-  ) external payable override {
+  ) external payable override onlyRegisterWhitelisted {
     emit TBridgeCrossChainMessage(_toContract, _toChainId, msg.sender, _message);
   }
 
@@ -55,6 +61,14 @@ contract MystikoTBridgeProxy is ICrossChainProxy {
 
   function removeExecutorWhitelist(address _executor) external onlyOperator {
     executorWhitelist[_executor] = false;
+  }
+
+  function addRegisterWhitelist(address _register) external onlyOperator {
+    registerWhitelist[_register] = true;
+  }
+
+  function removeRegisterWhitelist(address _register) external onlyOperator {
+    registerWhitelist[_register] = false;
   }
 
   function withdraw(address _recipient) external payable onlyOperator {

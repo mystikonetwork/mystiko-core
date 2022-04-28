@@ -18,7 +18,7 @@ async function deployTBridgeProxy() {
 }
 
 async function addExecutorWhitelist(addr: string, executors: string[]) {
-  console.log('add add executor whitelist');
+  console.log('add executor whitelist');
   const proxy = await MystikoTBridgeProxy.attach(addr);
 
   try {
@@ -28,6 +28,18 @@ async function addExecutorWhitelist(addr: string, executors: string[]) {
       all.push(add);
     }
     await Promise.all(all);
+  } catch (err: any) {
+    console.error(LOGRED, err);
+    process.exit(1);
+  }
+}
+
+export async function addRegisterWhitelist(addr: string, depositContractAddress: string) {
+  console.log('add register whitelist');
+  const proxy = await MystikoTBridgeProxy.attach(addr);
+
+  try {
+    await proxy.addRegisterWhitelist(depositContractAddress);
   } catch (err: any) {
     console.error(LOGRED, err);
     process.exit(1);
