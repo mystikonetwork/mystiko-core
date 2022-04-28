@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-const executionRevertedRegex = /"execution reverted: ([^"]+)"/;
+const executionRevertedRegex = /"execution reverted: ([^\\?"]+)\\?"/;
 
 export interface EtherError {
   reason?: string;

@@ -38,6 +38,11 @@ const depositSchemaLiteral = {
       final: true,
       pattern: ETH_ADDRESS_REGEX,
     },
+    poolAddress: {
+      type: 'string',
+      final: true,
+      pattern: ETH_ADDRESS_REGEX,
+    },
     commitmentHash: {
       type: 'string',
       final: true,
@@ -124,9 +129,16 @@ const depositSchemaLiteral = {
     dstChainId: {
       type: 'integer',
       minimum: 0,
+      final: true,
     },
     dstChainContractAddress: {
       type: 'string',
+      pattern: ETH_ADDRESS_REGEX,
+      final: true,
+    },
+    dstPoolAddress: {
+      type: 'string',
+      final: true,
       pattern: ETH_ADDRESS_REGEX,
     },
     assetApproveTransactionHash: {
@@ -152,6 +164,7 @@ const depositSchemaLiteral = {
     'updatedAt',
     'chainId',
     'contractAddress',
+    'poolAddress',
     'commitmentHash',
     'hashK',
     'randomS',
@@ -164,6 +177,9 @@ const depositSchemaLiteral = {
     'executorFeeAmount',
     'rollupFeeAmount',
     'shieldedRecipientAddress',
+    'dstChainId',
+    'dstChainContractAddress',
+    'dstPoolAddress',
     'status',
     'wallet',
   ],

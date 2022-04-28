@@ -17,7 +17,7 @@ import { toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
-import { CommitmentExecutor, CommitmentImport } from '../../../interface';
+import { CommitmentExecutor, CommitmentImport, DepositUpdate } from '../../../interface';
 import { MystikoExecutor } from '../../executor';
 
 type ImportContext = {
@@ -231,7 +231,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         const now = MystikoHandler.now();
         if (existingCommitment) {
           return existingCommitment.atomicUpdate((data) => {
-            if (data.status === CommitmentStatus.INIT) {
+            if (data.status === CommitmentStatus.INIT || data.status === CommitmentStatus.SRC_SUCCEEDED) {
               data.status = CommitmentStatus.QUEUED;
             }
             data.leafIndex = leafIndex.toString();
@@ -268,7 +268,17 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         }
         return this.db.commitments.insert(commitment);
       })
-      .then((commitment) => this.updateDepositStatus(commitment, DepositStatus.QUEUED))
+      .then((commitment) => {
+        const depositUpdate: DepositUpdate = {
+          status: DepositStatus.QUEUED,
+        };
+        if (chainConfig.getPoolContractBridgeType(contractConfig.address) === BridgeType.LOOP) {
+          depositUpdate.transactionHash = transactionHash;
+        } else {
+          depositUpdate.relayTransactionHash = transactionHash;
+        }
+        return this.updateDepositStatus(commitment, depositUpdate);
+      })
       .then((commitment) => this.tryDecryptCommitment(commitment, options.walletPassword));
   }
 
@@ -288,7 +298,11 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         const now = MystikoHandler.now();
         if (existingCommitment) {
           return existingCommitment.atomicUpdate((data) => {
-            if (data.status === CommitmentStatus.INIT || data.status === CommitmentStatus.QUEUED) {
+            if (
+              data.status === CommitmentStatus.INIT ||
+              data.status === CommitmentStatus.QUEUED ||
+              data.status === CommitmentStatus.SRC_SUCCEEDED
+            ) {
               data.status = CommitmentStatus.INCLUDED;
             }
             data.updatedAt = now;
@@ -301,7 +315,12 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
           MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
         );
       })
-      .then((commitment) => this.updateDepositStatus(commitment, DepositStatus.INCLUDED));
+      .then((commitment) =>
+        this.updateDepositStatus(commitment, {
+          status: DepositStatus.INCLUDED,
+          rollupTransactionHash: transactionHash,
+        }),
+      );
   }
 
   private handleCommitmentSpentEvent(
@@ -413,19 +432,20 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return Promise.resolve(commitment);
   }
 
-  private updateDepositStatus(commitment: Commitment, depositStatus: DepositStatus): Promise<Commitment> {
+  private updateDepositStatus(commitment: Commitment, depositUpdate: DepositUpdate): Promise<Commitment> {
     return this.context.deposits
-      .findOne({
-        chainId: commitment.chainId,
-        contractAddress: commitment.contractAddress,
-        commitmentHash: commitment.commitmentHash,
+      .find({
+        selector: {
+          dstChainId: commitment.chainId,
+          dstPoolAddress: commitment.contractAddress,
+          commitmentHash: commitment.commitmentHash,
+        },
       })
-      .then((deposit) => {
-        if (deposit) {
-          return this.context.deposits.update(deposit.id, { status: depositStatus }).then(() => commitment);
-        }
-        return commitment;
-      });
+      .then((deposits) =>
+        Promise.all(deposits.map((deposit) => this.context.deposits.update(deposit.id, depositUpdate))).then(
+          () => commitment,
+        ),
+      );
   }
 
   private connectPoolContract(importContext: ImportContractContext): CommitmentPool {

@@ -65,6 +65,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       bridgeFeeAssetSymbol: chainConfig.assetSymbol,
       minExecutorFeeAmount: config.minExecutorFeeNumber,
       executorFeeAssetSymbol: config.assetSymbol,
+      recommendedAmounts: config.recommendedAmountsNumber,
     }));
   }
 
@@ -263,6 +264,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             updatedAt: now,
             chainId: chainConfig.chainId,
             contractAddress: contractConfig.address,
+            poolAddress: contractConfig.poolAddress,
             commitmentHash: commitment.commitmentHash.toString(),
             hashK: commitment.k.toString(),
             randomS: commitment.randomS.toString(),
@@ -278,6 +280,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             executorFeeAmount: executorFee,
             executorFeeAssetAddress: contractConfig.executorFeeAsset.assetAddress,
             shieldedRecipientAddress: options.shieldedAddress,
+            dstChainId: contractConfig.peerChainId || chainConfig.chainId,
+            dstChainContractAddress: contractConfig.peerContractAddress || contractConfig.address,
+            dstPoolAddress: contractConfig.peerContract?.poolAddress || contractConfig.poolAddress,
             status: DepositStatus.INIT,
             wallet: wallet.id,
           });
@@ -443,6 +448,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       encryptedNote: deposit.encryptedNote,
       amount: deposit.amount,
       shieldedAddress: deposit.shieldedRecipientAddress,
+      creationTransactionHash: deposit.transactionHash,
     };
     return this.context.commitments
       .findOne({
