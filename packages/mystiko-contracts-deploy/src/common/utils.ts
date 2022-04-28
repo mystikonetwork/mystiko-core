@@ -63,3 +63,11 @@ export function getArtifact(contract: string): Promise<Artifact> {
   const artifacts = new Artifacts(artifactsPath);
   return artifacts.readArtifact(contract);
 }
+
+export function delay(timeoutMs: number) {
+  // return new Promise((resolve) => setTimeout(resolve, ms));
+
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeoutMs);
+  }).then(() => {});
+}

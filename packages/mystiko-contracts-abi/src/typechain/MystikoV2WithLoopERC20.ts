@@ -53,6 +53,7 @@ export interface MystikoV2WithLoopERC20Interface extends utils.Interface {
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256))': FunctionFragment;
     'hasher3()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
+    'isSanctionCheckDisabled()': FunctionFragment;
     'minAmount()': FunctionFragment;
     'operator()': FunctionFragment;
     'sanctionsContract()': FunctionFragment;
@@ -75,6 +76,7 @@ export interface MystikoV2WithLoopERC20Interface extends utils.Interface {
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoLoop.DepositRequestStruct]): string;
   encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
   encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
@@ -96,6 +98,7 @@ export interface MystikoV2WithLoopERC20Interface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
@@ -162,6 +165,8 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
+
     minAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     operator(overrides?: CallOverrides): Promise<[string]>;
@@ -224,6 +229,8 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
 
   isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+  isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
+
   minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
   operator(overrides?: CallOverrides): Promise<string>;
@@ -280,6 +287,8 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
+
     minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     operator(overrides?: CallOverrides): Promise<string>;
@@ -329,6 +338,8 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     hasher3(overrides?: CallOverrides): Promise<BigNumber>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -392,6 +403,8 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     hasher3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     minAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

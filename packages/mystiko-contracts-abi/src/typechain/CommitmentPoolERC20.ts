@@ -154,6 +154,7 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
     'historicCommitments(uint256)': FunctionFragment;
     'isKnownRoot(uint256)': FunctionFragment;
     'isRollupWhitelistDisabled()': FunctionFragment;
+    'isSanctionCheckDisabled()': FunctionFragment;
     'isVerifierUpdateDisabled()': FunctionFragment;
     'minRollupFee()': FunctionFragment;
     'operator()': FunctionFragment;
@@ -208,6 +209,7 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   encodeFunctionData(functionFragment: 'historicCommitments', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isKnownRoot', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isRollupWhitelistDisabled', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isVerifierUpdateDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
@@ -255,6 +257,7 @@ export interface CommitmentPoolERC20Interface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'historicCommitments', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isRollupWhitelistDisabled', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isVerifierUpdateDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
@@ -412,6 +415,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
+
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
     minRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -566,6 +571,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
   isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+  isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
+
   isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<boolean>;
 
   minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -707,6 +714,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
     isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<boolean>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
 
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<boolean>;
 
@@ -863,6 +872,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
 
     isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
+
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1007,6 +1018,8 @@ export interface CommitmentPoolERC20 extends BaseContract {
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isRollupWhitelistDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

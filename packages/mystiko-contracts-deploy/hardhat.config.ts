@@ -7,7 +7,8 @@ import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from 'hardhat/types';
 import { task } from 'hardhat/config';
 import { deploy } from './src/deploy';
-import { update } from './src/update';
+import { set } from './src/set';
+import { query } from './src/query';
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ task('migrate', 'deploy contract')
     await deploy(taskArgs, hre);
   });
 
-task('update', 'update contract configure')
+task('set', 'update contract configure')
   .addParam('bridge', 'loop、tbridge、celer')
   .addParam('dst', 'ropsten、goerli、bsctestnet')
   .addParam('token', 'ETH、BNB、MTT、mUSD')
@@ -31,7 +32,18 @@ task('update', 'update contract configure')
   .addParam('param', 'parameter')
   .setAction(async (taskArgs, hre) => {
     taskArgs.src = hre.network.name;
-    await update(taskArgs, hre);
+    await set(taskArgs, hre);
+  });
+
+task('query', 'update contract configure')
+  .addParam('bridge', 'loop、tbridge、celer')
+  .addParam('dst', 'ropsten、goerli、bsctestnet')
+  .addParam('token', 'ETH、BNB、MTT、mUSD')
+  .addParam('func', '')
+  .addParam('param', 'parameter')
+  .setAction(async (taskArgs, hre) => {
+    taskArgs.src = hre.network.name;
+    await query(taskArgs, hre);
   });
 
 const DEFAULT_ENDPOINT = 'http://localhost:8545';
