@@ -56,8 +56,21 @@ const chainSchemaLiteral = {
       type: 'integer',
       minimum: 1,
     },
+    syncedBlockNumber: {
+      type: 'integer',
+      minimum: 0,
+    },
   },
-  required: ['id', 'createdAt', 'updatedAt', 'chainId', 'name', 'providers', 'eventFilterSize'],
+  required: [
+    'id',
+    'createdAt',
+    'updatedAt',
+    'chainId',
+    'name',
+    'providers',
+    'eventFilterSize',
+    'syncedBlockNumber',
+  ],
   indexes: ['chainId'],
 } as const;
 
@@ -75,5 +88,6 @@ export type ChainType = {
   name: string;
   providers: ProviderType[];
   eventFilterSize: number;
+  syncedBlockNumber: number;
 };
 export const chainSchema: RxJsonSchema<ChainType> = chainSchemaLiteral;

@@ -17,6 +17,7 @@ export type DepositQuote = {
   bridgeFeeAssetSymbol: string;
   minExecutorFeeAmount: number;
   executorFeeAssetSymbol: string;
+  recommendedAmounts: number[];
 };
 
 export type DepositOptions = {

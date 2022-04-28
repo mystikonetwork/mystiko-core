@@ -35,6 +35,7 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
               maxTryCount: p.maxTryCount,
             })),
             eventFilterSize: chainConfig.eventFilterSize,
+            syncedBlockNumber: 0,
           });
         }
         return existingChain.atomicUpdate((data) => {

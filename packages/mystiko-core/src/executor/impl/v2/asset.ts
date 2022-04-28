@@ -1,4 +1,4 @@
-import { ERC20, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
+import { ERC20 } from '@mystikonetwork/contracts-abi';
 import { fromDecimals, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -13,8 +13,8 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
         MystikoErrorCode.INVALID_ASSET_APPROVE_OPTIONS,
       );
     }
-    const { signer } = options.signer;
-    const contract = MystikoContractFactory.connect<ERC20>('ERC20', options.assetAddress, signer);
+    const { signer } = options;
+    const contract = this.context.contractConnector.connect<ERC20>('ERC20', options.assetAddress, signer);
     return signer
       .getAddress()
       .then((account) => contract.allowance(account, options.spender))
@@ -46,7 +46,11 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
         );
       }
       if (options.assetAddress) {
-        const contract = MystikoContractFactory.connect<ERC20>('ERC20', options.assetAddress, provider);
+        const contract = this.context.contractConnector.connect<ERC20>(
+          'ERC20',
+          options.assetAddress,
+          provider,
+        );
         return contract.balanceOf(options.address).then((b) => b.toString());
       }
       return provider.getBalance(options.address).then((b) => b.toString());

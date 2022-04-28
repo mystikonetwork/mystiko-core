@@ -1,16 +1,20 @@
 import { MystikoConfig } from '@mystikonetwork/config';
+import { MystikoContractFactory, SupportedContractType } from '@mystikonetwork/contracts-abi';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
+import { ethers } from 'ethers';
 import { createError, MystikoErrorCode } from '../error';
 import {
   AccountHandler,
   AssetHandler,
   ChainHandler,
   CommitmentHandler,
+  ContractHandler,
   DepositHandler,
   ExecutorFactory,
   MystikoContextInterface,
+  MystikoContractConnector,
   TransactionHandler,
   WalletHandler,
 } from '../interface';
@@ -19,18 +23,21 @@ export class MystikoContext<
   A extends AccountHandler = AccountHandler,
   AS extends AssetHandler = AssetHandler,
   CH extends ChainHandler = ChainHandler,
+  CO extends ContractHandler = ContractHandler,
   CM extends CommitmentHandler = CommitmentHandler,
   D extends DepositHandler = DepositHandler,
   T extends TransactionHandler = TransactionHandler,
   W extends WalletHandler = WalletHandler,
   P extends MystikoProtocol = MystikoProtocol,
-> implements MystikoContextInterface<A, AS, CH, CM, D, T, W, P>
+> implements MystikoContextInterface<A, AS, CH, CO, CM, D, T, W, P>
 {
   private accountHandler?: A;
 
   private assetHandler?: AS;
 
   private chainHandler?: CH;
+
+  private contractHandler?: CO;
 
   private commitmentHandler?: CM;
 
@@ -50,10 +57,21 @@ export class MystikoContext<
 
   public protocol: P;
 
+  public contractConnector: MystikoContractConnector;
+
   constructor(config: MystikoConfig, db: MystikoDatabase, protocol: P) {
     this.config = config;
     this.db = db;
     this.protocol = protocol;
+    this.contractConnector = {
+      connect<CT extends SupportedContractType>(
+        contractName: string,
+        address: string,
+        signerOrProvider: ethers.Signer | ethers.providers.Provider,
+      ): CT {
+        return MystikoContractFactory.connect<CT>(contractName, address, signerOrProvider);
+      },
+    };
   }
 
   public get accounts(): A {
@@ -87,6 +105,17 @@ export class MystikoContext<
 
   public set chains(commitmentHandler: CH) {
     this.chainHandler = commitmentHandler;
+  }
+
+  public get contracts(): CO {
+    if (!this.contractHandler) {
+      throw createError('contract handler has not been set', MystikoErrorCode.NO_HANDLER);
+    }
+    return this.contractHandler;
+  }
+
+  public set contracts(contractHandler: CO) {
+    this.contractHandler = contractHandler;
   }
 
   public get commitments(): CM {

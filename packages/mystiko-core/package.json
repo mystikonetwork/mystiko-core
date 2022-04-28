@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/core",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "core handlers of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -35,7 +35,10 @@
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
+    "@ethereum-waffle/mock-contract": "^3.4.4",
+    "@ethereum-waffle/provider": "^3.4.4",
     "@tsconfig/recommended": "^1.0.1",
+    "@types/bn.js": "^5.1.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.21",
     "@types/uuid": "^8.3.4",
@@ -53,17 +56,18 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/config": "^0.1.0-alpha.2",
-    "@mystikonetwork/contracts-abi": "^0.1.0-alpha.2",
-    "@mystikonetwork/database": "^0.1.0-alpha.2",
-    "@mystikonetwork/ethers": "^0.1.0-alpha.2",
-    "@mystikonetwork/protocol": "^0.1.0-alpha.2",
-    "@mystikonetwork/utils": "^0.1.0-alpha.2",
+    "@mystikonetwork/config": "^0.1.0-alpha.3",
+    "@mystikonetwork/contracts-abi": "^0.1.0-alpha.3",
+    "@mystikonetwork/database": "^0.1.0-alpha.3",
+    "@mystikonetwork/ethers": "^0.1.0-alpha.3",
+    "@mystikonetwork/protocol": "^0.1.0-alpha.3",
+    "@mystikonetwork/utils": "^0.1.0-alpha.3",
     "bn.js": "^5.2.0",
     "class-validator": "^0.13.2",
     "ethereumjs-wallet": "^1.0.2",
     "ethers": "^5.5.3",
     "loglevel": "^1.8.0",
+    "loglevel-plugin-prefix": "^0.8.4",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5",
     "uuid": "^8.3.2",

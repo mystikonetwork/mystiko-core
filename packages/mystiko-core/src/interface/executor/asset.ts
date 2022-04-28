@@ -1,17 +1,16 @@
-import { MystikoSigner } from '@mystikonetwork/ethers';
 import { ethers } from 'ethers';
 
 export type AssetExecutorOptions = {
   chainId: number;
   assetAddress?: string;
-  assetSymbol: string;
-  assetDecimals: number;
 };
 
 export type AssetExecutorApproveOptions = AssetExecutorOptions & {
+  assetSymbol: string;
+  assetDecimals: number;
   amount: string;
   spender: string;
-  signer: MystikoSigner;
+  signer: ethers.Signer;
 };
 
 export type AssetExecutorBalanceOptions = AssetExecutorOptions & {

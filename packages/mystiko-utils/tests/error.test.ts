@@ -40,4 +40,6 @@ test('Test errorMessage', () => {
     'version=providers/5.5.3)';
   error.code = ethers.errors.UNPREDICTABLE_GAS_LIMIT;
   expect(errorMessage(error)).toBe('[UNPREDICTABLE_GAS_LIMIT] The note has been already spent');
+  error.message = '\\"execution reverted: amount too few\\"';
+  expect(errorMessage(error)).toBe('[UNPREDICTABLE_GAS_LIMIT] amount too few');
 });

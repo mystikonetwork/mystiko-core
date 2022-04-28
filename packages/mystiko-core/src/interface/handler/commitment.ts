@@ -1,5 +1,4 @@
 import { Commitment, CommitmentStatus, DatabaseQuery } from '@mystikonetwork/database';
-import { ContractType } from '@mystikonetwork/config';
 
 export type CommitmentContractQuery = {
   chainId: number;
@@ -18,9 +17,6 @@ export type CommitmentImport = {
   walletPassword: string;
   chainId?: number;
   contractAddress?: string;
-  contractType?: ContractType;
-  startBlock?: number;
-  toBlock?: number;
 };
 
 export interface CommitmentHandler<C = CommitmentContractQuery, Q = CommitmentQuery, CI = CommitmentImport> {

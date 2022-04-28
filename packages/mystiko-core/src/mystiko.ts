@@ -15,6 +15,7 @@ import {
   ChainHandler,
   CommitmentHandler,
   ContextFactory,
+  ContractHandler,
   DepositHandler,
   ExecutorFactory,
   HandlerFactory,
@@ -44,6 +45,8 @@ export abstract class Mystiko {
   public db?: MystikoDatabase;
 
   public chains?: ChainHandler;
+
+  public contracts?: ContractHandler;
 
   public wallets?: WalletHandler;
 
@@ -98,6 +101,7 @@ export abstract class Mystiko {
     this.context.executors = executorFactory || new ExecutorFactoryV2(this.context);
     const handlers = handlerFactory || new HandlerFactoryV2(this.context);
     this.chains = handlers.createChainHandler();
+    this.contracts = handlers.createContractHandler();
     this.wallets = handlers.createWalletHandler();
     this.accounts = handlers.createAccountHandler();
     this.assets = handlers.createAssetHandler();
@@ -115,6 +119,7 @@ export abstract class Mystiko {
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
     await this.chains.init();
+    await this.contracts.init();
     this.logger.info('@mystikonetwork/core has been successfully initialized, enjoy!');
   }
 

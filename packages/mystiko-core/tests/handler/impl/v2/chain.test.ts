@@ -1,7 +1,7 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { Chain } from '@mystikonetwork/database';
 import { ChainHandlerV2, createError, MystikoContext, MystikoErrorCode } from '../../../../src';
-import { createTestContext } from './context';
+import { createTestContext } from '../../../common/context';
 
 let config: MystikoConfig;
 let context: MystikoContext;
@@ -37,7 +37,7 @@ beforeAll(async () => {
       },
     ],
   });
-  context = await createTestContext(undefined, config);
+  context = await createTestContext({ config });
 });
 
 beforeEach(() => {
