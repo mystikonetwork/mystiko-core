@@ -2,7 +2,11 @@ import { BridgeLoop, BridgeTBridge, LOGRED, MystikoTestnet } from './common/cons
 import { loadConfig, saveConfig } from './config/config';
 import { addEnqueueWhitelist, getOrDeployCommitPool, initPoolContractFactory } from './contract/commitment';
 import { initTestTokenContractFactory, transferTokneToContract } from './contract/token';
-import { getOrDeployTBridgeProxy, initTBridgeContractFactory } from './contract/tbridge';
+import {
+  addRegisterWhitelist,
+  getOrDeployTBridgeProxy,
+  initTBridgeContractFactory,
+} from './contract/tbridge';
 import { deployDepositContract, initDepositContractFactory, setPeerContract } from './contract/depsit';
 import { deployBaseContract, initBaseContractFactory } from './contract/base';
 import { saveCoreContractJson } from './coreJson';
@@ -42,6 +46,7 @@ async function deployStep2(taskArgs: any) {
     c.operatorCfg,
     c.srcChainCfg.network,
   );
+
   const commitmentPoolAddress = await getOrDeployCommitPool(
     c.mystikoNetwork,
     c.bridgeCfg,
@@ -67,6 +72,8 @@ async function deployStep2(taskArgs: any) {
   await delay(10000);
 
   await addEnqueueWhitelist(c.srcTokenCfg.erc20, commitmentPoolAddress, depositAddress);
+  await addRegisterWhitelist(bridgeProxyAddress, depositAddress);
+
   saveConfig(c.mystikoNetwork, c.cfg);
 }
 
