@@ -1,6 +1,6 @@
 import { deployMockContract, MockContract } from '@ethereum-waffle/mock-contract';
 import { MockProvider } from '@ethereum-waffle/provider';
-import { MystikoConfig } from '@mystikonetwork/config';
+import { BridgeType, MAIN_ASSET_ADDRESS, MystikoConfig } from '@mystikonetwork/config';
 import {
   ERC20__factory,
   MystikoV2Bridge__factory,
@@ -36,9 +36,10 @@ beforeEach(async () => {
       accounts: [{ balance: toDecimals(10), secretKey: etherWallet.privateKey }],
     },
   });
-  mockERC20 = await deployMockContract(etherWallet, ERC20__factory.abi);
-  mockMystikoV2Loop = await deployMockContract(etherWallet, MystikoV2Loop__factory.abi);
-  mockMystikoV2Bridge = await deployMockContract(etherWallet, MystikoV2Bridge__factory.abi);
+  const [signer] = mockProvider.getWallets();
+  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
+  mockMystikoV2Loop = await deployMockContract(signer, MystikoV2Loop__factory.abi);
+  mockMystikoV2Bridge = await deployMockContract(signer, MystikoV2Bridge__factory.abi);
   config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({ config });
   walletHandler = new WalletHandlerV2(context);
@@ -49,4 +50,43 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await context.db.remove();
+});
+
+test('test quote', async () => {
+  const depositContractConfig = config.getDepositContractConfig(3, 97, 'MTT', BridgeType.TBRIDGE);
+  if (!depositContractConfig) {
+    throw new Error('depositContractConfig should not be undefined');
+  }
+  let quote = await executor.quote(
+    { srcChainId: 3, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
+    depositContractConfig,
+  );
+  expect(quote).toStrictEqual({
+    minAmount: depositContractConfig.minAmountNumber,
+    minRollupFeeAmount: depositContractConfig.minRollupFeeNumber,
+    rollupFeeAssetSymbol: depositContractConfig.assetSymbol,
+    minBridgeFeeAmount: depositContractConfig.minBridgeFeeNumber,
+    bridgeFeeAssetSymbol: depositContractConfig.bridgeFeeAsset.assetSymbol,
+    minExecutorFeeAmount: depositContractConfig.minExecutorFeeNumber,
+    executorFeeAssetSymbol: depositContractConfig.executorFeeAsset.assetSymbol,
+    recommendedAmounts: depositContractConfig.recommendedAmountsNumber,
+  });
+  const rawDepositContractConfig = depositContractConfig.copyData();
+  rawDepositContractConfig.bridgeFeeAssetAddress = depositContractConfig.assetAddress;
+  rawDepositContractConfig.executorFeeAssetAddress = MAIN_ASSET_ADDRESS;
+  const newDepositContractConfig = depositContractConfig.mutate(rawDepositContractConfig);
+  quote = await executor.quote(
+    { srcChainId: 3, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
+    newDepositContractConfig,
+  );
+  expect(quote).toStrictEqual({
+    minAmount: newDepositContractConfig.minAmountNumber,
+    minRollupFeeAmount: newDepositContractConfig.minRollupFeeNumber,
+    rollupFeeAssetSymbol: newDepositContractConfig.assetSymbol,
+    minBridgeFeeAmount: newDepositContractConfig.minBridgeFeeNumber,
+    bridgeFeeAssetSymbol: newDepositContractConfig.bridgeFeeAsset.assetSymbol,
+    minExecutorFeeAmount: newDepositContractConfig.minExecutorFeeNumber,
+    executorFeeAssetSymbol: newDepositContractConfig.executorFeeAsset.assetSymbol,
+    recommendedAmounts: newDepositContractConfig.recommendedAmountsNumber,
+  });
 });

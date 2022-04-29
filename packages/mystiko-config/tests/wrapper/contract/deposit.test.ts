@@ -4,7 +4,7 @@ import {
   BridgeType,
   CircuitConfig,
   CircuitType,
-  DepositContractConfig,
+  DepositContractConfig, MAIN_ASSET_ADDRESS,
   PoolContractConfig,
   RawAssetConfig,
   RawConfig,
@@ -99,60 +99,34 @@ test('test equality', () => {
 
 test('test bridgeFeeAsset', () => {
   rawConfig.bridgeFeeAssetAddress = undefined;
-  config = new DepositContractConfig(rawConfig, {
-    poolContractGetter: () => undefined,
-    depositContractGetter: () => undefined,
-    mainAssetConfig,
-    assetConfigs,
-  });
+  config = config.mutate(rawConfig);
   expect(config.bridgeFeeAsset).toStrictEqual(mainAssetConfig);
   rawConfig.bridgeFeeAssetAddress = '0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9';
-  expect(
-    () =>
-      new DepositContractConfig(rawConfig, {
-        poolContractGetter: () => undefined,
-        depositContractGetter: () => undefined,
-        mainAssetConfig,
-        assetConfigs,
-      }),
-  ).toThrow(
+  expect(() => config.mutate(rawConfig)).toThrow(
     new Error(
       'bridge fee asset address=0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9 config ' +
         `has not been defined for deposit contract address=${rawConfig.address}`,
     ),
   );
+  rawConfig.bridgeFeeAssetAddress = MAIN_ASSET_ADDRESS;
+  config = config.mutate(rawConfig);
+  expect(config.bridgeFeeAsset).toStrictEqual(mainAssetConfig);
 });
 
 test('test executorFeeAsset', () => {
   rawConfig.executorFeeAssetAddress = undefined;
-  config = new DepositContractConfig(rawConfig, {
-    poolContractGetter: () =>
-      new PoolContractConfig(rawMystikoConfig.chains[0].poolContracts[0], {
-        defaultCircuitConfigs,
-        circuitConfigsByName,
-        mainAssetConfig,
-        assetConfigs,
-      }),
-    depositContractGetter: () => undefined,
-    mainAssetConfig,
-    assetConfigs,
-  });
+  config = config.mutate(rawConfig);
   expect(config.executorFeeAsset).toStrictEqual(config.asset);
   rawConfig.executorFeeAssetAddress = '0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9';
-  expect(
-    () =>
-      new DepositContractConfig(rawConfig, {
-        poolContractGetter: () => undefined,
-        depositContractGetter: () => undefined,
-        mainAssetConfig,
-        assetConfigs,
-      }),
-  ).toThrow(
+  expect(() => config.mutate(rawConfig)).toThrow(
     new Error(
       'executor fee asset address=0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9 config ' +
         `has not been defined for deposit contract address=${rawConfig.address}`,
     ),
   );
+  rawConfig.executorFeeAssetAddress = MAIN_ASSET_ADDRESS;
+  config = config.mutate(rawConfig);
+  expect(config.executorFeeAsset).toStrictEqual(mainAssetConfig);
 });
 
 test('test peerContract', () => {

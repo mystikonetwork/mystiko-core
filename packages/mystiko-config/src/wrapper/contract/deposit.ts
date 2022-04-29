@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import { check, fromDecimals, toBN } from '@mystikonetwork/utils';
-import { AssetConfig } from '../asset';
+import { AssetConfig, MAIN_ASSET_ADDRESS } from '../asset';
 import { ContractConfig } from './base';
 import { CircuitConfig } from '../circuit';
 import { AssetType, BridgeType } from '../../common';
@@ -165,6 +165,9 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   private initBridgeFeeAssetConfig(assetConfigs: Map<string, AssetConfig>): AssetConfig | undefined {
     if (this.data.bridgeFeeAssetAddress) {
+      if (this.data.bridgeFeeAssetAddress === MAIN_ASSET_ADDRESS) {
+        return this.auxDataNotEmpty.mainAssetConfig;
+      }
       const assetConfig = assetConfigs.get(this.data.bridgeFeeAssetAddress);
       if (!assetConfig) {
         throw new Error(
@@ -179,6 +182,9 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   private initExecutorFeeAssetConfig(assetConfigs: Map<string, AssetConfig>): AssetConfig | undefined {
     if (this.data.executorFeeAssetAddress) {
+      if (this.data.executorFeeAssetAddress === MAIN_ASSET_ADDRESS) {
+        return this.auxDataNotEmpty.mainAssetConfig;
+      }
       const assetConfig = assetConfigs.get(this.data.executorFeeAssetAddress);
       if (!assetConfig) {
         throw new Error(
