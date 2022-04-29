@@ -22,6 +22,6 @@ export type CommitmentImport = {
 export interface CommitmentHandler<C = CommitmentContractQuery, Q = CommitmentQuery, CI = CommitmentImport> {
   find(query?: DatabaseQuery<Commitment>): Promise<Commitment[]>;
   findByContract(query: C): Promise<Commitment[]>;
-  findOne(query: Q): Promise<Commitment | null>;
+  findOne(query: Q | string): Promise<Commitment | null>;
   import(options: CI): Promise<Commitment[]>;
 }

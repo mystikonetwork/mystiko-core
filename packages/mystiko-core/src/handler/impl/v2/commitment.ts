@@ -26,7 +26,10 @@ export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHan
     return this.findByCommonFilter(selector, query);
   }
 
-  public findOne(query: CommitmentQuery): Promise<Commitment | null> {
+  public findOne(query: CommitmentQuery | string): Promise<Commitment | null> {
+    if (typeof query === 'string') {
+      return this.db.commitments.findOne(query).exec();
+    }
     return this.db.commitments
       .findOne({
         selector: {

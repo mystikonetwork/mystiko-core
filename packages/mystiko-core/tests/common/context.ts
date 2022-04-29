@@ -1,6 +1,6 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
-import { ProviderPoolImpl } from '@mystikonetwork/ethers';
+import { ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
 import { ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
 import {
@@ -8,6 +8,7 @@ import {
   AssetHandlerV2,
   ChainHandlerV2,
   CommitmentHandlerV2,
+  ContractHandlerV2,
   DepositHandlerV2,
   ExecutorFactoryV2,
   MystikoContext,
@@ -15,12 +16,12 @@ import {
   TransactionHandlerV2,
   WalletHandlerV2,
 } from '../../src';
-import { ContractHandlerV2 } from '../../src/handler/impl/v2/contracts';
 
 export type TestContextOptions = {
   db?: MystikoDatabase;
   config?: MystikoConfig;
   providerConfigGetter?: (chain: number) => Promise<ProviderConnection[]>;
+  providerPool?: ProviderPool;
   providerFactory?: ProviderFactory;
   contractConnector?: MystikoContractConnector;
 };
@@ -40,7 +41,8 @@ export async function createTestContext(
     MystikoProtocolV2
   >
 > {
-  const { db, config, providerConfigGetter, providerFactory, contractConnector } = options || {};
+  const { db, config, providerConfigGetter, providerPool, providerFactory, contractConnector } =
+    options || {};
   let wrappedConfig = config;
   if (!wrappedConfig) {
     wrappedConfig = await MystikoConfig.createFromPlain({
@@ -68,7 +70,11 @@ export async function createTestContext(
     MystikoProtocolV2
   >(wrappedConfig, wrappedDb, protocol);
   context.executors = new ExecutorFactoryV2(context);
-  context.providers = new ProviderPoolImpl(wrappedConfig, providerConfigGetter, providerFactory);
+  if (providerPool) {
+    context.providers = providerPool;
+  } else {
+    context.providers = new ProviderPoolImpl(wrappedConfig, providerConfigGetter, providerFactory);
+  }
   if (contractConnector) {
     context.contractConnector = contractConnector;
   }

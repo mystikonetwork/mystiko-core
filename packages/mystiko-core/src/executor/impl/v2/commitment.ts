@@ -37,9 +37,7 @@ type ImportContractContext = ImportChainContext & {
 
 export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentExecutor {
   public import(options: CommitmentImport): Promise<Commitment[]> {
-    return this.context.wallets
-      .checkPassword(options.walletPassword)
-      .then(() => this.importAll({ options: options || {} }));
+    return this.context.wallets.checkPassword(options.walletPassword).then(() => this.importAll({ options }));
   }
 
   private importAll(importContext: ImportContext): Promise<Commitment[]> {
@@ -57,6 +55,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                   this.importChain({ ...importContext, chainConfig, provider, currentBlock }),
                 );
             }
+            /* istanbul ignore next */
             return [];
           }),
         );
@@ -73,7 +72,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   private importChain(importContext: ImportChainContext): Promise<Commitment[]> {
     const promises: Promise<Commitment[]>[] = [];
     const { chainConfig, currentBlock } = importContext;
-    const { contractAddress } = importContext.options;
+    const { chainId, contractAddress } = importContext.options;
     const { poolContracts, depositContracts } = chainConfig;
     const contracts: Array<PoolContractConfig | DepositContractConfig> = [
       ...poolContracts,
@@ -82,7 +81,11 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
     for (let i = 0; i < contracts.length; i += 1) {
       const contractConfig = contracts[i];
-      if (!contractAddress || contractAddress === contractConfig.address) {
+      if (
+        !chainId ||
+        !contractAddress ||
+        (contractAddress === contractConfig.address && chainId === chainConfig.chainId)
+      ) {
         promises.push(
           this.context.contracts
             .findOne({ chainId: chainConfig.chainId, address: contractConfig.address })
@@ -94,6 +97,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                   contract,
                 });
               }
+              /* istanbul ignore next */
               return [];
             }),
         );
@@ -112,6 +116,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
               })
               .then(() => commitments);
           }
+          /* istanbul ignore next */
           return commitments;
         }),
       );
@@ -310,6 +315,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
             return data;
           });
         }
+        /* istanbul ignore next */
         return createErrorPromise(
           `CommitmentIncluded event contains a commitment=${commitmentHash} which does not exist in database`,
           MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
@@ -414,6 +420,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                   return data;
                 });
               }
+              /* istanbul ignore next */
               return undefined;
             })
             .catch(() => undefined),
@@ -429,6 +436,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         });
       });
     }
+    /* istanbul ignore next */
     return Promise.resolve(commitment);
   }
 
