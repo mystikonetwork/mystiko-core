@@ -57,16 +57,16 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   public quote(options: DepositQuoteOptions, config: DepositContractConfig): Promise<DepositQuote> {
-    return this.getChainConfig(options).then((chainConfig) => ({
+    return Promise.resolve({
       minAmount: config.minAmountNumber,
       minRollupFeeAmount: config.minRollupFeeNumber,
       rollupFeeAssetSymbol: config.assetSymbol,
       minBridgeFeeAmount: config.minBridgeFeeNumber,
-      bridgeFeeAssetSymbol: chainConfig.assetSymbol,
+      bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
       minExecutorFeeAmount: config.minExecutorFeeNumber,
-      executorFeeAssetSymbol: config.assetSymbol,
+      executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
       recommendedAmounts: config.recommendedAmountsNumber,
-    }));
+    });
   }
 
   public summary(options: DepositOptions, config: DepositContractConfig): Promise<DepositSummary> {
@@ -162,7 +162,19 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   private validateOptions(executionContext: ExecutionContext): Promise<ExecutionContext> {
-    const { options, contractConfig, amount, rollupFee, bridgeFee, executorFee } = executionContext;
+    const { options, contractConfig, chainConfig, amount, rollupFee, bridgeFee, executorFee } =
+      executionContext;
+    if (
+      !chainConfig.getDepositContractByAddress(contractConfig.address) ||
+      options.dstChainId !== contractConfig.peerChainId ||
+      options.bridge !== contractConfig.bridgeType ||
+      options.assetSymbol !== contractConfig.assetSymbol
+    ) {
+      return createErrorPromise(
+        'options mismatch with given contract config',
+        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+      );
+    }
     if (!this.context.protocol.isShieldedAddress(options.shieldedAddress)) {
       return createErrorPromise(
         `address ${options.shieldedAddress} is an invalid Mystiko address`,

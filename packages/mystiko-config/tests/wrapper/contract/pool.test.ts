@@ -55,13 +55,13 @@ beforeEach(async () => {
       new AssetConfig(rawMystikoConfig.chains[0].assets[0]),
     ],
   ]);
-  config = new PoolContractConfig(
-    rawConfig,
+  expect(() => new PoolContractConfig(rawConfig)).toThrow(new Error('auxData has not been specified'));
+  config = new PoolContractConfig(rawConfig, {
     defaultCircuitConfigs,
     circuitConfigsByName,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
 });
 
 test('test equality', () => {
@@ -79,13 +79,12 @@ test('test equality', () => {
 
 test('test assetAddress is undefined', () => {
   rawConfig.assetAddress = undefined;
-  config = new PoolContractConfig(
-    rawConfig,
+  config = new PoolContractConfig(rawConfig, {
     defaultCircuitConfigs,
     circuitConfigsByName,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
   expect(config.asset).toStrictEqual(mainAssetConfig);
 });
 
@@ -93,13 +92,12 @@ test('test assetAddress is not found', () => {
   rawConfig.assetAddress = '0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9';
   expect(
     () =>
-      new PoolContractConfig(
-        rawConfig,
+      new PoolContractConfig(rawConfig, {
         defaultCircuitConfigs,
         circuitConfigsByName,
         mainAssetConfig,
         assetConfigs,
-      ),
+      }),
   ).toThrow(
     new Error(
       'asset address=0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9 config ' +
@@ -111,27 +109,39 @@ test('test assetAddress is not found', () => {
 test('test circuit overwrite', () => {
   expect(config.getCircuitConfig(CircuitType.ROLLUP1)?.name).toBe('zokrates-1.0-rollup1');
   rawConfig.circuits = ['zokrates-2.0-rollup1'];
-  config = new PoolContractConfig(
-    rawConfig,
+  config = new PoolContractConfig(rawConfig, {
     defaultCircuitConfigs,
     circuitConfigsByName,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
   expect(config.getCircuitConfig(CircuitType.ROLLUP1)?.name).toBe('zokrates-2.0-rollup1');
   expect(config.getCircuitConfig(CircuitType.ROLLUP4)?.name).toBe('zokrates-1.0-rollup4');
 });
 
 test('test copy', () => {
   expect(
-    new PoolContractConfig(
-      config.copyData(),
+    new PoolContractConfig(rawConfig, {
       defaultCircuitConfigs,
       circuitConfigsByName,
       mainAssetConfig,
       assetConfigs,
-    ),
+    }),
   ).toStrictEqual(config);
+});
+
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  rawConfig.name = 'another name';
+  let newConfig = config.mutate(rawConfig);
+  expect(newConfig.name).toBe('another name');
+  newConfig = config.mutate(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    mainAssetConfig,
+    assetConfigs,
+  });
+  expect(newConfig.copyData()).toStrictEqual(rawConfig);
 });
 
 test('test toJsonString', async () => {

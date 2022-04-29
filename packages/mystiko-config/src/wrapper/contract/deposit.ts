@@ -7,33 +7,22 @@ import { AssetType, BridgeType } from '../../common';
 import { PoolContractConfig } from './pool';
 import { RawDepositContractConfig } from '../../raw';
 
-export class DepositContractConfig extends ContractConfig<RawDepositContractConfig> {
-  private readonly poolContractGetter: (address: string) => PoolContractConfig | undefined;
+type AuxData = {
+  poolContractGetter: (address: string) => PoolContractConfig | undefined;
+  depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined;
+  mainAssetConfig: AssetConfig;
+  assetConfigs: Map<string, AssetConfig>;
+};
 
-  private readonly depositContractGetter: (
-    chainId: number,
-    address: string,
-  ) => DepositContractConfig | undefined;
-
-  private readonly mainAssetConfig: AssetConfig;
-
+export class DepositContractConfig extends ContractConfig<RawDepositContractConfig, AuxData> {
   private readonly bridgeFeeAssetConfig?: AssetConfig;
 
   private readonly executorFeeAssetConfig?: AssetConfig;
 
-  constructor(
-    data: RawDepositContractConfig,
-    poolContractGetter: (address: string) => PoolContractConfig | undefined,
-    depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
-    mainAssetConfig: AssetConfig,
-    assetConfigs: Map<string, AssetConfig>,
-  ) {
-    super(data);
-    this.mainAssetConfig = mainAssetConfig;
-    this.depositContractGetter = depositContractGetter;
-    this.poolContractGetter = poolContractGetter;
-    this.bridgeFeeAssetConfig = this.initBridgeFeeAssetConfig(assetConfigs);
-    this.executorFeeAssetConfig = this.initExecutorFeeAssetConfig(assetConfigs);
+  constructor(data: RawDepositContractConfig, auxData?: AuxData) {
+    super(data, auxData);
+    this.bridgeFeeAssetConfig = this.initBridgeFeeAssetConfig(this.auxDataNotEmpty.assetConfigs);
+    this.executorFeeAssetConfig = this.initExecutorFeeAssetConfig(this.auxDataNotEmpty.assetConfigs);
     this.validate();
   }
 
@@ -46,7 +35,7 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
   }
 
   public get poolContract(): PoolContractConfig {
-    const poolContractConfig = this.poolContractGetter(this.poolAddress);
+    const poolContractConfig = this.auxDataNotEmpty.poolContractGetter(this.poolAddress);
     if (poolContractConfig) {
       return poolContractConfig;
     }
@@ -131,17 +120,21 @@ export class DepositContractConfig extends ContractConfig<RawDepositContractConf
 
   public get peerContract(): DepositContractConfig | undefined {
     if (this.peerChainId && this.peerContractAddress) {
-      return this.depositContractGetter(this.peerChainId, this.peerContractAddress);
+      return this.auxDataNotEmpty.depositContractGetter(this.peerChainId, this.peerContractAddress);
     }
     return undefined;
   }
 
   public get bridgeFeeAsset(): AssetConfig {
-    return this.bridgeFeeAssetConfig || this.mainAssetConfig;
+    return this.bridgeFeeAssetConfig || this.auxDataNotEmpty.mainAssetConfig;
   }
 
   public get executorFeeAsset(): AssetConfig {
     return this.executorFeeAssetConfig || this.asset;
+  }
+
+  public mutate(data?: RawDepositContractConfig, auxData?: AuxData): DepositContractConfig {
+    return new DepositContractConfig(data || this.data, auxData || this.auxData);
   }
 
   private validate() {

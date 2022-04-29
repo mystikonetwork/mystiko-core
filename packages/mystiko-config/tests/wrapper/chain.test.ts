@@ -31,7 +31,12 @@ beforeEach(async () => {
     }
   });
   rawConfig = await RawConfig.createFromFile(RawChainConfig, 'tests/files/chain.valid.json');
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  expect(() => new ChainConfig(rawConfig)).toThrow(new Error('auxData has not been specified'));
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
 });
 
 test('test equality', () => {
@@ -64,7 +69,11 @@ test('test equality', () => {
 test('test peerChainIds', async () => {
   expect(config.peerChainIds).toStrictEqual([]);
   rawConfig.depositContracts[0].disabled = false;
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.peerChainIds).toStrictEqual([97]);
   const loopDepositContractConfig = await RawConfig.createFromObject(RawDepositContractConfig, {
     version: 2,
@@ -90,14 +99,22 @@ test('test peerChainIds', async () => {
   });
   rawConfig.depositContracts.push(loopDepositContractConfig);
   rawConfig.poolContracts.push(poolContractConfig);
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.peerChainIds.sort()).toStrictEqual([3, 97]);
 });
 
 test('test getAssetSymbols', async () => {
   expect(config.getAssetSymbols(97)).toStrictEqual([]);
   rawConfig.depositContracts[0].disabled = false;
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getAssetSymbols(97)).toStrictEqual(['MTT']);
   const poolContractConfig1 = await RawConfig.createFromObject(RawPoolContractConfig, {
     version: 2,
@@ -147,7 +164,11 @@ test('test getAssetSymbols', async () => {
   rawConfig.depositContracts.push(loopDepositContractConfig2);
   rawConfig.poolContracts.push(poolContractConfig1);
   rawConfig.poolContracts.push(poolContractConfig2);
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getAssetSymbols(97).sort()).toStrictEqual(['ETH', 'MTT']);
   expect(config.getAssetSymbols(3)).toStrictEqual(['ETH']);
 });
@@ -155,7 +176,11 @@ test('test getAssetSymbols', async () => {
 test('test getBridges', async () => {
   expect(config.getBridges(97, 'MTT')).toStrictEqual([]);
   rawConfig.depositContracts[0].disabled = false;
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getBridges(97, 'MTT')).toStrictEqual([BridgeType.TBRIDGE]);
   const loopDepositContractConfig = await RawConfig.createFromObject(RawDepositContractConfig, {
     version: 2,
@@ -181,7 +206,11 @@ test('test getBridges', async () => {
   });
   rawConfig.depositContracts.push(loopDepositContractConfig);
   rawConfig.poolContracts.push(poolContractConfig1);
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getBridges(3, 'MTT')).toStrictEqual([]);
   const celerDepositContractConfig = await RawConfig.createFromObject(RawDepositContractConfig, {
     version: 2,
@@ -209,7 +238,11 @@ test('test getBridges', async () => {
   });
   rawConfig.depositContracts.push(celerDepositContractConfig);
   rawConfig.poolContracts.push(poolContractConfig2);
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getBridges(97, 'MTT').sort()).toStrictEqual([BridgeType.CELER, BridgeType.TBRIDGE]);
 });
 
@@ -253,7 +286,11 @@ test('test getDepositContract', async () => {
   rawConfig.depositContracts.push(tbridgeDepositContractConfig);
   rawConfig.depositContracts.push(loopDepositContractConfig);
   rawConfig.poolContracts.push(poolContractConfig);
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getDepositContract(97, 'MTT', BridgeType.TBRIDGE)?.address).toBe(
     '0x4c55C41Bd839B3552fb2AbecaCFdF4a5D2879Cb9',
   );
@@ -305,7 +342,11 @@ test('test getPoolContract', async () => {
   rawConfig.depositContracts.push(tbridgeDepositContractConfig);
   rawConfig.depositContracts.push(loopDepositContractConfig);
   rawConfig.depositContracts[0].disabled = false;
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getPoolContract('MTT', BridgeType.TBRIDGE)?.address).toBe(
     '0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d',
   );
@@ -329,7 +370,11 @@ test('test getPoolContractBridgeType', () => {
 
 test('test getEventFilterSizeByAddress', () => {
   rawConfig.eventFilterSize = 12345;
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.getEventFilterSizeByAddress('0x5380442d3c4ec4f5777f551f5edd2fa0f691a27c')).toBe(12345);
   expect(config.getEventFilterSizeByAddress('0x961f315a836542e603a3df2e0dd9d4ecd06ebc67')).toBe(12345);
   expect(config.getEventFilterSizeByAddress('0xF55Dbe8D71Df9Bbf5841052C75c6Ea9eA717fc6d')).toBe(12345);
@@ -342,7 +387,12 @@ test('test getEventFilterSizeByAddress', () => {
 test('test invalid poolAddress', () => {
   rawConfig.depositContracts[0].poolAddress = '0x5380442d3c4ec4f5777f551f5edd2fa0f691a27c';
   expect(
-    () => new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined),
+    () =>
+      new ChainConfig(rawConfig, {
+        defaultCircuitConfigs,
+        circuitConfigsByName,
+        depositContractGetter: () => undefined,
+      }),
   ).toThrow(
     new Error(
       'deposit contract=0x961f315a836542e603a3df2e0dd9d4ecd06ebc67 poolAddress definition does not exist',
@@ -353,7 +403,12 @@ test('test invalid poolAddress', () => {
 test('test invalid peerChainId', () => {
   rawConfig.depositContracts[0].peerChainId = 3;
   expect(
-    () => new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined),
+    () =>
+      new ChainConfig(rawConfig, {
+        defaultCircuitConfigs,
+        circuitConfigsByName,
+        depositContractGetter: () => undefined,
+      }),
   ).toThrow(
     new Error(
       'current chain id should be different with peer chain id in contract=0x961f315a836542e603a3df2e0dd9d4ecd06ebc67',
@@ -390,14 +445,23 @@ test('test duplicate bridge and asset', async () => {
   rawConfig.depositContracts.push(tbridgeDepositContractConfig);
   rawConfig.depositContracts[0].disabled = false;
   expect(
-    () => new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined),
+    () =>
+      new ChainConfig(rawConfig, {
+        defaultCircuitConfigs,
+        circuitConfigsByName,
+        depositContractGetter: () => undefined,
+      }),
   ).toThrow(new Error(`only one pool address allowed for asset MTT and bridge type ${BridgeType.TBRIDGE}`));
 });
 
 test('test different bridge with same pool address', async () => {
   expect(config.peerChainIds).toStrictEqual([]);
   rawConfig.depositContracts[0].disabled = false;
-  config = new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined);
+  config = new ChainConfig(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
   expect(config.peerChainIds).toStrictEqual([97]);
   const loopDepositContractConfig = await RawConfig.createFromObject(RawDepositContractConfig, {
     version: 2,
@@ -412,7 +476,12 @@ test('test different bridge with same pool address', async () => {
   });
   rawConfig.depositContracts.push(loopDepositContractConfig);
   expect(
-    () => new ChainConfig(rawConfig, defaultCircuitConfigs, circuitConfigsByName, () => undefined),
+    () =>
+      new ChainConfig(rawConfig, {
+        defaultCircuitConfigs,
+        circuitConfigsByName,
+        depositContractGetter: () => undefined,
+      }),
   ).toThrow(
     new Error(
       'deposit contract with different bridge type ' +
@@ -430,6 +499,19 @@ test('test getAssetConfigByAddress', () => {
 
 test('test copy', () => {
   expect(config.copyData()).toStrictEqual(rawConfig);
+});
+
+test('test mutate', () => {
+  expect(config.mutate().copyData()).toStrictEqual(rawConfig);
+  rawConfig.name = 'another name';
+  let newConfig = config.mutate(rawConfig);
+  expect(newConfig.name).toBe('another name');
+  newConfig = config.mutate(rawConfig, {
+    defaultCircuitConfigs,
+    circuitConfigsByName,
+    depositContractGetter: () => undefined,
+  });
+  expect(newConfig.copyData()).toStrictEqual(rawConfig);
 });
 
 test('test toJsonString', async () => {

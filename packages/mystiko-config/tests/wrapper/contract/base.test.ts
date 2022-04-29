@@ -21,6 +21,14 @@ test('test copy', () => {
   expect(new ContractConfig<RawContractConfig>(config.copyData())).toStrictEqual(config);
 });
 
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  expect(config.mutate(undefined, {}).copyData()).toStrictEqual(rawConfig);
+  rawConfig.name = 'another name';
+  const newConfig = config.mutate(rawConfig);
+  expect(newConfig.name).toBe('another name');
+});
+
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
   const loadedRawConfig = await RawConfig.createFromObject(RawContractConfig, JSON.parse(jsonString));

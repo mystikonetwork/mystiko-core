@@ -8,7 +8,13 @@ import { CircuitConfig } from './circuit';
 import { DepositContractConfig, PoolContractConfig } from './contract';
 import { ProviderConfig } from './provider';
 
-export class ChainConfig extends BaseConfig<RawChainConfig> {
+type AuxData = {
+  defaultCircuitConfigs: Map<CircuitType, CircuitConfig>;
+  circuitConfigsByName: Map<string, CircuitConfig>;
+  depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined;
+};
+
+export class ChainConfig extends BaseConfig<RawChainConfig, AuxData> {
   private readonly poolContractConfigs: Map<string, PoolContractConfig>;
 
   private readonly poolConfigsByAssetAndBridge: Map<string, Map<BridgeType, PoolContractConfig>>;
@@ -23,19 +29,17 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
 
   private readonly providerConfigs: ProviderConfig[];
 
-  constructor(
-    data: RawChainConfig,
-    defaultCircuitConfigs: Map<CircuitType, CircuitConfig>,
-    circuitConfigsByName: Map<string, CircuitConfig>,
-    depositContractGetter: (chainId: number, address: string) => DepositContractConfig | undefined,
-  ) {
-    super(data);
+  constructor(data: RawChainConfig, auxData?: AuxData) {
+    super(data, auxData);
     this.mainAssetConfig = this.initMainAssetConfig();
     this.assetConfigs = this.initAssetConfigs();
-    this.poolContractConfigs = this.initPoolContractConfigs(defaultCircuitConfigs, circuitConfigsByName);
+    this.poolContractConfigs = this.initPoolContractConfigs(
+      this.auxDataNotEmpty.defaultCircuitConfigs,
+      this.auxDataNotEmpty.circuitConfigsByName,
+    );
     this.depositContractConfigs = this.initDepositContractConfigs(
       this.poolContractConfigs,
-      depositContractGetter,
+      this.auxDataNotEmpty.depositContractGetter,
     );
     this.poolConfigsByAssetAndBridge = this.initPoolConfigsByAssetAndBridge();
     this.depositConfigsByPoolContract = this.initDepositConfigsByPoolContract();
@@ -198,6 +202,10 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
     return this.assetConfigs.get(assetAddress);
   }
 
+  public mutate(data?: RawChainConfig, auxData?: AuxData): ChainConfig {
+    return new ChainConfig(data || this.data, auxData || this.auxData);
+  }
+
   private initPoolContractConfigs(
     defaultCircuitConfigs: Map<CircuitType, CircuitConfig>,
     circuitConfigsByName: Map<string, CircuitConfig>,
@@ -210,13 +218,12 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
       );
       poolContractConfigs.set(
         raw.address,
-        new PoolContractConfig(
-          raw,
+        new PoolContractConfig(raw, {
           defaultCircuitConfigs,
           circuitConfigsByName,
-          this.mainAssetConfig,
-          this.assetConfigs,
-        ),
+          mainAssetConfig: this.mainAssetConfig,
+          assetConfigs: this.assetConfigs,
+        }),
       );
     });
     return poolContractConfigs;
@@ -244,13 +251,12 @@ export class ChainConfig extends BaseConfig<RawChainConfig> {
       }
       depositContractConfigs.set(
         raw.address,
-        new DepositContractConfig(
-          raw,
-          (address) => this.getPoolContractByAddress(address),
+        new DepositContractConfig(raw, {
+          poolContractGetter: (address) => this.getPoolContractByAddress(address),
           depositContractGetter,
-          this.mainAssetConfig,
-          this.assetConfigs,
-        ),
+          mainAssetConfig: this.mainAssetConfig,
+          assetConfigs: this.assetConfigs,
+        }),
       );
     });
     return depositContractConfigs;

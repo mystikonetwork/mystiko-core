@@ -21,6 +21,13 @@ test('test copy', () => {
   expect(new PolyBridgeConfig(config.copyData())).toStrictEqual(config);
 });
 
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  rawConfig.name = 'another name';
+  const newConfig = config.mutate(rawConfig);
+  expect(newConfig.name).toBe('another name');
+});
+
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
   const loadedRawConfig = await RawConfig.createFromObject(RawPolyBridgeConfig, JSON.parse(jsonString));

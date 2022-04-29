@@ -30,4 +30,8 @@ export class CircuitConfig extends BaseConfig<RawCircuitConfig> {
   public get verifyingKeyFile(): string[] {
     return this.data.verifyingKeyFile;
   }
+
+  public mutate(data?: RawCircuitConfig): CircuitConfig {
+    return new CircuitConfig(data || this.data);
+  }
 }

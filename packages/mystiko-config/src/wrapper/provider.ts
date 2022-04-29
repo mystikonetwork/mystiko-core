@@ -13,4 +13,8 @@ export class ProviderConfig extends BaseConfig<RawProviderConfig> {
   public get maxTryCount(): number {
     return this.data.maxTryCount;
   }
+
+  public mutate(data?: RawProviderConfig): ProviderConfig {
+    return new ProviderConfig(data || this.data);
+  }
 }

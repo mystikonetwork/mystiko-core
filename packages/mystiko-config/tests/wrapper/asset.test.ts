@@ -34,6 +34,13 @@ test('test copy', () => {
   expect(new AssetConfig(config.copyData())).toStrictEqual(config);
 });
 
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  rawConfig.assetDecimals = 6;
+  const newConfig = config.mutate(rawConfig);
+  expect(newConfig.assetDecimals).toBe(6);
+});
+
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
   const loadedRawConfig = await RawConfig.createFromObject(RawAssetConfig, JSON.parse(jsonString));
