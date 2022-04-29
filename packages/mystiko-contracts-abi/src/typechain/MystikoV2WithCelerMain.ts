@@ -64,6 +64,7 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
     'executeMessage(address,uint64,bytes,address)': FunctionFragment;
     'hasher3()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
+    'isSanctionCheckDisabled()': FunctionFragment;
     'minAmount()': FunctionFragment;
     'minBridgeFee()': FunctionFragment;
     'minExecutorFee()': FunctionFragment;
@@ -99,6 +100,7 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minBridgeFee', values?: undefined): string;
   encodeFunctionData(functionFragment: 'minExecutorFee', values?: undefined): string;
@@ -130,6 +132,7 @@ export interface MystikoV2WithCelerMainInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: 'executeMessage', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minBridgeFee', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'minExecutorFee', data: BytesLike): Result;
@@ -217,6 +220,8 @@ export interface MystikoV2WithCelerMain extends BaseContract {
     hasher3(overrides?: CallOverrides): Promise<[string]>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
     minAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -325,6 +330,8 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
   isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+  isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
+
   minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
   minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -426,6 +433,8 @@ export interface MystikoV2WithCelerMain extends BaseContract {
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
+
     minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
@@ -508,6 +517,8 @@ export interface MystikoV2WithCelerMain extends BaseContract {
     hasher3(overrides?: CallOverrides): Promise<BigNumber>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     minAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -616,6 +627,8 @@ export interface MystikoV2WithCelerMain extends BaseContract {
     hasher3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     minAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

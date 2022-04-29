@@ -1,20 +1,22 @@
 import { readJsonFile, writeJsonFile } from './common/utils';
-import { LOGRED, MystikoTestnet, MystikoDevelopment } from './common/constant';
+import { LOGRED, MystikoTestnet, MystikoDevelopment, MystikoMainnet } from './common/constant';
 
-export const tbridgeTestnetConfigFile = './src/json/bridge/tbridge/testnet.json';
-export const tbridgeDevelopmentConfigFile = './src/json/bridge/tbridge/development.json';
+const tbridgeTestnetConfigFile = './src/json/bridge/tbridge/testnet.json';
+const tbridgeDevelopmentConfigFile = './src/json/bridge/tbridge/development.json';
+const tbridgeMainnetConfigFile = './src/json/bridge/tbridge/mainnet.json';
 
 function getConfigFileName(mystikoNetwork: string) {
-  if (mystikoNetwork === MystikoTestnet) {
-    return tbridgeTestnetConfigFile;
+  switch (mystikoNetwork) {
+    case MystikoTestnet:
+      return tbridgeTestnetConfigFile;
+    case MystikoDevelopment:
+      return tbridgeDevelopmentConfigFile;
+    case MystikoMainnet:
+      return tbridgeMainnetConfigFile;
+    default:
+      console.error(LOGRED, 'load tbridge config, network not support');
+      return '';
   }
-
-  if (mystikoNetwork === MystikoDevelopment) {
-    return tbridgeDevelopmentConfigFile;
-  }
-
-  console.error(LOGRED, 'load tbridge config, network not support');
-  return '';
 }
 
 function loadTBridgeConfig(mystikoNetwork: string): any {
@@ -50,7 +52,8 @@ export function saveTBridgeJson(c: any) {
     ) {
       tbridgeConfig.bridge.pairs[i].local.mystikoAddress = c.pairSrcDepositCfg.address;
       tbridgeConfig.bridge.pairs[i].local.relayProxyAddress = c.proxyCfg.address;
-      console.log('tbridge save config');
+      tbridgeConfig.bridge.pairs[i].local.bridgeEnalbe = true;
+      console.log('update tbridge config');
       saveTBridgeConfig(c.mystikoNetwork, tbridgeConfig);
       return;
     }
@@ -62,12 +65,14 @@ export function saveTBridgeJson(c: any) {
     ) {
       tbridgeConfig.bridge.pairs[i].remote.mystikoAddress = c.pairSrcDepositCfg.address;
       tbridgeConfig.bridge.pairs[i].remote.relayProxyAddress = c.proxyCfg.address;
+      tbridgeConfig.bridge.pairs[i].remote.bridgeEnalbe = true;
+      console.log('update tbridge config');
       saveTBridgeConfig(c.mystikoNetwork, tbridgeConfig);
       return;
     }
   }
 
-  console.log('tbridge add new pair');
+  console.log('add new tbridge pair');
 
   const pair = {
     local: {
@@ -76,6 +81,7 @@ export function saveTBridgeJson(c: any) {
       assetSymbol: c.srcTokenCfg.assetSymbol,
       mystikoAddress: c.pairSrcDepositCfg.address,
       relayProxyAddress: c.proxyCfg.address,
+      bridgeEnalbe: true,
     },
     remote: {
       network: c.pairDstDepositCfg.network,

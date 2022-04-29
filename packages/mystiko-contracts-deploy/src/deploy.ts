@@ -2,11 +2,17 @@ import { BridgeLoop, BridgeTBridge, LOGRED, MystikoTestnet } from './common/cons
 import { loadConfig, saveConfig } from './config/config';
 import { addEnqueueWhitelist, getOrDeployCommitPool, initPoolContractFactory } from './contract/commitment';
 import { initTestTokenContractFactory, transferTokneToContract } from './contract/token';
-import { getOrDeployTBridgeProxy, initTBridgeContractFactory } from './contract/tbridge';
+import {
+  addRegisterWhitelist,
+  getOrDeployTBridgeProxy,
+  initTBridgeContractFactory,
+} from './contract/tbridge';
 import { deployDepositContract, initDepositContractFactory, setPeerContract } from './contract/depsit';
 import { deployBaseContract, initBaseContractFactory } from './contract/base';
 import { saveCoreContractJson } from './coreJson';
 import { saveTBridgeJson } from './tbridgeJson';
+import { saveRollupJson } from './rollupJson';
+import { delay } from './common/utils';
 
 let ethers: any;
 
@@ -15,6 +21,14 @@ async function deployStep1(taskArgs: any) {
   const c = loadConfig(taskArgs);
   await deployBaseContract(c.srcChainCfg);
   saveConfig(c.mystikoNetwork, c.cfg);
+}
+
+function dumpConfig(c: any) {
+  saveCoreContractJson(c);
+  saveRollupJson(c);
+  if (c.bridgeCfg.name === BridgeTBridge) {
+    saveTBridgeJson(c);
+  }
 }
 
 // deploy mystiko contract and config contract
@@ -32,6 +46,7 @@ async function deployStep2(taskArgs: any) {
     c.operatorCfg,
     c.srcChainCfg.network,
   );
+
   const commitmentPoolAddress = await getOrDeployCommitPool(
     c.mystikoNetwork,
     c.bridgeCfg,
@@ -40,6 +55,8 @@ async function deployStep2(taskArgs: any) {
     c.pairSrcPoolCfg,
     c.operatorCfg,
   );
+
+  await delay(10000);
 
   const depositAddress = await deployDepositContract(
     c.mystikoNetwork,
@@ -51,7 +68,12 @@ async function deployStep2(taskArgs: any) {
     commitmentPoolAddress,
     bridgeProxyAddress,
   );
-  await addEnqueueWhitelist(commitmentPoolAddress, depositAddress);
+
+  await delay(10000);
+
+  await addEnqueueWhitelist(c.srcTokenCfg.erc20, commitmentPoolAddress, depositAddress);
+  await addRegisterWhitelist(bridgeProxyAddress, depositAddress);
+
   saveConfig(c.mystikoNetwork, c.cfg);
 }
 
@@ -66,18 +88,26 @@ async function deployStep3(taskArgs: any) {
 
   // transfer token to contract
   if (c.srcTokenCfg.erc20 && c.bridgeCfg.name !== BridgeLoop && c.mystikoNetwork === MystikoTestnet) {
-    await transferTokneToContract(c.srcTokenCfg.address, c.pairSrcDepositCfg.address);
+    // @ts-ignore
+    await transferTokneToContract(c.srcTokenCfg.address, c.pairSrcPoolCfg.address);
   }
 
   if (c.bridgeCfg.name !== BridgeLoop) {
-    await setPeerContract(c.pairSrcDepositCfg.address, c.dstChainCfg.chainId, c.pairDstDepositCfg.address);
+    await setPeerContract(
+      c.bridgeCfg.name,
+      c.srcTokenCfg.erc20,
+      c.pairSrcDepositCfg.address,
+      c.dstChainCfg.chainId,
+      c.pairDstDepositCfg.address,
+    );
   }
 
-  saveCoreContractJson(c);
+  dumpConfig(c);
+}
 
-  if (c.bridgeCfg.name === BridgeTBridge) {
-    saveTBridgeJson(c);
-  }
+function dump(taskArgs: any) {
+  const c = loadConfig(taskArgs);
+  dumpConfig(c);
 }
 
 export async function deploy(taskArgs: any, hre: any) {
@@ -95,6 +125,8 @@ export async function deploy(taskArgs: any, hre: any) {
     await deployStep2(taskArgs);
   } else if (step === 'step3') {
     await deployStep3(taskArgs);
+  } else if (step === 'dump') {
+    dump(taskArgs);
   } else {
     console.error(LOGRED, 'wrong step');
   }

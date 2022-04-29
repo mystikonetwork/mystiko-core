@@ -22,16 +22,20 @@ export interface MystikoTBridgeProxyInterface extends utils.Interface {
   contractName: 'MystikoTBridgeProxy';
   functions: {
     'addExecutorWhitelist(address)': FunctionFragment;
+    'addRegisterWhitelist(address)': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
     'crossChainSyncTx(uint64,address,address,address,bytes)': FunctionFragment;
     'executorWhitelist(address)': FunctionFragment;
     'operator()': FunctionFragment;
+    'registerWhitelist(address)': FunctionFragment;
     'removeExecutorWhitelist(address)': FunctionFragment;
+    'removeRegisterWhitelist(address)': FunctionFragment;
     'sendMessage(address,uint64,bytes)': FunctionFragment;
     'withdraw(address)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'addExecutorWhitelist', values: [string]): string;
+  encodeFunctionData(functionFragment: 'addRegisterWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
   encodeFunctionData(
     functionFragment: 'crossChainSyncTx',
@@ -39,16 +43,21 @@ export interface MystikoTBridgeProxyInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: 'executorWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'registerWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'removeExecutorWhitelist', values: [string]): string;
+  encodeFunctionData(functionFragment: 'removeRegisterWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'sendMessage', values: [string, BigNumberish, BytesLike]): string;
   encodeFunctionData(functionFragment: 'withdraw', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'addExecutorWhitelist', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'addRegisterWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'crossChainSyncTx', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'executorWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'registerWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'removeExecutorWhitelist', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'removeRegisterWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'sendMessage', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
 
@@ -100,6 +109,11 @@ export interface MystikoTBridgeProxy extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
+    addRegisterWhitelist(
+      _register: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
     changeOperator(
       _newOperator: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -118,8 +132,15 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<[string]>;
 
+    registerWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
     removeExecutorWhitelist(
       _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<ContractTransaction>;
+
+    removeRegisterWhitelist(
+      _register: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
@@ -141,6 +162,11 @@ export interface MystikoTBridgeProxy extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
+  addRegisterWhitelist(
+    _register: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
   changeOperator(
     _newOperator: string,
     overrides?: Overrides & { from?: string | Promise<string> },
@@ -159,8 +185,15 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
   operator(overrides?: CallOverrides): Promise<string>;
 
+  registerWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
   removeExecutorWhitelist(
     _executor: string,
+    overrides?: Overrides & { from?: string | Promise<string> },
+  ): Promise<ContractTransaction>;
+
+  removeRegisterWhitelist(
+    _register: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
@@ -179,6 +212,8 @@ export interface MystikoTBridgeProxy extends BaseContract {
   callStatic: {
     addExecutorWhitelist(_executor: string, overrides?: CallOverrides): Promise<void>;
 
+    addRegisterWhitelist(_register: string, overrides?: CallOverrides): Promise<void>;
+
     changeOperator(_newOperator: string, overrides?: CallOverrides): Promise<void>;
 
     crossChainSyncTx(
@@ -194,7 +229,11 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<string>;
 
+    registerWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
     removeExecutorWhitelist(_executor: string, overrides?: CallOverrides): Promise<void>;
+
+    removeRegisterWhitelist(_register: string, overrides?: CallOverrides): Promise<void>;
 
     sendMessage(
       _toContract: string,
@@ -227,6 +266,11 @@ export interface MystikoTBridgeProxy extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
+    addRegisterWhitelist(
+      _register: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
     changeOperator(
       _newOperator: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -245,8 +289,15 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<BigNumber>;
 
+    registerWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     removeExecutorWhitelist(
       _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<BigNumber>;
+
+    removeRegisterWhitelist(
+      _register: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
@@ -269,6 +320,11 @@ export interface MystikoTBridgeProxy extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
+    addRegisterWhitelist(
+      _register: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
     changeOperator(
       _newOperator: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -287,8 +343,15 @@ export interface MystikoTBridgeProxy extends BaseContract {
 
     operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    registerWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     removeExecutorWhitelist(
       _executor: string,
+      overrides?: Overrides & { from?: string | Promise<string> },
+    ): Promise<PopulatedTransaction>;
+
+    removeRegisterWhitelist(
+      _register: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 

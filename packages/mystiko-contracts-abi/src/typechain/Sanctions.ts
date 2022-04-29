@@ -17,11 +17,14 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 export interface SanctionsInterface extends utils.Interface {
   contractName: 'Sanctions';
   functions: {
+    'isSanctionCheckDisabled()': FunctionFragment;
     'sanctionsContract()': FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
 
   events: {};
@@ -51,22 +54,32 @@ export interface Sanctions extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
+
     sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
   };
+
+  isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
 
   sanctionsContract(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
+
     sanctionsContract(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {};
 
   estimateGas: {
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
+
     sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

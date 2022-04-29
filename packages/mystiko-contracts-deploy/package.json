@@ -32,7 +32,8 @@
     "deploy:bridge": "yarn deploy:chain --network hardhat --step step1 --bridge tbridge --dst hardhat --token MTT && yarn deploy:chain --network hardhat --step step2 --bridge tbridge --dst hardhat --token MTT && yarn deploy:chain --network hardhat --step step2 --bridge tbridge --dst hardhat --token mUSD && yarn deploy:chain --network hardhat --step step3 --bridge tbridge --dst hardhat --token MTT && yarn deploy:chain --network hardhat --step step3 --bridge tbridge --dst hardhat --token mUSD",
     "deploy": "yarn deploy:loop && yarn deploy:bridge",
     "deploy:chain": "hardhat migrate",
-    "update": "hardhat update"
+    "set": "hardhat set",
+    "query": "hardhat query"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
@@ -58,8 +59,8 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/contracts-abi": "^0.0.11",
-    "@mystikonetwork/utils": "^0.0.11",
+    "@mystikonetwork/contracts-abi": "^0.1.0-alpha.3",
+    "@mystikonetwork/utils": "^0.1.0-alpha.3",
     "ethers": "^5.5.3",
     "hardhat": "^2.9.0",
     "hardhat-contract-sizer": "^2.5.0",

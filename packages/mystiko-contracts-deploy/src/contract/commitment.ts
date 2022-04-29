@@ -23,9 +23,9 @@ export async function initPoolContractFactory(eth: any) {
   CommitmentPoolERC20 = await ethers.getContractFactory('CommitmentPoolERC20');
 }
 
-export function getMystikoPoolContract(bErc20: string) {
+export function getMystikoPoolContract(bErc20: boolean) {
   let coreContract: any;
-  if (bErc20 === 'true') {
+  if (bErc20) {
     coreContract = CommitmentPoolERC20;
   } else {
     coreContract = CommitmentPoolMain;
@@ -41,12 +41,13 @@ async function deployCommitmentPool(
 ) {
   let pool: any;
   const poolCfg = commitmentPoolCfg;
+  const PoolContractFactory = getMystikoPoolContract(chainTokenCfg.erc20);
+
+  console.log('deploy Mystiko commitment pool contract');
   if (chainTokenCfg.erc20) {
-    console.log('deploy CommitmentPoolERC20');
-    pool = await CommitmentPoolERC20.deploy(MerkleTreeHeight, RootHistoryLength, chainTokenCfg.address);
+    pool = await PoolContractFactory.deploy(MerkleTreeHeight, RootHistoryLength, chainTokenCfg.address);
   } else {
-    console.log('deploy CommitmentPoolMain');
-    pool = await CommitmentPoolMain.deploy(MerkleTreeHeight, RootHistoryLength);
+    pool = await PoolContractFactory.deploy(MerkleTreeHeight, RootHistoryLength);
   }
   await pool.deployed();
 
@@ -70,13 +71,12 @@ async function deployCommitmentPool(
   return pool.address;
 }
 
-export async function togglePoolSanctionCheck(addr: string, check: boolean) {
-  console.log('toggle pool sanction check');
-  const poolContract = await CommitmentPoolMain.attach(addr);
+export async function togglePoolSanctionCheck(erc20: boolean, addr: string, check: boolean) {
+  console.log('toggle pool sanction check disable ', check);
+  const PoolContractFactory = getMystikoPoolContract(erc20);
+  const poolContract = await PoolContractFactory.attach(addr);
 
   try {
-    console.log('toggle pool sanction check 1');
-
     await poolContract.toggleSanctionCheck(check);
   } catch (err: any) {
     console.error(LOGRED, err);
@@ -84,9 +84,10 @@ export async function togglePoolSanctionCheck(addr: string, check: boolean) {
   }
 }
 
-export async function addRollupWhitelist(addr: string, rollers: string[]) {
+export async function addRollupWhitelist(erc20: boolean, addr: string, rollers: string[]) {
   console.log('add roller whitelist');
-  const pool = await CommitmentPoolMain.attach(addr);
+  const PoolContractFactory = getMystikoPoolContract(erc20);
+  const pool = await PoolContractFactory.attach(addr);
 
   try {
     const all = [];
@@ -101,8 +102,9 @@ export async function addRollupWhitelist(addr: string, rollers: string[]) {
   }
 }
 
-export async function addEnqueueWhitelist(addr: string, enqueueContractAddress: string) {
-  const pool = await CommitmentPoolMain.attach(addr);
+export async function addEnqueueWhitelist(erc20: boolean, addr: string, enqueueContractAddress: string) {
+  const PoolContractFactory = getMystikoPoolContract(erc20);
+  const pool = await PoolContractFactory.attach(addr);
   console.log('add enqueue whitelist');
   try {
     await pool.addEnqueueWhitelist(enqueueContractAddress);
@@ -129,10 +131,10 @@ export async function getOrDeployCommitPool(
     );
     console.log('commitment pool not exist, deploy');
     const commitmentPoolAddress = await deployCommitmentPool(newPairPoolCfg, chainCfg, chainTokenCfg);
-    await addRollupWhitelist(commitmentPoolAddress, operatorCfg.rollers);
+    await addRollupWhitelist(chainTokenCfg.erc20, commitmentPoolAddress, operatorCfg.rollers);
 
     if (mystikoNetwork === MystikoTestnet) {
-      togglePoolSanctionCheck(commitmentPoolAddress, true);
+      togglePoolSanctionCheck(chainTokenCfg.erc20, commitmentPoolAddress, true);
     }
 
     return commitmentPoolAddress;
@@ -140,7 +142,7 @@ export async function getOrDeployCommitPool(
 
   if (mystikoNetwork === MystikoDevelopment) {
     const commitmentPoolAddress = await deployCommitmentPool(pairSrcPoolCfg, chainCfg, chainTokenCfg);
-    await addRollupWhitelist(commitmentPoolAddress, operatorCfg.rollers);
+    await addRollupWhitelist(chainTokenCfg.erc20, commitmentPoolAddress, operatorCfg.rollers);
     return commitmentPoolAddress;
   }
 

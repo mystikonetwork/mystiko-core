@@ -406,6 +406,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: 'isSanctionCheckDisabled',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'isVerifierUpdateDisabled',
     outputs: [
       {
