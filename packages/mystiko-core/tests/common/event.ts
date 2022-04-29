@@ -63,27 +63,21 @@ export async function generateEvents(fileName: string) {
         contract
           .queryFilter(contract.filters.CommitmentQueued(), poolContract.startBlock + 1)
           .then((rawEvents) => {
-            events[chainConfig.chainId][poolContract.address][
-              JSON.stringify(contract.filters.CommitmentQueued().topics)
-            ] = rawEvents;
+            events[chainConfig.chainId][poolContract.address].CommitmentQueued = rawEvents;
           }),
       );
       promises.push(
         contract
           .queryFilter(contract.filters.CommitmentIncluded(), poolContract.startBlock + 1)
           .then((rawEvents) => {
-            events[chainConfig.chainId][poolContract.address][
-              JSON.stringify(contract.filters.CommitmentIncluded().topics)
-            ] = rawEvents;
+            events[chainConfig.chainId][poolContract.address].CommitmentIncluded = rawEvents;
           }),
       );
       promises.push(
         contract
           .queryFilter(contract.filters.CommitmentSpent(), poolContract.startBlock + 1)
           .then((rawEvents) => {
-            events[chainConfig.chainId][poolContract.address][
-              JSON.stringify(contract.filters.CommitmentSpent().topics)
-            ] = rawEvents;
+            events[chainConfig.chainId][poolContract.address].CommitmentSpent = rawEvents;
           }),
       );
     }

@@ -67,17 +67,6 @@ class TestContract extends ethers.Contract {
     toBlock?: number,
   ): Promise<Array<TEvent>> {
     const chainId = await this.provider.getNetwork().then((n) => n.chainId);
-    const allEvents = testEvents[chainId][this.address][JSON.stringify(eventFilter.topics)];
-    const filteredEvents = allEvents.filter((event) => {
-      let valid = true;
-      if (fromBlock) {
-        valid = event.blockNumber >= fromBlock;
-      }
-      if (toBlock) {
-        valid = valid && event.blockNumber <= toBlock;
-      }
-      return valid;
-    });
     const contractInterface = this.interface;
     const { topics } = eventFilter;
     if (!topics) {
@@ -90,6 +79,17 @@ class TestContract extends ethers.Contract {
     } else {
       fragment = contractInterface.getEvent(topic[0]);
     }
+    const allEvents = testEvents[chainId][this.address][fragment.name];
+    const filteredEvents = allEvents.filter((event) => {
+      let valid = true;
+      if (fromBlock) {
+        valid = event.blockNumber >= fromBlock;
+      }
+      if (toBlock) {
+        valid = valid && event.blockNumber <= toBlock;
+      }
+      return valid;
+    });
     return Promise.resolve(
       filteredEvents.map((e) => {
         e.args = contractInterface.decodeEventLog(fragment, e.data, e.topics);
