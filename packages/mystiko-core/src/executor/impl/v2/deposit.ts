@@ -166,7 +166,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       executionContext;
     if (
       !chainConfig.getDepositContractByAddress(contractConfig.address) ||
-      options.dstChainId !== contractConfig.peerChainId ||
+      options.dstChainId !== (contractConfig.peerChainId || chainConfig.chainId) ||
       options.bridge !== contractConfig.bridgeType ||
       options.assetSymbol !== contractConfig.assetSymbol
     ) {
@@ -203,6 +203,19 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       if (toBN(executorFee).lt(contractConfig.minExecutorFee)) {
         return createErrorPromise(
           `executor fee cannot be less than ${contractConfig.minExecutorFeeNumber}`,
+          MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+        );
+      }
+    } else {
+      if (!toBN(bridgeFee).isZero()) {
+        return createErrorPromise(
+          'bridge fee should be zero when depositing to loop contract',
+          MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+        );
+      }
+      if (!toBN(executorFee).isZero()) {
+        return createErrorPromise(
+          'executor fee should be zero when depositing to loop contract',
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
