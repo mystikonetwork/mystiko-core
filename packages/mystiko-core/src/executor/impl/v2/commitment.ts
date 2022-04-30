@@ -35,6 +35,11 @@ type ImportContractContext = ImportChainContext & {
   contract: Contract;
 };
 
+type ImportEventsContext = ImportContractContext & {
+  fromBlock: number;
+  toBlock: number;
+};
+
 export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentExecutor {
   public import(options: CommitmentImport): Promise<Commitment[]> {
     return this.context.wallets.checkPassword(options.walletPassword).then(() => this.importAll({ options }));
@@ -128,32 +133,59 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       'importing commitment related events from ' +
         `chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
     );
-    return this.importCommitmentQueuedEvents(importContext)
-      .then((queuedCommitments) =>
-        this.importCommitmentIncludedEvents(importContext).then((includedCommitments) =>
-          this.importCommitmentSpentEvents(importContext).then((spentCommitments) => {
-            const commitments = new Map<string, Commitment>();
-            queuedCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
-            includedCommitments.forEach((commitment) =>
-              commitments.set(commitment.commitmentHash, commitment),
-            );
-            spentCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
-            return Array.from(commitments.values());
-          }),
-        ),
-      )
-      .then((commitments) =>
-        contract
-          .atomicUpdate((data) => {
-            data.syncedBlockNumber = currentBlock;
-            data.updatedAt = MystikoHandler.now();
-            return data;
-          })
-          .then(() => commitments),
-      );
+    const syncedBlock =
+      contract.syncedBlockNumber < contract.syncStart ? contract.syncStart : contract.syncedBlockNumber;
+    const fromBlock = syncedBlock + 1;
+    const toBlock =
+      fromBlock + contract.syncSize - 1 > currentBlock ? currentBlock : fromBlock + contract.syncSize - 1;
+    return this.importContractEvents({ ...importContext, fromBlock, toBlock });
   }
 
-  private importCommitmentQueuedEvents(importContext: ImportContractContext): Promise<Commitment[]> {
+  private importContractEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
+    const { contract, fromBlock, toBlock, currentBlock } = importContext;
+    if (fromBlock <= toBlock) {
+      return this.importCommitmentQueuedEvents(importContext)
+        .then((queuedCommitments) =>
+          this.importCommitmentIncludedEvents(importContext).then((includedCommitments) =>
+            this.importCommitmentSpentEvents(importContext).then((spentCommitments) => {
+              const commitments = new Map<string, Commitment>();
+              queuedCommitments.forEach((commitment) =>
+                commitments.set(commitment.commitmentHash, commitment),
+              );
+              includedCommitments.forEach((commitment) =>
+                commitments.set(commitment.commitmentHash, commitment),
+              );
+              spentCommitments.forEach((commitment) =>
+                commitments.set(commitment.commitmentHash, commitment),
+              );
+              return Array.from(commitments.values());
+            }),
+          ),
+        )
+        .then((commitments) =>
+          contract
+            .atomicUpdate((data) => {
+              data.syncedBlockNumber = toBlock;
+              data.updatedAt = MystikoHandler.now();
+              return data;
+            })
+            .then(() => commitments),
+        )
+        .then((commitments) => {
+          const newFromBlock = toBlock + 1;
+          const newToBlock =
+            toBlock + contract.syncSize > currentBlock ? currentBlock : toBlock + contract.syncSize;
+          const newImportContext = { ...importContext, fromBlock: newFromBlock, toBlock: newToBlock };
+          return this.importContractEvents(newImportContext).then((moreCommitments) => [
+            ...commitments,
+            ...moreCommitments,
+          ]);
+        });
+    }
+    return Promise.resolve([]);
+  }
+
+  private importCommitmentQueuedEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
     const { contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
@@ -179,7 +211,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     });
   }
 
-  private importCommitmentIncludedEvents(importContext: ImportContractContext): Promise<Commitment[]> {
+  private importCommitmentIncludedEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
     const { contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
@@ -198,7 +230,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     });
   }
 
-  private importCommitmentSpentEvents(importContext: ImportContractContext): Promise<Commitment[]> {
+  private importCommitmentSpentEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
     const { contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
@@ -223,7 +255,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     rollupFee: ethers.BigNumber,
     encryptedNote: string,
     transactionHash: string,
-    importContext: ImportContractContext,
+    importContext: ImportEventsContext,
   ): Promise<Commitment> {
     const { chainConfig, contractConfig, options } = importContext;
     return this.context.commitments
@@ -290,7 +322,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   private handleCommitmentIncludedEvent(
     commitmentHash: ethers.BigNumber,
     transactionHash: string,
-    importContext: ImportContractContext,
+    importContext: ImportEventsContext,
   ): Promise<Commitment> {
     const { chainConfig, contractConfig } = importContext;
     return this.context.commitments
@@ -332,7 +364,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   private handleCommitmentSpentEvent(
     serialNumber: ethers.BigNumber,
     transactionHash: string,
-    importContext: ImportContractContext,
+    importContext: ImportEventsContext,
   ): Promise<Commitment[]> {
     const { chainConfig, contractConfig } = importContext;
     return this.context.commitments
@@ -358,39 +390,26 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private importCommitmentEvents<T extends TypedEvent, C extends SupportedContractType>(
-    importContext: ImportContractContext,
+    importContext: ImportEventsContext,
     etherContract: C,
     eventName: string,
     filter: TypedEventFilter<T>,
-    startBlock?: number,
   ): Promise<T[]> {
-    const { contract, chainConfig, currentBlock } = importContext;
-    const syncedBlock =
-      contract.syncedBlockNumber < contract.syncStart ? contract.syncStart : contract.syncedBlockNumber;
-    const from = startBlock || syncedBlock + 1;
-    let to = from + contract.syncSize - 1;
-    if (to > currentBlock) {
-      to = currentBlock;
-    }
-    if (from <= to) {
-      this.logger.debug(
-        `importing ${eventName} event from ` +
-          `chain id=${chainConfig.chainId} contract address=${contract.contractAddress}` +
-          ` fromBlock=${from}, toBlock=${to}`,
-      );
-      return etherContract.queryFilter(filter, from, to).then((rawEvents) => {
-        if (rawEvents.length > 0) {
-          this.logger.info(
-            `fetched ${rawEvents.length} ${eventName} event(s) from contract ` +
-              `chain id=${chainConfig.chainId} contract address=${contract.contractAddress}`,
-          );
-        }
-        return this.importCommitmentEvents(importContext, etherContract, eventName, filter, to + 1).then(
-          (moreRawEvents) => [...rawEvents, ...moreRawEvents],
+    const { contract, chainConfig, fromBlock, toBlock } = importContext;
+    this.logger.debug(
+      `importing ${eventName} event from ` +
+        `chain id=${chainConfig.chainId} contract address=${contract.contractAddress}` +
+        ` fromBlock=${fromBlock}, toBlock=${toBlock}`,
+    );
+    return etherContract.queryFilter(filter, fromBlock, toBlock).then((rawEvents) => {
+      if (rawEvents.length > 0) {
+        this.logger.info(
+          `fetched ${rawEvents.length} ${eventName} event(s) from contract ` +
+            `chain id=${chainConfig.chainId} contract address=${contract.contractAddress}`,
         );
-      });
-    }
-    return Promise.resolve([]);
+      }
+      return rawEvents;
+    });
   }
 
   private tryDecryptCommitment(commitment: Commitment, walletPassword: string): Promise<Commitment> {

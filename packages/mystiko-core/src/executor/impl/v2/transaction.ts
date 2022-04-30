@@ -89,18 +89,16 @@ type CommitmentUpdate = {
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
   public execute(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionResponse> {
-    return this.context.wallets.checkPassword(options.walletPassword).then(() =>
-      this.buildExecutionContext(options, config)
-        .then((executionContext) => this.validateOptions(executionContext))
-        .then((executionContext) => this.validatePoolBalance(executionContext))
-        .then((executionContext) => this.validateSigner(executionContext))
-        .then((executionContext) => this.createOutputCommitments(executionContext))
-        .then((executionContext) => this.createTransaction(executionContext))
-        .then((executionContext) => ({
-          transaction: executionContext.transaction,
-          transactionPromise: this.executeTransaction(executionContext),
-        })),
-    );
+    return this.buildExecutionContext(options, config, true)
+      .then((executionContext) => this.validateOptions(executionContext))
+      .then((executionContext) => this.validatePoolBalance(executionContext))
+      .then((executionContext) => this.validateSigner(executionContext))
+      .then((executionContext) => this.createOutputCommitments(executionContext))
+      .then((executionContext) => this.createTransaction(executionContext))
+      .then((executionContext) => ({
+        transaction: executionContext.transaction,
+        transactionPromise: this.executeTransaction(executionContext),
+      }));
   }
 
   public quote(options: TransactionQuoteOptions, config: PoolContractConfig): Promise<TransactionQuote> {
@@ -222,6 +220,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const {
       options,
       contractConfig,
+      chainConfig,
       quote,
       selectedCommitments,
       amount,
@@ -233,6 +232,16 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     if (!quote.valid) {
       return createErrorPromise(
         quote.invalidReason || 'invalid transfer/withdraw options',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    if (
+      !chainConfig.getDepositContractByAddress(contractConfig.address) ||
+      options.assetSymbol !== contractConfig.assetSymbol ||
+      options.bridgeType !== chainConfig.getPoolContractBridgeType(contractConfig.address)
+    ) {
+      return createErrorPromise(
+        'given options mismatch with config',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
