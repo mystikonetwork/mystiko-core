@@ -8,7 +8,7 @@ import {
   MystikoV2Loop__factory,
   SupportedContractType,
 } from '@mystikonetwork/contracts-abi';
-import { Account } from '@mystikonetwork/database';
+import { Account, CommitmentStatus, Deposit, DepositStatus, Wallet } from '@mystikonetwork/database';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
 import { toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
@@ -37,6 +37,7 @@ let mockMystikoV2Loop: MockContract;
 let mockMystikoV2Bridge: MockContract;
 let mockProvider: MockProvider;
 let etherWallet: ethers.Wallet;
+let mystikoWallet: Wallet;
 let mystikoAccount: Account;
 let mystikoSigner: PrivateKeySigner;
 const walletPassword = 'P@ssw0rd';
@@ -77,6 +78,67 @@ function createTestOptionsAndConfig(): TestOptions {
   return { options, depositContractConfig };
 }
 
+async function checkDeposit(
+  deposit: Deposit,
+  options: DepositOptions,
+  depositContractConfig: DepositContractConfig,
+) {
+  expect(deposit.chainId).toBe(options.srcChainId);
+  expect(deposit.contractAddress).toBe(depositContractConfig.address);
+  expect(deposit.poolAddress).toBe(depositContractConfig.poolAddress);
+  expect(deposit.bridgeType).toBe(depositContractConfig.bridgeType);
+  expect(deposit.dstChainId).toBe(depositContractConfig.peerChainId || options.srcChainId);
+  expect(deposit.dstChainContractAddress).toBe(
+    depositContractConfig.peerContractAddress || depositContractConfig.address,
+  );
+  expect(deposit.dstPoolAddress).toBe(
+    depositContractConfig.peerContract?.poolAddress || depositContractConfig.poolAddress,
+  );
+  expect(deposit.assetSymbol).toBe(depositContractConfig.assetSymbol);
+  expect(deposit.assetDecimals).toBe(depositContractConfig.assetDecimals);
+  expect(deposit.assetAddress).toBe(depositContractConfig.assetAddress);
+  expect(deposit.simpleAmount()).toBe(options.amount);
+  expect(deposit.rollupFeeSimpleAmount()).toBe(options.rollupFee);
+  expect(deposit.bridgeFeeSimpleAmount()).toBe(options.bridgeFee || 0);
+  expect(deposit.bridgeFeeAssetAddress).toBe(depositContractConfig.bridgeFeeAsset.assetAddress);
+  expect(deposit.executorFeeSimpleAmount()).toBe(options.executorFee || 0);
+  expect(deposit.executorFeeAssetAddress).toBe(depositContractConfig.executorFeeAsset.assetAddress);
+  expect(deposit.shieldedRecipientAddress).toBe(options.shieldedAddress);
+  expect(deposit.hashK).not.toBe(undefined);
+  expect(deposit.randomS).not.toBe(undefined);
+  expect(deposit.status).toBe(
+    options.bridge === BridgeType.LOOP ? DepositStatus.QUEUED : DepositStatus.SRC_SUCCEEDED,
+  );
+  expect(deposit.errorMessage).toBe(undefined);
+  expect(deposit.wallet).toBe(mystikoWallet.id);
+  expect(deposit.transactionHash).not.toBe(undefined);
+  expect((await depositHandler.findOne(deposit.id))?.toJSON()).toStrictEqual(deposit.toJSON());
+  const commitment = await commitmentHandler.findOne({
+    chainId: deposit.dstChainId,
+    contractAddress: deposit.dstPoolAddress,
+    commitmentHash: deposit.commitmentHash,
+  });
+  expect(commitment?.status).toBe(
+    options.bridge === BridgeType.LOOP ? CommitmentStatus.QUEUED : CommitmentStatus.SRC_SUCCEEDED,
+  );
+  expect(commitment?.assetSymbol).toBe(
+    depositContractConfig.peerContract?.assetSymbol || depositContractConfig.assetSymbol,
+  );
+  expect(commitment?.assetDecimals).toBe(
+    depositContractConfig.peerContract?.assetDecimals || depositContractConfig.assetDecimals,
+  );
+  expect(commitment?.assetAddress).toBe(
+    depositContractConfig.peerContract
+      ? depositContractConfig.peerContract.assetAddress
+      : depositContractConfig.assetAddress,
+  );
+  expect(commitment?.encryptedNote).toBe(deposit.encryptedNote);
+  expect(commitment?.amount).toBe(deposit.amount);
+  expect(commitment?.rollupFeeAmount).toBe(deposit.rollupFeeAmount);
+  expect(commitment?.shieldedAddress).toBe(deposit.shieldedRecipientAddress);
+  expect(commitment?.creationTransactionHash).toBe(deposit.transactionHash);
+}
+
 beforeEach(async () => {
   etherWallet = ethers.Wallet.createRandom();
   mockProvider = new MockProvider({
@@ -114,7 +176,7 @@ beforeEach(async () => {
   commitmentHandler = new CommitmentHandlerV2(context);
   executor = new DepositExecutorV2(context);
   mystikoSigner = new PrivateKeySigner(config, context.providers);
-  await walletHandler.create({ password: walletPassword, masterSeed: walletMasterSeed });
+  mystikoWallet = await walletHandler.create({ password: walletPassword, masterSeed: walletMasterSeed });
   mystikoAccount = await accountHandler.create(walletPassword);
 });
 
@@ -299,4 +361,229 @@ test('test invalid main asset balance', async () => {
       MystikoErrorCode.INSUFFICIENT_BALANCE,
     ),
   );
+});
+
+test('test loop main deposit', async () => {
+  await mockMystikoV2Loop.mock.deposit.returns();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const depositContractConfig = getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'BNB',
+    bridge: BridgeType.LOOP,
+    amount: 0.1,
+    rollupFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
+  expect(deposit.assetApproveTransactionHash).toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(3);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.QUEUED);
+});
+
+test('test loop erc20 deposit', async () => {
+  const depositContractConfig = getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
+  await mockMystikoV2Loop.mock.deposit.returns();
+  await mockERC20.mock.balanceOf.returns('0');
+  await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
+  await mockERC20.mock.allowance.returns('0');
+  await mockERC20.mock.approve.reverts();
+  await mockERC20.mock.approve
+    .withArgs(depositContractConfig.address, toDecimals(10.1).toString())
+    .returns(true);
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'MTT',
+    bridge: BridgeType.LOOP,
+    amount: 10,
+    rollupFee: 0.1,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
+  expect(deposit.assetApproveTransactionHash).not.toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(4);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVING);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[3][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.QUEUED);
+});
+
+test('test loop erc20 deposit without approve', async () => {
+  const depositContractConfig = getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
+  await mockMystikoV2Loop.mock.deposit.returns();
+  await mockERC20.mock.balanceOf.returns('0');
+  await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
+  await mockERC20.mock.allowance.returns('0');
+  await mockERC20.mock.allowance
+    .withArgs(etherWallet.address, depositContractConfig.address)
+    .returns(toDecimals(10.1).toString());
+  await mockERC20.mock.approve.reverts();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'MTT',
+    bridge: BridgeType.LOOP,
+    amount: 10,
+    rollupFee: 0.1,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
+  expect(deposit.assetApproveTransactionHash).toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(4);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVING);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[3][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.QUEUED);
+});
+
+test('test bridge main deposit', async () => {
+  const depositContractConfig = getDepositContractConfig(97, 3, 'BNB', BridgeType.TBRIDGE);
+  await mockMystikoV2Bridge.mock.deposit.returns();
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 3,
+    assetSymbol: 'BNB',
+    bridge: BridgeType.TBRIDGE,
+    amount: 0.1,
+    rollupFee: 0.1,
+    bridgeFee: 0.01,
+    executorFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
+  expect(deposit.assetApproveTransactionHash).toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(3);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.SRC_SUCCEEDED);
+});
+
+test('test bridge erc20 deposit', async () => {
+  const depositContractConfig = getDepositContractConfig(97, 3, 'MTT', BridgeType.TBRIDGE);
+  await mockMystikoV2Bridge.mock.deposit.returns();
+  await mockERC20.mock.balanceOf.returns('0');
+  await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
+  await mockERC20.mock.allowance.returns('0');
+  await mockERC20.mock.approve.reverts();
+  await mockERC20.mock.approve
+    .withArgs(depositContractConfig.address, toDecimals(10.11).toString())
+    .returns(true);
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 3,
+    assetSymbol: 'MTT',
+    bridge: BridgeType.TBRIDGE,
+    amount: 10,
+    rollupFee: 0.1,
+    bridgeFee: 0.01,
+    executorFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
+  expect(deposit.assetApproveTransactionHash).not.toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(4);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVING);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[3][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.SRC_SUCCEEDED);
+});
+
+test('test deposit with errors', async () => {
+  await mockMystikoV2Loop.mock.deposit.reverts();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const depositContractConfig = getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'BNB',
+    bridge: BridgeType.LOOP,
+    amount: 0.1,
+    rollupFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  expect(deposit.status).toBe(DepositStatus.FAILED);
+  expect(deposit.errorMessage).not.toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(2);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.FAILED);
+});
+
+test('test deposit statusCallback raise errors', async () => {
+  await mockMystikoV2Loop.mock.deposit.returns();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const depositContractConfig = getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'BNB',
+    bridge: BridgeType.LOOP,
+    amount: 0.1,
+    rollupFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: () => {
+      throw new Error('callback error');
+    },
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
 });

@@ -274,6 +274,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
               if (!existingDeposit) {
                 return commitment;
               }
+              /* istanbul ignore next */
               return createErrorPromise(
                 `duplicate deposit commitment ${commitment.commitmentHash.toString()} ` +
                   `of chain id=${chainConfig.chainId} contract address=${contractConfig.address}`,
@@ -463,7 +464,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       contractAddress: contractConfig.peerContract?.poolAddress || contractConfig.poolAddress,
       assetSymbol: contractConfig.peerContract?.assetSymbol || contractConfig.assetSymbol,
       assetDecimals: contractConfig.peerContract?.assetDecimals || contractConfig.assetDecimals,
-      assetAddress: contractConfig.peerContract?.assetAddress || contractConfig.assetAddress,
+      assetAddress: contractConfig.peerContract
+        ? contractConfig.peerContract.assetAddress
+        : contractConfig.assetAddress,
       status:
         contractConfig.bridgeType === BridgeType.LOOP
           ? CommitmentStatus.QUEUED
@@ -485,10 +488,13 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         if (!commitment) {
           return this.db.commitments.insert(rawCommitment).then(() => executionContext);
         }
+        /* istanbul ignore next */
         return executionContext;
       })
       .catch((error) => {
+        /* istanbul ignore next */
         this.logger.warn(`failed to insert commitment for deposit id=${deposit.id}: ${errorMessage(error)}`);
+        /* istanbul ignore next */
         return executionContext;
       });
   }
@@ -500,7 +506,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     updateOptions?: DepositUpdate,
   ): Promise<Deposit> {
     const oldStatus = deposit.status as DepositStatus;
-    if (oldStatus !== newStatus && updateOptions) {
+    if (oldStatus !== newStatus || updateOptions) {
       const wrappedUpdateOptions: DepositUpdate = updateOptions || {};
       wrappedUpdateOptions.status = newStatus;
       return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {
@@ -514,6 +520,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         return newDeposit;
       });
     }
+    /* istanbul ignore next */
     return Promise.resolve(deposit);
   }
 }
