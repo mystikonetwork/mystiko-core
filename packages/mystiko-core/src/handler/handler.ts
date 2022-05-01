@@ -1,12 +1,14 @@
 import { Logger } from 'loglevel';
-import { v4 as uuid } from 'uuid';
 import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { logger as rootLogger } from '@mystikonetwork/utils';
+import { monotonicFactory } from 'ulid';
 import { MystikoContextInterface } from '../interface';
 
 export class MystikoHandler {
+  protected static readonly ulid = monotonicFactory();
+
   protected readonly context: MystikoContextInterface;
 
   protected readonly logger: Logger;
@@ -29,7 +31,7 @@ export class MystikoHandler {
   }
 
   public static generateId(): string {
-    return uuid();
+    return MystikoHandler.ulid();
   }
 
   public static now(): string {

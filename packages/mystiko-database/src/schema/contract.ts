@@ -65,7 +65,7 @@ const contractSchemaLiteral = {
     'syncSize',
     'syncedBlockNumber',
   ],
-  indexes: ['chainId', 'contractAddress'],
+  indexes: ['createdAt', 'updatedAt', 'chainId', 'contractAddress'],
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(contractSchemaLiteral);

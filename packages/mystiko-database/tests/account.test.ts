@@ -1,7 +1,7 @@
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { toHexNoPrefix } from '@mystikonetwork/utils';
 import { createProtocol } from './common';
-import { initDatabase, MystikoDatabase } from '../src';
+import { AccountStatus, initDatabase, MystikoDatabase } from '../src';
 
 let db: MystikoDatabase;
 let protocol: MystikoProtocol;
@@ -56,6 +56,8 @@ test('test insert', async () => {
     shieldedAddress: protocol.shieldedAddress(keys.pkVerify, keys.pkEnc),
     publicKey: keys.publicKey,
     encryptedSecretKey: keys.encryptedSecretKey,
+    status: AccountStatus.SCANNED,
+    scanSize: 10000,
     wallet: '1',
   });
   const account = await db.accounts.findOne('1').exec();
@@ -97,6 +99,8 @@ test('test collection clear', async () => {
     shieldedAddress: protocol.shieldedAddress(keys.pkVerify, keys.pkEnc),
     publicKey: keys.publicKey,
     encryptedSecretKey: keys.encryptedSecretKey,
+    status: AccountStatus.CREATED,
+    scanSize: 20000,
     wallet: '1',
   });
   expect(await db.accounts.findOne().exec()).not.toBe(null);

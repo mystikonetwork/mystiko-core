@@ -176,6 +176,8 @@ const transactionLiteral = {
     'wallet',
   ],
   indexes: [
+    'createdAt',
+    'updatedAt',
     'chainId',
     'contractAddress',
     'signaturePublicKey',

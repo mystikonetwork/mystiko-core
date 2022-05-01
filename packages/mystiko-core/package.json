@@ -70,7 +70,7 @@
     "loglevel-plugin-prefix": "^0.8.4",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5",
-    "uuid": "^8.3.2",
+    "ulid": "^2.3.0",
     "zokrates-js": "1.0.41"
   }
 }

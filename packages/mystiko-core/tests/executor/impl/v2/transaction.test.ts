@@ -134,7 +134,7 @@ test('test quote', async () => {
   options.assetSymbol = 'MTT';
   options.bridgeType = BridgeType.TBRIDGE;
   options.amount = undefined;
-  options.publicAmount = 20;
+  options.publicAmount = 5;
   contractConfig = getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
   quote = await executor.quote(options, contractConfig);
   expect(quote.valid).toBe(true);

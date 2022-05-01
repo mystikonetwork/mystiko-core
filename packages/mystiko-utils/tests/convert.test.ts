@@ -11,6 +11,7 @@ import {
   toFixedLenHexNoPrefix,
   deepCopy,
   toString,
+  toFixedString,
 } from '../src';
 
 test('Test bnToFixedBytes', () => {
@@ -30,6 +31,7 @@ test('Test toDecimals', () => {
   expect(toDecimals(2, 4).toString()).toBe('20000');
   expect(toDecimals(0.1, 2).toString()).toBe('10');
   expect(toDecimals(0.01, 4).toString()).toBe('100');
+  expect(toDecimals(1e-18).toString()).toBe('1');
 });
 
 test('Test fromDecimals', () => {
@@ -84,6 +86,12 @@ test('Test toString', () => {
   expect(toString(0)).toBe('0');
   expect(toString(1)).toBe('1');
   expect(toString(new Error('msg'))).toBe('Error: msg');
+});
+
+test('Test toFixedString', () => {
+  expect(toFixedString(0.000000000000001)).toBe('0.000000000000001');
+  expect(toFixedString(23423423)).toBe('23423423');
+  expect(toFixedString(1.1e12)).toBe('1100000000000');
 });
 
 test('Test deepCopy', () => {

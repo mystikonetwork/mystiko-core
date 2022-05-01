@@ -19,9 +19,20 @@ export type CommitmentImport = {
   contractAddress?: string;
 };
 
-export interface CommitmentHandler<C = CommitmentContractQuery, Q = CommitmentQuery, CI = CommitmentImport> {
+export type CommitmentScan = {
+  walletPassword: string;
+  shieldedAddress: string;
+};
+
+export interface CommitmentHandler<
+  C = CommitmentContractQuery,
+  Q = CommitmentQuery,
+  CI = CommitmentImport,
+  CS = CommitmentScan,
+> {
   find(query?: DatabaseQuery<Commitment>): Promise<Commitment[]>;
   findByContract(query: C): Promise<Commitment[]>;
   findOne(query: Q | string): Promise<Commitment | null>;
   import(options: CI): Promise<Commitment[]>;
+  scan(options: CS): Promise<Commitment[]>;
 }

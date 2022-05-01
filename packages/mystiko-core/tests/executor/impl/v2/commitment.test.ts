@@ -6,7 +6,13 @@ import {
   TypedEvent,
   TypedEventFilter,
 } from '@mystikonetwork/contracts-abi';
-import { CommitmentStatus, DepositStatus } from '@mystikonetwork/database';
+import {
+  AccountStatus,
+  Commitment,
+  CommitmentStatus,
+  DepositStatus,
+  initDatabase,
+} from '@mystikonetwork/database';
 import { ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { readJsonFile } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
@@ -37,8 +43,8 @@ let depositHandler: DepositHandlerV2;
 let assetHandler: AssetHandlerV2;
 let executor: CommitmentExecutorV2;
 
-const ropstenCurrentBlock = 12225901;
-const bscCurrentBlock = 18855003;
+const ropstenCurrentBlock = 12230323;
+const bscCurrentBlock = 18919080;
 
 class TestProvider extends ethers.providers.JsonRpcProvider {
   private readonly chainId: number;
@@ -141,7 +147,7 @@ afterEach(async () => {
 
 test('test import all events', async () => {
   await executor.import({ walletPassword });
-  expect((await commitmentHandler.find()).length).toBe(56);
+  expect((await commitmentHandler.find()).length).toBe(72);
   expect((await chainHandler.findOne(3))?.syncedBlockNumber).toBe(ropstenCurrentBlock);
   expect((await chainHandler.findOne(97))?.syncedBlockNumber).toBe(bscCurrentBlock);
   const contracts = await contractHandler.find();
@@ -176,34 +182,36 @@ test('test import all events', async () => {
     );
   }
   await Promise.all(commitmentPromises);
-  let commitment = await commitmentHandler.findOne('eded38f5-d3c9-49f5-878c-9d9232a74978');
+  let commitment = await commitmentHandler.findOne('01G1Z1HCC34BGZRKCFJ274DVRK');
   expect(commitment?.status).toBe(CommitmentStatus.SPENT);
   expect(commitment?.spendingTransactionHash).toBe(
-    '0xe6168647f8beb195d4d6512154b5c328b37493cc87abb2b206dbef5d8fb67697',
+    '0xcce27527168596c3749509ee745eb38ee14e75db7b234d731d36353aa297a4f7',
   );
-  commitment = await commitmentHandler.findOne('cafbcaa4-2bd9-4ae0-9673-a9707c92bd2a');
+  commitment = await commitmentHandler.findOne('01G1Z1FW6T2SCHNJPFBGPDD2CA');
   expect(commitment?.status).toBe(CommitmentStatus.INCLUDED);
-  commitment = await commitmentHandler.findOne('11e41c38-dcd6-4986-84db-ac68078a3c1b');
+  commitment = await commitmentHandler.findOne('01G1YZD76WESAPZCHZB61QRNVZ');
+  expect(commitment?.status).toBe(CommitmentStatus.INCLUDED);
+  commitment = await commitmentHandler.findOne('01G1YZ9CDPRGHDQ0C8VH8XAWWF');
   expect(commitment?.status).toBe(CommitmentStatus.INCLUDED);
   commitment = await commitmentHandler.findOne({
-    chainId: 97,
-    contractAddress: '0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA',
-    commitmentHash: '17895733351896543519145553018111611932696899939062704937376219400860817450770',
+    chainId: 3,
+    contractAddress: '0xeb2a6545516ce618807c07BB04E9CCb8ED7D8e6F',
+    commitmentHash: '11180465719024310907677069927739127182050210721078823347787007200803871969694',
   });
-  expect(commitment?.amount).toBe('10000000000000000000');
-  expect(commitment?.leafIndex).toBe('5');
+  expect(commitment?.amount).toBe('5000000000000000000');
+  expect(commitment?.leafIndex).toBe('4');
   expect(commitment?.serialNumber).not.toBe(undefined);
   expect(commitment?.encryptedNote).not.toBe(undefined);
   const balances = await assetHandler.balances();
-  expect(balances.get('MTT')?.unspentTotal).toBe(30);
+  expect(balances.get('MTT')?.unspentTotal).toBe(19.9);
   expect(balances.get('MTT')?.pendingTotal).toBe(0);
-  expect(balances.get('BNB')?.unspentTotal).toBe(0.1);
+  expect(balances.get('BNB')?.unspentTotal).toBe(0.2);
   expect(balances.get('BNB')?.pendingTotal).toBe(0);
 });
 
 test('import commitments of one chain', async () => {
   await executor.import({ walletPassword, chainId: 3 });
-  expect((await commitmentHandler.find()).length).toBe(6);
+  expect((await commitmentHandler.find()).length).toBe(12);
 });
 
 test('import commitments of one contract', async () => {
@@ -212,5 +220,67 @@ test('import commitments of one contract', async () => {
     chainId: 97,
     contractAddress: '0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA',
   });
-  expect((await commitmentHandler.find()).length).toBe(9);
+  expect((await commitmentHandler.find()).length).toBe(12);
+});
+
+test('test import wrong password', async () => {
+  await expect(executor.import({ walletPassword: 'very wrong password' })).rejects.toThrow();
+});
+
+test('test scan account', async () => {
+  await context.db.remove();
+  context.db = await initDatabase();
+  const databaseData = await readJsonFile('tests/files/database.sync.test.json');
+  await context.db.importJSON(databaseData);
+  await commitmentHandler.find({ selector: { shieldedAddress: { $exists: true } } }).then((commitments) => {
+    const promises: Promise<Commitment>[] = [];
+    commitments.forEach((commitment) => {
+      promises.push(
+        commitment.update({
+          $unset: {
+            shieldedAddress: '',
+            serialNumber: '',
+          },
+        }),
+      );
+    });
+    return Promise.all(promises);
+  });
+  expect((await assetHandler.balances()).size).toBe(0);
+  const promises: Promise<any>[] = [];
+  const accounts = await accountHandler.find();
+  accounts.forEach((account) => {
+    promises.push(
+      account
+        .update({ $set: { scanSize: 2 } })
+        .then(() => executor.scan({ walletPassword, shieldedAddress: account.shieldedAddress }))
+        .then(() => expect(account.status).toBe(AccountStatus.SCANNED)),
+    );
+  });
+  await Promise.all(promises);
+  const balances = await assetHandler.balances();
+  expect(balances.get('MTT')?.unspentTotal).toBe(19.9);
+  expect(balances.get('MTT')?.pendingTotal).toBe(0);
+  expect(balances.get('BNB')?.unspentTotal).toBe(0.2);
+  expect(balances.get('BNB')?.pendingTotal).toBe(0);
+});
+
+test('test scan wrong account', async () => {
+  await context.db.remove();
+  context.db = await initDatabase();
+  const databaseData = await readJsonFile('tests/files/database.sync.test.json');
+  await context.db.importJSON(databaseData);
+  const commitments = await executor.scan({
+    walletPassword,
+    shieldedAddress:
+      '9WoZZ6FiZDK9BQhHrwci6c4nR3w917BLXKBQ4vUz41dKM4EzuPHyBhkYCE9xi6s78Ysfu3rhdyiwuxzru6Lwc52Tm',
+  });
+  expect(commitments.length).toBe(0);
+});
+
+test('test scan wrong password', async () => {
+  const [account] = await accountHandler.find();
+  await expect(
+    executor.scan({ walletPassword: 'wrong password', shieldedAddress: account.shieldedAddress }),
+  ).rejects.toThrow();
 });

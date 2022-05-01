@@ -6,10 +6,13 @@ import {
   TypedEventFilter,
 } from '@mystikonetwork/contracts-abi';
 import {
+  Account,
+  AccountStatus,
   Commitment,
   CommitmentStatus,
   CommitmentType,
   Contract,
+  DatabaseQuery,
   DepositStatus,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
@@ -17,7 +20,7 @@ import { toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
-import { CommitmentExecutor, CommitmentImport, DepositUpdate } from '../../../interface';
+import { CommitmentExecutor, CommitmentImport, CommitmentScan, DepositUpdate } from '../../../interface';
 import { MystikoExecutor } from '../../executor';
 
 type ImportContext = {
@@ -40,9 +43,38 @@ type ImportEventsContext = ImportContractContext & {
   toBlock: number;
 };
 
+type ScanContext = {
+  options: CommitmentScan;
+  account: Account;
+  lastId?: string;
+};
+
 export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentExecutor {
   public import(options: CommitmentImport): Promise<Commitment[]> {
     return this.context.wallets.checkPassword(options.walletPassword).then(() => this.importAll({ options }));
+  }
+
+  public scan(options: CommitmentScan): Promise<Commitment[]> {
+    const { shieldedAddress, walletPassword } = options;
+    return this.context.wallets.checkPassword(walletPassword).then(() =>
+      this.context.accounts.findOne(shieldedAddress).then((account) => {
+        if (account) {
+          this.logger.info(`start scanning commitments belong to account=${account.shieldedAddress}`);
+          return this.context.accounts
+            .update(walletPassword, account.id, { status: AccountStatus.SCANNING })
+            .then(() => this.scanAccount({ options, account }))
+            .then((commitments) => {
+              this.logger.info(
+                `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
+              );
+              return this.context.accounts
+                .update(walletPassword, account.id, { status: AccountStatus.SCANNED })
+                .then(() => commitments);
+            });
+        }
+        return Promise.resolve([]);
+      }),
+    );
   }
 
   private importAll(importContext: ImportContext): Promise<Commitment[]> {
@@ -412,11 +444,18 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     });
   }
 
-  private tryDecryptCommitment(commitment: Commitment, walletPassword: string): Promise<Commitment> {
+  private tryDecryptCommitment(
+    commitment: Commitment,
+    walletPassword: string,
+    accounts?: Account[],
+  ): Promise<Commitment> {
     const { encryptedNote } = commitment;
+    const accountsPromise: Promise<Account[]> = accounts
+      ? Promise.resolve(accounts)
+      : this.context.accounts.find();
     if (encryptedNote) {
-      return this.context.accounts.find().then((accounts) => {
-        const commitmentPromises: Promise<Commitment | undefined>[] = accounts.map((account) =>
+      return accountsPromise.then((myAccounts) => {
+        const commitmentPromises: Promise<Commitment | undefined>[] = myAccounts.map((account) =>
           (this.protocol as MystikoProtocolV2)
             .commitmentFromEncryptedNote(
               account.publicKeyForVerification(this.protocol),
@@ -482,5 +521,40 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       contractConfig.address,
       provider,
     );
+  }
+
+  private scanAccount(scanContext: ScanContext): Promise<Commitment[]> {
+    const { options, account, lastId } = scanContext;
+    const { scanSize } = account;
+    const query: DatabaseQuery<Commitment> = {
+      selector: {
+        status: { $in: [CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] },
+        shieldedAddress: { $exists: false },
+      },
+      sort: [{ id: 'asc' }],
+      limit: scanSize,
+    };
+    if (lastId) {
+      query.selector.id = { $gt: lastId };
+    }
+    return this.context.commitments.find(query).then((commitments) => {
+      const promises: Promise<Commitment>[] = [];
+      commitments.forEach((commitment) => {
+        promises.push(this.tryDecryptCommitment(commitment, options.walletPassword, [account]));
+      });
+      return Promise.all(promises).then((updatedCommitments) => {
+        const importedCommitment = updatedCommitments.filter(
+          (c) => c.shieldedAddress === account.shieldedAddress,
+        );
+        if (commitments.length === 0 || commitments.length < scanSize) {
+          return importedCommitment;
+        }
+        const updatedLastId = commitments[commitments.length - 1].id;
+        return this.scanAccount({ ...scanContext, lastId: updatedLastId }).then((moreCommitments) => [
+          ...importedCommitment,
+          ...moreCommitments,
+        ]);
+      });
+    });
   }
 }

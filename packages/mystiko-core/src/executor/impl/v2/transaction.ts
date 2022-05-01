@@ -236,7 +236,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       );
     }
     if (
-      !chainConfig.getDepositContractByAddress(contractConfig.address) ||
+      !chainConfig.getPoolContractByAddress(contractConfig.address) ||
       options.assetSymbol !== contractConfig.assetSymbol ||
       options.bridgeType !== chainConfig.getPoolContractBridgeType(contractConfig.address)
     ) {

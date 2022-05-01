@@ -108,6 +108,8 @@ const commitmentSchemaLiteral = {
     'status',
   ],
   indexes: [
+    'createdAt',
+    'updatedAt',
     'chainId',
     'contractAddress',
     'commitmentHash',

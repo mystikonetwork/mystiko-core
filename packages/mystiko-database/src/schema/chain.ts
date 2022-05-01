@@ -71,7 +71,7 @@ const chainSchemaLiteral = {
     'eventFilterSize',
     'syncedBlockNumber',
   ],
-  indexes: ['chainId'],
+  indexes: ['createdAt', 'updatedAt', 'chainId'],
 } as const;
 
 export type ProviderType = {

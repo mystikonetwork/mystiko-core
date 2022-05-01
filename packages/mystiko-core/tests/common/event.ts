@@ -2,7 +2,7 @@ import { MystikoConfig } from '@mystikonetwork/config';
 import { CommitmentPool, MystikoContractFactory } from '@mystikonetwork/contracts-abi';
 import { DefaultProviderFactory, readJsonFile } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
-import fs from 'fs';
+import * as fs from 'fs';
 
 export type ContractEvents = {
   [key: string]: ethers.Event[];
@@ -85,3 +85,5 @@ export async function generateEvents(fileName: string) {
   await Promise.all(promises);
   fs.writeFileSync(fileName, JSON.stringify(events, null, 2));
 }
+
+// generateEvents('tests/files/events.test.json').then(() => process.exit(0));

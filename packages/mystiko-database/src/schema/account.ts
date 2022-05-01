@@ -39,6 +39,14 @@ const accountSchemaLiteral = {
       type: 'string',
       minLength: 1,
     },
+    status: {
+      type: 'string',
+      minLength: 1,
+    },
+    scanSize: {
+      type: 'integer',
+      minimum: 1,
+    },
     wallet: {
       type: 'string',
       ref: WALLET_COLLECTION_NAME,
@@ -52,9 +60,11 @@ const accountSchemaLiteral = {
     'shieldedAddress',
     'publicKey',
     'encryptedSecretKey',
+    'status',
+    'scanSize',
     'wallet',
   ],
-  indexes: ['shieldedAddress', 'publicKey'],
+  indexes: ['createdAt', 'updatedAt', 'shieldedAddress', 'publicKey'],
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(accountSchemaLiteral);

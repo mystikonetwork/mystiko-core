@@ -184,6 +184,8 @@ const depositSchemaLiteral = {
     'wallet',
   ],
   indexes: [
+    'createdAt',
+    'updatedAt',
     'chainId',
     'contractAddress',
     'commitmentHash',

@@ -1,8 +1,9 @@
-import { Wallet } from '@mystikonetwork/database';
+import { AccountStatus, Wallet } from '@mystikonetwork/database';
 import { toHexNoPrefix } from '@mystikonetwork/utils';
 import {
   AccountHandlerV2,
   createError,
+  DEFAULT_ACCOUNT_SCAN_SIZE,
   MystikoContext,
   MystikoErrorCode,
   WalletHandlerV2,
@@ -73,8 +74,9 @@ test('test create', async () => {
 });
 
 test('test create names', async () => {
-  const account1 = await handler.create(walletPassword);
+  const account1 = await handler.create(walletPassword, {});
   expect(account1.name).toBe('Account 1');
+  expect(account1.status).toBe(AccountStatus.CREATED);
   const account2 = await handler.create(walletPassword, {});
   expect(account2.name).toBe('Account 2');
   const account3 = await handler.create(walletPassword, { name: '' });
@@ -82,6 +84,13 @@ test('test create names', async () => {
   const account4 = await handler.create(walletPassword, { name: 'My Account' });
   expect(account4.name).toBe('My Account');
   expect(wallet.accountNonce).toBe(8);
+  const account5 = await handler.create(walletPassword, { name: 'My Account', scanSize: 0 });
+  expect(account5.scanSize).toBe(DEFAULT_ACCOUNT_SCAN_SIZE);
+  const account6 = await handler.create(walletPassword, {
+    name: 'My Account',
+    scanSize: 100,
+  });
+  expect(account6.scanSize).toBe(100);
 });
 
 test('test import', async () => {
@@ -178,18 +187,40 @@ test('test findOne', async () => {
 
 test('test update', async () => {
   const newName = 'new name';
+  const newScanSize = 100;
+  const newStatus = AccountStatus.SCANNING;
   const account = await handler.create(walletPassword);
   const previousName = account.name;
-  const previousUpdatedAt = account.updatedAt;
+  const previousScanSize = account.scanSize;
+  const previousStatus = account.status as AccountStatus;
   await expect(handler.update('wrong password', account.id, { name: newName })).rejects.toThrow();
+  const previousUpdatedAt = account.updatedAt;
   await handler.update(walletPassword, account.id, {});
   expect(account.name).toBe(previousName);
+  expect(account.scanSize).toBe(previousScanSize);
+  expect(account.status).toBe(previousStatus);
   expect(account.updatedAt).toBe(previousUpdatedAt);
-  await handler.update(walletPassword, account.id, { name: '' });
+  await handler.update(walletPassword, account.id, { name: '', scanSize: 0 });
   expect(account.name).toBe(previousName);
+  expect(account.scanSize).toBe(previousScanSize);
   expect(account.updatedAt).toBe(previousUpdatedAt);
-  await handler.update(walletPassword, account.id, { name: newName });
+  await handler.update(walletPassword, account.id, {
+    name: previousName,
+    scanSize: previousScanSize,
+    status: previousStatus,
+  });
+  expect(account.name).toBe(previousName);
+  expect(account.scanSize).toBe(previousScanSize);
+  expect(account.status).toBe(previousStatus);
+  expect(account.updatedAt).toBe(previousUpdatedAt);
+  await handler.update(walletPassword, account.id, {
+    name: newName,
+    scanSize: newScanSize,
+    status: newStatus,
+  });
   expect(account.name).toBe(newName);
+  expect(account.scanSize).toBe(newScanSize);
+  expect(account.status).toBe(newStatus);
   expect(account.updatedAt).not.toBe(previousUpdatedAt);
   await expect(handler.update(walletPassword, 'wrong id', { name: 'new name' })).rejects.toThrow(
     createError('non existing account wrong id', MystikoErrorCode.NON_EXISTING_ACCOUNT),
