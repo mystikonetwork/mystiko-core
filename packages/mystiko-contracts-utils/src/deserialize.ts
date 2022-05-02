@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { toBN } from './bignumber';
+import { toBN } from '@mystikonetwork/utils';
 
 export const Uint8Size = 1 * 2;
 export const Uint16Size = 2 * 2;
@@ -127,7 +127,6 @@ export function NextBytes(
   if (r.output === undefined || r.outOffset === undefined) {
     return { output: undefined, outOffset: undefined };
   }
-
   const len = Number(r.output) * 2;
   return nextBytes(input, r.outOffset, len);
 }
@@ -162,7 +161,7 @@ export function NextHash(
   if (r.output === undefined || r.outOffset === undefined) {
     return { output: undefined, outOffset: undefined };
   }
-  return { output: toBN(r.output), outOffset: r.outOffset };
+  return { output: toBN(r.output, 16), outOffset: r.outOffset };
 }
 
 export function NextString(
@@ -175,4 +174,46 @@ export function NextString(
   }
 
   return { output: r.output, outOffset: r.outOffset };
+}
+
+export interface CommitmentRequest {
+  amount: BN;
+  commitment: BN;
+  executorFee: BN;
+  rollupFee: BN;
+  privateNote: Buffer;
+}
+
+export function deserializeCommitmentRequest(message: string): CommitmentRequest | undefined {
+  let r = NextUint256(message, 0);
+  if (r.output === undefined || r.outOffset === undefined) {
+    return undefined;
+  }
+  const amount = r.output;
+
+  r = NextUint256(message, r.outOffset);
+  if (r.output === undefined || r.outOffset === undefined) {
+    return undefined;
+  }
+  const commitment = r.output;
+
+  r = NextUint256(message, r.outOffset);
+  if (r.output === undefined || r.outOffset === undefined) {
+    return undefined;
+  }
+  const executorFee = r.output;
+
+  r = NextUint256(message, r.outOffset);
+  if (r.output === undefined || r.outOffset === undefined) {
+    return undefined;
+  }
+  const rollupFee = r.output;
+
+  const r2 = NextBytes(message, r.outOffset);
+  if (r2.output === undefined || r2.outOffset === undefined) {
+    return undefined;
+  }
+  const privateNote = Buffer.from(r2.output);
+
+  return { amount, commitment, executorFee, rollupFee, privateNote };
 }
