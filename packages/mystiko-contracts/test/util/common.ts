@@ -163,7 +163,7 @@ export async function deployTBridgeContracts(
   hasher3Address: string,
   tokenAddress: string,
   sanctionListAddress: string,
-  tbridgeAddress: string,
+  tbridge: MystikoTBridgeProxy,
   poolMain: CommitmentPoolMain,
   poolERC20: CommitmentPoolERC20,
   {
@@ -180,7 +180,7 @@ export async function deployTBridgeContracts(
   const coreMain = await tBridgeMainFactory.connect(accounts[0]).deploy(hasher3Address);
   await coreMain.deployed();
   await coreMain.setAssociatedCommitmentPool(poolMain.address);
-  await coreMain.setBridgeProxyAddress(tbridgeAddress);
+  await coreMain.setBridgeProxyAddress(tbridge.address);
   await coreMain.setMinAmount(minAmount);
   await coreMain.setMinBridgeFee(minBridgeFee);
   await coreMain.setMinExecutorFee(minExecutorFee);
@@ -188,6 +188,7 @@ export async function deployTBridgeContracts(
   await coreMain.setPeerMinRollupFee(minRollupFee);
   await coreMain.updateSanctionContractAddress(sanctionListAddress);
   await poolMain.addEnqueueWhitelist(coreMain.address);
+  await tbridge.addRegisterWhitelist(coreMain.address);
 
   const tBridgeERC20Factory = (await ethers.getContractFactory(
     'MystikoV2WithTBridgeERC20',
@@ -196,7 +197,7 @@ export async function deployTBridgeContracts(
   const coreERC20 = await tBridgeERC20Factory.connect(accounts[0]).deploy(hasher3Address, tokenAddress);
   await coreERC20.deployed();
   await coreERC20.setAssociatedCommitmentPool(poolERC20.address);
-  await coreERC20.setBridgeProxyAddress(tbridgeAddress);
+  await coreERC20.setBridgeProxyAddress(tbridge.address);
   await coreERC20.setMinAmount(minAmount);
   await coreERC20.setMinBridgeFee(minBridgeFee);
   await coreERC20.setMinExecutorFee(minExecutorFee);
@@ -204,6 +205,7 @@ export async function deployTBridgeContracts(
   await coreERC20.setPeerMinRollupFee(minRollupFee);
   await coreERC20.updateSanctionContractAddress(sanctionListAddress);
   await poolERC20.addEnqueueWhitelist(coreERC20.address);
+  await tbridge.addRegisterWhitelist(coreERC20.address);
 
   return { coreMain, coreERC20 };
 }

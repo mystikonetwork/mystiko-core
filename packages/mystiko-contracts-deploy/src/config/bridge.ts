@@ -163,6 +163,14 @@ export class BridgeConfig extends BaseConfig {
     return this.feesByNetwork[network];
   }
 
+  public getMinBridgeFee(network: string): string | undefined {
+    const brideFeeCfg = this.feesByNetwork[network];
+    if (brideFeeCfg !== undefined) {
+      return brideFeeCfg.minimal;
+    }
+    return undefined;
+  }
+
   public getBridgeCommitmentPool(network: string, assetSymbol: string): ContractDeployConfig | undefined {
     return this.poolByNetworkAndToken.get(network)?.get(assetSymbol);
   }

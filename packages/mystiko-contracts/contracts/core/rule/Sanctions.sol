@@ -7,7 +7,7 @@ interface SanctionsList {
 
 abstract contract Sanctions {
   address public sanctionsContract = 0x40C57923924B5c5c5455c48D93317139ADDaC8fb;
-  bool isSanctionCheckDisabled = false;
+  bool public isSanctionCheckDisabled = false;
 
   function isSanctioned(address _addr) internal returns (bool) {
     if (isSanctionCheckDisabled) {

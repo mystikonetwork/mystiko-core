@@ -9,6 +9,19 @@ import type { Sanctions, SanctionsInterface } from '../Sanctions';
 const _abi = [
   {
     inputs: [],
+    name: 'isSanctionCheckDisabled',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'sanctionsContract',
     outputs: [
       {

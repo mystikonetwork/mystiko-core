@@ -65,14 +65,13 @@ function addTokenConfig(
 
   for (let j = 0; j < coreConfig.chains[i].assets.length; j += 1) {
     if (coreConfig.chains[i].assets[j].assetSymbol === assetSymbol) {
+      console.log('update token configure');
       coreConfig.chains[i].assets[j].assetType = assetType;
       coreConfig.chains[i].assets[j].assetDecimals = assetDecimals;
       coreConfig.chains[i].assets[j].recommendedAmounts = recommendedAmounts;
-
       if (isERC20) {
         coreConfig.chains[i].assets[j].assetAddress = assetAddress;
       }
-
       return coreConfig;
     }
   }
@@ -135,7 +134,7 @@ function addPoolContractConfig(
   };
 
   // @ts-ignore
-  newPoolContract.type = 'pool';
+  // newPoolContract.type = 'pool';
 
   if (isERC20) {
     // @ts-ignore
@@ -196,7 +195,6 @@ function addNewDepositContractConfig(
   }
 
   console.log('add new deposit contract configure');
-  const disabled = false;
   const newContract = {
     version,
     name,
@@ -204,11 +202,13 @@ function addNewDepositContractConfig(
     startBlock,
     bridgeType,
     poolAddress,
-    disabled,
   };
 
   // @ts-ignore
-  newContract.type = 'deposit';
+  // newContract.disabled = false;
+
+  // @ts-ignore
+  // newContract.type = 'deposit';
 
   if (bridgeType !== BridgeLoop) {
     // @ts-ignore
@@ -272,7 +272,7 @@ export function saveCoreContractJson(c: any) {
     c.dstChainCfg.chainId,
     c.pairDstDepositCfg.address,
     c.srcTokenCfg.minAmount,
-    c.srcChainCfg.minBridgeFee,
+    c.bridgeCfg.getMinBridgeFee(c.srcChainCfg.network),
     c.srcTokenCfg.minExecutorFee,
   );
 
