@@ -258,8 +258,20 @@ test('test summary', async () => {
 
 test('test invalid options', async () => {
   const { options, depositContractConfig } = createTestOptionsAndConfig();
+  await expect(executor.summary({ ...options, amount: -1 }, depositContractConfig)).rejects.toThrow(
+    createError('amount cannot be negative or zero', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
+  );
+  await expect(executor.summary({ ...options, rollupFee: -1 }, depositContractConfig)).rejects.toThrow(
+    createError('rollup fee cannot be negative or zero', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
+  );
+  await expect(executor.summary({ ...options, bridgeFee: -1 }, depositContractConfig)).rejects.toThrow(
+    createError('bridge fee cannot be negative', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
+  );
+  await expect(executor.summary({ ...options, executorFee: -1 }, depositContractConfig)).rejects.toThrow(
+    createError('executor fee cannot be negative', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
+  );
   await expect(executor.summary({ ...options, srcChainId: 102400 }, depositContractConfig)).rejects.toThrow(
-    createError('no chain id=102400 configured', MystikoErrorCode.NON_EXISTING_CHAIN),
+    createError('no chain id=102400 configured', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
   );
   await expect(executor.summary({ ...options, srcChainId: 5 }, depositContractConfig)).rejects.toThrow(
     createError('options mismatch with given contract config', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
@@ -283,13 +295,13 @@ test('test invalid options', async () => {
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
-  await expect(executor.summary({ ...options, amount: 0 }, depositContractConfig)).rejects.toThrow(
+  await expect(executor.summary({ ...options, amount: 0.01 }, depositContractConfig)).rejects.toThrow(
     createError(
       `deposit amount cannot be less than ${depositContractConfig.minAmountNumber}`,
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
-  await expect(executor.summary({ ...options, rollupFee: 0 }, depositContractConfig)).rejects.toThrow(
+  await expect(executor.summary({ ...options, rollupFee: 0.001 }, depositContractConfig)).rejects.toThrow(
     createError(
       `rollup fee cannot be less than ${depositContractConfig.minRollupFeeNumber}`,
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,

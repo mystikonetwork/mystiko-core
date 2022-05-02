@@ -1428,7 +1428,7 @@
           "commitmentHash": "9767213979749030232291739607227707759364207821666891526342576962741855499910",
           "rollupFeeAmount": "100000000000000000",
           "encryptedNote": "0xce993ff3114a17969b264a3d2b1313e504c892af08da1395d2dd30623d34b03b1a9ed5adceb4500bb7c6957dfacbb2d547f21d4de4dc7167aa3ca95b93233ed7b70acbd3c9d872f49eaeaa62aa6d8efe6e5fca9d78b504de4602cdd1e04dc1095dbca2744910cdb25b2475ed7d9e69ca3ece2c5590c4022318f9e042e3619b32ee975b28787571f15a1e3b2c0a2a7f6ed3f83347a223558379cf1f877d47dad7b3331d1f1bdebbe69309943beed868c6cd6bd70e520fa7304d735bc2765515e25d2636bc371fb924758e7d4d706cc0e6ef",
-          "amount": "4899999999999999994",
+          "amount": "4900000000000000000",
           "shieldedAddress": "JgZ2yJL3t6KGFBtaRNRzuXyMp2qhhByrKRgKY68xTrwkDUBziQvofHrMxN798mqbjyWgiMo3UCW9kopFhKJEdH1Em",
           "creationTransactionHash": "0x97f8d0b56cbf58cc5d7ca435c537e7ff6f34f5ba160a47dd31216e2850846b9b",
           "leafIndex": "6",
@@ -1880,7 +1880,7 @@
           "outputCommitments": [
             "01G1Z2ZQK7FV9FTGE4TAG5MJJQ"
           ],
-          "amount": "4899999999999999994",
+          "amount": "4900000000000000000",
           "publicAmount": "0",
           "rollupFeeAmount": "100000000000000000",
           "gasRelayerFeeAmount": "0",

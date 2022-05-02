@@ -110,55 +110,57 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     options: DepositOptions,
     contractConfig: DepositContractConfig,
   ): Promise<ExecutionContext> {
-    return this.getChainConfig(options).then((chainConfig) => {
-      let mainAssetTotal = toBN(0);
-      const amount = toDecimals(options.amount, contractConfig.assetDecimals).toString();
-      const rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).toString();
-      const bridgeFee = toDecimals(
-        options.bridgeFee || 0,
-        contractConfig.bridgeFeeAsset.assetDecimals,
-      ).toString();
-      const executorFee = toDecimals(
-        options.executorFee || 0,
-        contractConfig.executorFeeAsset.assetDecimals,
-      ).toString();
-      const assetTotals = new Map<string, AssetTotal>();
-      const assets: Array<{ asset: AssetConfig; amount: string }> = [
-        { asset: contractConfig.asset, amount },
-        { asset: contractConfig.asset, amount: rollupFee },
-        { asset: contractConfig.bridgeFeeAsset, amount: bridgeFee },
-        { asset: contractConfig.executorFeeAsset, amount: executorFee },
-      ];
-      assets.forEach((assetWithAmount) => {
-        const { asset } = assetWithAmount;
-        const amountBN = toBN(assetWithAmount.amount);
-        if (asset.assetType === AssetType.MAIN) {
-          mainAssetTotal = mainAssetTotal.add(amountBN);
-        }
-        const assetTotal = assetTotals.get(assetWithAmount.asset.assetAddress);
-        if (assetTotal) {
-          assetTotal.total = toBN(assetTotal.total).add(amountBN).toString();
-          assetTotal.totalNumber += fromDecimals(assetWithAmount.amount, asset.assetDecimals);
-        } else {
-          assetTotals.set(assetWithAmount.asset.assetAddress, {
-            asset: assetWithAmount.asset,
-            total: assetWithAmount.amount,
-            totalNumber: fromDecimals(assetWithAmount.amount, asset.assetDecimals),
-          });
-        }
+    return DepositExecutorV2.validateNumbers(options)
+      .then(() => this.getChainConfig(options))
+      .then((chainConfig) => {
+        let mainAssetTotal = toBN(0);
+        const amount = toDecimals(options.amount, contractConfig.assetDecimals).toString();
+        const rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).toString();
+        const bridgeFee = toDecimals(
+          options.bridgeFee || 0,
+          contractConfig.bridgeFeeAsset.assetDecimals,
+        ).toString();
+        const executorFee = toDecimals(
+          options.executorFee || 0,
+          contractConfig.executorFeeAsset.assetDecimals,
+        ).toString();
+        const assetTotals = new Map<string, AssetTotal>();
+        const assets: Array<{ asset: AssetConfig; amount: string }> = [
+          { asset: contractConfig.asset, amount },
+          { asset: contractConfig.asset, amount: rollupFee },
+          { asset: contractConfig.bridgeFeeAsset, amount: bridgeFee },
+          { asset: contractConfig.executorFeeAsset, amount: executorFee },
+        ];
+        assets.forEach((assetWithAmount) => {
+          const { asset } = assetWithAmount;
+          const amountBN = toBN(assetWithAmount.amount);
+          if (asset.assetType === AssetType.MAIN) {
+            mainAssetTotal = mainAssetTotal.add(amountBN);
+          }
+          const assetTotal = assetTotals.get(assetWithAmount.asset.assetAddress);
+          if (assetTotal) {
+            assetTotal.total = toBN(assetTotal.total).add(amountBN).toString();
+            assetTotal.totalNumber += fromDecimals(assetWithAmount.amount, asset.assetDecimals);
+          } else {
+            assetTotals.set(assetWithAmount.asset.assetAddress, {
+              asset: assetWithAmount.asset,
+              total: assetWithAmount.amount,
+              totalNumber: fromDecimals(assetWithAmount.amount, asset.assetDecimals),
+            });
+          }
+        });
+        return {
+          options,
+          contractConfig,
+          chainConfig,
+          amount,
+          rollupFee,
+          bridgeFee,
+          executorFee,
+          assetTotals,
+          mainAssetTotal: mainAssetTotal.toString(),
+        };
       });
-      return {
-        options,
-        contractConfig,
-        chainConfig,
-        amount,
-        rollupFee,
-        bridgeFee,
-        executorFee,
-        assetTotals,
-        mainAssetTotal: mainAssetTotal.toString(),
-      };
-    });
   }
 
   private validateOptions(executionContext: ExecutionContext): Promise<ExecutionContext> {
@@ -522,5 +524,27 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     }
     /* istanbul ignore next */
     return Promise.resolve(deposit);
+  }
+
+  private static validateNumbers(options: DepositOptions): Promise<DepositOptions> {
+    if (options.amount <= 0) {
+      return createErrorPromise(
+        'amount cannot be negative or zero',
+        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+      );
+    }
+    if (options.rollupFee <= 0) {
+      return createErrorPromise(
+        'rollup fee cannot be negative or zero',
+        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+      );
+    }
+    if (options.bridgeFee && options.bridgeFee < 0) {
+      return createErrorPromise('bridge fee cannot be negative', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS);
+    }
+    if (options.executorFee && options.executorFee < 0) {
+      return createErrorPromise('executor fee cannot be negative', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS);
+    }
+    return Promise.resolve(options);
   }
 }

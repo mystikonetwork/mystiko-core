@@ -29,7 +29,7 @@ import {
   waitTransaction,
 } from '@mystikonetwork/utils';
 import BN from 'bn.js';
-import { isEthereumAddress } from 'class-validator';
+import { isEthereumAddress, isURL } from 'class-validator';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -113,6 +113,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then((executionContext) => {
         const { quote, amount, publicAmount, rollupFee, gasRelayerFee } = executionContext;
         const previousBalance = quote.balance;
+        let newBalance = toDecimals(previousBalance, config.assetDecimals);
         const rollupFeeAmount = fromDecimals(rollupFee, config.assetDecimals);
         const gasRelayerFeeAmount = fromDecimals(gasRelayerFee, config.assetDecimals);
         let withdrawingAmount = 0;
@@ -122,15 +123,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             publicAmount.sub(rollupFee).sub(gasRelayerFee),
             config.assetDecimals,
           );
+          newBalance = newBalance.sub(publicAmount);
         }
         if (options.type === TransactionEnum.TRANSFER) {
           transferringAmount = fromDecimals(amount.sub(rollupFee).sub(gasRelayerFee), config.assetDecimals);
+          newBalance = newBalance.sub(amount);
         }
-        const newBalance =
-          previousBalance - withdrawingAmount - transferringAmount - rollupFeeAmount - gasRelayerFeeAmount;
         return {
           previousBalance,
-          newBalance,
+          newBalance: fromDecimals(newBalance, config.assetDecimals),
           withdrawingAmount,
           transferringAmount,
           rollupFeeAmount,
@@ -161,59 +162,61 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     contractConfig: PoolContractConfig,
     checkPassword = false,
   ): Promise<ExecutionContext> {
-    const walletPromise: Promise<Wallet> = checkPassword
-      ? this.context.wallets.checkPassword(options.walletPassword)
-      : this.context.wallets.checkCurrent();
-    return walletPromise
-      .then((wallet) =>
-        this.getCommitments(options, contractConfig).then((commitments) => ({ wallet, commitments })),
-      )
-      .then(({ wallet, commitments }) => {
-        const chainConfig = this.config.getChainConfig(options.chainId);
-        if (!chainConfig) {
-          return createErrorPromise(
-            `failed to get chain id=${options.chainId} configuration`,
-            MystikoErrorCode.NON_EXISTING_CHAIN,
-          );
-        }
-        const quote = CommitmentUtils.quote(options, contractConfig, commitments, MAX_NUM_INPUTS);
-        let amount = toBN(0);
-        if (options.amount && quote.valid) {
-          amount = toDecimals(options.amount, contractConfig.assetDecimals);
-        }
-        let publicAmount = toBN(0);
-        if (options.publicAmount && quote.valid) {
-          publicAmount = toDecimals(options.publicAmount, contractConfig.assetDecimals);
-        }
-        let rollupFee = toBN(0);
-        if (options.rollupFee && quote.valid) {
-          rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).mul(
-            toBN(quote.numOfSplits),
-          );
-        }
-        let gasRelayerFee = toBN(0);
-        if (options.gasRelayerFee && quote.valid) {
-          gasRelayerFee = toDecimals(options.gasRelayerFee, contractConfig.assetDecimals);
-        }
-        let selectedCommitments: Commitment[] = [];
-        if (quote.valid) {
-          const spendingAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
-          selectedCommitments = CommitmentUtils.select(commitments, MAX_NUM_INPUTS, spendingAmount);
-        }
-        return {
-          options,
-          contractConfig,
-          chainConfig,
-          wallet,
-          commitments,
-          selectedCommitments,
-          quote,
-          amount,
-          publicAmount,
-          rollupFee,
-          gasRelayerFee,
-        };
-      });
+    return TransactionExecutorV2.validateNumbers(options).then(() => {
+      const walletPromise: Promise<Wallet> = checkPassword
+        ? this.context.wallets.checkPassword(options.walletPassword)
+        : this.context.wallets.checkCurrent();
+      return walletPromise
+        .then((wallet) =>
+          this.getCommitments(options, contractConfig).then((commitments) => ({ wallet, commitments })),
+        )
+        .then(({ wallet, commitments }) => {
+          const chainConfig = this.config.getChainConfig(options.chainId);
+          if (!chainConfig) {
+            return createErrorPromise(
+              `no chain id=${options.chainId} configured`,
+              MystikoErrorCode.NON_EXISTING_CHAIN,
+            );
+          }
+          const quote = CommitmentUtils.quote(options, contractConfig, commitments, MAX_NUM_INPUTS);
+          let amount = toBN(0);
+          if (options.amount && quote.valid) {
+            amount = toDecimals(options.amount, contractConfig.assetDecimals);
+          }
+          let publicAmount = toBN(0);
+          if (options.publicAmount && quote.valid) {
+            publicAmount = toDecimals(options.publicAmount, contractConfig.assetDecimals);
+          }
+          let rollupFee = toBN(0);
+          if (options.rollupFee && quote.valid) {
+            rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).mul(
+              toBN(quote.numOfSplits),
+            );
+          }
+          let gasRelayerFee = toBN(0);
+          if (options.gasRelayerFee && quote.valid) {
+            gasRelayerFee = toDecimals(options.gasRelayerFee, contractConfig.assetDecimals);
+          }
+          let selectedCommitments: Commitment[] = [];
+          if (quote.valid) {
+            const spendingAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
+            selectedCommitments = CommitmentUtils.select(commitments, MAX_NUM_INPUTS, spendingAmount);
+          }
+          return {
+            options,
+            contractConfig,
+            chainConfig,
+            wallet,
+            commitments,
+            selectedCommitments,
+            quote,
+            amount,
+            publicAmount,
+            rollupFee,
+            gasRelayerFee,
+          };
+        });
+    });
   }
 
   private validateOptions(executionContext: ExecutionContext): Promise<ExecutionContext> {
@@ -228,13 +231,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       rollupFee,
       gasRelayerFee,
     } = executionContext;
-    const spentAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
-    if (!quote.valid) {
-      return createErrorPromise(
-        quote.invalidReason || 'invalid transfer/withdraw options',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
     if (
       !chainConfig.getPoolContractByAddress(contractConfig.address) ||
       options.assetSymbol !== contractConfig.assetSymbol ||
@@ -242,6 +238,13 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     ) {
       return createErrorPromise(
         'given options mismatch with config',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    const spentAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
+    if (!quote.valid) {
+      return createErrorPromise(
+        quote.invalidReason || 'invalid transfer/withdraw options',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
@@ -253,7 +256,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     }
     if (rollupFee.lt(contractConfig.minRollupFee.mul(toBN(quote.numOfSplits)))) {
       return createErrorPromise(
-        'rollupFee is too small to pay rollup service',
+        'rollup fee is too small to pay rollup service',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
@@ -284,6 +287,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     if (options.gasRelayerAddress && !isEthereumAddress(options.gasRelayerAddress)) {
       return createErrorPromise(
         'invalid ethereum address for gas relayer',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    if (
+      options.gasRelayerEndpoint &&
+      !isURL(options.gasRelayerEndpoint, { protocols: ['http', 'https'], require_tld: false })
+    ) {
+      return createErrorPromise(
+        'invalid endpoint url for gas relayer',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
@@ -927,5 +939,34 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION2x2);
     }
     return config;
+  }
+
+  private static validateNumbers(options: TransactionOptions): Promise<TransactionOptions> {
+    if (options.type === TransactionEnum.TRANSFER) {
+      if (!options.amount || options.amount <= 0) {
+        return createErrorPromise(
+          'amount cannot be negative or zero or empty',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+    } else if (!options.publicAmount || options.publicAmount <= 0) {
+      return createErrorPromise(
+        'publicAmount cannot be negative or zero or empty',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    if (options.rollupFee && options.rollupFee < 0) {
+      return createErrorPromise(
+        'rollup fee cannot be negative',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    if (options.gasRelayerFee && options.gasRelayerFee < 0) {
+      return createErrorPromise(
+        'gas relayer fee cannot be negative',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    return Promise.resolve(options);
   }
 }
