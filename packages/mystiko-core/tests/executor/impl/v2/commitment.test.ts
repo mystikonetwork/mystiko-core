@@ -111,7 +111,7 @@ class TestProviderPool extends ProviderPoolImpl {
   }
 }
 
-beforeEach(async () => {
+beforeAll(async () => {
   testEvents = await loadEvents('tests/files/events.test.json');
   config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
@@ -135,13 +135,18 @@ beforeEach(async () => {
   depositHandler = new DepositHandlerV2(context);
   assetHandler = new AssetHandlerV2(context);
   executor = new CommitmentExecutorV2(context);
+});
+
+beforeEach(async () => {
+  await context.db.remove();
+  context.db = await initDatabase();
   const databaseData = await readJsonFile('tests/files/database.unsync.test.json');
   await context.db.importJSON(databaseData);
   expect(context.wallets).toBe(walletHandler);
   expect(context.accounts).toBe(accountHandler);
 });
 
-afterEach(async () => {
+afterAll(async () => {
   await context.db.remove();
 });
 

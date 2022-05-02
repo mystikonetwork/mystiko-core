@@ -8,7 +8,14 @@ import {
   MystikoV2Loop__factory,
   SupportedContractType,
 } from '@mystikonetwork/contracts-abi';
-import { Account, CommitmentStatus, Deposit, DepositStatus, Wallet } from '@mystikonetwork/database';
+import {
+  Account,
+  CommitmentStatus,
+  Deposit,
+  DepositStatus,
+  initDatabase,
+  Wallet,
+} from '@mystikonetwork/database';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
 import { toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
@@ -139,7 +146,7 @@ async function checkDeposit(
   expect(commitment?.creationTransactionHash).toBe(deposit.transactionHash);
 }
 
-beforeEach(async () => {
+beforeAll(async () => {
   etherWallet = ethers.Wallet.createRandom();
   mockProvider = new MockProvider({
     ganacheOptions: {
@@ -147,9 +154,6 @@ beforeEach(async () => {
     },
   });
   const [signer] = mockProvider.getWallets();
-  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
-  mockMystikoV2Loop = await deployMockContract(signer, MystikoV2Loop__factory.abi);
-  mockMystikoV2Bridge = await deployMockContract(signer, MystikoV2Bridge__factory.abi);
   config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
     config,
@@ -176,11 +180,20 @@ beforeEach(async () => {
   commitmentHandler = new CommitmentHandlerV2(context);
   executor = new DepositExecutorV2(context);
   mystikoSigner = new PrivateKeySigner(config, context.providers);
-  mystikoWallet = await walletHandler.create({ password: walletPassword, masterSeed: walletMasterSeed });
-  mystikoAccount = await accountHandler.create(walletPassword);
 });
 
-afterEach(async () => {
+beforeEach(async () => {
+  await context.db.remove();
+  context.db = await initDatabase();
+  mystikoWallet = await walletHandler.create({ password: walletPassword, masterSeed: walletMasterSeed });
+  mystikoAccount = await accountHandler.create(walletPassword);
+  const [signer] = mockProvider.getWallets();
+  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
+  mockMystikoV2Loop = await deployMockContract(signer, MystikoV2Loop__factory.abi);
+  mockMystikoV2Bridge = await deployMockContract(signer, MystikoV2Bridge__factory.abi);
+});
+
+afterAll(async () => {
   await context.db.remove();
 });
 

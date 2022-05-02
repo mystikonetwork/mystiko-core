@@ -1,8 +1,9 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
-import { MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
+import { MystikoProtocolV2, ZokratesCliRuntime, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
 import { ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
+import commandExists from 'command-exists';
 import {
   AccountHandlerV2,
   AssetHandlerV2,
@@ -56,7 +57,9 @@ export async function createTestContext(
   // eslint-disable-next-line global-require
   const { initialize } = require('zokrates-js/node');
   const zokrates = await initialize();
-  const runtime = new ZokratesWasmRuntime(zokrates);
+  const runtime = await commandExists('zokrates')
+    .then(() => new ZokratesCliRuntime(zokrates))
+    .catch(() => new ZokratesWasmRuntime(zokrates));
   const protocol = new MystikoProtocolV2(runtime);
   const context = new MystikoContext<
     AccountHandlerV2,

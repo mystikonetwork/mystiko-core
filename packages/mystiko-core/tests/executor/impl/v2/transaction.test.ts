@@ -7,12 +7,21 @@ import {
   MystikoContractFactory,
   SupportedContractType,
 } from '@mystikonetwork/contracts-abi';
-import { Account, TransactionEnum } from '@mystikonetwork/database';
+import {
+  Account,
+  Commitment,
+  CommitmentStatus,
+  initDatabase,
+  Transaction,
+  TransactionEnum,
+  TransactionStatus,
+} from '@mystikonetwork/database';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
-import { readJsonFile, toDecimals } from '@mystikonetwork/utils';
+import { readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import {
   AccountHandlerV2,
+  AssetHandlerV2,
   CommitmentHandlerV2,
   createError,
   MystikoContextInterface,
@@ -27,10 +36,6 @@ import { createTestContext } from '../../../common/context';
 
 let config: MystikoConfig;
 let context: MystikoContextInterface;
-let walletHandler: WalletHandlerV2;
-let accountHandler: AccountHandlerV2;
-let commitmentHandler: CommitmentHandlerV2;
-let transactionHandler: TransactionHandlerV2;
 let executor: TransactionExecutorV2;
 let mockERC20: MockContract;
 let mockCommitmentPool: MockContract;
@@ -69,6 +74,7 @@ function getTestOptions(): TestOptions {
     amount: 6,
     rollupFee: 0.1,
     signer: mystikoSigner,
+    statusCallback: jest.fn(),
   };
   const withdrawOptions: TransactionOptions = {
     walletPassword,
@@ -80,6 +86,7 @@ function getTestOptions(): TestOptions {
     publicAmount: 5,
     rollupFee: 0.1,
     signer: mystikoSigner,
+    statusCallback: jest.fn(),
   };
   const contractConfig = getPoolContractConfig(
     transferOptions.chainId,
@@ -89,7 +96,121 @@ function getTestOptions(): TestOptions {
   return { transferOptions, withdrawOptions, contractConfig };
 }
 
-beforeEach(async () => {
+type MockSetupOptions = {
+  poolBalance?: string;
+  isKnownRoot?: boolean;
+  spentSerialNumber?: boolean;
+  transactSuccess?: boolean;
+};
+
+async function setupMocks(options: MockSetupOptions): Promise<TestOptions> {
+  const testOptions = getTestOptions();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  await mockERC20.mock.balanceOf.reverts();
+  await mockERC20.mock.balanceOf
+    .withArgs(testOptions.contractConfig.address)
+    .returns(options.poolBalance || toDecimals(50).toString());
+  await mockCommitmentPool.mock.isKnownRoot.returns(!!options.isKnownRoot);
+  await mockCommitmentPool.mock.spentSerialNumbers.returns(!!options.spentSerialNumber);
+  if (options.transactSuccess) {
+    await mockCommitmentPool.mock.transact.returns();
+  } else {
+    await mockCommitmentPool.mock.transact.reverts();
+  }
+  return Promise.resolve(testOptions);
+}
+
+async function checkTransaction(
+  numInput: number,
+  numOutput: number,
+  tx: Transaction,
+  options: TransactionOptions,
+  contractConfig: PoolContractConfig,
+  hasError?: boolean,
+) {
+  expect(tx.status).toBe(hasError ? TransactionStatus.FAILED : TransactionStatus.SUCCEEDED);
+  if (hasError) {
+    expect(tx.errorMessage).not.toBe(undefined);
+  } else {
+    expect(tx.errorMessage).toBe(undefined);
+  }
+  expect(tx.chainId).toBe(options.chainId);
+  expect(tx.contractAddress).toBe(contractConfig.address);
+  expect(tx.assetSymbol).toBe(contractConfig.assetSymbol);
+  expect(tx.assetDecimals).toBe(contractConfig.assetDecimals);
+  expect(tx.assetAddress).toBe(contractConfig.assetAddress);
+  expect(tx.proof).not.toBe(undefined);
+  expect(tx.rootHash).not.toBe(undefined);
+  expect(tx.signaturePublicKey).not.toBe(undefined);
+  expect(tx.signature).not.toBe(undefined);
+  expect(tx.inputCommitments?.length).toBe(numInput);
+  expect(tx.serialNumbers?.length).toBe(numInput);
+  expect(tx.signaturePublicKeyHashes?.length).toBe(numInput);
+  expect(tx.outputCommitments?.length).toBe(numOutput);
+  const expectRollupFeeAmount = (options.rollupFee || 0) * numOutput;
+  const expectGasRelayerFeeAmount = options.gasRelayerFee || 0;
+  const expectAmount = options.amount
+    ? options.amount - expectRollupFeeAmount - expectGasRelayerFeeAmount
+    : 0;
+  const expectPublicAmount = options.publicAmount
+    ? options.publicAmount - expectRollupFeeAmount - expectGasRelayerFeeAmount
+    : 0;
+  expect(tx.simpleAmount()).toBe(expectAmount);
+  expect(tx.simplePublicAmount()).toBe(expectPublicAmount);
+  expect(tx.simpleRollupFeeAmount()).toBe(expectRollupFeeAmount);
+  expect(tx.simpleGasRelayerFeeAmount()).toBe(expectGasRelayerFeeAmount);
+  expect(tx.shieldedAddress).toBe(options.shieldedAddress);
+  expect(tx.publicAddress).toBe(options.publicAddress);
+  expect(tx.type).toBe(options.type);
+  if (!hasError) {
+    expect(tx.transactionHash).not.toBe(undefined);
+  }
+  expect(tx.wallet).toBe((await context.wallets.current())?.id);
+  const inputCommitments: Commitment[] = await tx.populate('inputCommitments');
+  let totalInputAmount = toBN(0);
+  inputCommitments.forEach((commitment, index) => {
+    expect(commitment.status).toBe(hasError ? CommitmentStatus.INCLUDED : CommitmentStatus.SPENT);
+    const serialNumber = tx.serialNumbers ? tx.serialNumbers[index] : undefined;
+    expect(serialNumber).toBe(commitment.serialNumber);
+    if (!hasError) {
+      expect(commitment.spendingTransactionHash).toBe(tx.transactionHash);
+    }
+    totalInputAmount = totalInputAmount.add(toBN(commitment.amount || 0));
+  });
+  const outputCommitments: Commitment[] = await tx.populate('outputCommitments');
+  let totalOutputAmount = toBN(0);
+  outputCommitments.forEach((commitment) => {
+    expect(commitment.status).toBe(hasError ? CommitmentStatus.FAILED : CommitmentStatus.QUEUED);
+    if (!hasError) {
+      expect(commitment.creationTransactionHash).toBe(tx.transactionHash);
+    }
+    totalOutputAmount = totalOutputAmount.add(toBN(commitment.amount || 0));
+  });
+  expect(totalInputAmount.toString()).toBe(
+    totalOutputAmount
+      .add(toBN(tx.publicAmount))
+      .add(toBN(tx.rollupFeeAmount))
+      .add(toBN(tx.gasRelayerFeeAmount))
+      .toString(),
+  );
+  const statusCallback = options.statusCallback as jest.Mock;
+  expect(statusCallback.mock.calls.length).toBe(hasError ? 3 : 4);
+  expect(statusCallback.mock.calls[0][1]).toBe(TransactionStatus.INIT);
+  expect(statusCallback.mock.calls[0][2]).toBe(TransactionStatus.PROOF_GENERATING);
+  expect(statusCallback.mock.calls[1][1]).toBe(TransactionStatus.PROOF_GENERATING);
+  expect(statusCallback.mock.calls[1][2]).toBe(TransactionStatus.PROOF_GENERATED);
+  if (hasError) {
+    expect(statusCallback.mock.calls[2][1]).toBe(TransactionStatus.PROOF_GENERATED);
+    expect(statusCallback.mock.calls[2][2]).toBe(TransactionStatus.FAILED);
+  } else {
+    expect(statusCallback.mock.calls[2][1]).toBe(TransactionStatus.PROOF_GENERATED);
+    expect(statusCallback.mock.calls[2][2]).toBe(TransactionStatus.PENDING);
+    expect(statusCallback.mock.calls[3][1]).toBe(TransactionStatus.PENDING);
+    expect(statusCallback.mock.calls[3][2]).toBe(TransactionStatus.SUCCEEDED);
+  }
+}
+
+beforeAll(async () => {
   etherWallet = ethers.Wallet.createRandom();
   mockProvider = new MockProvider({
     ganacheOptions: {
@@ -97,8 +218,6 @@ beforeEach(async () => {
     },
   });
   const [signer] = mockProvider.getWallets();
-  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
-  mockCommitmentPool = await deployMockContract(signer, CommitmentPool__factory.abi);
   config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
     config,
@@ -116,20 +235,27 @@ beforeEach(async () => {
       },
     },
   });
-  walletHandler = new WalletHandlerV2(context);
-  accountHandler = new AccountHandlerV2(context);
-  commitmentHandler = new CommitmentHandlerV2(context);
-  transactionHandler = new TransactionHandlerV2(context);
+  context.wallets = new WalletHandlerV2(context);
+  context.accounts = new AccountHandlerV2(context);
+  context.assets = new AssetHandlerV2(context);
+  context.commitments = new CommitmentHandlerV2(context);
+  context.transactions = new TransactionHandlerV2(context);
   executor = new TransactionExecutorV2(context);
-  mystikoSigner = new PrivateKeySigner(config, context.providers);
-  await context.db.importJSON(await readJsonFile('tests/files/database.sync.test.json'));
-  await walletHandler.checkCurrent();
-  await walletHandler.checkPassword(walletPassword);
-  mystikoAccount = await accountHandler.create(walletPassword);
 });
 
-afterEach(async () => {
+afterAll(async () => {
   await context.db.remove();
+});
+
+beforeEach(async () => {
+  await context.db.remove();
+  context.db = await initDatabase();
+  await context.db.importJSON(await readJsonFile('tests/files/database.sync.test.json'));
+  mystikoAccount = await context.accounts.create(walletPassword);
+  const [signer] = mockProvider.getWallets();
+  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
+  mockCommitmentPool = await deployMockContract(signer, CommitmentPool__factory.abi);
+  mystikoSigner = new PrivateKeySigner(config, context.providers);
 });
 
 test('test quote', async () => {
@@ -317,9 +443,7 @@ test('test summary', async () => {
 });
 
 test('test insufficient pool balance', async () => {
-  const { withdrawOptions, contractConfig } = getTestOptions();
-  await mockERC20.mock.balanceOf.reverts();
-  await mockERC20.mock.balanceOf.withArgs(contractConfig.address).returns('0');
+  const { withdrawOptions, contractConfig } = await setupMocks({ poolBalance: '0' });
   await expect(executor.execute(withdrawOptions, contractConfig)).rejects.toThrow(
     createError(
       `insufficient pool balance of contract=${contractConfig.address}`,
@@ -333,4 +457,199 @@ test('test invalid signer', async () => {
   await expect(executor.execute(transferOptions, contractConfig)).rejects.toThrow(
     new Error('signer has not been connected'),
   );
+});
+
+test('test invalid root hash', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: false,
+    spentSerialNumber: false,
+  });
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.FAILED);
+  expect(transaction.errorMessage).toBe(
+    'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
+  );
+});
+
+test('test already spent serial number', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    spentSerialNumber: true,
+  });
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.FAILED);
+  expect(transaction.errorMessage).toBe('some commitments hava already been spent');
+  const balances = await context.assets.balances();
+  expect(balances.get('MTT')?.unspentTotal).toBe(14.9);
+});
+
+test('test serial number not set', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    spentSerialNumber: false,
+  });
+  const promises = await context.commitments
+    .find({
+      selector: { serialNumber: { $exists: true } },
+    })
+    .then((commitments) =>
+      commitments.map((commitment) => commitment.update({ $unset: { serialNumber: '' } })),
+    );
+  await Promise.all(promises);
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.FAILED);
+  expect(transaction.errorMessage).toEqual(
+    expect.stringMatching(/^serial number of commitment id=.* is empty$/),
+  );
+});
+
+test('test serial number mismatch', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    spentSerialNumber: false,
+  });
+  const promises = await context.commitments
+    .find({
+      selector: { serialNumber: { $exists: true } },
+    })
+    .then((commitments) =>
+      commitments.map((commitment) => commitment.update({ $set: { serialNumber: '123' } })),
+    );
+  await Promise.all(promises);
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.FAILED);
+  expect(transaction.errorMessage).toEqual(
+    expect.stringMatching(/^generated commitment id=.* serial number mismatch$/),
+  );
+});
+
+test('test corrupted commitment data without leafIndex', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  const promises = await context.commitments
+    .find({
+      selector: { leafIndex: { $exists: true } },
+    })
+    .then((commitments) => commitments.map((commitment) => commitment.update({ $unset: { leafIndex: '' } })));
+  await Promise.all(promises);
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.FAILED);
+  expect(transaction.errorMessage).toEqual(expect.stringMatching(/^missing required data of commitment=.*$/));
+});
+
+test('test corrupted commitment data wrong leafIndex', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  const promises = await context.commitments
+    .find({
+      selector: { leafIndex: { $exists: true } },
+    })
+    .then((commitments) =>
+      commitments.map((commitment) => commitment.update({ $set: { leafIndex: '1000' } })),
+    );
+  await Promise.all(promises);
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.FAILED);
+  expect(transaction.errorMessage).toEqual(
+    expect.stringMatching(/^leafIndex is not correct of commitment=.*$/),
+  );
+});
+
+test('test transaction failure', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+  });
+  transferOptions.amount = 8;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(2, 2, transaction, transferOptions, contractConfig, true);
+});
+
+test('test status callback error', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  withdrawOptions.statusCallback = () => {
+    throw new Error('callback error');
+  };
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  expect(transaction.status).toBe(TransactionStatus.SUCCEEDED);
+  expect(transaction.errorMessage).toBe(undefined);
+});
+
+test('test transaction 1x0', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(1, 0, transaction, withdrawOptions, contractConfig);
+});
+
+test('test transaction 1x1', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  transferOptions.amount = 5;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(1, 1, transaction, transferOptions, contractConfig);
+});
+
+test('test transaction 1x2', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  transferOptions.amount = 3;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(1, 2, transaction, transferOptions, contractConfig);
+});
+
+test('test transaction 2x0', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  withdrawOptions.publicAmount = 9.9;
+  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(2, 0, transaction, withdrawOptions, contractConfig);
+});
+
+test('test transaction 2x1', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  transferOptions.amount = 9.9;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(2, 1, transaction, transferOptions, contractConfig);
+});
+
+test('test transaction 2x2', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  transferOptions.amount = 8;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  await checkTransaction(2, 2, transaction, transferOptions, contractConfig);
 });
