@@ -14,3 +14,4 @@ export * from './merkle';
 export * from './promise';
 export * from './provider';
 export * from './transaction';
+export * from './zeroCopySource';
