@@ -2,7 +2,7 @@ export * from './account';
 export * from './asset';
 export * from './chain';
 export * from './commitment';
-export * from './contracts';
+export * from './contract';
 export * from './deposit';
 export * from './factory';
 export * from './transaction';

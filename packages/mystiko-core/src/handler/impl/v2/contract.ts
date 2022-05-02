@@ -13,7 +13,10 @@ export class ContractHandlerV2 extends MystikoHandler implements ContractHandler
     return this.db.contracts.find(query).exec();
   }
 
-  public findOne(options: ContractOptions): Promise<Contract | null> {
+  public findOne(options: ContractOptions | string): Promise<Contract | null> {
+    if (typeof options === 'string') {
+      return this.db.contracts.findOne(options).exec();
+    }
     const selector = { chainId: options.chainId, contractAddress: options.address };
     return this.db.contracts.findOne({ selector }).exec();
   }
@@ -23,8 +26,8 @@ export class ContractHandlerV2 extends MystikoHandler implements ContractHandler
     const chainConfigs = this.config.chains;
     for (let i = 0; i < chainConfigs.length; i += 1) {
       const chainConfig = chainConfigs[i];
-      const { poolContracts, depositContracts } = chainConfig;
-      const contracts = [...poolContracts, ...depositContracts];
+      const { poolContracts, depositContractsWithDisabled } = chainConfig;
+      const contracts = [...poolContracts, ...depositContractsWithDisabled];
       for (let j = 0; j < contracts.length; j += 1) {
         const contract = contracts[j];
         const now = MystikoHandler.now();
