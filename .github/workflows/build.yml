@@ -9,18 +9,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: zokrates/zokrates:0.7.13
+    container: mystikonetwork/core-ci:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           lfs: true
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 14
       - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
-      - run: npm install --global lerna
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
       - run: lerna run build
