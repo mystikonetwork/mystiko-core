@@ -12,3 +12,4 @@ RUN echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\"" >> "$HOME/.bashr
 RUN . "$HOME/.bashrc"
 RUN nvm install 14
 RUN npm install -g yarn lerna
+ENV GITHUB_WORKSPACE="/home/zokrates/github"
