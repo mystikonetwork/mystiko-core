@@ -9,18 +9,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: mystikonetwork/core-ci:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           lfs: true
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: npm install -g lerna
       - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
+      - run: curl -L https://github.com/Zokrates/ZoKrates/releases/download/0.7.13/zokrates-0.7.13-x86_64-unknown-linux-gnu.tar.gz -o zokrates.tar.gz
+      - run: mkdir -p "$HOME/.zokrates/bin" && tar -xvvf zokrates.tar.gz -C "$HOME/.zokrates" && mv "$HOME/.zokrates/zokrates*" "$HOME/.zokrates/bin" && chmod 755 "$HOME/.zokrates/bin/*"
+      - run: echo "$HOME/.zokrates/bin" >> $GITHUB_PATH
+      - run: npm install --global lerna
       - run: cp packages/mystiko-contracts/.env.example packages/mystiko-contracts/.env
       - run: lerna bootstrap
       - run: lerna run build
