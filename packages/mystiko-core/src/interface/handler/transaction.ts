@@ -57,7 +57,10 @@ export type TransactionResponse = {
 export type TransactionQuery = {
   id?: string;
   chainId?: number;
-  contractAddress?: number;
+  contractAddress?: string;
+  serialNumber?: string;
+  inputCommitmentId?: string;
+  outputCommitmentId?: string;
   transactionHash?: string;
 };
 

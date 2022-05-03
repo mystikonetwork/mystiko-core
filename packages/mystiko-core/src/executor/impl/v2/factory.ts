@@ -13,7 +13,7 @@ type ExecutorFactoryV2Interface = ExecutorFactory<
 >;
 
 export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
-  public context: MystikoContextInterface;
+  protected context: MystikoContextInterface;
 
   constructor(context: MystikoContextInterface) {
     this.context = context;

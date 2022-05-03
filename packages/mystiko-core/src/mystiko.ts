@@ -62,9 +62,9 @@ export abstract class Mystiko {
 
   public signers?: { metaMask: MetaMaskSigner; privateKey: PrivateKeySigner };
 
-  private providers?: ProviderPool;
+  public providers?: ProviderPool;
 
-  private protocol?: MystikoProtocol;
+  public protocol?: MystikoProtocol;
 
   private context?: MystikoContextInterface;
 
@@ -133,9 +133,11 @@ export abstract class Mystiko {
             maxTryCount: p.maxTryCount,
           }));
         }
+        /* istanbul ignore next */
         return [];
       });
     }
+    /* istanbul ignore next */
     return Promise.resolve([]);
   }
 

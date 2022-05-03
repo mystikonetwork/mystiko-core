@@ -53,6 +53,15 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
       if (query.contractAddress) {
         selector.contractAddress = query.contractAddress;
       }
+      if (query.serialNumber) {
+        selector.serialNumbers = { $elemMatch: { $eq: query.serialNumber } };
+      }
+      if (query.inputCommitmentId) {
+        selector.inputCommitments = { $elemMatch: { $eq: query.inputCommitmentId } };
+      }
+      if (query.outputCommitmentId) {
+        selector.outputCommitments = { $elemMatch: { $eq: query.outputCommitmentId } };
+      }
       if (query.transactionHash) {
         selector.transactionHash = query.transactionHash;
       }
@@ -76,21 +85,21 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     return this.findOne(query).then((transaction) => {
       if (!transaction) {
         return createErrorPromise(
-          `no transaction found for query ${query}`,
+          `no transaction found for query=${query}`,
           MystikoErrorCode.NON_EXISTING_TRANSACTION,
         );
       }
       return transaction.atomicUpdate((oldData) => {
         let hasUpdate = false;
-        if (data.status) {
+        if (data.status && data.status !== oldData.status) {
           oldData.status = data.status;
           hasUpdate = true;
         }
-        if (data.errorMessage) {
+        if (data.errorMessage && data.errorMessage !== oldData.errorMessage) {
           oldData.errorMessage = data.errorMessage;
           hasUpdate = true;
         }
-        if (data.transactionHash) {
+        if (data.transactionHash && data.transactionHash !== oldData.transactionHash) {
           oldData.transactionHash = data.transactionHash;
           hasUpdate = true;
         }
