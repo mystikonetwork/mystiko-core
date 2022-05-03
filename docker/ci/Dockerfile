@@ -4,7 +4,7 @@ USER root
 RUN apt update
 RUN apt install -y curl git git-lfs
 ENV NVM_DIR=/root/.nvm
-ENV NODE_VERSION=14
+ENV NODE_VERSION=14.19.1
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
      && . $NVM_DIR/nvm.sh \
      && nvm install $NODE_VERSION \
@@ -12,3 +12,5 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | b
      && nvm use default \
      && npm install -g yarn lerna
 WORKDIR /root
+ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH
