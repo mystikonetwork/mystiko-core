@@ -97,7 +97,7 @@ test('test quote transfer', () => {
   expect(quote.valid).toBe(false);
   expect(quote.invalidReason).toBe('asset balance is too small to transfer');
   commitments = [{ amount: toDecimals(11).toString() }];
-  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER }, config, commitments, 2);
+  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 10 }, config, commitments, 2);
   expect(quote.valid).toBe(false);
   expect(quote.invalidReason).toBe('your asset amount should be exactly 11');
   expect(quote.minAmount).toBe(11);
@@ -108,14 +108,14 @@ test('test quote transfer', () => {
   expect(quote.numOfSplits).toBe(1);
   expect(quote.maxGasRelayerFee).toBe(1);
   commitments = [{ amount: toDecimals(20).toString() }];
-  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER }, config, commitments, 2);
+  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 11 }, config, commitments, 2);
   expect(quote.valid).toBe(false);
   expect(quote.invalidReason).toBe('your asset amount should be exactly 20');
   expect(quote.minAmount).toBe(20);
   expect(quote.maxAmount).toBe(20);
   expect(quote.fixedAmount).toBe(true);
   commitments = [{ amount: toDecimals(21).toString() }];
-  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER }, config, commitments, 2);
+  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 11 }, config, commitments, 2);
   expect(quote.valid).toBe(false);
   expect(quote.invalidReason).toBe('asset amount must be greater than 20');
   expect(quote.minAmount).toBe(20);
@@ -125,6 +125,9 @@ test('test quote transfer', () => {
   expect(quote.valid).toBe(false);
   expect(quote.invalidReason).toBe('asset amount cannot exceed 21');
   commitments = [{ amount: toDecimals(30).toString() }];
+  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: -1 }, config, commitments, 2);
+  expect(quote.valid).toBe(false);
+  expect(quote.invalidReason).toBe('asset amount cannot be negative or zero');
   quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 22 }, config, commitments, 2);
   expect(quote.valid).toBe(true);
   expect(quote.numOfSplits).toBe(2);

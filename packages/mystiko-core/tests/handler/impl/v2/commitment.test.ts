@@ -1,7 +1,10 @@
+// eslint-disable-next-line max-classes-per-file
 import { Account, Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import {
   AccountHandlerV2,
+  CommitmentExecutorV2,
   CommitmentHandlerV2,
+  ExecutorFactoryV2,
   MystikoContext,
   MystikoHandler,
   WalletHandlerV2,
@@ -40,8 +43,25 @@ let account2: Account;
 const walletMasterSeed = '0xdeadbeef';
 const walletPassword = 'P@ssw0rd';
 
+class TestCommitmentExecutor extends CommitmentExecutorV2 {
+  public import(): Promise<Commitment[]> {
+    return Promise.resolve([]);
+  }
+
+  public scan(): Promise<Commitment[]> {
+    return Promise.resolve([]);
+  }
+}
+
+class TestExecutorFactory extends ExecutorFactoryV2 {
+  public getCommitmentExecutor(): CommitmentExecutorV2 {
+    return new TestCommitmentExecutor(this.context);
+  }
+}
+
 beforeAll(async () => {
   context = await createTestContext();
+  context.executors = new TestExecutorFactory(context);
 });
 
 beforeEach(async () => {
@@ -147,4 +167,16 @@ test('test findOne', async () => {
     commitmentHash: '2',
   });
   expect(commitment).not.toBe(null);
+  if (commitment) {
+    const newCommitment = await handler.findOne(commitment.id);
+    expect(newCommitment?.toJSON()).toStrictEqual(commitment.toJSON());
+  }
+});
+
+test('test import', async () => {
+  await handler.import({ walletPassword });
+});
+
+test('test scan', async () => {
+  await handler.scan({ walletPassword, shieldedAddress: account1.shieldedAddress });
 });

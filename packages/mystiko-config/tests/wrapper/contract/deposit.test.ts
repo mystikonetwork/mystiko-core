@@ -5,6 +5,7 @@ import {
   CircuitConfig,
   CircuitType,
   DepositContractConfig,
+  MAIN_ASSET_ADDRESS,
   PoolContractConfig,
   RawAssetConfig,
   RawConfig,
@@ -51,20 +52,19 @@ beforeEach(async () => {
   rawConfig.bridgeType = BridgeType.LOOP;
   rawConfig.peerChainId = undefined;
   rawConfig.peerContractAddress = undefined;
-  config = new DepositContractConfig(
-    rawConfig,
-    () =>
-      new PoolContractConfig(
-        rawMystikoConfig.chains[0].poolContracts[0],
+  expect(() => new DepositContractConfig(rawConfig)).toThrow(new Error('auxData has not been specified'));
+  config = new DepositContractConfig(rawConfig, {
+    poolContractGetter: () =>
+      new PoolContractConfig(rawMystikoConfig.chains[0].poolContracts[0], {
         defaultCircuitConfigs,
         circuitConfigsByName,
         mainAssetConfig,
         assetConfigs,
-      ),
-    () => undefined,
+      }),
+    depositContractGetter: () => undefined,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
 });
 
 test('test equality', () => {
@@ -100,85 +100,52 @@ test('test equality', () => {
 
 test('test bridgeFeeAsset', () => {
   rawConfig.bridgeFeeAssetAddress = undefined;
-  config = new DepositContractConfig(
-    rawConfig,
-    () => undefined,
-    () => undefined,
-    mainAssetConfig,
-    assetConfigs,
-  );
+  config = config.mutate(rawConfig);
   expect(config.bridgeFeeAsset).toStrictEqual(mainAssetConfig);
   rawConfig.bridgeFeeAssetAddress = '0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9';
-  expect(
-    () =>
-      new DepositContractConfig(
-        rawConfig,
-        () => undefined,
-        () => undefined,
-        mainAssetConfig,
-        assetConfigs,
-      ),
-  ).toThrow(
+  expect(() => config.mutate(rawConfig)).toThrow(
     new Error(
       'bridge fee asset address=0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9 config ' +
         `has not been defined for deposit contract address=${rawConfig.address}`,
     ),
   );
+  rawConfig.bridgeFeeAssetAddress = MAIN_ASSET_ADDRESS;
+  config = config.mutate(rawConfig);
+  expect(config.bridgeFeeAsset).toStrictEqual(mainAssetConfig);
 });
 
 test('test executorFeeAsset', () => {
   rawConfig.executorFeeAssetAddress = undefined;
-  config = new DepositContractConfig(
-    rawConfig,
-    () =>
-      new PoolContractConfig(
-        rawMystikoConfig.chains[0].poolContracts[0],
-        defaultCircuitConfigs,
-        circuitConfigsByName,
-        mainAssetConfig,
-        assetConfigs,
-      ),
-    () => undefined,
-    mainAssetConfig,
-    assetConfigs,
-  );
+  config = config.mutate(rawConfig);
   expect(config.executorFeeAsset).toStrictEqual(config.asset);
   rawConfig.executorFeeAssetAddress = '0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9';
-  expect(
-    () =>
-      new DepositContractConfig(
-        rawConfig,
-        () => undefined,
-        () => undefined,
-        mainAssetConfig,
-        assetConfigs,
-      ),
-  ).toThrow(
+  expect(() => config.mutate(rawConfig)).toThrow(
     new Error(
       'executor fee asset address=0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9 config ' +
         `has not been defined for deposit contract address=${rawConfig.address}`,
     ),
   );
+  rawConfig.executorFeeAssetAddress = MAIN_ASSET_ADDRESS;
+  config = config.mutate(rawConfig);
+  expect(config.executorFeeAsset).toStrictEqual(mainAssetConfig);
 });
 
 test('test peerContract', () => {
-  const peerContractConfig = new DepositContractConfig(
-    rawMystikoConfig.chains[1].depositContracts[0],
-    () => undefined,
-    () => undefined,
+  const peerContractConfig = new DepositContractConfig(rawMystikoConfig.chains[1].depositContracts[0], {
+    poolContractGetter: () => undefined,
+    depositContractGetter: () => undefined,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
   rawConfig.bridgeType = BridgeType.TBRIDGE;
   rawConfig.peerChainId = 97;
   rawConfig.peerContractAddress = '0xd791049D0a154bC7860804e1A18ACD148Eb0afD9';
-  config = new DepositContractConfig(
-    rawConfig,
-    () => undefined,
-    () => peerContractConfig,
+  config = new DepositContractConfig(rawConfig, {
+    poolContractGetter: () => undefined,
+    depositContractGetter: () => peerContractConfig,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
   expect(config.peerContract?.address).toBe('0xd791049D0a154bC7860804e1A18ACD148Eb0afD9');
 });
 
@@ -186,46 +153,42 @@ test('test invalid rawConfig', () => {
   rawConfig.bridgeType = BridgeType.TBRIDGE;
   expect(
     () =>
-      new DepositContractConfig(
-        rawConfig,
-        () => undefined,
-        () => undefined,
+      new DepositContractConfig(rawConfig, {
+        poolContractGetter: () => undefined,
+        depositContractGetter: () => undefined,
         mainAssetConfig,
         assetConfigs,
-      ),
+      }),
   ).toThrow();
   rawConfig.bridgeType = BridgeType.LOOP;
   rawConfig.peerContractAddress = '0xd791049D0a154bC7860804e1A18ACD148Eb0afD9';
   expect(
     () =>
-      new DepositContractConfig(
-        rawConfig,
-        () => undefined,
-        () => undefined,
+      new DepositContractConfig(rawConfig, {
+        poolContractGetter: () => undefined,
+        depositContractGetter: () => undefined,
         mainAssetConfig,
         assetConfigs,
-      ),
+      }),
   ).toThrow();
   rawConfig.peerContractAddress = undefined;
   rawConfig.peerChainId = 97;
   expect(
     () =>
-      new DepositContractConfig(
-        rawConfig,
-        () => undefined,
-        () => undefined,
+      new DepositContractConfig(rawConfig, {
+        poolContractGetter: () => undefined,
+        depositContractGetter: () => undefined,
         mainAssetConfig,
         assetConfigs,
-      ),
+      }),
   ).toThrow();
   rawConfig.peerChainId = undefined;
-  config = new DepositContractConfig(
-    rawConfig,
-    () => undefined,
-    () => undefined,
+  config = new DepositContractConfig(rawConfig, {
+    poolContractGetter: () => undefined,
+    depositContractGetter: () => undefined,
     mainAssetConfig,
     assetConfigs,
-  );
+  });
   expect(() => config.poolContract).toThrow(
     new Error(`no poolContract definition found for deposit contract=${rawConfig.address}`),
   );
@@ -233,6 +196,26 @@ test('test invalid rawConfig', () => {
 
 test('test copy', () => {
   expect(config.copyData()).toStrictEqual(rawConfig);
+});
+
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  rawConfig.name = 'another name';
+  let newConfig = config.mutate(rawConfig);
+  expect(newConfig.name).toBe('another name');
+  newConfig = config.mutate(rawConfig, {
+    poolContractGetter: () =>
+      new PoolContractConfig(rawMystikoConfig.chains[0].poolContracts[0], {
+        defaultCircuitConfigs,
+        circuitConfigsByName,
+        mainAssetConfig,
+        assetConfigs,
+      }),
+    depositContractGetter: () => undefined,
+    mainAssetConfig,
+    assetConfigs,
+  });
+  expect(newConfig.copyData()).toStrictEqual(rawConfig);
 });
 
 test('test toJsonString', async () => {

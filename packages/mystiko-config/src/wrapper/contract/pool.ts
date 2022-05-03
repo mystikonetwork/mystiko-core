@@ -6,24 +6,28 @@ import { AssetConfig } from '../asset';
 import { CircuitConfig } from '../circuit';
 import { ContractConfig } from './base';
 
-export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
+type AuxData = {
+  defaultCircuitConfigs: Map<CircuitType, CircuitConfig>;
+  circuitConfigsByName: Map<string, CircuitConfig>;
+  mainAssetConfig: AssetConfig;
+  assetConfigs: Map<string, AssetConfig>;
+};
+
+export class PoolContractConfig extends ContractConfig<RawPoolContractConfig, AuxData> {
   private readonly circuitConfigs: Map<CircuitType, CircuitConfig> = new Map<CircuitType, CircuitConfig>();
 
   private readonly mainAssetConfig: AssetConfig;
 
   private readonly assetConfig?: AssetConfig;
 
-  constructor(
-    data: RawPoolContractConfig,
-    defaultCircuitConfigs: Map<CircuitType, CircuitConfig>,
-    circuitConfigsByName: Map<string, CircuitConfig>,
-    mainAssetConfig: AssetConfig,
-    assetConfigs: Map<string, AssetConfig>,
-  ) {
-    super(data);
-    this.circuitConfigs = this.initCircuitsConfigs(defaultCircuitConfigs, circuitConfigsByName);
-    this.assetConfig = this.initAssetConfig(assetConfigs);
-    this.mainAssetConfig = mainAssetConfig;
+  constructor(data: RawPoolContractConfig, auxData?: AuxData) {
+    super(data, auxData);
+    this.circuitConfigs = this.initCircuitsConfigs(
+      this.auxDataNotEmpty.defaultCircuitConfigs,
+      this.auxDataNotEmpty.circuitConfigsByName,
+    );
+    this.assetConfig = this.initAssetConfig(this.auxDataNotEmpty.assetConfigs);
+    this.mainAssetConfig = this.auxDataNotEmpty.mainAssetConfig;
     this.validate();
   }
 
@@ -69,6 +73,10 @@ export class PoolContractConfig extends ContractConfig<RawPoolContractConfig> {
 
   public getCircuitConfig(type: CircuitType): CircuitConfig | undefined {
     return this.circuitConfigs.get(type);
+  }
+
+  public mutate(data?: RawPoolContractConfig, auxData?: AuxData): PoolContractConfig {
+    return new PoolContractConfig(data || this.data, auxData || this.auxData);
   }
 
   private initCircuitsConfigs(

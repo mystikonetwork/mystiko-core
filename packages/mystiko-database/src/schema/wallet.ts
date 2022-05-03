@@ -37,7 +37,7 @@ const walletSchemaLiteral = {
     },
   },
   required: ['id', 'createdAt', 'updatedAt', 'encryptedMasterSeed', 'hashedPassword', 'accountNonce'],
-  indexes: ['createdAt'],
+  indexes: ['createdAt', 'updatedAt'],
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(walletSchemaLiteral);

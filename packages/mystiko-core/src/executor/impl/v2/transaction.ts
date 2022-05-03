@@ -29,7 +29,7 @@ import {
   waitTransaction,
 } from '@mystikonetwork/utils';
 import BN from 'bn.js';
-import { isEthereumAddress } from 'class-validator';
+import { isEthereumAddress, isURL } from 'class-validator';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -61,6 +61,7 @@ type ExecutionContext = {
   rollupFee: BN;
   gasRelayerFee: BN;
   outputCommitments?: Array<{ commitment: Commitment; info: CommitmentV2 }>;
+  etherContract: CommitmentPool;
 };
 
 type ExecutionContextWithTransaction = ExecutionContext & {
@@ -84,23 +85,20 @@ type CommitmentUpdate = {
   status?: CommitmentStatus;
   creationTransactionHash?: string;
   spentTransactionHash?: string;
-  serialNumber?: string;
 };
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
   public execute(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionResponse> {
-    return this.context.wallets.checkPassword(options.walletPassword).then(() =>
-      this.buildExecutionContext(options, config)
-        .then((executionContext) => this.validateOptions(executionContext))
-        .then((executionContext) => this.validatePoolBalance(executionContext))
-        .then((executionContext) => this.validateSigner(executionContext))
-        .then((executionContext) => this.createOutputCommitments(executionContext))
-        .then((executionContext) => this.createTransaction(executionContext))
-        .then((executionContext) => ({
-          transaction: executionContext.transaction,
-          transactionPromise: this.executeTransaction(executionContext),
-        })),
-    );
+    return this.buildExecutionContext(options, config, true)
+      .then((executionContext) => this.validateOptions(executionContext))
+      .then((executionContext) => this.validatePoolBalance(executionContext))
+      .then((executionContext) => this.validateSigner(executionContext))
+      .then((executionContext) => this.createOutputCommitments(executionContext))
+      .then((executionContext) => this.createTransaction(executionContext))
+      .then((executionContext) => ({
+        transaction: executionContext.transaction,
+        transactionPromise: this.executeTransaction(executionContext),
+      }));
   }
 
   public quote(options: TransactionQuoteOptions, config: PoolContractConfig): Promise<TransactionQuote> {
@@ -115,6 +113,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then((executionContext) => {
         const { quote, amount, publicAmount, rollupFee, gasRelayerFee } = executionContext;
         const previousBalance = quote.balance;
+        let newBalance = toDecimals(previousBalance, config.assetDecimals);
         const rollupFeeAmount = fromDecimals(rollupFee, config.assetDecimals);
         const gasRelayerFeeAmount = fromDecimals(gasRelayerFee, config.assetDecimals);
         let withdrawingAmount = 0;
@@ -124,15 +123,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             publicAmount.sub(rollupFee).sub(gasRelayerFee),
             config.assetDecimals,
           );
+          newBalance = newBalance.sub(publicAmount);
         }
         if (options.type === TransactionEnum.TRANSFER) {
           transferringAmount = fromDecimals(amount.sub(rollupFee).sub(gasRelayerFee), config.assetDecimals);
+          newBalance = newBalance.sub(amount);
         }
-        const newBalance =
-          previousBalance - withdrawingAmount - transferringAmount - rollupFeeAmount - gasRelayerFeeAmount;
         return {
           previousBalance,
-          newBalance,
+          newBalance: fromDecimals(newBalance, config.assetDecimals),
           withdrawingAmount,
           transferringAmount,
           rollupFeeAmount,
@@ -163,65 +162,75 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     contractConfig: PoolContractConfig,
     checkPassword = false,
   ): Promise<ExecutionContext> {
-    const walletPromise: Promise<Wallet> = checkPassword
-      ? this.context.wallets.checkPassword(options.walletPassword)
-      : this.context.wallets.checkCurrent();
-    return walletPromise
-      .then((wallet) =>
-        this.getCommitments(options, contractConfig).then((commitments) => ({ wallet, commitments })),
-      )
-      .then(({ wallet, commitments }) => {
-        const chainConfig = this.config.getChainConfig(options.chainId);
-        if (!chainConfig) {
-          return createErrorPromise(
-            `failed to get chain id=${options.chainId} configuration`,
-            MystikoErrorCode.NON_EXISTING_CHAIN,
+    return TransactionExecutorV2.validateNumbers(options).then(() => {
+      const walletPromise: Promise<Wallet> = checkPassword
+        ? this.context.wallets.checkPassword(options.walletPassword)
+        : this.context.wallets.checkCurrent();
+      return walletPromise
+        .then((wallet) =>
+          this.getCommitments(options, contractConfig).then((commitments) => ({ wallet, commitments })),
+        )
+        .then(({ wallet, commitments }) => {
+          const chainConfig = this.config.getChainConfig(options.chainId);
+          if (!chainConfig) {
+            return createErrorPromise(
+              `no chain id=${options.chainId} configured`,
+              MystikoErrorCode.NON_EXISTING_CHAIN,
+            );
+          }
+          const quote = CommitmentUtils.quote(options, contractConfig, commitments, MAX_NUM_INPUTS);
+          let amount = toBN(0);
+          if (options.amount && quote.valid) {
+            amount = toDecimals(options.amount, contractConfig.assetDecimals);
+          }
+          let publicAmount = toBN(0);
+          if (options.publicAmount && quote.valid) {
+            publicAmount = toDecimals(options.publicAmount, contractConfig.assetDecimals);
+          }
+          let rollupFee = toBN(0);
+          if (options.rollupFee && quote.valid) {
+            rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).mul(
+              toBN(quote.numOfSplits),
+            );
+          }
+          let gasRelayerFee = toBN(0);
+          if (options.gasRelayerFee && quote.valid) {
+            gasRelayerFee = toDecimals(options.gasRelayerFee, contractConfig.assetDecimals);
+          }
+          let selectedCommitments: Commitment[] = [];
+          if (quote.valid) {
+            const spendingAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
+            selectedCommitments = CommitmentUtils.select(commitments, MAX_NUM_INPUTS, spendingAmount);
+          }
+          const { signer } = options;
+          const etherContract = this.context.contractConnector.connect<CommitmentPool>(
+            'CommitmentPool',
+            contractConfig.address,
+            signer.signer,
           );
-        }
-        const quote = CommitmentUtils.quote(options, contractConfig, commitments, MAX_NUM_INPUTS);
-        let amount = toBN(0);
-        if (options.amount && quote.valid) {
-          amount = toDecimals(options.amount, contractConfig.assetDecimals);
-        }
-        let publicAmount = toBN(0);
-        if (options.publicAmount && quote.valid) {
-          publicAmount = toDecimals(options.publicAmount, contractConfig.assetDecimals);
-        }
-        let rollupFee = toBN(0);
-        if (options.rollupFee && quote.valid) {
-          rollupFee = toDecimals(options.rollupFee, contractConfig.assetDecimals).mul(
-            toBN(quote.numOfSplits),
-          );
-        }
-        let gasRelayerFee = toBN(0);
-        if (options.gasRelayerFee && quote.valid) {
-          gasRelayerFee = toDecimals(options.gasRelayerFee, contractConfig.assetDecimals);
-        }
-        let selectedCommitments: Commitment[] = [];
-        if (quote.valid) {
-          const spendingAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
-          selectedCommitments = CommitmentUtils.select(commitments, MAX_NUM_INPUTS, spendingAmount);
-        }
-        return {
-          options,
-          contractConfig,
-          chainConfig,
-          wallet,
-          commitments,
-          selectedCommitments,
-          quote,
-          amount,
-          publicAmount,
-          rollupFee,
-          gasRelayerFee,
-        };
-      });
+          return {
+            options,
+            contractConfig,
+            chainConfig,
+            wallet,
+            commitments,
+            selectedCommitments,
+            quote,
+            amount,
+            publicAmount,
+            rollupFee,
+            gasRelayerFee,
+            etherContract,
+          };
+        });
+    });
   }
 
   private validateOptions(executionContext: ExecutionContext): Promise<ExecutionContext> {
     const {
       options,
       contractConfig,
+      chainConfig,
       quote,
       selectedCommitments,
       amount,
@@ -229,6 +238,16 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       rollupFee,
       gasRelayerFee,
     } = executionContext;
+    if (
+      !chainConfig.getPoolContractByAddress(contractConfig.address) ||
+      options.assetSymbol !== contractConfig.assetSymbol ||
+      options.bridgeType !== chainConfig.getPoolContractBridgeType(contractConfig.address)
+    ) {
+      return createErrorPromise(
+        'given options mismatch with config',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
     const spentAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
     if (!quote.valid) {
       return createErrorPromise(
@@ -244,7 +263,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     }
     if (rollupFee.lt(contractConfig.minRollupFee.mul(toBN(quote.numOfSplits)))) {
       return createErrorPromise(
-        'rollupFee is too small to pay rollup service',
+        'rollup fee is too small to pay rollup service',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
@@ -278,6 +297,16 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
+    if (
+      options.gasRelayerEndpoint &&
+      !isURL(options.gasRelayerEndpoint, { protocols: ['http', 'https'], require_tld: false })
+    ) {
+      return createErrorPromise(
+        'invalid endpoint url for gas relayer',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    /* istanbul ignore if */
     if (selectedCommitments.length === 0) {
       return createErrorPromise(
         'cannot find any private asset to withdraw or transfer',
@@ -317,35 +346,32 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
 
   private createOutputCommitments(executionContext: ExecutionContext): Promise<ExecutionContext> {
     const { options, selectedCommitments, amount, publicAmount, rollupFee, gasRelayerFee } = executionContext;
-    if (selectedCommitments.length > 0) {
-      const inputSum = CommitmentUtils.sum(selectedCommitments);
-      const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentV2 }>[] = [];
-      let remainingAmount;
-      if (options.type === TransactionEnum.TRANSFER && options.shieldedAddress) {
-        remainingAmount = inputSum.sub(amount);
-        const transferringAmount = amount.sub(rollupFee).sub(gasRelayerFee);
-        if (transferringAmount.gtn(0)) {
-          commitmentPromises.push(
-            this.createOutputCommitment(executionContext, options.shieldedAddress, transferringAmount),
-          );
-        }
-      } else {
-        remainingAmount = inputSum.sub(publicAmount);
+    const inputSum = CommitmentUtils.sum(selectedCommitments);
+    const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentV2 }>[] = [];
+    let remainingAmount;
+    if (options.type === TransactionEnum.TRANSFER && options.shieldedAddress) {
+      remainingAmount = inputSum.sub(amount);
+      const transferringAmount = amount.sub(rollupFee).sub(gasRelayerFee);
+      if (transferringAmount.gtn(0)) {
+        commitmentPromises.push(
+          this.createOutputCommitment(executionContext, options.shieldedAddress, transferringAmount),
+        );
       }
-      if (remainingAmount.gtn(0)) {
-        const inputCommitment = selectedCommitments[0];
-        if (inputCommitment.shieldedAddress) {
-          commitmentPromises.push(
-            this.createOutputCommitment(executionContext, inputCommitment.shieldedAddress, remainingAmount),
-          );
-        }
-      }
-      return Promise.all(commitmentPromises).then((outputCommitments) => ({
-        ...executionContext,
-        outputCommitments,
-      }));
+    } else {
+      remainingAmount = inputSum.sub(publicAmount);
     }
-    return Promise.resolve(executionContext);
+    if (remainingAmount.gtn(0)) {
+      const inputCommitment = selectedCommitments[0];
+      if (inputCommitment.shieldedAddress) {
+        commitmentPromises.push(
+          this.createOutputCommitment(executionContext, inputCommitment.shieldedAddress, remainingAmount),
+        );
+      }
+    }
+    return Promise.all(commitmentPromises).then((outputCommitments) => ({
+      ...executionContext,
+      outputCommitments,
+    }));
   }
 
   private createOutputCommitment(
@@ -431,32 +457,35 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private executeTransaction(executionContext: ExecutionContextWithTransaction): Promise<Transaction> {
     const { options, selectedCommitments, transaction, outputCommitments } = executionContext;
     const outCommitments = outputCommitments ? outputCommitments.map((c) => c.commitment) : [];
-    return this.generateProof(executionContext)
-      .then((ec) => this.sendTransaction(ec))
-      .then((ec) => {
-        const promises: Promise<void>[] = [];
-        const selectedCommitmentsUpdate: CommitmentUpdate[] = [];
-        const outCommitmentsUpdate: CommitmentUpdate[] = [];
-        for (let i = 0; i < selectedCommitments.length; i += 1) {
-          const commitment = selectedCommitments[i];
-          selectedCommitmentsUpdate.push({
-            commitment,
-            spentTransactionHash: ec.transaction.transactionHash,
-            status: CommitmentStatus.SPENT,
-          });
-        }
-        for (let i = 0; i < outCommitments.length; i += 1) {
-          const commitment = outCommitments[i];
-          outCommitmentsUpdate.push({
-            commitment,
-            creationTransactionHash: ec.transaction.transactionHash,
-            status: CommitmentStatus.QUEUED,
-          });
-        }
-        promises.push(TransactionExecutorV2.updateCommitments(selectedCommitmentsUpdate));
-        promises.push(TransactionExecutorV2.updateCommitments(outCommitmentsUpdate));
-        return Promise.all(promises).then(() => transaction);
-      })
+    return TransactionExecutorV2.validateSerialNumbers(executionContext)
+      .then(() =>
+        this.generateProof(executionContext)
+          .then((ec) => this.sendTransaction(ec))
+          .then((ec) => {
+            const promises: Promise<void>[] = [];
+            const selectedCommitmentsUpdate: CommitmentUpdate[] = [];
+            const outCommitmentsUpdate: CommitmentUpdate[] = [];
+            for (let i = 0; i < selectedCommitments.length; i += 1) {
+              const commitment = selectedCommitments[i];
+              selectedCommitmentsUpdate.push({
+                commitment,
+                spentTransactionHash: ec.transaction.transactionHash,
+                status: CommitmentStatus.SPENT,
+              });
+            }
+            for (let i = 0; i < outCommitments.length; i += 1) {
+              const commitment = outCommitments[i];
+              outCommitmentsUpdate.push({
+                commitment,
+                creationTransactionHash: ec.transaction.transactionHash,
+                status: CommitmentStatus.QUEUED,
+              });
+            }
+            promises.push(TransactionExecutorV2.updateCommitments(selectedCommitmentsUpdate));
+            promises.push(TransactionExecutorV2.updateCommitments(outCommitmentsUpdate));
+            return Promise.all(promises).then(() => transaction);
+          }),
+      )
       .catch((error) => {
         const errorMsg = errorMessage(error);
         this.logger.error(`transaction id=${transaction.id} failed: ${errorMsg}`);
@@ -496,6 +525,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
               numOutputs,
               contractConfig,
             );
+            /* istanbul ignore if */
             if (!circuitConfig) {
               return createErrorPromise(
                 `missing circuit config with number of inputs=${numInputs} ` +
@@ -525,6 +555,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
               const commitment = selectedCommitments[i];
               const account = accounts[i];
               const { commitmentHash, leafIndex, encryptedNote } = commitment;
+              /* istanbul ignore if */
               if (!encryptedNote || !leafIndex) {
                 return createErrorPromise(
                   `missing required data of input commitment=${commitmentHash}`,
@@ -550,6 +581,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                 const { commitment, info } = outputCommitments[i];
                 const { shieldedAddress, amount, rollupFeeAmount } = commitment;
                 const { randomP, randomR, randomS, commitmentHash, privateNote } = info;
+                /* istanbul ignore if */
                 if (!shieldedAddress || !amount) {
                   return createErrorPromise(
                     `missing required data of output commitment=${commitmentHash.toString()}`,
@@ -598,6 +630,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                 (this.protocol as MystikoProtocolV2)
                   .zkVerify(proof, circuitConfig.verifyingKeyFile)
                   .then((proofValid) => {
+                    /* istanbul ignore if */
                     if (!proofValid) {
                       return createErrorPromise(
                         'generated an invalid proof',
@@ -626,7 +659,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   }
 
   private buildMerkleTree(executionContext: ExecutionContext): Promise<MerkleTree> {
-    const { options, contractConfig } = executionContext;
+    const { options, contractConfig, etherContract } = executionContext;
     return this.context.commitments
       .findByContract({
         chainId: options.chainId,
@@ -653,51 +686,64 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           commitmentHashes.push(toBN(commitmentHash));
         }
         return new MerkleTree(commitmentHashes);
-      });
+      })
+      .then((merkleTree: MerkleTree) =>
+        etherContract.isKnownRoot(merkleTree.root().toString()).then((validRoot) => {
+          if (!validRoot) {
+            return createErrorPromise(
+              'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
+              MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+            );
+          }
+          return Promise.resolve(merkleTree);
+        }),
+      );
   }
 
   private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithRequest> {
-    const { options, contractConfig, chainConfig, transaction } = executionContext;
-    const { signer } = options;
-    const contract = this.context.contractConnector.connect<CommitmentPool>(
-      'CommitmentPool',
-      contractConfig.address,
-      signer.signer,
-    );
+    const { options, contractConfig, chainConfig, transaction, etherContract, selectedCommitments } =
+      executionContext;
     const request = TransactionExecutorV2.buildTransactionRequest(executionContext);
-    return TransactionExecutorV2.validateRequest(executionContext, request, contract).then(() =>
-      TransactionExecutorV2.signRequest(executionContext, request)
-        .then((signature) => {
+    for (let i = 0; i < request.serialNumbers.length; i += 1) {
+      const commitment = selectedCommitments[i];
+      if (commitment.serialNumber !== ethers.BigNumber.from(request.serialNumbers[i]).toString()) {
+        return createErrorPromise(
+          `generated commitment id=${commitment.id} serial number mismatch`,
+          MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+        );
+      }
+    }
+    return TransactionExecutorV2.signRequest(executionContext, request)
+      .then((signature) => {
+        this.logger.info(
+          `submitting transaction id=${transaction.id} to ` +
+            `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}`,
+        );
+        return etherContract.transact(request, signature);
+      })
+      .then((resp) => {
+        this.logger.info(
+          `successfully submitted transaction id=${transaction.id} to ` +
+            `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
+            `transaction hash=${resp.hash}`,
+        );
+        return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
+          transactionHash: resp.hash,
+        }).then((tx) => ({ tx, resp }));
+      })
+      .then(({ tx, resp }) =>
+        waitTransaction(resp).then((receipt) => {
           this.logger.info(
-            `submitting transaction id=${transaction.id} to ` +
-              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}`,
+            `transaction id=${transaction.id} to ` +
+              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
+              ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
           );
-          return contract.transact(request, signature);
-        })
-        .then((resp) => {
-          this.logger.info(
-            `successfully submitted transaction id=${transaction.id} to ` +
-              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
-              `transaction hash=${resp.hash}`,
-          );
-          return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
-            transactionHash: resp.hash,
-          }).then((tx) => ({ tx, resp }));
-        })
-        .then(({ tx, resp }) =>
-          waitTransaction(resp).then((receipt) => {
-            this.logger.info(
-              `transaction id=${transaction.id} to ` +
-                `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
-                ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
-            );
-            return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-              transactionHash: receipt.transactionHash,
-            });
-          }),
-        )
-        .then((tx) => ({ ...executionContext, transaction: tx, request })),
-    );
+          return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+            transactionHash: receipt.transactionHash,
+          });
+        }),
+      )
+      .then((tx) => ({ ...executionContext, transaction: tx, request }));
   }
 
   private updateTransactionStatus(
@@ -707,7 +753,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     extraData?: TransactionUpdate,
   ): Promise<Transaction> {
     const oldStatus = transaction.status as TransactionStatus;
-    if (oldStatus !== newStatus && extraData) {
+    if (oldStatus !== newStatus || extraData) {
       const wrappedData: TransactionUpdate = extraData || {};
       wrappedData.status = newStatus;
       return this.context.transactions.update(transaction.id, wrappedData).then((newTransaction) => {
@@ -721,47 +767,25 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         return newTransaction;
       });
     }
+    /* istanbul ignore next */
     return Promise.resolve(transaction);
   }
 
-  private static validateRequest(
-    executionContext: ExecutionContextWithProof,
-    request: ICommitmentPool.TransactRequestStruct,
-    contract: CommitmentPool,
-  ): Promise<ExecutionContextWithProof> {
-    return contract
-      .isKnownRoot(request.rootHash)
-      .then((validRoot) => {
-        if (!validRoot) {
-          return createErrorPromise(
-            'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
-            MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
-          );
-        }
-        return Promise.resolve();
-      })
-      .then(() => TransactionExecutorV2.validateSerialNumbers(executionContext, request, contract));
-  }
-
-  private static validateSerialNumbers(
-    executionContext: ExecutionContextWithProof,
-    request: ICommitmentPool.TransactRequestStruct,
-    contract: CommitmentPool,
-  ): Promise<ExecutionContextWithProof> {
+  private static validateSerialNumbers(executionContext: ExecutionContext): Promise<ExecutionContext> {
+    const { etherContract } = executionContext;
     const { selectedCommitments } = executionContext;
-    const { serialNumbers } = request;
-    if (serialNumbers.length !== selectedCommitments.length) {
-      return createErrorPromise(
-        'number of serial numbers is not equal to number of input commitments',
-        MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
-      );
-    }
     const serialNumberPromises: Promise<boolean>[] = [];
-    for (let i = 0; i < serialNumbers.length; i += 1) {
+    for (let i = 0; i < selectedCommitments.length; i += 1) {
       const commitment = selectedCommitments[i];
-      const serialNumber = serialNumbers[i];
+      const { serialNumber } = selectedCommitments[i];
+      if (!serialNumber) {
+        return createErrorPromise(
+          `serial number of commitment id=${commitment.id} is empty`,
+          MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+        );
+      }
       serialNumberPromises.push(
-        contract.spentSerialNumbers(serialNumber).then((spent) => {
+        etherContract.spentSerialNumbers(serialNumber).then((spent) => {
           if (spent) {
             return this.updateCommitments([{ commitment, status: CommitmentStatus.SPENT }]).then(() => spent);
           }
@@ -769,26 +793,16 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }),
       );
     }
-    return Promise.all(serialNumberPromises)
-      .then((spentFlags) => {
-        const doubleSpent = spentFlags.filter((spent) => spent).length > 0;
-        if (doubleSpent) {
-          return createErrorPromise(
-            'some commitments hava already been spent',
-            MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
-          );
-        }
-        return Promise.resolve(executionContext);
-      })
-      .then((ec) => {
-        const selectedCommitmentsUpdate: CommitmentUpdate[] = selectedCommitments.map(
-          (commitment, index) => ({
-            commitment,
-            serialNumber: ethers.BigNumber.from(serialNumbers[index]).toString(),
-          }),
+    return Promise.all(serialNumberPromises).then((spentFlags) => {
+      const doubleSpent = spentFlags.filter((spent) => spent).length > 0;
+      if (doubleSpent) {
+        return createErrorPromise(
+          'some commitments hava already been spent',
+          MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
         );
-        return this.updateCommitments(selectedCommitmentsUpdate).then(() => ec);
-      });
+      }
+      return Promise.resolve(executionContext);
+    });
   }
 
   private static updateCommitments(commitments: CommitmentUpdate[]): Promise<void> {
@@ -808,10 +822,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           }
           if (commitmentUpdate.spentTransactionHash) {
             data.spendingTransactionHash = commitmentUpdate.spentTransactionHash;
-            hasUpdate = true;
-          }
-          if (commitmentUpdate.serialNumber) {
-            data.serialNumber = commitmentUpdate.serialNumber;
             hasUpdate = true;
           }
           if (hasUpdate) {
@@ -877,6 +887,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     for (let i = 0; i < selectedCommitments.length; i += 1) {
       const commitment = selectedCommitments[i];
       const { commitmentHash, shieldedAddress } = commitment;
+      /* istanbul ignore if */
       if (!shieldedAddress) {
         return createErrorPromise(
           `missing required data of input commitment=${commitmentHash}`,
@@ -885,6 +896,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       }
       accountPromises.push(
         this.context.accounts.findOne(shieldedAddress).then((account) => {
+          /* istanbul ignore if */
           if (account === null) {
             return createErrorPromise(
               `account with mystiko address=${shieldedAddress} does not exist in your wallet`,
@@ -918,5 +930,34 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       config = contractConfig.getCircuitConfig(CircuitType.TRANSACTION2x2);
     }
     return config;
+  }
+
+  private static validateNumbers(options: TransactionOptions): Promise<TransactionOptions> {
+    if (options.type === TransactionEnum.TRANSFER) {
+      if (!options.amount || options.amount <= 0) {
+        return createErrorPromise(
+          'amount cannot be negative or zero or empty',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+    } else if (!options.publicAmount || options.publicAmount <= 0) {
+      return createErrorPromise(
+        'publicAmount cannot be negative or zero or empty',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    if (options.rollupFee && options.rollupFee < 0) {
+      return createErrorPromise(
+        'rollup fee cannot be negative',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    if (options.gasRelayerFee && options.gasRelayerFee < 0) {
+      return createErrorPromise(
+        'gas relayer fee cannot be negative',
+        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+      );
+    }
+    return Promise.resolve(options);
   }
 }

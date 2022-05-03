@@ -36,6 +36,10 @@ export class AssetConfig extends BaseConfig<RawAssetConfig> {
     return this.data.recommendedAmounts.map((amount) => fromDecimals(amount, this.assetDecimals));
   }
 
+  public mutate(data?: RawAssetConfig): AssetConfig {
+    return new AssetConfig(data || this.data);
+  }
+
   private validate() {
     check(
       (this.assetType !== AssetType.MAIN && this.assetAddress !== MAIN_ASSET_ADDRESS) ||

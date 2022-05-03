@@ -19,15 +19,17 @@ let mockERC20: MockContract;
 let context: MystikoContextInterface;
 let executor: AssetExecutorV2;
 
-beforeEach(async () => {
+beforeAll(async () => {
   etherWallet = ethers.Wallet.createRandom();
   provider = new MockProvider({
     ganacheOptions: {
-      accounts: [{ balance: toDecimals(100), secretKey: etherWallet.privateKey }],
+      accounts: [
+        { balance: toDecimals(100), secretKey: etherWallet.privateKey },
+        { balance: toDecimals(100), secretKey: ethers.Wallet.createRandom().privateKey },
+      ],
     },
   });
-  const [signer] = new MockProvider().getWallets();
-  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
+  const [signer] = provider.getWallets();
   const contractConnector: MystikoContractConnector = {
     connect<T extends SupportedContractType>(contractName: string, address: string): T {
       expect(address).toBe(mockERC20.address);
@@ -49,7 +51,12 @@ beforeEach(async () => {
   executor = new AssetExecutorV2(context);
 });
 
-afterEach(async () => {
+beforeEach(async () => {
+  const [, signer] = provider.getWallets();
+  mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
+});
+
+afterAll(async () => {
   await context.db.remove();
 });
 

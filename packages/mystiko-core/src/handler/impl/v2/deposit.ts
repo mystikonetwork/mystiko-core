@@ -75,33 +75,36 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
     return this.findOne(query).then((deposit) => {
       if (!deposit) {
         return createErrorPromise(
-          `no deposit found for query ${query}`,
+          `no deposit found for query=${query}`,
           MystikoErrorCode.NON_EXISTING_DEPOSIT,
         );
       }
       return deposit.atomicUpdate((oldData) => {
         let hasUpdate = false;
-        if (data.status) {
+        if (data.status && data.status !== oldData.status) {
           oldData.status = data.status;
           hasUpdate = true;
         }
-        if (data.errorMessage) {
+        if (data.errorMessage && data.errorMessage !== oldData.errorMessage) {
           oldData.errorMessage = data.errorMessage;
           hasUpdate = true;
         }
-        if (data.transactionHash) {
+        if (data.transactionHash && data.transactionHash !== oldData.transactionHash) {
           oldData.transactionHash = data.transactionHash;
           hasUpdate = true;
         }
-        if (data.assetApproveTransactionHash) {
+        if (
+          data.assetApproveTransactionHash &&
+          data.assetApproveTransactionHash !== oldData.assetApproveTransactionHash
+        ) {
           oldData.assetApproveTransactionHash = data.assetApproveTransactionHash;
           hasUpdate = true;
         }
-        if (data.relayTransactionHash) {
+        if (data.relayTransactionHash && data.relayTransactionHash !== oldData.relayTransactionHash) {
           oldData.relayTransactionHash = data.relayTransactionHash;
           hasUpdate = true;
         }
-        if (data.rollupTransactionHash) {
+        if (data.rollupTransactionHash && data.rollupTransactionHash !== oldData.rollupTransactionHash) {
           oldData.rollupTransactionHash = data.rollupTransactionHash;
           hasUpdate = true;
         }

@@ -2,7 +2,7 @@ import { RawContractConfig } from '../../raw';
 import { BaseConfig } from '../base';
 import { ContractType } from '../../common';
 
-export class ContractConfig<T extends RawContractConfig> extends BaseConfig<T> {
+export class ContractConfig<T extends RawContractConfig, A = {}> extends BaseConfig<T, A> {
   public get version(): number {
     return this.data.version;
   }
@@ -25,5 +25,9 @@ export class ContractConfig<T extends RawContractConfig> extends BaseConfig<T> {
 
   public get eventFilterSize(): number | undefined {
     return this.data.eventFilterSize;
+  }
+
+  public mutate(data?: T, auxData?: A): ContractConfig<T, A> {
+    return new ContractConfig<T, A>(data || this.data, auxData || this.auxData);
   }
 }

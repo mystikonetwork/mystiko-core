@@ -17,6 +17,13 @@ test('test copy', () => {
   expect(new CelerBridgeConfig(config.copyData())).toStrictEqual(config);
 });
 
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  rawConfig.name = 'another name';
+  const newConfig = config.mutate(rawConfig);
+  expect(newConfig.name).toBe('another name');
+});
+
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
   const loadedRawConfig = await RawConfig.createFromObject(RawCelerBridgeConfig, JSON.parse(jsonString));

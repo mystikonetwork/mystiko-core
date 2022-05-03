@@ -3,7 +3,7 @@ import { AccountHandlerV2 } from './account';
 import { AssetHandlerV2 } from './asset';
 import { ChainHandlerV2 } from './chain';
 import { CommitmentHandlerV2 } from './commitment';
-import { ContractHandlerV2 } from './contracts';
+import { ContractHandlerV2 } from './contract';
 import { DepositHandlerV2 } from './deposit';
 import { TransactionHandlerV2 } from './transaction';
 import { WalletHandlerV2 } from './wallet';

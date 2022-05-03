@@ -28,7 +28,7 @@
     "build:cjs": "tsc -p ./tsconfig.json",
     "build:esm": "tsc -p ./tsconfig.esm.json",
     "build": "rm -rf build && yarn build:cjs && yarn build:esm",
-    "test": "jest --coverage",
+    "test": "jest --forceExit --coverage",
     "lint": "eslint --ext .js,.ts .",
     "prettier:check": "prettier --check \"./**/*.{js,ts}\" --config .prettierrc",
     "prettier:fix": "prettier --write \"./**/*.{js,ts}\" --config .prettierrc",
@@ -37,13 +37,16 @@
   "devDependencies": {
     "@ethereum-waffle/mock-contract": "^3.4.4",
     "@ethereum-waffle/provider": "^3.4.4",
+    "@mystikonetwork/circuits": "^0.1.0-alpha.3",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.0",
+    "@types/command-exists": "^1.2.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.21",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
+    "command-exists": "^1.2.9",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-typescript": "^16.1.0",
     "eslint-config-prettier": "^8.3.0",
@@ -70,7 +73,7 @@
     "loglevel-plugin-prefix": "^0.8.4",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5",
-    "uuid": "^8.3.2",
+    "ulid": "^2.3.0",
     "zokrates-js": "1.0.41"
   }
 }

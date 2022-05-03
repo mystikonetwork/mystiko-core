@@ -1,6 +1,6 @@
 import { BridgeType } from '@mystikonetwork/config';
 import { Chain, Commitment, CommitmentStatus } from '@mystikonetwork/database';
-import { fromDecimals } from '@mystikonetwork/utils';
+import { fromDecimals, toBN } from '@mystikonetwork/utils';
 import { MystikoHandler } from '../../handler';
 import {
   AssetBalance,
@@ -144,13 +144,6 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
           commitmentSelector.chainId = options.chainId;
         }
       }
-      if (options && options.bridgeType) {
-        if (options.bridgeType instanceof Array && options.bridgeType.length > 0) {
-          commitmentSelector.bridgeType = { $in: options.bridgeType };
-        } else if (!(options.bridgeType instanceof Array)) {
-          commitmentSelector.bridgeType = options.bridgeType;
-        }
-      }
       if (options && options.contractAddress) {
         if (options.contractAddress instanceof Array && options.contractAddress.length > 0) {
           commitmentSelector.contractAddress = { $in: options.contractAddress };
@@ -161,13 +154,33 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
       if (statuses && statuses.length > 0) {
         commitmentSelector.status = { $in: statuses };
       }
-      return this.context.commitments.find({ selector: commitmentSelector });
+      let bridges: BridgeType[] | undefined;
+      if (options && options.bridgeType) {
+        if (options.bridgeType instanceof Array && options.bridgeType.length > 0) {
+          bridges = options.bridgeType;
+        } else if (!(options.bridgeType instanceof Array)) {
+          bridges = [options.bridgeType];
+        }
+      }
+      return this.context.commitments.find({ selector: commitmentSelector }).then((commitments) =>
+        commitments.filter((c) => {
+          const bridgeType = this.config
+            .getChainConfig(c.chainId)
+            ?.getPoolContractBridgeType(c.contractAddress);
+          if (bridges) {
+            return !!bridgeType && bridges.indexOf(bridgeType) !== -1;
+          }
+          return true;
+        }),
+      );
     });
   }
 
   private calculateCommitmentAmountTotal(commitments: Commitment[]) {
-    return commitments
-      .map((c) => (c.amount ? fromDecimals(c.amount, c.assetDecimals) : 0))
-      .reduce((c1, c2) => c1 + c2, 0);
+    const total = commitments
+      .map((c) => (c.amount ? toBN(c.amount) : toBN(0)))
+      .reduce((c1, c2) => c1.add(c2), toBN(0));
+    const decimal = commitments.length > 0 ? commitments[0].assetDecimals : undefined;
+    return fromDecimals(total, decimal);
   }
 }

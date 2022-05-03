@@ -103,6 +103,7 @@ export class CommitmentUtils {
     if (amount.lten(0)) {
       transactionQuote.valid = false;
       transactionQuote.invalidReason = 'asset amount cannot be negative or zero';
+      return transactionQuote;
     }
     if (amount.gt(inputMax)) {
       transactionQuote.valid = false;

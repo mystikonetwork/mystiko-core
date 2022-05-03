@@ -18,6 +18,13 @@ test('test copy', () => {
   expect(new ProviderConfig(config.copyData())).toStrictEqual(config);
 });
 
+test('test mutate', () => {
+  expect(config.mutate()).toStrictEqual(config);
+  rawConfig.maxTryCount = 10;
+  const newConfig = config.mutate(rawConfig);
+  expect(newConfig.maxTryCount).toBe(10);
+});
+
 test('test toJsonString', async () => {
   const jsonString = config.toJsonString();
   const loadedRawConfig = await RawConfig.createFromObject(RawProviderConfig, JSON.parse(jsonString));

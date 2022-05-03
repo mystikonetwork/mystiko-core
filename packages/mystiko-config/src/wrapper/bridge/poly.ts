@@ -17,4 +17,8 @@ export class PolyBridgeConfig extends BridgeConfig<RawPolyBridgeConfig> {
   public get apiPrefix(): string {
     return this.data.apiPrefix;
   }
+
+  public mutate(data?: RawPolyBridgeConfig): PolyBridgeConfig {
+    return new PolyBridgeConfig(data || this.data);
+  }
 }

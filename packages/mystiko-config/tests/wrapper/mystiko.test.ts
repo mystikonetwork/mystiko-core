@@ -281,3 +281,10 @@ test('test createDefaultTestnetConfig', async () => {
 test('test createDefaultMainnetConfig', async () => {
   await MystikoConfig.createDefaultMainnetConfig();
 });
+
+test('test mutate', () => {
+  expect(config.mutate().copyData()).toStrictEqual(rawConfig);
+  rawConfig.version = '1.1.1';
+  const newConfig = config.mutate(rawConfig);
+  expect(newConfig.version).toBe('1.1.1');
+});

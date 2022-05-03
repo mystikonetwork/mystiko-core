@@ -12,6 +12,25 @@ export function toString(object: any): string {
   return object !== undefined && object !== null ? object.toString() : '';
 }
 
+export function toFixedString(num: number): string {
+  if (Math.abs(num) < 1) {
+    const e = parseInt(num.toString().split('e-')[1], 10);
+    if (e) {
+      const newNum = 10 ** (e - 1) * num;
+      return `0.${new Array(e).join('0')}${newNum.toString().substring(2)}`;
+    }
+  } else {
+    let e = parseInt(num.toString().split('+')[1], 10);
+    let newNum = num;
+    if (e > 20) {
+      e -= 20;
+      newNum /= 10 ** e;
+      return `${newNum.toString()}${new Array(e + 1).join('0')}`;
+    }
+  }
+  return num.toString();
+}
+
 /**
  * @function module:mystiko/utils.toDecimals
  * @desc convert a number into big number with given decimals. This is useful for calling smart contract functions.
@@ -20,7 +39,7 @@ export function toString(object: any): string {
  * @returns {BN} a instance of {@link BN}
  */
 export function toDecimals(amount: number, decimals: number = 18): BN {
-  const converted = ethers.utils.parseUnits(`${amount}`, decimals);
+  const converted = ethers.utils.parseUnits(toFixedString(amount), decimals);
   return toBN(toString(converted));
 }
 

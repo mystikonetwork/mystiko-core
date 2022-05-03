@@ -122,6 +122,10 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     return this.circuitConfigsByName.get(name);
   }
 
+  public mutate(data?: RawMystikoConfig): MystikoConfig {
+    return new MystikoConfig(data || this.data);
+  }
+
   public static createFromFile(jsonFile: string): Promise<MystikoConfig> {
     return RawConfig.createFromFile(RawMystikoConfig, jsonFile).then((raw) => new MystikoConfig(raw));
   }
@@ -199,9 +203,12 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     this.data.chains.forEach((raw) => {
       chainConfigs.set(
         raw.chainId,
-        new ChainConfig(raw, defaultCircuitConfigs, circuitConfigsByName, (chainId, address) =>
-          this.getDepositContractConfigByAddress(chainId, address),
-        ),
+        new ChainConfig(raw, {
+          defaultCircuitConfigs,
+          circuitConfigsByName,
+          depositContractGetter: (chainId, address) =>
+            this.getDepositContractConfigByAddress(chainId, address),
+        }),
       );
     });
     return chainConfigs;

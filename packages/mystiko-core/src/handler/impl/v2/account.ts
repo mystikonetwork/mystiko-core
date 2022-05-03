@@ -1,9 +1,11 @@
 import { hdkey } from 'ethereumjs-wallet';
-import { Account, AccountType, DatabaseQuery, Wallet } from '@mystikonetwork/database';
+import { Account, AccountStatus, AccountType, DatabaseQuery, Wallet } from '@mystikonetwork/database';
 import { toBuff, toHexNoPrefix } from '@mystikonetwork/utils';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../handler';
-import { AccountHandler, AccountOptions, MystikoContextInterface } from '../../../interface';
+import { AccountHandler, AccountOptions, AccountUpdate, MystikoContextInterface } from '../../../interface';
+
+export const DEFAULT_ACCOUNT_SCAN_SIZE = 10000;
 
 export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   constructor(context: MystikoContextInterface) {
@@ -24,7 +26,9 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         }
         return { wallet, name: options.name };
       })
-      .then(({ name, wallet }) => this.createRawAccount(wallet, walletPassword, name, options?.secretKey))
+      .then(({ name, wallet }) =>
+        this.createRawAccount(wallet, walletPassword, name, options?.secretKey, options?.scanSize),
+      )
       .then(({ wallet, account }) => this.insertAccount(wallet, account, !options?.secretKey))
       .then((account) => {
         this.logger.info(`account address=${account.shieldedAddress} has been created successfully`);
@@ -79,12 +83,24 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     );
   }
 
-  public update(walletPassword: string, identifier: string, options: AccountOptions): Promise<Account> {
+  public update(walletPassword: string, identifier: string, options: AccountUpdate): Promise<Account> {
     return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) =>
       account.atomicUpdate((data) => {
-        if (options.name && options.name.length > 0) {
-          data.updatedAt = MystikoHandler.now();
+        let hasUpdate = false;
+        if (options.name && options.name.length > 0 && options.name !== data.name) {
+          hasUpdate = true;
           data.name = options.name;
+        }
+        if (options.scanSize && options.scanSize > 0 && options.scanSize !== data.scanSize) {
+          hasUpdate = true;
+          data.scanSize = options.scanSize;
+        }
+        if (options.status && options.status !== data.status) {
+          hasUpdate = true;
+          data.status = options.status;
+        }
+        if (hasUpdate) {
+          data.updatedAt = MystikoHandler.now();
         }
         return data;
       }),
@@ -115,6 +131,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     walletPassword: string,
     name: string,
     rawSecretKey?: string,
+    scanSize?: number,
   ): { wallet: Wallet; account: AccountType } {
     let secretKeys: { skVerify: Buffer; skEnc: Buffer };
     if (rawSecretKey) {
@@ -134,6 +151,8 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
       shieldedAddress: this.protocol.shieldedAddress(pkVerify, pkEnc),
       publicKey: toHexNoPrefix(this.protocol.fullPublicKey(pkVerify, pkEnc)),
       encryptedSecretKey: this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(secretKey)),
+      status: AccountStatus.CREATED,
+      scanSize: scanSize || DEFAULT_ACCOUNT_SCAN_SIZE,
       wallet: wallet.id,
     };
     return { wallet, account };

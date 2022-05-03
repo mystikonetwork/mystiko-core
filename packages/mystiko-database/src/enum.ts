@@ -1,3 +1,9 @@
+export enum AccountStatus {
+  CREATED = 'created',
+  SCANNING = 'scanning',
+  SCANNED = 'scanned',
+}
+
 export enum CommitmentStatus {
   INIT = 'init',
   SRC_SUCCEEDED = 'srcSucceeded',
