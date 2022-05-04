@@ -58,6 +58,7 @@ export interface Synchronizer<
   addListener(listener: L, event?: ET | ET[]): void;
   removeListener(listener: L): void;
   get running(): boolean;
+  get error(): string | undefined;
   get scheduled(): boolean;
   get status(): Promise<S>;
 }

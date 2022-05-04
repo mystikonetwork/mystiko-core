@@ -1,8 +1,10 @@
 import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
+import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
 import {
   MystikoContextInterface,
   SyncChainStatus,
+  SyncEvent,
   SyncEventType,
   Synchronizer,
   SyncListener,
@@ -37,6 +39,8 @@ export class SynchronizerV2 implements Synchronizer {
 
   private readonly logger: Logger;
 
+  private readonly broadcastChannel: BroadcastChannel<SyncEvent>;
+
   private initTimer?: NodeJS.Timer;
 
   private intervalTimer?: NodeJS.Timer;
@@ -45,7 +49,7 @@ export class SynchronizerV2 implements Synchronizer {
 
   private schedulerState: SyncSchedulerState;
 
-  private error?: string;
+  private syncError?: string;
 
   constructor(context: MystikoContextInterface) {
     this.context = context;
@@ -54,6 +58,7 @@ export class SynchronizerV2 implements Synchronizer {
     this.schedulerState = SyncSchedulerState.INIT;
     this.chains = this.initChainInternalStatuses();
     this.listeners = [];
+    this.broadcastChannel = this.initBroadcastChannel();
   }
 
   public cancelSchedule(): void {
@@ -115,6 +120,10 @@ export class SynchronizerV2 implements Synchronizer {
     return this.isSyncing;
   }
 
+  public get error(): string | undefined {
+    return this.syncError;
+  }
+
   public get scheduled(): boolean {
     return this.schedulerState === SyncSchedulerState.SCHEDULED;
   }
@@ -152,7 +161,7 @@ export class SynchronizerV2 implements Synchronizer {
               chainStatus.isSyncing = true;
               chainStatus.error = undefined;
               promises.push(
-                this.callListeners(SyncEventType.CHAIN_SYNCHRONIZING, chainId)
+                this.emitEvent(SyncEventType.CHAIN_SYNCHRONIZING, chainId)
                   .then(() =>
                     this.context.commitments.import({ walletPassword: options.walletPassword, chainId }),
                   )
@@ -161,12 +170,12 @@ export class SynchronizerV2 implements Synchronizer {
                     if (updatedChain) {
                       chainStatus.isSyncing = false;
                     }
-                    return this.callListeners(SyncEventType.CHAIN_SYNCHRONIZED, chainId);
+                    return this.emitEvent(SyncEventType.CHAIN_SYNCHRONIZED, chainId);
                   })
                   .catch((error) => {
                     chainStatus.error = errorMessage(error);
                     chainStatus.isSyncing = false;
-                    return this.callListeners(SyncEventType.CHAIN_FAILED, chainId);
+                    return this.emitEvent(SyncEventType.CHAIN_FAILED, chainId);
                   }),
               );
             }
@@ -198,39 +207,73 @@ export class SynchronizerV2 implements Synchronizer {
     return internalStatuses;
   }
 
-  private updateStatus(isSyncing: boolean, error?: string): Promise<void> {
-    this.isSyncing = isSyncing;
-    this.error = error;
-    if (error) {
-      return this.callListeners(SyncEventType.FAILED);
-    }
-    if (isSyncing) {
-      return this.callListeners(SyncEventType.SYNCHRONIZING);
-    }
-    return this.callListeners(SyncEventType.SYNCHRONIZED);
+  private initBroadcastChannel(): BroadcastChannel<SyncEvent> {
+    const channel = new BroadcastChannel<SyncEvent>('mystiko-synchronizer');
+    channel.addEventListener('message', (event) => {
+      const { status } = event;
+      if (!this.isSyncing) {
+        this.isSyncing = status.isSyncing;
+        this.syncError = status.error;
+        status.chains.forEach((chainStatus) => {
+          this.chains.set(chainStatus.chainId, {
+            chainId: chainStatus.chainId,
+            name: chainStatus.name,
+            isSyncing: chainStatus.isSyncing,
+            error: chainStatus.error,
+          });
+        });
+        return this.callListeners(event);
+      }
+      return Promise.resolve();
+    });
+    return channel;
   }
 
-  private callListeners(eventType: SyncEventType, chainId?: number): Promise<void> {
+  private updateStatus(isSyncing: boolean, error?: string): Promise<void> {
+    this.isSyncing = isSyncing;
+    this.syncError = error;
+    if (error) {
+      return this.emitEvent(SyncEventType.FAILED);
+    }
+    if (isSyncing) {
+      return this.emitEvent(SyncEventType.SYNCHRONIZING);
+    }
+    return this.emitEvent(SyncEventType.SYNCHRONIZED);
+  }
+
+  private emitEvent(eventType: SyncEventType, chainId?: number): Promise<void> {
     return this.status
       .then((status) => {
-        this.listeners.forEach((eventListener) => {
-          const { listener, eventTypes } = eventListener;
-          try {
-            if (eventTypes.length === 0 || eventTypes.indexOf(eventType) >= 0) {
-              listener({
-                type: eventType,
-                status,
-                chainStatus: chainId ? SynchronizerV2.getChainStatus(status, chainId) : undefined,
-              });
-            }
-          } catch (listenerError) {
-            this.logger.warn(`call one of the listener failed: ${errorMessage(listenerError)}`);
-          }
-        });
+        const event: SyncEvent = {
+          type: eventType,
+          status,
+          chainStatus: chainId ? SynchronizerV2.getChainStatus(status, chainId) : undefined,
+        };
+        return this.broadcastChannel
+          .postMessage(event)
+          .then(() => event)
+          .catch((error) => {
+            this.logger.warn(`failed to broadcast message: ${errorMessage(error)}`);
+            return event;
+          });
       })
+      .then((event) => this.callListeners(event))
       .catch((statusError) => {
         this.logger.warn(`failed to fetch synchronizer status: ${errorMessage(statusError)}`);
       });
+  }
+
+  private callListeners(event: SyncEvent): void {
+    this.listeners.forEach((eventListener) => {
+      const { listener, eventTypes } = eventListener;
+      try {
+        if (eventTypes.length === 0 || eventTypes.indexOf(event.type) >= 0) {
+          listener(event);
+        }
+      } catch (listenerError) {
+        this.logger.warn(`call one of the listener failed: ${errorMessage(listenerError)}`);
+      }
+    });
   }
 
   private static getChainStatus(status: SyncStatus, chainId: number): SyncChainStatus | undefined {

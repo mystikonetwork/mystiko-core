@@ -66,6 +66,7 @@
     "@mystikonetwork/protocol": "^0.1.0-beta.0",
     "@mystikonetwork/utils": "^0.1.0-beta.0",
     "bn.js": "^5.2.0",
+    "broadcast-channel": "4.9.0",
     "class-validator": "^0.13.2",
     "ethereumjs-wallet": "^1.0.2",
     "ethers": "^5.5.3",
