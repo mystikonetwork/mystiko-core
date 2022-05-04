@@ -28,7 +28,7 @@ type EventListener = {
 };
 
 export class SynchronizerV2 implements Synchronizer {
-  public static readonly DEFAULT_START_DELAY_MS = 10000;
+  public static readonly DEFAULT_START_DELAY_MS = 1000;
 
   public static readonly DEFAULT_INTERVAL_MS = 300000;
 
