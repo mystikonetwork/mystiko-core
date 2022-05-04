@@ -20,9 +20,12 @@ import {
   ExecutorFactory,
   HandlerFactory,
   MystikoContextInterface,
+  Synchronizer,
+  SynchronizerFactory,
   TransactionHandler,
   WalletHandler,
 } from './interface';
+import { SynchronizerFactoryV2 } from './synchronizer';
 
 export interface InitOptions {
   isTestnet?: boolean;
@@ -35,6 +38,7 @@ export interface InitOptions {
   providerFactory?: ProviderFactory;
   handlerFactory?: HandlerFactory;
   executorFactory?: ExecutorFactory;
+  synchronizerFactory?: SynchronizerFactory;
 }
 
 export abstract class Mystiko {
@@ -66,6 +70,8 @@ export abstract class Mystiko {
 
   public protocol?: MystikoProtocol;
 
+  public synchronizer?: Synchronizer;
+
   private context?: MystikoContextInterface;
 
   public async initialize(options?: InitOptions) {
@@ -80,6 +86,7 @@ export abstract class Mystiko {
       providerFactory,
       handlerFactory,
       executorFactory,
+      synchronizerFactory,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
@@ -118,9 +125,11 @@ export abstract class Mystiko {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
+    const syncFactory = synchronizerFactory || new SynchronizerFactoryV2(this.context);
+    this.synchronizer = syncFactory.createSynchronizer();
     await this.chains.init();
     await this.contracts.init();
-    this.logger.info('@mystikonetwork/core has been successfully initialized, enjoy!');
+    this.logger.info('mystiko has been successfully initialized, enjoy!');
   }
 
   protected getChainConfig(chainId: number): Promise<ProviderConnection[]> {

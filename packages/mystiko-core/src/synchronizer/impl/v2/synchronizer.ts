@@ -50,6 +50,8 @@ export class SynchronizerV2 implements Synchronizer {
 
   private isClosed: boolean;
 
+  private hasPendingSync: boolean;
+
   private schedulerState: SyncSchedulerState;
 
   private syncError?: string;
@@ -58,6 +60,7 @@ export class SynchronizerV2 implements Synchronizer {
     this.context = context;
     this.isSyncing = false;
     this.isClosed = false;
+    this.hasPendingSync = false;
     this.logger = rootLogger.getLogger('SynchronizerV2');
     this.schedulerState = SyncSchedulerState.INIT;
     this.chains = this.initChainInternalStatuses();
@@ -66,16 +69,19 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public close(): Promise<void> {
-    return this.broadcastChannel.close().then(() => {
-      this.cancelSchedule();
-      this.isClosed = true;
-    });
+    if (!this.isClosed) {
+      return this.broadcastChannel.close().then(() => {
+        this.cancelSchedule();
+        this.isClosed = true;
+      });
+    }
+    return Promise.resolve();
   }
 
   public cancelSchedule(): void {
     if (this.schedulerState === SyncSchedulerState.SCHEDULED) {
       if (this.initTimer) {
-        clearInterval(this.initTimer);
+        clearTimeout(this.initTimer);
         this.initTimer = undefined;
       }
       if (this.intervalTimer) {
@@ -97,12 +103,17 @@ export class SynchronizerV2 implements Synchronizer {
         ) {
           const { startDelayMs, intervalMs } = options;
           this.schedulerState = SyncSchedulerState.SCHEDULED;
-          this.initTimer = setTimeout(() => {
-            this.intervalTimer = setTimeout(
-              () => this.executeSync(options),
-              intervalMs || SynchronizerV2.DEFAULT_INTERVAL_MS,
-            );
-          }, startDelayMs || SynchronizerV2.DEFAULT_START_DELAY_MS);
+          this.initTimer = setTimeout(
+            () => {
+              this.executeSync(options).then(() => {
+                this.intervalTimer = setInterval(
+                  () => this.executeSync(options),
+                  intervalMs !== undefined ? intervalMs : SynchronizerV2.DEFAULT_INTERVAL_MS,
+                );
+              });
+            },
+            startDelayMs !== undefined ? startDelayMs : SynchronizerV2.DEFAULT_START_DELAY_MS,
+          );
         }
         return Promise.resolve();
       });
@@ -138,7 +149,14 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public get error(): string | undefined {
-    return this.syncError;
+    /* istanbul ignore if */
+    if (this.syncError) {
+      return this.syncError;
+    }
+    if (Array.from(this.chains.values()).filter((c) => !!c.error).length > 0) {
+      return 'some chain(s) failed to sync';
+    }
+    return undefined;
   }
 
   public get scheduled(): boolean {
@@ -168,8 +186,9 @@ export class SynchronizerV2 implements Synchronizer {
 
   private executeSync(options: SyncOptions): Promise<void> {
     if (!this.isSyncing) {
+      this.hasPendingSync = true;
       this.logger.info('start synchronizing relevant data from blockchains');
-      return this.updateStatus(true)
+      return this.updateStatus(options, true)
         .then(() => {
           const promises: Promise<void>[] = [];
           this.chains.forEach((chainStatus) => {
@@ -178,7 +197,7 @@ export class SynchronizerV2 implements Synchronizer {
               chainStatus.isSyncing = true;
               chainStatus.error = undefined;
               promises.push(
-                this.emitEvent(SyncEventType.CHAIN_SYNCHRONIZING, chainId)
+                this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
                   .then(() =>
                     this.context.commitments.import({ walletPassword: options.walletPassword, chainId }),
                   )
@@ -187,12 +206,12 @@ export class SynchronizerV2 implements Synchronizer {
                     if (updatedChain) {
                       chainStatus.isSyncing = false;
                     }
-                    return this.emitEvent(SyncEventType.CHAIN_SYNCHRONIZED, chainId);
+                    return this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZED, chainId);
                   })
                   .catch((error) => {
                     chainStatus.error = errorMessage(error);
                     chainStatus.isSyncing = false;
-                    return this.emitEvent(SyncEventType.CHAIN_FAILED, chainId);
+                    return this.emitEvent(options, SyncEventType.CHAIN_FAILED, chainId);
                   }),
               );
             }
@@ -200,13 +219,15 @@ export class SynchronizerV2 implements Synchronizer {
           return Promise.all(promises);
         })
         .then(() => {
+          this.hasPendingSync = false;
           this.logger.info('synchronization finished successfully');
-          return this.updateStatus(false);
+          return this.updateStatus(options, false);
         })
-        .catch((error) => {
+        .catch((error) => /* istanbul ignore next */ {
+          this.hasPendingSync = false;
           const syncError = errorMessage(error);
           this.logger.warn(`synchronization failed: ${syncError}`);
-          return this.updateStatus(false, syncError);
+          return this.updateStatus(options, false, syncError);
         });
     }
     return Promise.resolve();
@@ -228,37 +249,30 @@ export class SynchronizerV2 implements Synchronizer {
     const channel = new BroadcastChannel<SyncEvent>('mystiko-synchronizer');
     channel.addEventListener('message', (event) => {
       const { status } = event;
-      if (!this.isSyncing && !this.isClosed) {
-        this.isSyncing = status.isSyncing;
-        this.syncError = status.error;
-        status.chains.forEach((chainStatus) => {
-          this.chains.set(chainStatus.chainId, {
-            chainId: chainStatus.chainId,
-            name: chainStatus.name,
-            isSyncing: chainStatus.isSyncing,
-            error: chainStatus.error,
-          });
-        });
+      if (!this.hasPendingSync && !this.isClosed) {
+        this.copyStatus(status);
         return this.callListeners(event);
       }
+      /* istanbul ignore next */
       return Promise.resolve();
     });
     return channel;
   }
 
-  private updateStatus(isSyncing: boolean, error?: string): Promise<void> {
+  private updateStatus(options: SyncOptions, isSyncing: boolean, error?: string): Promise<void> {
     this.isSyncing = isSyncing;
     this.syncError = error;
+    /* istanbul ignore if */
     if (error) {
-      return this.emitEvent(SyncEventType.FAILED);
+      return this.emitEvent(options, SyncEventType.FAILED);
     }
     if (isSyncing) {
-      return this.emitEvent(SyncEventType.SYNCHRONIZING);
+      return this.emitEvent(options, SyncEventType.SYNCHRONIZING);
     }
-    return this.emitEvent(SyncEventType.SYNCHRONIZED);
+    return this.emitEvent(options, SyncEventType.SYNCHRONIZED);
   }
 
-  private emitEvent(eventType: SyncEventType, chainId?: number): Promise<void> {
+  private emitEvent(options: SyncOptions, eventType: SyncEventType, chainId?: number): Promise<void> {
     if (!this.isClosed) {
       return this.status
         .then((status) => {
@@ -270,13 +284,13 @@ export class SynchronizerV2 implements Synchronizer {
           return this.broadcastChannel
             .postMessage(event)
             .then(() => event)
-            .catch((error) => {
+            .catch((error) => /* istanbul ignore next */ {
               this.logger.warn(`failed to broadcast message: ${errorMessage(error)}`);
               return event;
             });
         })
         .then((event) => this.callListeners(event))
-        .catch((statusError) => {
+        .catch((statusError) => /* istanbul ignore next */ {
           this.logger.warn(`failed to fetch synchronizer status: ${errorMessage(statusError)}`);
         });
     }
@@ -290,7 +304,7 @@ export class SynchronizerV2 implements Synchronizer {
         if (eventTypes.length === 0 || eventTypes.indexOf(event.type) >= 0) {
           listener(event);
         }
-      } catch (listenerError) {
+      } catch (listenerError) /* istanbul ignore next */ {
         this.logger.warn(`call one of the listener failed: ${errorMessage(listenerError)}`);
       }
     });
@@ -302,12 +316,26 @@ export class SynchronizerV2 implements Synchronizer {
       : Promise.resolve();
   }
 
+  private copyStatus(status: SyncStatus) {
+    this.isSyncing = status.isSyncing;
+    this.syncError = status.error;
+    status.chains.forEach((chainStatus) => {
+      this.chains.set(chainStatus.chainId, {
+        chainId: chainStatus.chainId,
+        name: chainStatus.name,
+        isSyncing: chainStatus.isSyncing,
+        error: chainStatus.error,
+      });
+    });
+  }
+
   private static getChainStatus(status: SyncStatus, chainId: number): SyncChainStatus | undefined {
     for (let i = 0; i < status.chains.length; i += 1) {
       if (status.chains[i].chainId === chainId) {
         return status.chains[i];
       }
     }
+    /* istanbul ignore next */
     return undefined;
   }
 }

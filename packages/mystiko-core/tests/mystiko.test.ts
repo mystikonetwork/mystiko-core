@@ -26,6 +26,7 @@ function checkMystiko(mystiko: Mystiko) {
   expect(mystiko.signers).not.toBe(undefined);
   expect(mystiko.transactions).not.toBe(undefined);
   expect(mystiko.signers).not.toBe(undefined);
+  expect(mystiko.synchronizer).not.toBe(undefined);
 }
 
 test('test initialize', async () => {

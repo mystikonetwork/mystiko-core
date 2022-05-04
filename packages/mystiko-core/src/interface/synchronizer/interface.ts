@@ -5,12 +5,12 @@ export enum SyncSchedulerState {
 }
 
 export enum SyncEventType {
-  SYNCHRONIZING = 0,
-  SYNCHRONIZED = 1,
-  FAILED = 2,
-  CHAIN_SYNCHRONIZING = 3,
-  CHAIN_SYNCHRONIZED = 4,
-  CHAIN_FAILED = 5,
+  SYNCHRONIZING = 'synchronizing',
+  SYNCHRONIZED = 'synchronized',
+  FAILED = 'failed',
+  CHAIN_SYNCHRONIZING = 'chain_synchronizing',
+  CHAIN_SYNCHRONIZED = 'chain_synchronized',
+  CHAIN_FAILED = 'chain_failed',
 }
 
 export type SyncChainStatus = {

@@ -79,7 +79,8 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
 
   private importAll(importContext: ImportContext): Promise<Commitment[]> {
     const promises: Promise<Commitment[]>[] = [];
-    const { chainId } = importContext.options;
+    const { options } = importContext;
+    const { chainId } = options;
     for (let i = 0; i < this.config.chains.length; i += 1) {
       const chainConfig = this.config.chains[i];
       if (!chainId || chainId === chainConfig.chainId) {
@@ -101,7 +102,10 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return Promise.all(promises)
       .then((commitments) => commitments.flat())
       .then((commitments) => {
-        this.logger.info(`import is done, imported ${commitments.length} commitments`);
+        this.logger.info(
+          `import(${CommitmentExecutorV2.formatOptions(options)}) is done, ` +
+            `imported ${commitments.length} commitments`,
+        );
         return commitments;
       });
   }
@@ -555,6 +559,13 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
           ...moreCommitments,
         ]);
       });
+    });
+  }
+
+  private static formatOptions(options: CommitmentImport): string {
+    return JSON.stringify({
+      chainId: options.chainId,
+      contractAddress: options.contractAddress,
     });
   }
 }
