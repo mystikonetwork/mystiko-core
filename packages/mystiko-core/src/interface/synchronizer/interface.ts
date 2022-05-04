@@ -52,12 +52,14 @@ export interface Synchronizer<
   ET = SyncEventType,
   SO = SyncSchedulerOptions,
 > {
+  close(): Promise<void>;
   run(options: O): Promise<void>;
   schedule(options: SO): Promise<void>;
   cancelSchedule(): void;
   addListener(listener: L, event?: ET | ET[]): void;
   removeListener(listener: L): void;
   get running(): boolean;
+  get closed(): boolean;
   get error(): string | undefined;
   get scheduled(): boolean;
   get status(): Promise<S>;

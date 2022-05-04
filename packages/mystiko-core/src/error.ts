@@ -29,6 +29,7 @@ export enum MystikoErrorCode {
   DUPLICATE_COMMITMENT = 27,
   MISSING_COMMITMENT_DATA = 28,
   CORRUPTED_COMMITMENT_DATA = 29,
+  SYNCHRONIZER_CLOSED = 30,
 }
 
 export class MystikoError extends Error {

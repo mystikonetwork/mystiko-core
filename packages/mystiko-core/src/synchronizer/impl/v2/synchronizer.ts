@@ -1,6 +1,7 @@
 import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
+import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import {
   MystikoContextInterface,
   SyncChainStatus,
@@ -47,6 +48,8 @@ export class SynchronizerV2 implements Synchronizer {
 
   private isSyncing: boolean;
 
+  private isClosed: boolean;
+
   private schedulerState: SyncSchedulerState;
 
   private syncError?: string;
@@ -54,11 +57,19 @@ export class SynchronizerV2 implements Synchronizer {
   constructor(context: MystikoContextInterface) {
     this.context = context;
     this.isSyncing = false;
+    this.isClosed = false;
     this.logger = rootLogger.getLogger('SynchronizerV2');
     this.schedulerState = SyncSchedulerState.INIT;
     this.chains = this.initChainInternalStatuses();
-    this.listeners = [];
     this.broadcastChannel = this.initBroadcastChannel();
+    this.listeners = [];
+  }
+
+  public close(): Promise<void> {
+    return this.broadcastChannel.close().then(() => {
+      this.cancelSchedule();
+      this.isClosed = true;
+    });
   }
 
   public cancelSchedule(): void {
@@ -76,8 +87,8 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public schedule(options: SyncSchedulerOptions): Promise<void> {
-    return this.context.wallets
-      .checkPassword(options.walletPassword)
+    return this.checkClose()
+      .then(() => this.context.wallets.checkPassword(options.walletPassword))
       .then(() => this.context.db.waitForLeadership())
       .then(() => {
         if (
@@ -98,7 +109,9 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public run(options: SyncOptions): Promise<void> {
-    return this.context.wallets.checkPassword(options.walletPassword).then(() => this.executeSync(options));
+    return this.checkClose()
+      .then(() => this.context.wallets.checkPassword(options.walletPassword))
+      .then(() => this.executeSync(options));
   }
 
   public addListener(listener: SyncListener, event?: SyncEventType | SyncEventType[]) {
@@ -118,6 +131,10 @@ export class SynchronizerV2 implements Synchronizer {
 
   public get running(): boolean {
     return this.isSyncing;
+  }
+
+  public get closed(): boolean {
+    return this.isClosed;
   }
 
   public get error(): string | undefined {
@@ -211,7 +228,7 @@ export class SynchronizerV2 implements Synchronizer {
     const channel = new BroadcastChannel<SyncEvent>('mystiko-synchronizer');
     channel.addEventListener('message', (event) => {
       const { status } = event;
-      if (!this.isSyncing) {
+      if (!this.isSyncing && !this.isClosed) {
         this.isSyncing = status.isSyncing;
         this.syncError = status.error;
         status.chains.forEach((chainStatus) => {
@@ -242,25 +259,28 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   private emitEvent(eventType: SyncEventType, chainId?: number): Promise<void> {
-    return this.status
-      .then((status) => {
-        const event: SyncEvent = {
-          type: eventType,
-          status,
-          chainStatus: chainId ? SynchronizerV2.getChainStatus(status, chainId) : undefined,
-        };
-        return this.broadcastChannel
-          .postMessage(event)
-          .then(() => event)
-          .catch((error) => {
-            this.logger.warn(`failed to broadcast message: ${errorMessage(error)}`);
-            return event;
-          });
-      })
-      .then((event) => this.callListeners(event))
-      .catch((statusError) => {
-        this.logger.warn(`failed to fetch synchronizer status: ${errorMessage(statusError)}`);
-      });
+    if (!this.isClosed) {
+      return this.status
+        .then((status) => {
+          const event: SyncEvent = {
+            type: eventType,
+            status,
+            chainStatus: chainId ? SynchronizerV2.getChainStatus(status, chainId) : undefined,
+          };
+          return this.broadcastChannel
+            .postMessage(event)
+            .then(() => event)
+            .catch((error) => {
+              this.logger.warn(`failed to broadcast message: ${errorMessage(error)}`);
+              return event;
+            });
+        })
+        .then((event) => this.callListeners(event))
+        .catch((statusError) => {
+          this.logger.warn(`failed to fetch synchronizer status: ${errorMessage(statusError)}`);
+        });
+    }
+    return Promise.resolve();
   }
 
   private callListeners(event: SyncEvent): void {
@@ -274,6 +294,12 @@ export class SynchronizerV2 implements Synchronizer {
         this.logger.warn(`call one of the listener failed: ${errorMessage(listenerError)}`);
       }
     });
+  }
+
+  private checkClose(): Promise<void> {
+    return this.isClosed
+      ? createErrorPromise('synchronizer has already been closed', MystikoErrorCode.SYNCHRONIZER_CLOSED)
+      : Promise.resolve();
   }
 
   private static getChainStatus(status: SyncStatus, chainId: number): SyncChainStatus | undefined {
