@@ -4,4 +4,5 @@ export * from './executor';
 export * from './handler';
 export * from './interface';
 export * from './mystiko';
+export * from './synchronizer';
 export * from './utils';
