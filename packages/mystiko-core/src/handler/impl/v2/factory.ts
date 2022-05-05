@@ -5,6 +5,7 @@ import { ChainHandlerV2 } from './chain';
 import { CommitmentHandlerV2 } from './commitment';
 import { ContractHandlerV2 } from './contract';
 import { DepositHandlerV2 } from './deposit';
+import { NullifierHandlerV2 } from './nullifier';
 import { TransactionHandlerV2 } from './transaction';
 import { WalletHandlerV2 } from './wallet';
 
@@ -15,6 +16,7 @@ type HandlerFactoryV2Interface = HandlerFactory<
   ContractHandlerV2,
   CommitmentHandlerV2,
   DepositHandlerV2,
+  NullifierHandlerV2,
   TransactionHandlerV2,
   WalletHandlerV2
 >;
@@ -48,6 +50,10 @@ export class HandlerFactoryV2 implements HandlerFactoryV2Interface {
 
   public createDepositHandler(): DepositHandlerV2 {
     return new DepositHandlerV2(this.context);
+  }
+
+  public createNullifierHandler(): NullifierHandlerV2 {
+    return new NullifierHandlerV2(this.context);
   }
 
   public createTransactionHandler(): TransactionHandlerV2 {

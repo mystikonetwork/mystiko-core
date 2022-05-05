@@ -65,7 +65,6 @@ test('test insert full', async () => {
     shieldedAddress:
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     creationTransactionHash: '0x5b78a656ef8cc070639cdf1cc486ffb7e2cbd8f0354b221a671d2eb17157b8a3',
-    relayTransactionHash: '0xe53c1586b284074fab9b062f089efe89c1135fbbb0af68a54c88a886e6b9a4ad',
     spendingTransactionHash: '0x3190d660a6555a36caa841205c1c5140513654f44133ca9dd87d6a1149307e9a',
     rollupTransactionHash: '0x75abe0a3f8bbadb2e2cd52957afc5a0aa72fdb30ec6059e1181c82f3cf23284c',
   });
@@ -90,9 +89,6 @@ test('test insert full', async () => {
     expect(commitment.serialNumber).toBe('343243');
     expect(commitment.shieldedAddress).toBe(
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
-    );
-    expect(commitment.relayTransactionHash).toBe(
-      '0xe53c1586b284074fab9b062f089efe89c1135fbbb0af68a54c88a886e6b9a4ad',
     );
     expect(commitment.spendingTransactionHash).toBe(
       '0x3190d660a6555a36caa841205c1c5140513654f44133ca9dd87d6a1149307e9a',

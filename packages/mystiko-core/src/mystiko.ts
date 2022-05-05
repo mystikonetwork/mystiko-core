@@ -20,6 +20,7 @@ import {
   ExecutorFactory,
   HandlerFactory,
   MystikoContextInterface,
+  NullifierHandler,
   Synchronizer,
   SynchronizerFactory,
   TransactionHandler,
@@ -59,6 +60,8 @@ export abstract class Mystiko {
   public assets?: AssetHandler;
 
   public commitments?: CommitmentHandler;
+
+  public nullifiers?: NullifierHandler;
 
   public deposits?: DepositHandler;
 
@@ -113,6 +116,7 @@ export abstract class Mystiko {
     this.accounts = handlers.createAccountHandler();
     this.assets = handlers.createAssetHandler();
     this.commitments = handlers.createCommitmentHandler();
+    this.nullifiers = handlers.createNullifierHandler();
     this.deposits = handlers.createDepositHandler();
     this.transactions = handlers.createTransactionHandler();
     this.providers = new ProviderPoolImpl(

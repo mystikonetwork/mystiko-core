@@ -27,6 +27,7 @@ import {
   MystikoContext,
   WalletHandlerV2,
 } from '../../../../src';
+import { NullifierHandlerV2 } from '../../../../src/handler/impl/v2/nullifier';
 import { createTestContext } from '../../../common/context';
 import { AllEvents, loadEvents } from '../../../common/event';
 
@@ -39,6 +40,7 @@ let accountHandler: AccountHandlerV2;
 let chainHandler: ChainHandlerV2;
 let contractHandler: ContractHandlerV2;
 let commitmentHandler: CommitmentHandlerV2;
+let nullifierHandler: NullifierHandlerV2;
 let depositHandler: DepositHandlerV2;
 let assetHandler: AssetHandlerV2;
 let executor: CommitmentExecutorV2;
@@ -132,6 +134,7 @@ beforeAll(async () => {
   chainHandler = new ChainHandlerV2(context);
   contractHandler = new ContractHandlerV2(context);
   commitmentHandler = new CommitmentHandlerV2(context);
+  nullifierHandler = new NullifierHandlerV2(context);
   depositHandler = new DepositHandlerV2(context);
   assetHandler = new AssetHandlerV2(context);
   executor = new CommitmentExecutorV2(context);
@@ -153,6 +156,7 @@ afterAll(async () => {
 test('test import all events', async () => {
   await executor.import({ walletPassword });
   expect((await commitmentHandler.find()).length).toBe(72);
+  expect((await nullifierHandler.find()).length).toBe(44);
   expect((await chainHandler.findOne(3))?.syncedBlockNumber).toBe(ropstenCurrentBlock);
   expect((await chainHandler.findOne(97))?.syncedBlockNumber).toBe(bscCurrentBlock);
   const contracts = await contractHandler.find();
@@ -179,9 +183,10 @@ test('test import all events', async () => {
             throw new Error('commitment should not be null here');
           }
           expect(deposit.rollupTransactionHash).toBe(commitment.rollupTransactionHash);
-          expect(deposit.transactionHash).toBe(commitment.creationTransactionHash);
           if (deposit.bridgeType !== BridgeType.LOOP) {
-            expect(deposit.relayTransactionHash).toBe(commitment.relayTransactionHash);
+            expect(deposit.relayTransactionHash).toBe(commitment.creationTransactionHash);
+          } else {
+            expect(deposit.transactionHash).toBe(commitment.creationTransactionHash);
           }
         }),
     );
@@ -242,6 +247,10 @@ test('test scan account', async () => {
     commitments.forEach((commitment) => {
       promises.push(
         commitment.update({
+          $set: {
+            status:
+              commitment.status === CommitmentStatus.SPENT ? CommitmentStatus.INCLUDED : commitment.status,
+          },
           $unset: {
             shieldedAddress: '',
             serialNumber: '',

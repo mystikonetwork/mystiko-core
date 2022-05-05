@@ -14,6 +14,7 @@ import {
   Contract,
   DatabaseQuery,
   DepositStatus,
+  NullifierType,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toBuff } from '@mystikonetwork/utils';
@@ -311,11 +312,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
             data.rollupFeeAmount = rollupFee.toString();
             data.encryptedNote = encryptedNote;
             data.updatedAt = now;
-            if (chainConfig.getPoolContractBridgeType(contractConfig.address) === BridgeType.LOOP) {
-              data.creationTransactionHash = transactionHash;
-            } else {
-              data.relayTransactionHash = transactionHash;
-            }
+            data.creationTransactionHash = transactionHash;
             return data;
           });
         }
@@ -334,11 +331,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
           encryptedNote,
           status: CommitmentStatus.QUEUED,
         };
-        if (chainConfig.getPoolContractBridgeType(contractConfig.address) === BridgeType.LOOP) {
-          commitment.creationTransactionHash = transactionHash;
-        } else {
-          commitment.relayTransactionHash = transactionHash;
-        }
+        commitment.creationTransactionHash = transactionHash;
         return this.db.commitments.insert(commitment);
       })
       .then((commitment) => {
@@ -403,14 +396,27 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     importContext: ImportEventsContext,
   ): Promise<Commitment[]> {
     const { chainConfig, contractConfig } = importContext;
-    return this.context.commitments
-      .find({
-        selector: {
-          chainId: chainConfig.chainId,
-          contractAddress: contractConfig.address,
-          serialNumber: serialNumber.toString(),
-        },
-      })
+    const now = MystikoHandler.now();
+    const nullifier: NullifierType = {
+      id: MystikoHandler.generateId(),
+      createdAt: now,
+      updatedAt: now,
+      chainId: chainConfig.chainId,
+      contractAddress: contractConfig.address,
+      serialNumber: serialNumber.toString(),
+      transactionHash,
+    };
+    return this.context.nullifiers
+      .upsert(nullifier)
+      .then(() =>
+        this.context.commitments.find({
+          selector: {
+            chainId: chainConfig.chainId,
+            contractAddress: contractConfig.address,
+            serialNumber: serialNumber.toString(),
+          },
+        }),
+      )
       .then((commitments) => {
         const promises: Promise<Commitment>[] = commitments.map((commitment) =>
           commitment.atomicUpdate((data) => {
@@ -544,7 +550,34 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return this.context.commitments.find(query).then((commitments) => {
       const promises: Promise<Commitment>[] = [];
       commitments.forEach((commitment) => {
-        promises.push(this.tryDecryptCommitment(commitment, options.walletPassword, [account]));
+        promises.push(
+          this.tryDecryptCommitment(commitment, options.walletPassword, [account]).then(
+            (decryptedCommitment) => {
+              if (
+                decryptedCommitment.shieldedAddress === account.shieldedAddress &&
+                decryptedCommitment.serialNumber
+              ) {
+                return this.context.nullifiers
+                  .findOne({
+                    chainId: decryptedCommitment.chainId,
+                    contractAddress: decryptedCommitment.contractAddress,
+                    serialNumber: decryptedCommitment.serialNumber,
+                  })
+                  .then((nullifier) => {
+                    if (nullifier) {
+                      return decryptedCommitment.atomicUpdate((data) => {
+                        data.status = CommitmentStatus.SPENT;
+                        data.spendingTransactionHash = nullifier.transactionHash;
+                        return data;
+                      });
+                    }
+                    return decryptedCommitment;
+                  });
+              }
+              return decryptedCommitment;
+            },
+          ),
+        );
       });
       return Promise.all(promises).then((updatedCommitments) => {
         const importedCommitment = updatedCommitments.filter(

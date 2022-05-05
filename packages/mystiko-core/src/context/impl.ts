@@ -15,6 +15,7 @@ import {
   ExecutorFactory,
   MystikoContextInterface,
   MystikoContractConnector,
+  NullifierHandler,
   TransactionHandler,
   WalletHandler,
 } from '../interface';
@@ -26,10 +27,11 @@ export class MystikoContext<
   CO extends ContractHandler = ContractHandler,
   CM extends CommitmentHandler = CommitmentHandler,
   D extends DepositHandler = DepositHandler,
+  N extends NullifierHandler = NullifierHandler,
   T extends TransactionHandler = TransactionHandler,
   W extends WalletHandler = WalletHandler,
   P extends MystikoProtocol = MystikoProtocol,
-> implements MystikoContextInterface<A, AS, CH, CO, CM, D, T, W, P>
+> implements MystikoContextInterface<A, AS, CH, CO, CM, D, N, T, W, P>
 {
   private accountHandler?: A;
 
@@ -42,6 +44,8 @@ export class MystikoContext<
   private commitmentHandler?: CM;
 
   private depositHandler?: D;
+
+  private nullifierHandler?: N;
 
   private transactionHandler?: T;
 
@@ -138,6 +142,17 @@ export class MystikoContext<
 
   public set deposits(depositHandler: D) {
     this.depositHandler = depositHandler;
+  }
+
+  public get nullifiers(): N {
+    if (!this.nullifierHandler) {
+      throw createError('nullifier handler has not been set', MystikoErrorCode.NO_HANDLER);
+    }
+    return this.nullifierHandler;
+  }
+
+  public set nullifiers(nullifierHandler: N) {
+    this.nullifierHandler = nullifierHandler;
   }
 
   public get transactions(): T {

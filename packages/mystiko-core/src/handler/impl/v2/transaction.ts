@@ -121,7 +121,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     );
     if (!poolContractConfig) {
       return createErrorPromise(
-        `invalid transaction options ${options}, no corresponding contract found`,
+        'invalid transaction options, no corresponding contract found',
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }

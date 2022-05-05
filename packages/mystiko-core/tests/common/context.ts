@@ -17,6 +17,7 @@ import {
   TransactionHandlerV2,
   WalletHandlerV2,
 } from '../../src';
+import { NullifierHandlerV2 } from '../../src/handler/impl/v2/nullifier';
 
 export type TestContextOptions = {
   db?: MystikoDatabase;
@@ -37,6 +38,7 @@ export async function createTestContext(
     ContractHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
+    NullifierHandlerV2,
     TransactionHandlerV2,
     WalletHandlerV2,
     MystikoProtocolV2
@@ -68,6 +70,7 @@ export async function createTestContext(
     ContractHandlerV2,
     CommitmentHandlerV2,
     DepositHandlerV2,
+    NullifierHandlerV2,
     TransactionHandlerV2,
     WalletHandlerV2,
     MystikoProtocolV2

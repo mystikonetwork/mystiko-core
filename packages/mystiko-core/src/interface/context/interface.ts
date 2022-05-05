@@ -14,6 +14,7 @@ import {
   DepositHandler,
   TransactionHandler,
   WalletHandler,
+  NullifierHandler,
 } from '../handler';
 
 export interface MystikoContractConnector {
@@ -31,6 +32,7 @@ export interface MystikoContextInterface<
   CO extends ContractHandler = ContractHandler,
   CM extends CommitmentHandler = CommitmentHandler,
   D extends DepositHandler = DepositHandler,
+  N extends NullifierHandler = NullifierHandler,
   T extends TransactionHandler = TransactionHandler,
   W extends WalletHandler = WalletHandler,
   P extends MystikoProtocol = MystikoProtocol,
@@ -53,6 +55,8 @@ export interface MystikoContextInterface<
   set contracts(handler: CO);
   get deposits(): D;
   set deposits(handler: D);
+  get nullifiers(): N;
+  set nullifiers(handler: N);
   get transactions(): T;
   set transactions(handler: T);
   get wallets(): W;

@@ -83,10 +83,6 @@ const commitmentSchemaLiteral = {
       type: 'string',
       pattern: ETH_TX_HASH_REGEX,
     },
-    relayTransactionHash: {
-      type: 'string',
-      pattern: ETH_TX_HASH_REGEX,
-    },
     spendingTransactionHash: {
       type: 'string',
       pattern: ETH_TX_HASH_REGEX,
