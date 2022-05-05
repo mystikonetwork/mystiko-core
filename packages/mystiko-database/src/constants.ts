@@ -9,4 +9,5 @@ export const CHAIN_COLLECTION_NAME = 'chains';
 export const COMMITMENT_COLLECTION_NAME = 'commitments';
 export const CONTRACT_COLLECTION_NAME = 'contracts';
 export const DEPOSIT_COLLECTION_NAME = 'deposits';
+export const NULLIFIER_COLLECTION_NAME = 'nullifiers';
 export const TRANSACTION_COLLECTION_NAME = 'transactions';

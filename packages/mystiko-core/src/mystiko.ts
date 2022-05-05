@@ -20,9 +20,13 @@ import {
   ExecutorFactory,
   HandlerFactory,
   MystikoContextInterface,
+  NullifierHandler,
+  Synchronizer,
+  SynchronizerFactory,
   TransactionHandler,
   WalletHandler,
 } from './interface';
+import { SynchronizerFactoryV2 } from './synchronizer';
 
 export interface InitOptions {
   isTestnet?: boolean;
@@ -35,6 +39,7 @@ export interface InitOptions {
   providerFactory?: ProviderFactory;
   handlerFactory?: HandlerFactory;
   executorFactory?: ExecutorFactory;
+  synchronizerFactory?: SynchronizerFactory;
 }
 
 export abstract class Mystiko {
@@ -56,6 +61,8 @@ export abstract class Mystiko {
 
   public commitments?: CommitmentHandler;
 
+  public nullifiers?: NullifierHandler;
+
   public deposits?: DepositHandler;
 
   public transactions?: TransactionHandler;
@@ -65,6 +72,8 @@ export abstract class Mystiko {
   public providers?: ProviderPool;
 
   public protocol?: MystikoProtocol;
+
+  public synchronizer?: Synchronizer;
 
   private context?: MystikoContextInterface;
 
@@ -80,6 +89,7 @@ export abstract class Mystiko {
       providerFactory,
       handlerFactory,
       executorFactory,
+      synchronizerFactory,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
@@ -106,6 +116,7 @@ export abstract class Mystiko {
     this.accounts = handlers.createAccountHandler();
     this.assets = handlers.createAssetHandler();
     this.commitments = handlers.createCommitmentHandler();
+    this.nullifiers = handlers.createNullifierHandler();
     this.deposits = handlers.createDepositHandler();
     this.transactions = handlers.createTransactionHandler();
     this.providers = new ProviderPoolImpl(
@@ -118,9 +129,11 @@ export abstract class Mystiko {
       metaMask: new MetaMaskSigner(this.config),
       privateKey: new PrivateKeySigner(this.config, this.providers),
     };
+    const syncFactory = synchronizerFactory || new SynchronizerFactoryV2(this.context);
+    this.synchronizer = syncFactory.createSynchronizer();
     await this.chains.init();
     await this.contracts.init();
-    this.logger.info('@mystikonetwork/core has been successfully initialized, enjoy!');
+    this.logger.info('mystiko has been successfully initialized, enjoy!');
   }
 
   protected getChainConfig(chainId: number): Promise<ProviderConnection[]> {

@@ -5,6 +5,7 @@ import {
   CommitmentCollection,
   ContractCollection,
   DepositCollection,
+  NullifierCollection,
   TransactionCollection,
   WalletCollection,
 } from '../collection';
@@ -14,6 +15,7 @@ import {
   COMMITMENT_COLLECTION_NAME,
   CONTRACT_COLLECTION_NAME,
   DEPOSIT_COLLECTION_NAME,
+  NULLIFIER_COLLECTION_NAME,
   TRANSACTION_COLLECTION_NAME,
   WALLET_COLLECTION_NAME,
 } from '../constants';
@@ -24,6 +26,7 @@ export type MystikoClientCollections = {
   [COMMITMENT_COLLECTION_NAME]: CommitmentCollection;
   [CONTRACT_COLLECTION_NAME]: ContractCollection;
   [DEPOSIT_COLLECTION_NAME]: DepositCollection;
+  [NULLIFIER_COLLECTION_NAME]: NullifierCollection;
   [TRANSACTION_COLLECTION_NAME]: TransactionCollection;
   [WALLET_COLLECTION_NAME]: WalletCollection;
 };

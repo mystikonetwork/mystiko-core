@@ -21,6 +21,9 @@ test('test raise errors', async () => {
   expect(() => context.deposits).toThrow(
     createError('deposit handler has not been set', MystikoErrorCode.NO_HANDLER),
   );
+  expect(() => context.nullifiers).toThrow(
+    createError('nullifier handler has not been set', MystikoErrorCode.NO_HANDLER),
+  );
   expect(() => context.transactions).toThrow(
     createError('transaction handler has not been set', MystikoErrorCode.NO_HANDLER),
   );

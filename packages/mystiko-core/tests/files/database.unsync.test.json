@@ -1,5 +1,5 @@
 {
-  "name": "../../db/mystiko",
+  "name": "mystiko",
   "instanceToken": "wjtyogwlrl",
   "encrypted": false,
   "passwordHash": null,
@@ -191,7 +191,7 @@
     },
     {
       "name": "commitments",
-      "schemaHash": "78f586093f267e306d5fb015683bdc55",
+      "schemaHash": "51e7cb2de0cfd54f160f0826ba732e52",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -242,7 +242,6 @@
           "encryptedNote": "0x03f346861b892cc79fc596ab9d2f2f5f045eca8c9b1395b97423c73bafb747b0d3974a51caebefaaaa258805b58a80070dc89da2e98df7d980be6f1f82f9e01bf485d248709ef377426dfb808b72e87f358f3172c8d6952304e9fbc3bf9fc0657d522dd26aef525a6433b682ee9a110146c72ff91c3bcc13b1f7fdc317e86e0cad16038d498c47fdbfdf45ce401c3ce79721ea2a0e5741e277bb3abc0d547dada2eb0180408cc48cb3b82106f85af00d3258d8e08869e038c8b526053098a59a6e168e4f28f59a0948bcfb7a8627b7fa50",
           "amount": "5000000000000000000",
           "shieldedAddress": "EWwpfC6wxg3RA71cHimWonUfSPwZF3hjjHATdzN5hEidjLod3gEy3NNZVC8uXtzrrYPjZXCvNCDm7Pnuyd4hpxkkP",
-          "creationTransactionHash": "0xa7c78a79e60b364f25d5a4959f3c74aa220a35938acd499cc313620f6cc15007",
           "id": "01G1Z1982JQVSNSB2GJHTDJWN0"
         },
         {
@@ -259,7 +258,6 @@
           "encryptedNote": "0xf7b415cd1ef5eec18a1c949bd2a3b9b804e7f41a7af37d708d01eea5a256ab0170b098d741c4647aabf95826eade9bfbf546e95d0cbc2d0e6bbfac8a8c606bb625dc3d258aab09c80df8fc1799c07a9d2b9d0936d75d7a6a1027ebd51118897ea2e9ad560af771004f89c09fb40759572a6236feca4bcf1b8d5b43be00a6cc4f3caa61a077b40c9ee260dce7464ad675391b0bdae28ba6ee1d1afa177a734c1b57a713aebc1c1a49284abffa5c4d0861aa99def25c2f50d1b266a24098ea0e1bb6bb5ca78ce70289b44e1c799b78a17be5",
           "amount": "5000000000000000000",
           "shieldedAddress": "EWwpfC6wxg3RA71cHimWonUfSPwZF3hjjHATdzN5hEidjLod3gEy3NNZVC8uXtzrrYPjZXCvNCDm7Pnuyd4hpxkkP",
-          "creationTransactionHash": "0x7da0251d069d8411c3403e464061126d6c642745f2015548902c2cc89beae2b0",
           "id": "01G1Z1FW6T2SCHNJPFBGPDD2CA"
         },
         {
@@ -276,7 +274,6 @@
           "encryptedNote": "0x89ff1a15920042b909b50773f472b95304adffbd8973763b856a4d6fe41b28a8dc0cddcf47713a59c021023599e815c4ccfde8d1f336ef378e34af6d8ad7eeb42a35a435ea04d3d0b15cc47e23dfdf2e7be6348f473ec504c433a18af3336faf304db1529a448b1ceb20278d5823f89d013f3153a3537c53a7658853900fa7ffab01f9bc529fa702c03979ab47e748d5402ba19df856ad8aacc0a05db5ecdb236e0c253d12c05880b75d0903ffc0fa48a7e631d1b7f23066c98a860a42622b33c3182a44ecdb4bade5d24165af70c4ac6e",
           "amount": "5000000000000000000",
           "shieldedAddress": "EWwpfC6wxg3RA71cHimWonUfSPwZF3hjjHATdzN5hEidjLod3gEy3NNZVC8uXtzrrYPjZXCvNCDm7Pnuyd4hpxkkP",
-          "creationTransactionHash": "0xc021413815f559dcdf99906918650df4c4c7a62b9d497268a4938deb0c18974f",
           "id": "01G1Z1HCC34BGZRKCFJ274DVRK"
         }
       ]

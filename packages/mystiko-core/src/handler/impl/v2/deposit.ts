@@ -135,7 +135,7 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
     );
     if (!contractConfig) {
       return createErrorPromise(
-        `invalid deposit options ${options}, no corresponding contract found`,
+        'invalid deposit options, no corresponding contract found',
         MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
       );
     }

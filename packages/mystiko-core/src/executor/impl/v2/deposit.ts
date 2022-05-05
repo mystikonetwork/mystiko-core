@@ -478,7 +478,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       encryptedNote: deposit.encryptedNote,
       amount: deposit.amount,
       shieldedAddress: deposit.shieldedRecipientAddress,
-      creationTransactionHash: deposit.transactionHash,
+      creationTransactionHash:
+        contractConfig.bridgeType === BridgeType.LOOP ? deposit.transactionHash : undefined,
     };
     return this.context.commitments
       .findOne({

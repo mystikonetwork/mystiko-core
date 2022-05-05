@@ -5,6 +5,7 @@ import {
   commitmentCollectionMethods,
   contractCollectionMethods,
   depositCollectionMethods,
+  nullifierCollectionMethods,
   transactionCollectionMethods,
   walletCollectionMethods,
 } from '../collection';
@@ -14,6 +15,7 @@ import {
   COMMITMENT_COLLECTION_NAME,
   CONTRACT_COLLECTION_NAME,
   DEPOSIT_COLLECTION_NAME,
+  NULLIFIER_COLLECTION_NAME,
   TRANSACTION_COLLECTION_NAME,
   WALLET_COLLECTION_NAME,
 } from '../constants';
@@ -23,6 +25,7 @@ import {
   commitmentMethods,
   contractMethods,
   depositMethods,
+  nullifierMethods,
   transactionMethods,
   walletMethods,
 } from '../document';
@@ -33,6 +36,7 @@ import {
   commitmentSchema,
   contractSchema,
   depositSchema,
+  nullifierSchema,
   transactionSchema,
   walletSchema,
 } from '../schema';
@@ -75,6 +79,11 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoD
       schema: depositSchema,
       methods: depositMethods,
       statics: depositCollectionMethods,
+    },
+    [NULLIFIER_COLLECTION_NAME]: {
+      schema: nullifierSchema,
+      methods: nullifierMethods,
+      statics: nullifierCollectionMethods,
     },
     [TRANSACTION_COLLECTION_NAME]: {
       schema: transactionSchema,

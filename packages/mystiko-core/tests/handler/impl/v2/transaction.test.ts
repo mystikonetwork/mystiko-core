@@ -86,7 +86,7 @@ test('test create', async () => {
   options.chainId = 1024;
   await expect(handler.create(options)).rejects.toThrow(
     createError(
-      `invalid transaction options ${options}, no corresponding contract found`,
+      'invalid transaction options, no corresponding contract found',
       MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
     ),
   );
@@ -149,7 +149,7 @@ test('test quote', async () => {
   options.chainId = 2048;
   await expect(handler.quote(options)).rejects.toThrow(
     createError(
-      `invalid transaction options ${options}, no corresponding contract found`,
+      'invalid transaction options, no corresponding contract found',
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
@@ -161,7 +161,7 @@ test('test summary', async () => {
   options.chainId = 2048;
   await expect(handler.summary(options)).rejects.toThrow(
     createError(
-      `invalid transaction options ${options}, no corresponding contract found`,
+      'invalid transaction options, no corresponding contract found',
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );

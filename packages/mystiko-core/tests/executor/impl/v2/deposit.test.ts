@@ -143,7 +143,11 @@ async function checkDeposit(
   expect(commitment?.amount).toBe(deposit.amount);
   expect(commitment?.rollupFeeAmount).toBe(deposit.rollupFeeAmount);
   expect(commitment?.shieldedAddress).toBe(deposit.shieldedRecipientAddress);
-  expect(commitment?.creationTransactionHash).toBe(deposit.transactionHash);
+  if (deposit.bridgeType === BridgeType.LOOP) {
+    expect(commitment?.creationTransactionHash).toBe(deposit.transactionHash);
+  } else {
+    expect(commitment?.creationTransactionHash).toBe(undefined);
+  }
 }
 
 beforeAll(async () => {
