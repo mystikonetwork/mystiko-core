@@ -41,6 +41,7 @@ async function deployStep2(taskArgs: any) {
   }
 
   const bridgeProxyAddress = await getOrDeployTBridgeProxy(
+    c.mystikoNetwork,
     c.bridgeCfg,
     c.proxyCfg,
     c.operatorCfg,
@@ -72,7 +73,11 @@ async function deployStep2(taskArgs: any) {
   await delay(10000);
 
   await addEnqueueWhitelist(c.srcTokenCfg.erc20, commitmentPoolAddress, depositAddress);
-  await addRegisterWhitelist(bridgeProxyAddress, depositAddress);
+  await delay(2000);
+
+  if (c.bridgeCfg.name === BridgeTBridge) {
+    await addRegisterWhitelist(bridgeProxyAddress, depositAddress);
+  }
 
   saveConfig(c.mystikoNetwork, c.cfg);
 }

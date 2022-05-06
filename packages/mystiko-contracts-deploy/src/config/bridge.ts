@@ -139,20 +139,21 @@ export class BridgeConfig extends BaseConfig {
     return this.asRawBridgeConfig().contractName;
   }
 
-  public addBridgeProxyConfig(network: string, address: string): BridgeProxyConfig {
-    if (this.getBridgeProxyConfig(network) !== undefined) {
-      console.log(LOGRED, 'bridge proxy already exist');
-      process.exit(-1);
+  public addOrUpdateBridgeProxyConfig(network: string, address: string): BridgeProxyConfig {
+    const bridgeCfg = this.getBridgeProxyConfig(network);
+    if (bridgeCfg !== undefined) {
+      console.log('bridge proxy already exist, update');
+      return bridgeCfg;
     }
 
     const rawBridgeProxyCfg = {
       network,
       address,
     };
-    const bridgeCfg = new BridgeProxyConfig(rawBridgeProxyCfg);
+    const newBridgeCfg = new BridgeProxyConfig(rawBridgeProxyCfg);
     this.asRawBridgeConfig().proxys.push(rawBridgeProxyCfg);
-    this.proxyByNetwork[network] = bridgeCfg;
-    return bridgeCfg;
+    this.proxyByNetwork[network] = newBridgeCfg;
+    return newBridgeCfg;
   }
 
   public getBridgeProxyConfig(network: string): BridgeProxyConfig | undefined {
