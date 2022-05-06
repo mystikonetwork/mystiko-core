@@ -164,13 +164,13 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
       }
       return this.context.commitments.find({ selector: commitmentSelector }).then((commitments) =>
         commitments.filter((c) => {
-          const bridgeType = this.config
-            .getChainConfig(c.chainId)
-            ?.getPoolContractBridgeType(c.contractAddress);
+          const chainConfig = this.config.getChainConfig(c.chainId);
+          const contractConfig = chainConfig?.getPoolContractByAddress(c.contractAddress);
+          const bridgeType = chainConfig?.getPoolContractBridgeType(c.contractAddress);
           if (bridges) {
             return !!bridgeType && bridges.indexOf(bridgeType) !== -1;
           }
-          return true;
+          return !!chainConfig && !!contractConfig && !!bridgeType;
         }),
       );
     });

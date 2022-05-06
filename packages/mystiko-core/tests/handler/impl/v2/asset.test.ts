@@ -125,3 +125,22 @@ test('test balances', async () => {
   expect(balances.get('BNB')?.unspentTotal).toBe(0.2);
   expect(balances.get('BNB')?.pendingTotal).toBe(0);
 });
+
+test('test skip removed contract', async () => {
+  const rawConfig = context.config.copyData();
+  const rawChainConfig = rawConfig.chains.filter((c) => c.chainId === 97)[0];
+  rawChainConfig.depositContracts = rawChainConfig.depositContracts.filter(
+    (c) => c.address !== '0x4471873169EA7cd3f45beA9105f567Bdc8608240',
+  );
+  rawChainConfig.poolContracts = rawChainConfig.poolContracts.filter(
+    (c) => c.address !== '0xae5009F4B58E6eF25Fee71174A827042c543ac46',
+  );
+  context.config = await MystikoConfig.createFromRaw(rawConfig);
+  const balances = await handler.balances();
+  expect(balances.size).toBe(1);
+  expect(balances.get('MTT')?.unspentTotal).toBe(19.9);
+  expect(balances.get('MTT')?.pendingTotal).toBe(0);
+  const balance = await handler.balance({ asset: 'BNB' });
+  expect(balance.unspentTotal).toBe(0);
+  expect(balance.pendingTotal).toBe(0);
+});
