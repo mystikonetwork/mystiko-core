@@ -99,7 +99,7 @@ function getTestOptions(): TestOptions {
 type MockSetupOptions = {
   poolBalance?: string;
   isKnownRoot?: boolean;
-  spentSerialNumber?: boolean;
+  isSpentSerialNumber?: boolean;
   transactSuccess?: boolean;
 };
 
@@ -111,7 +111,7 @@ async function setupMocks(options: MockSetupOptions): Promise<TestOptions> {
     .withArgs(testOptions.contractConfig.address)
     .returns(options.poolBalance || toDecimals(50).toString());
   await mockCommitmentPool.mock.isKnownRoot.returns(!!options.isKnownRoot);
-  await mockCommitmentPool.mock.spentSerialNumbers.returns(!!options.spentSerialNumber);
+  await mockCommitmentPool.mock.isSpentSerialNumber.returns(!!options.isSpentSerialNumber);
   if (options.transactSuccess) {
     await mockCommitmentPool.mock.transact.returns();
   } else {
@@ -462,7 +462,7 @@ test('test invalid signer', async () => {
 test('test invalid root hash', async () => {
   const { withdrawOptions, contractConfig } = await setupMocks({
     isKnownRoot: false,
-    spentSerialNumber: false,
+    isSpentSerialNumber: false,
   });
   const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
   await transactionPromise;
@@ -475,7 +475,7 @@ test('test invalid root hash', async () => {
 test('test already spent serial number', async () => {
   const { withdrawOptions, contractConfig } = await setupMocks({
     isKnownRoot: true,
-    spentSerialNumber: true,
+    isSpentSerialNumber: true,
   });
   const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
   await transactionPromise;
@@ -488,7 +488,7 @@ test('test already spent serial number', async () => {
 test('test serial number not set', async () => {
   const { withdrawOptions, contractConfig } = await setupMocks({
     isKnownRoot: true,
-    spentSerialNumber: false,
+    isSpentSerialNumber: false,
   });
   const promises = await context.commitments
     .find({
@@ -509,7 +509,7 @@ test('test serial number not set', async () => {
 test('test serial number mismatch', async () => {
   const { withdrawOptions, contractConfig } = await setupMocks({
     isKnownRoot: true,
-    spentSerialNumber: false,
+    isSpentSerialNumber: false,
   });
   const promises = await context.commitments
     .find({
