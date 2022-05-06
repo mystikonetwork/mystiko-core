@@ -282,6 +282,17 @@ test('test createDefaultMainnetConfig', async () => {
   await MystikoConfig.createDefaultMainnetConfig();
 });
 
+test('test getTransactionUrl', () => {
+  expect(
+    config.getTransactionUrl(1024, '0xbce8d733536ee3b769456cf91bebae1e9e5be6cb89bb7490c6225384e1bc5e3e'),
+  ).toBe(undefined);
+  expect(
+    config.getTransactionUrl(3, '0xbce8d733536ee3b769456cf91bebae1e9e5be6cb89bb7490c6225384e1bc5e3e'),
+  ).toBe(
+    'https://ropsten.etherscan.io/tx/0xbce8d733536ee3b769456cf91bebae1e9e5be6cb89bb7490c6225384e1bc5e3e',
+  );
+});
+
 test('test mutate', () => {
   expect(config.mutate().copyData()).toStrictEqual(rawConfig);
   rawConfig.version = '1.1.1';

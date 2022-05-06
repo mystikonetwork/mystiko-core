@@ -122,6 +122,10 @@ export class MystikoConfig extends BaseConfig<RawMystikoConfig> {
     return this.circuitConfigsByName.get(name);
   }
 
+  public getTransactionUrl(chainId: number, transactionHash: string): string | undefined {
+    return this.getChainConfig(chainId)?.getTransactionUrl(transactionHash);
+  }
+
   public mutate(data?: RawMystikoConfig): MystikoConfig {
     return new MystikoConfig(data || this.data);
   }
