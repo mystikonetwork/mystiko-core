@@ -1,11 +1,6 @@
 import { Wallet } from '@ethersproject/wallet';
-import {
-  Hasher3,
-  MystikoV2WithLoopERC20,
-  MystikoV2WithLoopMain,
-  CommitmentPoolMain,
-  CommitmentPoolERC20,
-} from '@mystikonetwork/contracts-abi';
+import { waffle } from 'hardhat';
+import { MystikoV2WithLoopERC20, MystikoV2WithLoopMain } from '@mystikonetwork/contracts-abi';
 import {
   deployLoopContracts,
   deployDependContracts,
@@ -14,8 +9,6 @@ import {
 } from '../../util/common';
 import { testLoopConstructor, testLoopAdminOperations } from '../../common';
 import { MinAmount } from '../../util/constants';
-
-const { waffle } = require('hardhat');
 
 describe('Test Mystiko loop', () => {
   async function fixture(accounts: Wallet[]) {
@@ -62,26 +55,24 @@ describe('Test Mystiko loop', () => {
   }
 
   let accounts: Wallet[];
-  let poolMain: CommitmentPoolMain;
-  let poolErc20: CommitmentPoolERC20;
+  // let poolMain: CommitmentPoolMain;
+  // let poolErc20: CommitmentPoolERC20;
   let loopERC20: MystikoV2WithLoopERC20;
   let loopMain: MystikoV2WithLoopMain;
-  let hasher3: Hasher3;
 
   beforeEach(async () => {
     accounts = waffle.provider.getWallets();
 
     const r = await loadFixture(fixture);
-    poolMain = r.pool.poolMain;
-    poolErc20 = r.pool.poolERC20;
+    // poolMain = r.pool.poolMain;
+    // poolErc20 = r.pool.poolERC20;
     loopMain = r.loop.coreMain;
     loopERC20 = r.loop.coreERC20;
-    hasher3 = r.hasher3;
   });
 
   it('test constructor', () => {
-    testLoopConstructor('MystikoV2WithLoopMain', loopMain, hasher3, MinAmount, poolMain.address);
-    testLoopConstructor('MystikoV2WithLoopERC20', loopERC20, hasher3, MinAmount, poolErc20.address);
+    testLoopConstructor('MystikoV2WithLoopMain', loopMain, MinAmount);
+    testLoopConstructor('MystikoV2WithLoopERC20', loopERC20, MinAmount);
   });
 
   it('test admin operation', () => {

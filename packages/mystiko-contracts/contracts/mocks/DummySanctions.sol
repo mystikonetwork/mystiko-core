@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract DummySanctionsList {
-  mapping(address => bool) public sanctionsList;
+  mapping(address => bool) sanctionsList;
 
   function addToSanctionsList(address addr) external {
     sanctionsList[addr] = true;

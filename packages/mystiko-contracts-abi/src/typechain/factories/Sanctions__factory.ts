@@ -9,12 +9,12 @@ import type { Sanctions, SanctionsInterface } from '../Sanctions';
 const _abi = [
   {
     inputs: [],
-    name: 'isSanctionCheckDisabled',
+    name: 'getSanctionsContract',
     outputs: [
       {
-        internalType: 'bool',
+        internalType: 'address',
         name: '',
-        type: 'bool',
+        type: 'address',
       },
     ],
     stateMutability: 'view',
@@ -22,12 +22,12 @@ const _abi = [
   },
   {
     inputs: [],
-    name: 'sanctionsContract',
+    name: 'isSanctionCheckDisabled',
     outputs: [
       {
-        internalType: 'address',
+        internalType: 'bool',
         name: '',
-        type: 'address',
+        type: 'bool',
       },
     ],
     stateMutability: 'view',

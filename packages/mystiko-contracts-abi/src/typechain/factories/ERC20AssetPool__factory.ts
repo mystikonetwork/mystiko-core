@@ -9,19 +9,6 @@ import type { ERC20AssetPool, ERC20AssetPoolInterface } from '../ERC20AssetPool'
 const _abi = [
   {
     inputs: [],
-    name: 'asset',
-    outputs: [
-      {
-        internalType: 'contract IERC20Metadata',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'assetDecimals',
     outputs: [
       {

@@ -10,23 +10,22 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
-  uint256 public constant FIELD_SIZE =
-    21888242871839275222246405745257275088548364400416034343698204186575808495617;
+  uint256 constant FIELD_SIZE = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
   // Hasher related.
-  IHasher3 public hasher3;
+  IHasher3 hasher3;
 
-  address public associatedCommitmentPool;
-  uint256 public minAmount;
+  address associatedCommitmentPool;
+  uint256 minAmount;
 
   // Admin related.
-  address public operator;
+  address operator;
 
   // Some switches.
-  bool public isDepositsDisabled;
+  bool depositsDisabled;
 
   modifier onlyOperator() {
-    require(msg.sender == operator, "Only operator can call this function.");
+    require(msg.sender == operator, "only operator.");
     _;
   }
 
@@ -54,7 +53,7 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
   }
 
   function deposit(DepositRequest memory _request) external payable override {
-    require(!isDepositsDisabled, "deposits are disabled");
+    require(!depositsDisabled, "deposits are disabled");
     require(_request.amount >= minAmount, "amount too few");
     uint256 calculatedCommitment = _commitmentHash(_request.hashK, _request.amount, _request.randomS);
     require(_request.commitment == calculatedCommitment, "commitment hash incorrect");
@@ -84,7 +83,7 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
   }
 
   function toggleDeposits(bool _state) external onlyOperator {
-    isDepositsDisabled = _state;
+    depositsDisabled = _state;
   }
 
   function changeOperator(address _newOperator) external onlyOperator {
@@ -92,7 +91,7 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
   }
 
   function toggleSanctionCheck(bool _check) external onlyOperator {
-    isSanctionCheckDisabled = _check;
+    sanctionCheckDisabled = _check;
   }
 
   function updateSanctionContractAddress(address _sanction) external onlyOperator {
@@ -101,5 +100,13 @@ abstract contract MystikoV2Loop is IMystikoLoop, AssetPool, Sanctions {
 
   function bridgeType() public pure returns (string memory) {
     return "loop";
+  }
+
+  function getMinAmount() public view returns (uint256) {
+    return minAmount;
+  }
+
+  function isDepositsDisabled() public view returns (bool) {
+    return depositsDisabled;
   }
 }

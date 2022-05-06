@@ -11,36 +11,35 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSerializable, Sanctions {
-  uint256 public constant FIELD_SIZE =
-    21888242871839275222246405745257275088548364400416034343698204186575808495617;
+  uint256 FIELD_SIZE = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
   // Hasher related.
-  IHasher3 public hasher3;
+  IHasher3 hasher3;
 
-  address public associatedCommitmentPool;
-  uint64 public peerChainId;
-  address public peerContract;
+  address associatedCommitmentPool;
+  uint64 peerChainId;
+  address peerContract;
 
   //bridge proxy address
-  address public bridgeProxyAddress;
+  address bridgeProxyAddress;
 
   //local chain fee
-  uint256 public minAmount;
-  uint256 public minBridgeFee;
-  uint256 public minExecutorFee;
+  uint256 minAmount;
+  uint256 minBridgeFee;
+  uint256 minExecutorFee;
 
   //remote chain fee
-  uint256 public peerMinExecutorFee;
-  uint256 public peerMinRollupFee;
+  uint256 peerMinExecutorFee;
+  uint256 peerMinRollupFee;
 
   // Admin related.
-  address public operator;
+  address operator;
 
   // Some switches.
-  bool public isDepositsDisabled;
+  bool depositsDisabled;
 
   modifier onlyOperator() {
-    require(msg.sender == operator, "Only operator can call this function.");
+    require(msg.sender == operator, "only operator.");
     _;
   }
 
@@ -103,7 +102,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   }
 
   function deposit(DepositRequest memory _request) external payable override {
-    require(!isDepositsDisabled, "deposits are disabled");
+    require(!depositsDisabled, "deposits are disabled");
     require(_request.amount >= minAmount, "amount too few");
     require(_request.bridgeFee >= minBridgeFee, "bridge fee too few");
     require(_request.executorFee >= peerMinExecutorFee, "executor fee too few");
@@ -150,7 +149,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   }
 
   function toggleDeposits(bool _state) external onlyOperator {
-    isDepositsDisabled = _state;
+    depositsDisabled = _state;
   }
 
   function changeOperator(address _newOperator) external onlyOperator {
@@ -158,7 +157,7 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   }
 
   function toggleSanctionCheck(bool _check) external onlyOperator {
-    isSanctionCheckDisabled = _check;
+    sanctionCheckDisabled = _check;
   }
 
   function updateSanctionContractAddress(address _sanction) external onlyOperator {
@@ -166,4 +165,28 @@ abstract contract MystikoV2Bridge is IMystikoBridge, AssetPool, CrossChainDataSe
   }
 
   function bridgeType() public pure virtual returns (string memory);
+
+  function getMinAmount() public view returns (uint256) {
+    return minAmount;
+  }
+
+  function getMinBridgeFee() public view returns (uint256) {
+    return minBridgeFee;
+  }
+
+  function getMinExecutorFee() public view returns (uint256) {
+    return minExecutorFee;
+  }
+
+  function getPeerMinExecutorFee() public view returns (uint256) {
+    return peerMinExecutorFee;
+  }
+
+  function getPeerMinRollupFee() public view returns (uint256) {
+    return peerMinRollupFee;
+  }
+
+  function isDepositsDisabled() public view returns (bool) {
+    return depositsDisabled;
+  }
 }

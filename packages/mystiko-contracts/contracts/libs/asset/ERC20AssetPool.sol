@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 abstract contract ERC20AssetPool is AssetPool {
   using SafeERC20 for IERC20Metadata;
-  IERC20Metadata public asset;
+  IERC20Metadata asset;
 
   constructor(address _assetAddress) {
     asset = IERC20Metadata(_assetAddress);

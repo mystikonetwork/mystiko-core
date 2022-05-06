@@ -20,51 +20,50 @@ struct WrappedVerifier {
 }
 
 abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard, Sanctions {
-  uint256 public constant FIELD_SIZE =
-    21888242871839275222246405745257275088548364400416034343698204186575808495617;
+  uint256 constant FIELD_SIZE = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
   // Verifier related.
-  mapping(uint32 => mapping(uint32 => WrappedVerifier)) public transactVerifiers;
-  mapping(uint32 => WrappedVerifier) public rollupVerifiers;
+  mapping(uint32 => mapping(uint32 => WrappedVerifier)) transactVerifiers;
+  mapping(uint32 => WrappedVerifier) rollupVerifiers;
 
   // For checking duplicates.
-  mapping(uint256 => bool) public historicCommitments;
-  mapping(uint256 => bool) public spentSerialNumbers;
+  mapping(uint256 => bool) historicCommitments;
+  mapping(uint256 => bool) spentSerialNumbers;
 
   // Commitment queue related.
-  mapping(uint256 => CommitmentLeaf) public commitmentQueue;
-  uint256 public commitmentQueueSize = 0;
-  uint256 public commitmentIncludedCount = 0;
+  mapping(uint256 => CommitmentLeaf) commitmentQueue;
+  uint256 commitmentQueueSize = 0;
+  uint256 commitmentIncludedCount = 0;
 
   // merkle tree roots;
-  uint256 public immutable treeCapacity;
-  mapping(uint32 => uint256) public rootHistory;
-  uint256 public currentRoot;
-  uint32 public currentRootIndex = 0;
-  uint32 public rootHistoryLength;
+  uint256 immutable treeCapacity;
+  mapping(uint32 => uint256) rootHistory;
+  uint256 currentRoot;
+  uint32 currentRootIndex = 0;
+  uint32 immutable rootHistoryLength;
 
   // Admin related.
-  address public operator;
-  uint256 public minRollupFee;
-  mapping(address => bool) public rollupWhitelist;
-  mapping(address => bool) public enqueueWhitelist;
+  address operator;
+  uint256 minRollupFee;
+  mapping(address => bool) rollupWhitelist;
+  mapping(address => bool) enqueueWhitelist;
 
   // Some switches.
-  bool public isVerifierUpdateDisabled;
-  bool public isRollupWhitelistDisabled;
+  bool verifierUpdateDisabled;
+  bool rollupWhitelistDisabled;
 
   modifier onlyOperator() {
-    require(msg.sender == operator, "Only operator.");
+    require(msg.sender == operator, "only operator.");
     _;
   }
 
   modifier onlyRollupWhitelisted() {
-    require(isRollupWhitelistDisabled || rollupWhitelist[msg.sender], "Only whitelisted roller.");
+    require(rollupWhitelistDisabled || rollupWhitelist[msg.sender], "only whitelisted roller.");
     _;
   }
 
   modifier onlyEnqueueWhitelisted() {
-    require(enqueueWhitelist[msg.sender], "Only whitelisted sender.");
+    require(enqueueWhitelist[msg.sender], "only whitelisted sender.");
     _;
   }
 
@@ -225,26 +224,12 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     }
   }
 
-  function isKnownRoot(uint256 root) public view returns (bool) {
-    uint32 i = currentRootIndex;
-    do {
-      if (root == rootHistory[i]) {
-        return true;
-      }
-      if (i == 0) {
-        i = rootHistoryLength;
-      }
-      i--;
-    } while (i != currentRootIndex);
-    return false;
-  }
-
   function toggleRollupWhitelist(bool _state) external onlyOperator {
-    isRollupWhitelistDisabled = _state;
+    rollupWhitelistDisabled = _state;
   }
 
   function toggleVerifierUpdate(bool _state) external onlyOperator {
-    isVerifierUpdateDisabled = _state;
+    verifierUpdateDisabled = _state;
   }
 
   function enableTransactVerifier(
@@ -252,14 +237,14 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
     uint32 _numOutputs,
     address _transactVerifier
   ) external onlyOperator {
-    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
+    require(!verifierUpdateDisabled, "verifier updates have been disabled.");
     require(_numInputs > 0, "numInputs should > 0");
     require(_numOutputs >= 0, "numOutputs should >= 0");
     transactVerifiers[_numInputs][_numOutputs] = WrappedVerifier(IVerifier(_transactVerifier), true);
   }
 
   function disableTransactVerifier(uint32 _numInputs, uint32 _numOutputs) external onlyOperator {
-    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
+    require(!verifierUpdateDisabled, "verifier updates have been disabled.");
     require(_numInputs > 0, "numInputs should > 0");
     require(_numOutputs >= 0, "numOutputs should >= 0");
     if (transactVerifiers[_numInputs][_numOutputs].enabled) {
@@ -268,14 +253,14 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
   }
 
   function enableRollupVerifier(uint32 _rollupSize, address _rollupVerifier) external onlyOperator {
-    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
+    require(!verifierUpdateDisabled, "verifier updates have been disabled.");
     require(_rollupSize > 0, "invalid rollupSize");
     rollupVerifiers[_rollupSize] = WrappedVerifier(IVerifier(_rollupVerifier), true);
   }
 
   function disableRollupVerifier(uint32 _rollupSize) external onlyOperator {
     require(_rollupSize > 0, "invalid rollupSize");
-    require(!isVerifierUpdateDisabled, "Verifier updates have been disabled.");
+    require(!verifierUpdateDisabled, "verifier updates have been disabled.");
     if (rollupVerifiers[_rollupSize].enabled) {
       rollupVerifiers[_rollupSize].enabled = false;
     }
@@ -307,11 +292,57 @@ abstract contract CommitmentPool is ICommitmentPool, AssetPool, ReentrancyGuard,
   }
 
   function toggleSanctionCheck(bool _check) external onlyOperator {
-    isSanctionCheckDisabled = _check;
+    sanctionCheckDisabled = _check;
   }
 
   function updateSanctionContractAddress(address _sanction) external onlyOperator {
     sanctionsContract = _sanction;
+  }
+
+  function isHistoricCommitment(uint256 _commitment) public view returns (bool) {
+    return historicCommitments[_commitment];
+  }
+
+  function isSpentSerialNumber(uint256 _serialNumber) public view returns (bool) {
+    return spentSerialNumbers[_serialNumber];
+  }
+
+  function isKnownRoot(uint256 root) public view returns (bool) {
+    uint32 i = currentRootIndex;
+    do {
+      if (root == rootHistory[i]) {
+        return true;
+      }
+      if (i == 0) {
+        i = rootHistoryLength;
+      }
+      i--;
+    } while (i != currentRootIndex);
+    return false;
+  }
+
+  function getTreeCapacity() public view returns (uint256) {
+    return treeCapacity;
+  }
+
+  function getRootHistoryLength() public view returns (uint32) {
+    return rootHistoryLength;
+  }
+
+  function isVerifierUpdateDisabled() public view returns (bool) {
+    return verifierUpdateDisabled;
+  }
+
+  function isRollupWhitelistDisabled() public view returns (bool) {
+    return rollupWhitelistDisabled;
+  }
+
+  function getMinRollupFee() public view returns (uint256) {
+    return minRollupFee;
+  }
+
+  function getCommitmentIncludedCount() public view returns (uint256) {
+    return commitmentIncludedCount;
   }
 
   function _enqueueCommitment(

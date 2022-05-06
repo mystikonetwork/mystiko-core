@@ -41,22 +41,17 @@ export declare namespace IMystikoLoop {
 export interface MystikoV2WithLoopERC20Interface extends utils.Interface {
   contractName: 'MystikoV2WithLoopERC20';
   functions: {
-    'FIELD_SIZE()': FunctionFragment;
-    'asset()': FunctionFragment;
     'assetDecimals()': FunctionFragment;
     'assetName()': FunctionFragment;
     'assetSymbol()': FunctionFragment;
     'assetType()': FunctionFragment;
-    'associatedCommitmentPool()': FunctionFragment;
     'bridgeType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256))': FunctionFragment;
-    'hasher3()': FunctionFragment;
+    'getMinAmount()': FunctionFragment;
+    'getSanctionsContract()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
     'isSanctionCheckDisabled()': FunctionFragment;
-    'minAmount()': FunctionFragment;
-    'operator()': FunctionFragment;
-    'sanctionsContract()': FunctionFragment;
     'setAssociatedCommitmentPool(address)': FunctionFragment;
     'setMinAmount(uint256)': FunctionFragment;
     'toggleDeposits(bool)': FunctionFragment;
@@ -64,44 +59,34 @@ export interface MystikoV2WithLoopERC20Interface extends utils.Interface {
     'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'asset', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetDecimals', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetName', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetSymbol', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'associatedCommitmentPool', values?: undefined): string;
   encodeFunctionData(functionFragment: 'bridgeType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoLoop.DepositRequestStruct]): string;
-  encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getMinAmount', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getSanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setAssociatedCommitmentPool', values: [string]): string;
   encodeFunctionData(functionFragment: 'setMinAmount', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'toggleDeposits', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'toggleSanctionCheck', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
-  decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'asset', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetDecimals', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetName', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetSymbol', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'associatedCommitmentPool', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'bridgeType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getMinAmount', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getSanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setAssociatedCommitmentPool', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinAmount', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleDeposits', data: BytesLike): Result;
@@ -135,10 +120,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    asset(overrides?: CallOverrides): Promise<[string]>;
-
     assetDecimals(overrides?: CallOverrides): Promise<[number]>;
 
     assetName(overrides?: CallOverrides): Promise<[string]>;
@@ -146,8 +127,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     assetSymbol(overrides?: CallOverrides): Promise<[string]>;
 
     assetType(overrides?: CallOverrides): Promise<[string]>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<[string]>;
 
     bridgeType(overrides?: CallOverrides): Promise<[string]>;
 
@@ -161,17 +140,13 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    hasher3(overrides?: CallOverrides): Promise<[string]>;
+    getMinAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<[string]>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
-
-    minAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    operator(overrides?: CallOverrides): Promise<[string]>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
 
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
@@ -199,10 +174,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
-  asset(overrides?: CallOverrides): Promise<string>;
-
   assetDecimals(overrides?: CallOverrides): Promise<number>;
 
   assetName(overrides?: CallOverrides): Promise<string>;
@@ -210,8 +181,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
   assetSymbol(overrides?: CallOverrides): Promise<string>;
 
   assetType(overrides?: CallOverrides): Promise<string>;
-
-  associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
 
   bridgeType(overrides?: CallOverrides): Promise<string>;
 
@@ -225,17 +194,13 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  hasher3(overrides?: CallOverrides): Promise<string>;
+  getMinAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getSanctionsContract(overrides?: CallOverrides): Promise<string>;
 
   isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
   isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-  minAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  operator(overrides?: CallOverrides): Promise<string>;
-
-  sanctionsContract(overrides?: CallOverrides): Promise<string>;
 
   setAssociatedCommitmentPool(
     _commitmentPoolAddress: string,
@@ -263,10 +228,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    asset(overrides?: CallOverrides): Promise<string>;
-
     assetDecimals(overrides?: CallOverrides): Promise<number>;
 
     assetName(overrides?: CallOverrides): Promise<string>;
@@ -275,25 +236,19 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
 
     assetType(overrides?: CallOverrides): Promise<string>;
 
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
-
     bridgeType(overrides?: CallOverrides): Promise<string>;
 
     changeOperator(_newOperator: string, overrides?: CallOverrides): Promise<void>;
 
     deposit(_request: IMystikoLoop.DepositRequestStruct, overrides?: CallOverrides): Promise<void>;
 
-    hasher3(overrides?: CallOverrides): Promise<string>;
+    getMinAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<string>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-    minAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operator(overrides?: CallOverrides): Promise<string>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<string>;
 
     setAssociatedCommitmentPool(_commitmentPoolAddress: string, overrides?: CallOverrides): Promise<void>;
 
@@ -309,10 +264,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
   filters: {};
 
   estimateGas: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    asset(overrides?: CallOverrides): Promise<BigNumber>;
-
     assetDecimals(overrides?: CallOverrides): Promise<BigNumber>;
 
     assetName(overrides?: CallOverrides): Promise<BigNumber>;
@@ -320,8 +271,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     assetSymbol(overrides?: CallOverrides): Promise<BigNumber>;
 
     assetType(overrides?: CallOverrides): Promise<BigNumber>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<BigNumber>;
 
     bridgeType(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -335,17 +284,13 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    hasher3(overrides?: CallOverrides): Promise<BigNumber>;
+    getMinAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operator(overrides?: CallOverrides): Promise<BigNumber>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
@@ -374,10 +319,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
   };
 
   populateTransaction: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    asset(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     assetDecimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     assetName(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -385,8 +326,6 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
     assetSymbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     assetType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     bridgeType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -400,17 +339,13 @@ export interface MystikoV2WithLoopERC20 extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    hasher3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getMinAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,

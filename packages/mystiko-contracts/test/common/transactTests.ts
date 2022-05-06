@@ -1,13 +1,12 @@
 import BN from 'bn.js';
 import { expect } from 'chai';
+import { waffle } from 'hardhat';
 import { ethers } from 'ethers';
 import { Proof } from 'zokrates-js';
 import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { MerkleTree, toBN, toBuff, toHex, toHexNoPrefix } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
-
-const { waffle } = require('hardhat');
 
 function getBalance(address: string, testToken: TestToken | undefined): Promise<BN> {
   if (!testToken) {
@@ -27,7 +26,7 @@ async function generateProof(
   numOutputs: number,
   commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
-  includedCount: BN,
+  includedCount: number,
   sigPk: Buffer,
   publicAmount: BN,
   relayerFeeAmount: BN,
@@ -37,7 +36,7 @@ async function generateProof(
   abiFile: string,
   provingKeyFile: string,
 ): Promise<{ proof: Proof; outCommitments: CommitmentV2[] }> {
-  const commitments = commitmentInfo.commitments.slice(0, includedCount.toNumber());
+  const commitments = commitmentInfo.commitments.slice(0, includedCount);
   const merkleTree = new MerkleTree(
     commitments.map((c) => c.commitmentHash),
     { maxLevels: protocol.merkleTreeLevels },
@@ -55,8 +54,8 @@ async function generateProof(
     inVerifySks.push(protocol.secretKeyForVerification(commitmentInfo.rawSkVerify));
     inEncPks.push(commitmentInfo.pkEnc);
     inEncSks.push(protocol.secretKeyForEncryption(commitmentInfo.rawSkEnc));
-    inCommitments.push(commitments[inCommitmentsIndices[i]].commitmentHash);
-    inPrivateNotes.push(commitments[inCommitmentsIndices[i]].privateNote);
+    inCommitments.push(commitmentInfo.commitments[inCommitmentsIndices[i]].commitmentHash);
+    inPrivateNotes.push(commitmentInfo.commitments[inCommitmentsIndices[i]].privateNote);
     const fullPath = merkleTree.path(inCommitmentsIndices[i]);
     pathIndices.push(fullPath.pathIndices);
     pathElements.push(fullPath.pathElements);
@@ -152,6 +151,8 @@ export function testTransact(
   transactVerifier: any,
   commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
+  queueSize: number,
+  includedCount: number,
   publicAmount: BN,
   relayerFeeAmount: BN,
   outAmounts: BN[],
@@ -174,14 +175,11 @@ export function testTransact(
   let outCommitments: CommitmentV2[];
   let outEncryptedNotes: Buffer[];
   let signature: string;
-  let commitmentQueueSize: BN;
-  let commitmentIncludedCount: BN;
   let txReceipt: any;
   const events: ethers.utils.LogDescription[] = [];
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
-      const includedCount = await commitmentPoolContract.commitmentIncludedCount();
       const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
@@ -209,12 +207,6 @@ export function testTransact(
       );
       recipientBalance = await getBalance(publicRecipientAddress, testToken);
       relayerBalance = await getBalance(relayerAddress, testToken);
-      commitmentQueueSize = await commitmentPoolContract
-        .commitmentQueueSize()
-        .then((r: any) => toBN(r.toString()));
-      commitmentIncludedCount = await commitmentPoolContract
-        .commitmentIncludedCount()
-        .then((r: any) => toBN(r.toString()));
     });
 
     it('should transact successfully', async () => {
@@ -259,7 +251,7 @@ export function testTransact(
       for (let i = 0; i < numOutputs; i += 1) {
         const outCommitment = outCommitments[i].commitmentHash;
         const outEncryptedNote = outEncryptedNotes[i];
-        const leafIndex = commitmentQueueSize.add(commitmentIncludedCount).addn(i);
+        const leafIndex = queueSize + includedCount + i;
         const commitmentIndex = events.findIndex(
           (event) =>
             event.name === 'CommitmentQueued' &&
@@ -283,7 +275,7 @@ export function testTransact(
       const snPromises: Promise<boolean>[] = [];
       for (let i = 1; i < numInputs + 1; i += 1) {
         const sn = proof.inputs[i];
-        snPromises.push(commitmentPoolContract.spentSerialNumbers(sn));
+        snPromises.push(commitmentPoolContract.isSpentSerialNumber(sn));
       }
       const snExists = await Promise.all(snPromises);
       snExists.forEach((exist) => expect(exist).to.equal(true));
@@ -294,7 +286,7 @@ export function testTransact(
       for (let i = 0; i < outCommitments.length; i += 1) {
         const commitment = outCommitments[i].commitmentHash;
         if (isLoop) {
-          commitmentPromises.push(commitmentPoolContract.historicCommitments(commitment.toString()));
+          commitmentPromises.push(commitmentPoolContract.isHistoricCommitment(commitment.toString()));
         } else {
           commitmentPromises.push(commitmentPoolContract.relayCommitments(commitment.toString()));
         }
@@ -303,25 +295,7 @@ export function testTransact(
       commitmentExists.forEach((exist) => expect(exist).to.equal(true));
     });
 
-    it('should set commitmentQueue correctly', async () => {
-      const newCommitmentQueueSize: BN = await commitmentPoolContract
-        .commitmentQueueSize()
-        .then((r: any) => toBN(r.toString()));
-
-      expect(newCommitmentQueueSize.toString()).to.equal(commitmentQueueSize.addn(numOutputs).toString());
-      const commitmentQueuePromises: Promise<void>[] = [];
-      for (let i = 0; i < outCommitments.length; i += 1) {
-        const commitment = outCommitments[i].commitmentHash;
-        commitmentQueuePromises.push(
-          commitmentPoolContract
-            .commitmentQueue(commitmentIncludedCount.add(commitmentQueueSize).addn(i).toString())
-            .then((r: any) => {
-              expect(r.commitment.toString()).to.equal(commitment.toString());
-            }),
-        );
-      }
-      await Promise.all(commitmentQueuePromises);
-    });
+    // todo eric should test new commitment that insert by transact
   });
 }
 
@@ -333,6 +307,8 @@ export function testTransactRevert(
   transactVerifier: any,
   commitmentInfo: CommitmentInfo<CommitmentV2>,
   inCommitmentsIndices: number[],
+  queueSize: number,
+  includedCount: number,
   publicAmount: BN,
   relayerFeeAmount: BN,
   outAmounts: BN[],
@@ -353,7 +329,6 @@ export function testTransactRevert(
   describe(`Test ${contractName} transaction${numInputs}x${numOutputs} operations`, () => {
     before(async () => {
       await commitmentPoolContract.enableTransactVerifier(numInputs, numOutputs, transactVerifier.address);
-      const includedCount = await commitmentPoolContract.commitmentIncludedCount();
       const proofWithCommitments = await generateProof(
         protocol,
         numInputs,
