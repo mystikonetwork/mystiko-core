@@ -497,6 +497,12 @@ test('test getAssetConfigByAddress', () => {
   expect(config.getAssetConfigByAddress('0xBc28029D248FC60bce0bAC01cF41A53aEEaE06F9')).toBe(undefined);
 });
 
+test('test getTransactionUrl', () => {
+  expect(config.getTransactionUrl('0xbce8d733536ee3b769456cf91bebae1e9e5be6cb89bb7490c6225384e1bc5e3e')).toBe(
+    'https://ropsten.etherscan.io/tx/0xbce8d733536ee3b769456cf91bebae1e9e5be6cb89bb7490c6225384e1bc5e3e',
+  );
+});
+
 test('test copy', () => {
   expect(config.copyData()).toStrictEqual(rawConfig);
 });

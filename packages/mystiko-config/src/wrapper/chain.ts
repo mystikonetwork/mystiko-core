@@ -1,7 +1,7 @@
 import { check } from '@mystikonetwork/utils';
 import BN from 'bn.js';
 import { AssetType, BridgeType, CircuitType } from '../common';
-import { RawAssetConfig, RawChainConfig } from '../raw';
+import { EXPLORER_TX_PLACEHOLDER, RawAssetConfig, RawChainConfig } from '../raw';
 import { AssetConfig, MAIN_ASSET_ADDRESS } from './asset';
 import { BaseConfig } from './base';
 import { CircuitConfig } from './circuit';
@@ -200,6 +200,10 @@ export class ChainConfig extends BaseConfig<RawChainConfig, AuxData> {
 
   public getAssetConfigByAddress(assetAddress: string): AssetConfig | undefined {
     return this.assetConfigs.get(assetAddress);
+  }
+
+  public getTransactionUrl(transactionHash: string): string {
+    return `${this.explorerUrl}${this.explorerPrefix}`.replace(EXPLORER_TX_PLACEHOLDER, transactionHash);
   }
 
   public mutate(data?: RawChainConfig, auxData?: AuxData): ChainConfig {
