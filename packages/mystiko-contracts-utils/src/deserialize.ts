@@ -181,7 +181,7 @@ export interface CommitmentRequest {
   commitment: BN;
   executorFee: BN;
   rollupFee: BN;
-  privateNote: Buffer;
+  encryptedNote: Buffer;
 }
 
 export function deserializeCommitmentRequest(message: string): CommitmentRequest | undefined {
@@ -213,7 +213,7 @@ export function deserializeCommitmentRequest(message: string): CommitmentRequest
   if (r2.output === undefined || r2.outOffset === undefined) {
     return undefined;
   }
-  const privateNote = Buffer.from(r2.output);
+  const encryptedNote = Buffer.from(r2.output);
 
-  return { amount, commitment, executorFee, rollupFee, privateNote };
+  return { amount, commitment, executorFee, rollupFee, encryptedNote };
 }
