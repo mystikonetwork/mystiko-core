@@ -192,6 +192,8 @@ test('test private key signer', async () => {
     expect(await signer.chainId()).toBe('0x3');
     expect(await signer.chainName()).toBe('Ethereum Ropsten');
     expect(await signer.accounts()).toStrictEqual([etherWallet.address]);
+    signer.setPrivateKey(etherWallet.privateKey);
+    expect(signer.signer.provider).not.toBe(undefined);
   } else {
     throw new Error('no expected chainConfig found');
   }

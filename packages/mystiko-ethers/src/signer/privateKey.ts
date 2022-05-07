@@ -14,7 +14,12 @@ export class PrivateKeySigner extends BaseSigner {
   }
 
   public setPrivateKey(privateKey: string) {
-    this.provider = new ethers.Wallet(toHexNoPrefix(privateKey));
+    if (this.provider) {
+      const etherWallet = this.provider as ethers.Wallet;
+      this.provider = new ethers.Wallet(toHexNoPrefix(privateKey), etherWallet.provider);
+    } else {
+      this.provider = new ethers.Wallet(toHexNoPrefix(privateKey));
+    }
   }
 
   public installed(): Promise<boolean> {
@@ -41,7 +46,7 @@ export class PrivateKeySigner extends BaseSigner {
   public switchChain(chainId: number, chainConfig: ChainConfig): Promise<void> {
     check(chainId === chainConfig.chainId, `${chainId} !== ${chainConfig.chainId} chain id mismatch`);
     check(this.provider, 'you should call setPrivateKey before calling switchChain');
-    return this.providerPool.getProvider(chainId).then((jsonRpcProvider) => {
+    return this.providerPool.checkProvider(chainId).then((jsonRpcProvider) => {
       this.provider = this.provider.connect(jsonRpcProvider);
       this.logger.info(`successfully switched to chain ${chainId}`);
       return Promise.resolve();
