@@ -1,17 +1,10 @@
 import { expect } from 'chai';
+import { waffle } from 'hardhat';
 import { Wallet } from '@ethersproject/wallet';
 import { TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { toBN, MerkleTree, toHexNoPrefix } from '@mystikonetwork/utils';
-import {
-  MerkleTreeHeight,
-  MinRollupFee,
-  RollupAccountIndex1,
-  RollupAccountIndex2,
-  RootHistoryLength,
-} from '../util/constants';
-
-const { waffle } = require('hardhat');
+import { toBN, MerkleTree } from '@mystikonetwork/utils';
+import { MerkleTreeHeight, MinRollupFee, RollupAccountIndex1, RollupAccountIndex2 } from '../util/constants';
 
 async function enableRollupVerifier(
   mystikoContract: any,
@@ -31,25 +24,19 @@ async function generateProof(
   mystikoContract: any,
   treeHeight: number,
   rollupSize: number,
+  includedCount: number,
 ) {
   const oldLeaves = [];
-  const commitmentsInQueue = [];
   const newLeaves = [];
-  const commitmentIncludedCount = (await mystikoContract.commitmentIncludedCount()).toNumber();
-  for (let i = 0; i < commitmentIncludedCount; i += 1) {
+  let i = 0;
+  for (; i < includedCount; i += 1) {
     oldLeaves.push(commitments[i].commitmentHash);
   }
-  const commitmentQueueSize = (await mystikoContract.commitmentQueueSize()).toNumber();
-  expect(commitmentQueueSize).to.gte(rollupSize);
-  const currentRootIndex = await mystikoContract.currentRootIndex();
-  const currentRoot = (await mystikoContract.currentRoot()).toString();
-  expect((await mystikoContract.rootHistory(`${currentRootIndex}`)).toString()).to.equal(currentRoot);
-  for (let i = 0; i < rollupSize; i += 1) {
-    commitmentsInQueue.push(await mystikoContract.commitmentQueue(`${i + commitmentIncludedCount}`));
-    newLeaves.push(toBN(commitmentsInQueue[i].commitment.toString()));
+  expect(includedCount + rollupSize).lte(commitments.length);
+  for (; i < includedCount + rollupSize; i += 1) {
+    newLeaves.push(commitments[i].commitmentHash);
   }
   const tree = new MerkleTree(oldLeaves, { maxLevels: treeHeight });
-  expect(tree.root().toString()).to.equal(currentRoot);
   let proof: any;
   if (rollupSize === 1) {
     proof = await protocol.zkProveRollup({
@@ -83,10 +70,6 @@ async function generateProof(
   const newRoot = proof.inputs[1];
   const leafHash = proof.inputs[2];
   return {
-    commitmentIncludedCount,
-    currentRoot,
-    currentRootIndex,
-    commitmentQueueSize,
     proofA,
     proofB,
     proofC,
@@ -107,8 +90,8 @@ export function testRollup(
     isMainAsset = true,
     rollupFee = MinRollupFee,
     rollupSize = 4,
+    includedCount = 0,
     treeHeight = MerkleTreeHeight,
-    rootHistoryLength = RootHistoryLength,
   },
 ) {
   let proof: any;
@@ -124,20 +107,14 @@ export function testRollup(
         rollupAccount,
         rollupAccount2,
       );
-      proof = await generateProof(protocol, commitments, commitmentPoolContract, treeHeight, rollupSize);
-    });
-
-    it('should revert known root', async () => {
-      await expect(
-        commitmentPoolContract
-          .connect(rollupAccount)
-          .rollup([
-            [proof.proofA, proof.proofB, proof.proofC],
-            `${rollupSize}`,
-            proof.currentRoot,
-            proof.leafHash,
-          ]),
-      ).to.be.revertedWith('newRoot is duplicated');
+      proof = await generateProof(
+        protocol,
+        commitments,
+        commitmentPoolContract,
+        treeHeight,
+        rollupSize,
+        includedCount,
+      );
     });
 
     it('should revert unsupported rollup Size', () => {
@@ -196,19 +173,20 @@ export function testRollup(
       const expectRollupFee = toBN(rollupFee).muln(rollupSize).toString();
       expect(totalRollupFee.toString()).to.equal(expectRollupFee.toString());
 
-      expect((await commitmentPoolContract.commitmentIncludedCount()).toNumber()).to.equal(
-        proof.commitmentIncludedCount + rollupSize,
-      );
-      expect((await commitmentPoolContract.currentRoot()).toString()).to.equal(
-        toBN(toHexNoPrefix(proof.newRoot), 16).toString(),
-      );
-      expect(await commitmentPoolContract.currentRootIndex()).to.equal(
-        (proof.currentRootIndex + 1) % rootHistoryLength,
-      );
       expect(await commitmentPoolContract.isKnownRoot(proof.newRoot)).to.equal(true);
-      expect((await commitmentPoolContract.commitmentQueueSize()).toNumber()).to.equal(
-        proof.commitmentQueueSize - rollupSize,
-      );
+    });
+
+    it('should revert known root', async () => {
+      await expect(
+        commitmentPoolContract
+          .connect(rollupAccount)
+          .rollup([
+            [proof.proofA, proof.proofB, proof.proofC],
+            `${rollupSize}`,
+            proof.newRoot,
+            proof.leafHash,
+          ]),
+      ).to.be.revertedWith('newRoot is duplicated');
     });
   });
 }

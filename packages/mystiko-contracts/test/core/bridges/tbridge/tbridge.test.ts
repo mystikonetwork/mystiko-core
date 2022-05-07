@@ -1,12 +1,11 @@
 import { Wallet } from '@ethersproject/wallet';
+import { waffle } from 'hardhat';
 import {
-  Hasher3,
   MystikoTBridgeProxy,
   MystikoV2WithTBridgeERC20,
   MystikoV2WithTBridgeMain,
   TestToken,
   CommitmentPoolMain,
-  CommitmentPoolERC20,
   DummySanctionsList,
 } from '@mystikonetwork/contracts-abi';
 import { ZokratesRuntime, MystikoProtocolV2, ZokratesCliRuntime } from '@mystikonetwork/protocol';
@@ -29,7 +28,6 @@ import {
 } from '../../../util/constants';
 import { testBridgeDeposit } from '../../../common/bridgeDepositTests';
 
-const { waffle } = require('hardhat');
 const { initialize } = require('zokrates-js/node');
 
 describe('Test Mystiko tbridge', () => {
@@ -111,12 +109,11 @@ describe('Test Mystiko tbridge', () => {
   let tbridgeProxy: MystikoTBridgeProxy;
   let localPoolMain: CommitmentPoolMain;
   let remotePoolMain: CommitmentPoolMain;
-  let localPoolERC20: CommitmentPoolERC20;
+  // let localPoolERC20: CommitmentPoolERC20;
   let localERC20: MystikoV2WithTBridgeERC20;
   let localMain: MystikoV2WithTBridgeMain;
   let remoteERC20: MystikoV2WithTBridgeERC20;
   let remoteMain: MystikoV2WithTBridgeMain;
-  let hasher3: Hasher3;
   let zokratesRuntime: ZokratesRuntime;
   let protocol: MystikoProtocolV2;
 
@@ -129,7 +126,7 @@ describe('Test Mystiko tbridge', () => {
     const r = await loadFixture(fixture);
     testToken = r.testToken;
     localPoolMain = r.poolLocal.poolMain;
-    localPoolERC20 = r.poolLocal.poolERC20;
+    // localPoolERC20 = r.poolLocal.poolERC20;
     remotePoolMain = r.poolRemote.poolMain;
     localMain = r.local.coreMain;
     localERC20 = r.local.coreERC20;
@@ -137,7 +134,6 @@ describe('Test Mystiko tbridge', () => {
     remoteERC20 = r.remote.coreERC20;
     sanctionList = r.sanctionList;
     tbridgeProxy = r.tbridge;
-    hasher3 = r.hasher3;
   });
 
   it('test constructor', async () => {
@@ -145,28 +141,20 @@ describe('Test Mystiko tbridge', () => {
     testBridgeConstructor(
       'MystikoV2WithTBridgeMain',
       localMain,
-      hasher3,
       MinAmount,
       MinBridgeFee,
       MinExecutorFee,
       MinRollupFee,
-      DestinationChainID,
-      remoteMain.address,
-      localPoolMain.address,
     );
 
     await localERC20.setPeerContract(DestinationChainID, remoteERC20.address);
     testBridgeConstructor(
       'MystikoV2WithTBridgeERC20',
       localERC20,
-      hasher3,
       MinAmount,
       MinBridgeFee,
       MinExecutorFee,
       MinRollupFee,
-      DestinationChainID,
-      remoteERC20.address,
-      localPoolERC20.address,
     );
   });
 

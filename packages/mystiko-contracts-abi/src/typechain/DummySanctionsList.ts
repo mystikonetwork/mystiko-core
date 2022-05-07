@@ -22,18 +22,15 @@ export interface DummySanctionsListInterface extends utils.Interface {
     'addToSanctionsList(address)': FunctionFragment;
     'isSanctioned(address)': FunctionFragment;
     'removeToSanctionsList(address)': FunctionFragment;
-    'sanctionsList(address)': FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'addToSanctionsList', values: [string]): string;
   encodeFunctionData(functionFragment: 'isSanctioned', values: [string]): string;
   encodeFunctionData(functionFragment: 'removeToSanctionsList', values: [string]): string;
-  encodeFunctionData(functionFragment: 'sanctionsList', values: [string]): string;
 
   decodeFunctionResult(functionFragment: 'addToSanctionsList', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isSanctioned', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'removeToSanctionsList', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sanctionsList', data: BytesLike): Result;
 
   events: {};
 }
@@ -73,8 +70,6 @@ export interface DummySanctionsList extends BaseContract {
       addr: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
-
-    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
   };
 
   addToSanctionsList(
@@ -89,16 +84,12 @@ export interface DummySanctionsList extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  sanctionsList(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
   callStatic: {
     addToSanctionsList(addr: string, overrides?: CallOverrides): Promise<void>;
 
     isSanctioned(addr: string, overrides?: CallOverrides): Promise<boolean>;
 
     removeToSanctionsList(addr: string, overrides?: CallOverrides): Promise<void>;
-
-    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<boolean>;
   };
 
   filters: {};
@@ -115,8 +106,6 @@ export interface DummySanctionsList extends BaseContract {
       addr: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
-
-    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -131,7 +120,5 @@ export interface DummySanctionsList extends BaseContract {
       addr: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
-
-    sanctionsList(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

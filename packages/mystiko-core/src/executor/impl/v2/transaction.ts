@@ -785,7 +785,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         );
       }
       serialNumberPromises.push(
-        etherContract.spentSerialNumbers(serialNumber).then((spent) => {
+        etherContract.isSpentSerialNumber(serialNumber).then((spent) => {
           if (spent) {
             return this.updateCommitments([{ commitment, status: CommitmentStatus.SPENT }]).then(() => spent);
           }

@@ -11,6 +11,7 @@ import { ChainConfig } from '../config/chain';
 import { ChainTokenConfig } from '../config/chainToken';
 import { ContractDeployConfig } from '../config/bridgeDeploy';
 import { BridgeCeler, BridgeLoop, BridgeTBridge, LOGRED, MystikoTestnet } from '../common/constant';
+import { delay } from '../common/utils';
 
 let MystikoV2WithLoopERC20: MystikoV2WithLoopERC20__factory;
 let MystikoV2WithLoopMain: MystikoV2WithLoopMain__factory;
@@ -102,6 +103,8 @@ export async function deployDepositContract(
     coreContract = await DepositContractFactory.deploy(srcChainCfg.hasher3Address);
   }
   await coreContract.deployed();
+
+  await delay(10000);
 
   if (bridgeCfg.name !== BridgeLoop) {
     await coreContract.setBridgeProxyAddress(bridgeProxyAddress);

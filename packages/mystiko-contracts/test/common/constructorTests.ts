@@ -1,26 +1,13 @@
 import { expect } from 'chai';
-import { Hasher3 } from '@mystikonetwork/contracts-abi';
 import { MerkleTree } from '@mystikonetwork/utils';
 
-export function testLoopConstructor(
-  contractName: string,
-  mystikoContract: any,
-  hasher3: Hasher3,
-  minAmount: number,
-  commitmentPoolAddress: string,
-) {
+export function testLoopConstructor(contractName: string, mystikoContract: any, minAmount: number) {
   describe(`Test ${contractName} constructor`, () => {
-    it('should initialize hasher3 correctly', async () => {
-      expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
-    });
     it('should initialize minAmount correctly', async () => {
-      expect(await mystikoContract.minAmount()).to.equal(minAmount);
+      expect(await mystikoContract.getMinAmount()).to.equal(minAmount);
     });
     it('should initialize admin related resources correctly', async () => {
       expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
-    });
-    it('should initialize commitment pool address correctly', async () => {
-      expect(await mystikoContract.associatedCommitmentPool()).to.equal(commitmentPoolAddress);
     });
   });
 }
@@ -28,45 +15,29 @@ export function testLoopConstructor(
 export function testBridgeConstructor(
   contractName: string,
   mystikoContract: any,
-  hasher3: Hasher3,
   minAmount: number,
   minBridgeFee: number,
   minExecutorFee: number,
   peerMinRoolupFee: number,
-  peerChainId: number,
-  peerContract: string,
-  commitmentPoolAddress: string,
 ) {
   describe(`Test ${contractName} constructor`, () => {
-    it('should initialize hasher3 correctly', async () => {
-      expect(await mystikoContract.hasher3()).to.equal(hasher3.address);
-    });
     it('should initialize minAmount correctly', async () => {
-      expect(await mystikoContract.minAmount()).to.equal(minAmount);
+      expect(await mystikoContract.getMinAmount()).to.equal(minAmount);
     });
     it('should initialize minBridgeFee correctly', async () => {
-      expect(await mystikoContract.minBridgeFee()).to.equal(minBridgeFee);
+      expect(await mystikoContract.getMinBridgeFee()).to.equal(minBridgeFee);
     });
     it('should initialize minExecutorFee correctly', async () => {
-      expect(await mystikoContract.minExecutorFee()).to.equal(minExecutorFee);
+      expect(await mystikoContract.getMinExecutorFee()).to.equal(minExecutorFee);
     });
     it('should initialize peerMinExecutorFee correctly', async () => {
-      expect(await mystikoContract.peerMinExecutorFee()).to.equal(minExecutorFee);
+      expect(await mystikoContract.getPeerMinExecutorFee()).to.equal(minExecutorFee);
     });
     it('should initialize peerMinRollupFee correctly', async () => {
-      expect(await mystikoContract.peerMinRollupFee()).to.equal(peerMinRoolupFee);
-    });
-    it('should initialize peerChainId correctly', async () => {
-      expect(await mystikoContract.peerChainId()).to.equal(peerChainId);
-    });
-    it('should initialize peerContract correctly', async () => {
-      expect(await mystikoContract.peerContract()).to.equal(peerContract);
+      expect(await mystikoContract.getPeerMinRollupFee()).to.equal(peerMinRoolupFee);
     });
     it('should initialize admin related resources correctly', async () => {
       expect(await mystikoContract.isDepositsDisabled()).to.equal(false);
-    });
-    it('should initialize commitment pool address correctly', async () => {
-      expect(await mystikoContract.associatedCommitmentPool()).to.equal(commitmentPoolAddress);
     });
   });
 }
@@ -83,15 +54,12 @@ export function testCommitmentPoolConstructor(
       expect(await mystikoContract.minRollupFee()).to.equal(minRollupFee);
     });
     it('should initialize commitmentQueue related resources correctly', async () => {
-      expect((await mystikoContract.commitmentQueueSize()).toNumber()).to.equal(0);
       expect((await mystikoContract.commitmentIncludedCount()).toNumber()).to.equal(0);
     });
     it('should initialize tree related resources correctly', async () => {
       const defaultZero = MerkleTree.calcDefaultZeroElement();
       const zeros = MerkleTree.calcZeros(defaultZero, treeHeight);
-      expect((await mystikoContract.treeCapacity()).toNumber()).to.equal(2 ** treeHeight);
-      expect((await mystikoContract.currentRoot()).toString()).to.equal(zeros[treeHeight].toString());
-      expect(await mystikoContract.currentRootIndex()).to.equal(0);
+      expect((await mystikoContract.getTreeCapacity()).toNumber()).to.equal(2 ** treeHeight);
       expect((await mystikoContract.rootHistory(0)).toString()).to.equal(zeros[treeHeight].toString());
       expect(await mystikoContract.rootHistoryLength()).to.equal(rootHistoryLength);
     });

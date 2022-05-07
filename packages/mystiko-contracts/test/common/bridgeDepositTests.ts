@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { waffle } from 'hardhat';
 import { ethers } from 'ethers';
 import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
@@ -13,8 +14,6 @@ import {
   SourceChainID,
   MinAmount,
 } from '../util/constants';
-
-const { waffle } = require('hardhat');
 
 export function testBridgeDeposit(
   contractName: string,
@@ -45,9 +44,9 @@ export function testBridgeDeposit(
 
   describe(`Test ${contractName} deposit operation`, () => {
     before(async () => {
-      minBridgeFee = (await mystikoContract.minBridgeFee()).toString();
-      minExecutorFee = (await mystikoContract.minExecutorFee()).toString();
-      minRollupFee = (await commitmentPool.minRollupFee()).toString();
+      minBridgeFee = (await mystikoContract.getMinBridgeFee()).toString();
+      minExecutorFee = (await mystikoContract.getMinExecutorFee()).toString();
+      minRollupFee = (await commitmentPool.getMinRollupFee()).toString();
 
       const amount = toBN(depositAmount).add(toBN(minExecutorFee)).add(toBN(minRollupFee));
       minTotalAmount = amount.toString();
@@ -275,7 +274,7 @@ export function testBridgeDeposit(
             bridgeAccount.address,
             bridgeMessages[0],
           ),
-      ).revertedWith('Only whitelisted executor.');
+      ).revertedWith('only whitelisted executor.');
     });
 
     it('should bridge deposit transaction success', async () => {
@@ -317,14 +316,8 @@ export function testBridgeDeposit(
         }
 
         expect(
-          await peerCommitmentPool.historicCommitments(commitments[i].commitmentHash.toString()),
+          await peerCommitmentPool.isHistoricCommitment(commitments[i].commitmentHash.toString()),
         ).to.equal(true);
-        expect((await peerCommitmentPool.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
-          commitments[i].commitmentHash.toString(),
-        );
-        expect((await peerCommitmentPool.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(
-          minRollupFee,
-        );
 
         for (let j = 0; j < txReceipt.logs.length; j += 1) {
           try {
@@ -340,8 +333,6 @@ export function testBridgeDeposit(
         // todo check dst contract balance
         // todo proxy parameter check
       }
-
-      expect((await peerCommitmentPool.commitmentQueueSize()).toString()).to.equal(`${commitments.length}`);
     });
 
     it('should emit correct events', () => {

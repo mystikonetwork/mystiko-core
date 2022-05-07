@@ -1,7 +1,7 @@
 import { MystikoTBridgeProxy__factory } from '@mystikonetwork/contracts-abi';
 import { BridgeConfig } from '../config/bridge';
 import { OperatorConfig } from '../config/operator';
-import { BridgeLoop, BridgeTBridge, LOGRED } from '../common/constant';
+import { BridgeLoop, BridgeTBridge, LOGRED, MystikoDevelopment } from '../common/constant';
 import { BridgeProxyConfig } from '../config/bridgeProxy';
 
 let MystikoTBridgeProxy: MystikoTBridgeProxy__factory;
@@ -47,6 +47,7 @@ export async function addRegisterWhitelist(addr: string, depositContractAddress:
 }
 
 export async function getOrDeployTBridgeProxy(
+  mystikoNetwork: string,
   bridgeCfg: BridgeConfig,
   bridgeProxyCfg: BridgeProxyConfig | undefined,
   operatorCfg: OperatorConfig,
@@ -57,10 +58,10 @@ export async function getOrDeployTBridgeProxy(
   }
 
   if (bridgeCfg.name === BridgeTBridge) {
-    if (bridgeProxyCfg === undefined) {
+    if (bridgeProxyCfg === undefined || mystikoNetwork === MystikoDevelopment) {
       console.log('tbridge proxy not exist, deploy');
 
-      const addBridgeCfg = bridgeCfg.addBridgeProxyConfig(chainNetwork, '');
+      const addBridgeCfg = bridgeCfg.addOrUpdateBridgeProxyConfig(chainNetwork, '');
       const bridgeProxyAddress = await deployTBridgeProxy();
       console.log('bridgeProxy address is ', bridgeProxyAddress);
       addBridgeCfg.address = bridgeProxyAddress;

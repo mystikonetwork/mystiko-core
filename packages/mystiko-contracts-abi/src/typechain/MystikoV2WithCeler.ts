@@ -54,26 +54,19 @@ export declare namespace IMystikoBridge {
 export interface MystikoV2WithCelerInterface extends utils.Interface {
   contractName: 'MystikoV2WithCeler';
   functions: {
-    'FIELD_SIZE()': FunctionFragment;
     'assetType()': FunctionFragment;
-    'associatedCommitmentPool()': FunctionFragment;
-    'bridgeProxyAddress()': FunctionFragment;
     'bridgeType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
     'deposit((uint256,uint256,uint256,uint128,bytes,uint256,uint256,uint256))': FunctionFragment;
     'executeMessage(address,uint64,bytes,address)': FunctionFragment;
-    'hasher3()': FunctionFragment;
+    'getMinAmount()': FunctionFragment;
+    'getMinBridgeFee()': FunctionFragment;
+    'getMinExecutorFee()': FunctionFragment;
+    'getPeerMinExecutorFee()': FunctionFragment;
+    'getPeerMinRollupFee()': FunctionFragment;
+    'getSanctionsContract()': FunctionFragment;
     'isDepositsDisabled()': FunctionFragment;
     'isSanctionCheckDisabled()': FunctionFragment;
-    'minAmount()': FunctionFragment;
-    'minBridgeFee()': FunctionFragment;
-    'minExecutorFee()': FunctionFragment;
-    'operator()': FunctionFragment;
-    'peerChainId()': FunctionFragment;
-    'peerContract()': FunctionFragment;
-    'peerMinExecutorFee()': FunctionFragment;
-    'peerMinRollupFee()': FunctionFragment;
-    'sanctionsContract()': FunctionFragment;
     'setAssociatedCommitmentPool(address)': FunctionFragment;
     'setBridgeProxyAddress(address)': FunctionFragment;
     'setMinAmount(uint256)': FunctionFragment;
@@ -87,10 +80,7 @@ export interface MystikoV2WithCelerInterface extends utils.Interface {
     'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'associatedCommitmentPool', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'bridgeProxyAddress', values?: undefined): string;
   encodeFunctionData(functionFragment: 'bridgeType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
   encodeFunctionData(functionFragment: 'deposit', values: [IMystikoBridge.DepositRequestStruct]): string;
@@ -98,18 +88,14 @@ export interface MystikoV2WithCelerInterface extends utils.Interface {
     functionFragment: 'executeMessage',
     values: [string, BigNumberish, BytesLike, string],
   ): string;
-  encodeFunctionData(functionFragment: 'hasher3', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getMinAmount', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getMinBridgeFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getMinExecutorFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getPeerMinExecutorFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getPeerMinRollupFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getSanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isDepositsDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minAmount', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minBridgeFee', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minExecutorFee', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'peerChainId', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'peerContract', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'peerMinExecutorFee', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'peerMinRollupFee', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setAssociatedCommitmentPool', values: [string]): string;
   encodeFunctionData(functionFragment: 'setBridgeProxyAddress', values: [string]): string;
   encodeFunctionData(functionFragment: 'setMinAmount', values: [BigNumberish]): string;
@@ -122,26 +108,19 @@ export interface MystikoV2WithCelerInterface extends utils.Interface {
   encodeFunctionData(functionFragment: 'toggleSanctionCheck', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
-  decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'associatedCommitmentPool', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'bridgeProxyAddress', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'bridgeType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'executeMessage', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'hasher3', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getMinAmount', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getMinBridgeFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getMinExecutorFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getPeerMinExecutorFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getPeerMinRollupFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getSanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isDepositsDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minAmount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minBridgeFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minExecutorFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'peerChainId', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'peerContract', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'peerMinExecutorFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'peerMinRollupFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setAssociatedCommitmentPool', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setBridgeProxyAddress', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinAmount', data: BytesLike): Result;
@@ -189,13 +168,7 @@ export interface MystikoV2WithCeler extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     assetType(overrides?: CallOverrides): Promise<[string]>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<[string]>;
-
-    bridgeProxyAddress(overrides?: CallOverrides): Promise<[string]>;
 
     bridgeType(overrides?: CallOverrides): Promise<[string]>;
 
@@ -217,29 +190,21 @@ export interface MystikoV2WithCeler extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    hasher3(overrides?: CallOverrides): Promise<[string]>;
+    getMinAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getMinBridgeFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getMinExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getPeerMinExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getPeerMinRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<[string]>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
-
-    minAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    minBridgeFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    minExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    operator(overrides?: CallOverrides): Promise<[string]>;
-
-    peerChainId(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    peerContract(overrides?: CallOverrides): Promise<[string]>;
-
-    peerMinExecutorFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    peerMinRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
 
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
@@ -298,13 +263,7 @@ export interface MystikoV2WithCeler extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
   assetType(overrides?: CallOverrides): Promise<string>;
-
-  associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
-
-  bridgeProxyAddress(overrides?: CallOverrides): Promise<string>;
 
   bridgeType(overrides?: CallOverrides): Promise<string>;
 
@@ -326,29 +285,21 @@ export interface MystikoV2WithCeler extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  hasher3(overrides?: CallOverrides): Promise<string>;
+  getMinAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getMinBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getPeerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getPeerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getSanctionsContract(overrides?: CallOverrides): Promise<string>;
 
   isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
   isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-  minAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  operator(overrides?: CallOverrides): Promise<string>;
-
-  peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
-
-  peerContract(overrides?: CallOverrides): Promise<string>;
-
-  peerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  sanctionsContract(overrides?: CallOverrides): Promise<string>;
 
   setAssociatedCommitmentPool(
     _commitmentPoolAddress: string,
@@ -407,13 +358,7 @@ export interface MystikoV2WithCeler extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
     assetType(overrides?: CallOverrides): Promise<string>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<string>;
-
-    bridgeProxyAddress(overrides?: CallOverrides): Promise<string>;
 
     bridgeType(overrides?: CallOverrides): Promise<string>;
 
@@ -429,29 +374,21 @@ export interface MystikoV2WithCeler extends BaseContract {
       overrides?: CallOverrides,
     ): Promise<boolean>;
 
-    hasher3(overrides?: CallOverrides): Promise<string>;
+    getMinAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMinBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPeerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPeerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<string>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<boolean>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-    minAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operator(overrides?: CallOverrides): Promise<string>;
-
-    peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    peerContract(overrides?: CallOverrides): Promise<string>;
-
-    peerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<string>;
 
     setAssociatedCommitmentPool(_commitmentPoolAddress: string, overrides?: CallOverrides): Promise<void>;
 
@@ -486,13 +423,7 @@ export interface MystikoV2WithCeler extends BaseContract {
   };
 
   estimateGas: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
     assetType(overrides?: CallOverrides): Promise<BigNumber>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<BigNumber>;
-
-    bridgeProxyAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     bridgeType(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -514,29 +445,21 @@ export interface MystikoV2WithCeler extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    hasher3(overrides?: CallOverrides): Promise<BigNumber>;
+    getMinAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMinBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPeerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPeerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minBridgeFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operator(overrides?: CallOverrides): Promise<BigNumber>;
-
-    peerChainId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    peerContract(overrides?: CallOverrides): Promise<BigNumber>;
-
-    peerMinExecutorFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    peerMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,
@@ -596,13 +519,7 @@ export interface MystikoV2WithCeler extends BaseContract {
   };
 
   populateTransaction: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     assetType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    associatedCommitmentPool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    bridgeProxyAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     bridgeType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -624,29 +541,21 @@ export interface MystikoV2WithCeler extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    hasher3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getMinAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getMinBridgeFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getMinExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getPeerMinExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getPeerMinRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isDepositsDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minBridgeFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    peerChainId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    peerContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    peerMinExecutorFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    peerMinRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setAssociatedCommitmentPool(
       _commitmentPoolAddress: string,

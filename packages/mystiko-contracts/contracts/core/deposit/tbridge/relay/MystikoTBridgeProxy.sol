@@ -6,26 +6,26 @@ import "../../base/CrossChainDataSerializable.sol";
 import "../MystikoV2WithTBridge.sol";
 
 contract MystikoTBridgeProxy is ICrossChainProxy {
-  address public operator;
-  mapping(address => bool) public executorWhitelist;
-  mapping(address => bool) public registerWhitelist;
+  address operator;
+  mapping(address => bool) executorWhitelist;
+  mapping(address => bool) registerWhitelist;
 
   constructor() {
     operator = msg.sender;
   }
 
   modifier onlyOperator() {
-    require(msg.sender == operator, "Only operator.");
+    require(msg.sender == operator, "only operator.");
     _;
   }
 
   modifier onlyExecutorWhitelisted() {
-    require(executorWhitelist[msg.sender], "Only whitelisted executor.");
+    require(executorWhitelist[msg.sender], "only whitelisted executor.");
     _;
   }
 
   modifier onlyRegisterWhitelisted() {
-    require(registerWhitelist[msg.sender], "Only register.");
+    require(registerWhitelist[msg.sender], "only register.");
     _;
   }
 

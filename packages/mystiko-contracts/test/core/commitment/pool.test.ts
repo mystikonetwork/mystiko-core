@@ -1,4 +1,5 @@
 import { Wallet } from '@ethersproject/wallet';
+import { waffle } from 'hardhat';
 import {
   MystikoV2WithLoopERC20,
   MystikoV2WithLoopMain,
@@ -27,7 +28,6 @@ import {
 import { constructCommitment, testLoopDeposit, testRollup, testTransact } from '../../common';
 import { testTransactRevert } from '../../common/transactTests';
 
-const { waffle } = require('hardhat');
 const { initialize } = require('zokrates-js/node');
 
 describe('Test Mystiko loop', () => {
@@ -120,7 +120,9 @@ describe('Test Mystiko loop', () => {
 
   it('test loop main deposit', async () => {
     const depositAmount = toDecimals(10);
-    const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
+    let queueSize = 21;
+    let includedCounter = 0;
+    const cmInfo = await constructCommitment(protocol, queueSize, depositAmount.toString());
 
     await testLoopDeposit(
       'MystikoV2WithLoopMain',
@@ -137,14 +139,19 @@ describe('Test Mystiko loop', () => {
 
     testRollup('CommitmentPoolMain', protocol, poolMain, rollup16, testToken, accounts, cmInfo.commitments, {
       rollupSize: 16,
+      includedCount: 0,
     });
     testRollup('CommitmentPoolMain', protocol, poolMain, rollup4, testToken, accounts, cmInfo.commitments, {
       rollupSize: 4,
+      includedCount: 16,
     });
     testRollup('CommitmentPoolMain', protocol, poolMain, rollup1, testToken, accounts, cmInfo.commitments, {
       rollupSize: 1,
+      includedCount: 20,
     });
 
+    queueSize = 0;
+    includedCounter = 21;
     testTransactRevert(
       'CommitmentPoolMain',
       protocol,
@@ -153,6 +160,8 @@ describe('Test Mystiko loop', () => {
       transaction1x0Verifier,
       cmInfo,
       [0],
+      queueSize,
+      includedCounter,
       depositAmount,
       toBN(0),
       [],
@@ -169,6 +178,8 @@ describe('Test Mystiko loop', () => {
       transaction1x0Verifier,
       cmInfo,
       [0],
+      queueSize,
+      includedCounter,
       depositAmount,
       toBN(0),
       [],
@@ -186,6 +197,8 @@ describe('Test Mystiko loop', () => {
       transaction1x1Verifier,
       cmInfo,
       [1],
+      queueSize,
+      includedCounter,
       depositAmount.sub(toDecimals(3)),
       toDecimals(1),
       [toDecimals(1)],
@@ -195,6 +208,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
     );
+    queueSize = 1;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolMain',
@@ -203,6 +218,8 @@ describe('Test Mystiko loop', () => {
       transaction1x2Verifier,
       cmInfo,
       [2],
+      queueSize,
+      includedCounter,
       depositAmount.sub(toDecimals(5)),
       toDecimals(1),
       [toDecimals(1), toDecimals(1)],
@@ -212,6 +229,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
     );
+    queueSize = 3;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolMain',
@@ -220,6 +239,8 @@ describe('Test Mystiko loop', () => {
       transaction2x0Verifier,
       cmInfo,
       [3, 4],
+      queueSize,
+      includedCounter,
       depositAmount.add(depositAmount).sub(toDecimals(1)),
       toDecimals(1),
       [],
@@ -229,6 +250,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
     );
+    queueSize = 3;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolMain',
@@ -237,6 +260,8 @@ describe('Test Mystiko loop', () => {
       transaction2x1Verifier,
       cmInfo,
       [5, 6],
+      queueSize,
+      includedCounter,
       depositAmount.add(depositAmount).sub(toDecimals(3)),
       toDecimals(1),
       [toDecimals(1)],
@@ -246,6 +271,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz',
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
     );
+    queueSize = 4;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolMain',
@@ -254,6 +281,8 @@ describe('Test Mystiko loop', () => {
       transaction2x2Verifier,
       cmInfo,
       [7, 8],
+      queueSize,
+      includedCounter,
       depositAmount.add(depositAmount).sub(toDecimals(5)),
       toDecimals(1),
       [toDecimals(1), toDecimals(1)],
@@ -267,7 +296,9 @@ describe('Test Mystiko loop', () => {
 
   it('test loop erc20 deposit', async () => {
     const depositAmount = toDecimals(100);
-    const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
+    let queueSize = 21;
+    let includedCounter = 0;
+    const cmInfo = await constructCommitment(protocol, queueSize, depositAmount.toString());
 
     await testLoopDeposit(
       'MystikoV2WithLoopERC20',
@@ -293,17 +324,22 @@ describe('Test Mystiko loop', () => {
       {
         isMainAsset: false,
         rollupSize: 16,
+        includedCount: 0,
       },
     );
     testRollup('CommitmentPoolERC20', protocol, poolErc20, rollup4, testToken, accounts, cmInfo.commitments, {
       isMainAsset: false,
       rollupSize: 4,
+      includedCount: 16,
     });
     testRollup('CommitmentPoolERC20', protocol, poolErc20, rollup1, testToken, accounts, cmInfo.commitments, {
       isMainAsset: false,
       rollupSize: 1,
+      includedCount: 20,
     });
 
+    queueSize = 0;
+    includedCounter = 21;
     testTransact(
       'CommitmentPoolERC20',
       protocol,
@@ -311,6 +347,8 @@ describe('Test Mystiko loop', () => {
       transaction1x0Verifier,
       cmInfo,
       [0],
+      queueSize,
+      includedCounter,
       depositAmount,
       toBN(0),
       [],
@@ -321,6 +359,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
       testToken,
     );
+    queueSize = 0;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -329,6 +369,8 @@ describe('Test Mystiko loop', () => {
       transaction1x1Verifier,
       cmInfo,
       [1],
+      queueSize,
+      includedCounter,
       depositAmount.sub(toDecimals(3)),
       toDecimals(1),
       [toDecimals(1)],
@@ -339,6 +381,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz',
       testToken,
     );
+    queueSize = 1;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -347,6 +391,8 @@ describe('Test Mystiko loop', () => {
       transaction1x2Verifier,
       cmInfo,
       [2],
+      queueSize,
+      includedCounter,
       depositAmount.sub(toDecimals(5)),
       toDecimals(1),
       [toDecimals(1), toDecimals(1)],
@@ -357,6 +403,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz',
       testToken,
     );
+    queueSize = 3;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -365,6 +413,8 @@ describe('Test Mystiko loop', () => {
       transaction2x0Verifier,
       cmInfo,
       [3, 4],
+      queueSize,
+      includedCounter,
       depositAmount.add(depositAmount).sub(toDecimals(1)),
       toDecimals(1),
       [],
@@ -375,6 +425,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz',
       testToken,
     );
+    queueSize = 3;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -383,6 +435,8 @@ describe('Test Mystiko loop', () => {
       transaction2x1Verifier,
       cmInfo,
       [5, 6],
+      queueSize,
+      includedCounter,
       depositAmount.add(depositAmount).sub(toDecimals(3)),
       toDecimals(1),
       [toDecimals(1)],
@@ -393,6 +447,8 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz',
       testToken,
     );
+    queueSize = 4;
+    includedCounter = 21;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -401,6 +457,8 @@ describe('Test Mystiko loop', () => {
       transaction2x2Verifier,
       cmInfo,
       [7, 8],
+      queueSize,
+      includedCounter,
       depositAmount.add(depositAmount).sub(toDecimals(5)),
       toDecimals(1),
       [toDecimals(1), toDecimals(1)],
@@ -415,7 +473,9 @@ describe('Test Mystiko loop', () => {
 
   it('test loop erc20 [ rollup + transact ]', async () => {
     const depositAmount = toDecimals(100);
-    const cmInfo = await constructCommitment(protocol, 21, depositAmount.toString());
+    let queueSize = 21;
+    let includedCounter = 0;
+    const cmInfo = await constructCommitment(protocol, queueSize, depositAmount.toString());
 
     await testLoopDeposit(
       'MystikoV2WithLoopERC20',
@@ -433,7 +493,10 @@ describe('Test Mystiko loop', () => {
     testRollup('CommitmentPoolERC20', protocol, poolErc20, rollup1, testToken, accounts, cmInfo.commitments, {
       isMainAsset: false,
       rollupSize: 1,
+      includedCount: 0,
     });
+    queueSize = 0;
+    includedCounter = 1;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -442,6 +505,8 @@ describe('Test Mystiko loop', () => {
       transaction1x0Verifier,
       cmInfo,
       [0],
+      queueSize,
+      includedCounter,
       depositAmount,
       toBN(0),
       [],
@@ -452,11 +517,16 @@ describe('Test Mystiko loop', () => {
       'node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz',
       testToken,
     );
+    queueSize = 0;
+    includedCounter = 1;
 
     testRollup('CommitmentPoolERC20', protocol, poolErc20, rollup1, testToken, accounts, cmInfo.commitments, {
       isMainAsset: false,
       rollupSize: 1,
+      includedCount: 1,
     });
+    queueSize = 0;
+    includedCounter = 2;
 
     testTransact(
       'CommitmentPoolERC20',
@@ -465,6 +535,8 @@ describe('Test Mystiko loop', () => {
       transaction1x0Verifier,
       cmInfo,
       [1],
+      queueSize,
+      includedCounter,
       depositAmount,
       toBN(0),
       [],

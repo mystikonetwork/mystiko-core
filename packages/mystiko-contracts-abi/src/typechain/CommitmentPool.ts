@@ -131,58 +131,41 @@ export declare namespace IVerifier {
 export interface CommitmentPoolInterface extends utils.Interface {
   contractName: 'CommitmentPool';
   functions: {
-    'FIELD_SIZE()': FunctionFragment;
     'addEnqueueWhitelist(address)': FunctionFragment;
     'addRollupWhitelist(address)': FunctionFragment;
     'assetType()': FunctionFragment;
     'changeOperator(address)': FunctionFragment;
-    'commitmentIncludedCount()': FunctionFragment;
-    'commitmentQueue(uint256)': FunctionFragment;
-    'commitmentQueueSize()': FunctionFragment;
-    'currentRoot()': FunctionFragment;
-    'currentRootIndex()': FunctionFragment;
     'disableRollupVerifier(uint32)': FunctionFragment;
     'disableTransactVerifier(uint32,uint32)': FunctionFragment;
     'enableRollupVerifier(uint32,address)': FunctionFragment;
     'enableTransactVerifier(uint32,uint32,address)': FunctionFragment;
     'enqueue((uint256,uint256,uint256,uint256,bytes),address)': FunctionFragment;
-    'enqueueWhitelist(address)': FunctionFragment;
-    'historicCommitments(uint256)': FunctionFragment;
+    'getCommitmentIncludedCount()': FunctionFragment;
+    'getMinRollupFee()': FunctionFragment;
+    'getRootHistoryLength()': FunctionFragment;
+    'getSanctionsContract()': FunctionFragment;
+    'getTreeCapacity()': FunctionFragment;
+    'isHistoricCommitment(uint256)': FunctionFragment;
     'isKnownRoot(uint256)': FunctionFragment;
     'isRollupWhitelistDisabled()': FunctionFragment;
     'isSanctionCheckDisabled()': FunctionFragment;
+    'isSpentSerialNumber(uint256)': FunctionFragment;
     'isVerifierUpdateDisabled()': FunctionFragment;
-    'minRollupFee()': FunctionFragment;
-    'operator()': FunctionFragment;
     'removeEnqueueWhitelist(address)': FunctionFragment;
     'removeRollupWhitelist(address)': FunctionFragment;
     'rollup((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint32,uint256,uint256))': FunctionFragment;
-    'rollupVerifiers(uint32)': FunctionFragment;
-    'rollupWhitelist(address)': FunctionFragment;
-    'rootHistory(uint32)': FunctionFragment;
-    'rootHistoryLength()': FunctionFragment;
-    'sanctionsContract()': FunctionFragment;
     'setMinRollupFee(uint256)': FunctionFragment;
-    'spentSerialNumbers(uint256)': FunctionFragment;
     'toggleRollupWhitelist(bool)': FunctionFragment;
     'toggleSanctionCheck(bool)': FunctionFragment;
     'toggleVerifierUpdate(bool)': FunctionFragment;
     'transact((((uint256,uint256),(uint256[2],uint256[2]),(uint256,uint256)),uint256,uint256[],uint256[],bytes32,uint256,uint256,uint256[],uint256[],address,address,bytes[]),bytes)': FunctionFragment;
-    'transactVerifiers(uint32,uint32)': FunctionFragment;
-    'treeCapacity()': FunctionFragment;
     'updateSanctionContractAddress(address)': FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: 'FIELD_SIZE', values?: undefined): string;
   encodeFunctionData(functionFragment: 'addEnqueueWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'addRollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'assetType', values?: undefined): string;
   encodeFunctionData(functionFragment: 'changeOperator', values: [string]): string;
-  encodeFunctionData(functionFragment: 'commitmentIncludedCount', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'commitmentQueue', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'commitmentQueueSize', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'currentRoot', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'currentRootIndex', values?: undefined): string;
   encodeFunctionData(functionFragment: 'disableRollupVerifier', values: [BigNumberish]): string;
   encodeFunctionData(
     functionFragment: 'disableTransactVerifier',
@@ -197,24 +180,21 @@ export interface CommitmentPoolInterface extends utils.Interface {
     functionFragment: 'enqueue',
     values: [ICommitmentPool.CommitmentRequestStruct, string],
   ): string;
-  encodeFunctionData(functionFragment: 'enqueueWhitelist', values: [string]): string;
-  encodeFunctionData(functionFragment: 'historicCommitments', values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'getCommitmentIncludedCount', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getMinRollupFee', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getRootHistoryLength', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getSanctionsContract', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getTreeCapacity', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'isHistoricCommitment', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isKnownRoot', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isRollupWhitelistDisabled', values?: undefined): string;
   encodeFunctionData(functionFragment: 'isSanctionCheckDisabled', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'isSpentSerialNumber', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'isVerifierUpdateDisabled', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'minRollupFee', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'operator', values?: undefined): string;
   encodeFunctionData(functionFragment: 'removeEnqueueWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'removeRollupWhitelist', values: [string]): string;
   encodeFunctionData(functionFragment: 'rollup', values: [ICommitmentPool.RollupRequestStruct]): string;
-  encodeFunctionData(functionFragment: 'rollupVerifiers', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'rollupWhitelist', values: [string]): string;
-  encodeFunctionData(functionFragment: 'rootHistory', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'rootHistoryLength', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'sanctionsContract', values?: undefined): string;
   encodeFunctionData(functionFragment: 'setMinRollupFee', values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'spentSerialNumbers', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'toggleRollupWhitelist', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'toggleSanctionCheck', values: [boolean]): string;
   encodeFunctionData(functionFragment: 'toggleVerifierUpdate', values: [boolean]): string;
@@ -222,49 +202,36 @@ export interface CommitmentPoolInterface extends utils.Interface {
     functionFragment: 'transact',
     values: [ICommitmentPool.TransactRequestStruct, BytesLike],
   ): string;
-  encodeFunctionData(functionFragment: 'transactVerifiers', values: [BigNumberish, BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'treeCapacity', values?: undefined): string;
   encodeFunctionData(functionFragment: 'updateSanctionContractAddress', values: [string]): string;
 
-  decodeFunctionResult(functionFragment: 'FIELD_SIZE', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'addEnqueueWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'addRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'assetType', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'changeOperator', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'commitmentIncludedCount', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'commitmentQueue', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'commitmentQueueSize', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'currentRoot', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'currentRootIndex', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'disableRollupVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'disableTransactVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enableRollupVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enableTransactVerifier', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'enqueue', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'enqueueWhitelist', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'historicCommitments', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getCommitmentIncludedCount', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getMinRollupFee', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getRootHistoryLength', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getSanctionsContract', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getTreeCapacity', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isHistoricCommitment', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isKnownRoot', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isRollupWhitelistDisabled', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isSanctionCheckDisabled', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isSpentSerialNumber', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'isVerifierUpdateDisabled', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'minRollupFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'operator', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'removeEnqueueWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'removeRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'rollup', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rollupVerifiers', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rollupWhitelist', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rootHistory', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'rootHistoryLength', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sanctionsContract', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'setMinRollupFee', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'spentSerialNumbers', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleRollupWhitelist', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleSanctionCheck', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'toggleVerifierUpdate', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'transact', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'transactVerifiers', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'treeCapacity', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'updateSanctionContractAddress', data: BytesLike): Result;
 
   events: {
@@ -325,8 +292,6 @@ export interface CommitmentPool extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     addEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -343,19 +308,6 @@ export interface CommitmentPool extends BaseContract {
       _newOperator: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
-
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    commitmentQueue(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[BigNumber, BigNumber] & { commitment: BigNumber; rollupFee: BigNumber }>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    currentRoot(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<[number]>;
 
     disableRollupVerifier(
       _rollupSize: BigNumberish,
@@ -387,9 +339,17 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+    getCommitmentIncludedCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
+    getMinRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getRootHistoryLength(overrides?: CallOverrides): Promise<[number]>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<[string]>;
+
+    getTreeCapacity(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    isHistoricCommitment(_commitment: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -397,11 +357,9 @@ export interface CommitmentPool extends BaseContract {
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<[boolean]>;
 
+    isSpentSerialNumber(_serialNumber: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
+
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<[boolean]>;
-
-    minRollupFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    operator(overrides?: CallOverrides): Promise<[string]>;
 
     removeEnqueueWhitelist(
       _actor: string,
@@ -418,25 +376,10 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    rollupVerifiers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<[number]>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<[string]>;
-
     setMinRollupFee(
       _minRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
 
     toggleRollupWhitelist(
       _state: boolean,
@@ -459,21 +402,11 @@ export interface CommitmentPool extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
-    transactVerifiers(
-      arg0: BigNumberish,
-      arg1: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     updateSanctionContractAddress(
       _sanction: string,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
   };
-
-  FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
   addEnqueueWhitelist(
     _actor: string,
@@ -491,19 +424,6 @@ export interface CommitmentPool extends BaseContract {
     _newOperator: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
-
-  commitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  commitmentQueue(
-    arg0: BigNumberish,
-    overrides?: CallOverrides,
-  ): Promise<[BigNumber, BigNumber] & { commitment: BigNumber; rollupFee: BigNumber }>;
-
-  commitmentQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-  currentRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-  currentRootIndex(overrides?: CallOverrides): Promise<number>;
 
   disableRollupVerifier(
     _rollupSize: BigNumberish,
@@ -535,9 +455,17 @@ export interface CommitmentPool extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+  getCommitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
 
-  historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+  getMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getRootHistoryLength(overrides?: CallOverrides): Promise<number>;
+
+  getSanctionsContract(overrides?: CallOverrides): Promise<string>;
+
+  getTreeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+
+  isHistoricCommitment(_commitment: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
   isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -545,11 +473,9 @@ export interface CommitmentPool extends BaseContract {
 
   isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+  isSpentSerialNumber(_serialNumber: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+
   isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-  minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  operator(overrides?: CallOverrides): Promise<string>;
 
   removeEnqueueWhitelist(
     _actor: string,
@@ -566,25 +492,10 @@ export interface CommitmentPool extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  rollupVerifiers(
-    arg0: BigNumberish,
-    overrides?: CallOverrides,
-  ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-  rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-  rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-  rootHistoryLength(overrides?: CallOverrides): Promise<number>;
-
-  sanctionsContract(overrides?: CallOverrides): Promise<string>;
-
   setMinRollupFee(
     _minRollupFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
-
-  spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
   toggleRollupWhitelist(
     _state: boolean,
@@ -607,22 +518,12 @@ export interface CommitmentPool extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
-  transactVerifiers(
-    arg0: BigNumberish,
-    arg1: BigNumberish,
-    overrides?: CallOverrides,
-  ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-  treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
-
   updateSanctionContractAddress(
     _sanction: string,
     overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
     addEnqueueWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
 
     addRollupWhitelist(_roller: string, overrides?: CallOverrides): Promise<void>;
@@ -630,19 +531,6 @@ export interface CommitmentPool extends BaseContract {
     assetType(overrides?: CallOverrides): Promise<string>;
 
     changeOperator(_newOperator: string, overrides?: CallOverrides): Promise<void>;
-
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    commitmentQueue(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[BigNumber, BigNumber] & { commitment: BigNumber; rollupFee: BigNumber }>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<number>;
 
     disableRollupVerifier(_rollupSize: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -671,9 +559,17 @@ export interface CommitmentPool extends BaseContract {
       overrides?: CallOverrides,
     ): Promise<boolean>;
 
-    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+    getCommitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+    getMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getRootHistoryLength(overrides?: CallOverrides): Promise<number>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<string>;
+
+    getTreeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isHistoricCommitment(_commitment: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -681,11 +577,9 @@ export interface CommitmentPool extends BaseContract {
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<boolean>;
 
+    isSpentSerialNumber(_serialNumber: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<boolean>;
-
-    minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operator(overrides?: CallOverrides): Promise<string>;
 
     removeEnqueueWhitelist(_actor: string, overrides?: CallOverrides): Promise<void>;
 
@@ -693,22 +587,7 @@ export interface CommitmentPool extends BaseContract {
 
     rollup(_request: ICommitmentPool.RollupRequestStruct, overrides?: CallOverrides): Promise<void>;
 
-    rollupVerifiers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<number>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<string>;
-
     setMinRollupFee(_minRollupFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
     toggleRollupWhitelist(_state: boolean, overrides?: CallOverrides): Promise<void>;
 
@@ -721,14 +600,6 @@ export interface CommitmentPool extends BaseContract {
       _signature: BytesLike,
       overrides?: CallOverrides,
     ): Promise<void>;
-
-    transactVerifiers(
-      arg0: BigNumberish,
-      arg1: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<[string, boolean] & { verifier: string; enabled: boolean }>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
 
     updateSanctionContractAddress(_sanction: string, overrides?: CallOverrides): Promise<void>;
   };
@@ -761,8 +632,6 @@ export interface CommitmentPool extends BaseContract {
   };
 
   estimateGas: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
     addEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -780,16 +649,6 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    commitmentQueue(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<BigNumber>;
-
     disableRollupVerifier(
       _rollupSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -820,9 +679,17 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    getCommitmentIncludedCount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    getMinRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getRootHistoryLength(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTreeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isHistoricCommitment(_commitment: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -830,11 +697,9 @@ export interface CommitmentPool extends BaseContract {
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<BigNumber>;
 
+    isSpentSerialNumber(_serialNumber: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minRollupFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operator(overrides?: CallOverrides): Promise<BigNumber>;
 
     removeEnqueueWhitelist(
       _actor: string,
@@ -851,22 +716,10 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    rollupVerifiers(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<BigNumber>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<BigNumber>;
-
     setMinRollupFee(
       _minRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
     toggleRollupWhitelist(
       _state: boolean,
@@ -889,10 +742,6 @@ export interface CommitmentPool extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
-    transactVerifiers(arg0: BigNumberish, arg1: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<BigNumber>;
-
     updateSanctionContractAddress(
       _sanction: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -900,8 +749,6 @@ export interface CommitmentPool extends BaseContract {
   };
 
   populateTransaction: {
-    FIELD_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     addEnqueueWhitelist(
       _actor: string,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -919,16 +766,6 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    commitmentIncludedCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    commitmentQueue(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    commitmentQueueSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    currentRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    currentRootIndex(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     disableRollupVerifier(
       _rollupSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
@@ -959,9 +796,17 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    enqueueWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getCommitmentIncludedCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    historicCommitments(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getMinRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getRootHistoryLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getSanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTreeCapacity(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isHistoricCommitment(_commitment: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isKnownRoot(root: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -969,11 +814,12 @@ export interface CommitmentPool extends BaseContract {
 
     isSanctionCheckDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    isSpentSerialNumber(
+      _serialNumber: BigNumberish,
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
+
     isVerifierUpdateDisabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minRollupFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    operator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     removeEnqueueWhitelist(
       _actor: string,
@@ -990,22 +836,10 @@ export interface CommitmentPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
-    rollupVerifiers(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rollupWhitelist(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rootHistory(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    rootHistoryLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    sanctionsContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     setMinRollupFee(
       _minRollupFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
-
-    spentSerialNumbers(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     toggleRollupWhitelist(
       _state: boolean,
@@ -1027,14 +861,6 @@ export interface CommitmentPool extends BaseContract {
       _signature: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
-
-    transactVerifiers(
-      arg0: BigNumberish,
-      arg1: BigNumberish,
-      overrides?: CallOverrides,
-    ): Promise<PopulatedTransaction>;
-
-    treeCapacity(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     updateSanctionContractAddress(
       _sanction: string,

@@ -1,6 +1,7 @@
 import { Fixture } from 'ethereum-waffle/dist/esm';
 import { Artifacts } from 'hardhat/internal/artifacts';
 import { Artifact } from 'hardhat/types';
+import { ethers, waffle } from 'hardhat';
 import { parseUnits } from '@ethersproject/units';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -52,8 +53,6 @@ import {
   MinAmount,
   BridgeAccountIndex,
 } from './constants';
-
-const { ethers, waffle } = require('hardhat');
 
 // Workaround for https://github.com/nomiclabs/hardhat/issues/849
 // TODO: Remove once fixed upstream.

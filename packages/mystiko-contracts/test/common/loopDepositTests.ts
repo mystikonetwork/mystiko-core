@@ -1,12 +1,11 @@
 import { expect } from 'chai';
+import { waffle } from 'hardhat';
 import { Wallet } from '@ethersproject/wallet';
 import { DummySanctionsList, TestToken } from '@mystikonetwork/contracts-abi';
 import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { toHex, toBN } from '@mystikonetwork/utils';
 import { CommitmentInfo } from './commitment';
 import { MinAmount } from '../util/constants';
-
-const { waffle } = require('hardhat');
 
 export function testLoopDeposit(
   contractName: string,
@@ -28,7 +27,7 @@ export function testLoopDeposit(
 
   describe(`Test ${contractName} deposit operations`, () => {
     before(async () => {
-      minRollupFee = (await commitmentPool.minRollupFee()).toString();
+      minRollupFee = (await commitmentPool.getMinRollupFee()).toString();
       minTotalAmount = toBN(depositAmount).add(toBN(minRollupFee)).toString();
     });
 
@@ -152,15 +151,10 @@ export function testLoopDeposit(
             toHex(commitments[i].privateNote),
           );
 
-        expect(await commitmentPool.historicCommitments(commitments[i].commitmentHash.toString())).to.equal(
+        expect(await commitmentPool.isHistoricCommitment(commitments[i].commitmentHash.toString())).to.equal(
           true,
         );
-        expect((await commitmentPool.commitmentQueue(`${i}`)).commitment.toString()).to.equal(
-          commitments[i].commitmentHash.toString(),
-        );
-        expect((await commitmentPool.commitmentQueue(`${i}`)).rollupFee.toString()).to.equal(minRollupFee);
       }
-      expect((await commitmentPool.commitmentQueueSize()).toString()).to.equal(`${commitments.length}`);
     });
 
     it('should have correct balance', async () => {
