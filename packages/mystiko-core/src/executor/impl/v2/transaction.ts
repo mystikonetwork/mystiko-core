@@ -170,7 +170,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         .then((wallet) =>
           this.getCommitments(options, contractConfig).then((commitments) => ({ wallet, commitments })),
         )
-        .then(({ wallet, commitments }) => {
+        .then(({ wallet, commitments }) =>
+          this.context.providers
+            .checkProvider(options.chainId)
+            .then((provider) => ({ wallet, commitments, provider })),
+        )
+        .then(({ wallet, commitments, provider }) => {
           const chainConfig = this.config.getChainConfig(options.chainId);
           if (!chainConfig) {
             return createErrorPromise(
@@ -202,11 +207,10 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             const spendingAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
             selectedCommitments = CommitmentUtils.select(commitments, MAX_NUM_INPUTS, spendingAmount);
           }
-          const { signer } = options;
           const etherContract = this.context.contractConnector.connect<CommitmentPool>(
             'CommitmentPool',
             contractConfig.address,
-            signer.signer,
+            provider,
           );
           return {
             options,
@@ -703,6 +707,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithRequest> {
     const { options, contractConfig, chainConfig, transaction, etherContract, selectedCommitments } =
       executionContext;
+    const etherContractWithSigner = etherContract.connect(options.signer.signer);
     const request = TransactionExecutorV2.buildTransactionRequest(executionContext);
     for (let i = 0; i < request.serialNumbers.length; i += 1) {
       const commitment = selectedCommitments[i];
@@ -719,7 +724,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           `submitting transaction id=${transaction.id} to ` +
             `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}`,
         );
-        return etherContract.transact(request, signature);
+        return etherContractWithSigner.transact(request, signature);
       })
       .then((resp) => {
         this.logger.info(

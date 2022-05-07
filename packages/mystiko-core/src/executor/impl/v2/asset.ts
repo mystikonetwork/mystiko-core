@@ -38,13 +38,7 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
   }
 
   public balance(options: AssetExecutorBalanceOptions): Promise<string> {
-    return this.context.providers.getProvider(options.chainId).then((provider) => {
-      if (!provider) {
-        return createErrorPromise(
-          `no provider configured for chain id=${options.chainId}`,
-          MystikoErrorCode.NON_EXISTING_PROVIDER,
-        );
-      }
+    return this.context.providers.checkProvider(options.chainId).then((provider) => {
       if (options.assetAddress) {
         const contract = this.context.contractConnector.connect<ERC20>(
           'ERC20',

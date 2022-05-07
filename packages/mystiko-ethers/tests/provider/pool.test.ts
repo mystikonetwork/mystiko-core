@@ -35,6 +35,14 @@ beforeEach(async () => {
   });
 });
 
+test('test checkProvider', async () => {
+  const providerPool = new ProviderPoolImpl(config);
+  await expect(providerPool.checkProvider(300)).rejects.toThrow(
+    new Error('cannot get provider for chainId=300'),
+  );
+  expect(await providerPool.checkProvider(3)).not.toBe(undefined);
+});
+
 test('test getProvider', async () => {
   const providerPool = new ProviderPoolImpl(config);
   expect(await providerPool.getProvider(300)).toBe(undefined);

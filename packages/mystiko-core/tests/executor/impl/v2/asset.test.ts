@@ -74,13 +74,6 @@ test('test erc20 balance', async () => {
   options.address = '0x64BaB5ed694635F0b5d594D78A0Dd0a8499f174e';
   balance = await executor.balance(options);
   expect(fromDecimals(balance, 16)).toBe(0);
-  options.chainId = 97;
-  await expect(executor.balance(options)).rejects.toThrow(
-    createError(
-      `no provider configured for chain id=${options.chainId}`,
-      MystikoErrorCode.NON_EXISTING_PROVIDER,
-    ),
-  );
 });
 
 test('test main asset balance', async () => {
