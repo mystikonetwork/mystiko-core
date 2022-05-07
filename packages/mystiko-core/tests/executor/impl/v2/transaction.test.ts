@@ -314,7 +314,7 @@ test('test invalid options', async () => {
     createError('gas relayer fee cannot be negative', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
   await expect(executor.summary({ ...transferOptions, chainId: 1024 }, contractConfig)).rejects.toThrow(
-    createError('no chain id=1024 configured', MystikoErrorCode.NON_EXISTING_CHAIN),
+    createError('cannot get provider for chainId=1024', MystikoErrorCode.NON_EXISTING_CHAIN),
   );
   await expect(executor.summary({ ...transferOptions, chainId: 97 }, contractConfig)).rejects.toThrow(
     createError('given options mismatch with config', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),

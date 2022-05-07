@@ -8,6 +8,7 @@ type ProviderConfigGetter = (chain: number) => Promise<ProviderConnection[]>;
 export interface ProviderPool {
   hasProvider(chainId: number): boolean;
   clearProvider(chainId: number): void;
+  checkProvider(chainId: number): Promise<EtherProvider>;
   getProvider(chainId: number): Promise<EtherProvider | undefined>;
   setProvider(chainId: number, provider: EtherProvider): void;
   setProviderFactory(factory: ProviderFactory): void;
@@ -37,6 +38,15 @@ export class ProviderPoolImpl implements ProviderPool {
     if (this.pool.has(chainId)) {
       this.pool.delete(chainId);
     }
+  }
+
+  public checkProvider(chainId: number): Promise<EtherProvider> {
+    return this.getProvider(chainId).then((provider) => {
+      if (!provider) {
+        return Promise.reject(new Error(`cannot get provider for chainId=${chainId}`));
+      }
+      return provider;
+    });
   }
 
   public getProvider(chainId: number): Promise<EtherProvider | undefined> {
