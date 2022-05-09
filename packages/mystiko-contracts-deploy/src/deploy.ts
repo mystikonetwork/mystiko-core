@@ -9,7 +9,7 @@ import {
 } from './contract/tbridge';
 import { deployDepositContract, initDepositContractFactory, setPeerContract } from './contract/depsit';
 import { deployBaseContract, initBaseContractFactory } from './contract/base';
-import { saveCoreContractJson } from './coreJson';
+import { checkCoreConfig, saveCoreContractJson } from './coreJson';
 import { saveTBridgeJson } from './tbridgeJson';
 import { saveRollupJson } from './rollupJson';
 import { delay } from './common/utils';
@@ -115,6 +115,11 @@ function dump(taskArgs: any) {
   dumpConfig(c);
 }
 
+async function check(taskArgs: any) {
+  const c = loadConfig(taskArgs);
+  await checkCoreConfig(c.mystikoNetwork);
+}
+
 export async function deploy(taskArgs: any, hre: any) {
   ethers = hre.ethers;
   await initBaseContractFactory(ethers);
@@ -132,6 +137,8 @@ export async function deploy(taskArgs: any, hre: any) {
     await deployStep3(taskArgs);
   } else if (step === 'dump') {
     dump(taskArgs);
+  } else if (step === 'check') {
+    await check(taskArgs);
   } else {
     console.error(LOGRED, 'wrong step');
   }

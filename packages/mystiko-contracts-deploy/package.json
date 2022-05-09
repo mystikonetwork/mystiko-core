@@ -61,6 +61,7 @@
   "dependencies": {
     "@mystikonetwork/contracts-abi": "^0.1.0-beta.3",
     "@mystikonetwork/utils": "^0.1.0-beta.3",
+    "@mystikonetwork/config": "^0.1.0-beta.3",
     "ethers": "^5.5.3",
     "hardhat": "^2.9.0",
     "hardhat-contract-sizer": "^2.5.0",
