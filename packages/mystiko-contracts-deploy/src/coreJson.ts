@@ -1,36 +1,48 @@
+import { MystikoConfig } from '@mystikonetwork/config';
 import { LOGRED, MystikoTestnet, MystikoMainnet, MystikoDevelopment, BridgeLoop } from './common/constant';
 import { readJsonFile, writeJsonFile } from './common/utils';
 
 function getCoreConfigFileName(mystikoNetwork: string) {
   let fileNameWithPath = '';
   if (mystikoNetwork === MystikoTestnet) {
-    fileNameWithPath = './src/json/core/testnet.json';
+    fileNameWithPath = `${process.env.CLIENT_CONFIG_FILE_PATH}/testnet.json`;
   } else if (mystikoNetwork === MystikoMainnet) {
     fileNameWithPath = `${process.env.CLIENT_CONFIG_FILE_PATH}/mainnet.json`;
   } else if (mystikoNetwork === MystikoDevelopment) {
     fileNameWithPath = './src/json/core/development.json';
   } else {
     console.error(LOGRED, 'load config network not support');
+    process.exit(-1);
   }
   return fileNameWithPath;
 }
 
 function loadCoreConfig(mystikoNetwork: string): any {
   const fileName = getCoreConfigFileName(mystikoNetwork);
-  if (fileName === '') {
-    return undefined;
-  }
   return readJsonFile(fileName);
 }
 
 function saveCoreConfig(mystikoNetwork: string, data: string) {
   const fileName = getCoreConfigFileName(mystikoNetwork);
-  if (fileName === '') {
-    return;
-  }
-
   const jsonData = JSON.stringify(data, null, 2);
   writeJsonFile(fileName, jsonData);
+}
+
+export async function checkCoreConfig(mystikoNetwork: string) {
+  const fileName = getCoreConfigFileName(mystikoNetwork);
+  await MystikoConfig.createFromFile(fileName);
+}
+
+function getChainConfig(coreConfig: any, chainId: number): any {
+  for (let i = 0; i < coreConfig.chains.length; i += 1) {
+    if (coreConfig.chains[i].chainId === chainId) {
+      return coreConfig.chains[i];
+    }
+  }
+
+  console.error(LOGRED, 'chain config not exist');
+  process.exit(-1);
+  return undefined;
 }
 
 function addTokenConfig(
@@ -48,29 +60,17 @@ function addTokenConfig(
     return coreConfig;
   }
 
-  let i = 0;
-  for (i = 0; i < coreConfig.chains.length; i += 1) {
-    if (coreConfig.chains[i].chainId === chainId) {
-      // eslint-disable-next-line
-      break;
-    }
-  }
-
-  if (i === coreConfig.chains.length) {
-    console.log(LOGRED, 'core configure not exist');
-    process.exit(-1);
-  }
-
+  const chainConfig = getChainConfig(coreConfig, chainId);
   const assetType = isERC20 ? 'erc20' : 'main';
 
-  for (let j = 0; j < coreConfig.chains[i].assets.length; j += 1) {
-    if (coreConfig.chains[i].assets[j].assetSymbol === assetSymbol) {
+  for (let j = 0; j < chainConfig.assets.length; j += 1) {
+    if (chainConfig.assets[j].assetSymbol === assetSymbol) {
       console.log('update token configure');
-      coreConfig.chains[i].assets[j].assetType = assetType;
-      coreConfig.chains[i].assets[j].assetDecimals = assetDecimals;
-      coreConfig.chains[i].assets[j].recommendedAmounts = recommendedAmounts;
+      chainConfig.assets[j].assetType = assetType;
+      chainConfig.assets[j].assetDecimals = assetDecimals;
+      chainConfig.assets[j].recommendedAmounts = recommendedAmounts;
       if (isERC20) {
-        coreConfig.chains[i].assets[j].assetAddress = assetAddress;
+        chainConfig.assets[j].assetAddress = assetAddress;
       }
       return coreConfig;
     }
@@ -89,7 +89,7 @@ function addTokenConfig(
     newToken.assetAddress = assetAddress;
   }
 
-  coreConfig.chains[i].assets.push(newToken);
+  chainConfig.assets.push(newToken);
   return coreConfig;
 }
 
@@ -105,20 +105,10 @@ function addPoolContractConfig(
   circuits: string[],
 ): any {
   const coreConfig = inCoreConfig;
-  let i = 0;
-  for (i = 0; i < coreConfig.chains.length; i += 1) {
-    if (coreConfig.chains[i].chainId === chainId) {
-      // eslint-disable-next-line
-      break;
-    }
-  }
-  if (i === coreConfig.chains.length) {
-    console.log(LOGRED, 'core configure not exist');
-    process.exit(-1);
-  }
+  const chainConfig = getChainConfig(coreConfig, chainId);
 
-  for (let j = 0; j < coreConfig.chains[i].poolContracts.length; j += 1) {
-    if (coreConfig.chains[i].poolContracts[j].address === address) {
+  for (let j = 0; j < chainConfig.poolContracts.length; j += 1) {
+    if (chainConfig.poolContracts[j].address === address) {
       return coreConfig;
     }
   }
@@ -147,7 +137,7 @@ function addPoolContractConfig(
     newPoolContract.circuits = circuits;
   }
 
-  coreConfig.chains[i].poolContracts.push(newPoolContract);
+  chainConfig.poolContracts.push(newPoolContract);
   return coreConfig;
 }
 
@@ -175,21 +165,10 @@ function addNewDepositContractConfig(
   minExecutorFee: string,
 ): any {
   const coreConfig = inCoreConfig;
-  let i = 0;
-  for (i = 0; i < coreConfig.chains.length; i += 1) {
-    if (coreConfig.chains[i].chainId === chainId) {
-      // eslint-disable-next-line
-      break;
-    }
-  }
+  const chainConfig = getChainConfig(coreConfig, chainId);
 
-  if (i === coreConfig.chains.length) {
-    console.log(LOGRED, 'core configure not exist');
-    process.exit(-1);
-  }
-
-  for (let j = 0; j < coreConfig.chains[i].depositContracts.length; j += 1) {
-    if (coreConfig.chains[i].depositContracts[j].address === address) {
+  for (let j = 0; j < chainConfig.depositContracts.length; j += 1) {
+    if (chainConfig.depositContracts[j].address === address) {
       return coreConfig;
     }
   }
@@ -226,16 +205,12 @@ function addNewDepositContractConfig(
     newContract.minExecutorFee = minExecutorFee;
   }
 
-  coreConfig.chains[i].depositContracts.push(newContract);
+  chainConfig.depositContracts.push(newContract);
   return coreConfig;
 }
 
 export function saveCoreContractJson(c: any) {
   let coreCfg = loadCoreConfig(c.mystikoNetwork);
-  if (coreCfg === undefined) {
-    console.error(LOGRED, 'load core configure error');
-    return;
-  }
 
   coreCfg = addTokenConfig(
     coreCfg,
