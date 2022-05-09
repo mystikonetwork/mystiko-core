@@ -56,14 +56,6 @@ Once you have checked out this repo into your local machine, you could install a
 lerna bootstrap
 ```
 
-## Package Structures
-This repository contains five packages at this moment:
-* [mystiko-circuits](./packages/mystiko-circuits) - It contains the zkSnark circuit written in Circom language.
-* [mystiko-client](./packages/mystiko-client) - It contains a Javascript client SDK of Mystiko's core protocol.
-* [mystiko-client-browser](./packages/mystiko-client-browser) - It contains a Javascript bundle for browser environment.
-* [mystiko-client-node](./packages/mystiko-client-node) - It contains a Javascript bundle for NodeJS environment.
-* [mystiko-contracts](./packages/mystiko-contracts) - It contains all smart contracts written in Solidity.
-
 ## Developing Guide
 
 ### Build the repo

@@ -1,14 +1,14 @@
 {
-  "name": "@mystikonetwork/contracts-abi",
+  "name": "@mystikonetwork/config",
   "version": "0.1.0-beta.3",
-  "description": "contracts abi of mystiko core",
+  "description": "configuration of mystiko-core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
   "types": "build/cjs/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mystikonetwork/mystiko-core",
-    "directory": "packages/mystiko-conotracts-abi"
+    "directory": "packages/config"
   },
   "author": {
     "name": "Mystiko Network"
@@ -24,10 +24,6 @@
   ],
   "license": "MIT",
   "scripts": {
-    "pregenerate": "rm -rf ./src/typechain",
-    "generate": "typechain --target ethers-v5 --out-dir src/typechain '../mystiko-contracts/artifacts/!(build-info)/**/+([a-zA-Z0-9_]).json' '../mystiko-contracts/artifactsExternal/**/+([a-zA-Z0-9_]).json'",
-    "postgenerate": "yarn prettier:fix && yarn build",
-    "build:browser": "webpack -c webpack.config.js",
     "build:cjs": "tsc -p ./tsconfig.json",
     "build:esm": "tsc -p ./tsconfig.esm.json",
     "build": "rm -rf build && yarn build:cjs && yarn build:esm",
@@ -39,12 +35,12 @@
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
-    "@typechain/ethers-v5": "^9.0.0",
+    "@types/bn.js": "^5.1.0",
     "@types/jest": "^27.4.0",
-    "@types/node": "^17.0.21",
-    "@types/uuid": "^8.3.4",
+    "@types/pako": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
+    "dts-gen": "^0.6.0",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-typescript": "^16.1.0",
     "eslint-config-prettier": "^8.3.0",
@@ -53,13 +49,14 @@
     "jest": "^27.4.7",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",
-    "ts-node": "^10.5.0",
-    "typechain": "^7.0.0",
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@ethersproject/abi": "^5.5.3",
-    "@ethersproject/providers": "^5.5.3",
-    "ethers": "^5.5.3"
+    "@mystikonetwork/utils": "^0.1.0-beta.3",
+    "bn.js": "^5.2.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "ethers": "^5.5.3",
+    "reflect-metadata": "^0.1.13"
   }
 }

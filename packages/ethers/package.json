@@ -1,14 +1,14 @@
 {
-  "name": "@mystikonetwork/database",
+  "name": "@mystikonetwork/ethers",
   "version": "0.1.0-beta.3",
-  "description": "database of mystiko core",
+  "description": "ethers related of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
   "types": "build/cjs/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/mystikonetwork/mystiko-core",
-    "directory": "packages/mystiko-database"
+    "directory": "packages/ethers"
   },
   "author": {
     "name": "Mystiko Network"
@@ -49,14 +49,13 @@
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.5.0",
-    "typescript": "^4.5.5",
-    "zokrates-js": "1.0.41"
+    "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/protocol": "^0.1.0-beta.3",
+    "@metamask/detect-provider": "^1.2.0",
+    "@mystikonetwork/config": "^0.1.0-beta.3",
     "@mystikonetwork/utils": "^0.1.0-beta.3",
-    "pouchdb-adapter-memory": "^7.2.2",
-    "rxdb": "^11.6.0",
-    "rxjs": "^7.5.5"
+    "ethers": "^5.5.3",
+    "loglevel": "^1.8.0"
   }
 }
