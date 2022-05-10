@@ -1,3 +1,0 @@
-def main(field a, field b, field c):
-  assert(a + b == c)
-  return
