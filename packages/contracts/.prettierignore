@@ -1,6 +1,0 @@
-artifacts
-artifactsExternal
-*.log
-yarn.lock
-typechain
-

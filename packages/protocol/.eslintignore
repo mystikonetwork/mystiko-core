@@ -1,5 +1,0 @@
-build/*
-node_modules/*
-coverage/*
-jest.*.js
-src/types/*.d.ts

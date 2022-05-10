@@ -13,12 +13,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          token: ${{ secrets.PACKAGES_TOKEN }}
           lfs: true
+          submodules: recursive
       - uses: actions/setup-node@v2
         with:
           node-version: 14
       - run: echo "@mystikonetwork:registry=https://npm.pkg.github.com" >> $HOME/.npmrc
-      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> $HOME/.npmrc
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.PACKAGES_TOKEN }}" >> $HOME/.npmrc
       - run: npm install --global lerna
       - run: lerna bootstrap
       - run: lerna run build

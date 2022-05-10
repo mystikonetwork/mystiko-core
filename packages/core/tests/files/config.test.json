@@ -412,16 +412,16 @@
       "type": "transaction1x0",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.program.gz"
+        "circuits/dist/zokrates/dev/Transaction1x0.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.abi.json"
+        "circuits/dist/zokrates/dev/Transaction1x0.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.pkey.gz"
+        "circuits/dist/zokrates/dev/Transaction1x0.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x0.vkey.gz"
+        "circuits/dist/zokrates/dev/Transaction1x0.vkey.gz"
       ]
     },
     {
@@ -429,16 +429,16 @@
       "type": "transaction1x1",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.program.gz"
+        "circuits/dist/zokrates/dev/Transaction1x1.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.abi.json"
+        "circuits/dist/zokrates/dev/Transaction1x1.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.pkey.gz"
+        "circuits/dist/zokrates/dev/Transaction1x1.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x1.vkey.gz"
+        "circuits/dist/zokrates/dev/Transaction1x1.vkey.gz"
       ]
     },
     {
@@ -446,16 +446,16 @@
       "type": "transaction1x2",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.program.gz"
+        "circuits/dist/zokrates/dev/Transaction1x2.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.abi.json"
+        "circuits/dist/zokrates/dev/Transaction1x2.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.pkey.gz"
+        "circuits/dist/zokrates/dev/Transaction1x2.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction1x2.vkey.gz"
+        "circuits/dist/zokrates/dev/Transaction1x2.vkey.gz"
       ]
     },
     {
@@ -463,16 +463,16 @@
       "type": "transaction2x0",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.program.gz"
+        "circuits/dist/zokrates/dev/Transaction2x0.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.abi.json"
+        "circuits/dist/zokrates/dev/Transaction2x0.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.pkey.gz"
+        "circuits/dist/zokrates/dev/Transaction2x0.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x0.vkey.gz"
+        "circuits/dist/zokrates/dev/Transaction2x0.vkey.gz"
       ]
     },
     {
@@ -480,16 +480,16 @@
       "type": "transaction2x1",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.program.gz"
+        "circuits/dist/zokrates/dev/Transaction2x1.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.abi.json"
+        "circuits/dist/zokrates/dev/Transaction2x1.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.pkey.gz"
+        "circuits/dist/zokrates/dev/Transaction2x1.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x1.vkey.gz"
+        "circuits/dist/zokrates/dev/Transaction2x1.vkey.gz"
       ]
     },
     {
@@ -497,16 +497,16 @@
       "type": "transaction2x2",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.program.gz"
+        "circuits/dist/zokrates/dev/Transaction2x2.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.abi.json"
+        "circuits/dist/zokrates/dev/Transaction2x2.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.pkey.gz"
+        "circuits/dist/zokrates/dev/Transaction2x2.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Transaction2x2.vkey.gz"
+        "circuits/dist/zokrates/dev/Transaction2x2.vkey.gz"
       ]
     },
     {
@@ -514,16 +514,16 @@
       "type": "rollup1",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.program.gz"
+        "circuits/dist/zokrates/dev/Rollup1.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.abi.json"
+        "circuits/dist/zokrates/dev/Rollup1.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.pkey.gz"
+        "circuits/dist/zokrates/dev/Rollup1.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup1.vkey.gz"
+        "circuits/dist/zokrates/dev/Rollup1.vkey.gz"
       ]
     },
     {
@@ -531,16 +531,16 @@
       "type": "rollup4",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.program.gz"
+        "circuits/dist/zokrates/dev/Rollup4.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.abi.json"
+        "circuits/dist/zokrates/dev/Rollup4.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.pkey.gz"
+        "circuits/dist/zokrates/dev/Rollup4.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup4.vkey.gz"
+        "circuits/dist/zokrates/dev/Rollup4.vkey.gz"
       ]
     },
     {
@@ -548,16 +548,16 @@
       "type": "rollup16",
       "isDefault": true,
       "programFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.program.gz"
+        "circuits/dist/zokrates/dev/Rollup16.program.gz"
       ],
       "abiFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.abi.json"
+        "circuits/dist/zokrates/dev/Rollup16.abi.json"
       ],
       "provingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.pkey.gz"
+        "circuits/dist/zokrates/dev/Rollup16.pkey.gz"
       ],
       "verifyingKeyFile": [
-        "node_modules/@mystikonetwork/circuits/dist/zokrates/dev/Rollup16.vkey.gz"
+        "circuits/dist/zokrates/dev/Rollup16.vkey.gz"
       ]
     }
   ]

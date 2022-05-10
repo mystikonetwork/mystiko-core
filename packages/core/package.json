@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/core",
-  "version": "0.1.0-beta.3",
+  "version": "0.1.0",
   "description": "core handlers of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -37,7 +37,6 @@
   "devDependencies": {
     "@ethereum-waffle/mock-contract": "^3.4.4",
     "@ethereum-waffle/provider": "^3.4.4",
-    "@mystikonetwork/circuits": "^0.1.0-beta.3",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.0",
     "@types/command-exists": "^1.2.0",
@@ -59,12 +58,12 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/config": "^0.1.0-beta.3",
-    "@mystikonetwork/contracts-abi": "^0.1.0-beta.3",
-    "@mystikonetwork/database": "^0.1.0-beta.3",
-    "@mystikonetwork/ethers": "^0.1.0-beta.3",
-    "@mystikonetwork/protocol": "^0.1.0-beta.3",
-    "@mystikonetwork/utils": "^0.1.0-beta.3",
+    "@mystikonetwork/config": "^0.1.0",
+    "@mystikonetwork/contracts-abi": "^0.1.0",
+    "@mystikonetwork/database": "^0.1.0",
+    "@mystikonetwork/ethers": "^0.1.0",
+    "@mystikonetwork/protocol": "^0.1.0",
+    "@mystikonetwork/utils": "^0.1.0",
     "bn.js": "^5.2.0",
     "broadcast-channel": "4.9.0",
     "class-validator": "^0.13.2",
