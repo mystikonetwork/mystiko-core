@@ -1,7 +1,7 @@
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
-import { ZokratesRuntime, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
+import { ZKProverFactory } from '@mystikonetwork/zkp';
+import { ZokratesWasmProverFactory } from '@mystikonetwork/zkp-browser';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
-import { initialize } from 'zokrates-js';
 
 export type InitOptionsInBrowser = InitOptions & {
   dbInMemory?: boolean;
@@ -28,9 +28,8 @@ export class MystikoInBrowser extends Mystiko {
     return super.initialize(wrappedOptions);
   }
 
-  protected async zokratesRuntime(): Promise<ZokratesRuntime> {
-    const zokrates = await initialize();
-    return new ZokratesWasmRuntime(zokrates);
+  protected zkProverFactory(): Promise<ZKProverFactory> {
+    return Promise.resolve(new ZokratesWasmProverFactory());
   }
 }
 

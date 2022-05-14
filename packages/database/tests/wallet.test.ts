@@ -5,8 +5,8 @@ import { createProtocol } from './common';
 let db: MystikoDatabase;
 let protocol: MystikoProtocol;
 
-beforeAll(async () => {
-  protocol = await createProtocol();
+beforeAll(() => {
+  protocol = createProtocol();
 });
 
 beforeEach(async () => {

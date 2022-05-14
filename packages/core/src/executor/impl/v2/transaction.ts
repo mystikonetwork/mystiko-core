@@ -17,7 +17,7 @@ import {
   Wallet,
 } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
-import { CommitmentV2, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import {
   errorMessage,
   fromDecimals,
@@ -28,10 +28,10 @@ import {
   toHex,
   waitTransaction,
 } from '@mystikonetwork/utils';
+import { ZKProof } from '@mystikonetwork/zkp';
 import BN from 'bn.js';
 import { isEthereumAddress, isURL } from 'class-validator';
 import { ethers } from 'ethers';
-import { Proof } from 'zokrates-js';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -60,7 +60,7 @@ type ExecutionContext = {
   publicAmount: BN;
   rollupFee: BN;
   gasRelayerFee: BN;
-  outputCommitments?: Array<{ commitment: Commitment; info: CommitmentV2 }>;
+  outputCommitments?: Array<{ commitment: Commitment; info: CommitmentOutput }>;
   etherContract: CommitmentPool;
 };
 
@@ -72,7 +72,7 @@ type ExecutionContextWithProof = ExecutionContextWithTransaction & {
   numInputs: number;
   numOutputs: number;
   outputEncryptedNotes: Buffer[];
-  proof: Proof;
+  proof: ZKProof;
   randomEtherWallet: ethers.Wallet;
 };
 
@@ -351,7 +351,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private createOutputCommitments(executionContext: ExecutionContext): Promise<ExecutionContext> {
     const { options, selectedCommitments, amount, publicAmount, rollupFee, gasRelayerFee } = executionContext;
     const inputSum = CommitmentUtils.sum(selectedCommitments);
-    const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentV2 }>[] = [];
+    const commitmentPromises: Promise<{ commitment: Commitment; info: CommitmentOutput }>[] = [];
     let remainingAmount;
     if (options.type === TransactionEnum.TRANSFER && options.shieldedAddress) {
       remainingAmount = inputSum.sub(amount);
@@ -382,12 +382,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     executionContext: ExecutionContext,
     shieldedAddress: string,
     amount: BN,
-  ): Promise<{ commitment: Commitment; info: CommitmentV2 }> {
+  ): Promise<{ commitment: Commitment; info: CommitmentOutput }> {
     const { options, contractConfig } = executionContext;
     return (this.protocol as MystikoProtocolV2)
-      .commitmentWithShieldedAddress(shieldedAddress, amount)
+      .commitment({ publicKeys: shieldedAddress, amount })
       .then((commitmentInfo) => {
-        const { commitmentHash, privateNote } = commitmentInfo;
+        const { commitmentHash, encryptedNote } = commitmentInfo;
         const now = MystikoHandler.now();
         const rawCommitment: CommitmentType = {
           id: MystikoHandler.generateId(),
@@ -401,7 +401,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           status: CommitmentStatus.INIT,
           commitmentHash: commitmentHash.toString(),
           rollupFeeAmount: toDecimals(options.rollupFee || 0, contractConfig.assetDecimals).toString(),
-          encryptedNote: toHex(privateNote),
+          encryptedNote: toHex(encryptedNote),
           amount: amount.toString(),
           shieldedAddress,
         };
@@ -584,7 +584,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
               for (let i = 0; i < outputCommitments.length; i += 1) {
                 const { commitment, info } = outputCommitments[i];
                 const { shieldedAddress, amount, rollupFeeAmount } = commitment;
-                const { randomP, randomR, randomS, commitmentHash, privateNote } = info;
+                const { randomP, randomR, randomS, commitmentHash, encryptedNote } = info;
                 /* istanbul ignore if */
                 if (!shieldedAddress || !amount) {
                   return createErrorPromise(
@@ -600,7 +600,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                 outRandomSs.push(randomS);
                 outAmounts.push(toBN(amount));
                 rollupFeeAmounts.push(toBN(rollupFeeAmount || 0));
-                outputEncryptedNotes.push(privateNote);
+                outputEncryptedNotes.push(encryptedNote);
               }
             }
             return (this.protocol as MystikoProtocolV2)

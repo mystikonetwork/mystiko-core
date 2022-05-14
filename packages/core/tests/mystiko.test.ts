@@ -1,13 +1,11 @@
 import { MystikoConfig } from '@mystikonetwork/config';
-import { ZokratesRuntime, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
+import { ZKProverFactory } from '@mystikonetwork/zkp';
+import { ZokratesCliProverFactory } from '@mystikonetwork/zkp-node';
 import { Mystiko } from '../src';
 
 class TestMystiko extends Mystiko {
-  protected async zokratesRuntime(): Promise<ZokratesRuntime> {
-    // eslint-disable-next-line global-require
-    const { initialize } = require('zokrates-js/node');
-    const zokrates = await initialize();
-    return Promise.resolve(new ZokratesWasmRuntime(zokrates));
+  protected zkProverFactory(): Promise<ZKProverFactory> {
+    return Promise.resolve(new ZokratesCliProverFactory());
   }
 }
 

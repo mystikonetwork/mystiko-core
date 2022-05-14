@@ -1,8 +1,9 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MetaMaskSigner, PrivateKeySigner, ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
-import { MystikoProtocol, MystikoProtocolV2, ZokratesRuntime } from '@mystikonetwork/protocol';
+import { MystikoProtocol, ProtocolFactory, ProtocolFactoryV2 } from '@mystikonetwork/protocol';
 import { initLogger, logger, ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
+import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { Logger, LogLevelDesc } from 'loglevel';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import { RxDatabaseCreator } from 'rxdb';
@@ -34,12 +35,12 @@ export interface InitOptions {
   dbParams?: RxDatabaseCreator;
   loggingLevel?: LogLevelDesc;
   loggingOptions?: LoglevelPluginPrefixOptions;
-  protocol?: MystikoProtocol;
   contextFactory?: ContextFactory;
   providerFactory?: ProviderFactory;
   handlerFactory?: HandlerFactory;
   executorFactory?: ExecutorFactory;
   synchronizerFactory?: SynchronizerFactory;
+  protocolFactory?: ProtocolFactory;
 }
 
 export abstract class Mystiko {
@@ -84,12 +85,12 @@ export abstract class Mystiko {
       dbParams,
       loggingLevel = 'warn',
       loggingOptions,
-      protocol,
       contextFactory,
       providerFactory,
       handlerFactory,
       executorFactory,
       synchronizerFactory,
+      protocolFactory,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
@@ -105,7 +106,8 @@ export abstract class Mystiko {
     initLogger(loggingOptions);
     this.logger = logger;
     this.logger.setLevel(loggingLevel);
-    this.protocol = protocol || new MystikoProtocolV2(await this.zokratesRuntime());
+    const protocols = protocolFactory || new ProtocolFactoryV2(await this.zkProverFactory());
+    this.protocol = await protocols.create();
     const contexts = contextFactory || new DefaultContextFactory(this.config, this.db, this.protocol);
     this.context = contexts.createContext();
     this.context.executors = executorFactory || new ExecutorFactoryV2(this.context);
@@ -154,5 +156,5 @@ export abstract class Mystiko {
     return Promise.resolve([]);
   }
 
-  protected abstract zokratesRuntime(): Promise<ZokratesRuntime>;
+  protected abstract zkProverFactory(): Promise<ZKProverFactory>;
 }
