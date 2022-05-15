@@ -3,7 +3,7 @@ import {
   CircuitConfig,
   CircuitType,
   MAIN_ASSET_ADDRESS,
-  PoolContractConfig,
+  PoolContractConfig
 } from '@mystikonetwork/config';
 import { CommitmentPool, ICommitmentPool } from '@mystikonetwork/contracts-abi';
 import {
@@ -14,7 +14,7 @@ import {
   Transaction,
   TransactionEnum,
   TransactionStatus,
-  Wallet,
+  Wallet
 } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
@@ -26,7 +26,7 @@ import {
   toBuff,
   toDecimals,
   toHex,
-  waitTransaction,
+  waitTransaction
 } from '@mystikonetwork/utils';
 import { ZKProof } from '@mystikonetwork/zkp';
 import BN from 'bn.js';
@@ -41,7 +41,7 @@ import {
   TransactionQuoteOptions,
   TransactionResponse,
   TransactionSummary,
-  TransactionUpdate,
+  TransactionUpdate
 } from '../../../interface';
 import { CommitmentUtils } from '../../../utils';
 import { MystikoExecutor } from '../../executor';
@@ -185,12 +185,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           }
           const quote = CommitmentUtils.quote(options, contractConfig, commitments, MAX_NUM_INPUTS);
           let amount = toBN(0);
-          if (options.amount && quote.valid) {
-            amount = toDecimals(options.amount, contractConfig.assetDecimals);
+          if (quote.valid && options.type === TransactionEnum.TRANSFER) {
+            amount = toDecimals(options.amount || quote.maxAmount, contractConfig.assetDecimals);
           }
           let publicAmount = toBN(0);
-          if (options.publicAmount && quote.valid) {
-            publicAmount = toDecimals(options.publicAmount, contractConfig.assetDecimals);
+          if (quote.valid && options.type === TransactionEnum.WITHDRAW) {
+            publicAmount = toDecimals(options.publicAmount || quote.maxAmount, contractConfig.assetDecimals);
           }
           let rollupFee = toBN(0);
           if (options.rollupFee && quote.valid) {

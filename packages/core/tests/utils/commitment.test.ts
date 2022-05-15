@@ -173,5 +173,5 @@ test('test quote withdraw', () => {
   expect(quote.maxGasRelayerFee).toBe(0.5);
   expect(quote.numOfSplits).toBe(1);
   quote = CommitmentUtils.quote({ type: TransactionEnum.WITHDRAW }, config, commitments, 2);
-  expect(quote.valid).toBe(false);
+  expect(quote.valid).toBe(true);
 });

@@ -64,8 +64,5 @@
     "pouchdb-adapter-node-websql": "^7.0.0",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5"
-  },
-  "peerDependencies": {
-    "@mystikonetwork/config": "^0.1.1"
   }
 }
