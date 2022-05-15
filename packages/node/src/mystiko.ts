@@ -1,5 +1,7 @@
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
-import { ZokratesCliRuntime, ZokratesRuntime, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
+import { ZKProverFactory } from '@mystikonetwork/zkp';
+import { ZokratesWasmProverFactory } from '@mystikonetwork/zkp-browser';
+import { ZokratesCliProverFactory } from '@mystikonetwork/zkp-node';
 import chalk, { Chalk } from 'chalk';
 import commandExists from 'command-exists';
 import * as fs from 'fs';
@@ -55,12 +57,10 @@ export class MystikoInNode extends Mystiko {
     return super.initialize(wrappedOptions);
   }
 
-  protected async zokratesRuntime(): Promise<ZokratesRuntime> {
-    const { initialize } = require('zokrates-js/node');
-    const zokrates = await initialize();
+  protected zkProverFactory(): Promise<ZKProverFactory> {
     return commandExists('zokrates')
-      .then(() => new ZokratesCliRuntime(zokrates))
-      .catch(() => new ZokratesWasmRuntime(zokrates));
+      .then(() => new ZokratesCliProverFactory())
+      .catch(() => new ZokratesWasmProverFactory());
   }
 }
 

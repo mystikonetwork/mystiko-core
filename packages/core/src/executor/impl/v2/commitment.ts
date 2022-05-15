@@ -467,12 +467,13 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       return accountsPromise.then((myAccounts) => {
         const commitmentPromises: Promise<Commitment | undefined>[] = myAccounts.map((account) =>
           (this.protocol as MystikoProtocolV2)
-            .commitmentFromEncryptedNote(
-              account.publicKeyForVerification(this.protocol),
-              account.publicKeyForEncryption(this.protocol),
-              account.secretKeyForEncryption(this.protocol, walletPassword),
-              toBuff(encryptedNote),
-            )
+            .commitment({
+              publicKeys: account.shieldedAddress,
+              encryptedNote: {
+                encryptedNote: toBuff(encryptedNote),
+                skEnc: account.secretKeyForEncryption(this.protocol, walletPassword),
+              },
+            })
             .then((decryptedCommitment) => {
               const { amount, randomP, commitmentHash } = decryptedCommitment;
               if (commitmentHash.toString() === commitment.commitmentHash) {

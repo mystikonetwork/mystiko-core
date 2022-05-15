@@ -267,6 +267,10 @@ test('test quote', async () => {
   };
   let contractConfig = getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
   let quote = await executor.quote(options, contractConfig);
+  expect(quote.valid).toBe(true);
+  expect(quote.invalidReason).toBe(undefined);
+  options.amount = -0.1;
+  quote = await executor.quote(options, contractConfig);
   expect(quote.valid).toBe(false);
   expect(quote.invalidReason).not.toBe(undefined);
   options.amount = 0.1;

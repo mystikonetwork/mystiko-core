@@ -8,7 +8,7 @@ import {
 import { MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
 import { CommitmentStatus, CommitmentType, Deposit, DepositStatus } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
-import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
 import { ContractTransaction, ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -264,7 +264,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       executionContext;
     return this.context.wallets.checkCurrent().then((wallet) =>
       (this.protocol as MystikoProtocolV2)
-        .commitmentWithShieldedAddress(options.shieldedAddress, toBN(amount))
+        .commitment({ publicKeys: options.shieldedAddress, amount: toBN(amount) })
         .then((commitment) =>
           this.context.deposits
             .findOne({
@@ -284,7 +284,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
               );
             }),
         )
-        .then((commitment) => {
+        .then((commitment: CommitmentOutput) => {
           const now = MystikoHandler.now();
           return this.db.deposits.insert({
             id: MystikoHandler.generateId(),
@@ -296,7 +296,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             commitmentHash: commitment.commitmentHash.toString(),
             hashK: commitment.k.toString(),
             randomS: commitment.randomS.toString(),
-            encryptedNote: toHex(commitment.privateNote),
+            encryptedNote: toHex(commitment.encryptedNote),
             assetSymbol: contractConfig.assetSymbol,
             assetDecimals: contractConfig.assetDecimals,
             assetAddress: contractConfig.assetAddress,

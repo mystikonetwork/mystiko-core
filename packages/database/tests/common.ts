@@ -1,9 +1,7 @@
-import { MystikoProtocol, MystikoProtocolV2, ZokratesWasmRuntime } from '@mystikonetwork/protocol';
+import { MystikoProtocol, MystikoProtocolV2 } from '@mystikonetwork/protocol';
+import { ZokratesCliProver } from '@mystikonetwork/zkp-node';
 
-export async function createProtocol(): Promise<MystikoProtocol> {
-  // eslint-disable-next-line global-require
-  const { initialize } = require('zokrates-js/node');
-  const zokrates = await initialize();
-  const runtime = new ZokratesWasmRuntime(zokrates);
-  return Promise.resolve(new MystikoProtocolV2(runtime));
+export function createProtocol(): MystikoProtocol {
+  const prover = new ZokratesCliProver();
+  return new MystikoProtocolV2(prover);
 }

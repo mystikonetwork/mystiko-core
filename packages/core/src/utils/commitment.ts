@@ -96,10 +96,14 @@ export class CommitmentUtils {
       transactionQuote.invalidReason = 'asset balance is too small to transfer';
       return transactionQuote;
     }
-    const amount =
-      options.type === TransactionEnum.TRANSFER
-        ? toDecimals(options.amount || 0, contractConfig.assetDecimals)
-        : toDecimals(options.publicAmount || 0, contractConfig.assetDecimals);
+    let amount: BN;
+    if (options.type === TransactionEnum.TRANSFER) {
+      amount = options.amount ? toDecimals(options.amount, contractConfig.assetDecimals) : inputMax;
+    } else {
+      amount = options.publicAmount
+        ? toDecimals(options.publicAmount, contractConfig.assetDecimals)
+        : inputMax;
+    }
     if (amount.lten(0)) {
       transactionQuote.valid = false;
       transactionQuote.invalidReason = 'asset amount cannot be negative or zero';

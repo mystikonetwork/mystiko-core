@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "core handlers of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -37,9 +37,9 @@
   "devDependencies": {
     "@ethereum-waffle/mock-contract": "^3.4.4",
     "@ethereum-waffle/provider": "^3.4.4",
+    "@mystikonetwork/zkp-node": "^0.1.1",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.0",
-    "@types/command-exists": "^1.2.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.21",
     "@types/uuid": "^8.3.4",
@@ -58,12 +58,13 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/config": "^0.1.0",
+    "@mystikonetwork/config": "^0.1.2",
     "@mystikonetwork/contracts-abi": "^0.1.0",
-    "@mystikonetwork/database": "^0.1.0",
-    "@mystikonetwork/ethers": "^0.1.0",
-    "@mystikonetwork/protocol": "^0.1.0",
+    "@mystikonetwork/database": "^0.1.1",
+    "@mystikonetwork/ethers": "^0.1.1",
+    "@mystikonetwork/protocol": "^0.1.1",
     "@mystikonetwork/utils": "^0.1.0",
+    "@mystikonetwork/zkp": "^0.1.1",
     "bn.js": "^5.2.0",
     "broadcast-channel": "4.9.0",
     "class-validator": "^0.13.2",
@@ -73,7 +74,6 @@
     "loglevel-plugin-prefix": "^0.8.4",
     "rxdb": "^11.6.0",
     "rxjs": "^7.5.5",
-    "ulid": "^2.3.0",
-    "zokrates-js": "1.0.41"
+    "ulid": "^2.3.0"
   }
 }
