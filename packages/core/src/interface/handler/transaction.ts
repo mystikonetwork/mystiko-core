@@ -40,8 +40,10 @@ export type TransactionQuote = {
 export type TransactionSummary = {
   previousBalance: number;
   newBalance: number;
+  assetSymbol: string;
   withdrawingAmount: number;
   transferringAmount: number;
+  recipient: string;
   rollupFeeAmount: number;
   rollupFeeAssetSymbol: string;
   gasRelayerFeeAmount: number;

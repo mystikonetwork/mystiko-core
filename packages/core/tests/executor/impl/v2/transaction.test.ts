@@ -424,6 +424,8 @@ test('test summary', async () => {
   expect(transferSummary).toStrictEqual({
     previousBalance: 9.9,
     newBalance: 3.9,
+    assetSymbol: 'MTT',
+    recipient: mystikoAccount.shieldedAddress,
     withdrawingAmount: 0,
     transferringAmount: 5.8,
     rollupFeeAmount: 0.2,
@@ -436,6 +438,8 @@ test('test summary', async () => {
   expect(withdrawSummary).toStrictEqual({
     previousBalance: 9.9,
     newBalance: 4.9,
+    assetSymbol: 'MTT',
+    recipient: etherWallet.address,
     withdrawingAmount: 5,
     transferringAmount: 0,
     rollupFeeAmount: 0,
