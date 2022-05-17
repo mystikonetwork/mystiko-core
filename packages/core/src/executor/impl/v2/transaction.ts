@@ -132,6 +132,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         return {
           previousBalance,
           newBalance: fromDecimals(newBalance, config.assetDecimals),
+          assetSymbol: config.assetSymbol,
+          recipient: options.shieldedAddress || options.publicAddress || '',
           withdrawingAmount,
           transferringAmount,
           rollupFeeAmount,
