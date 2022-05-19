@@ -1,7 +1,8 @@
 import { MystikoProtocol, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { ZokratesCliProver } from '@mystikonetwork/zkp-node';
+import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 
-export function createProtocol(): MystikoProtocol {
-  const prover = new ZokratesCliProver();
+export async function createProtocol(): Promise<MystikoProtocol> {
+  const factory = new ZokratesNodeProverFactory();
+  const prover = await factory.create();
   return new MystikoProtocolV2(prover);
 }

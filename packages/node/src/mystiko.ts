@@ -1,9 +1,7 @@
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
-import { ZokratesWasmProverFactory } from '@mystikonetwork/zkp-browser';
-import { ZokratesCliProverFactory } from '@mystikonetwork/zkp-node';
+import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import chalk, { Chalk } from 'chalk';
-import commandExists from 'command-exists';
 import * as fs from 'fs';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
@@ -58,9 +56,7 @@ export class MystikoInNode extends Mystiko {
   }
 
   protected zkProverFactory(): Promise<ZKProverFactory> {
-    return commandExists('zokrates')
-      .then(() => new ZokratesCliProverFactory())
-      .catch(() => new ZokratesWasmProverFactory());
+    return Promise.resolve(new ZokratesNodeProverFactory());
   }
 }
 

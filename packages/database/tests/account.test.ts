@@ -24,8 +24,8 @@ function generateKeys(password: string): {
   return { rawSkVerify, rawSkEnc, pkVerify, pkEnc, publicKey: toHexNoPrefix(publicKey), encryptedSecretKey };
 }
 
-beforeAll(() => {
-  protocol = createProtocol();
+beforeAll(async () => {
+  protocol = await createProtocol();
 });
 
 beforeEach(async () => {

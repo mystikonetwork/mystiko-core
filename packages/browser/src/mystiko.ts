@@ -1,6 +1,6 @@
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
-import { ZokratesWasmProverFactory } from '@mystikonetwork/zkp-browser';
+import { ZokratesBrowserProverFactory } from '@mystikonetwork/zkp-browser';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
 
 export type InitOptionsInBrowser = InitOptions & {
@@ -29,7 +29,7 @@ export class MystikoInBrowser extends Mystiko {
   }
 
   protected zkProverFactory(): Promise<ZKProverFactory> {
-    return Promise.resolve(new ZokratesWasmProverFactory());
+    return Promise.resolve(new ZokratesBrowserProverFactory());
   }
 }
 

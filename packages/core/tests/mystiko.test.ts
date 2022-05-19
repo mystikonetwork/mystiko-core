@@ -1,11 +1,11 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
-import { ZokratesCliProverFactory } from '@mystikonetwork/zkp-node';
+import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import { Mystiko } from '../src';
 
 class TestMystiko extends Mystiko {
   protected zkProverFactory(): Promise<ZKProverFactory> {
-    return Promise.resolve(new ZokratesCliProverFactory());
+    return Promise.resolve(new ZokratesNodeProverFactory());
   }
 }
 
