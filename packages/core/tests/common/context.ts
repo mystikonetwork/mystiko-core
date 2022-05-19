@@ -4,7 +4,7 @@ import { ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { MystikoProtocolV2, ProtocolFactoryV2 } from '@mystikonetwork/protocol';
 import { ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
-import { ZokratesCliProverFactory } from '@mystikonetwork/zkp-node';
+import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import {
   AccountHandlerV2,
   AssetHandlerV2,
@@ -57,7 +57,7 @@ export async function createTestContext(
   if (!wrappedDb) {
     wrappedDb = await initDatabase();
   }
-  const proverFactory: ZKProverFactory = new ZokratesCliProverFactory();
+  const proverFactory: ZKProverFactory = new ZokratesNodeProverFactory();
   const protocolFactory = new ProtocolFactoryV2(proverFactory);
   const protocol = await protocolFactory.create();
   const context = new MystikoContext<
