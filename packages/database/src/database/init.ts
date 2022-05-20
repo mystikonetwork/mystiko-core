@@ -65,7 +65,7 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoD
       schema: chainSchema,
       methods: chainMethods,
       statics: chainCollectionMethods,
-      migrationStrategies: chainCollectionMigrations
+      migrationStrategies: chainCollectionMigrations,
     },
     [COMMITMENT_COLLECTION_NAME]: {
       schema: commitmentSchema,

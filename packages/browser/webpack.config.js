@@ -84,5 +84,5 @@ module.exports = {
   optimization: getOptimization(),
   experiments: {
     asyncWebAssembly: true,
-  }
+  },
 };

@@ -140,8 +140,8 @@ test('test update', async () => {
   expect(chain?.providers).toStrictEqual(providers);
   await handler.update(3, {
     providers: [
-      { url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
       { url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
+      { url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
     ],
   });
   expect(chain?.name).toBe(name);
@@ -188,21 +188,6 @@ test('test update', async () => {
     'http://localhost:12345',
   ]);
   expect(chain?.providerOverride).toBe(1);
-  updatedAt = chain?.updatedAt;
-  await handler.update(3, {
-    providers: [
-      { url: 'http://localhost:36666' },
-      { url: 'http://localhost:34567' },
-      { url: 'http://localhost:12345' },
-    ],
-  });
-  expect(chain?.updatedAt).not.toBe(updatedAt);
-  expect(chain?.providers.map((p) => p.url)).toStrictEqual([
-    'http://localhost:36666',
-    'http://localhost:34567',
-    'http://localhost:12345',
-  ]);
-  expect(chain?.providerOverride).toBe(1);
 });
 
 test('test update invalid url', async () => {
@@ -224,10 +209,7 @@ test('test reset', async () => {
   });
   await handler.update(5, {
     name: 'My New Name',
-    providers: [
-      { url: 'http://localhost:34567' },
-      { url: 'http://localhost:12345' },
-    ],
+    providers: [{ url: 'http://localhost:34567' }, { url: 'http://localhost:12345' }],
   });
   expect(await handler.reset(100)).toBe(null);
   let chain = await handler.reset(3);

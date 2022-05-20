@@ -124,15 +124,8 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
     if (providersA.length === providersB.length) {
       for (let i = 0; i < providersA.length; i += 1) {
         const a = providersA[i];
-        const index = providersB.findIndex((b) => a.url === b.url);
-        if (index < 0) {
-          return false;
-        }
-      }
-      for (let i = 0; i < providersB.length; i += 1) {
         const b = providersB[i];
-        const index = providersA.findIndex((a) => b.url === a.url);
-        if (index < 0) {
+        if (a.url !== b.url) {
           return false;
         }
       }
