@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 import { URL_REGEX } from '../constants';
 
 const chainSchemaLiteral = {
-  version: 0,
+  version: 1,
   title: 'chain schema',
   description: 'a document contains chain information',
   primaryKey: 'id',
@@ -52,6 +52,11 @@ const chainSchemaLiteral = {
         },
       },
     },
+    providerOverride: {
+      type: 'integer',
+      minimum: 0,
+      maximum: 1,
+    },
     eventFilterSize: {
       type: 'integer',
       minimum: 1,
@@ -87,6 +92,7 @@ export type ChainType = {
   chainId: number;
   name: string;
   providers: ProviderType[];
+  providerOverride?: number;
   eventFilterSize: number;
   syncedBlockNumber: number;
 };

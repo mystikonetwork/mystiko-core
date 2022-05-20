@@ -63,6 +63,7 @@ test('test collection clear', async () => {
         maxTryCount: 2,
       },
     ],
+    providerOverride: 0,
     eventFilterSize: 200000,
     syncedBlockNumber: 100,
   });

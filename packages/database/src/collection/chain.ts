@@ -22,3 +22,9 @@ export const chainCollectionMethods: ChainCollectionMethods = {
       });
   },
 };
+
+export const chainCollectionMigrations = {
+  1(oldDoc: any) {
+    return oldDoc;
+  },
+};
