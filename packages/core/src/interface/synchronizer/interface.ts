@@ -30,6 +30,8 @@ export type SyncStatus = {
 
 export type SyncOptions = {
   walletPassword: string;
+  timeoutMs?: number;
+  chainTimeoutMs?: number;
 };
 
 export type SyncSchedulerOptions = SyncOptions & {

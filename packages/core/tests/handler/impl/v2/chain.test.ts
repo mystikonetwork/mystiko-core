@@ -18,8 +18,16 @@ beforeAll(async () => {
         explorerUrl: 'https://ropsten.etherscan.io',
         signerEndpoint: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
-          { url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
-          { url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
+          {
+            url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+            timeoutMs: 1000,
+            maxTryCount: 3,
+          },
+          {
+            url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
+            timeoutMs: 2000,
+            maxTryCount: 4,
+          },
         ],
         eventFilterSize: 100000,
       },
@@ -30,8 +38,16 @@ beforeAll(async () => {
         explorerUrl: 'https://goerli.etherscan.io',
         signerEndpoint: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
-          { url: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
-          { url: 'https://eth-goerli.alchemyapi.io/v2/X0WmNwQWIjARyvQ2io1aZk0F3IjJ2qcM' },
+          {
+            url: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+            timeoutMs: 3000,
+            maxTryCount: 5,
+          },
+          {
+            url: 'https://eth-goerli.alchemyapi.io/v2/X0WmNwQWIjARyvQ2io1aZk0F3IjJ2qcM',
+            timeoutMs: 4000,
+            maxTryCount: 6,
+          },
         ],
         eventFilterSize: 200000,
       },
@@ -41,6 +57,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  context.config = config;
   handler = new ChainHandlerV2(context);
 });
 
@@ -86,7 +103,7 @@ test('test init', async () => {
   await handler.init();
   expect((await handler.find()).length).toBe(2);
   const updatedAt = (await handler.findOne(3))?.updatedAt;
-  const rawConfig = config.copyData();
+  let rawConfig = config.copyData();
   rawConfig.chains[0].eventFilterSize = 700000000;
   rawConfig.chains[1].chainId = 10;
   context.config = await MystikoConfig.createFromRaw(rawConfig);
@@ -95,16 +112,26 @@ test('test init', async () => {
   expect((await handler.findOne(3))?.eventFilterSize).toBe(700000000);
   expect((await handler.findOne(3))?.updatedAt).not.toBe(updatedAt);
   expect(await handler.findOne(10)).not.toBe(null);
+  const chain1 = await handler.findOne(3);
+  if (!chain1) {
+    throw new Error('chain id=3 should not be undefined');
+  }
+  await chain1.update({ $set: { providerOverride: 1 } });
+  rawConfig = config.copyData();
+  rawConfig.chains[0].providers = [rawConfig.chains[0].providers[1]];
+  rawConfig.chains[1].providers = [rawConfig.chains[1].providers[0]];
+  context.config = await MystikoConfig.createFromRaw(rawConfig);
+  await handler.init();
+  expect((await handler.findOne(3))?.providers.length).toBe(2);
+  expect((await handler.findOne(5))?.providers.length).toBe(1);
 });
 
 test('test update', async () => {
-  await expect(handler.update(3, {})).rejects.toThrow(
-    createError('cannot find chain id=3 in database', MystikoErrorCode.NON_EXISTING_CHAIN),
-  );
+  expect(await handler.update(3, {})).toBe(null);
   await handler.init();
   const chain = await handler.findOne(3);
   const name = chain?.name;
-  const updatedAt = chain?.updatedAt;
+  let updatedAt = chain?.updatedAt;
   const providers = chain?.providers;
   await handler.update(3, {});
   await handler.update(3, { name: '', providers: [] });
@@ -112,26 +139,70 @@ test('test update', async () => {
   expect(chain?.updatedAt).toBe(updatedAt);
   expect(chain?.providers).toStrictEqual(providers);
   await handler.update(3, {
+    providers: [
+      { url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
+      { url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
+    ],
+  });
+  expect(chain?.name).toBe(name);
+  expect(chain?.updatedAt).toBe(updatedAt);
+  expect(chain?.providers).toStrictEqual(providers);
+  await handler.update(3, {
     name: 'New Chain Name',
     providers: [
       {
-        url: 'http://localhost:12345',
+        url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
       },
       {
         url: 'http://localhost:34567',
-        maxTryCount: 4,
+        maxTryCount: 10,
         timeoutMs: 1000,
+      },
+      {
+        url: 'http://localhost:12345',
       },
     ],
   });
   expect(chain?.name).toBe('New Chain Name');
   expect(chain?.updatedAt).not.toBe(updatedAt);
   expect(chain?.providers.map((p) => p.url)).toStrictEqual([
-    'http://localhost:12345',
+    'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
     'http://localhost:34567',
+    'http://localhost:12345',
   ]);
-  expect(chain?.providers.map((p) => p.timeoutMs)).toStrictEqual([undefined, 1000]);
-  expect(chain?.providers.map((p) => p.maxTryCount)).toStrictEqual([undefined, 4]);
+  expect(chain?.providerOverride).toBe(1);
+  expect(chain?.providers.map((p) => p.timeoutMs)).toStrictEqual([2000, 1000, undefined]);
+  expect(chain?.providers.map((p) => p.maxTryCount)).toStrictEqual([4, 10, undefined]);
+  updatedAt = chain?.updatedAt;
+  await handler.update(3, {
+    providers: [
+      { url: 'http://localhost:34567' },
+      { url: 'http://localhost:34567' },
+      { url: 'http://localhost:12345' },
+    ],
+  });
+  expect(chain?.updatedAt).not.toBe(updatedAt);
+  expect(chain?.providers.map((p) => p.url)).toStrictEqual([
+    'http://localhost:34567',
+    'http://localhost:34567',
+    'http://localhost:12345',
+  ]);
+  expect(chain?.providerOverride).toBe(1);
+  updatedAt = chain?.updatedAt;
+  await handler.update(3, {
+    providers: [
+      { url: 'http://localhost:36666' },
+      { url: 'http://localhost:34567' },
+      { url: 'http://localhost:12345' },
+    ],
+  });
+  expect(chain?.updatedAt).not.toBe(updatedAt);
+  expect(chain?.providers.map((p) => p.url)).toStrictEqual([
+    'http://localhost:36666',
+    'http://localhost:34567',
+    'http://localhost:12345',
+  ]);
+  expect(chain?.providerOverride).toBe(1);
 });
 
 test('test update invalid url', async () => {
@@ -139,4 +210,39 @@ test('test update invalid url', async () => {
   await expect(
     handler.update(3, { providers: [{ url: 'http://localhost:12345' }, { url: 'not_a_url' }] }),
   ).rejects.toThrow(createError('invalid provider url not_a_url', MystikoErrorCode.INVALID_PROVIDER_URL));
+});
+
+test('test reset', async () => {
+  await handler.init();
+  await handler.update(3, {
+    name: 'My New Name',
+    providers: [
+      { url: 'http://localhost:34567' },
+      { url: 'http://localhost:34567' },
+      { url: 'http://localhost:12345' },
+    ],
+  });
+  await handler.update(5, {
+    name: 'My New Name',
+    providers: [
+      { url: 'http://localhost:34567' },
+      { url: 'http://localhost:12345' },
+    ],
+  });
+  expect(await handler.reset(100)).toBe(null);
+  let chain = await handler.reset(3);
+  expect(chain?.name).toBe('Ethereum Ropsten');
+  expect(chain?.providers.map((p) => p.url)).toStrictEqual([
+    'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
+  ]);
+  const rawConfig = config.copyData();
+  rawConfig.chains[1].chainId = 10;
+  context.config = await MystikoConfig.createFromRaw(rawConfig);
+  chain = await handler.reset(5);
+  expect(chain?.name).toBe('My New Name');
+  expect(chain?.providers.map((p) => p.url)).toStrictEqual([
+    'http://localhost:34567',
+    'http://localhost:12345',
+  ]);
 });

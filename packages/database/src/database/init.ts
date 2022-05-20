@@ -2,6 +2,7 @@ import { addPouchPlugin, createRxDatabase, getRxStoragePouch, RxDatabaseCreator 
 import {
   accountCollectionMethods,
   chainCollectionMethods,
+  chainCollectionMigrations,
   commitmentCollectionMethods,
   contractCollectionMethods,
   depositCollectionMethods,
@@ -64,6 +65,7 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoD
       schema: chainSchema,
       methods: chainMethods,
       statics: chainCollectionMethods,
+      migrationStrategies: chainCollectionMigrations
     },
     [COMMITMENT_COLLECTION_NAME]: {
       schema: commitmentSchema,

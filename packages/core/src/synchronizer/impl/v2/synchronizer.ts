@@ -1,4 +1,4 @@
-import { errorMessage, logger as rootLogger } from '@mystikonetwork/utils';
+import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -31,6 +31,10 @@ export class SynchronizerV2 implements Synchronizer {
   public static readonly DEFAULT_START_DELAY_MS = 1000;
 
   public static readonly DEFAULT_INTERVAL_MS = 300000;
+
+  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 120000;
+
+  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 60000;
 
   private readonly context: MystikoContextInterface;
 
@@ -149,7 +153,6 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public get error(): string | undefined {
-    /* istanbul ignore if */
     if (this.syncError) {
       return this.syncError;
     }
@@ -199,7 +202,10 @@ export class SynchronizerV2 implements Synchronizer {
               promises.push(
                 this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
                   .then(() =>
-                    this.context.commitments.import({ walletPassword: options.walletPassword, chainId }),
+                    promiseWithTimeout(
+                      this.context.commitments.import({ walletPassword: options.walletPassword, chainId }),
+                      options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS,
+                    ),
                   )
                   .then(() => this.context.chains.findOne(chainId))
                   .then((updatedChain) => {
@@ -216,7 +222,10 @@ export class SynchronizerV2 implements Synchronizer {
               );
             }
           });
-          return Promise.all(promises);
+          return promiseWithTimeout(
+            Promise.all(promises),
+            options.timeoutMs || SynchronizerV2.DEFAULT_SYNC_TIMEOUT_MS,
+          );
         })
         .then(() => {
           this.hasPendingSync = false;

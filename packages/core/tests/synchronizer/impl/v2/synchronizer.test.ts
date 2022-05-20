@@ -168,6 +168,18 @@ test('test run', async () => {
   });
 });
 
+test('test run timeout', async () => {
+  await synchronizer.run({ walletPassword, chainTimeoutMs: 500 });
+  let status = await synchronizer.status;
+  expect(status.isSyncing).toBe(false);
+  expect(status.error).toBe('some chain(s) failed to sync');
+  expect(status.chains[0].error).toBe('timeout after 500 ms');
+  await synchronizer.run({ walletPassword, timeoutMs: 500 });
+  status = await synchronizer.status;
+  expect(status.isSyncing).toBe(false);
+  expect(status.error).toBe('timeout after 500 ms');
+});
+
 test('test run with chain error', async () => {
   context.commitments = new MockCommitmentHandler({ raiseError: true });
   await synchronizer.run({ walletPassword });

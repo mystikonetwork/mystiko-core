@@ -10,4 +10,5 @@ export interface ChainHandler<C = ChainOptions> {
   findOne(chainId: number): Promise<Chain | null>;
   init(): Promise<Chain[]>;
   update(chainId: number, options: C): Promise<Chain | null>;
+  reset(chainId: number): Promise<Chain | null>;
 }
