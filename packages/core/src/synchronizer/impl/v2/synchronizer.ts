@@ -32,9 +32,9 @@ export class SynchronizerV2 implements Synchronizer {
 
   public static readonly DEFAULT_INTERVAL_MS = 300000;
 
-  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 120000;
+  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 400000;
 
-  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 60000;
+  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 300000;
 
   private readonly context: MystikoContextInterface;
 
