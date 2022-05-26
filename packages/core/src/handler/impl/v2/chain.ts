@@ -49,6 +49,9 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
               maxTryCount: p.maxTryCount,
             }));
           }
+          if (!data.nameOverride) {
+            data.name = chainConfig.name;
+          }
           return data;
         });
       }),
@@ -73,9 +76,10 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
         const chainConfig = this.config.getChainConfig(chainId);
         return chain.atomicUpdate((data) => {
           let hasUpdate = false;
-          if (options.name && options.name.length > 0) {
+          if (options.name && options.name.length > 0 && options.name !== data.name) {
             hasUpdate = true;
             data.name = options.name;
+            data.nameOverride = 1;
           }
           if (
             options.providers &&
@@ -110,6 +114,7 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
             timeoutMs: p.timeoutMs,
             maxTryCount: p.maxTryCount,
           }));
+          data.nameOverride = undefined;
           data.providerOverride = undefined;
           data.eventFilterSize = chainConfig.eventFilterSize;
           data.updatedAt = data.createdAt;
