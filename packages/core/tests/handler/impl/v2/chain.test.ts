@@ -116,13 +116,14 @@ test('test init', async () => {
   if (!chain1) {
     throw new Error('chain id=3 should not be undefined');
   }
-  await chain1.update({ $set: { providerOverride: 1 } });
+  await chain1.update({ $set: { providerOverride: 1, nameOverride: 1, name: 'Changed Name' } });
   rawConfig = config.copyData();
   rawConfig.chains[0].providers = [rawConfig.chains[0].providers[1]];
   rawConfig.chains[1].providers = [rawConfig.chains[1].providers[0]];
   context.config = await MystikoConfig.createFromRaw(rawConfig);
   await handler.init();
   expect((await handler.findOne(3))?.providers.length).toBe(2);
+  expect((await handler.findOne(3))?.name).toBe('Changed Name');
   expect((await handler.findOne(5))?.providers.length).toBe(1);
 });
 
@@ -147,6 +148,9 @@ test('test update', async () => {
   expect(chain?.name).toBe(name);
   expect(chain?.updatedAt).toBe(updatedAt);
   expect(chain?.providers).toStrictEqual(providers);
+  expect(chain?.name).toBe(name);
+  expect(chain?.updatedAt).toBe(updatedAt);
+  await handler.update(3, { name });
   await handler.update(3, {
     name: 'New Chain Name',
     providers: [
@@ -164,6 +168,7 @@ test('test update', async () => {
     ],
   });
   expect(chain?.name).toBe('New Chain Name');
+  expect(chain?.nameOverride).toBe(1);
   expect(chain?.updatedAt).not.toBe(updatedAt);
   expect(chain?.providers.map((p) => p.url)).toStrictEqual([
     'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
@@ -218,6 +223,8 @@ test('test reset', async () => {
     'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
     'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
   ]);
+  expect(chain?.nameOverride).toBe(undefined);
+  expect(chain?.providerOverride).toBe(undefined);
   const rawConfig = config.copyData();
   rawConfig.chains[1].chainId = 10;
   context.config = await MystikoConfig.createFromRaw(rawConfig);

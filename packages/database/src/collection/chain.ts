@@ -24,7 +24,12 @@ export const chainCollectionMethods: ChainCollectionMethods = {
 };
 
 export const chainCollectionMigrations = {
+  /* istanbul ignore next */
   1(oldDoc: any) {
+    return oldDoc;
+  },
+  /* istanbul ignore next */
+  2(oldDoc: any) {
     return oldDoc;
   },
 };
