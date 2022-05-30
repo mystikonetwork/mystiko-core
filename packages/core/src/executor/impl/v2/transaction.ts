@@ -17,11 +17,11 @@ import {
   Wallet,
 } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
+import { MerkleTree } from '@mystikonetwork/merkle';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import {
   errorMessage,
   fromDecimals,
-  MerkleTree,
   toBN,
   toBuff,
   toDecimals,
