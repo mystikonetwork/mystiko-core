@@ -22,7 +22,7 @@ import { MystikoExecutor } from '../../executor';
 
 type ImportContext = {
   chainConfig: ChainConfig;
-  contractConfig: PoolContractConfig | DepositContractConfig;
+  contractConfig: PoolContractConfig | DepositContractConfig | undefined;
   options: EventImportOptions;
 };
 
@@ -56,12 +56,6 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
     if (!contractConfig) {
       contractConfig = this.config.getDepositContractConfigByAddress(chainId, contractAddress);
     }
-    if (!contractConfig) {
-      return createErrorPromise(
-        `no contract chainId=${chainId}, address=${contractAddress} configured`,
-        MystikoErrorCode.NON_EXISTING_CONTRACT,
-      );
-    }
     return Promise.resolve({ chainConfig, contractConfig, options });
   }
 
@@ -88,6 +82,9 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
   ): Promise<Commitment[]> {
     const { commitmentHash, leafIndex, rollupFee, encryptedNote, transactionHash } = event;
     const { chainConfig, contractConfig } = context;
+    if (!contractConfig) {
+      return Promise.resolve([]);
+    }
     const commitmentHashStr = typeof commitmentHash === 'string' ? commitmentHash : commitmentHash.toString();
     const leafIndexStr = typeof leafIndex === 'string' ? leafIndex : leafIndex.toString();
     const rollupFeeStr = typeof rollupFee === 'string' ? rollupFee : rollupFee.toString();
@@ -150,6 +147,9 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
   ): Promise<Commitment[]> {
     const { commitmentHash, transactionHash } = event;
     const { chainConfig, contractConfig, options } = context;
+    if (!contractConfig) {
+      return Promise.resolve([]);
+    }
     const commitmentHashStr = typeof commitmentHash === 'string' ? commitmentHash : commitmentHash.toString();
     return this.context.commitments
       .findOne({
@@ -199,6 +199,9 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
   ): Promise<Commitment[]> {
     const { serialNumber, transactionHash } = event;
     const { chainConfig, contractConfig } = context;
+    if (!contractConfig) {
+      return Promise.resolve([]);
+    }
     const serialNumberStr = typeof serialNumber === 'string' ? serialNumber : serialNumber.toString();
     const now = MystikoHandler.now();
     const nullifier: NullifierType = {

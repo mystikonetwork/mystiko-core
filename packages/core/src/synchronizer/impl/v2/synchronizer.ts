@@ -1,3 +1,4 @@
+import { Commitment } from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
@@ -203,7 +204,7 @@ export class SynchronizerV2 implements Synchronizer {
                 this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
                   .then(() =>
                     promiseWithTimeout(
-                      this.context.commitments.import({ walletPassword: options.walletPassword, chainId }),
+                      this.executeSyncImport(options, chainId),
                       options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS,
                     ),
                   )
@@ -240,6 +241,25 @@ export class SynchronizerV2 implements Synchronizer {
         });
     }
     return Promise.resolve();
+  }
+
+  private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+    const indexerExecutor = this.context.executors.getIndexerExecutor();
+    if (indexerExecutor) {
+      return indexerExecutor
+        .import({ walletPassword: options.walletPassword, chainId })
+        .then((commitments) => {
+          if (commitments.length > 0) {
+            return commitments;
+          }
+          return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+        })
+        .catch((error) => {
+          this.logger.warn(`failed to import chainId=${chainId} from indexer: ${errorMessage(error)}`);
+          return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+        });
+    }
+    return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
   }
 
   private initChainInternalStatuses(): Map<number, ChainInternalStatus> {
