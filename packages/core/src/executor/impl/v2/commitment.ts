@@ -406,7 +406,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       sort: [{ id: 'asc' }],
       limit: scanSize,
     };
-    if (lastId) {
+    if (lastId && query.selector) {
       query.selector.id = { $gt: lastId };
     }
     return this.context.commitments.find(query).then((commitments) => {

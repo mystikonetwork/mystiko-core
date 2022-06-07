@@ -57,7 +57,7 @@
     "@mystikonetwork/protocol": "^0.1.3",
     "@mystikonetwork/utils": "^0.1.2",
     "pouchdb-adapter-memory": "^7.2.2",
-    "rxdb": "^11.6.0",
+    "rxdb": "^12.4.3",
     "rxjs": "^7.5.5"
   }
 }

@@ -4,7 +4,7 @@ import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import chalk, { Chalk } from 'chalk';
 import * as fs from 'fs';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
-import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
+import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
 
 const colors: { [key: string]: Chalk } = {
   TRACE: chalk.magentaBright,

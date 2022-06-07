@@ -1,4 +1,4 @@
-import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
+import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
 import { initDatabase, MystikoDatabase } from '../src';
 
 test('test default parameters', async () => {

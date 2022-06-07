@@ -1,4 +1,10 @@
-import { addPouchPlugin, createRxDatabase, getRxStoragePouch, RxDatabaseCreator } from 'rxdb';
+import { addRxPlugin, createRxDatabase, RxDatabaseCreator } from 'rxdb';
+import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
+import { RxDBLeaderElectionPlugin } from 'rxdb/plugins/leader-election';
+import { RxDBMigrationPlugin } from 'rxdb/plugins/migration';
+import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
+import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
+import { RxDBValidatePlugin } from 'rxdb/plugins/validate';
 import {
   accountCollectionMethods,
   chainCollectionMethods,
@@ -43,6 +49,11 @@ import {
 } from '../schema';
 
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoDatabase> {
+  addRxPlugin(RxDBJsonDumpPlugin);
+  addRxPlugin(RxDBLeaderElectionPlugin);
+  addRxPlugin(RxDBMigrationPlugin);
+  addRxPlugin(RxDBUpdatePlugin);
+  addRxPlugin(RxDBValidatePlugin);
   let dbPromise: Promise<MystikoDatabase>;
   if (params) {
     dbPromise = createRxDatabase<MystikoClientCollections>(params);
