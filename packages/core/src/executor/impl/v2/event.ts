@@ -72,8 +72,15 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
   }
 
   private importEvents(events: ContractEvent[], options: EventImportOptions): Promise<Commitment[]> {
-    const promises: Promise<Commitment[]>[] = events.map((event) => this.importEvent(event, options));
-    return Promise.all(promises).then((commitments) => commitments.flat());
+    if (events.length > 0) {
+      return this.importEvent(events[0], options).then((commitments) =>
+        this.importEvents(events.slice(1), options).then((moreCommitments) => [
+          ...commitments,
+          ...moreCommitments,
+        ]),
+      );
+    }
+    return Promise.resolve([]);
   }
 
   private importCommitmentQueuedEvent(
@@ -81,7 +88,7 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
     context: ImportContext,
   ): Promise<Commitment[]> {
     const { commitmentHash, leafIndex, rollupFee, encryptedNote, transactionHash } = event;
-    const { chainConfig, contractConfig } = context;
+    const { chainConfig, contractConfig, options } = context;
     if (!contractConfig) {
       return Promise.resolve([]);
     }
@@ -138,6 +145,11 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
         }
         return this.updateDepositStatus(commitment, depositUpdate);
       })
+      .then((commitment) =>
+        this.context.executors
+          .getCommitmentExecutor()
+          .decrypt({ commitment, walletPassword: options.walletPassword }),
+      )
       .then((commitment) => [commitment]);
   }
 
@@ -146,7 +158,7 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
     context: ImportContext,
   ): Promise<Commitment[]> {
     const { commitmentHash, transactionHash } = event;
-    const { chainConfig, contractConfig, options } = context;
+    const { chainConfig, contractConfig } = context;
     if (!contractConfig) {
       return Promise.resolve([]);
     }
@@ -184,11 +196,6 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
           status: DepositStatus.INCLUDED,
           rollupTransactionHash: transactionHash,
         }),
-      )
-      .then((commitment) =>
-        this.context.executors
-          .getCommitmentExecutor()
-          .decrypt({ commitment, walletPassword: options.walletPassword }),
       )
       .then((commitment) => [commitment]);
   }

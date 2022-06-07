@@ -245,7 +245,7 @@ export class SynchronizerV2 implements Synchronizer {
 
   private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
     const indexerExecutor = this.context.executors.getIndexerExecutor();
-    if (indexerExecutor) {
+    if (indexerExecutor && !options.noIndexer) {
       return indexerExecutor
         .import({ walletPassword: options.walletPassword, chainId })
         .then((commitments) => {

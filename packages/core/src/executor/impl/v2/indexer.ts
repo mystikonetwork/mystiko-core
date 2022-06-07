@@ -161,9 +161,18 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         rollupFee: rawEvent.rollupFee,
         encryptedNote: rawEvent.encryptedNote,
       }));
+      const startMs = new Date().getTime();
       return this.context.executors
         .getEventExecutor()
-        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true });
+        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true })
+        .then((commitments) => {
+          const endMs = new Date().getTime();
+          this.logger.debug(
+            `import events chainId=${options.chainId} event=CommitmentQueuedEvents took` +
+              ` ${endMs - startMs} ms`,
+          );
+          return commitments;
+        });
     });
   }
 
@@ -184,9 +193,18 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         transactionHash: rawEvent.txHash,
         commitmentHash: rawEvent.commitHash,
       }));
+      const startMs = new Date().getTime();
       return this.context.executors
         .getEventExecutor()
-        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true });
+        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true })
+        .then((commitments) => {
+          const endMs = new Date().getTime();
+          this.logger.debug(
+            `import events chainId=${options.chainId} event=CommitmentIncludedEvents took` +
+              ` ${endMs - startMs} ms`,
+          );
+          return commitments;
+        });
     });
   }
 
@@ -207,37 +225,54 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         transactionHash: rawEvent.txHash,
         serialNumber: rawEvent.serialNum,
       }));
+      const startMs = new Date().getTime();
       return this.context.executors
         .getEventExecutor()
-        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true });
+        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true })
+        .then((commitments) => {
+          const endMs = new Date().getTime();
+          this.logger.debug(
+            `import events chainId=${options.chainId} event=CommitmentSpentEvents took` +
+              ` ${endMs - startMs} ms`,
+          );
+          return commitments;
+        });
     });
   }
 
   private saveBlockNumber(context: ImportEventsContext): Promise<void> {
     const { chain, contractAddresses, endBlock } = context;
+    const startMs = new Date().getTime();
     return chain
       .atomicUpdate((data) => {
         data.syncedBlockNumber = endBlock;
         data.updatedAt = MystikoHandler.now();
         return data;
       })
+      .then(() => this.saveContractBlockNumber(contractAddresses, context))
       .then(() => {
-        const promises: Promise<Contract | undefined>[] = contractAddresses.map((contractAddress) =>
-          this.context.contracts
-            .findOne({ chainId: chain.chainId, address: contractAddress })
-            .then((contract) => {
-              if (contract) {
-                return contract.atomicUpdate((data) => {
-                  data.syncedBlockNumber = endBlock;
-                  data.updatedAt = MystikoHandler.now();
-                  return data;
-                });
-              }
-              return undefined;
-            }),
-        );
-        return Promise.all(promises);
-      })
-      .then(() => {});
+        const endMs = new Date().getTime();
+        this.logger.debug(`save block number of chainId=${chain.chainId} took ${endMs - startMs} ms`);
+      });
+  }
+
+  private saveContractBlockNumber(contractAddresses: string[], context: ImportEventsContext): Promise<void> {
+    const { chain, endBlock } = context;
+    if (contractAddresses.length > 0) {
+      return this.context.contracts
+        .findOne({ chainId: chain.chainId, address: contractAddresses[0] })
+        .then((contract) => {
+          if (contract) {
+            return contract.atomicUpdate((data) => {
+              data.syncedBlockNumber = endBlock;
+              data.updatedAt = MystikoHandler.now();
+              return data;
+            });
+          }
+          return undefined;
+        })
+        .then(() => this.saveContractBlockNumber(contractAddresses.slice(1), context));
+    }
+    return Promise.resolve();
   }
 }
