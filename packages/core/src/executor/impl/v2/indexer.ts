@@ -23,6 +23,7 @@ type ImportContext = {
 type ImportEventsContext = {
   chainConfig: ChainConfig;
   chain: Chain;
+  contractAddresses: string[];
   startBlock: number;
   endBlock: number;
   targetBlock: number;
@@ -69,6 +70,7 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
     )
       .then((result) => {
         const targetBlock = result.currentSyncBlockNum;
+        const contractAddresses = result.contracts.map((c) => c.contractAddress);
         const contracts = [...chainConfig.depositContracts, ...chainConfig.poolContracts];
         const startBlocks = contracts.map((c) => c.startBlock);
         const initialBlock = Math.min(...startBlocks);
@@ -82,7 +84,15 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
             `import(chainId=${options.chainId}) blocks(#${startBlock} -> #${targetBlock}) events from indexer`,
           );
         }
-        return this.importEvents({ chainConfig, chain, startBlock, endBlock, targetBlock, options });
+        return this.importEvents({
+          chainConfig,
+          chain,
+          contractAddresses,
+          startBlock,
+          endBlock,
+          targetBlock,
+          options,
+        });
       })
       .then((commitments) => {
         this.logger.info(
@@ -204,21 +214,27 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
   }
 
   private saveBlockNumber(context: ImportEventsContext): Promise<void> {
-    const { chain, endBlock } = context;
+    const { chain, contractAddresses, endBlock } = context;
     return chain
       .atomicUpdate((data) => {
         data.syncedBlockNumber = endBlock;
         data.updatedAt = MystikoHandler.now();
         return data;
       })
-      .then(() => this.context.contracts.find({ selector: { chainId: chain.chainId } }))
-      .then((contracts) => {
-        const promises: Promise<Contract>[] = contracts.map((contract) =>
-          contract.atomicUpdate((data) => {
-            data.syncedBlockNumber = endBlock;
-            data.updatedAt = MystikoHandler.now();
-            return data;
-          }),
+      .then(() => {
+        const promises: Promise<Contract | undefined>[] = contractAddresses.map((contractAddress) =>
+          this.context.contracts
+            .findOne({ chainId: chain.chainId, address: contractAddress })
+            .then((contract) => {
+              if (contract) {
+                return contract.atomicUpdate((data) => {
+                  data.syncedBlockNumber = endBlock;
+                  data.updatedAt = MystikoHandler.now();
+                  return data;
+                });
+              }
+              return undefined;
+            }),
         );
         return Promise.all(promises);
       })

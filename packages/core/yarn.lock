@@ -1031,18 +1031,18 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/fastfile/0.0.21/b3362f8527fa15a2d745c0b516c92d0a5ca0ceef4c2e103aac2d79305f0c4207#069a0d0d6a28a3f002fe97519456bbbd14880f9c"
   integrity sha512-o9vr4WoWEGord8+6ADBSulLO9arM2z0R5bOKj+GGPOFY/Zm8bg7alqRfuTvcxzll9TTk/rv7gDM4GnbBHhvyMA==
 
-"@mystikonetwork/indexer-client@^0.0.6":
-  version "0.0.6"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-client/0.0.6/f09ad01008ec780e8f1876d70057efb6766b905f6d132c2cba5d2a0659d2459c#8dba067124fa4b99e8f9086f2ecbe8039c128524"
-  integrity sha512-Hh1GBnj3Mw2rCeXvqK5+XEBh8HYlpgknJCli3b0St+ujCeypZISJG6zGB9KRCFpyJw5kkhYXxq+Jnuf1gmN7gw==
+"@mystikonetwork/indexer-client@^0.0.7":
+  version "0.0.7"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-client/0.0.7/347f197503cd4db82250dbf50aae6170669efd3108f75b6f9f799784abaf4eda#291e1f075ef8886a745c1682ab66700bf7f8a705"
+  integrity sha512-giOfyGG9+++BXVyHIUa7vz/UadpoTFUQjFWoXEQH0wLMBDkNleqNfarymZetjW8OWGcbqKEDFoJfM5aHoFKa1Q==
   dependencies:
-    "@mystikonetwork/indexer-common" "^0.0.6"
+    "@mystikonetwork/indexer-common" "^0.0.7"
     axios "^0.27.2"
 
-"@mystikonetwork/indexer-common@^0.0.6":
-  version "0.0.6"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-common/0.0.6/e6205e78153f1d870e7ae052182292843c5fa7bef678be96ba0a0b9e5dc8c7b0#5e07daa4abe052a1ebfba77f4495f502ba625c39"
-  integrity sha512-a9zBn+dSNyYp1oYuwyJRNA6MdZ3wD4xmlXa5qBZB3Nxdhe0rt7EQ6V1aIhEC//POR/SxTlvnbdCkGia9MvcSSA==
+"@mystikonetwork/indexer-common@^0.0.7":
+  version "0.0.7"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-common/0.0.7/f3ab8d4ef7bc8e64c38d9779b8697f9e1ffface8063a39d61b1eb001d1cf118d#5df7f279e8b4eecd7f1ecba37969f30b28b07bc5"
+  integrity sha512-8P/BpJT9mMJU0k1G3d7I7aix1bRBLHAVe1lLVsbLjJKyqlfJs6p+jD9Bk7wv5wdudOUhsHrit9kwxQnzRNzBLw==
 
 "@mystikonetwork/merkle@^0.1.3":
   version "0.1.3"
