@@ -1,5 +1,5 @@
 import { ChainConfig, IndexerConfig } from '@mystikonetwork/config';
-import { Chain, Commitment, Contract } from '@mystikonetwork/database';
+import { Chain, Commitment } from '@mystikonetwork/database';
 import { DefaultMystikoIndexerFactory, MystikoIndexerClient } from '@mystikonetwork/indexer-client';
 import { promiseWithTimeout } from '@mystikonetwork/utils';
 import { MystikoHandler } from '../../../handler';
@@ -7,6 +7,7 @@ import {
   CommitmentIncludedEvent,
   CommitmentQueuedEvent,
   CommitmentSpentEvent,
+  ContractEvent,
   EventType,
   ImportOptions,
   IndexerExecutor,
@@ -108,24 +109,20 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
       this.logger.debug(
         `import(chainId=${options.chainId}) blocks(#${startBlock} -> #${endBlock}) events from indexer`,
       );
-      const allCommitments: Map<string, Commitment> = new Map<string, Commitment>();
-      return this.importCommitmentQueuedEvents(context)
-        .then((queuedCommitments) =>
-          this.importCommitmentIncludedEvents(context).then((includedCommitments) =>
-            this.importCommitmentSpentEvents(context).then((spentCommitments) => {
-              queuedCommitments.forEach((commitment) =>
-                allCommitments.set(commitment.commitmentHash, commitment),
-              );
-              includedCommitments.forEach((commitment) =>
-                allCommitments.set(commitment.commitmentHash, commitment),
-              );
-              spentCommitments.forEach((commitment) =>
-                allCommitments.set(commitment.commitmentHash, commitment),
-              );
-              return Array.from(allCommitments.values());
-            }),
-          ),
-        )
+      const events: Promise<ContractEvent[]>[] = [
+        this.importCommitmentQueuedEvents(context),
+        this.importCommitmentIncludedEvents(context),
+        this.importCommitmentSpentEvents(context),
+      ];
+      return Promise.all(events)
+        .then((fetchedEvents) => {
+          const flatEvents = fetchedEvents.flat();
+          return this.context.executors.getEventExecutor().import(flatEvents, {
+            chainId: chainConfig.chainId,
+            walletPassword: options.walletPassword,
+            skipCheckPassword: true,
+          });
+        })
         .then((commitments) => this.saveBlockNumber(context).then(() => commitments))
         .then((commitments) => {
           const newStartBlock = endBlock + 1;
@@ -141,7 +138,7 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
     return Promise.resolve([]);
   }
 
-  private importCommitmentQueuedEvents(context: ImportEventsContext): Promise<Commitment[]> {
+  private importCommitmentQueuedEvents(context: ImportEventsContext): Promise<CommitmentQueuedEvent[]> {
     const { chainConfig, startBlock, endBlock, options } = context;
     return promiseWithTimeout(
       this.indexerClient.findCommitmentQueuedForChain(chainConfig.chainId, startBlock, endBlock),
@@ -151,7 +148,7 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         `fetched ${rawEvents.length} CommitmentQueuedEvents of chainId=${options.chainId} ` +
           `blocks(#${startBlock} -> #${endBlock}) from indexer`,
       );
-      const events: CommitmentQueuedEvent[] = rawEvents.map((rawEvent) => ({
+      return rawEvents.map((rawEvent) => ({
         eventType: EventType.COMMITMENT_QUEUED,
         chainId: chainConfig.chainId,
         contractAddress: rawEvent.contractAddress,
@@ -161,22 +158,10 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         rollupFee: rawEvent.rollupFee,
         encryptedNote: rawEvent.encryptedNote,
       }));
-      const startMs = new Date().getTime();
-      return this.context.executors
-        .getEventExecutor()
-        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true })
-        .then((commitments) => {
-          const endMs = new Date().getTime();
-          this.logger.debug(
-            `import events chainId=${options.chainId} event=CommitmentQueuedEvents took` +
-              ` ${endMs - startMs} ms`,
-          );
-          return commitments;
-        });
     });
   }
 
-  private importCommitmentIncludedEvents(context: ImportEventsContext): Promise<Commitment[]> {
+  private importCommitmentIncludedEvents(context: ImportEventsContext): Promise<CommitmentIncludedEvent[]> {
     const { chainConfig, startBlock, endBlock, options } = context;
     return promiseWithTimeout(
       this.indexerClient.findCommitmentIncludedForChain(chainConfig.chainId, startBlock, endBlock),
@@ -186,29 +171,17 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         `fetched ${rawEvents.length} CommitmentIncludedEvents of chainId=${options.chainId} ` +
           `blocks(#${startBlock} -> #${endBlock}) from indexer`,
       );
-      const events: CommitmentIncludedEvent[] = rawEvents.map((rawEvent) => ({
+      return rawEvents.map((rawEvent) => ({
         eventType: EventType.COMMITMENT_INCLUDED,
         chainId: chainConfig.chainId,
         contractAddress: rawEvent.contractAddress,
         transactionHash: rawEvent.txHash,
         commitmentHash: rawEvent.commitHash,
       }));
-      const startMs = new Date().getTime();
-      return this.context.executors
-        .getEventExecutor()
-        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true })
-        .then((commitments) => {
-          const endMs = new Date().getTime();
-          this.logger.debug(
-            `import events chainId=${options.chainId} event=CommitmentIncludedEvents took` +
-              ` ${endMs - startMs} ms`,
-          );
-          return commitments;
-        });
     });
   }
 
-  private importCommitmentSpentEvents(context: ImportEventsContext): Promise<Commitment[]> {
+  private importCommitmentSpentEvents(context: ImportEventsContext): Promise<CommitmentSpentEvent[]> {
     const { chainConfig, startBlock, endBlock, options } = context;
     return promiseWithTimeout(
       this.indexerClient.findCommitmentSpentForChain(chainConfig.chainId, startBlock, endBlock),
@@ -218,25 +191,13 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         `fetched ${rawEvents.length} CommitmentSpentEvents of chainId=${options.chainId} ` +
           `blocks(#${startBlock} -> #${endBlock}) from indexer`,
       );
-      const events: CommitmentSpentEvent[] = rawEvents.map((rawEvent) => ({
+      return rawEvents.map((rawEvent) => ({
         eventType: EventType.COMMITMENT_SPENT,
         chainId: chainConfig.chainId,
         contractAddress: rawEvent.contractAddress,
         transactionHash: rawEvent.txHash,
         serialNumber: rawEvent.serialNum,
       }));
-      const startMs = new Date().getTime();
-      return this.context.executors
-        .getEventExecutor()
-        .importBatch(events, { walletPassword: options.walletPassword, skipCheckPassword: true })
-        .then((commitments) => {
-          const endMs = new Date().getTime();
-          this.logger.debug(
-            `import events chainId=${options.chainId} event=CommitmentSpentEvents took` +
-              ` ${endMs - startMs} ms`,
-          );
-          return commitments;
-        });
     });
   }
 

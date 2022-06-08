@@ -9,7 +9,6 @@ export enum EventType {
 
 export type ContractBaseEvent = {
   eventType: EventType;
-  chainId: number;
   contractAddress: string;
   transactionHash: string;
 };
@@ -32,14 +31,14 @@ export type CommitmentSpentEvent = ContractBaseEvent & {
   serialNumber: ethers.BigNumber | string;
 };
 
-export type ContractEvent = CommitmentQueuedEvent | CommitmentIncludedEvent | CommitmentSpentEvent;
-
 export type EventImportOptions = {
+  chainId: number;
   walletPassword: string;
   skipCheckPassword?: boolean;
 };
 
+export type ContractEvent = CommitmentQueuedEvent | CommitmentIncludedEvent | CommitmentSpentEvent;
+
 export interface EventExecutor<E = ContractEvent, IO = EventImportOptions> {
-  import(event: E, options: IO): Promise<Commitment[]>;
-  importBatch(events: E[], options: IO): Promise<Commitment[]>;
+  import(events: E | E[], options: IO): Promise<Commitment[]>;
 }

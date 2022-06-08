@@ -21,7 +21,11 @@ import {
   CommitmentDecrypt,
   CommitmentExecutor,
   CommitmentImport,
+  CommitmentIncludedEvent,
+  CommitmentQueuedEvent,
   CommitmentScan,
+  CommitmentSpentEvent,
+  ContractEvent,
   EventType,
 } from '../../../interface';
 import { MystikoExecutor } from '../../executor';
@@ -233,26 +237,22 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private importContractEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
-    const { contract, fromBlock, toBlock, currentBlock } = importContext;
+    const { contract, fromBlock, toBlock, currentBlock, options, chainConfig } = importContext;
     if (fromBlock <= toBlock) {
-      return this.importCommitmentQueuedEvents(importContext)
-        .then((queuedCommitments) =>
-          this.importCommitmentIncludedEvents(importContext).then((includedCommitments) =>
-            this.importCommitmentSpentEvents(importContext).then((spentCommitments) => {
-              const commitments = new Map<string, Commitment>();
-              queuedCommitments.forEach((commitment) =>
-                commitments.set(commitment.commitmentHash, commitment),
-              );
-              includedCommitments.forEach((commitment) =>
-                commitments.set(commitment.commitmentHash, commitment),
-              );
-              spentCommitments.forEach((commitment) =>
-                commitments.set(commitment.commitmentHash, commitment),
-              );
-              return Array.from(commitments.values());
-            }),
-          ),
-        )
+      const events: Promise<ContractEvent[]>[] = [
+        this.importCommitmentQueuedEvents(importContext),
+        this.importCommitmentIncludedEvents(importContext),
+        this.importCommitmentSpentEvents(importContext),
+      ];
+      return Promise.all(events)
+        .then((fetchedEvents) => {
+          const flatEvents = fetchedEvents.flat();
+          return this.context.executors.getEventExecutor().import(flatEvents, {
+            chainId: chainConfig.chainId,
+            walletPassword: options.walletPassword,
+            skipCheckPassword: true,
+          });
+        })
         .then((commitments) =>
           contract
             .atomicUpdate((data) => {
@@ -276,8 +276,8 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return Promise.resolve([]);
   }
 
-  private importCommitmentQueuedEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
-    const { chainConfig, contractConfig, options } = importContext;
+  private importCommitmentQueuedEvents(importContext: ImportEventsContext): Promise<CommitmentQueuedEvent[]> {
+    const { chainConfig, contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
@@ -287,28 +287,24 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       etherContract,
       'CommitmentQueued',
       etherContract.filters.CommitmentQueued(),
-    ).then((rawEvents) => {
-      const promises: Promise<Commitment[]>[] = rawEvents.map((rawEvent) =>
-        this.context.executors.getEventExecutor().import(
-          {
-            eventType: EventType.COMMITMENT_QUEUED,
-            chainId: chainConfig.chainId,
-            contractAddress: contractConfig.address,
-            commitmentHash: rawEvent.args.commitment,
-            leafIndex: rawEvent.args.leafIndex,
-            rollupFee: rawEvent.args.rollupFee,
-            encryptedNote: rawEvent.args.encryptedNote,
-            transactionHash: rawEvent.transactionHash,
-          },
-          { walletPassword: options.walletPassword, skipCheckPassword: true },
-        ),
-      );
-      return Promise.all(promises).then((commitments) => commitments.flat());
-    });
+    ).then((rawEvents) =>
+      rawEvents.map((rawEvent) => ({
+        eventType: EventType.COMMITMENT_QUEUED,
+        chainId: chainConfig.chainId,
+        contractAddress: contractConfig.address,
+        commitmentHash: rawEvent.args.commitment,
+        leafIndex: rawEvent.args.leafIndex,
+        rollupFee: rawEvent.args.rollupFee,
+        encryptedNote: rawEvent.args.encryptedNote,
+        transactionHash: rawEvent.transactionHash,
+      })),
+    );
   }
 
-  private importCommitmentIncludedEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
-    const { chainConfig, contractConfig, options } = importContext;
+  private importCommitmentIncludedEvents(
+    importContext: ImportEventsContext,
+  ): Promise<CommitmentIncludedEvent[]> {
+    const { chainConfig, contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
@@ -318,25 +314,19 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       etherContract,
       'CommitmentIncluded',
       etherContract.filters.CommitmentIncluded(),
-    ).then((rawEvents) => {
-      const promises: Promise<Commitment[]>[] = rawEvents.map((rawEvent) =>
-        this.context.executors.getEventExecutor().import(
-          {
-            eventType: EventType.COMMITMENT_INCLUDED,
-            chainId: chainConfig.chainId,
-            contractAddress: contractConfig.address,
-            commitmentHash: rawEvent.args.commitment,
-            transactionHash: rawEvent.transactionHash,
-          },
-          { walletPassword: options.walletPassword, skipCheckPassword: true },
-        ),
-      );
-      return Promise.all(promises).then((commitments) => commitments.flat());
-    });
+    ).then((rawEvents) =>
+      rawEvents.map((rawEvent) => ({
+        eventType: EventType.COMMITMENT_INCLUDED,
+        chainId: chainConfig.chainId,
+        contractAddress: contractConfig.address,
+        commitmentHash: rawEvent.args.commitment,
+        transactionHash: rawEvent.transactionHash,
+      })),
+    );
   }
 
-  private importCommitmentSpentEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
-    const { chainConfig, contractConfig, options } = importContext;
+  private importCommitmentSpentEvents(importContext: ImportEventsContext): Promise<CommitmentSpentEvent[]> {
+    const { chainConfig, contractConfig } = importContext;
     if (contractConfig instanceof DepositContractConfig) {
       return Promise.resolve([]);
     }
@@ -346,21 +336,15 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       etherContract,
       'CommitmentSpent',
       etherContract.filters.CommitmentSpent(),
-    ).then((rawEvents) => {
-      const promises: Promise<Commitment[]>[] = rawEvents.map((rawEvent) =>
-        this.context.executors.getEventExecutor().import(
-          {
-            eventType: EventType.COMMITMENT_SPENT,
-            chainId: chainConfig.chainId,
-            contractAddress: contractConfig.address,
-            serialNumber: rawEvent.args.serialNumber,
-            transactionHash: rawEvent.transactionHash,
-          },
-          { walletPassword: options.walletPassword, skipCheckPassword: true },
-        ),
-      );
-      return Promise.all(promises).then((commitments) => commitments.flat());
-    });
+    ).then((rawEvents) =>
+      rawEvents.map((rawEvent) => ({
+        eventType: EventType.COMMITMENT_SPENT,
+        chainId: chainConfig.chainId,
+        contractAddress: contractConfig.address,
+        serialNumber: rawEvent.args.serialNumber,
+        transactionHash: rawEvent.transactionHash,
+      })),
+    );
   }
 
   private importCommitmentEvents<T extends TypedEvent, C extends SupportedContractType>(

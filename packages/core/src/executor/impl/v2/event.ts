@@ -4,6 +4,7 @@ import {
   CommitmentStatus,
   CommitmentType,
   DepositStatus,
+  DepositType,
   NullifierType,
 } from '@mystikonetwork/database';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -13,7 +14,6 @@ import {
   CommitmentQueuedEvent,
   CommitmentSpentEvent,
   ContractEvent,
-  DepositUpdate,
   EventExecutor,
   EventImportOptions,
   EventType,
@@ -22,100 +22,93 @@ import { MystikoExecutor } from '../../executor';
 
 type ImportContext = {
   chainConfig: ChainConfig;
-  contractConfig: PoolContractConfig | DepositContractConfig | undefined;
+  contractConfigs: Map<string, PoolContractConfig | DepositContractConfig>;
   options: EventImportOptions;
 };
 
 export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
-  public import(event: ContractEvent, options: EventImportOptions): Promise<Commitment[]> {
+  public import(events: ContractEvent | ContractEvent[], options: EventImportOptions): Promise<Commitment[]> {
+    let eventsArray: ContractEvent[] = [];
+    if (!(events instanceof Array)) {
+      eventsArray = [events];
+    } else {
+      eventsArray = events;
+    }
     if (options.skipCheckPassword) {
-      return this.importEvent(event, options);
+      return this.importEvents(eventsArray, options);
     }
     return this.context.wallets
       .checkPassword(options.walletPassword)
-      .then(() => this.importEvent(event, options));
+      .then(() => this.importEvents(eventsArray, options));
   }
 
-  public importBatch(events: ContractEvent[], options: EventImportOptions): Promise<Commitment[]> {
-    if (options.skipCheckPassword) {
-      return this.importEvents(events, options);
-    }
-    return this.context.wallets
-      .checkPassword(options.walletPassword)
-      .then(() => this.importEvents(events, options));
-  }
-
-  private buildContext(event: ContractEvent, options: EventImportOptions): Promise<ImportContext> {
-    const { chainId, contractAddress } = event;
+  private buildContext(events: ContractEvent[], options: EventImportOptions): Promise<ImportContext> {
+    const { chainId } = options;
     const chainConfig = this.config.getChainConfig(chainId);
     if (!chainConfig) {
       return createErrorPromise(`no chain id=${chainId} configured`, MystikoErrorCode.NON_EXISTING_CHAIN);
     }
-    let contractConfig: PoolContractConfig | DepositContractConfig | undefined =
-      this.config.getPoolContractConfigByAddress(chainId, contractAddress);
-    if (!contractConfig) {
-      contractConfig = this.config.getDepositContractConfigByAddress(chainId, contractAddress);
-    }
-    return Promise.resolve({ chainConfig, contractConfig, options });
-  }
-
-  private importEvent(event: ContractEvent, options: EventImportOptions): Promise<Commitment[]> {
-    return this.buildContext(event, options).then((context) => {
-      if (event.eventType === EventType.COMMITMENT_QUEUED) {
-        return this.importCommitmentQueuedEvent(event, context);
+    const contractConfigs = new Map<string, DepositContractConfig | PoolContractConfig>();
+    events.forEach((event) => {
+      const { contractAddress } = event;
+      let contractConfig: PoolContractConfig | DepositContractConfig | undefined =
+        this.config.getPoolContractConfigByAddress(chainId, contractAddress);
+      if (!contractConfig) {
+        contractConfig = this.config.getDepositContractConfigByAddress(chainId, contractAddress);
       }
-      if (event.eventType === EventType.COMMITMENT_INCLUDED) {
-        return this.importCommitmentIncludedEvent(event, context);
+      if (contractConfig) {
+        contractConfigs.set(contractConfig.address, contractConfig);
       }
-      return this.importCommitmentSpentEvent(event, context);
     });
+
+    return Promise.resolve({ chainConfig, contractConfigs, options });
   }
 
   private importEvents(events: ContractEvent[], options: EventImportOptions): Promise<Commitment[]> {
-    if (events.length > 0) {
-      return this.importEvent(events[0], options).then((commitments) =>
-        this.importEvents(events.slice(1), options).then((moreCommitments) => [
-          ...commitments,
-          ...moreCommitments,
-        ]),
+    return this.buildContext(events, options).then((context) => {
+      const commitmentQueuedEvents: CommitmentQueuedEvent[] = [];
+      const commitmentIncludedEvents: CommitmentIncludedEvent[] = [];
+      const commitmentSpentEvents: CommitmentSpentEvent[] = [];
+      events.forEach((event) => {
+        if (event.eventType === EventType.COMMITMENT_QUEUED) {
+          commitmentQueuedEvents.push(event);
+        } else if (event.eventType === EventType.COMMITMENT_INCLUDED) {
+          commitmentIncludedEvents.push(event);
+        } else if (event.eventType === EventType.COMMITMENT_SPENT) {
+          commitmentSpentEvents.push(event);
+        }
+      });
+      return this.importCommitmentQueuedEvents(commitmentQueuedEvents, context).then((queuedCommitments) =>
+        this.importCommitmentIncludedEvent(commitmentIncludedEvents, context).then((includedCommitments) =>
+          this.importCommitmentSpentEvent(commitmentSpentEvents, context).then((spentCommitments) => {
+            const commitments: Map<string, Commitment> = new Map<string, Commitment>();
+            queuedCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
+            includedCommitments.forEach((commitment) =>
+              commitments.set(commitment.commitmentHash, commitment),
+            );
+            spentCommitments.forEach((commitment) => commitments.set(commitment.commitmentHash, commitment));
+            return Array.from(commitments.values());
+          }),
+        ),
       );
-    }
-    return Promise.resolve([]);
+    });
   }
 
-  private importCommitmentQueuedEvent(
-    event: CommitmentQueuedEvent,
+  private importCommitmentQueuedEvents(
+    events: CommitmentQueuedEvent[],
     context: ImportContext,
   ): Promise<Commitment[]> {
-    const { commitmentHash, leafIndex, rollupFee, encryptedNote, transactionHash } = event;
-    const { chainConfig, contractConfig, options } = context;
-    if (!contractConfig) {
-      return Promise.resolve([]);
-    }
-    const commitmentHashStr = typeof commitmentHash === 'string' ? commitmentHash : commitmentHash.toString();
-    const leafIndexStr = typeof leafIndex === 'string' ? leafIndex : leafIndex.toString();
-    const rollupFeeStr = typeof rollupFee === 'string' ? rollupFee : rollupFee.toString();
-    return this.context.commitments
-      .findOne({
-        chainId: chainConfig.chainId,
-        contractAddress: contractConfig.address,
-        commitmentHash: commitmentHashStr,
-      })
-      .then((existingCommitment) => {
+    const { chainConfig, contractConfigs } = context;
+    const commitments: CommitmentType[] = [];
+    events.forEach((event) => {
+      const contractConfig = contractConfigs.get(event.contractAddress);
+      const { commitmentHash, leafIndex, rollupFee, encryptedNote, transactionHash } = event;
+      const commitmentHashStr =
+        typeof commitmentHash === 'string' ? commitmentHash : commitmentHash.toString();
+      const leafIndexStr = typeof leafIndex === 'string' ? leafIndex : leafIndex.toString();
+      const rollupFeeStr = typeof rollupFee === 'string' ? rollupFee : rollupFee.toString();
+      if (contractConfig) {
         const now = MystikoHandler.now();
-        if (existingCommitment) {
-          return existingCommitment.atomicUpdate((data) => {
-            if (data.status === CommitmentStatus.INIT || data.status === CommitmentStatus.SRC_SUCCEEDED) {
-              data.status = CommitmentStatus.QUEUED;
-            }
-            data.leafIndex = leafIndexStr;
-            data.rollupFeeAmount = rollupFeeStr;
-            data.encryptedNote = encryptedNote;
-            data.updatedAt = now;
-            data.creationTransactionHash = transactionHash;
-            return data;
-          });
-        }
         const commitment: CommitmentType = {
           id: MystikoHandler.generateId(),
           createdAt: now,
@@ -130,134 +123,236 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
           rollupFeeAmount: rollupFeeStr,
           encryptedNote,
           status: CommitmentStatus.QUEUED,
+          creationTransactionHash: transactionHash,
         };
-        commitment.creationTransactionHash = transactionHash;
-        return this.db.commitments.insert(commitment);
+        commitments.push(commitment);
+      }
+    });
+    return this.context.commitments
+      .find({
+        selector: {
+          chainId: chainConfig.chainId,
+          commitmentHash: { $in: commitments.map((commitment) => commitment.commitmentHash) },
+        },
       })
-      .then((commitment) => {
-        const depositUpdate: DepositUpdate = {
-          status: DepositStatus.QUEUED,
-        };
-        if (chainConfig.getPoolContractBridgeType(contractConfig.address) === BridgeType.LOOP) {
-          depositUpdate.transactionHash = transactionHash;
-        } else {
-          depositUpdate.relayTransactionHash = transactionHash;
-        }
-        return this.updateDepositStatus(commitment, depositUpdate);
+      .then((existingCommitments) => {
+        const mergedCommitments: CommitmentType[] = [];
+        commitments.forEach((commitment) => {
+          const existing = existingCommitments.find(
+            (existingCommitment) =>
+              existingCommitment.commitmentHash === commitment.commitmentHash &&
+              existingCommitment.contractAddress === commitment.contractAddress,
+          );
+          if (existing) {
+            const merged: CommitmentType = existing.toMutableJSON();
+            if (merged.status === CommitmentStatus.INIT || merged.status === CommitmentStatus.SRC_SUCCEEDED) {
+              merged.status = CommitmentStatus.QUEUED;
+            }
+            merged.leafIndex = commitment.leafIndex;
+            merged.rollupFeeAmount = commitment.rollupFeeAmount;
+            merged.encryptedNote = commitment.encryptedNote;
+            merged.updatedAt = commitment.updatedAt;
+            merged.creationTransactionHash = commitment.creationTransactionHash;
+            mergedCommitments.push(merged);
+          } else {
+            mergedCommitments.push(commitment);
+          }
+        });
+        return this.context.db.commitments.bulkUpsert(mergedCommitments);
       })
-      .then((commitment) =>
-        this.context.executors
-          .getCommitmentExecutor()
-          .decrypt({ commitment, walletPassword: options.walletPassword }),
+      .then((updatedCommitments) =>
+        this.updateDepositStatus(updatedCommitments, DepositStatus.QUEUED, context),
       )
-      .then((commitment) => [commitment]);
+      .then((updatedCommitments) => this.decryptCommitments(updatedCommitments, context));
   }
 
   private importCommitmentIncludedEvent(
-    event: CommitmentIncludedEvent,
+    events: CommitmentIncludedEvent[],
     context: ImportContext,
   ): Promise<Commitment[]> {
-    const { commitmentHash, transactionHash } = event;
-    const { chainConfig, contractConfig } = context;
-    if (!contractConfig) {
-      return Promise.resolve([]);
-    }
-    const commitmentHashStr = typeof commitmentHash === 'string' ? commitmentHash : commitmentHash.toString();
+    const { chainConfig, contractConfigs } = context;
     return this.context.commitments
-      .findOne({
-        chainId: chainConfig.chainId,
-        contractAddress: contractConfig.address,
-        commitmentHash: commitmentHashStr,
+      .find({
+        selector: {
+          chainId: chainConfig.chainId,
+          commitmentHash: {
+            $in: events.map((e) =>
+              typeof e.commitmentHash === 'string' ? e.commitmentHash : e.commitmentHash.toString(),
+            ),
+          },
+        },
       })
-      .then((existingCommitment) => {
-        const now = MystikoHandler.now();
-        if (existingCommitment) {
-          return existingCommitment.atomicUpdate((data) => {
-            if (
-              data.status === CommitmentStatus.INIT ||
-              data.status === CommitmentStatus.QUEUED ||
-              data.status === CommitmentStatus.SRC_SUCCEEDED
-            ) {
-              data.status = CommitmentStatus.INCLUDED;
+      .then((existingCommitments) => {
+        const commitments: CommitmentType[] = [];
+        for (let i = 0; i < events.length; i += 1) {
+          const event = events[i];
+          const { commitmentHash, contractAddress, transactionHash } = event;
+          if (contractConfigs.has(contractAddress)) {
+            const commitmentHashStr =
+              typeof commitmentHash === 'string' ? commitmentHash : commitmentHash.toString();
+            const existingCommitment = existingCommitments.find(
+              (c) => c.commitmentHash === commitmentHashStr && c.contractAddress === contractAddress,
+            );
+            if (!existingCommitment) {
+              return createErrorPromise(
+                `cannot find commitment=${commitmentHashStr} contract=${contractAddress} chainId=${chainConfig.chainId}`,
+                MystikoErrorCode.MISSING_COMMITMENT_DATA,
+              );
             }
-            data.updatedAt = now;
-            data.rollupTransactionHash = transactionHash;
-            return data;
-          });
+            const commitment: CommitmentType = existingCommitment.toMutableJSON();
+            if (
+              commitment.status === CommitmentStatus.INIT ||
+              commitment.status === CommitmentStatus.QUEUED ||
+              commitment.status === CommitmentStatus.SRC_SUCCEEDED
+            ) {
+              commitment.status = CommitmentStatus.INCLUDED;
+            }
+            commitment.updatedAt = MystikoHandler.now();
+            commitment.rollupTransactionHash = transactionHash;
+            commitments.push(commitment);
+          }
         }
-        /* istanbul ignore next */
-        return createErrorPromise(
-          `CommitmentIncluded event contains a commitment=${commitmentHashStr} which does not exist in database`,
-          MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
-        );
+        return this.context.db.commitments.bulkUpsert(commitments);
       })
-      .then((commitment) =>
-        this.updateDepositStatus(commitment, {
-          status: DepositStatus.INCLUDED,
-          rollupTransactionHash: transactionHash,
-        }),
-      )
-      .then((commitment) => [commitment]);
+      .then((updatedCommitments) =>
+        this.updateDepositStatus(updatedCommitments, DepositStatus.INCLUDED, context),
+      );
   }
 
   private importCommitmentSpentEvent(
-    event: CommitmentSpentEvent,
+    events: CommitmentSpentEvent[],
     context: ImportContext,
   ): Promise<Commitment[]> {
-    const { serialNumber, transactionHash } = event;
-    const { chainConfig, contractConfig } = context;
-    if (!contractConfig) {
-      return Promise.resolve([]);
-    }
-    const serialNumberStr = typeof serialNumber === 'string' ? serialNumber : serialNumber.toString();
-    const now = MystikoHandler.now();
-    const nullifier: NullifierType = {
-      id: MystikoHandler.generateId(),
-      createdAt: now,
-      updatedAt: now,
-      chainId: chainConfig.chainId,
-      contractAddress: contractConfig.address,
-      serialNumber: serialNumberStr,
-      transactionHash,
-    };
+    const { chainConfig, contractConfigs } = context;
+    const nullifiers: NullifierType[] = [];
+    events.forEach((event) => {
+      if (contractConfigs.has(event.contractAddress)) {
+        const { serialNumber, transactionHash } = event;
+        const serialNumberStr = typeof serialNumber === 'string' ? serialNumber : serialNumber.toString();
+        const now = MystikoHandler.now();
+        nullifiers.push({
+          id: MystikoHandler.generateId(),
+          createdAt: now,
+          updatedAt: now,
+          chainId: chainConfig.chainId,
+          contractAddress: event.contractAddress,
+          serialNumber: serialNumberStr,
+          transactionHash,
+        });
+      }
+    });
     return this.context.nullifiers
-      .upsert(nullifier)
-      .then(() =>
-        this.context.commitments.find({
-          selector: {
-            chainId: chainConfig.chainId,
-            contractAddress: contractConfig.address,
-            serialNumber: serialNumberStr,
-          },
-        }),
+      .find({
+        selector: {
+          chainId: chainConfig.chainId,
+          serialNumber: { $in: nullifiers.map((n) => n.serialNumber) },
+        },
+      })
+      .then((existingNullifiers) => {
+        const mergedNullifiers: NullifierType[] = [];
+        nullifiers.forEach((nullifier) => {
+          const existingNullifier = existingNullifiers.find(
+            (n) =>
+              n.contractAddress === nullifier.contractAddress && n.serialNumber === nullifier.serialNumber,
+          );
+          if (existingNullifier) {
+            const merged: NullifierType = existingNullifier.toMutableJSON();
+            merged.transactionHash = nullifier.transactionHash;
+            merged.updatedAt = MystikoHandler.now();
+            mergedNullifiers.push(merged);
+          } else {
+            mergedNullifiers.push(nullifier);
+          }
+        });
+        return this.context.db.nullifiers.bulkUpsert(mergedNullifiers);
+      })
+      .then((updatedNullifiers) =>
+        this.context.commitments
+          .find({
+            selector: {
+              chainId: chainConfig.chainId,
+              serialNumber: { $in: updatedNullifiers.map((n) => n.serialNumber) },
+            },
+          })
+          .then((commitments) => ({ updatedNullifiers, commitments })),
       )
-      .then((commitments) => {
-        const promises: Promise<Commitment>[] = commitments.map((commitment) =>
-          commitment.atomicUpdate((data) => {
+      .then(({ updatedNullifiers, commitments }) => {
+        const commitmentsData: CommitmentType[] = [];
+        commitments.forEach((c) => {
+          const nullifier = updatedNullifiers.find(
+            (n) => n.contractAddress === c.contractAddress && n.serialNumber === c.serialNumber,
+          );
+          if (nullifier) {
+            const data = c.toMutableJSON();
             if (data.status !== CommitmentStatus.FAILED) {
               data.status = CommitmentStatus.SPENT;
             }
-            data.spendingTransactionHash = transactionHash;
-            return data;
-          }),
-        );
-        return Promise.all(promises);
+            data.spendingTransactionHash = nullifier.transactionHash;
+            data.updatedAt = MystikoHandler.now();
+            commitmentsData.push(data);
+          }
+        });
+        return this.context.db.commitments.bulkUpsert(commitmentsData);
       });
   }
 
-  private updateDepositStatus(commitment: Commitment, depositUpdate: DepositUpdate): Promise<Commitment> {
+  private updateDepositStatus(
+    commitments: Commitment[],
+    depositStatus: DepositStatus,
+    context: ImportContext,
+  ): Promise<Commitment[]> {
+    const { chainConfig } = context;
     return this.context.deposits
       .find({
         selector: {
-          dstChainId: commitment.chainId,
-          dstPoolAddress: commitment.contractAddress,
-          commitmentHash: commitment.commitmentHash,
+          dstChainId: chainConfig.chainId,
+          dstPoolAddress: { $in: commitments.map((commitment) => commitment.contractAddress) },
+          commitmentHash: { $in: commitments.map((commitment) => commitment.commitmentHash) },
         },
       })
-      .then((deposits) =>
-        Promise.all(deposits.map((deposit) => this.context.deposits.update(deposit.id, depositUpdate))).then(
-          () => commitment,
-        ),
-      );
+      .then((deposits) => {
+        const depositsData: DepositType[] = [];
+        deposits.forEach((deposit) => {
+          const commitment = commitments.find(
+            (c) =>
+              c.commitmentHash === deposit.commitmentHash && c.contractAddress === deposit.dstPoolAddress,
+          );
+          if (commitment) {
+            const depositData: DepositType = deposit.toMutableJSON();
+            depositData.status = depositStatus;
+            depositData.updatedAt = MystikoHandler.now();
+            if (depositStatus === DepositStatus.QUEUED) {
+              if (chainConfig.getPoolContractBridgeType(commitment.contractAddress) === BridgeType.LOOP) {
+                depositData.transactionHash = commitment.creationTransactionHash;
+              } else {
+                depositData.relayTransactionHash = commitment.creationTransactionHash;
+              }
+            } else if (depositStatus === DepositStatus.INCLUDED) {
+              depositData.rollupTransactionHash = commitment.rollupTransactionHash;
+            }
+            depositsData.push(depositData);
+          }
+        });
+        return this.context.db.deposits.bulkUpsert(depositsData);
+      })
+      .then(() => commitments);
+  }
+
+  private decryptCommitments(commitments: Commitment[], context: ImportContext): Promise<Commitment[]> {
+    if (commitments.length > 0) {
+      return this.context.executors
+        .getCommitmentExecutor()
+        .decrypt({
+          commitment: commitments[0],
+          walletPassword: context.options.walletPassword,
+        })
+        .then((commitment) =>
+          this.decryptCommitments(commitments.slice(1), context).then((moreCommitments) => [
+            commitment,
+            ...moreCommitments,
+          ]),
+        );
+    }
+    return Promise.resolve([]);
   }
 }
