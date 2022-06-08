@@ -5,6 +5,11 @@ export type ImportOptions = {
   chainId: number;
 };
 
-export interface IndexerExecutor<IO = ImportOptions> {
-  import(options: IO): Promise<Commitment[]>;
+export type ImportResult = {
+  commitments: Commitment[];
+  hasUpdates: boolean;
+};
+
+export interface IndexerExecutor<IO = ImportOptions, IR = ImportResult> {
+  import(options: IO): Promise<IR>;
 }

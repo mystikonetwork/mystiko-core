@@ -248,11 +248,14 @@ export class SynchronizerV2 implements Synchronizer {
     if (indexerExecutor && !options.noIndexer) {
       return indexerExecutor
         .import({ walletPassword: options.walletPassword, chainId })
-        .then((commitments) => {
-          if (commitments.length > 0) {
+        .then(({ commitments, hasUpdates }) => {
+          if (hasUpdates) {
             return commitments;
           }
-          return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+          return this.context.commitments.import({
+            walletPassword: options.walletPassword,
+            chainId,
+          });
         })
         .catch((error) => {
           this.logger.warn(`failed to import chainId=${chainId} from indexer: ${errorMessage(error)}`);

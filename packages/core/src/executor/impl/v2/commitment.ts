@@ -178,48 +178,47 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       ...poolContracts,
       ...depositContracts,
     ];
-    this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
-    for (let i = 0; i < contracts.length; i += 1) {
-      const contractConfig = contracts[i];
-      if (
-        !chainId ||
-        !contractAddress ||
-        (contractAddress === contractConfig.address && chainId === chainConfig.chainId)
-      ) {
-        promises.push(
-          this.context.contracts
-            .findOne({ chainId: chainConfig.chainId, address: contractConfig.address })
-            .then((contract) => {
-              if (contract) {
-                return this.importContract({
-                  ...importContext,
-                  contractConfig,
-                  contract,
-                });
-              }
-              /* istanbul ignore next */
-              return [];
-            }),
-        );
-      }
-    }
-    return Promise.all(promises)
-      .then((commitments) => commitments.flat())
-      .then((commitments) =>
-        this.context.chains.findOne(chainConfig.chainId).then((chain) => {
-          if (chain) {
-            return chain
+    return this.context.chains.findOne(chainConfig.chainId).then((chain) => {
+      if (chain) {
+        this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
+        for (let i = 0; i < contracts.length; i += 1) {
+          const contractConfig = contracts[i];
+          if (
+            !chainId ||
+            !contractAddress ||
+            (contractAddress === contractConfig.address && chainId === chainConfig.chainId)
+          ) {
+            promises.push(
+              this.context.contracts
+                .findOne({ chainId: chainConfig.chainId, address: contractConfig.address })
+                .then((contract) => {
+                  if (contract) {
+                    return this.importContract({
+                      ...importContext,
+                      contractConfig,
+                      contract,
+                    });
+                  }
+                  /* istanbul ignore next */
+                  return [];
+                }),
+            );
+          }
+        }
+        return Promise.all(promises)
+          .then((commitments) => commitments.flat())
+          .then((commitments) =>
+            chain
               .atomicUpdate((data) => {
                 data.syncedBlockNumber = currentBlock;
                 data.updatedAt = MystikoHandler.now();
                 return data;
               })
-              .then(() => commitments);
-          }
-          /* istanbul ignore next */
-          return commitments;
-        }),
-      );
+              .then(() => commitments),
+          );
+      }
+      return Promise.resolve([]);
+    });
   }
 
   private importContract(importContext: ImportContractContext): Promise<Commitment[]> {
