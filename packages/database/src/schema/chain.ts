@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 import { URL_REGEX } from '../constants';
 
 const chainSchemaLiteral = {
-  version: 2,
+  version: 3,
   title: 'chain schema',
   description: 'a document contains chain information',
   primaryKey: 'id',
@@ -11,21 +11,26 @@ const chainSchemaLiteral = {
   properties: {
     id: {
       type: 'string',
+      maxLength: 32,
       final: true,
     },
     createdAt: {
       type: 'string',
+      maxLength: 32,
       final: true,
       format: 'date-time',
     },
     updatedAt: {
       type: 'string',
+      maxLength: 32,
       format: 'date-time',
     },
     chainId: {
       type: 'integer',
       final: true,
       minimum: 0,
+      maximum: 1e32,
+      multipleOf: 1,
     },
     name: {
       type: 'string',

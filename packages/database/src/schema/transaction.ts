@@ -9,7 +9,7 @@ import {
 } from '../constants';
 
 const transactionLiteral = {
-  version: 0,
+  version: 1,
   title: 'transaction schema',
   description: 'a document contains transaction information',
   primaryKey: 'id',
@@ -18,24 +18,30 @@ const transactionLiteral = {
   properties: {
     id: {
       type: 'string',
+      maxLength: 32,
       final: true,
     },
     createdAt: {
       type: 'string',
+      maxLength: 32,
       final: true,
       format: 'date-time',
     },
     updatedAt: {
       type: 'string',
+      maxLength: 32,
       format: 'date-time',
     },
     chainId: {
       type: 'integer',
       final: true,
       minimum: 0,
+      maximum: 1e32,
+      multipleOf: 1,
     },
     contractAddress: {
       type: 'string',
+      maxLength: 64,
       final: true,
       pattern: ETH_ADDRESS_REGEX,
     },
@@ -59,6 +65,7 @@ const transactionLiteral = {
     },
     rootHash: {
       type: 'string',
+      maxLength: 128,
       pattern: BN_REGEX,
     },
     inputCommitments: {
@@ -90,6 +97,7 @@ const transactionLiteral = {
     },
     signaturePublicKey: {
       type: 'string',
+      maxLength: 128,
       pattern: HEX_REGEX,
     },
     signaturePublicKeyHashes: {
@@ -122,10 +130,12 @@ const transactionLiteral = {
     },
     shieldedAddress: {
       type: 'string',
+      maxLength: 128,
       minLength: 1,
     },
     publicAddress: {
       type: 'string',
+      maxLength: 64,
       pattern: ETH_ADDRESS_REGEX,
     },
     gasRelayerAddress: {
@@ -138,6 +148,7 @@ const transactionLiteral = {
     },
     type: {
       type: 'string',
+      maxLength: 32,
       minLength: 1,
       final: true,
     },
@@ -150,10 +161,12 @@ const transactionLiteral = {
     },
     transactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
     wallet: {
       type: 'string',
+      maxLength: 32,
       ref: WALLET_COLLECTION_NAME,
       final: true,
     },

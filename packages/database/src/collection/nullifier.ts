@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { NullifierType } from '../schema';
 import { Nullifier, NullifierMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type NullifierCollectionMethods = {
   clear: () => Promise<Nullifier[]>;
@@ -21,4 +22,9 @@ export const nullifierCollectionMethods: NullifierCollectionMethods = {
         return result.success;
       });
   },
+};
+
+export const nullifierCollectionMigrations = {
+  /* istanbul ignore next */
+  1: defaultMigrationStrategy,
 };

@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { DepositType } from '../schema';
 import { Deposit, DepositMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type DepositCollectionMethods = {
   clear: () => Promise<Deposit[]>;
@@ -21,4 +22,9 @@ export const depositCollectionMethods: DepositCollectionMethods = {
         return result.success;
       });
   },
+};
+
+export const depositCollectionMigrations = {
+  /* istanbul ignore next */
+  1: defaultMigrationStrategy,
 };

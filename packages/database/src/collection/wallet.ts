@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { WalletType } from '../schema';
 import { Wallet, WalletMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type WalletCollectionMethods = {
   clear: () => Promise<Wallet[]>;
@@ -21,4 +22,9 @@ export const walletCollectionMethods: WalletCollectionMethods = {
         return result.success;
       });
   },
+};
+
+export const walletCollectionMigrations = {
+  /* istanbul ignore next */
+  1: defaultMigrationStrategy,
 };

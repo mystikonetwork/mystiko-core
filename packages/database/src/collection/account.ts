@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { AccountType } from '../schema';
 import { Account, AccountMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type AccountCollectionMethods = {
   clear: () => Promise<Account[]>;
@@ -21,4 +22,9 @@ export const accountCollectionMethods: AccountCollectionMethods = {
         return result.success;
       });
   },
+};
+
+export const accountCollectionMigrations = {
+  /* istanbul ignore next */
+  1: defaultMigrationStrategy,
 };

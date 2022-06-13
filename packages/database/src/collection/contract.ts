@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { ContractType } from '../schema';
 import { Contract, ContractMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type ContractCollectionMethods = {
   clear: () => Promise<Contract[]>;
@@ -21,4 +22,9 @@ export const contractCollectionMethods: ContractCollectionMethods = {
         return result.success;
       });
   },
+};
+
+export const contractCollectionMigrations = {
+  /* istanbul ignore next */
+  1: defaultMigrationStrategy,
 };

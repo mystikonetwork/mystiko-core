@@ -1,7 +1,7 @@
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesBrowserProverFactory } from '@mystikonetwork/zkp-browser';
-import { addPouchPlugin, getRxStoragePouch } from 'rxdb';
+import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
 
 export type InitOptionsInBrowser = InitOptions & {
   dbInMemory?: boolean;

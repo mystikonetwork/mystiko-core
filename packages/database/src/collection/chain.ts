@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { ChainType } from '../schema';
 import { Chain, ChainMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type ChainCollectionMethods = {
   clear: () => Promise<Chain[]>;
@@ -25,11 +26,9 @@ export const chainCollectionMethods: ChainCollectionMethods = {
 
 export const chainCollectionMigrations = {
   /* istanbul ignore next */
-  1(oldDoc: any) {
-    return oldDoc;
-  },
+  1: defaultMigrationStrategy,
   /* istanbul ignore next */
-  2(oldDoc: any) {
-    return oldDoc;
-  },
+  2: defaultMigrationStrategy,
+  /* istanbul ignore next */
+  3: defaultMigrationStrategy,
 };
