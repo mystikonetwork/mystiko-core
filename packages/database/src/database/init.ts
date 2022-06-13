@@ -1,11 +1,11 @@
 import { addRxPlugin, createRxDatabase, RxDatabaseCreator } from 'rxdb';
+import { RxDBAjvValidatePlugin } from 'rxdb/plugins/ajv-validate';
 import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
 import { RxDBKeyCompressionPlugin } from 'rxdb/plugins/key-compression';
 import { RxDBLeaderElectionPlugin } from 'rxdb/plugins/leader-election';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
-import { RxDBValidateZSchemaPlugin } from 'rxdb/plugins/validate-z-schema';
 import {
   accountCollectionMethods,
   accountCollectionMigrations,
@@ -56,12 +56,12 @@ import {
   walletSchema,
 } from '../schema';
 
+addRxPlugin(RxDBAjvValidatePlugin);
 addRxPlugin(RxDBJsonDumpPlugin);
 addRxPlugin(RxDBKeyCompressionPlugin);
 addRxPlugin(RxDBLeaderElectionPlugin);
 addRxPlugin(RxDBMigrationPlugin);
 addRxPlugin(RxDBUpdatePlugin);
-addRxPlugin(RxDBValidateZSchemaPlugin);
 
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoDatabase> {
   let dbPromise: Promise<MystikoDatabase>;

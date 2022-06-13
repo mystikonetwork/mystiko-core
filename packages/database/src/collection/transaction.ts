@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { TransactionType } from '../schema';
 import { Transaction, TransactionMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type TransactionCollectionMethods = {
   clear: () => Promise<Transaction[]>;
@@ -29,7 +30,5 @@ export const transactionCollectionMethods: TransactionCollectionMethods = {
 
 export const transactionCollectionMigrations = {
   /* istanbul ignore next */
-  1(oldDoc: any) {
-    return oldDoc;
-  },
+  1: defaultMigrationStrategy,
 };

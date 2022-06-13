@@ -1,6 +1,7 @@
 import { RxCollection } from 'rxdb';
 import { CommitmentType } from '../schema';
 import { Commitment, CommitmentMethods } from '../document';
+import { defaultMigrationStrategy } from './common';
 
 export type CommitmentCollectionMethods = {
   clear: () => Promise<Commitment[]>;
@@ -29,7 +30,5 @@ export const commitmentCollectionMethods: CommitmentCollectionMethods = {
 
 export const commitmentCollectionMigrations = {
   /* istanbul ignore next */
-  1(oldDoc: any) {
-    return oldDoc;
-  },
+  1: defaultMigrationStrategy,
 };

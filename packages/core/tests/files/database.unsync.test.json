@@ -6,7 +6,7 @@
   "collections": [
     {
       "name": "accounts",
-      "schemaHash": "ea01bfc223a90e2466b9685b6638610d",
+      "schemaHash": "f2bc712ae0007119df75bb388123ee6a",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -504,7 +504,7 @@
     },
     {
       "name": "deposits",
-      "schemaHash": "457b6d98798867c33071f9d2a459128b",
+      "schemaHash": "dc200dfce5910cb0e35cceb9ba1775ec",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
