@@ -2,7 +2,7 @@ import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSc
 import { HEX_REGEX, WALLET_COLLECTION_NAME } from '../constants';
 
 const accountSchemaLiteral = {
-  version: 0,
+  version: 1,
   title: 'account schema',
   description: 'a document contains account information',
   primaryKey: 'id',
@@ -11,15 +11,18 @@ const accountSchemaLiteral = {
   properties: {
     id: {
       type: 'string',
+      maxLength: 32,
       final: true,
     },
     createdAt: {
       type: 'string',
+      maxLength: 32,
       final: true,
       format: 'date-time',
     },
     updatedAt: {
       type: 'string',
+      maxLength: 32,
       format: 'date-time',
     },
     name: {
@@ -28,10 +31,12 @@ const accountSchemaLiteral = {
     },
     shieldedAddress: {
       type: 'string',
+      maxLength: 128,
       final: true,
     },
     publicKey: {
       type: 'string',
+      maxLength: 160,
       final: true,
       pattern: HEX_REGEX,
     },
@@ -49,6 +54,7 @@ const accountSchemaLiteral = {
     },
     wallet: {
       type: 'string',
+      maxLength: 32,
       ref: WALLET_COLLECTION_NAME,
     },
   },

@@ -22,3 +22,10 @@ export const nullifierCollectionMethods: NullifierCollectionMethods = {
       });
   },
 };
+
+export const nullifierCollectionMigrations = {
+  /* istanbul ignore next */
+  1(oldDoc: any) {
+    return oldDoc;
+  },
+};

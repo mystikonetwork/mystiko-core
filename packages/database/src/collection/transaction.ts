@@ -26,3 +26,10 @@ export const transactionCollectionMethods: TransactionCollectionMethods = {
       });
   },
 };
+
+export const transactionCollectionMigrations = {
+  /* istanbul ignore next */
+  1(oldDoc: any) {
+    return oldDoc;
+  },
+};

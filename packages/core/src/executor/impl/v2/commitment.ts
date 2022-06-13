@@ -8,16 +8,18 @@ import {
 import {
   Account,
   AccountStatus,
+  Chain,
   Commitment,
   CommitmentStatus,
   Contract,
   DatabaseQuery,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { toBuff } from '@mystikonetwork/utils';
+import { toBN, toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
+  CommitmentCheck,
   CommitmentDecrypt,
   CommitmentExecutor,
   CommitmentImport,
@@ -28,7 +30,22 @@ import {
   ContractEvent,
   EventType,
 } from '../../../interface';
+import { CommitmentUtils } from '../../../utils';
 import { MystikoExecutor } from '../../executor';
+
+type CheckContext = {
+  options: CommitmentCheck;
+};
+
+type CheckChainContext = CheckContext & {
+  chainConfig: ChainConfig;
+  chain: Chain;
+};
+
+type CheckContractContext = CheckChainContext & {
+  contractConfig: PoolContractConfig | DepositContractConfig;
+  contract: Contract;
+};
 
 type ImportContext = {
   options: CommitmentImport;
@@ -57,6 +74,10 @@ type ScanContext = {
 };
 
 export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentExecutor {
+  public check(options: CommitmentCheck): Promise<void> {
+    return this.checkAll({ options });
+  }
+
   public import(options: CommitmentImport): Promise<Commitment[]> {
     return this.context.wallets.checkPassword(options.walletPassword).then(() => this.importAll({ options }));
   }
@@ -134,6 +155,118 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     }
     /* istanbul ignore next */
     return Promise.resolve(commitment);
+  }
+
+  private checkAll(checkContext: CheckContext): Promise<void> {
+    const promises: Promise<void>[] = [];
+    const { options } = checkContext;
+    const { chainId } = options;
+    for (let i = 0; i < this.config.chains.length; i += 1) {
+      const chainConfig = this.config.chains[i];
+      if (!chainId || chainId === chainConfig.chainId) {
+        promises.push(
+          this.context.chains.findOne(chainConfig.chainId).then((chain) => {
+            if (chain) {
+              return this.checkChain({ ...checkContext, chain, chainConfig });
+            }
+            return Promise.resolve();
+          }),
+        );
+      }
+    }
+    return Promise.all(promises).then(() => {});
+  }
+
+  private checkChain(checkContext: CheckChainContext): Promise<void> {
+    const promises: Promise<void>[] = [];
+    const { chainConfig } = checkContext;
+    const { chainId, contractAddress } = checkContext.options;
+    const { poolContracts, depositContracts } = chainConfig;
+    const contracts: Array<PoolContractConfig | DepositContractConfig> = [
+      ...poolContracts,
+      ...depositContracts,
+    ];
+    for (let i = 0; i < contracts.length; i += 1) {
+      const contractConfig = contracts[i];
+      if (
+        !chainId ||
+        !contractAddress ||
+        (contractAddress === contractConfig.address && chainId === chainConfig.chainId)
+      ) {
+        promises.push(
+          this.context.contracts
+            .findOne({ chainId: chainConfig.chainId, address: contractConfig.address })
+            .then((contract) => {
+              if (contract) {
+                return this.checkContract({ ...checkContext, contract, contractConfig });
+              }
+              return Promise.resolve();
+            }),
+        );
+      }
+    }
+    return Promise.all(promises).then(() => {});
+  }
+
+  private checkContract(checkContext: CheckContractContext): Promise<void> {
+    const { chainConfig, chain, contractConfig, contract } = checkContext;
+    return this.context.commitments
+      .find({
+        selector: {
+          chainId: chainConfig.chainId,
+          contractAddress: contractConfig.address,
+          status: { $in: [CommitmentStatus.INCLUDED, CommitmentStatus.SPENT] },
+          leafIndex: { $gte: contract.checkedLeafIndex ? contract.checkedLeafIndex + 1 : 0 },
+        },
+      })
+      .then((commitments) => {
+        const sorted = CommitmentUtils.sortByLeafIndex(commitments, false);
+        const lastIndex = sorted.length > 0 ? sorted.length - 1 : undefined;
+        for (let i = 0; i < sorted.length; i += 1) {
+          const { leafIndex, commitmentHash } = sorted[i];
+          if (!leafIndex || !toBN(leafIndex).eqn(i)) {
+            this.logger.warn(
+              `corrupted commitment data of chainId=${chainConfig.chainId}, ` +
+                `contractAddress=${contractConfig.address}, commitmentHash=${commitmentHash}, ` +
+                `leafIndex expected=${i} vs actual=${leafIndex}`,
+            );
+            return { isValid: false, lastIndex };
+          }
+        }
+        return { isValid: true, lastIndex };
+      })
+      .then(({ isValid, lastIndex }) => {
+        if (!isValid) {
+          return contract
+            .atomicUpdate((data) => {
+              data.checkedLeafIndex = undefined;
+              data.syncedBlockNumber = contractConfig.startBlock;
+              data.updatedAt = MystikoHandler.now();
+              return data;
+            })
+            .then(() => {
+              if (chain.syncedBlockNumber > contractConfig.startBlock) {
+                return chain
+                  .atomicUpdate((data) => {
+                    data.syncedBlockNumber = contractConfig.startBlock;
+                    data.updatedAt = MystikoHandler.now();
+                    return data;
+                  })
+                  .then(() => {});
+              }
+              return Promise.resolve();
+            });
+        }
+        return contract
+          .atomicUpdate((data) => {
+            if (lastIndex) {
+              data.checkedLeafIndex = lastIndex;
+              data.updatedAt = MystikoHandler.now();
+            }
+            return data;
+          })
+          .then(() => {});
+      });
   }
 
   private importAll(importContext: ImportContext): Promise<Commitment[]> {

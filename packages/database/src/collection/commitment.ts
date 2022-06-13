@@ -26,3 +26,10 @@ export const commitmentCollectionMethods: CommitmentCollectionMethods = {
       });
   },
 };
+
+export const commitmentCollectionMigrations = {
+  /* istanbul ignore next */
+  1(oldDoc: any) {
+    return oldDoc;
+  },
+};

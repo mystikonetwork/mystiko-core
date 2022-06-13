@@ -2,7 +2,7 @@ import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSc
 import { ETH_ADDRESS_REGEX } from '../constants';
 
 const contractSchemaLiteral = {
-  version: 0,
+  version: 1,
   title: 'contract schema',
   description: 'a document contains contract information',
   primaryKey: 'id',
@@ -11,23 +11,29 @@ const contractSchemaLiteral = {
   properties: {
     id: {
       type: 'string',
+      maxLength: 32,
       final: true,
     },
     createdAt: {
       type: 'string',
+      maxLength: 32,
       final: true,
       format: 'date-time',
     },
     updatedAt: {
       type: 'string',
+      maxLength: 32,
       format: 'date-time',
     },
     chainId: {
       type: 'integer',
       minimum: 0,
+      maximum: 1e32,
+      multipleOf: 1,
     },
     contractAddress: {
       type: 'string',
+      maxLength: 64,
       pattern: ETH_ADDRESS_REGEX,
     },
     type: {
@@ -49,6 +55,10 @@ const contractSchemaLiteral = {
       minimum: 1,
     },
     syncedBlockNumber: {
+      type: 'integer',
+      minimum: 0,
+    },
+    checkedLeafIndex: {
       type: 'integer',
       minimum: 0,
     },

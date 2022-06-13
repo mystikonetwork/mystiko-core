@@ -24,6 +24,7 @@ test('test insert', async () => {
     syncStart: 10,
     syncSize: 10000,
     syncedBlockNumber: 100,
+    checkedLeafIndex: 200,
   });
   const contract = await db.contracts.findOne('1').exec();
   if (contract) {
@@ -35,6 +36,7 @@ test('test insert', async () => {
     expect(contract.syncStart).toBe(10);
     expect(contract.syncSize).toBe(10000);
     expect(contract.syncedBlockNumber).toBe(100);
+    expect(contract.checkedLeafIndex).toBe(200);
   } else {
     throw new Error('contract not found');
   }

@@ -22,3 +22,10 @@ export const accountCollectionMethods: AccountCollectionMethods = {
       });
   },
 };
+
+export const accountCollectionMigrations = {
+  /* istanbul ignore next */
+  1(oldDoc: any) {
+    return oldDoc;
+  },
+};

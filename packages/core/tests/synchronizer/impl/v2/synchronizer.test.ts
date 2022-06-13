@@ -6,6 +6,7 @@ import {
   ChainHandlerV2,
   CommitmentHandlerV2,
   CommitmentImport,
+  ContractHandlerV2,
   createError,
   MystikoContextInterface,
   MystikoErrorCode,
@@ -65,6 +66,7 @@ beforeAll(async () => {
   });
   context.wallets = new WalletHandlerV2(context);
   context.chains = new ChainHandlerV2(context);
+  context.contracts = new ContractHandlerV2(context);
 });
 
 beforeEach(async () => {

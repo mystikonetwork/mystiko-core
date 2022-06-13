@@ -2,7 +2,7 @@ import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSc
 import { BN_REGEX, ETH_ADDRESS_REGEX, ETH_TX_HASH_REGEX, HEX_REGEX } from '../constants';
 
 const commitmentSchemaLiteral = {
-  version: 0,
+  version: 1,
   title: 'commitment schema',
   description: 'a document contains commitment information',
   primaryKey: 'id',
@@ -11,29 +11,36 @@ const commitmentSchemaLiteral = {
   properties: {
     id: {
       type: 'string',
+      maxLength: 32,
       final: true,
     },
     createdAt: {
       type: 'string',
+      maxLength: 32,
       final: true,
       format: 'date-time',
     },
     updatedAt: {
       type: 'string',
+      maxLength: 32,
       format: 'date-time',
     },
     chainId: {
       type: 'integer',
       final: true,
       minimum: 0,
+      maximum: 1e32,
+      multipleOf: 1,
     },
     contractAddress: {
       type: 'string',
+      maxLength: 64,
       final: true,
       pattern: ETH_ADDRESS_REGEX,
     },
     commitmentHash: {
       type: 'string',
+      maxLength: 128,
       final: true,
       pattern: BN_REGEX,
     },
@@ -73,22 +80,27 @@ const commitmentSchemaLiteral = {
     },
     serialNumber: {
       type: 'string',
+      maxLength: 128,
       pattern: BN_REGEX,
     },
     shieldedAddress: {
       type: 'string',
+      maxLength: 128,
       minLength: 1,
     },
     creationTransactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
     spendingTransactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
     rollupTransactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
   },

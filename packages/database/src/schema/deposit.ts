@@ -8,7 +8,7 @@ import {
 } from '../constants';
 
 const depositSchemaLiteral = {
-  version: 0,
+  version: 1,
   title: 'deposit schema',
   description: 'a document contains deposit information',
   primaryKey: 'id',
@@ -17,24 +17,30 @@ const depositSchemaLiteral = {
   properties: {
     id: {
       type: 'string',
+      maxLength: 32,
       final: true,
     },
     createdAt: {
       type: 'string',
+      maxLength: 32,
       final: true,
       format: 'date-time',
     },
     updatedAt: {
       type: 'string',
+      maxLength: 32,
       format: 'date-time',
     },
     chainId: {
       type: 'integer',
       final: true,
       minimum: 0,
+      maximum: 1e32,
+      multipleOf: 1,
     },
     contractAddress: {
       type: 'string',
+      maxLength: 64,
       final: true,
       pattern: ETH_ADDRESS_REGEX,
     },
@@ -45,6 +51,7 @@ const depositSchemaLiteral = {
     },
     commitmentHash: {
       type: 'string',
+      maxLength: 128,
       final: true,
       pattern: BN_REGEX,
     },
@@ -111,6 +118,7 @@ const depositSchemaLiteral = {
     },
     shieldedRecipientAddress: {
       type: 'string',
+      maxLength: 128,
       minLength: 1,
       final: true,
     },
@@ -123,16 +131,20 @@ const depositSchemaLiteral = {
     },
     wallet: {
       type: 'string',
+      maxLength: 32,
       ref: WALLET_COLLECTION_NAME,
       final: true,
     },
     dstChainId: {
       type: 'integer',
       minimum: 0,
+      maximum: 1e32,
+      multipleOf: 1,
       final: true,
     },
     dstChainContractAddress: {
       type: 'string',
+      maxLength: 64,
       pattern: ETH_ADDRESS_REGEX,
       final: true,
     },
@@ -143,18 +155,22 @@ const depositSchemaLiteral = {
     },
     assetApproveTransactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
     transactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
     relayTransactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
     rollupTransactionHash: {
       type: 'string',
+      maxLength: 128,
       pattern: ETH_TX_HASH_REGEX,
     },
   },

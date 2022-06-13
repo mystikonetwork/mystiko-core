@@ -6,7 +6,7 @@
   "collections": [
     {
       "name": "accounts",
-      "schemaHash": "063cd613f2a0a105c60c27eddada0c99",
+      "schemaHash": "ea01bfc223a90e2466b9685b6638610d",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -38,7 +38,7 @@
     },
     {
       "name": "chains",
-      "schemaHash": "353b3ac458d2f2d672b3747d8ca57e6f",
+      "schemaHash": "bbb9c3a023e77505a7de7e204e13b0c9",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -191,7 +191,7 @@
     },
     {
       "name": "commitments",
-      "schemaHash": "3fae2d87c6693f97828357bd24743040",
+      "schemaHash": "ed70bd7571b674498d1c63ff2d8113ab",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -1437,7 +1437,7 @@
     },
     {
       "name": "contracts",
-      "schemaHash": "e2c9e6293f2bb105fef136f9bd6946c8",
+      "schemaHash": "abe4a5cba5be209626d4481c21fc444b",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -1661,7 +1661,7 @@
     },
     {
       "name": "deposits",
-      "schemaHash": "295ae8a2e8e351669762e68c2c13fa23",
+      "schemaHash": "457b6d98798867c33071f9d2a459128b",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -1825,7 +1825,7 @@
     },
     {
       "name": "nullifiers",
-      "schemaHash": "f96c66ee60faa5c8d8801e8846453e05",
+      "schemaHash": "93ffda6df9d665c2daa12fff72cb0ae7",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -2229,7 +2229,7 @@
     },
     {
       "name": "transactions",
-      "schemaHash": "69fd88aa2e01ae7986edd0bcbcb6c6d7",
+      "schemaHash": "bb01ecf24b0a87cf7db3b597355190ff",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -2305,7 +2305,7 @@
     },
     {
       "name": "wallets",
-      "schemaHash": "70412ad03e153b8added5962854a5f9b",
+      "schemaHash": "d44e5254832b464ddbc2cc092c876f9c",
       "encrypted": false,
       "passwordHash": null,
       "docs": [

@@ -22,3 +22,10 @@ export const depositCollectionMethods: DepositCollectionMethods = {
       });
   },
 };
+
+export const depositCollectionMigrations = {
+  /* istanbul ignore next */
+  1(oldDoc: any) {
+    return oldDoc;
+  },
+};

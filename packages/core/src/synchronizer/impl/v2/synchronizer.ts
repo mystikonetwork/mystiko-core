@@ -202,6 +202,7 @@ export class SynchronizerV2 implements Synchronizer {
               chainStatus.error = undefined;
               promises.push(
                 this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
+                  .then(() => this.context.executors.getCommitmentExecutor().check({ chainId }))
                   .then(() =>
                     promiseWithTimeout(
                       this.executeSyncImport(options, chainId),

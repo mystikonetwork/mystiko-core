@@ -1,20 +1,28 @@
 import { addRxPlugin, createRxDatabase, RxDatabaseCreator } from 'rxdb';
+import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
 import { RxDBLeaderElectionPlugin } from 'rxdb/plugins/leader-election';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
-import { RxDBValidatePlugin } from 'rxdb/plugins/validate';
+import { RxDBValidateZSchemaPlugin } from 'rxdb/plugins/validate-z-schema';
 import {
   accountCollectionMethods,
+  accountCollectionMigrations,
   chainCollectionMethods,
   chainCollectionMigrations,
   commitmentCollectionMethods,
+  commitmentCollectionMigrations,
   contractCollectionMethods,
+  contractCollectionMigrations,
   depositCollectionMethods,
+  depositCollectionMigrations,
   nullifierCollectionMethods,
+  nullifierCollectionMigrations,
   transactionCollectionMethods,
+  transactionCollectionMigrations,
   walletCollectionMethods,
+  walletCollectionMigrations,
 } from '../collection';
 import {
   ACCOUNT_COLLECTION_NAME,
@@ -48,12 +56,14 @@ import {
   walletSchema,
 } from '../schema';
 
+addRxPlugin(RxDBDevModePlugin);
+addRxPlugin(RxDBJsonDumpPlugin);
+addRxPlugin(RxDBLeaderElectionPlugin);
+addRxPlugin(RxDBMigrationPlugin);
+addRxPlugin(RxDBUpdatePlugin);
+addRxPlugin(RxDBValidateZSchemaPlugin);
+
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoDatabase> {
-  addRxPlugin(RxDBJsonDumpPlugin);
-  addRxPlugin(RxDBLeaderElectionPlugin);
-  addRxPlugin(RxDBMigrationPlugin);
-  addRxPlugin(RxDBUpdatePlugin);
-  addRxPlugin(RxDBValidatePlugin);
   let dbPromise: Promise<MystikoDatabase>;
   if (params) {
     dbPromise = createRxDatabase<MystikoClientCollections>(params);
@@ -71,6 +81,7 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoD
       schema: accountSchema,
       methods: accountMethods,
       statics: accountCollectionMethods,
+      migrationStrategies: accountCollectionMigrations,
     },
     [CHAIN_COLLECTION_NAME]: {
       schema: chainSchema,
@@ -82,31 +93,37 @@ export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoD
       schema: commitmentSchema,
       methods: commitmentMethods,
       statics: commitmentCollectionMethods,
+      migrationStrategies: commitmentCollectionMigrations,
     },
     [CONTRACT_COLLECTION_NAME]: {
       schema: contractSchema,
       methods: contractMethods,
       statics: contractCollectionMethods,
+      migrationStrategies: contractCollectionMigrations,
     },
     [DEPOSIT_COLLECTION_NAME]: {
       schema: depositSchema,
       methods: depositMethods,
       statics: depositCollectionMethods,
+      migrationStrategies: depositCollectionMigrations,
     },
     [NULLIFIER_COLLECTION_NAME]: {
       schema: nullifierSchema,
       methods: nullifierMethods,
       statics: nullifierCollectionMethods,
+      migrationStrategies: nullifierCollectionMigrations,
     },
     [TRANSACTION_COLLECTION_NAME]: {
       schema: transactionSchema,
       methods: transactionMethods,
       statics: transactionCollectionMethods,
+      migrationStrategies: transactionCollectionMigrations,
     },
     [WALLET_COLLECTION_NAME]: {
       schema: walletSchema,
       methods: walletMethods,
       statics: walletCollectionMethods,
+      migrationStrategies: walletCollectionMigrations,
     },
   });
   return db;

@@ -32,4 +32,8 @@ export const chainCollectionMigrations = {
   2(oldDoc: any) {
     return oldDoc;
   },
+  /* istanbul ignore next */
+  3(oldDoc: any) {
+    return oldDoc;
+  },
 };
