@@ -1,6 +1,6 @@
 import { addRxPlugin, createRxDatabase, RxDatabaseCreator } from 'rxdb';
-import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { RxDBJsonDumpPlugin } from 'rxdb/plugins/json-dump';
+import { RxDBKeyCompressionPlugin } from 'rxdb/plugins/key-compression';
 import { RxDBLeaderElectionPlugin } from 'rxdb/plugins/leader-election';
 import { RxDBMigrationPlugin } from 'rxdb/plugins/migration';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
@@ -56,8 +56,8 @@ import {
   walletSchema,
 } from '../schema';
 
-addRxPlugin(RxDBDevModePlugin);
 addRxPlugin(RxDBJsonDumpPlugin);
+addRxPlugin(RxDBKeyCompressionPlugin);
 addRxPlugin(RxDBLeaderElectionPlugin);
 addRxPlugin(RxDBMigrationPlugin);
 addRxPlugin(RxDBUpdatePlugin);
