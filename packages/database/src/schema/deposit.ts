@@ -8,7 +8,7 @@ import {
 } from '../constants';
 
 const depositSchemaLiteral = {
-  version: 1,
+  version: 2,
   title: 'deposit schema',
   description: 'a document contains deposit information',
   primaryKey: 'id',
@@ -116,6 +116,11 @@ const depositSchemaLiteral = {
       type: 'string',
       pattern: ETH_ADDRESS_REGEX,
     },
+    serviceFeeAmount: {
+      type: 'string',
+      final: true,
+      pattern: BN_REGEX,
+    },
     shieldedRecipientAddress: {
       type: 'string',
       maxLength: 128,
@@ -192,6 +197,7 @@ const depositSchemaLiteral = {
     'bridgeFeeAmount',
     'executorFeeAmount',
     'rollupFeeAmount',
+    'serviceFeeAmount',
     'shieldedRecipientAddress',
     'dstChainId',
     'dstChainContractAddress',

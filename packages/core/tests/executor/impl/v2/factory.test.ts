@@ -6,7 +6,7 @@ test('test basic getters', async () => {
     config: await MystikoConfig.createFromFile('tests/files/config.test.json'),
   });
   const depositContractConfig = context.config.getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
-  const poolContractConfig = context.config.getPoolContractConfig(97, 'BNB', BridgeType.LOOP);
+  const poolContractConfig = context.config.getPoolContractConfig(97, 'BNB', BridgeType.LOOP, 2);
   if (!depositContractConfig) {
     throw new Error('deposit contract config should not be undefined');
   }

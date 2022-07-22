@@ -110,6 +110,9 @@ async function checkDeposit(
   expect(deposit.bridgeFeeAssetAddress).toBe(depositContractConfig.bridgeFeeAsset.assetAddress);
   expect(deposit.executorFeeSimpleAmount()).toBe(options.executorFee || 0);
   expect(deposit.executorFeeAssetAddress).toBe(depositContractConfig.executorFeeAsset.assetAddress);
+  expect(deposit.serviceFeeSimpleAmount()).toBe(
+    (options.amount * depositContractConfig.serviceFee) / depositContractConfig.serviceFeeDivider,
+  );
   expect(deposit.shieldedRecipientAddress).toBe(options.shieldedAddress);
   expect(deposit.hashK).not.toBe(undefined);
   expect(deposit.randomS).not.toBe(undefined);
@@ -251,9 +254,14 @@ test('test summary', async () => {
   expect(summary.bridgeFeeAssetSymbol).toBe(depositContractConfig.bridgeFeeAsset.assetSymbol);
   expect(summary.executorFee).toBe(options.executorFee);
   expect(summary.executorFeeAssetSymbol).toBe(depositContractConfig.executorFeeAsset.assetSymbol);
+  expect(summary.serviceFeeRatio).toBe(
+    depositContractConfig.serviceFee / depositContractConfig.serviceFeeDivider,
+  );
+  expect(summary.serviceFeeAssetSymbol).toBe(depositContractConfig.assetSymbol);
+  expect(summary.serviceFee).toBe(options.amount * summary.serviceFeeRatio);
   expect(summary.totals.sort()).toStrictEqual(
     [
-      { assetSymbol: 'MTT', total: 11.1 },
+      { assetSymbol: 'MTT', total: 11.11 },
       { assetSymbol: 'ETH', total: 0.01 },
     ].sort(),
   );
@@ -267,7 +275,7 @@ test('test summary', async () => {
   expect(summary.executorFee).toBe(0);
   expect(summary.totals.sort()).toStrictEqual(
     [
-      { assetSymbol: 'MTT', total: 11 },
+      { assetSymbol: 'MTT', total: 11.01 },
       { assetSymbol: 'BNB', total: 0 },
     ].sort(),
   );
@@ -429,7 +437,7 @@ test('test loop erc20 deposit', async () => {
   await mockERC20.mock.allowance.returns('0');
   await mockERC20.mock.approve.reverts();
   await mockERC20.mock.approve
-    .withArgs(depositContractConfig.address, toDecimals(10.1).toString())
+    .withArgs(depositContractConfig.address, toDecimals(10.11).toString())
     .returns(true);
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
   const mockCallback = jest.fn();
@@ -467,7 +475,7 @@ test('test loop erc20 deposit without approve', async () => {
   await mockERC20.mock.allowance.returns('0');
   await mockERC20.mock.allowance
     .withArgs(etherWallet.address, depositContractConfig.address)
-    .returns(toDecimals(10.1).toString());
+    .returns(toDecimals(10.11).toString());
   await mockERC20.mock.approve.reverts();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
   const mockCallback = jest.fn();
@@ -536,7 +544,7 @@ test('test bridge erc20 deposit', async () => {
   await mockERC20.mock.allowance.returns('0');
   await mockERC20.mock.approve.reverts();
   await mockERC20.mock.approve
-    .withArgs(depositContractConfig.address, toDecimals(10.11).toString())
+    .withArgs(depositContractConfig.address, toDecimals(10.12).toString())
     .returns(true);
   const mockCallback = jest.fn();
   const options: DepositOptions = {

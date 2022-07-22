@@ -983,10 +983,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@mystikonetwork/config@^0.1.13":
-  version "0.1.13"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.1.13/c3b56d20e16044b32a1e73195fe09d5fff3b2bca715586a17f4099b52cea7944#25f5feb365c0dc5dd8dd18b99d4f2fa7b4fb60fb"
-  integrity sha512-DZdlAZKmf8rPAjQDevct+K0qLRC1ovLbCtkagYIDFTyKk28Xv2Tuv8wCORvsv7UnJCFPsL4Brk3wkQLZvup7+A==
+"@mystikonetwork/config@^0.1.14":
+  version "0.1.14"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.1.14/9e67fd3d186317efc245ef71d677a36debdd60c225c4ca9ac072f719882a6de7#faa08bd9b930f994d5cd17bb259f410af992309d"
+  integrity sha512-/9pi9xKqJtl6jAeIlSQt7ctaC8d/bPebz6c/8hYb2JFb3dAGYrWBuNIMy9gGqTuVWLRpQWyrmM7nTM/DMb4thw==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"

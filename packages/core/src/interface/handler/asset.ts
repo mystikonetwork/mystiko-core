@@ -1,4 +1,4 @@
-import { BridgeType } from '@mystikonetwork/config';
+import { BridgeType, PoolContractConfig } from '@mystikonetwork/config';
 import { Chain } from '@mystikonetwork/database';
 
 export type AssetBalance = {
@@ -27,4 +27,5 @@ export interface AssetHandler<B = AssetBalance, O = AssetBalanceOptions, MO = As
   balances(options?: MO): Promise<Map<string, B>>;
   bridges(chainId: number, assetSymbol: string): Promise<BridgeType[]>;
   chains(): Promise<Chain[]>;
+  pools(chainId: number, assetSymbol: string, bridgeType: BridgeType): Promise<PoolContractConfig[]>;
 }

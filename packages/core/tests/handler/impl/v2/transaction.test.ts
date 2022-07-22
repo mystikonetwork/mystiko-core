@@ -44,6 +44,7 @@ async function getTransactionOptions(): Promise<TransactionOptions> {
     chainId: 3,
     assetSymbol: 'MTT',
     bridgeType: BridgeType.TBRIDGE,
+    version: 2,
     shieldedAddress: account.shieldedAddress,
     amount: 6,
     rollupFee: 0.1,
@@ -145,6 +146,7 @@ test('test findOne', async () => {
 
 test('test quote', async () => {
   const options = await getTransactionOptions();
+  options.version = undefined;
   expect(await handler.quote(options)).not.toBe(undefined);
   options.chainId = 2048;
   await expect(handler.quote(options)).rejects.toThrow(

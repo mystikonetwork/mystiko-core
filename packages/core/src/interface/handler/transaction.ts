@@ -7,6 +7,7 @@ export type TransactionQuoteOptions = {
   chainId: number;
   assetSymbol: string;
   bridgeType: BridgeType;
+  version?: number;
   amount?: number;
   publicAmount?: number;
 };

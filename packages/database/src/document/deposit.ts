@@ -7,6 +7,7 @@ export type DepositMethods = {
   rollupFeeSimpleAmount: () => number;
   bridgeFeeSimpleAmount: () => number;
   executorFeeSimpleAmount: () => number;
+  serviceFeeSimpleAmount: () => number;
 };
 
 export type Deposit = RxDocument<DepositType, DepositMethods>;
@@ -23,5 +24,8 @@ export const depositMethods: DepositMethods = {
   },
   executorFeeSimpleAmount(this: Deposit): number {
     return fromDecimals(this.executorFeeAmount, this.assetDecimals);
+  },
+  serviceFeeSimpleAmount(this: Deposit): number {
+    return fromDecimals(this.serviceFeeAmount, this.assetDecimals);
   },
 };

@@ -50,7 +50,7 @@ function getPoolContractConfig(
   assetSymbol: string,
   bridgeType: BridgeType,
 ): PoolContractConfig {
-  const poolContractConfig = config.getPoolContractConfig(chainId, assetSymbol, bridgeType);
+  const poolContractConfig = config.getPoolContractConfig(chainId, assetSymbol, bridgeType, 2);
   if (!poolContractConfig) {
     throw new Error('poolContractConfig should not be undefined');
   }
@@ -70,6 +70,7 @@ function getTestOptions(): TestOptions {
     chainId: 3,
     assetSymbol: 'MTT',
     bridgeType: BridgeType.TBRIDGE,
+    version: 2,
     shieldedAddress: mystikoAccount.shieldedAddress,
     amount: 6,
     rollupFee: 0.1,
@@ -82,6 +83,7 @@ function getTestOptions(): TestOptions {
     chainId: 3,
     assetSymbol: 'MTT',
     bridgeType: BridgeType.TBRIDGE,
+    version: 2,
     publicAddress: etherWallet.address,
     publicAmount: 5,
     rollupFee: 0.1,
@@ -264,6 +266,7 @@ test('test quote', async () => {
     chainId: 97,
     assetSymbol: 'BNB',
     bridgeType: BridgeType.LOOP,
+    version: 2,
   };
   let contractConfig = getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
   let quote = await executor.quote(options, contractConfig);
