@@ -3,6 +3,7 @@ import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import chalk, { Chalk } from 'chalk';
 import * as fs from 'fs';
+import leveldown from 'leveldown';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
 import { addPouchPlugin, getRxStoragePouch } from 'rxdb/plugins/pouchdb';
 
@@ -45,10 +46,10 @@ export class MystikoInNode extends Mystiko {
           storage: getRxStoragePouch('memory'),
         };
       } else {
-        addPouchPlugin(require('pouchdb-adapter-node-websql'));
+        addPouchPlugin(require('pouchdb-adapter-leveldb'));
         wrappedOptions.dbParams = {
           name: wrappedOptions.dbName,
-          storage: getRxStoragePouch('websql'),
+          storage: getRxStoragePouch(leveldown),
         };
       }
     }
