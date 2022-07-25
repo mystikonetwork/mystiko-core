@@ -47,6 +47,9 @@ export type DepositSummary = {
   bridgeFeeAssetSymbol: string;
   executorFee: number;
   executorFeeAssetSymbol: string;
+  serviceFeeRatio: number;
+  serviceFee: number;
+  serviceFeeAssetSymbol: string;
   totals: Array<{ assetSymbol: string; total: number }>;
 };
 

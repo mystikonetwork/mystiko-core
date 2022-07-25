@@ -1,4 +1,4 @@
-import { BridgeType } from '@mystikonetwork/config';
+import { BridgeType, PoolContractConfig } from '@mystikonetwork/config';
 import { Chain, Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import { fromDecimals, toBN } from '@mystikonetwork/utils';
 import { MystikoHandler } from '../../handler';
@@ -105,6 +105,23 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
         });
         return filteredChains;
       });
+  }
+
+  public pools(chainId: number, assetSymbol: string, bridgeType: BridgeType): Promise<PoolContractConfig[]> {
+    const poolContractConfigs = this.config.getPoolContractConfigs(chainId, assetSymbol, bridgeType);
+    if (poolContractConfigs.length > 0) {
+      poolContractConfigs.sort((c1, c2) => c2.version - c1.version);
+      return this.getCommitments([CommitmentStatus.INCLUDED], {
+        assets: [assetSymbol],
+        chainId,
+        bridgeType,
+      }).then((commitments) => {
+        const addresses = new Set<string>();
+        commitments.forEach((commitment) => addresses.add(commitment.contractAddress));
+        return poolContractConfigs.filter((config) => addresses.has(config.address));
+      });
+    }
+    return Promise.resolve([]);
   }
 
   private defaultShieldedAddresses(): Promise<string[]> {

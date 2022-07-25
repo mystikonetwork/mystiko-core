@@ -114,11 +114,25 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
   private getPoolContractConfig(
     options: TransactionOptions | TransactionQuoteOptions,
   ): Promise<PoolContractConfig> {
-    const poolContractConfig = this.config.getPoolContractConfig(
-      options.chainId,
-      options.assetSymbol,
-      options.bridgeType,
-    );
+    let poolContractConfig: PoolContractConfig | undefined;
+    if (options.version) {
+      poolContractConfig = this.config.getPoolContractConfig(
+        options.chainId,
+        options.assetSymbol,
+        options.bridgeType,
+        options.version,
+      );
+    } else {
+      const poolContractConfigs = this.config.getPoolContractConfigs(
+        options.chainId,
+        options.assetSymbol,
+        options.bridgeType,
+      );
+      if (poolContractConfigs.length > 0) {
+        poolContractConfigs.sort((c1, c2) => c2.version - c1.version);
+        [poolContractConfig] = poolContractConfigs;
+      }
+    }
     if (!poolContractConfig) {
       return createErrorPromise(
         'invalid transaction options, no corresponding contract found',

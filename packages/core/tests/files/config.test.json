@@ -78,6 +78,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "tbridge",
           "address": "0xDede369C8444324cFd75038F1F2A39C4E44F6035",
           "startBlock": 12221049,
           "type": "pool",
@@ -87,6 +89,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "tbridge",
           "address": "0xeb2a6545516ce618807c07BB04E9CCb8ED7D8e6F",
           "startBlock": 12222248,
           "type": "pool",
@@ -96,6 +100,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "tbridge",
           "address": "0x1cF3F084635FEa4a455f3165D75697499e8a1C53",
           "startBlock": 12222232,
           "type": "pool",
@@ -268,6 +274,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "loop",
           "address": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
           "startBlock": 18759778,
           "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
@@ -276,14 +284,27 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "loop",
           "address": "0xfbb1A6Da247b1D3a261Dbdb425295d29177cf47A",
           "startBlock": 18759747,
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0",
           "minRollupFee": "10000000000000000"
         },
         {
+          "version": 1,
+          "name": "CommitmentPool",
+          "poolName": "pre-alpha-20220510",
+          "bridgeType": "loop",
+          "address": "0x2d7572cc8e272f1d0076a44b6143d6d21414efc6",
+          "startBlock": 18739678,
+          "minRollupFee": "10000000000000000"
+        },
+        {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "loop",
           "address": "0xae5009F4B58E6eF25Fee71174A827042c543ac46",
           "startBlock": 18759678,
           "minRollupFee": "10000000000000000"
@@ -291,6 +312,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "tbridge",
           "address": "0x4fe8bfa6e1E1BD6E27a1Eb33F036020DA27F9541",
           "startBlock": 18805712,
           "type": "pool",
@@ -299,6 +322,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "tbridge",
           "address": "0x73Ddcd8fdb507B11372702DF69ad2742D06eF36C",
           "startBlock": 18817132,
           "type": "pool",
@@ -308,6 +333,8 @@
         {
           "version": 2,
           "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "tbridge",
           "address": "0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA",
           "startBlock": 18817024,
           "type": "pool",

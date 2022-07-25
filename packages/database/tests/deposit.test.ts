@@ -44,6 +44,7 @@ test('test insert', async () => {
     bridgeFeeAssetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     executorFeeAmount: toDecimals(3, 18).toString(),
     executorFeeAssetAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
+    serviceFeeAmount: toDecimals(0.123, 18).toString(),
     shieldedRecipientAddress:
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     status: DepositStatus.QUEUED,
@@ -81,6 +82,8 @@ test('test insert', async () => {
     expect(deposit.executorFeeAmount).toBe(toDecimals(3, 18).toString());
     expect(deposit.executorFeeSimpleAmount()).toBe(3);
     expect(deposit.executorFeeAssetAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
+    expect(deposit.serviceFeeAmount).toBe(toDecimals(0.123, 18).toString());
+    expect(deposit.serviceFeeSimpleAmount()).toBe(0.123);
     expect(deposit.shieldedRecipientAddress).toBe(
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     );
@@ -127,6 +130,7 @@ test('test collection clear', async () => {
     rollupFeeAmount: toDecimals(1, 18).toString(),
     bridgeFeeAmount: toDecimals(2, 18).toString(),
     executorFeeAmount: toDecimals(3, 18).toString(),
+    serviceFeeAmount: toDecimals(0.123, 18).toString(),
     shieldedRecipientAddress:
       'Jc29nDcY9js9EtgeVkcE6w24eTpweTXZjr4TxaMSUB8fbxoLyovKU3Z89tPLrkmjHX4NvXfaKX676yW1sKTbXoJZ5',
     status: DepositStatus.QUEUED,

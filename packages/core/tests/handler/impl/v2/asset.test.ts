@@ -65,6 +65,15 @@ test('test bridges', async () => {
   expect(bridges).toStrictEqual([BridgeType.LOOP]);
 });
 
+test('test pools', async () => {
+  let pools = await handler.pools(3, 'MTT', BridgeType.LOOP);
+  expect(pools).toStrictEqual([]);
+  pools = await handler.pools(3, 'MTT', BridgeType.TBRIDGE);
+  expect(pools.map((c) => c.address)).toStrictEqual(['0xeb2a6545516ce618807c07BB04E9CCb8ED7D8e6F']);
+  pools = await handler.pools(97, 'BNB', BridgeType.LOOP);
+  expect(pools.map((c) => c.address)).toStrictEqual(['0xae5009F4B58E6eF25Fee71174A827042c543ac46']);
+});
+
 test('test balance', async () => {
   let balance = await handler.balance({ asset: 'mUSD' });
   expect(balance.unspentTotal).toBe(0);

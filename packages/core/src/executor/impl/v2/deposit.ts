@@ -38,6 +38,7 @@ type ExecutionContext = {
   rollupFee: string;
   bridgeFee: string;
   executorFee: string;
+  serviceFee: string;
   assetTotals: Map<string, AssetTotal>;
   mainAssetTotal: string;
 };
@@ -73,7 +74,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     return this.buildExecutionContext(options, config)
       .then((context) => this.validateOptions(context))
       .then((context) => {
-        const { assetTotals } = context;
+        const { assetTotals, serviceFee } = context;
         return {
           srcChainId: options.srcChainId,
           dstChainId: options.dstChainId,
@@ -87,6 +88,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
           executorFee: options.executorFee || 0,
           executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
+          serviceFeeRatio: config.serviceFee / config.serviceFeeDivider,
+          serviceFee: fromDecimals(serviceFee, config.assetDecimals),
+          serviceFeeAssetSymbol: config.assetSymbol,
           totals: Array.from(assetTotals.values()).map((assetTotal) => ({
             assetSymbol: assetTotal.asset.assetSymbol,
             total: assetTotal.totalNumber,
@@ -124,12 +128,17 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           options.executorFee || 0,
           contractConfig.executorFeeAsset.assetDecimals,
         ).toString();
+        const serviceFee = toDecimals(options.amount, contractConfig.assetDecimals)
+          .muln(contractConfig.serviceFee)
+          .divn(contractConfig.serviceFeeDivider)
+          .toString();
         const assetTotals = new Map<string, AssetTotal>();
         const assets: Array<{ asset: AssetConfig; amount: string }> = [
           { asset: contractConfig.asset, amount },
           { asset: contractConfig.asset, amount: rollupFee },
           { asset: contractConfig.bridgeFeeAsset, amount: bridgeFee },
           { asset: contractConfig.executorFeeAsset, amount: executorFee },
+          { asset: contractConfig.asset, amount: serviceFee },
         ];
         assets.forEach((assetWithAmount) => {
           const { asset } = assetWithAmount;
@@ -157,6 +166,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           rollupFee,
           bridgeFee,
           executorFee,
+          serviceFee,
           assetTotals,
           mainAssetTotal: mainAssetTotal.toString(),
         };
@@ -260,7 +270,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   private createDeposit(executionContext: ExecutionContext): Promise<ExecutionContextWithDeposit> {
-    const { options, contractConfig, chainConfig, amount, rollupFee, bridgeFee, executorFee } =
+    const { options, contractConfig, chainConfig, amount, rollupFee, bridgeFee, executorFee, serviceFee } =
       executionContext;
     return this.context.wallets.checkCurrent().then((wallet) =>
       (this.protocol as MystikoProtocolV2)
@@ -307,6 +317,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             bridgeFeeAssetAddress: contractConfig.bridgeFeeAsset.assetAddress,
             executorFeeAmount: executorFee,
             executorFeeAssetAddress: contractConfig.executorFeeAsset.assetAddress,
+            serviceFeeAmount: serviceFee,
             shieldedRecipientAddress: options.shieldedAddress,
             dstChainId: contractConfig.peerChainId || chainConfig.chainId,
             dstChainContractAddress: contractConfig.peerContractAddress || contractConfig.address,

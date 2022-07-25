@@ -899,10 +899,10 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@^0.1.13":
-  version "0.1.13"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.1.13/c3b56d20e16044b32a1e73195fe09d5fff3b2bca715586a17f4099b52cea7944#25f5feb365c0dc5dd8dd18b99d4f2fa7b4fb60fb"
-  integrity sha512-DZdlAZKmf8rPAjQDevct+K0qLRC1ovLbCtkagYIDFTyKk28Xv2Tuv8wCORvsv7UnJCFPsL4Brk3wkQLZvup7+A==
+"@mystikonetwork/config@^0.1.15":
+  version "0.1.15"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.1.15/a73c659409026adf5dfef9d9adddfb8dc550da485d01a23ffe93c02d64342956#743c64861d1aa5ea3699904322f5d2e7edee1813"
+  integrity sha512-cH8Dw444T19Dup6RhiVSG4R0O/r4GCTGL+v7BMJh6D8VMMX8TjQtBCIhaXW9IFZdRn0s3fWqBslSb+l2MonI1g==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"

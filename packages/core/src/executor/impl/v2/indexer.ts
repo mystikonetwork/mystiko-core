@@ -1,4 +1,9 @@
-import { ChainConfig, IndexerConfig } from '@mystikonetwork/config';
+import {
+  ChainConfig,
+  DepositContractConfig,
+  IndexerConfig,
+  PoolContractConfig,
+} from '@mystikonetwork/config';
 import { Chain, Commitment, ContractType } from '@mystikonetwork/database';
 import { DefaultMystikoIndexerFactory, MystikoIndexerClient } from '@mystikonetwork/indexer-client';
 import { promiseWithTimeout } from '@mystikonetwork/utils';
@@ -204,10 +209,23 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
   }
 
   private saveBlockNumber(context: ImportEventsContext): Promise<void> {
-    const { chain, contractAddresses, endBlock } = context;
+    const { chain, chainConfig, contractAddresses, endBlock } = context;
+    const contractAddressSet = new Set<string>(contractAddresses);
+    let skipSaveBlockNumber = false;
+    const { poolContracts, depositContracts } = chainConfig;
+    const contracts: Array<PoolContractConfig | DepositContractConfig> = [
+      ...poolContracts,
+      ...depositContracts,
+    ];
+    for (let i = 0; i < contracts.length; i += 1) {
+      if (!contractAddressSet.has(contracts[i].address)) {
+        skipSaveBlockNumber = true;
+        break;
+      }
+    }
     const startMs = new Date().getTime();
     let chainPromise: Promise<void> = Promise.resolve();
-    if (chain.syncedBlockNumber < endBlock) {
+    if (!skipSaveBlockNumber && chain.syncedBlockNumber < endBlock) {
       chainPromise = chain
         .atomicUpdate((data) => {
           data.syncedBlockNumber = endBlock;
