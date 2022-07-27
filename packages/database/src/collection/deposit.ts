@@ -29,7 +29,7 @@ export const depositCollectionMigrations = {
   1: defaultMigrationStrategy,
   2: (oldDoc: any) => /* istanbul ignore next */ {
     // eslint-disable-next-line no-param-reassign
-    oldDoc.serviceFee = '0';
+    oldDoc.serviceFeeAmount = '0';
     return oldDoc;
   },
 };
