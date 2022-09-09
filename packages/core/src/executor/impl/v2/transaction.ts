@@ -16,6 +16,7 @@ import {
   TransactionStatus,
   Wallet,
 } from '@mystikonetwork/database';
+import { ECIES } from '@mystikonetwork/ecies';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { MerkleTree } from '@mystikonetwork/merkle';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
@@ -74,6 +75,8 @@ type ExecutionContextWithProof = ExecutionContextWithTransaction & {
   outputEncryptedNotes: Buffer[];
   proof: ZKProof;
   randomEtherWallet: ethers.Wallet;
+  numOfAuditors: number;
+  randomAuditingSecretKey: BN;
 };
 
 type ExecutionContextWithRequest = ExecutionContextWithProof & {
@@ -605,51 +608,60 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                 outputEncryptedNotes.push(encryptedNote);
               }
             }
-            return (this.protocol as MystikoProtocolV2)
-              .zkProveTransaction({
-                numInputs,
-                numOutputs,
-                inVerifyPks,
-                inVerifySks,
-                inEncPks,
-                inEncSks,
-                inCommitments,
-                inPrivateNotes,
-                pathIndices,
-                pathElements,
-                sigPk,
-                treeRoot: merkleTree.root(),
-                publicAmount: toBN(transaction.publicAmount),
-                relayerFeeAmount: gasRelayerFee,
-                rollupFeeAmounts,
-                outVerifyPks,
-                outAmounts,
-                outCommitments,
-                outRandomPs,
-                outRandomRs,
-                outRandomSs,
-                programFile: circuitConfig.programFile,
-                provingKeyFile: circuitConfig.provingKeyFile,
-                abiFile: circuitConfig.abiFile,
-              })
-              .then((proof) =>
-                (this.protocol as MystikoProtocolV2)
-                  .zkVerify(proof, circuitConfig.verifyingKeyFile)
-                  .then((proofValid) => {
-                    /* istanbul ignore if */
-                    if (!proofValid) {
-                      return createErrorPromise(
-                        'generated an invalid proof',
-                        MystikoErrorCode.INVALID_ZKP_PROOF,
+            const randomAuditingSecretKey = ECIES.generateSecretKey();
+            return this.getAuditorPublicKeys(executionContext).then((auditorPublicKeys) =>
+              (this.protocol as MystikoProtocolV2)
+                .zkProveTransaction({
+                  numInputs,
+                  numOutputs,
+                  inVerifyPks,
+                  inVerifySks,
+                  inEncPks,
+                  inEncSks,
+                  inCommitments,
+                  inPrivateNotes,
+                  pathIndices,
+                  pathElements,
+                  sigPk,
+                  treeRoot: merkleTree.root(),
+                  publicAmount: toBN(transaction.publicAmount),
+                  relayerFeeAmount: gasRelayerFee,
+                  rollupFeeAmounts,
+                  outVerifyPks,
+                  outAmounts,
+                  outCommitments,
+                  outRandomPs,
+                  outRandomRs,
+                  outRandomSs,
+                  programFile: circuitConfig.programFile,
+                  provingKeyFile: circuitConfig.provingKeyFile,
+                  abiFile: circuitConfig.abiFile,
+                  randomAuditingSecretKey,
+                  auditorPublicKeys,
+                })
+                .then((proof) =>
+                  (this.protocol as MystikoProtocolV2)
+                    .zkVerify(proof, circuitConfig.verifyingKeyFile)
+                    .then((proofValid) => {
+                      /* istanbul ignore if */
+                      if (!proofValid) {
+                        return createErrorPromise(
+                          'generated an invalid proof',
+                          MystikoErrorCode.INVALID_ZKP_PROOF,
+                        );
+                      }
+                      this.logger.info(
+                        `proof is generated successfully for transaction id=${transaction.id}`,
                       );
-                    }
-                    this.logger.info(`proof is generated successfully for transaction id=${transaction.id}`);
-                    return proof;
-                  }),
-              )
-              .then((proof) =>
-                this.updateTransactionStatus(options, newTransaction, TransactionStatus.PROOF_GENERATED).then(
-                  (tx) => ({
+                      return proof;
+                    }),
+                )
+                .then((proof) =>
+                  this.updateTransactionStatus(
+                    options,
+                    newTransaction,
+                    TransactionStatus.PROOF_GENERATED,
+                  ).then((tx) => ({
                     ...executionContext,
                     numInputs,
                     numOutputs,
@@ -657,11 +669,27 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
                     proof,
                     transaction: tx,
                     randomEtherWallet,
-                  }),
+                    numOfAuditors: this.protocol.numOfAuditors,
+                    randomAuditingSecretKey,
+                  })),
                 ),
-              );
+            );
           }),
     );
+  }
+
+  private getAuditorPublicKeys(executionContext: ExecutionContext): Promise<BN[]> {
+    const { etherContract } = executionContext;
+    return etherContract.getAllAuditorPublicKeys().then((rawPublicKeys) => {
+      if (rawPublicKeys.length !== this.protocol.numOfAuditors) {
+        return createErrorPromise(
+          'number of auditors saved in contract is incorrect: actual ' +
+            `${rawPublicKeys.length} vs expected ${this.protocol.numOfAuditors}`,
+          MystikoErrorCode.WRONG_AUDITOR_NUMBER,
+        );
+      }
+      return rawPublicKeys.map((pk) => toBN(pk.toString()));
+    });
   }
 
   private buildMerkleTree(executionContext: ExecutionContext): Promise<MerkleTree> {
@@ -844,12 +872,25 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private static buildTransactionRequest(
     executionContext: ExecutionContextWithProof,
   ): ICommitmentPool.TransactRequestStruct {
-    const { options, proof, numInputs, numOutputs, outputEncryptedNotes } = executionContext;
+    const {
+      options,
+      proof,
+      numInputs,
+      numOutputs,
+      outputEncryptedNotes,
+      numOfAuditors,
+      randomAuditingSecretKey,
+    } = executionContext;
+    const randomAuditingPublicKey = ECIES.publicKey(randomAuditingSecretKey);
+    const encryptedAuditorNotes = proof.inputs
+      .slice(proof.inputs.length - numInputs * numOfAuditors)
+      .map((n) => ethers.BigNumber.from(n).toString());
+    const proofABC = proof.proof as { a: any; b: any; c: any };
     return {
       proof: {
-        a: { X: proof.proof.a[0], Y: proof.proof.a[1] },
-        b: { X: proof.proof.b[0], Y: proof.proof.b[1] },
-        c: { X: proof.proof.c[0], Y: proof.proof.c[1] },
+        a: { X: proofABC.a[0], Y: proofABC.a[1] },
+        b: { X: proofABC.b[0], Y: proofABC.b[1] },
+        c: { X: proofABC.c[0], Y: proofABC.c[1] },
       },
       rootHash: proof.inputs[0],
       serialNumbers: proof.inputs.slice(1, 1 + numInputs),
@@ -862,6 +903,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       publicRecipient: options.publicAddress || MAIN_ASSET_ADDRESS,
       relayerAddress: options.gasRelayerAddress || MAIN_ASSET_ADDRESS,
       outEncryptedNotes: outputEncryptedNotes.map(toHex),
+      randomAuditingPublicKey: randomAuditingPublicKey.toString(),
+      encryptedAuditorNotes,
     };
   }
 
@@ -881,6 +924,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           data.signaturePublicKey = ethers.utils.hexlify(request.sigPk);
           data.signaturePublicKeyHashes = request.sigHashes.map((h) => ethers.BigNumber.from(h).toString());
           data.serialNumbers = request.serialNumbers.map((sn) => ethers.BigNumber.from(sn).toString());
+          data.randomAuditingPublicKey = request.randomAuditingPublicKey.toString();
+          data.encryptedAuditorNotes = request.encryptedAuditorNotes.map((n) => n.toString());
           data.updatedAt = MystikoHandler.now();
           return data;
         })

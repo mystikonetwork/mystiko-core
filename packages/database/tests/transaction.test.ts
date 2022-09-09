@@ -112,6 +112,8 @@ test('test insert', async () => {
     publicAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
     gasRelayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     signature: 'baadbeef',
+    randomAuditingPublicKey: '86473822',
+    encryptedAuditorNotes: ['1', '2'],
     type: TransactionEnum.WITHDRAW,
     status: TransactionStatus.SUCCEEDED,
     errorMessage: 'error',
@@ -148,6 +150,8 @@ test('test insert', async () => {
     expect(transaction.publicAddress).toBe('0x80525A2C863107210e0208D60e2694949914c26A');
     expect(transaction.gasRelayerAddress).toBe('0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88');
     expect(transaction.signature).toBe('baadbeef');
+    expect(transaction.randomAuditingPublicKey).toBe('86473822');
+    expect(transaction.encryptedAuditorNotes).toStrictEqual(['1', '2']);
     expect(transaction.type).toBe(TransactionEnum.WITHDRAW);
     expect(transaction.status).toBe(TransactionStatus.SUCCEEDED);
     expect(transaction.errorMessage).toBe('error');
@@ -190,6 +194,8 @@ test('test collection clear', async () => {
     publicAddress: '0x80525A2C863107210e0208D60e2694949914c26A',
     gasRelayerAddress: '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88',
     signature: 'baadbeef',
+    randomAuditingPublicKey: '86473822',
+    encryptedAuditorNotes: ['1', '2'],
     type: TransactionEnum.WITHDRAW,
     status: TransactionStatus.SUCCEEDED,
     errorMessage: 'error',

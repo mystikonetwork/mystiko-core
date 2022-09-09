@@ -7,6 +7,7 @@ import {
 import { Chain, Commitment, ContractType } from '@mystikonetwork/database';
 import { DefaultMystikoIndexerFactory, MystikoIndexerClient } from '@mystikonetwork/indexer-client';
 import { promiseWithTimeout } from '@mystikonetwork/utils';
+import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
   CommitmentIncludedEvent,
@@ -161,7 +162,7 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         contractAddress: rawEvent.contractAddress,
         transactionHash: rawEvent.txHash,
         commitmentHash: rawEvent.commitHash,
-        leafIndex: rawEvent.leafIndex,
+        leafIndex: ethers.BigNumber.from(rawEvent.leafIndex),
         rollupFee: rawEvent.rollupFee,
         encryptedNote: rawEvent.encryptedNote,
       }));

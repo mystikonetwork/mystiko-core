@@ -31,4 +31,6 @@ export const transactionCollectionMethods: TransactionCollectionMethods = {
 export const transactionCollectionMigrations = {
   /* istanbul ignore next */
   1: defaultMigrationStrategy,
+  /* istanbul ignore next */
+  2: defaultMigrationStrategy,
 };

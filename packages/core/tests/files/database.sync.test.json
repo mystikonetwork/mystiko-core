@@ -2234,7 +2234,7 @@
     },
     {
       "name": "transactions",
-      "schemaHash": "bb01ecf24b0a87cf7db3b597355190ff",
+      "schemaHash": "266bf20cbe1274370dae7ee0093649a7",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
