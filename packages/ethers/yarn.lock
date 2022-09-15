@@ -901,8 +901,8 @@
 
 "@mystikonetwork/config@^0.2.0":
   version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.2.0/ce24b20d3ba91467d475b6384f695a8f76a2a3b4#ce24b20d3ba91467d475b6384f695a8f76a2a3b4"
-  integrity sha512-VRo3Fri7MSXAUO0e8oDJyHRvjs2PN4xWiZrRZclmvlJVcb0cx9VV33KeDn1+4g8BIBdqGaHYUgJwZ9GNV34dnQ==
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.2.0/f2f20577339d82dc942aa6fb7a367629ca4815c9#f2f20577339d82dc942aa6fb7a367629ca4815c9"
+  integrity sha512-6iSoTnlhGvYGSfd+NCXC31dwGp/xF/E9kPhMFuyEcQzct48leROvmRKbJiU5lfxkIFJuN84u1od+4ampZs6tRg==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"
