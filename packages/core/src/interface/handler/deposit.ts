@@ -11,6 +11,7 @@ export type DepositQuoteOptions = {
 
 export type DepositQuote = {
   minAmount: number;
+  maxAmount: number;
   minRollupFeeAmount: number;
   rollupFeeAssetSymbol: string;
   minBridgeFeeAmount: number;

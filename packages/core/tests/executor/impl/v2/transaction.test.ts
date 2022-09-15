@@ -16,8 +16,11 @@ import {
   TransactionEnum,
   TransactionStatus,
 } from '@mystikonetwork/database';
+import { ECIES } from '@mystikonetwork/ecies';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
+import { Point, SecretSharing } from '@mystikonetwork/secret-share';
 import { readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
+import BN from 'bn.js';
 import { ethers } from 'ethers';
 import {
   AccountHandlerV2,
@@ -44,6 +47,8 @@ let etherWallet: ethers.Wallet;
 let mystikoAccount: Account;
 let mystikoSigner: PrivateKeySigner;
 const walletPassword = 'P@ssw0rd';
+const auditorSecretKeys: BN[] = [];
+const auditorPublicKeys: BN[] = [];
 
 function getPoolContractConfig(
   chainId: number,
@@ -119,6 +124,7 @@ async function setupMocks(options: MockSetupOptions): Promise<TestOptions> {
   } else {
     await mockCommitmentPool.mock.transact.reverts();
   }
+  await mockCommitmentPool.mock.getAllAuditorPublicKeys.returns(auditorPublicKeys.map((pk) => pk.toString()));
   return Promise.resolve(testOptions);
 }
 
@@ -210,6 +216,26 @@ async function checkTransaction(
     expect(statusCallback.mock.calls[3][1]).toBe(TransactionStatus.PENDING);
     expect(statusCallback.mock.calls[3][2]).toBe(TransactionStatus.SUCCEEDED);
   }
+  const { numOfAuditors, auditingThreshold } = executor.protocol;
+  const encryptedAuditorNotes = tx.encryptedAuditorNotes || [];
+  expect(encryptedAuditorNotes.length).toBe(numInput * numOfAuditors);
+  for (let i = 0; i < numInput; i += 1) {
+    const decryptedShares: Point[] = [];
+    for (let j = 0; j < numOfAuditors; j += 1) {
+      const auditorSk = auditorSecretKeys[j];
+      const randomAuditingPublicKey = toBN(tx.randomAuditingPublicKey || '0');
+      decryptedShares.push({
+        x: toBN(j + 1),
+        y: ECIES.decrypt(
+          toBN(encryptedAuditorNotes[i * numOfAuditors + j]),
+          auditorSk,
+          randomAuditingPublicKey,
+        ),
+      });
+    }
+    const commitment = SecretSharing.recover(decryptedShares.slice(0, auditingThreshold));
+    expect(commitment.toString()).toBe(inputCommitments[i].commitmentHash);
+  }
 }
 
 beforeAll(async () => {
@@ -243,6 +269,11 @@ beforeAll(async () => {
   context.commitments = new CommitmentHandlerV2(context);
   context.transactions = new TransactionHandlerV2(context);
   executor = new TransactionExecutorV2(context);
+  for (let i = 0; i < executor.protocol.numOfAuditors; i += 1) {
+    const sk = ECIES.generateSecretKey();
+    auditorSecretKeys.push(sk);
+    auditorPublicKeys.push(ECIES.publicKey(sk));
+  }
 });
 
 afterAll(async () => {

@@ -60,6 +60,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   public quote(options: DepositQuoteOptions, config: DepositContractConfig): Promise<DepositQuote> {
     return Promise.resolve({
       minAmount: config.minAmountNumber,
+      maxAmount: config.maxAmountNumber,
       minRollupFeeAmount: config.minRollupFeeNumber,
       rollupFeeAssetSymbol: config.assetSymbol,
       minBridgeFeeAmount: config.minBridgeFeeNumber,
@@ -196,6 +197,12 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     if (toBN(amount).lt(contractConfig.minAmount)) {
       return createErrorPromise(
         `deposit amount cannot be less than ${contractConfig.minAmountNumber}`,
+        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+      );
+    }
+    if (toBN(amount).gt(contractConfig.maxAmount)) {
+      return createErrorPromise(
+        `deposit amount cannot be greater than ${contractConfig.maxAmountNumber}`,
         MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
       );
     }

@@ -13,8 +13,5 @@ module.exports = {
       },
     },
   },
-  moduleNameMapper: {
-    '^zokrates-js': 'zokrates-js/node',
-  },
   setupFilesAfterEnv: ['./jest.setup.js'],
 };

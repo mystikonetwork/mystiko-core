@@ -9,7 +9,7 @@ import {
 } from '../constants';
 
 const transactionLiteral = {
-  version: 1,
+  version: 2,
   title: 'transaction schema',
   description: 'a document contains transaction information',
   primaryKey: 'id',
@@ -145,6 +145,17 @@ const transactionLiteral = {
     signature: {
       type: 'string',
       pattern: HEX_REGEX,
+    },
+    randomAuditingPublicKey: {
+      type: 'string',
+      pattern: BN_REGEX,
+    },
+    encryptedAuditorNotes: {
+      type: 'array',
+      items: {
+        type: 'string',
+        pattern: BN_REGEX,
+      },
     },
     type: {
       type: 'string',
