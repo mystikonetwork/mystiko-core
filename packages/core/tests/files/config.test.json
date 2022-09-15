@@ -41,6 +41,7 @@
           "peerChainId": 97,
           "peerContractAddress": "0x6FbC93BD1F8dc453ded554a087B161837046a143",
           "minAmount": "100000000000000000",
+          "maxAmount": "100000000000000000000",
           "minBridgeFee": "1000",
           "minExecutorFee": "5000000000000000"
         },
@@ -56,6 +57,8 @@
           "peerChainId": 97,
           "peerContractAddress": "0xb3C2b6bb56AA3C0F5D4d8449A9A9c006b4047606",
           "minAmount": "100000000000000000",
+          "maxAmount": "100000000000000000000",
+          "serviceFee": 1000,
           "minBridgeFee": "1000",
           "minExecutorFee": "5000000000000000"
         },
@@ -71,6 +74,7 @@
           "peerChainId": 97,
           "peerContractAddress": "0x8291FC5FeAB9fC267345a7f270F1ce227778B771",
           "minAmount": "100000",
+          "maxAmount": "100000000",
           "minExecutorFee": "5000"
         }
       ],
@@ -204,7 +208,8 @@
           "startBlock": 18759788,
           "bridgeType": "loop",
           "poolAddress": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
-          "minAmount": "100000"
+          "minAmount": "100000",
+          "maxAmount": "100000000"
         },
         {
           "version": 2,
@@ -213,7 +218,9 @@
           "startBlock": 18759760,
           "bridgeType": "loop",
           "poolAddress": "0xfbb1A6Da247b1D3a261Dbdb425295d29177cf47A",
-          "minAmount": "100000000000000000"
+          "serviceFee": 1000,
+          "minAmount": "100000000000000000",
+          "maxAmount": "100000000000000000000"
         },
         {
           "version": 2,
@@ -222,7 +229,8 @@
           "startBlock": 18759687,
           "bridgeType": "loop",
           "poolAddress": "0xae5009F4B58E6eF25Fee71174A827042c543ac46",
-          "minAmount": "100000000000000000"
+          "minAmount": "100000000000000000",
+          "maxAmount": "100000000000000000000"
         },
         {
           "version": 2,
@@ -236,6 +244,7 @@
           "peerChainId": 3,
           "peerContractAddress": "0x32a026860E7a5957a3d98960239af12d92F76441",
           "minAmount": "100000000000000000",
+          "maxAmount": "100000000000000000000",
           "minBridgeFee": "1000",
           "minExecutorFee": "5000000000000000"
         },
@@ -251,6 +260,7 @@
           "peerChainId": 3,
           "peerContractAddress": "0x80610b9B9b30a2a77bE5550fE476B287997010d9",
           "minAmount": "100000",
+          "maxAmount": "1000000000",
           "minBridgeFee": "1000",
           "minExecutorFee": "5000"
         },
@@ -266,6 +276,7 @@
           "peerChainId": 3,
           "peerContractAddress": "0x0c15c7f06Da813290cfeb1f44D80507f6d566165",
           "minAmount": "100000000000000000",
+          "maxAmount": "100000000000000000000",
           "minBridgeFee": "1000",
           "minExecutorFee": "5000000000000000"
         }

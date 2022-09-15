@@ -59,7 +59,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/config": "^0.1.15",
+    "@mystikonetwork/config": "^0.2.0",
     "@mystikonetwork/contracts-abi": "^0.2.0",
     "@mystikonetwork/database": "^0.2.0",
     "@mystikonetwork/ecies": "^0.2.2",

@@ -212,6 +212,7 @@ test('test quote', async () => {
   );
   expect(quote).toStrictEqual({
     minAmount: depositContractConfig.minAmountNumber,
+    maxAmount: depositContractConfig.maxAmountNumber,
     minRollupFeeAmount: depositContractConfig.minRollupFeeNumber,
     rollupFeeAssetSymbol: depositContractConfig.assetSymbol,
     minBridgeFeeAmount: depositContractConfig.minBridgeFeeNumber,
@@ -230,6 +231,7 @@ test('test quote', async () => {
   );
   expect(quote).toStrictEqual({
     minAmount: newDepositContractConfig.minAmountNumber,
+    maxAmount: newDepositContractConfig.maxAmountNumber,
     minRollupFeeAmount: newDepositContractConfig.minRollupFeeNumber,
     rollupFeeAssetSymbol: newDepositContractConfig.assetSymbol,
     minBridgeFeeAmount: newDepositContractConfig.minBridgeFeeNumber,
@@ -323,6 +325,12 @@ test('test invalid options', async () => {
   await expect(executor.summary({ ...options, amount: 0.01 }, depositContractConfig)).rejects.toThrow(
     createError(
       `deposit amount cannot be less than ${depositContractConfig.minAmountNumber}`,
+      MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+    ),
+  );
+  await expect(executor.summary({ ...options, amount: 1000000 }, depositContractConfig)).rejects.toThrow(
+    createError(
+      `deposit amount cannot be greater than ${depositContractConfig.maxAmountNumber}`,
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
@@ -544,7 +552,7 @@ test('test bridge erc20 deposit', async () => {
   await mockERC20.mock.allowance.returns('0');
   await mockERC20.mock.approve.reverts();
   await mockERC20.mock.approve
-    .withArgs(depositContractConfig.address, toDecimals(10.12).toString())
+    .withArgs(depositContractConfig.address, toDecimals(10.11).toString())
     .returns(true);
   const mockCallback = jest.fn();
   const options: DepositOptions = {
