@@ -70,9 +70,9 @@
   },
   "dependencies": {
     "@mystikonetwork/core": "^0.2.0",
-    "@mystikonetwork/protocol": "^0.2.2",
-    "@mystikonetwork/zkp": "^0.2.2",
-    "@mystikonetwork/zkp-browser": "^0.2.2",
+    "@mystikonetwork/protocol": "^0.2.3",
+    "@mystikonetwork/zkp": "^0.2.3",
+    "@mystikonetwork/zkp-browser": "^0.2.3",
     "pouchdb-adapter-idb": "^7.0.0",
     "pouchdb-adapter-memory": "^7.2.2",
     "rxdb": "^12.4.3",
