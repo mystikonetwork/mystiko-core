@@ -219,7 +219,7 @@ test('test quote', async () => {
     bridgeFeeAssetSymbol: depositContractConfig.bridgeFeeAsset.assetSymbol,
     minExecutorFeeAmount: depositContractConfig.minExecutorFeeNumber,
     executorFeeAssetSymbol: depositContractConfig.executorFeeAsset.assetSymbol,
-    recommendedAmounts: depositContractConfig.recommendedAmountsNumber,
+    recommendedAmounts: [1, 10, 100],
   });
   const rawDepositContractConfig = depositContractConfig.copyData();
   rawDepositContractConfig.bridgeFeeAssetAddress = depositContractConfig.assetAddress;
@@ -238,7 +238,7 @@ test('test quote', async () => {
     bridgeFeeAssetSymbol: newDepositContractConfig.bridgeFeeAsset.assetSymbol,
     minExecutorFeeAmount: newDepositContractConfig.minExecutorFeeNumber,
     executorFeeAssetSymbol: newDepositContractConfig.executorFeeAsset.assetSymbol,
-    recommendedAmounts: newDepositContractConfig.recommendedAmountsNumber,
+    recommendedAmounts: [1, 10, 100],
   });
 });
 

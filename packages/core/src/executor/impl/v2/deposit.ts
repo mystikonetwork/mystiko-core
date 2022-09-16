@@ -67,7 +67,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
       minExecutorFeeAmount: config.minExecutorFeeNumber,
       executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
-      recommendedAmounts: config.recommendedAmountsNumber,
+      recommendedAmounts: config.recommendedAmountsNumber.filter(
+        (amount) => amount >= config.minAmountNumber && amount <= config.maxAmountNumber,
+      ),
     });
   }
 
