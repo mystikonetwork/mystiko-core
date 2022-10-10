@@ -44,7 +44,7 @@ test('test initialize with config file', async () => {
       chains.map((c) => c.update({ $set: { providers: [{ url: 'http://localhost:32134' }] } })),
     );
   }
-  const provider = await mystiko.providers?.getProvider(3);
+  const provider = await mystiko.providers?.getProvider(11155111);
   await expect(provider?.getNetwork()).rejects.toThrow();
   await mystiko.db?.remove();
 });

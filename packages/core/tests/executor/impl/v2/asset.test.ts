@@ -42,7 +42,7 @@ beforeAll(async () => {
     },
   };
   const providerConfigGetter = (chainId: number) => {
-    if (chainId === 3) {
+    if (chainId === 11155111) {
       return Promise.resolve([{ url: 'http://localhost:8545' } as ProviderConnection]);
     }
     return Promise.resolve([]);
@@ -65,7 +65,7 @@ test('test erc20 balance', async () => {
   await mockERC20.mock.balanceOf.returns('0');
   await mockERC20.mock.balanceOf.withArgs(addressToCheck).returns(toDecimals(1024, 16).toString());
   const options = {
-    chainId: 3,
+    chainId: 11155111,
     assetAddress: mockERC20.address,
     address: addressToCheck,
   };
@@ -78,7 +78,7 @@ test('test erc20 balance', async () => {
 
 test('test main asset balance', async () => {
   const options = {
-    chainId: 3,
+    chainId: 11155111,
     address: etherWallet.address,
   };
   let balance = await executor.balance(options);
@@ -94,7 +94,7 @@ test('test approve', async () => {
   await mockERC20.mock.approve.reverts();
   await mockERC20.mock.approve.withArgs(addressToCheck, toDecimals(150).toString()).returns(true);
   const options: AssetExecutorApproveOptions = {
-    chainId: 3,
+    chainId: 11155111,
     assetAddress: mockERC20.address,
     assetSymbol: 'MTT',
     assetDecimals: 18,
@@ -121,7 +121,7 @@ test('test no need approve', async () => {
     .returns(toDecimals(200).toString());
   await mockERC20.mock.approve.reverts();
   const options = {
-    chainId: 3,
+    chainId: 11155111,
     assetAddress: mockERC20.address,
     assetSymbol: 'MTT',
     assetDecimals: 18,

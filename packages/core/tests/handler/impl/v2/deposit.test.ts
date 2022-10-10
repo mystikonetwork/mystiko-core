@@ -38,7 +38,7 @@ async function getDepositOptions(): Promise<DepositOptions> {
   const signer = new PrivateKeySigner(context.config, context.providers);
   const account = (await context.accounts.find())[0];
   return Promise.resolve({
-    srcChainId: 3,
+    srcChainId: 11155111,
     dstChainId: 97,
     assetSymbol: 'MTT',
     bridge: BridgeType.TBRIDGE,
@@ -75,7 +75,7 @@ afterAll(async () => {
 test('test count', async () => {
   let count = await handler.count();
   expect(count).toBe(5);
-  count = await handler.count({ selector: { chainId: 3 } });
+  count = await handler.count({ selector: { chainId: 11155111 } });
   expect(count).toBe(1);
 });
 

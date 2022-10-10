@@ -41,7 +41,7 @@ async function getTransactionOptions(): Promise<TransactionOptions> {
   return Promise.resolve({
     walletPassword: 'P@assw0rd',
     type: TransactionEnum.TRANSFER,
-    chainId: 3,
+    chainId: 11155111,
     assetSymbol: 'MTT',
     bridgeType: BridgeType.TBRIDGE,
     version: 2,
@@ -77,7 +77,7 @@ afterAll(async () => {
 test('test count', async () => {
   let count = await handler.count();
   expect(count).toBe(2);
-  count = await handler.count({ selector: { chainId: 3 } });
+  count = await handler.count({ selector: { chainId: 11155111 } });
   expect(count).toBe(1);
 });
 

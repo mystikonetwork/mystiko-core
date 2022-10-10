@@ -12,19 +12,19 @@ beforeAll(async () => {
     version: '0.1.0',
     chains: [
       {
-        chainId: 3,
-        name: 'Ethereum Ropsten',
+        chainId: 11155111,
+        name: 'Ethereum Sepolia',
         assetSymbol: 'ETH',
-        explorerUrl: 'https://ropsten.etherscan.io',
-        signerEndpoint: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+        explorerUrl: 'https://sepolia.etherscan.io',
+        signerEndpoint: 'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
           {
-            url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+            url: 'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
             timeoutMs: 1000,
             maxTryCount: 3,
           },
           {
-            url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
+            url: 'https://eth-sepolia.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
             timeoutMs: 2000,
             maxTryCount: 4,
           },
@@ -83,36 +83,36 @@ test('test find', async () => {
     config.getChainConfig(5)?.providers.map((p) => p.url),
   );
   chains = await handler.find({
-    selector: { chainId: 3 },
+    selector: { chainId: 11155111 },
   });
   expect(chains.length).toBe(1);
-  expect(chains[0].name).toBe(config.getChainConfig(3)?.name);
-  expect(chains[0].eventFilterSize).toBe(config.getChainConfig(3)?.eventFilterSize);
+  expect(chains[0].name).toBe(config.getChainConfig(11155111)?.name);
+  expect(chains[0].eventFilterSize).toBe(config.getChainConfig(11155111)?.eventFilterSize);
   expect(chains[0].providers.map((p) => p.url)).toStrictEqual(
-    config.getChainConfig(3)?.providers.map((p) => p.url),
+    config.getChainConfig(11155111)?.providers.map((p) => p.url),
   );
 });
 
 test('test findOne', async () => {
   await handler.init();
   expect(await handler.findOne(10)).toBe(null);
-  expect((await handler.findOne(3))?.name).toBe(config.getChainConfig(3)?.name);
+  expect((await handler.findOne(11155111))?.name).toBe(config.getChainConfig(11155111)?.name);
 });
 
 test('test init', async () => {
   await handler.init();
   expect((await handler.find()).length).toBe(2);
-  const updatedAt = (await handler.findOne(3))?.updatedAt;
+  const updatedAt = (await handler.findOne(11155111))?.updatedAt;
   let rawConfig = config.copyData();
   rawConfig.chains[0].eventFilterSize = 700000000;
   rawConfig.chains[1].chainId = 10;
   context.config = await MystikoConfig.createFromRaw(rawConfig);
   await handler.init();
   expect((await handler.find()).length).toBe(3);
-  expect((await handler.findOne(3))?.eventFilterSize).toBe(700000000);
-  expect((await handler.findOne(3))?.updatedAt).not.toBe(updatedAt);
+  expect((await handler.findOne(11155111))?.eventFilterSize).toBe(700000000);
+  expect((await handler.findOne(11155111))?.updatedAt).not.toBe(updatedAt);
   expect(await handler.findOne(10)).not.toBe(null);
-  const chain1 = await handler.findOne(3);
+  const chain1 = await handler.findOne(11155111);
   if (!chain1) {
     throw new Error('chain id=3 should not be undefined');
   }
@@ -122,27 +122,27 @@ test('test init', async () => {
   rawConfig.chains[1].providers = [rawConfig.chains[1].providers[0]];
   context.config = await MystikoConfig.createFromRaw(rawConfig);
   await handler.init();
-  expect((await handler.findOne(3))?.providers.length).toBe(2);
-  expect((await handler.findOne(3))?.name).toBe('Changed Name');
+  expect((await handler.findOne(11155111))?.providers.length).toBe(2);
+  expect((await handler.findOne(11155111))?.name).toBe('Changed Name');
   expect((await handler.findOne(5))?.providers.length).toBe(1);
 });
 
 test('test update', async () => {
-  expect(await handler.update(3, {})).toBe(null);
+  expect(await handler.update(11155111, {})).toBe(null);
   await handler.init();
-  const chain = await handler.findOne(3);
+  const chain = await handler.findOne(11155111);
   const name = chain?.name;
   let updatedAt = chain?.updatedAt;
   const providers = chain?.providers;
-  await handler.update(3, {});
-  await handler.update(3, { name: '', providers: [] });
+  await handler.update(11155111, {});
+  await handler.update(11155111, { name: '', providers: [] });
   expect(chain?.name).toBe(name);
   expect(chain?.updatedAt).toBe(updatedAt);
   expect(chain?.providers).toStrictEqual(providers);
-  await handler.update(3, {
+  await handler.update(11155111, {
     providers: [
-      { url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
-      { url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
+      { url: 'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
+      { url: 'https://eth-sepolia.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
     ],
   });
   expect(chain?.name).toBe(name);
@@ -150,12 +150,12 @@ test('test update', async () => {
   expect(chain?.providers).toStrictEqual(providers);
   expect(chain?.name).toBe(name);
   expect(chain?.updatedAt).toBe(updatedAt);
-  await handler.update(3, { name });
-  await handler.update(3, {
+  await handler.update(11155111, { name });
+  await handler.update(11155111, {
     name: 'New Chain Name',
     providers: [
       {
-        url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
+        url: 'https://eth-sepolia.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
       },
       {
         url: 'http://localhost:34567',
@@ -171,7 +171,7 @@ test('test update', async () => {
   expect(chain?.nameOverride).toBe(1);
   expect(chain?.updatedAt).not.toBe(updatedAt);
   expect(chain?.providers.map((p) => p.url)).toStrictEqual([
-    'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
+    'https://eth-sepolia.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
     'http://localhost:34567',
     'http://localhost:12345',
   ]);
@@ -179,7 +179,7 @@ test('test update', async () => {
   expect(chain?.providers.map((p) => p.timeoutMs)).toStrictEqual([2000, 1000, undefined]);
   expect(chain?.providers.map((p) => p.maxTryCount)).toStrictEqual([4, 10, undefined]);
   updatedAt = chain?.updatedAt;
-  await handler.update(3, {
+  await handler.update(11155111, {
     providers: [
       { url: 'http://localhost:34567' },
       { url: 'http://localhost:34567' },
@@ -198,13 +198,13 @@ test('test update', async () => {
 test('test update invalid url', async () => {
   await handler.init();
   await expect(
-    handler.update(3, { providers: [{ url: 'http://localhost:12345' }, { url: 'not_a_url' }] }),
+    handler.update(11155111, { providers: [{ url: 'http://localhost:12345' }, { url: 'not_a_url' }] }),
   ).rejects.toThrow(createError('invalid provider url not_a_url', MystikoErrorCode.INVALID_PROVIDER_URL));
 });
 
 test('test reset', async () => {
   await handler.init();
-  await handler.update(3, {
+  await handler.update(11155111, {
     name: 'My New Name',
     providers: [
       { url: 'http://localhost:34567' },
@@ -217,11 +217,11 @@ test('test reset', async () => {
     providers: [{ url: 'http://localhost:34567' }, { url: 'http://localhost:12345' }],
   });
   expect(await handler.reset(100)).toBe(null);
-  let chain = await handler.reset(3);
-  expect(chain?.name).toBe('Ethereum Ropsten');
+  let chain = await handler.reset(11155111);
+  expect(chain?.name).toBe('Ethereum Sepolia');
   expect(chain?.providers.map((p) => p.url)).toStrictEqual([
-    'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-    'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
+    'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    'https://eth-sepolia.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
   ]);
   expect(chain?.nameOverride).toBe(undefined);
   expect(chain?.providerOverride).toBe(undefined);
