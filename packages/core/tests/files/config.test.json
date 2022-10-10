@@ -565,6 +565,23 @@
       ]
     },
     {
+      "name": "zokrates-1.0-rollup2",
+      "type": "rollup2",
+      "isDefault": true,
+      "programFile": [
+        "circuits/dist/zokrates/dev/Rollup2.program.gz"
+      ],
+      "abiFile": [
+        "circuits/dist/zokrates/dev/Rollup2.abi.json"
+      ],
+      "provingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup2.pkey.gz"
+      ],
+      "verifyingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup2.vkey.gz"
+      ]
+    },
+    {
       "name": "zokrates-1.0-rollup4",
       "type": "rollup4",
       "isDefault": true,
@@ -579,6 +596,23 @@
       ],
       "verifyingKeyFile": [
         "circuits/dist/zokrates/dev/Rollup4.vkey.gz"
+      ]
+    },
+    {
+      "name": "zokrates-1.0-rollup8",
+      "type": "rollup8",
+      "isDefault": true,
+      "programFile": [
+        "circuits/dist/zokrates/dev/Rollup8.program.gz"
+      ],
+      "abiFile": [
+        "circuits/dist/zokrates/dev/Rollup8.abi.json"
+      ],
+      "provingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup8.pkey.gz"
+      ],
+      "verifyingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup8.vkey.gz"
       ]
     },
     {
