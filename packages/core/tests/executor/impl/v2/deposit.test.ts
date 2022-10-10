@@ -69,9 +69,9 @@ type TestOptions = {
 };
 
 function createTestOptionsAndConfig(): TestOptions {
-  const depositContractConfig = getDepositContractConfig(3, 97, 'MTT', BridgeType.TBRIDGE);
+  const depositContractConfig = getDepositContractConfig(11155111, 97, 'MTT', BridgeType.TBRIDGE);
   const options: DepositOptions = {
-    srcChainId: 3,
+    srcChainId: 11155111,
     dstChainId: 97,
     assetSymbol: 'MTT',
     bridge: BridgeType.TBRIDGE,
@@ -205,9 +205,9 @@ afterAll(async () => {
 });
 
 test('test quote', async () => {
-  const depositContractConfig = getDepositContractConfig(3, 97, 'MTT', BridgeType.TBRIDGE);
+  const depositContractConfig = getDepositContractConfig(11155111, 97, 'MTT', BridgeType.TBRIDGE);
   let quote = await executor.quote(
-    { srcChainId: 3, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
+    { srcChainId: 11155111, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
     depositContractConfig,
   );
   expect(quote).toStrictEqual({
@@ -226,7 +226,7 @@ test('test quote', async () => {
   rawDepositContractConfig.executorFeeAssetAddress = MAIN_ASSET_ADDRESS;
   const newDepositContractConfig = depositContractConfig.mutate(rawDepositContractConfig);
   quote = await executor.quote(
-    { srcChainId: 3, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
+    { srcChainId: 11155111, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
     newDepositContractConfig,
   );
   expect(quote).toStrictEqual({
@@ -514,12 +514,12 @@ test('test loop erc20 deposit without approve', async () => {
 });
 
 test('test bridge main deposit', async () => {
-  const depositContractConfig = getDepositContractConfig(97, 3, 'BNB', BridgeType.TBRIDGE);
+  const depositContractConfig = getDepositContractConfig(97, 11155111, 'BNB', BridgeType.TBRIDGE);
   await mockMystikoV2Bridge.mock.deposit.returns();
   const mockCallback = jest.fn();
   const options: DepositOptions = {
     srcChainId: 97,
-    dstChainId: 3,
+    dstChainId: 11155111,
     assetSymbol: 'BNB',
     bridge: BridgeType.TBRIDGE,
     amount: 0.1,
@@ -545,7 +545,7 @@ test('test bridge main deposit', async () => {
 });
 
 test('test bridge erc20 deposit', async () => {
-  const depositContractConfig = getDepositContractConfig(97, 3, 'MTT', BridgeType.TBRIDGE);
+  const depositContractConfig = getDepositContractConfig(97, 11155111, 'MTT', BridgeType.TBRIDGE);
   await mockMystikoV2Bridge.mock.deposit.returns();
   await mockERC20.mock.balanceOf.returns('0');
   await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
@@ -557,7 +557,7 @@ test('test bridge erc20 deposit', async () => {
   const mockCallback = jest.fn();
   const options: DepositOptions = {
     srcChainId: 97,
-    dstChainId: 3,
+    dstChainId: 11155111,
     assetSymbol: 'MTT',
     bridge: BridgeType.TBRIDGE,
     amount: 10,

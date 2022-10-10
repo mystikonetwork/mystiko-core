@@ -45,7 +45,7 @@ let depositHandler: DepositHandlerV2;
 let assetHandler: AssetHandlerV2;
 let executor: CommitmentExecutorV2;
 
-const ropstenCurrentBlock = 12230323;
+const sepoliaCurrentBlock = 12230323;
 const bscCurrentBlock = 18919080;
 
 class TestProvider extends ethers.providers.JsonRpcProvider {
@@ -61,8 +61,8 @@ class TestProvider extends ethers.providers.JsonRpcProvider {
   }
 
   public getBlockNumber(): Promise<number> {
-    if (this.chainId === 3) {
-      return Promise.resolve(ropstenCurrentBlock);
+    if (this.chainId === 11155111) {
+      return Promise.resolve(sepoliaCurrentBlock);
     }
     return Promise.resolve(bscCurrentBlock);
   }
@@ -157,13 +157,15 @@ test('test import all events', async () => {
   await executor.import({ walletPassword });
   expect((await commitmentHandler.find()).length).toBe(72);
   expect((await nullifierHandler.find()).length).toBe(44);
-  expect((await chainHandler.findOne(3))?.syncedBlockNumber).toBe(ropstenCurrentBlock);
+  expect((await chainHandler.findOne(11155111))?.syncedBlockNumber).toBe(sepoliaCurrentBlock);
   expect((await chainHandler.findOne(97))?.syncedBlockNumber).toBe(bscCurrentBlock);
   const contracts = await contractHandler.find();
   for (let i = 0; i < contracts.length; i += 1) {
     const contract = contracts[i];
     if (contract.type === ContractType.POOL) {
-      expect(contract.syncedBlockNumber).toBe(contract.chainId === 3 ? ropstenCurrentBlock : bscCurrentBlock);
+      expect(contract.syncedBlockNumber).toBe(
+        contract.chainId === 11155111 ? sepoliaCurrentBlock : bscCurrentBlock,
+      );
     }
   }
   const deposits = await depositHandler.find();
@@ -204,7 +206,7 @@ test('test import all events', async () => {
   commitment = await commitmentHandler.findOne('01G1YZ9CDPRGHDQ0C8VH8XAWWF');
   expect(commitment?.status).toBe(CommitmentStatus.INCLUDED);
   commitment = await commitmentHandler.findOne({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0xeb2a6545516ce618807c07BB04E9CCb8ED7D8e6F',
     commitmentHash: '11180465719024310907677069927739127182050210721078823347787007200803871969694',
   });
@@ -220,7 +222,7 @@ test('test import all events', async () => {
 });
 
 test('import commitments of one chain', async () => {
-  await executor.import({ walletPassword, chainId: 3 });
+  await executor.import({ walletPassword, chainId: 11155111 });
   expect((await commitmentHandler.find()).length).toBe(12);
 });
 

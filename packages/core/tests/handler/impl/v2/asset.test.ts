@@ -38,8 +38,8 @@ afterAll(async () => {
 
 test('test chains', async () => {
   let chains = await handler.chains();
-  expect(chains.map((c) => c.chainId).sort()).toStrictEqual([3, 97]);
-  const chain = await context.chains.findOne(3);
+  expect(chains.map((c) => c.chainId).sort()).toStrictEqual([11155111, 97]);
+  const chain = await context.chains.findOne(11155111);
   await chain?.remove();
   chains = await handler.chains();
   expect(chains.map((c) => c.chainId).sort()).toStrictEqual([97]);
@@ -48,7 +48,7 @@ test('test chains', async () => {
 test('test assets', async () => {
   let assets = await handler.assets(1024);
   expect(assets).toStrictEqual([]);
-  assets = await handler.assets(3);
+  assets = await handler.assets(11155111);
   expect(assets.sort()).toStrictEqual(['MTT']);
   assets = await handler.assets(97);
   expect(assets.sort()).toStrictEqual(['BNB', 'MTT']);
@@ -57,18 +57,18 @@ test('test assets', async () => {
 test('test bridges', async () => {
   let bridges = await handler.bridges(1024, 'MTT');
   expect(bridges).toStrictEqual([]);
-  bridges = await handler.bridges(3, 'mUSD');
+  bridges = await handler.bridges(11155111, 'mUSD');
   expect(bridges).toStrictEqual([]);
-  bridges = await handler.bridges(3, 'MTT');
+  bridges = await handler.bridges(11155111, 'MTT');
   expect(bridges).toStrictEqual([BridgeType.TBRIDGE]);
   bridges = await handler.bridges(97, 'BNB');
   expect(bridges).toStrictEqual([BridgeType.LOOP]);
 });
 
 test('test pools', async () => {
-  let pools = await handler.pools(3, 'MTT', BridgeType.LOOP);
+  let pools = await handler.pools(11155111, 'MTT', BridgeType.LOOP);
   expect(pools).toStrictEqual([]);
-  pools = await handler.pools(3, 'MTT', BridgeType.TBRIDGE);
+  pools = await handler.pools(11155111, 'MTT', BridgeType.TBRIDGE);
   expect(pools.map((c) => c.address)).toStrictEqual(['0xeb2a6545516ce618807c07BB04E9CCb8ED7D8e6F']);
   pools = await handler.pools(97, 'BNB', BridgeType.LOOP);
   expect(pools.map((c) => c.address)).toStrictEqual(['0xae5009F4B58E6eF25Fee71174A827042c543ac46']);
@@ -113,7 +113,7 @@ test('test balances', async () => {
   expect(balances.get('BNB')?.unspentTotal).toBe(0.2);
   expect(balances.get('BNB')?.pendingTotal).toBe(0);
   balances = await handler.balances({
-    chainId: [3, 97],
+    chainId: [11155111, 97],
     assets: ['BNB', 'MTT'],
     bridgeType: [BridgeType.LOOP],
   });

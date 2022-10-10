@@ -72,7 +72,7 @@ function getTestOptions(): TestOptions {
   const transferOptions: TransactionOptions = {
     walletPassword,
     type: TransactionEnum.TRANSFER,
-    chainId: 3,
+    chainId: 11155111,
     assetSymbol: 'MTT',
     bridgeType: BridgeType.TBRIDGE,
     version: 2,
@@ -85,7 +85,7 @@ function getTestOptions(): TestOptions {
   const withdrawOptions: TransactionOptions = {
     walletPassword,
     type: TransactionEnum.WITHDRAW,
-    chainId: 3,
+    chainId: 11155111,
     assetSymbol: 'MTT',
     bridgeType: BridgeType.TBRIDGE,
     version: 2,
@@ -311,7 +311,7 @@ test('test quote', async () => {
   quote = await executor.quote(options, contractConfig);
   expect(quote.valid).toBe(true);
   expect(quote.invalidReason).toBe(undefined);
-  options.chainId = 3;
+  options.chainId = 11155111;
   options.type = TransactionEnum.WITHDRAW;
   options.assetSymbol = 'MTT';
   options.bridgeType = BridgeType.TBRIDGE;

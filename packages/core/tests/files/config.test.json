@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "chains": [
     {
-      "name": "Ethereum Ropsten",
+      "name": "Ethereum Sepolia",
       "assetSymbol": "ETH",
       "assetDecimals": 18,
       "recommendedAmounts": [
@@ -11,23 +11,17 @@
         "10000000000000000000",
         "100000000000000000000"
       ],
-      "chainId": 3,
-      "explorerUrl": "https://ropsten.etherscan.io",
+      "chainId": 11155111,
+      "explorerUrl": "https://sepolia.etherscan.io",
       "providers": [
         {
-          "url": "wss://ropsten.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+          "url": "wss://sepolia.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
         },
         {
-          "url": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
-        },
-        {
-          "url": "wss://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5"
-        },
-        {
-          "url": "https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5"
+          "url": "https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
         }
       ],
-      "signerEndpoint": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      "signerEndpoint": "https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "depositContracts": [
         {
           "version": 2,
@@ -241,7 +235,7 @@
           "poolAddress": "0x4fe8bfa6e1E1BD6E27a1Eb33F036020DA27F9541",
           "disabled": false,
           "type": "deposit",
-          "peerChainId": 3,
+          "peerChainId": 11155111,
           "peerContractAddress": "0x32a026860E7a5957a3d98960239af12d92F76441",
           "minAmount": "100000000000000000",
           "maxAmount": "100000000000000000000",
@@ -257,7 +251,7 @@
           "poolAddress": "0x73Ddcd8fdb507B11372702DF69ad2742D06eF36C",
           "disabled": false,
           "type": "deposit",
-          "peerChainId": 3,
+          "peerChainId": 11155111,
           "peerContractAddress": "0x80610b9B9b30a2a77bE5550fE476B287997010d9",
           "minAmount": "100000",
           "maxAmount": "1000000000",
@@ -273,7 +267,7 @@
           "poolAddress": "0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA",
           "disabled": false,
           "type": "deposit",
-          "peerChainId": 3,
+          "peerChainId": 11155111,
           "peerContractAddress": "0x0c15c7f06Da813290cfeb1f44D80507f6d566165",
           "minAmount": "100000000000000000",
           "maxAmount": "100000000000000000000",
@@ -565,6 +559,23 @@
       ]
     },
     {
+      "name": "zokrates-1.0-rollup2",
+      "type": "rollup2",
+      "isDefault": true,
+      "programFile": [
+        "circuits/dist/zokrates/dev/Rollup2.program.gz"
+      ],
+      "abiFile": [
+        "circuits/dist/zokrates/dev/Rollup2.abi.json"
+      ],
+      "provingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup2.pkey.gz"
+      ],
+      "verifyingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup2.vkey.gz"
+      ]
+    },
+    {
       "name": "zokrates-1.0-rollup4",
       "type": "rollup4",
       "isDefault": true,
@@ -579,6 +590,23 @@
       ],
       "verifyingKeyFile": [
         "circuits/dist/zokrates/dev/Rollup4.vkey.gz"
+      ]
+    },
+    {
+      "name": "zokrates-1.0-rollup8",
+      "type": "rollup8",
+      "isDefault": true,
+      "programFile": [
+        "circuits/dist/zokrates/dev/Rollup8.program.gz"
+      ],
+      "abiFile": [
+        "circuits/dist/zokrates/dev/Rollup8.abi.json"
+      ],
+      "provingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup8.pkey.gz"
+      ],
+      "verifyingKeyFile": [
+        "circuits/dist/zokrates/dev/Rollup8.vkey.gz"
       ]
     },
     {

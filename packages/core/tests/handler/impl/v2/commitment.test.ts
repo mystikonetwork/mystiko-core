@@ -72,9 +72,9 @@ beforeEach(async () => {
   account1 = await accountHandler.create(walletPassword);
   account2 = await accountHandler.create(walletPassword);
   await context.db.commitments.bulkInsert([
-    createCommitment(3, '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D', 'ETH', '1'),
+    createCommitment(11155111, '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D', 'ETH', '1'),
     createCommitment(
-      3,
+      11155111,
       '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
       'MTT',
       '2',
@@ -82,7 +82,7 @@ beforeEach(async () => {
       CommitmentStatus.QUEUED,
     ),
     createCommitment(
-      3,
+      11155111,
       '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
       'MTT',
       '3',
@@ -119,7 +119,7 @@ test('test find', async () => {
 
 test('test findByContract', async () => {
   let commitments = await handler.findByContract({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0x76cf9b3148d907f80d0a8567ed47c3fa971bbcc9',
   });
   expect(commitments.length).toBe(0);
@@ -129,7 +129,7 @@ test('test findByContract', async () => {
   });
   expect(commitments.length).toBe(0);
   commitments = await handler.findByContract({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
   });
   expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['1', '2', '3']);
@@ -140,13 +140,13 @@ test('test findByContract', async () => {
   });
   expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['4']);
   commitments = await handler.findByContract({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
     statuses: [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED],
   });
   expect(commitments.map((c) => c.commitmentHash).sort()).toStrictEqual(['1', '2']);
   commitments = await handler.findByContract({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
     shieldedAddresses: [account1.shieldedAddress, account2.shieldedAddress],
     statuses: [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED],
@@ -156,13 +156,13 @@ test('test findByContract', async () => {
 
 test('test findOne', async () => {
   let commitment = await handler.findOne({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
     commitmentHash: '100',
   });
   expect(commitment).toBe(null);
   commitment = await handler.findOne({
-    chainId: 3,
+    chainId: 11155111,
     contractAddress: '0x5709faB0715f1BcBd6Ac007d2c574982baCFb71D',
     commitmentHash: '2',
   });

@@ -31,7 +31,7 @@ test('test find', async () => {
   expect(nullifiers.length).toBe(44);
   nullifiers = await handler.find({ selector: { chainId: 97 } });
   expect(nullifiers.length).toBe(42);
-  nullifiers = await handler.find({ selector: { chainId: 3 } });
+  nullifiers = await handler.find({ selector: { chainId: 11155111 } });
   expect(nullifiers.length).toBe(2);
 });
 
