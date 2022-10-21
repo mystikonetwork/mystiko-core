@@ -97,14 +97,10 @@ test('test import', async () => {
   const account1 = await handler.create(walletPassword);
   const secretKey = account1.secretKey(handler.protocol, walletPassword);
   await handler.db.accounts.bulkRemove([account1.id]);
-  const account2 = await handler.create(walletPassword, { secretKey });
+  const account2 = await handler.create(walletPassword, { secretKey, name: 'name 1' });
   expect(account2.shieldedAddress).toBe(account1.shieldedAddress);
-  await expect(handler.create(walletPassword, { secretKey })).rejects.toThrow(
-    createError(
-      `duplicate account with same Mystiko Address ${account1.shieldedAddress}`,
-      MystikoErrorCode.DUPLICATE_ACCOUNT,
-    ),
-  );
+  const account3 = await handler.create(walletPassword, { secretKey, name: 'name 2' });
+  expect(account3.name).toBe('name 1');
   expect(wallet.accountNonce).toBe(2);
 });
 
@@ -119,6 +115,22 @@ test('test create consistency', async () => {
   expect(account3.shieldedAddress).toBe(account1.shieldedAddress);
   expect(account4.shieldedAddress).toBe(account2.shieldedAddress);
   expect(wallet2.accountNonce).toBe(4);
+});
+
+test('test create with existing derived keys', async () => {
+  const account1 = await handler.create(walletPassword);
+  const account2 = await handler.create(walletPassword);
+  const account3 = await handler.create(walletPassword);
+  const account2FullSecretKey = await handler.export(walletPassword, account2.publicKey);
+  const wallet2 = await context.wallets.create({ masterSeed: walletMasterSeed, password: walletPassword });
+  const account4 = await handler.create(walletPassword);
+  const account5 = await handler.create(walletPassword, { secretKey: account2FullSecretKey });
+  expect(wallet2.accountNonce).toBe(2);
+  const account6 = await handler.create(walletPassword);
+  expect(account4.shieldedAddress).toBe(account1.shieldedAddress);
+  expect(account5.shieldedAddress).toBe(account2.shieldedAddress);
+  expect(account6.shieldedAddress).toBe(account3.shieldedAddress);
+  expect(wallet2.accountNonce).toBe(6);
 });
 
 test('test encrypt', async () => {
