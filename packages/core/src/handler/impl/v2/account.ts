@@ -29,7 +29,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
       .then(({ name, wallet }) =>
         this.createRawAccount(wallet, walletPassword, name, options?.secretKey, options?.scanSize),
       )
-      .then(({ wallet, account }) => this.insertAccount(wallet, account, !options?.secretKey))
+      .then(({ wallet, account, accountNonce }) => this.insertAccount(wallet, account, accountNonce))
       .then((account) => {
         this.logger.info(`account address=${account.shieldedAddress} has been created successfully`);
         return account;
@@ -111,19 +111,34 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     return this.count().then((count) => `Account ${count + 1}`);
   }
 
-  private generateSecretKeys(wallet: Wallet, walletPassword: string): { skVerify: Buffer; skEnc: Buffer } {
+  private generateSecretKeys(
+    wallet: Wallet,
+    walletPassword: string,
+    accountNonce: number,
+  ): Promise<{ skVerify: Buffer; skEnc: Buffer; accountNonce: number }> {
     const hdWallet = hdkey.fromMasterSeed(toBuff(wallet.masterSeed(this.protocol, walletPassword)));
     let skVerify: Buffer;
-    if (wallet.accountNonce === 0) {
+    if (accountNonce === 0) {
       skVerify = hdWallet.getWallet().getPrivateKey();
     } else {
-      skVerify = hdWallet.deriveChild(wallet.accountNonce).getWallet().getPrivateKey();
+      skVerify = hdWallet.deriveChild(accountNonce).getWallet().getPrivateKey();
     }
     const skEnc = hdWallet
-      .deriveChild(wallet.accountNonce + 1)
+      .deriveChild(accountNonce + 1)
       .getWallet()
       .getPrivateKey();
-    return { skVerify, skEnc };
+    const pkVerify = this.protocol.publicKeyForVerification(skVerify);
+    const pkEnc = this.protocol.publicKeyForEncryption(skEnc);
+    const publicKey = toHexNoPrefix(this.protocol.fullPublicKey(pkVerify, pkEnc));
+    return this.db.accounts
+      .findOne({ selector: { wallet: wallet.id, publicKey } })
+      .exec()
+      .then((existingAccount) => {
+        if (existingAccount) {
+          return this.generateSecretKeys(wallet, walletPassword, accountNonce + 2);
+        }
+        return { skVerify, skEnc, accountNonce: accountNonce + 2 };
+      });
   }
 
   private createRawAccount(
@@ -132,45 +147,47 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     name: string,
     rawSecretKey?: string,
     scanSize?: number,
-  ): { wallet: Wallet; account: AccountType } {
-    let secretKeys: { skVerify: Buffer; skEnc: Buffer };
+  ): Promise<{ wallet: Wallet; account: AccountType; accountNonce: number }> {
+    let secretKeys: Promise<{ skVerify: Buffer; skEnc: Buffer; accountNonce: number }>;
     if (rawSecretKey) {
-      secretKeys = this.protocol.separatedSecretKeys(toBuff(rawSecretKey));
+      secretKeys = Promise.resolve({
+        ...this.protocol.separatedSecretKeys(toBuff(rawSecretKey)),
+        accountNonce: wallet.accountNonce,
+      });
     } else {
-      secretKeys = this.generateSecretKeys(wallet, walletPassword);
+      secretKeys = this.generateSecretKeys(wallet, walletPassword, wallet.accountNonce);
     }
-    const pkVerify = this.protocol.publicKeyForVerification(secretKeys.skVerify);
-    const pkEnc = this.protocol.publicKeyForEncryption(secretKeys.skEnc);
-    const secretKey = this.protocol.fullSecretKey(secretKeys.skVerify, secretKeys.skEnc);
-    const now = MystikoHandler.now();
-    const account: AccountType = {
-      id: MystikoHandler.generateId(),
-      createdAt: now,
-      updatedAt: now,
-      name,
-      shieldedAddress: this.protocol.shieldedAddress(pkVerify, pkEnc),
-      publicKey: toHexNoPrefix(this.protocol.fullPublicKey(pkVerify, pkEnc)),
-      encryptedSecretKey: this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(secretKey)),
-      status: AccountStatus.CREATED,
-      scanSize: scanSize || DEFAULT_ACCOUNT_SCAN_SIZE,
-      wallet: wallet.id,
-    };
-    return { wallet, account };
+    return secretKeys.then(({ skVerify, skEnc, accountNonce }) => {
+      const pkVerify = this.protocol.publicKeyForVerification(skVerify);
+      const pkEnc = this.protocol.publicKeyForEncryption(skEnc);
+      const secretKey = this.protocol.fullSecretKey(skVerify, skEnc);
+      const now = MystikoHandler.now();
+      const account: AccountType = {
+        id: MystikoHandler.generateId(),
+        createdAt: now,
+        updatedAt: now,
+        name,
+        shieldedAddress: this.protocol.shieldedAddress(pkVerify, pkEnc),
+        publicKey: toHexNoPrefix(this.protocol.fullPublicKey(pkVerify, pkEnc)),
+        encryptedSecretKey: this.protocol.encryptSymmetric(walletPassword, toHexNoPrefix(secretKey)),
+        status: AccountStatus.CREATED,
+        scanSize: scanSize || DEFAULT_ACCOUNT_SCAN_SIZE,
+        wallet: wallet.id,
+      };
+      return { wallet, account, accountNonce };
+    });
   }
 
-  private insertAccount(wallet: Wallet, account: AccountType, updateNonce: boolean): Promise<Account> {
+  private insertAccount(wallet: Wallet, account: AccountType, accountNonce: number): Promise<Account> {
     return this.findOne(account.shieldedAddress).then((existingAccount) => {
       if (existingAccount != null) {
-        return createErrorPromise(
-          `duplicate account with same Mystiko Address ${account.shieldedAddress}`,
-          MystikoErrorCode.DUPLICATE_ACCOUNT,
-        );
+        return existingAccount;
       }
-      if (updateNonce) {
+      if (wallet.accountNonce !== accountNonce) {
         return wallet
           .atomicUpdate((data) => {
             data.updatedAt = MystikoHandler.now();
-            data.accountNonce = wallet.accountNonce + 2;
+            data.accountNonce = accountNonce;
             return data;
           })
           .then(() => this.db.accounts.insert(account));
