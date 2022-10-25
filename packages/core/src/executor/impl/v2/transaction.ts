@@ -90,6 +90,10 @@ type CommitmentUpdate = {
   spentTransactionHash?: string;
 };
 
+type RemoteContractConfig = {
+  minRollupFee: BN;
+};
+
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
   public execute(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionResponse> {
     return this.buildExecutionContext(options, config, true)
@@ -105,9 +109,18 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   }
 
   public quote(options: TransactionQuoteOptions, config: PoolContractConfig): Promise<TransactionQuote> {
-    return this.getCommitments(options, config).then((commitments) =>
-      CommitmentUtils.quote(options, config, commitments, MAX_NUM_INPUTS),
-    );
+    return this.fetchRemoteContractConfig(options, config)
+      .then(({ minRollupFee }) =>
+        this.getCommitments(options, config).then((commitments) => ({ commitments, minRollupFee })),
+      )
+      .then(({ commitments, minRollupFee }) =>
+        CommitmentUtils.quote(
+          options,
+          { assetSymbol: config.assetSymbol, assetDecimals: config.assetDecimals, minRollupFee },
+          commitments,
+          MAX_NUM_INPUTS,
+        ),
+      );
   }
 
   public summary(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionSummary> {
@@ -247,82 +260,84 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       rollupFee,
       gasRelayerFee,
     } = executionContext;
-    if (
-      !chainConfig.getPoolContractByAddress(contractConfig.address) ||
-      options.assetSymbol !== contractConfig.assetSymbol ||
-      options.bridgeType !== chainConfig.getPoolContractBridgeType(contractConfig.address)
-    ) {
-      return createErrorPromise(
-        'given options mismatch with config',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    const spentAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
-    if (!quote.valid) {
-      return createErrorPromise(
-        quote.invalidReason || 'invalid transfer/withdraw options',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (spentAmount.lte(rollupFee.add(gasRelayerFee))) {
-      return createErrorPromise(
-        'rollup fee or gas relayer fee is too high',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (rollupFee.lt(contractConfig.minRollupFee.mul(toBN(quote.numOfSplits)))) {
-      return createErrorPromise(
-        'rollup fee is too small to pay rollup service',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (gasRelayerFee.gtn(0) && (!options.gasRelayerAddress || !options.gasRelayerEndpoint)) {
-      return createErrorPromise(
-        'must specify gas relayer address and endpoint when gas relayer fee is not 0',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (
-      options.type === TransactionEnum.WITHDRAW &&
-      (!options.publicAddress || !isEthereumAddress(options.publicAddress))
-    ) {
-      return createErrorPromise(
-        'invalid ethereum address for withdrawing',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (
-      options.type === TransactionEnum.TRANSFER &&
-      (!options.shieldedAddress || !this.protocol.isShieldedAddress(options.shieldedAddress))
-    ) {
-      return createErrorPromise(
-        'invalid mystiko address for transferring',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (options.gasRelayerAddress && !isEthereumAddress(options.gasRelayerAddress)) {
-      return createErrorPromise(
-        'invalid ethereum address for gas relayer',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    if (
-      options.gasRelayerEndpoint &&
-      !isURL(options.gasRelayerEndpoint, { protocols: ['http', 'https'], require_tld: false })
-    ) {
-      return createErrorPromise(
-        'invalid endpoint url for gas relayer',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    /* istanbul ignore if */
-    if (selectedCommitments.length === 0) {
-      return createErrorPromise(
-        'cannot find any private asset to withdraw or transfer',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-      );
-    }
-    return Promise.resolve(executionContext);
+    return this.fetchRemoteContractConfig(options, contractConfig).then(({ minRollupFee }) => {
+      if (
+        !chainConfig.getPoolContractByAddress(contractConfig.address) ||
+        options.assetSymbol !== contractConfig.assetSymbol ||
+        options.bridgeType !== chainConfig.getPoolContractBridgeType(contractConfig.address)
+      ) {
+        return createErrorPromise(
+          'given options mismatch with config',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      const spentAmount = options.type === TransactionEnum.TRANSFER ? amount : publicAmount;
+      if (!quote.valid) {
+        return createErrorPromise(
+          quote.invalidReason || 'invalid transfer/withdraw options',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (spentAmount.lte(rollupFee.add(gasRelayerFee))) {
+        return createErrorPromise(
+          'rollup fee or gas relayer fee is too high',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (rollupFee.lt(minRollupFee.mul(toBN(quote.numOfSplits)))) {
+        return createErrorPromise(
+          'rollup fee is too small to pay rollup service',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (gasRelayerFee.gtn(0) && (!options.gasRelayerAddress || !options.gasRelayerEndpoint)) {
+        return createErrorPromise(
+          'must specify gas relayer address and endpoint when gas relayer fee is not 0',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (
+        options.type === TransactionEnum.WITHDRAW &&
+        (!options.publicAddress || !isEthereumAddress(options.publicAddress))
+      ) {
+        return createErrorPromise(
+          'invalid ethereum address for withdrawing',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (
+        options.type === TransactionEnum.TRANSFER &&
+        (!options.shieldedAddress || !this.protocol.isShieldedAddress(options.shieldedAddress))
+      ) {
+        return createErrorPromise(
+          'invalid mystiko address for transferring',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (options.gasRelayerAddress && !isEthereumAddress(options.gasRelayerAddress)) {
+        return createErrorPromise(
+          'invalid ethereum address for gas relayer',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      if (
+        options.gasRelayerEndpoint &&
+        !isURL(options.gasRelayerEndpoint, { protocols: ['http', 'https'], require_tld: false })
+      ) {
+        return createErrorPromise(
+          'invalid endpoint url for gas relayer',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      /* istanbul ignore if */
+      if (selectedCommitments.length === 0) {
+        return createErrorPromise(
+          'cannot find any private asset to withdraw or transfer',
+          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        );
+      }
+      return executionContext;
+    });
   }
 
   private validatePoolBalance(executionContext: ExecutionContext): Promise<ExecutionContext> {
@@ -960,6 +975,32 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       );
     }
     return Promise.all(accountPromises);
+  }
+
+  private fetchRemoteContractConfig(
+    options: TransactionOptions | TransactionQuoteOptions,
+    config: PoolContractConfig,
+  ): Promise<RemoteContractConfig> {
+    return this.context.providers
+      .checkProvider(options.chainId)
+      .then((provider) => {
+        const poolContract = this.context.contractConnector.connect<CommitmentPool>(
+          'CommitmentPool',
+          config.address,
+          provider,
+        );
+        return { poolContract };
+      })
+      .then(({ poolContract }) => poolContract.getMinRollupFee())
+      .then((minRollupFee) => ({ minRollupFee: toBN(minRollupFee.toString()) }))
+      .catch((error) => {
+        this.logger.warn(
+          `failed to fetch remote config for contract chainId=${options.chainId}, address=${
+            config.address
+          }: ${errorMessage(error)}`,
+        );
+        return { minRollupFee: config.minRollupFee };
+      });
   }
 
   private static getCircuitConfig(

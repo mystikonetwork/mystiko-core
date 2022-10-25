@@ -2,6 +2,7 @@ import { deployMockContract, MockContract } from '@ethereum-waffle/mock-contract
 import { MockProvider } from '@ethereum-waffle/provider';
 import { BridgeType, DepositContractConfig, MAIN_ASSET_ADDRESS, MystikoConfig } from '@mystikonetwork/config';
 import {
+  CommitmentPool__factory,
   ERC20__factory,
   MystikoContractFactory,
   MystikoV2Bridge__factory,
@@ -17,7 +18,7 @@ import {
   Wallet,
 } from '@mystikonetwork/database';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
-import { toDecimals } from '@mystikonetwork/utils';
+import { fromDecimals, toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import {
   AccountHandlerV2,
@@ -42,6 +43,7 @@ let executor: DepositExecutorV2;
 let mockERC20: MockContract;
 let mockMystikoV2Loop: MockContract;
 let mockMystikoV2Bridge: MockContract;
+let mockCommitmentPool: MockContract;
 let mockProvider: MockProvider;
 let etherWallet: ethers.Wallet;
 let mystikoWallet: Wallet;
@@ -50,16 +52,17 @@ let mystikoSigner: PrivateKeySigner;
 const walletPassword = 'P@ssw0rd';
 const walletMasterSeed = 'deadbeefbaadbabe';
 
-function getDepositContractConfig(
+async function getDepositContractConfig(
   srcChainId: number,
   dstChainId: number,
   assetSymbol: string,
   bridge: BridgeType,
-): DepositContractConfig {
+): Promise<DepositContractConfig> {
   const depositContractConfig = config.getDepositContractConfig(srcChainId, dstChainId, assetSymbol, bridge);
   if (!depositContractConfig) {
     throw new Error('depositContractConfig should not be undefined');
   }
+  await mockCommitmentPool.mock.getMinRollupFee.returns(depositContractConfig.minRollupFee.toString());
   return depositContractConfig;
 }
 
@@ -68,8 +71,8 @@ type TestOptions = {
   depositContractConfig: DepositContractConfig;
 };
 
-function createTestOptionsAndConfig(): TestOptions {
-  const depositContractConfig = getDepositContractConfig(11155111, 97, 'MTT', BridgeType.TBRIDGE);
+async function createTestOptionsAndConfig(): Promise<TestOptions> {
+  const depositContractConfig = await getDepositContractConfig(11155111, 97, 'MTT', BridgeType.TBRIDGE);
   const options: DepositOptions = {
     srcChainId: 11155111,
     dstChainId: 97,
@@ -174,6 +177,9 @@ beforeAll(async () => {
         if (contractName === 'ERC20') {
           return MystikoContractFactory.connect<T>(contractName, mockERC20.address, signer);
         }
+        if (contractName === 'CommitmentPool') {
+          return MystikoContractFactory.connect<T>(contractName, mockCommitmentPool.address, signer);
+        }
         if (contractName === 'MystikoV2Loop') {
           return MystikoContractFactory.connect<T>(contractName, mockMystikoV2Loop.address, signer);
         }
@@ -198,6 +204,7 @@ beforeEach(async () => {
   mockERC20 = await deployMockContract(signer, ERC20__factory.abi);
   mockMystikoV2Loop = await deployMockContract(signer, MystikoV2Loop__factory.abi);
   mockMystikoV2Bridge = await deployMockContract(signer, MystikoV2Bridge__factory.abi);
+  mockCommitmentPool = await deployMockContract(signer, CommitmentPool__factory.abi);
 });
 
 afterAll(async () => {
@@ -205,7 +212,10 @@ afterAll(async () => {
 });
 
 test('test quote', async () => {
-  const depositContractConfig = getDepositContractConfig(11155111, 97, 'MTT', BridgeType.TBRIDGE);
+  const depositContractConfig = await getDepositContractConfig(11155111, 97, 'MTT', BridgeType.TBRIDGE);
+  await mockCommitmentPool.mock.getMinRollupFee.returns(
+    depositContractConfig.minRollupFee.muln(2).toString(),
+  );
   let quote = await executor.quote(
     { srcChainId: 11155111, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
     depositContractConfig,
@@ -213,7 +223,7 @@ test('test quote', async () => {
   expect(quote).toStrictEqual({
     minAmount: depositContractConfig.minAmountNumber,
     maxAmount: depositContractConfig.maxAmountNumber,
-    minRollupFeeAmount: depositContractConfig.minRollupFeeNumber,
+    minRollupFeeAmount: depositContractConfig.minRollupFeeNumber * 2,
     rollupFeeAssetSymbol: depositContractConfig.assetSymbol,
     minBridgeFeeAmount: depositContractConfig.minBridgeFeeNumber,
     bridgeFeeAssetSymbol: depositContractConfig.bridgeFeeAsset.assetSymbol,
@@ -225,6 +235,7 @@ test('test quote', async () => {
   rawDepositContractConfig.bridgeFeeAssetAddress = depositContractConfig.assetAddress;
   rawDepositContractConfig.executorFeeAssetAddress = MAIN_ASSET_ADDRESS;
   const newDepositContractConfig = depositContractConfig.mutate(rawDepositContractConfig);
+  await mockCommitmentPool.mock.getMinRollupFee.reverts();
   quote = await executor.quote(
     { srcChainId: 11155111, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
     newDepositContractConfig,
@@ -243,7 +254,7 @@ test('test quote', async () => {
 });
 
 test('test summary', async () => {
-  const { options, depositContractConfig } = createTestOptionsAndConfig();
+  const { options, depositContractConfig } = await createTestOptionsAndConfig();
   let summary = await executor.summary(options, depositContractConfig);
   expect(summary.srcChainId).toBe(options.srcChainId);
   expect(summary.dstChainId).toBe(options.dstChainId);
@@ -267,7 +278,7 @@ test('test summary', async () => {
       { assetSymbol: 'ETH', total: 0.01 },
     ].sort(),
   );
-  const depositContractConfig1 = getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
+  const depositContractConfig1 = await getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
   options.srcChainId = 97;
   options.bridge = BridgeType.LOOP;
   options.bridgeFee = 0;
@@ -284,7 +295,7 @@ test('test summary', async () => {
 });
 
 test('test invalid options', async () => {
-  const { options, depositContractConfig } = createTestOptionsAndConfig();
+  const { options, depositContractConfig } = await createTestOptionsAndConfig();
   await expect(executor.summary({ ...options, amount: -1 }, depositContractConfig)).rejects.toThrow(
     createError('amount cannot be negative or zero', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS),
   );
@@ -334,9 +345,15 @@ test('test invalid options', async () => {
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
-  await expect(executor.summary({ ...options, rollupFee: 0.001 }, depositContractConfig)).rejects.toThrow(
+  await mockCommitmentPool.mock.getMinRollupFee.returns(
+    depositContractConfig.minRollupFee.divn(10).toString(),
+  );
+  await expect(executor.summary({ ...options, rollupFee: 0.0001 }, depositContractConfig)).rejects.toThrow(
     createError(
-      `rollup fee cannot be less than ${depositContractConfig.minRollupFeeNumber}`,
+      `rollup fee cannot be less than ${fromDecimals(
+        depositContractConfig.minRollupFee.divn(10),
+        depositContractConfig.assetDecimals,
+      )}`,
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
@@ -352,7 +369,7 @@ test('test invalid options', async () => {
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
-  const depositContractConfig1 = getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
+  const depositContractConfig1 = await getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
   await expect(
     executor.summary(
       { ...options, srcChainId: 97, bridge: BridgeType.LOOP, executorFee: 0 },
@@ -378,7 +395,7 @@ test('test invalid options', async () => {
 });
 
 test('test invalid signer', async () => {
-  const { options, depositContractConfig } = createTestOptionsAndConfig();
+  const { options, depositContractConfig } = await createTestOptionsAndConfig();
   await expect(executor.execute(options, depositContractConfig)).rejects.toThrow(
     new Error('signer has not been connected'),
   );
@@ -387,7 +404,7 @@ test('test invalid signer', async () => {
 test('test invalid erc20 balance', async () => {
   await mockERC20.mock.balanceOf.returns('0');
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
-  const { options, depositContractConfig } = createTestOptionsAndConfig();
+  const { options, depositContractConfig } = await createTestOptionsAndConfig();
   await expect(executor.execute(options, depositContractConfig)).rejects.toThrow(
     createError(
       `insufficient balance of asset=MTT on chain id=${options.srcChainId}`,
@@ -398,7 +415,7 @@ test('test invalid erc20 balance', async () => {
 
 test('test invalid main asset balance', async () => {
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
-  const { options, depositContractConfig } = createTestOptionsAndConfig();
+  const { options, depositContractConfig } = await createTestOptionsAndConfig();
   options.bridgeFee = 2;
   await expect(executor.execute(options, depositContractConfig)).rejects.toThrow(
     createError(
@@ -411,7 +428,7 @@ test('test invalid main asset balance', async () => {
 test('test loop main deposit', async () => {
   await mockMystikoV2Loop.mock.deposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
-  const depositContractConfig = getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const mockCallback = jest.fn();
   const options: DepositOptions = {
     srcChainId: 97,
@@ -438,7 +455,7 @@ test('test loop main deposit', async () => {
 });
 
 test('test loop erc20 deposit', async () => {
-  const depositContractConfig = getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
   await mockMystikoV2Loop.mock.deposit.returns();
   await mockERC20.mock.balanceOf.returns('0');
   await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
@@ -476,7 +493,7 @@ test('test loop erc20 deposit', async () => {
 });
 
 test('test loop erc20 deposit without approve', async () => {
-  const depositContractConfig = getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'MTT', BridgeType.LOOP);
   await mockMystikoV2Loop.mock.deposit.returns();
   await mockERC20.mock.balanceOf.returns('0');
   await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
@@ -514,7 +531,7 @@ test('test loop erc20 deposit without approve', async () => {
 });
 
 test('test bridge main deposit', async () => {
-  const depositContractConfig = getDepositContractConfig(97, 11155111, 'BNB', BridgeType.TBRIDGE);
+  const depositContractConfig = await getDepositContractConfig(97, 11155111, 'BNB', BridgeType.TBRIDGE);
   await mockMystikoV2Bridge.mock.deposit.returns();
   const mockCallback = jest.fn();
   const options: DepositOptions = {
@@ -545,7 +562,7 @@ test('test bridge main deposit', async () => {
 });
 
 test('test bridge erc20 deposit', async () => {
-  const depositContractConfig = getDepositContractConfig(97, 11155111, 'MTT', BridgeType.TBRIDGE);
+  const depositContractConfig = await getDepositContractConfig(97, 11155111, 'MTT', BridgeType.TBRIDGE);
   await mockMystikoV2Bridge.mock.deposit.returns();
   await mockERC20.mock.balanceOf.returns('0');
   await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
@@ -587,7 +604,7 @@ test('test bridge erc20 deposit', async () => {
 test('test deposit with errors', async () => {
   await mockMystikoV2Loop.mock.deposit.reverts();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
-  const depositContractConfig = getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const mockCallback = jest.fn();
   const options: DepositOptions = {
     srcChainId: 97,
@@ -614,7 +631,7 @@ test('test deposit with errors', async () => {
 test('test deposit statusCallback raise errors', async () => {
   await mockMystikoV2Loop.mock.deposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
-  const depositContractConfig = getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const options: DepositOptions = {
     srcChainId: 97,
     dstChainId: 97,
