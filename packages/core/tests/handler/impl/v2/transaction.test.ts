@@ -1,8 +1,16 @@
 // eslint-disable-next-line max-classes-per-file
+import { deployMockContract, MockContract } from '@ethereum-waffle/mock-contract';
+import { MockProvider } from '@ethereum-waffle/provider';
 import { BridgeType, MystikoConfig } from '@mystikonetwork/config';
+import {
+  CommitmentPool__factory,
+  MystikoContractFactory,
+  SupportedContractType,
+} from '@mystikonetwork/contracts-abi';
 import { initDatabase, TransactionEnum, TransactionStatus } from '@mystikonetwork/database';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
-import { readJsonFile } from '@mystikonetwork/utils';
+import { readJsonFile, toDecimals } from '@mystikonetwork/utils';
+import { ethers } from 'ethers';
 import {
   AccountHandlerV2,
   CommitmentHandlerV2,
@@ -20,6 +28,9 @@ import { createTestContext } from '../../../common/context';
 
 let context: MystikoContextInterface;
 let handler: TransactionHandlerV2;
+let mockCommitmentPool: MockContract;
+let mockProvider: MockProvider;
+let etherWallet: ethers.Wallet;
 
 class TestTransactionExecutor extends TransactionExecutorV2 {
   public async execute(): Promise<TransactionResponse> {
@@ -53,8 +64,25 @@ async function getTransactionOptions(): Promise<TransactionOptions> {
 }
 
 beforeAll(async () => {
+  etherWallet = ethers.Wallet.createRandom();
+  mockProvider = new MockProvider({
+    ganacheOptions: {
+      accounts: [{ balance: toDecimals(1), secretKey: etherWallet.privateKey }],
+    },
+  });
+  const [signer] = mockProvider.getWallets();
   context = await createTestContext({
     config: await MystikoConfig.createFromFile('tests/files/config.test.json'),
+    providerFactory: {
+      createProvider(): ethers.providers.Provider {
+        return mockProvider;
+      },
+    },
+    contractConnector: {
+      connect<T extends SupportedContractType>(contractName: string): T {
+        return MystikoContractFactory.connect<T>(contractName, mockCommitmentPool.address, signer);
+      },
+    },
   });
   context.wallets = new WalletHandlerV2(context);
   context.accounts = new AccountHandlerV2(context);
@@ -68,6 +96,8 @@ beforeEach(async () => {
   context.db = await initDatabase();
   const dbData = await readJsonFile('tests/files/database.sync.test.json');
   await context.db.importJSON(dbData);
+  const [signer] = mockProvider.getWallets();
+  mockCommitmentPool = await deployMockContract(signer, CommitmentPool__factory.abi);
 });
 
 afterAll(async () => {
@@ -146,6 +176,7 @@ test('test findOne', async () => {
 
 test('test quote', async () => {
   const options = await getTransactionOptions();
+  await mockCommitmentPool.mock.getMinRollupFee.returns(toDecimals(0.01).toString());
   options.version = undefined;
   expect(await handler.quote(options)).not.toBe(undefined);
   options.chainId = 2048;
@@ -159,6 +190,7 @@ test('test quote', async () => {
 
 test('test summary', async () => {
   const options = await getTransactionOptions();
+  await mockCommitmentPool.mock.getMinRollupFee.returns(toDecimals(0.01).toString());
   expect(await handler.summary(options)).not.toBe(undefined);
   options.chainId = 2048;
   await expect(handler.summary(options)).rejects.toThrow(
