@@ -2,7 +2,11 @@
 import { deployMockContract, MockContract } from '@ethereum-waffle/mock-contract';
 import { MockProvider } from '@ethereum-waffle/provider';
 import { BridgeType, DepositContractConfig, MystikoConfig } from '@mystikonetwork/config';
-import { CommitmentPool__factory, MystikoContractFactory, SupportedContractType } from '@mystikonetwork/contracts-abi';
+import {
+  CommitmentPool__factory,
+  MystikoContractFactory,
+  SupportedContractType,
+} from '@mystikonetwork/contracts-abi';
 import { DepositStatus, initDatabase } from '@mystikonetwork/database';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
 import { readJsonFile, toDecimals } from '@mystikonetwork/utils';
