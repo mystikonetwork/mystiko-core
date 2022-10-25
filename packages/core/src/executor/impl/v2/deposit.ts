@@ -559,12 +559,12 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     config: DepositContractConfig,
   ): Promise<RemoteContractConfig> {
     return this.context.providers
-      .checkProvider(options.srcChainId)
-      .then((provider) => {
+      .checkProvider(options.dstChainId)
+      .then((dstProvider) => {
         const poolContract = this.context.contractConnector.connect<CommitmentPool>(
           'CommitmentPool',
-          config.poolAddress,
-          provider,
+          config.peerContract?.poolAddress || config.poolAddress,
+          dstProvider,
         );
         return { poolContract };
       })
