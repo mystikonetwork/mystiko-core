@@ -5,11 +5,12 @@ import {
   ChainConfig,
   DepositContractConfig,
 } from '@mystikonetwork/config';
-import { MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
+import { CommitmentPool, MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
 import { CommitmentStatus, CommitmentType, Deposit, DepositStatus } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
+import BN from 'bn.js';
 import { ContractTransaction, ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
@@ -47,6 +48,10 @@ type ExecutionContextWithDeposit = ExecutionContext & {
   deposit: Deposit;
 };
 
+type RemoteContractConfig = {
+  minRollupFee: BN;
+};
+
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
     return this.buildExecutionContext(options, config)
@@ -58,10 +63,10 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   public quote(options: DepositQuoteOptions, config: DepositContractConfig): Promise<DepositQuote> {
-    return Promise.resolve({
+    return this.fetchRemoteContractConfig(options, config).then(({ minRollupFee }) => ({
       minAmount: config.minAmountNumber,
       maxAmount: config.maxAmountNumber,
-      minRollupFeeAmount: config.minRollupFeeNumber,
+      minRollupFeeAmount: fromDecimals(minRollupFee, config.assetDecimals),
       rollupFeeAssetSymbol: config.assetSymbol,
       minBridgeFeeAmount: config.minBridgeFeeNumber,
       bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
@@ -70,7 +75,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       recommendedAmounts: config.recommendedAmountsNumber.filter(
         (amount) => amount >= config.minAmountNumber && amount <= config.maxAmountNumber,
       ),
-    });
+    }));
   }
 
   public summary(options: DepositOptions, config: DepositContractConfig): Promise<DepositSummary> {
@@ -179,69 +184,71 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   private validateOptions(executionContext: ExecutionContext): Promise<ExecutionContext> {
     const { options, contractConfig, chainConfig, amount, rollupFee, bridgeFee, executorFee } =
       executionContext;
-    if (
-      !chainConfig.getDepositContractByAddress(contractConfig.address) ||
-      options.dstChainId !== (contractConfig.peerChainId || chainConfig.chainId) ||
-      options.bridge !== contractConfig.bridgeType ||
-      options.assetSymbol !== contractConfig.assetSymbol
-    ) {
-      return createErrorPromise(
-        'options mismatch with given contract config',
-        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
-      );
-    }
-    if (!this.context.protocol.isShieldedAddress(options.shieldedAddress)) {
-      return createErrorPromise(
-        `address ${options.shieldedAddress} is an invalid Mystiko address`,
-        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
-      );
-    }
-    if (toBN(amount).lt(contractConfig.minAmount)) {
-      return createErrorPromise(
-        `deposit amount cannot be less than ${contractConfig.minAmountNumber}`,
-        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
-      );
-    }
-    if (toBN(amount).gt(contractConfig.maxAmount)) {
-      return createErrorPromise(
-        `deposit amount cannot be greater than ${contractConfig.maxAmountNumber}`,
-        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
-      );
-    }
-    if (toBN(rollupFee).lt(contractConfig.minRollupFee)) {
-      return createErrorPromise(
-        `rollup fee cannot be less than ${contractConfig.minRollupFeeNumber}`,
-        MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
-      );
-    }
-    if (options.bridge !== BridgeType.LOOP) {
-      if (toBN(bridgeFee).lt(contractConfig.minBridgeFee)) {
+    return this.fetchRemoteContractConfig(options, contractConfig).then(({ minRollupFee }) => {
+      if (
+        !chainConfig.getDepositContractByAddress(contractConfig.address) ||
+        options.dstChainId !== (contractConfig.peerChainId || chainConfig.chainId) ||
+        options.bridge !== contractConfig.bridgeType ||
+        options.assetSymbol !== contractConfig.assetSymbol
+      ) {
         return createErrorPromise(
-          `bridge fee cannot be less than ${contractConfig.minBridgeFeeNumber}`,
+          'options mismatch with given contract config',
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
-      if (toBN(executorFee).lt(contractConfig.minExecutorFee)) {
+      if (!this.context.protocol.isShieldedAddress(options.shieldedAddress)) {
         return createErrorPromise(
-          `executor fee cannot be less than ${contractConfig.minExecutorFeeNumber}`,
+          `address ${options.shieldedAddress} is an invalid Mystiko address`,
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
-    } else {
-      if (!toBN(bridgeFee).isZero()) {
+      if (toBN(amount).lt(contractConfig.minAmount)) {
         return createErrorPromise(
-          'bridge fee should be zero when depositing to loop contract',
+          `deposit amount cannot be less than ${contractConfig.minAmountNumber}`,
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
-      if (!toBN(executorFee).isZero()) {
+      if (toBN(amount).gt(contractConfig.maxAmount)) {
         return createErrorPromise(
-          'executor fee should be zero when depositing to loop contract',
+          `deposit amount cannot be greater than ${contractConfig.maxAmountNumber}`,
           MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
         );
       }
-    }
-    return Promise.resolve(executionContext);
+      if (toBN(rollupFee).lt(minRollupFee)) {
+        return createErrorPromise(
+          `rollup fee cannot be less than ${fromDecimals(minRollupFee, contractConfig.assetDecimals)}`,
+          MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+        );
+      }
+      if (options.bridge !== BridgeType.LOOP) {
+        if (toBN(bridgeFee).lt(contractConfig.minBridgeFee)) {
+          return createErrorPromise(
+            `bridge fee cannot be less than ${contractConfig.minBridgeFeeNumber}`,
+            MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+          );
+        }
+        if (toBN(executorFee).lt(contractConfig.minExecutorFee)) {
+          return createErrorPromise(
+            `executor fee cannot be less than ${contractConfig.minExecutorFeeNumber}`,
+            MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+          );
+        }
+      } else {
+        if (!toBN(bridgeFee).isZero()) {
+          return createErrorPromise(
+            'bridge fee should be zero when depositing to loop contract',
+            MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+          );
+        }
+        if (!toBN(executorFee).isZero()) {
+          return createErrorPromise(
+            'executor fee should be zero when depositing to loop contract',
+            MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
+          );
+        }
+      }
+      return executionContext;
+    });
   }
 
   private validateSigner(executionContext: ExecutionContext): Promise<ExecutionContext> {
@@ -545,6 +552,32 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     }
     /* istanbul ignore next */
     return Promise.resolve(deposit);
+  }
+
+  private fetchRemoteContractConfig(
+    options: DepositOptions | DepositQuoteOptions,
+    config: DepositContractConfig,
+  ): Promise<RemoteContractConfig> {
+    return this.context.providers
+      .checkProvider(options.srcChainId)
+      .then((provider) => {
+        const poolContract = this.context.contractConnector.connect<CommitmentPool>(
+          'CommitmentPool',
+          config.poolAddress,
+          provider,
+        );
+        return { poolContract };
+      })
+      .then(({ poolContract }) => poolContract.getMinRollupFee())
+      .then((minRollupFee) => ({ minRollupFee: toBN(minRollupFee.toString()) }))
+      .catch((error) => {
+        this.logger.warn(
+          `failed to fetch remote config for contract chainId=${options.srcChainId}, address=${
+            config.address
+          }: ${errorMessage(error)}`,
+        );
+        return { minRollupFee: config.minRollupFee };
+      });
   }
 
   private static validateNumbers(options: DepositOptions): Promise<DepositOptions> {

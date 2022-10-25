@@ -50,15 +50,16 @@ const walletPassword = 'P@ssw0rd';
 const auditorSecretKeys: BN[] = [];
 const auditorPublicKeys: BN[] = [];
 
-function getPoolContractConfig(
+async function getPoolContractConfig(
   chainId: number,
   assetSymbol: string,
   bridgeType: BridgeType,
-): PoolContractConfig {
+): Promise<PoolContractConfig> {
   const poolContractConfig = config.getPoolContractConfig(chainId, assetSymbol, bridgeType, 2);
   if (!poolContractConfig) {
     throw new Error('poolContractConfig should not be undefined');
   }
+  await mockCommitmentPool.mock.getMinRollupFee.returns(poolContractConfig.minRollupFee.toString());
   return poolContractConfig;
 }
 
@@ -68,7 +69,7 @@ type TestOptions = {
   contractConfig: PoolContractConfig;
 };
 
-function getTestOptions(): TestOptions {
+async function getTestOptions(): Promise<TestOptions> {
   const transferOptions: TransactionOptions = {
     walletPassword,
     type: TransactionEnum.TRANSFER,
@@ -95,7 +96,7 @@ function getTestOptions(): TestOptions {
     signer: mystikoSigner,
     statusCallback: jest.fn(),
   };
-  const contractConfig = getPoolContractConfig(
+  const contractConfig = await getPoolContractConfig(
     transferOptions.chainId,
     transferOptions.assetSymbol,
     transferOptions.bridgeType,
@@ -111,7 +112,7 @@ type MockSetupOptions = {
 };
 
 async function setupMocks(options: MockSetupOptions): Promise<TestOptions> {
-  const testOptions = getTestOptions();
+  const testOptions = await getTestOptions();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
   await mockERC20.mock.balanceOf.reverts();
   await mockERC20.mock.balanceOf
@@ -299,7 +300,7 @@ test('test quote', async () => {
     bridgeType: BridgeType.LOOP,
     version: 2,
   };
-  let contractConfig = getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
+  let contractConfig = await getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
   let quote = await executor.quote(options, contractConfig);
   expect(quote.valid).toBe(true);
   expect(quote.invalidReason).toBe(undefined);
@@ -317,14 +318,20 @@ test('test quote', async () => {
   options.bridgeType = BridgeType.TBRIDGE;
   options.amount = undefined;
   options.publicAmount = 5;
-  contractConfig = getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
+  contractConfig = await getPoolContractConfig(options.chainId, options.assetSymbol, options.bridgeType);
   quote = await executor.quote(options, contractConfig);
   expect(quote.valid).toBe(true);
   expect(quote.invalidReason).toBe(undefined);
+  await mockCommitmentPool.mock.getMinRollupFee.returns(contractConfig.minRollupFee.muln(2).toString());
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.minRollupFee).toBe(contractConfig.minRollupFeeNumber * 2);
+  await mockCommitmentPool.mock.getMinRollupFee.reverts();
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.minRollupFee).toBe(contractConfig.minRollupFeeNumber);
 });
 
 test('test invalid options', async () => {
-  const { transferOptions, withdrawOptions, contractConfig } = getTestOptions();
+  const { transferOptions, withdrawOptions, contractConfig } = await getTestOptions();
   await expect(executor.summary({ ...transferOptions, amount: undefined }, contractConfig)).rejects.toThrow(
     createError('amount cannot be negative or zero or empty', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
@@ -374,8 +381,9 @@ test('test invalid options', async () => {
   await expect(executor.summary({ ...transferOptions, gasRelayerFee: 20 }, contractConfig)).rejects.toThrow(
     createError('rollup fee or gas relayer fee is too high', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
+  await mockCommitmentPool.mock.getMinRollupFee.returns(contractConfig.minRollupFee.muln(2).toString());
   await expect(
-    executor.summary({ ...transferOptions, amount: 4, rollupFee: 0.005 }, contractConfig),
+    executor.summary({ ...transferOptions, amount: 4, rollupFee: 0.01 }, contractConfig),
   ).rejects.toThrow(
     createError(
       'rollup fee is too small to pay rollup service',
@@ -453,7 +461,7 @@ test('test invalid options', async () => {
 });
 
 test('test summary', async () => {
-  const { transferOptions, withdrawOptions, contractConfig } = getTestOptions();
+  const { transferOptions, withdrawOptions, contractConfig } = await getTestOptions();
   const transferSummary = await executor.summary(transferOptions, contractConfig);
   expect(transferSummary).toStrictEqual({
     previousBalance: 9.9,
@@ -495,7 +503,7 @@ test('test insufficient pool balance', async () => {
 });
 
 test('test invalid signer', async () => {
-  const { transferOptions, contractConfig } = getTestOptions();
+  const { transferOptions, contractConfig } = await getTestOptions();
   await expect(executor.execute(transferOptions, contractConfig)).rejects.toThrow(
     new Error('signer has not been connected'),
   );
