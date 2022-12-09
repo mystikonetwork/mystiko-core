@@ -19,7 +19,7 @@ import {
 import { ECIES } from '@mystikonetwork/ecies';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
 import { Point, SecretSharing } from '@mystikonetwork/secret-share';
-import { readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
+import { fromDecimals, readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import {
@@ -157,7 +157,18 @@ async function checkTransaction(
   expect(tx.signaturePublicKeyHashes?.length).toBe(numInput);
   expect(tx.outputCommitments?.length).toBe(numOutput);
   const expectRollupFeeAmount = (options.rollupFee || 0) * numOutput;
-  const expectGasRelayerFeeAmount = options.gasRelayerFee || 0;
+  const expectFullAmount = toDecimals(
+    options.amount || options.publicAmount || 0,
+    contractConfig.assetDecimals,
+  );
+  let expectGasRelayerFeeAmount: number = 0;
+  const { gasRelayerInfo } = options;
+  if (gasRelayerInfo) {
+    expectGasRelayerFeeAmount = fromDecimals(
+      TransactionExecutorV2.calcGasRelayerFee(expectFullAmount, gasRelayerInfo),
+      contractConfig.assetDecimals,
+    );
+  }
   const expectAmount = options.amount
     ? options.amount - expectRollupFeeAmount - expectGasRelayerFeeAmount
     : 0;
@@ -355,7 +366,23 @@ test('test invalid options', async () => {
   await expect(executor.summary({ ...transferOptions, rollupFee: -1 }, contractConfig)).rejects.toThrow(
     createError('rollup fee cannot be negative', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
-  await expect(executor.summary({ ...transferOptions, gasRelayerFee: -1 }, contractConfig)).rejects.toThrow(
+  await expect(
+    executor.summary(
+      {
+        ...transferOptions,
+        gasRelayerInfo: {
+          url: 'http://localhost:9999',
+          name: 'test gas relayer',
+          address: etherWallet.address,
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: -20,
+          minGasFee: '-20000000000000000000',
+        },
+      },
+      contractConfig,
+    ),
+  ).rejects.toThrow(
     createError('gas relayer fee cannot be negative', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
   await expect(executor.summary({ ...transferOptions, chainId: 1024 }, contractConfig)).rejects.toThrow(
@@ -378,7 +405,23 @@ test('test invalid options', async () => {
   await expect(executor.summary({ ...transferOptions, rollupFee: 20 }, contractConfig)).rejects.toThrow(
     createError('rollup fee or gas relayer fee is too high', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
-  await expect(executor.summary({ ...transferOptions, gasRelayerFee: 20 }, contractConfig)).rejects.toThrow(
+  await expect(
+    executor.summary(
+      {
+        ...transferOptions,
+        gasRelayerInfo: {
+          url: 'http://localhost:9999',
+          name: 'test gas relayer',
+          address: etherWallet.address,
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: 20,
+          minGasFee: '20000000000000000000',
+        },
+      },
+      contractConfig,
+    ),
+  ).rejects.toThrow(
     createError('rollup fee or gas relayer fee is too high', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
   await mockCommitmentPool.mock.getMinRollupFee.returns(contractConfig.minRollupFee.muln(2).toString());
@@ -392,33 +435,17 @@ test('test invalid options', async () => {
   );
   await expect(
     executor.summary(
-      { ...transferOptions, gasRelayerFee: 0.1, gasRelayerAddress: etherWallet.address },
-      contractConfig,
-    ),
-  ).rejects.toThrow(
-    createError(
-      'must specify gas relayer address and endpoint when gas relayer fee is not 0',
-      MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-    ),
-  );
-  await expect(
-    executor.summary(
-      { ...transferOptions, gasRelayerFee: 0.1, gasRelayerEndpoint: 'http://localhost:9999' },
-      contractConfig,
-    ),
-  ).rejects.toThrow(
-    createError(
-      'must specify gas relayer address and endpoint when gas relayer fee is not 0',
-      MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-    ),
-  );
-  await expect(
-    executor.summary(
       {
         ...transferOptions,
-        gasRelayerFee: 0.1,
-        gasRelayerAddress: 'not an address',
-        gasRelayerEndpoint: 'http://localhost:9999',
+        gasRelayerInfo: {
+          url: 'http://localhost:9999',
+          name: 'test gas relayer',
+          address: 'not an address',
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: 0.01,
+          minGasFee: '10000000000000000',
+        },
       },
       contractConfig,
     ),
@@ -429,9 +456,15 @@ test('test invalid options', async () => {
     executor.summary(
       {
         ...transferOptions,
-        gasRelayerFee: 0.1,
-        gasRelayerAddress: etherWallet.address,
-        gasRelayerEndpoint: 'not an endpoint url',
+        gasRelayerInfo: {
+          url: 'not an endpoint url',
+          name: 'test gas relayer',
+          address: etherWallet.address,
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: 0.01,
+          minGasFee: '10000000000000000',
+        },
       },
       contractConfig,
     ),

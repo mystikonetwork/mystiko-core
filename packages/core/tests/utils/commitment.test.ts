@@ -105,6 +105,7 @@ test('test quote transfer', () => {
   expect(quote.fixedAmount).toBe(true);
   quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 11 }, config, commitments, 2);
   expect(quote.valid).toBe(true);
+  expect(quote.numOfInputs).toBe(1);
   expect(quote.numOfSplits).toBe(1);
   expect(quote.maxGasRelayerFee).toBe(1);
   commitments = [{ amount: toDecimals(20).toString() }];
@@ -130,6 +131,7 @@ test('test quote transfer', () => {
   expect(quote.invalidReason).toBe('asset amount cannot be negative or zero');
   quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 22 }, config, commitments, 2);
   expect(quote.valid).toBe(true);
+  expect(quote.numOfInputs).toBe(1);
   expect(quote.numOfSplits).toBe(2);
   expect(quote.maxGasRelayerFee).toBe(2);
   commitments = [
@@ -139,6 +141,7 @@ test('test quote transfer', () => {
   ];
   quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 22 }, config, commitments, 2);
   expect(quote.valid).toBe(true);
+  expect(quote.numOfInputs).toBe(2);
   expect(quote.numOfSplits).toBe(1);
 });
 

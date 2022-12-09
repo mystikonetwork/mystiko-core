@@ -983,6 +983,11 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@metamask/detect-provider@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
+  integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
+
 "@mystikonetwork/config@^0.3.0":
   version "0.3.0"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.3.0/0c15cd68bf1b60978425123e1454331fa4e90b0c#0c15cd68bf1b60978425123e1454331fa4e90b0c"
@@ -1004,6 +1009,15 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
+"@mystikonetwork/contracts-abi@^0.2.2":
+  version "0.2.2"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.2.2/32b80af881225fed0e6e33370af5da5c2c64be74#32b80af881225fed0e6e33370af5da5c2c64be74"
+  integrity sha512-RghJF0nh0XPwkXUwL9JhBKywv1y4mjCJx1Js/vl8SFF+cb3M5UcHivR0IcRqeCqcohlMHR3AqO4t4c7CNtRkwg==
+  dependencies:
+    "@ethersproject/abi" "^5.5.3"
+    "@ethersproject/providers" "^5.5.3"
+    ethers "^5.5.3"
+
 "@mystikonetwork/ecies@^0.2.3":
   version "0.2.3"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/ecies/0.2.3/e3cb4ae755f10a1f49adb9a9706d0019629b71d2#e3cb4ae755f10a1f49adb9a9706d0019629b71d2"
@@ -1015,10 +1029,58 @@
     ffjavascript "0.2.52"
     randombytes "^2.1.0"
 
+"@mystikonetwork/ethers@^0.3.0":
+  version "0.3.2"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ethers/0.3.2/9380c121d063badcf02aabe36f48e17f6a3dc084#9380c121d063badcf02aabe36f48e17f6a3dc084"
+  integrity sha512-XjncHiT40WU5b3KunD1g6NMOoUHxyceyoLmXc26zc2TsaTTI+X6zN9SOHP5v25KnT5gqsugrwKWE6SeVnmdf/g==
+  dependencies:
+    "@metamask/detect-provider" "^1.2.0"
+    "@mystikonetwork/config" "^0.3.0"
+    "@mystikonetwork/utils" "^0.1.3"
+    ethers "^5.5.3"
+    loglevel "^1.8.0"
+
 "@mystikonetwork/fastfile@^0.0.21":
   version "0.0.21"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/fastfile/0.0.21/b3362f8527fa15a2d745c0b516c92d0a5ca0ceef4c2e103aac2d79305f0c4207#069a0d0d6a28a3f002fe97519456bbbd14880f9c"
   integrity sha512-o9vr4WoWEGord8+6ADBSulLO9arM2z0R5bOKj+GGPOFY/Zm8bg7alqRfuTvcxzll9TTk/rv7gDM4GnbBHhvyMA==
+
+"@mystikonetwork/gas-relayer-client@^0.1.9":
+  version "0.1.9"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-client/0.1.9/128bd9a9e3626eab18b2a4d7e11ae697aafc5e81#128bd9a9e3626eab18b2a4d7e11ae697aafc5e81"
+  integrity sha512-AtDvYBUvjq2hrK88wE8kbzvK1RTmrb2mHNEjll/PPc4XLvg7qvXH0mCxeUI8BRw7aSUVgsd4qo9ENiKV+7xetw==
+  dependencies:
+    "@mystikonetwork/config" "^0.3.0"
+    "@mystikonetwork/ethers" "^0.3.0"
+    "@mystikonetwork/gas-relayer-config" "^0.1.9"
+    "@mystikonetwork/gas-relayer-contracts-abi" "^0.0.9"
+    "@mystikonetwork/utils" "^0.1.4"
+    axios "^0.27.2"
+    ethers "^5.5.3"
+    loglevel "^1.8.0"
+    loglevel-plugin-prefix "^0.8.4"
+
+"@mystikonetwork/gas-relayer-config@^0.1.9":
+  version "0.1.9"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-config/0.1.9/09e93df4e2773b56121ee0c4d2bebe905b218394#09e93df4e2773b56121ee0c4d2bebe905b218394"
+  integrity sha512-RM8moRrArfgpsCpixKNLskHqmXoqudL8QeY/3iyqHEtYLxnsP6XbsC+KXxrFov2ofS0cgn74JjOuUeTaOO7/ig==
+  dependencies:
+    "@mystikonetwork/config" "^0.3.0"
+    "@mystikonetwork/contracts-abi" "^0.2.2"
+    "@mystikonetwork/utils" "^0.1.4"
+    bn.js "^5.2.0"
+    class-transformer "^0.5.1"
+    class-validator "^0.13.2"
+    reflect-metadata "^0.1.13"
+
+"@mystikonetwork/gas-relayer-contracts-abi@^0.0.9":
+  version "0.0.9"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-contracts-abi/0.0.9/a503242e20f200dff4bb19b0d2bb58bf4b355af8#a503242e20f200dff4bb19b0d2bb58bf4b355af8"
+  integrity sha512-Fcgm7f/8R8+RopykXTIQ3m5U22ZtDqckSClummaEuSX5JHM5SGD6lqjxqldypPCT5/Oe2Hxt338kx+9oYrPEgg==
+  dependencies:
+    "@ethersproject/abi" "^5.5.3"
+    "@ethersproject/providers" "^5.5.3"
+    ethers "^5.5.3"
 
 "@mystikonetwork/indexer-client@^0.2.0":
   version "0.2.0"
@@ -1077,6 +1139,19 @@
   version "0.1.3"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.3/451ced81091dc81743116b8002dce16ee5f633f10c10759bb855a01f8889cb0e#6c62dfdfc996367de5185b1011e5860c173d3677"
   integrity sha512-gnelPL/Ld5abJbbFLR7aZd1wNjTzzeD6VQTIldGII40qp99D9Yq4c7ybhZxBfhvaMHCZuTYJN6trALfRHmOJaw==
+  dependencies:
+    "@mystikonetwork/fastfile" "^0.0.21"
+    axios "^0.27.2"
+    bn.js "^5.2.0"
+    ethers "^5.5.3"
+    loglevel "^1.8.0"
+    loglevel-plugin-prefix "^0.8.4"
+    pako "^2.0.4"
+
+"@mystikonetwork/utils@^0.1.4":
+  version "0.1.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.4/ffb61bae42af920e379dea28da1669a89a22953f#ffb61bae42af920e379dea28da1669a89a22953f"
+  integrity sha512-75PM+Fc3fQ9R4QuFuQu6jfyiCwbAOuApQzjQkVJZlpUB3ERx35dqA56hYH9n83EAby5A4XPm9vU9XYlsM7xf+Q==
   dependencies:
     "@mystikonetwork/fastfile" "^0.0.21"
     axios "^0.27.2"

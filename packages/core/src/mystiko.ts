@@ -1,6 +1,10 @@
 import { MystikoConfig } from '@mystikonetwork/config';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MetaMaskSigner, PrivateKeySigner, ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
+import {
+  IRelayerHandler as GasRelayers,
+  Relayer as GasRelayerClient,
+} from '@mystikonetwork/gas-relayer-client';
 import { MystikoProtocol, ProtocolFactory, ProtocolFactoryV2 } from '@mystikonetwork/protocol';
 import { initLogger, logger, ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
@@ -41,6 +45,7 @@ export interface InitOptions {
   executorFactory?: ExecutorFactory;
   synchronizerFactory?: SynchronizerFactory;
   protocolFactory?: ProtocolFactory;
+  gasRelayers?: GasRelayers;
 }
 
 export abstract class Mystiko {
@@ -91,6 +96,7 @@ export abstract class Mystiko {
       executorFactory,
       synchronizerFactory,
       protocolFactory,
+      gasRelayers,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
@@ -104,8 +110,8 @@ export abstract class Mystiko {
     }
     this.db = await initDatabase(dbParams);
     initLogger(loggingOptions);
+    logger.setLevel(loggingLevel);
     this.logger = logger;
-    this.logger.setLevel(loggingLevel);
     const protocols = protocolFactory || new ProtocolFactoryV2(await this.zkProverFactory());
     this.protocol = await protocols.create();
     const contexts = contextFactory || new DefaultContextFactory(this.config, this.db, this.protocol);
@@ -135,6 +141,20 @@ export abstract class Mystiko {
     this.synchronizer = syncFactory.createSynchronizer();
     await this.chains.init();
     await this.contracts.init();
+    if (gasRelayers) {
+      this.context.gasRelayers = gasRelayers;
+    } else {
+      const gasRelayerClient = new GasRelayerClient();
+      await gasRelayerClient.initialize({
+        isTestnet,
+        mystikoConfig: this.config,
+        logger: logger.getLogger('gas-relayer-client'),
+        providers: this.providers,
+      });
+      if (gasRelayerClient.relayerHandler) {
+        this.context.gasRelayers = gasRelayerClient.relayerHandler;
+      }
+    }
     this.logger.info('mystiko has been successfully initialized, enjoy!');
   }
 

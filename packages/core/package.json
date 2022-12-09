@@ -64,6 +64,8 @@
     "@mystikonetwork/database": "^0.3.2",
     "@mystikonetwork/ecies": "^0.2.3",
     "@mystikonetwork/ethers": "^0.3.2",
+    "@mystikonetwork/gas-relayer-client": "^0.1.9",
+    "@mystikonetwork/gas-relayer-config": "^0.1.9",
     "@mystikonetwork/indexer-client": "^0.2.0",
     "@mystikonetwork/merkle": "^0.2.3",
     "@mystikonetwork/protocol": "^0.2.3",

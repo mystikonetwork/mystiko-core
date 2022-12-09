@@ -31,6 +31,7 @@ export enum MystikoErrorCode {
   CORRUPTED_COMMITMENT_DATA = 29,
   SYNCHRONIZER_CLOSED = 30,
   WRONG_AUDITOR_NUMBER = 31,
+  NO_GAS_RELAYER_CLIENT = 32,
 }
 
 export class MystikoError extends Error {

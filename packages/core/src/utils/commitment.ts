@@ -82,6 +82,7 @@ export class CommitmentUtils {
     const transactionQuote: TransactionQuote = {
       valid: true,
       balance: fromDecimals(balance, assetDecimals),
+      numOfInputs: numInputs,
       numOfSplits: maxNumOfSplits,
       minRollupFee: fromDecimals(minRollupFee, assetDecimals),
       rollupFeeAssetSymbol: assetSymbol,
@@ -115,6 +116,8 @@ export class CommitmentUtils {
       return transactionQuote;
     }
     if (amount.eq(inputMax)) {
+      const selected = this.select(commitments, numInputs, amount);
+      transactionQuote.numOfInputs = selected.length;
       transactionQuote.numOfSplits = maxNumOfSplits - 1;
       transactionQuote.maxGasRelayerFee = fromDecimals(
         amount.sub(minRollupFee.mul(toBN(maxNumOfSplits - 1))),
@@ -134,6 +137,7 @@ export class CommitmentUtils {
     }
     const selected = this.select(commitments, numInputs, amount);
     const selectedSum = this.sum(selected);
+    transactionQuote.numOfInputs = selected.length;
     transactionQuote.numOfSplits = selectedSum.eq(amount) ? maxNumOfSplits - 1 : maxNumOfSplits;
     transactionQuote.maxGasRelayerFee = fromDecimals(
       amount.sub(minRollupFee.mul(toBN(transactionQuote.numOfSplits))),

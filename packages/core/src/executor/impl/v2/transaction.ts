@@ -18,6 +18,7 @@ import {
 } from '@mystikonetwork/database';
 import { ECIES } from '@mystikonetwork/ecies';
 import { checkSigner } from '@mystikonetwork/ethers';
+import { JobTypeEnum, RegisterInfo as RawGasRelayerInfo } from '@mystikonetwork/gas-relayer-config';
 import { MerkleTree } from '@mystikonetwork/merkle';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import {
@@ -36,10 +37,12 @@ import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
 import {
+  GasRelayerInfo,
   TransactionExecutor,
   TransactionOptions,
   TransactionQuote,
   TransactionQuoteOptions,
+  TransactionQuoteWithRelayers,
   TransactionResponse,
   TransactionSummary,
   TransactionUpdate,
@@ -56,13 +59,14 @@ type ExecutionContext = {
   wallet: Wallet;
   commitments: Commitment[];
   selectedCommitments: Commitment[];
-  quote: TransactionQuote;
+  quote: TransactionQuoteWithRelayers;
   amount: BN;
   publicAmount: BN;
   rollupFee: BN;
   gasRelayerFee: BN;
   outputCommitments?: Array<{ commitment: Commitment; info: CommitmentOutput }>;
   etherContract: CommitmentPool;
+  circuitConfig: CircuitConfig;
 };
 
 type ExecutionContextWithTransaction = ExecutionContext & {
@@ -94,6 +98,8 @@ type RemoteContractConfig = {
   minRollupFee: BN;
 };
 
+export const DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS = 600000;
+
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
   public execute(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionResponse> {
     return this.buildExecutionContext(options, config, true)
@@ -108,7 +114,10 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       }));
   }
 
-  public quote(options: TransactionQuoteOptions, config: PoolContractConfig): Promise<TransactionQuote> {
+  public quote(
+    options: TransactionQuoteOptions,
+    config: PoolContractConfig,
+  ): Promise<TransactionQuoteWithRelayers> {
     return this.fetchRemoteContractConfig(options, config)
       .then(({ minRollupFee }) =>
         this.getCommitments(options, config).then((commitments) => ({ commitments, minRollupFee })),
@@ -120,7 +129,13 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           commitments,
           MAX_NUM_INPUTS,
         ),
-      );
+      )
+      .then((quote) => {
+        if (options.useGasRelayers) {
+          return this.getRegisteredRelayers(options, config, quote);
+        }
+        return { ...quote, gasRelayers: [] };
+      });
   }
 
   public summary(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionSummary> {
@@ -156,9 +171,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           rollupFeeAssetSymbol: config.assetSymbol,
           gasRelayerFeeAmount,
           gasRelayerFeeAssetSymbol: config.assetSymbol,
-          gasRelayerAddress: options.gasRelayerAddress,
+          gasRelayerAddress: options.gasRelayerInfo?.address,
         };
       });
+  }
+
+  public static calcGasRelayerFee(amount: BN, gasRelayerInfo: GasRelayerInfo): BN {
+    const serviceFee = amount.muln(gasRelayerInfo.serviceFeeOfTenThousandth).divn(10000);
+    const minGasFee = toBN(gasRelayerInfo.minGasFee);
+    return serviceFee.add(minGasFee);
   }
 
   private getCommitments(
@@ -217,8 +238,19 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             );
           }
           let gasRelayerFee = toBN(0);
-          if (options.gasRelayerFee && quote.valid) {
-            gasRelayerFee = toDecimals(options.gasRelayerFee, contractConfig.assetDecimals);
+          const { gasRelayerInfo } = options;
+          const rawAmount = options.publicAmount || options.amount;
+          if (gasRelayerInfo && rawAmount && quote.valid) {
+            gasRelayerFee = TransactionExecutorV2.calcGasRelayerFee(
+              toDecimals(rawAmount, contractConfig.assetDecimals),
+              gasRelayerInfo,
+            );
+          }
+          if (gasRelayerFee.ltn(0)) {
+            return createErrorPromise(
+              'gas relayer fee cannot be negative',
+              MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+            );
           }
           let selectedCommitments: Commitment[] = [];
           if (quote.valid) {
@@ -230,6 +262,18 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             contractConfig.address,
             provider,
           );
+          const circuitConfig = TransactionExecutorV2.getCircuitConfig(
+            quote.numOfInputs,
+            quote.numOfSplits,
+            contractConfig,
+          );
+          if (!circuitConfig) {
+            return createErrorPromise(
+              `missing circuit config with number of inputs=${quote.numOfInputs} ` +
+                `and number of outputs=${quote.numOfSplits}`,
+              MystikoErrorCode.NON_EXISTING_CIRCUIT_CONFIG,
+            );
+          }
           return {
             options,
             contractConfig,
@@ -243,6 +287,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             rollupFee,
             gasRelayerFee,
             etherContract,
+            circuitConfig,
           };
         });
     });
@@ -290,12 +335,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
         );
       }
-      if (gasRelayerFee.gtn(0) && (!options.gasRelayerAddress || !options.gasRelayerEndpoint)) {
-        return createErrorPromise(
-          'must specify gas relayer address and endpoint when gas relayer fee is not 0',
-          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-        );
-      }
       if (
         options.type === TransactionEnum.WITHDRAW &&
         (!options.publicAddress || !isEthereumAddress(options.publicAddress))
@@ -314,20 +353,23 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
         );
       }
-      if (options.gasRelayerAddress && !isEthereumAddress(options.gasRelayerAddress)) {
-        return createErrorPromise(
-          'invalid ethereum address for gas relayer',
-          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-        );
-      }
-      if (
-        options.gasRelayerEndpoint &&
-        !isURL(options.gasRelayerEndpoint, { protocols: ['http', 'https'], require_tld: false })
-      ) {
-        return createErrorPromise(
-          'invalid endpoint url for gas relayer',
-          MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-        );
+      const { gasRelayerInfo } = options;
+      if (gasRelayerInfo) {
+        if (gasRelayerInfo.address && !isEthereumAddress(gasRelayerInfo.address)) {
+          return createErrorPromise(
+            'invalid ethereum address for gas relayer',
+            MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+          );
+        }
+        if (
+          gasRelayerInfo.url &&
+          !isURL(gasRelayerInfo.url, { protocols: ['http', 'https'], require_tld: false })
+        ) {
+          return createErrorPromise(
+            'invalid endpoint url for gas relayer',
+            MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+          );
+        }
       }
       /* istanbul ignore if */
       if (selectedCommitments.length === 0) {
@@ -468,7 +510,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         publicAmount: receivingPublicAmount.toString(),
         rollupFeeAmount: rollupFee.toString(),
         gasRelayerFeeAmount: gasRelayerFee.toString(),
-        gasRelayerAddress: options.gasRelayerAddress,
+        gasRelayerAddress: options.gasRelayerInfo?.address,
         shieldedAddress: options.shieldedAddress,
         publicAddress: options.publicAddress,
         status: TransactionStatus.INIT,
@@ -540,23 +582,9 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             this.getInputAccounts(executionContext).then((accounts) => ({ merkleTree, accounts })),
           )
           .then(({ merkleTree, accounts }) => {
-            const { contractConfig, selectedCommitments, outputCommitments, gasRelayerFee } =
-              executionContext;
+            const { circuitConfig, selectedCommitments, outputCommitments, gasRelayerFee } = executionContext;
             const numInputs = selectedCommitments.length;
             const numOutputs = outputCommitments?.length || 0;
-            const circuitConfig = TransactionExecutorV2.getCircuitConfig(
-              numInputs,
-              numOutputs,
-              contractConfig,
-            );
-            /* istanbul ignore if */
-            if (!circuitConfig) {
-              return createErrorPromise(
-                `missing circuit config with number of inputs=${numInputs} ` +
-                  `and number of outputs=${numOutputs}`,
-                MystikoErrorCode.NON_EXISTING_CIRCUIT_CONFIG,
-              );
-            }
             const randomEtherWallet = ethers.Wallet.createRandom();
             const sigPk = toBuff(randomEtherWallet.address);
             const inVerifyPks: Buffer[] = [];
@@ -750,9 +778,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   }
 
   private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithRequest> {
-    const { options, contractConfig, chainConfig, transaction, etherContract, selectedCommitments } =
-      executionContext;
-    const etherContractWithSigner = etherContract.connect(options.signer.signer);
+    const { contractConfig, chainConfig, transaction, selectedCommitments } = executionContext;
     const request = TransactionExecutorV2.buildTransactionRequest(executionContext);
     for (let i = 0; i < request.serialNumbers.length; i += 1) {
       const commitment = selectedCommitments[i];
@@ -769,13 +795,92 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           `submitting transaction id=${transaction.id} to ` +
             `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}`,
         );
-        return etherContractWithSigner.transact(request, signature);
+        const { gasRelayerInfo } = executionContext.options;
+        if (gasRelayerInfo) {
+          return this.sendTransactionViaGasRelayer(executionContext, request, signature, gasRelayerInfo);
+        }
+        return this.sendTransactionViaWallet(executionContext, request, signature);
+      })
+      .then((tx) => ({ ...executionContext, transaction: tx, request }));
+  }
+
+  private sendTransactionViaGasRelayer(
+    executionContext: ExecutionContextWithProof,
+    request: ICommitmentPool.TransactRequestStruct,
+    signature: string,
+    gasRelayerInfo: GasRelayerInfo,
+  ): Promise<Transaction> {
+    const { options, circuitConfig, contractConfig, chainConfig, transaction } = executionContext;
+    this.logger.info(
+      `submitting transaction id=${transaction.id} to ` +
+        `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
+        ` via gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
+    );
+    return this.context.gasRelayers
+      .relayTransact({
+        relayerUrl: gasRelayerInfo.url,
+        transactRequest: {
+          type: options.type === TransactionEnum.TRANSFER ? JobTypeEnum.TRANSFER : JobTypeEnum.WITHDRAW,
+          bridgeType: options.bridgeType,
+          chainId: options.chainId,
+          symbol: options.assetSymbol,
+          mystikoContractAddress: contractConfig.address,
+          circuitType: circuitConfig.type,
+          signature,
+          ...request,
+        },
       })
       .then((resp) => {
         this.logger.info(
           `successfully submitted transaction id=${transaction.id} to ` +
             `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
-            `transaction hash=${resp.hash}`,
+            `transaction hash=${resp.hash}` +
+            ` via gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
+        );
+        return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
+          transactionHash: resp.hash,
+        }).then((tx) => ({ tx, resp }));
+      })
+      .then(({ tx, resp }) =>
+        this.context.gasRelayers
+          .waitUntilConfirmed({
+            registerUrl: gasRelayerInfo.url,
+            jobId: resp.id,
+            options: {
+              timeoutMs: options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
+            },
+          })
+          .then(() => {
+            this.logger.info(
+              `transaction id=${transaction.id} to ` +
+                `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
+                `gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
+            );
+            return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+              transactionHash: resp.hash,
+            });
+          }),
+      );
+  }
+
+  private sendTransactionViaWallet(
+    executionContext: ExecutionContextWithProof,
+    request: ICommitmentPool.TransactRequestStruct,
+    signature: string,
+  ): Promise<Transaction> {
+    const { options, contractConfig, chainConfig, transaction, etherContract } = executionContext;
+    this.logger.info(
+      `submitting transaction id=${transaction.id} to ` +
+        `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} via connected wallet`,
+    );
+    const etherContractWithSigner = etherContract.connect(options.signer.signer);
+    return etherContractWithSigner
+      .transact(request, signature)
+      .then((resp) => {
+        this.logger.info(
+          `successfully submitted transaction id=${transaction.id} to ` +
+            `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
+            `transaction hash=${resp.hash} via connected wallet`,
         );
         return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
           transactionHash: resp.hash,
@@ -792,8 +897,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             transactionHash: receipt.transactionHash,
           });
         }),
-      )
-      .then((tx) => ({ ...executionContext, transaction: tx, request }));
+      );
   }
 
   private updateTransactionStatus(
@@ -916,7 +1020,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       outCommitments: proof.inputs.slice(4 + 2 * numInputs, 4 + 2 * numInputs + numOutputs),
       outRollupFees: proof.inputs.slice(4 + 2 * numInputs + numOutputs, 4 + 2 * numInputs + 2 * numOutputs),
       publicRecipient: options.publicAddress || MAIN_ASSET_ADDRESS,
-      relayerAddress: options.gasRelayerAddress || MAIN_ASSET_ADDRESS,
+      relayerAddress: options.gasRelayerInfo?.address || MAIN_ASSET_ADDRESS,
       outEncryptedNotes: outputEncryptedNotes.map(toHex),
       randomAuditingPublicKey: randomAuditingPublicKey.toString(),
       encryptedAuditorNotes,
@@ -1045,12 +1149,78 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
       );
     }
-    if (options.gasRelayerFee && options.gasRelayerFee < 0) {
+    return Promise.resolve(options);
+  }
+
+  private getRegisteredRelayers(
+    options: TransactionQuoteOptions,
+    config: PoolContractConfig,
+    quote: TransactionQuote,
+  ): Promise<TransactionQuoteWithRelayers> {
+    const rawAmount = options.publicAmount || options.amount;
+    if (!rawAmount) {
+      return Promise.resolve({ ...quote, gasRelayers: [] });
+    }
+    const circuitConfig = TransactionExecutorV2.getCircuitConfig(
+      quote.numOfInputs,
+      quote.numOfSplits,
+      config,
+    );
+    if (!circuitConfig) {
       return createErrorPromise(
-        'gas relayer fee cannot be negative',
-        MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
+        `missing circuit config with number of inputs=${quote.numOfInputs} ` +
+          `and number of outputs=${quote.numOfSplits}`,
+        MystikoErrorCode.NON_EXISTING_CIRCUIT_CONFIG,
       );
     }
-    return Promise.resolve(options);
+    return this.context.gasRelayers
+      .registerInfo({
+        chainId: options.chainId,
+        options: {
+          assetSymbol: options.assetSymbol,
+          assetDecimals: config.assetDecimals,
+          circuitType: circuitConfig.type,
+        },
+      })
+      .then((gasRelayers) => this.filterGasRelayerInfo(rawAmount, gasRelayers, config))
+      .then((gasRelayers) => ({ ...quote, gasRelayers }))
+      .catch((error) => {
+        this.logger.error(`failed to get gas relayers from remote: ${errorMessage(error)}`);
+        return { ...quote, gasRelayers: [] };
+      });
+  }
+
+  private filterGasRelayerInfo(
+    rawAmount: number,
+    rawInfos: RawGasRelayerInfo[],
+    config: PoolContractConfig,
+  ): GasRelayerInfo[] {
+    const filtered: GasRelayerInfo[] = [];
+    rawInfos.forEach((rawInfo) => {
+      if (rawInfo.available) {
+        const { contracts } = rawInfo;
+        if (contracts) {
+          for (let i = 0; i < contracts.length; i += 1) {
+            if (contracts[i].assetSymbol === config.assetSymbol) {
+              const gasRelayerInfo: GasRelayerInfo = {
+                url: rawInfo.registerUrl,
+                name: rawInfo.registerName,
+                address: rawInfo.relayerAddress,
+                serviceFeeOfTenThousandth: contracts[i].relayerFeeOfTenThousandth,
+                serviceFeeRatio: contracts[i].relayerFeeOfTenThousandth / 10000.0,
+                minGasFee: contracts[i].minimumGasFee,
+                minGasFeeNumber: fromDecimals(contracts[i].minimumGasFee, config.assetDecimals),
+              };
+              const amount = toDecimals(rawAmount, config.assetDecimals);
+              const gasRelayerFee = TransactionExecutorV2.calcGasRelayerFee(amount, gasRelayerInfo);
+              if (gasRelayerFee.lt(amount)) {
+                filtered.push(gasRelayerInfo);
+              }
+            }
+          }
+        }
+      }
+    });
+    return filtered;
   }
 }

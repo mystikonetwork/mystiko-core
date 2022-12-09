@@ -1,8 +1,8 @@
 import { PoolContractConfig } from '@mystikonetwork/config';
 import {
   TransactionOptions,
-  TransactionQuote,
   TransactionQuoteOptions,
+  TransactionQuoteWithRelayers,
   TransactionResponse,
   TransactionSummary,
 } from '../handler';
@@ -10,7 +10,7 @@ import {
 export interface TransactionExecutor<
   T = TransactionOptions,
   QO = TransactionQuoteOptions,
-  Q = TransactionQuote,
+  Q = TransactionQuoteWithRelayers,
   S = TransactionSummary,
   R = TransactionResponse,
 > {

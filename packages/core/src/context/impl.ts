@@ -2,6 +2,7 @@ import { MystikoConfig } from '@mystikonetwork/config';
 import { MystikoContractFactory, SupportedContractType } from '@mystikonetwork/contracts-abi';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
+import { IRelayerHandler as GasRelayers } from '@mystikonetwork/gas-relayer-client';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { ethers } from 'ethers';
 import { createError, MystikoErrorCode } from '../error';
@@ -54,6 +55,8 @@ export class MystikoContext<
   private executorFactory?: ExecutorFactory;
 
   private providerPool?: ProviderPool;
+
+  private gasRelayerClient?: GasRelayers;
 
   public config: MystikoConfig;
 
@@ -197,5 +200,16 @@ export class MystikoContext<
 
   public set providers(pool: ProviderPool) {
     this.providerPool = pool;
+  }
+
+  public get gasRelayers(): GasRelayers {
+    if (!this.gasRelayerClient) {
+      throw createError('gas relayer client has not been set', MystikoErrorCode.NO_GAS_RELAYER_CLIENT);
+    }
+    return this.gasRelayerClient;
+  }
+
+  public set gasRelayers(gasRelayerHandler: GasRelayers) {
+    this.gasRelayerClient = gasRelayerHandler;
   }
 }

@@ -6,8 +6,8 @@ import {
   TransactionHandler,
   TransactionOptions,
   TransactionQuery,
-  TransactionQuote,
   TransactionQuoteOptions,
+  TransactionQuoteWithRelayers,
   TransactionResponse,
   TransactionSummary,
   TransactionUpdate,
@@ -69,7 +69,7 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     return this.db.transactions.findOne({ selector }).exec();
   }
 
-  public quote(options: TransactionQuoteOptions): Promise<TransactionQuote> {
+  public quote(options: TransactionQuoteOptions): Promise<TransactionQuoteWithRelayers> {
     return this.getPoolContractConfig(options).then((poolContractConfig) =>
       this.context.executors.getTransactionExecutor(poolContractConfig).quote(options, poolContractConfig),
     );
