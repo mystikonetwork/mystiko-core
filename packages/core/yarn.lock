@@ -1045,14 +1045,14 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/fastfile/0.0.21/b3362f8527fa15a2d745c0b516c92d0a5ca0ceef4c2e103aac2d79305f0c4207#069a0d0d6a28a3f002fe97519456bbbd14880f9c"
   integrity sha512-o9vr4WoWEGord8+6ADBSulLO9arM2z0R5bOKj+GGPOFY/Zm8bg7alqRfuTvcxzll9TTk/rv7gDM4GnbBHhvyMA==
 
-"@mystikonetwork/gas-relayer-client@^0.1.9":
-  version "0.1.9"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-client/0.1.9/128bd9a9e3626eab18b2a4d7e11ae697aafc5e81#128bd9a9e3626eab18b2a4d7e11ae697aafc5e81"
-  integrity sha512-AtDvYBUvjq2hrK88wE8kbzvK1RTmrb2mHNEjll/PPc4XLvg7qvXH0mCxeUI8BRw7aSUVgsd4qo9ENiKV+7xetw==
+"@mystikonetwork/gas-relayer-client@^0.1.10":
+  version "0.1.10"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-client/0.1.10/ebdec68233438d28db365cc256fd056ae816cd78#ebdec68233438d28db365cc256fd056ae816cd78"
+  integrity sha512-auoAwC8bVq5B1P9u+jF0OdAjM+GnVBF7qv0lq6f4f8xhpYnpBtxGTH8xkkPa7yyT8cEtR+hNPTenUqPeztYFag==
   dependencies:
     "@mystikonetwork/config" "^0.3.0"
     "@mystikonetwork/ethers" "^0.3.0"
-    "@mystikonetwork/gas-relayer-config" "^0.1.9"
+    "@mystikonetwork/gas-relayer-config" "^0.1.10"
     "@mystikonetwork/gas-relayer-contracts-abi" "^0.0.9"
     "@mystikonetwork/utils" "^0.1.4"
     axios "^0.27.2"
@@ -1060,10 +1060,10 @@
     loglevel "^1.8.0"
     loglevel-plugin-prefix "^0.8.4"
 
-"@mystikonetwork/gas-relayer-config@^0.1.9":
-  version "0.1.9"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-config/0.1.9/09e93df4e2773b56121ee0c4d2bebe905b218394#09e93df4e2773b56121ee0c4d2bebe905b218394"
-  integrity sha512-RM8moRrArfgpsCpixKNLskHqmXoqudL8QeY/3iyqHEtYLxnsP6XbsC+KXxrFov2ofS0cgn74JjOuUeTaOO7/ig==
+"@mystikonetwork/gas-relayer-config@^0.1.10":
+  version "0.1.10"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-config/0.1.10/56e79273e96a3eb049a3bc9125e25040bc48bd5d#56e79273e96a3eb049a3bc9125e25040bc48bd5d"
+  integrity sha512-rQbA0DmD5Jk/hv4kuIQz1kSFSDLhxDxo+dfZw4rqKKVTSQJcql9677E2IK4L69TbUwPoU85ibUW6VFvpgjQsmg==
   dependencies:
     "@mystikonetwork/config" "^0.3.0"
     "@mystikonetwork/contracts-abi" "^0.2.2"

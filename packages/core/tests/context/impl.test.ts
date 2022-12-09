@@ -37,4 +37,8 @@ test('test raise errors', async () => {
   expect(() => newContext.executors).toThrow(
     createError('executor factory has not been set', MystikoErrorCode.NO_EXECUTOR),
   );
+
+  expect(() => newContext.gasRelayers).toThrow(
+    createError('gas relayer client has not been set', MystikoErrorCode.NO_GAS_RELAYER_CLIENT),
+  );
 });

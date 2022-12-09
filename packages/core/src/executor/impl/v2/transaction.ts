@@ -267,6 +267,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             quote.numOfSplits,
             contractConfig,
           );
+          /* istanbul ignore if */
           if (!circuitConfig) {
             return createErrorPromise(
               `missing circuit config with number of inputs=${quote.numOfInputs} ` +
@@ -1166,6 +1167,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       quote.numOfSplits,
       config,
     );
+    /* istanbul ignore if */
     if (!circuitConfig) {
       return createErrorPromise(
         `missing circuit config with number of inputs=${quote.numOfInputs} ` +
@@ -1197,7 +1199,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   ): GasRelayerInfo[] {
     const filtered: GasRelayerInfo[] = [];
     rawInfos.forEach((rawInfo) => {
-      if (rawInfo.available) {
+      if (rawInfo.available && rawInfo.support) {
         const { contracts } = rawInfo;
         if (contracts) {
           for (let i = 0; i < contracts.length; i += 1) {
