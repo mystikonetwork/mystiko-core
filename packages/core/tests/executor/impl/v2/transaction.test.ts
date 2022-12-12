@@ -18,8 +18,22 @@ import {
 } from '@mystikonetwork/database';
 import { ECIES } from '@mystikonetwork/ecies';
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
+import {
+  GetJobStatusRequest,
+  GetRegisterRequest,
+  IRelayerHandler as GasRelayers,
+  RelayTransactRequest,
+  WaitingJobRequest,
+} from '@mystikonetwork/gas-relayer-client';
+import {
+  JobTypeEnum,
+  RegisterInfo,
+  TransactResponse,
+  TransactStatus,
+  TransactStatusEnum,
+} from '@mystikonetwork/gas-relayer-config';
 import { Point, SecretSharing } from '@mystikonetwork/secret-share';
-import { readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
+import { fromDecimals, readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import {
@@ -27,6 +41,8 @@ import {
   AssetHandlerV2,
   CommitmentHandlerV2,
   createError,
+  createErrorPromise,
+  GasRelayerInfo,
   MystikoContextInterface,
   MystikoErrorCode,
   TransactionExecutorV2,
@@ -36,6 +52,48 @@ import {
   WalletHandlerV2,
 } from '../../../../src';
 import { createTestContext } from '../../../common/context';
+
+class TestGasRelayerClient implements GasRelayers {
+  public jobStatusRet?: TransactStatus;
+
+  public registerInfoRet?: RegisterInfo[];
+
+  public relayTransactRet?: TransactResponse;
+
+  public waitUntilConfirmedRet?: TransactStatus;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public jobStatus(request: GetJobStatusRequest): Promise<TransactStatus> {
+    if (this.jobStatusRet) {
+      return Promise.resolve(this.jobStatusRet);
+    }
+    return createErrorPromise('jobStatusRet is not set');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public registerInfo(request: GetRegisterRequest): Promise<RegisterInfo[]> {
+    if (this.registerInfoRet) {
+      return Promise.resolve(this.registerInfoRet);
+    }
+    return createErrorPromise('registerInfoRet is not set');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public relayTransact(request: RelayTransactRequest): Promise<TransactResponse> {
+    if (this.relayTransactRet) {
+      return Promise.resolve(this.relayTransactRet);
+    }
+    return createErrorPromise('relayTransactRet is not set');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public waitUntilConfirmed(request: WaitingJobRequest): Promise<TransactStatus> {
+    if (this.waitUntilConfirmedRet) {
+      return Promise.resolve(this.waitUntilConfirmedRet);
+    }
+    return createErrorPromise('waitUntilConfirmedRet is not set');
+  }
+}
 
 let config: MystikoConfig;
 let context: MystikoContextInterface;
@@ -49,6 +107,7 @@ let mystikoSigner: PrivateKeySigner;
 const walletPassword = 'P@ssw0rd';
 const auditorSecretKeys: BN[] = [];
 const auditorPublicKeys: BN[] = [];
+const gasRelayers: TestGasRelayerClient = new TestGasRelayerClient();
 
 async function getPoolContractConfig(
   chainId: number,
@@ -157,7 +216,18 @@ async function checkTransaction(
   expect(tx.signaturePublicKeyHashes?.length).toBe(numInput);
   expect(tx.outputCommitments?.length).toBe(numOutput);
   const expectRollupFeeAmount = (options.rollupFee || 0) * numOutput;
-  const expectGasRelayerFeeAmount = options.gasRelayerFee || 0;
+  const expectFullAmount = toDecimals(
+    options.amount || options.publicAmount || 0,
+    contractConfig.assetDecimals,
+  );
+  let expectGasRelayerFeeAmount: number = 0;
+  const { gasRelayerInfo } = options;
+  if (gasRelayerInfo) {
+    expectGasRelayerFeeAmount = fromDecimals(
+      TransactionExecutorV2.calcGasRelayerFee(expectFullAmount, gasRelayerInfo),
+      contractConfig.assetDecimals,
+    );
+  }
   const expectAmount = options.amount
     ? options.amount - expectRollupFeeAmount - expectGasRelayerFeeAmount
     : 0;
@@ -269,6 +339,7 @@ beforeAll(async () => {
   context.assets = new AssetHandlerV2(context);
   context.commitments = new CommitmentHandlerV2(context);
   context.transactions = new TransactionHandlerV2(context);
+  context.gasRelayers = gasRelayers;
   executor = new TransactionExecutorV2(context);
   for (let i = 0; i < executor.protocol.numOfAuditors; i += 1) {
     const sk = ECIES.generateSecretKey();
@@ -330,6 +401,86 @@ test('test quote', async () => {
   expect(quote.minRollupFee).toBe(contractConfig.minRollupFeeNumber);
 });
 
+test('test quote with gas relayers', async () => {
+  const options: TransactionQuoteOptions = {
+    type: TransactionEnum.WITHDRAW,
+    chainId: 11155111,
+    assetSymbol: 'MTT',
+    bridgeType: BridgeType.TBRIDGE,
+    publicAmount: 1,
+    useGasRelayers: true,
+  };
+  const contractConfig = await getPoolContractConfig(
+    options.chainId,
+    options.assetSymbol,
+    options.bridgeType,
+  );
+  let quote = await executor.quote(options, contractConfig);
+  expect(quote.gasRelayers).toStrictEqual([]);
+  const registerInfo: RegisterInfo = {
+    chainId: 11155111,
+    available: true,
+    support: true,
+    registerUrl: 'http://127.0.0.1:8090/',
+    registerName: 'sepolia',
+    relayerAddress: '0x90Dacf39bB9Bf2da9A94933868cB7936f4F08027',
+    contracts: [
+      {
+        assetSymbol: 'MTT',
+        relayerFeeOfTenThousandth: 25,
+        minimumGasFee: '100000000000000000',
+      },
+    ],
+  };
+  const expectedGasRelayerInfo: GasRelayerInfo = {
+    url: 'http://127.0.0.1:8090/',
+    name: 'sepolia',
+    address: '0x90Dacf39bB9Bf2da9A94933868cB7936f4F08027',
+    serviceFeeOfTenThousandth: 25,
+    serviceFeeRatio: 0.0025,
+    minGasFee: '100000000000000000',
+    minGasFeeNumber: 0.1,
+  };
+  gasRelayers.registerInfoRet = [registerInfo];
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.gasRelayers).toStrictEqual([expectedGasRelayerInfo]);
+  registerInfo.support = false;
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.gasRelayers).toStrictEqual([]);
+  registerInfo.support = true;
+  registerInfo.available = false;
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.gasRelayers).toStrictEqual([]);
+  const { contracts } = registerInfo;
+  if (contracts) {
+    registerInfo.support = true;
+    registerInfo.available = true;
+    contracts[0].assetSymbol = 'BNB';
+    quote = await executor.quote(options, contractConfig);
+    expect(quote.gasRelayers).toStrictEqual([]);
+    registerInfo.support = true;
+    registerInfo.available = true;
+    contracts[0].assetSymbol = 'MTT';
+    contracts[0].minimumGasFee = '1000000000000000000';
+    quote = await executor.quote(options, contractConfig);
+    expect(quote.gasRelayers).toStrictEqual([]);
+    registerInfo.support = true;
+    registerInfo.available = true;
+    contracts[0].assetSymbol = 'MTT';
+    contracts[0].minimumGasFee = '100000000000000000';
+    options.publicAmount = undefined;
+    quote = await executor.quote(options, contractConfig);
+    expect(quote.gasRelayers).toStrictEqual([]);
+  }
+  options.type = TransactionEnum.TRANSFER;
+  options.amount = 1;
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.gasRelayers).toStrictEqual([expectedGasRelayerInfo]);
+  gasRelayers.registerInfoRet = undefined;
+  quote = await executor.quote(options, contractConfig);
+  expect(quote.gasRelayers).toStrictEqual([]);
+});
+
 test('test invalid options', async () => {
   const { transferOptions, withdrawOptions, contractConfig } = await getTestOptions();
   await expect(executor.summary({ ...transferOptions, amount: undefined }, contractConfig)).rejects.toThrow(
@@ -355,7 +506,23 @@ test('test invalid options', async () => {
   await expect(executor.summary({ ...transferOptions, rollupFee: -1 }, contractConfig)).rejects.toThrow(
     createError('rollup fee cannot be negative', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
-  await expect(executor.summary({ ...transferOptions, gasRelayerFee: -1 }, contractConfig)).rejects.toThrow(
+  await expect(
+    executor.summary(
+      {
+        ...transferOptions,
+        gasRelayerInfo: {
+          url: 'http://localhost:9999',
+          name: 'test gas relayer',
+          address: etherWallet.address,
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: -20,
+          minGasFee: '-20000000000000000000',
+        },
+      },
+      contractConfig,
+    ),
+  ).rejects.toThrow(
     createError('gas relayer fee cannot be negative', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
   await expect(executor.summary({ ...transferOptions, chainId: 1024 }, contractConfig)).rejects.toThrow(
@@ -378,7 +545,23 @@ test('test invalid options', async () => {
   await expect(executor.summary({ ...transferOptions, rollupFee: 20 }, contractConfig)).rejects.toThrow(
     createError('rollup fee or gas relayer fee is too high', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
-  await expect(executor.summary({ ...transferOptions, gasRelayerFee: 20 }, contractConfig)).rejects.toThrow(
+  await expect(
+    executor.summary(
+      {
+        ...transferOptions,
+        gasRelayerInfo: {
+          url: 'http://localhost:9999',
+          name: 'test gas relayer',
+          address: etherWallet.address,
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: 20,
+          minGasFee: '20000000000000000000',
+        },
+      },
+      contractConfig,
+    ),
+  ).rejects.toThrow(
     createError('rollup fee or gas relayer fee is too high', MystikoErrorCode.INVALID_TRANSACTION_OPTIONS),
   );
   await mockCommitmentPool.mock.getMinRollupFee.returns(contractConfig.minRollupFee.muln(2).toString());
@@ -392,33 +575,17 @@ test('test invalid options', async () => {
   );
   await expect(
     executor.summary(
-      { ...transferOptions, gasRelayerFee: 0.1, gasRelayerAddress: etherWallet.address },
-      contractConfig,
-    ),
-  ).rejects.toThrow(
-    createError(
-      'must specify gas relayer address and endpoint when gas relayer fee is not 0',
-      MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-    ),
-  );
-  await expect(
-    executor.summary(
-      { ...transferOptions, gasRelayerFee: 0.1, gasRelayerEndpoint: 'http://localhost:9999' },
-      contractConfig,
-    ),
-  ).rejects.toThrow(
-    createError(
-      'must specify gas relayer address and endpoint when gas relayer fee is not 0',
-      MystikoErrorCode.INVALID_TRANSACTION_OPTIONS,
-    ),
-  );
-  await expect(
-    executor.summary(
       {
         ...transferOptions,
-        gasRelayerFee: 0.1,
-        gasRelayerAddress: 'not an address',
-        gasRelayerEndpoint: 'http://localhost:9999',
+        gasRelayerInfo: {
+          url: 'http://localhost:9999',
+          name: 'test gas relayer',
+          address: 'not an address',
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: 0.01,
+          minGasFee: '10000000000000000',
+        },
       },
       contractConfig,
     ),
@@ -429,9 +596,15 @@ test('test invalid options', async () => {
     executor.summary(
       {
         ...transferOptions,
-        gasRelayerFee: 0.1,
-        gasRelayerAddress: etherWallet.address,
-        gasRelayerEndpoint: 'not an endpoint url',
+        gasRelayerInfo: {
+          url: 'not an endpoint url',
+          name: 'test gas relayer',
+          address: etherWallet.address,
+          serviceFeeOfTenThousandth: 25,
+          serviceFeeRatio: 0.0025,
+          minGasFeeNumber: 0.01,
+          minGasFee: '10000000000000000',
+        },
       },
       contractConfig,
     ),
@@ -461,8 +634,34 @@ test('test invalid options', async () => {
 });
 
 test('test summary', async () => {
+  const gasRelayerInfo: GasRelayerInfo = {
+    url: 'http://127.0.0.1:8090/',
+    name: 'test gas relayer',
+    address: '0x90Dacf39bB9Bf2da9A94933868cB7936f4F08027',
+    serviceFeeOfTenThousandth: 25,
+    serviceFeeRatio: 0.0025,
+    minGasFee: '10000000000000000',
+    minGasFeeNumber: 0.01,
+  };
   const { transferOptions, withdrawOptions, contractConfig } = await getTestOptions();
-  const transferSummary = await executor.summary(transferOptions, contractConfig);
+  transferOptions.gasRelayerInfo = gasRelayerInfo;
+  withdrawOptions.gasRelayerInfo = gasRelayerInfo;
+  let transferSummary = await executor.summary(transferOptions, contractConfig);
+  expect(transferSummary).toStrictEqual({
+    previousBalance: 9.9,
+    newBalance: 3.9,
+    assetSymbol: 'MTT',
+    recipient: mystikoAccount.shieldedAddress,
+    withdrawingAmount: 0,
+    transferringAmount: 5.775,
+    rollupFeeAmount: 0.2,
+    rollupFeeAssetSymbol: 'MTT',
+    gasRelayerFeeAmount: 0.025,
+    gasRelayerFeeAssetSymbol: 'MTT',
+    gasRelayerAddress: '0x90Dacf39bB9Bf2da9A94933868cB7936f4F08027',
+  });
+  transferOptions.gasRelayerInfo = undefined;
+  transferSummary = await executor.summary(transferOptions, contractConfig);
   expect(transferSummary).toStrictEqual({
     previousBalance: 9.9,
     newBalance: 3.9,
@@ -476,7 +675,22 @@ test('test summary', async () => {
     gasRelayerFeeAssetSymbol: 'MTT',
     gasRelayerAddress: undefined,
   });
-  const withdrawSummary = await executor.summary(withdrawOptions, contractConfig);
+  let withdrawSummary = await executor.summary(withdrawOptions, contractConfig);
+  expect(withdrawSummary).toStrictEqual({
+    previousBalance: 9.9,
+    newBalance: 4.9,
+    assetSymbol: 'MTT',
+    recipient: etherWallet.address,
+    withdrawingAmount: 4.9775,
+    transferringAmount: 0,
+    rollupFeeAmount: 0,
+    rollupFeeAssetSymbol: 'MTT',
+    gasRelayerFeeAmount: 0.0225,
+    gasRelayerFeeAssetSymbol: 'MTT',
+    gasRelayerAddress: '0x90Dacf39bB9Bf2da9A94933868cB7936f4F08027',
+  });
+  withdrawOptions.gasRelayerInfo = undefined;
+  withdrawSummary = await executor.summary(withdrawOptions, contractConfig);
   expect(withdrawSummary).toStrictEqual({
     previousBalance: 9.9,
     newBalance: 4.9,
@@ -702,4 +916,52 @@ test('test transaction 2x2', async () => {
   const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
   await transactionPromise;
   await checkTransaction(2, 2, transaction, transferOptions, contractConfig);
+});
+
+test('test transaction with gas relayers', async () => {
+  const { withdrawOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  withdrawOptions.gasRelayerInfo = {
+    url: 'http://127.0.0.1:8090/',
+    name: 'test gas relayer',
+    address: '0x90Dacf39bB9Bf2da9A94933868cB7936f4F08027',
+    serviceFeeOfTenThousandth: 25,
+    serviceFeeRatio: 0.0025,
+    minGasFee: '10000000000000000',
+    minGasFeeNumber: 0.01,
+  };
+  const relayTransactRet = {
+    id: '1',
+    hash: '0xf1a37404bc619328699869ab412cc848b51b98af2ca7055214f55b998f4d420c',
+    chainId: withdrawOptions.chainId,
+    nonce: 1,
+  };
+  gasRelayers.relayTransactRet = relayTransactRet;
+  const gasRelayerRequest: any = {};
+  gasRelayers.waitUntilConfirmedRet = {
+    id: '1',
+    type: JobTypeEnum.WITHDRAW,
+    status: TransactStatusEnum.CONFIRMED,
+    error: '',
+    request: gasRelayerRequest,
+  };
+  let exeRet = await executor.execute(withdrawOptions, contractConfig);
+  await exeRet.transactionPromise;
+  await checkTransaction(1, 0, exeRet.transaction, withdrawOptions, contractConfig);
+
+  withdrawOptions.publicAmount = 1;
+  gasRelayers.relayTransactRet = undefined;
+  exeRet = await executor.execute(withdrawOptions, contractConfig);
+  await exeRet.transactionPromise;
+  expect(exeRet.transaction.status).toBe(TransactionStatus.FAILED);
+  expect(exeRet.transaction.errorMessage).toBe('relayTransactRet is not set');
+
+  gasRelayers.relayTransactRet = relayTransactRet;
+  gasRelayers.waitUntilConfirmedRet = undefined;
+  exeRet = await executor.execute(withdrawOptions, contractConfig);
+  await exeRet.transactionPromise;
+  expect(exeRet.transaction.status).toBe(TransactionStatus.FAILED);
+  expect(exeRet.transaction.errorMessage).toBe('waitUntilConfirmedRet is not set');
 });

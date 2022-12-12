@@ -10,6 +10,17 @@ export type TransactionQuoteOptions = {
   version?: number;
   amount?: number;
   publicAmount?: number;
+  useGasRelayers?: boolean;
+};
+
+export type GasRelayerInfo = {
+  url: string;
+  name: string;
+  address: string;
+  serviceFeeOfTenThousandth: number;
+  serviceFeeRatio: number;
+  minGasFee: string;
+  minGasFeeNumber: number;
 };
 
 export type TransactionOptions = TransactionQuoteOptions & {
@@ -18,9 +29,8 @@ export type TransactionOptions = TransactionQuoteOptions & {
   publicAddress?: string;
   signer: MystikoSigner;
   rollupFee?: number;
-  gasRelayerFee?: number;
-  gasRelayerAddress?: string;
-  gasRelayerEndpoint?: string;
+  gasRelayerInfo?: GasRelayerInfo;
+  gasRelayerWaitingTimeoutMs?: number;
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
 };
 
@@ -28,6 +38,7 @@ export type TransactionQuote = {
   valid: boolean;
   invalidReason?: string;
   balance: number;
+  numOfInputs: number;
   numOfSplits: number;
   minRollupFee: number;
   rollupFeeAssetSymbol: string;
@@ -36,6 +47,10 @@ export type TransactionQuote = {
   fixedAmount: boolean;
   maxGasRelayerFee: number;
   gasRelayerFeeAssetSymbol: string;
+};
+
+export type TransactionQuoteWithRelayers = TransactionQuote & {
+  gasRelayers: GasRelayerInfo[];
 };
 
 export type TransactionSummary = {
@@ -77,7 +92,7 @@ export interface TransactionHandler<
   T = TransactionOptions,
   Q = TransactionQuery,
   QO = TransactionQuoteOptions,
-  QUO = TransactionQuote,
+  QUO = TransactionQuoteWithRelayers,
   S = TransactionSummary,
   R = TransactionResponse,
   U = TransactionUpdate,
