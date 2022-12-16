@@ -195,9 +195,11 @@ export class SynchronizerV2 implements Synchronizer {
       return this.updateStatus(options, true)
         .then(() => {
           const promises: Promise<void>[] = [];
+          const filteredChains =
+            options.chainIds && options.chainIds.length > 0 ? new Set(options.chainIds) : undefined;
           this.chains.forEach((chainStatus) => {
             const { chainId } = chainStatus;
-            if (!chainStatus.isSyncing) {
+            if (!chainStatus.isSyncing && (!filteredChains || filteredChains.has(chainId))) {
               chainStatus.isSyncing = true;
               chainStatus.error = undefined;
               promises.push(
