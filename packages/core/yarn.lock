@@ -1349,10 +1349,10 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@^0.3.0", "@mystikonetwork/config@^0.3.1":
-  version "0.3.1"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.3.1/25d2dd01e5ae22b5333fae0f8acf51e23b4ee0b8#25d2dd01e5ae22b5333fae0f8acf51e23b4ee0b8"
-  integrity sha512-uM1tcBKuXIQUZrc1E6kkShIOEOkNtXZnTRvfvbh6n1v3XhArr2NRKbW5aJXX4XhqNIo4vdggbww3R9fHUSgkXg==
+"@mystikonetwork/config@^0.3.0", "@mystikonetwork/config@^0.3.2":
+  version "0.3.2"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.3.2/7e4483f0c68d241ecf491df0519649f75b58564b#7e4483f0c68d241ecf491df0519649f75b58564b"
+  integrity sha512-J+rxuCOtbqkuWrBF4fHWKnBiavSGCAifnNUfaM0+fyenYHCdPwBtj5qWK1RrQ6gGOE9dNBdZuPIunMC+zQAgwA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"
@@ -1361,19 +1361,19 @@
     ethers "^5.5.3"
     reflect-metadata "^0.1.13"
 
-"@mystikonetwork/contracts-abi@^0.2.0":
-  version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.2.0/4576a734148d209500d6031d7fdf1971e28e63b2#4576a734148d209500d6031d7fdf1971e28e63b2"
-  integrity sha512-qTi3QjMFeEMQauil+6O0KQ6EkqFB2H0iqpWLcGiO9pCj3GMpj1US3CW2TvRyOEpw0gqmIjsjCrrEApJpxXiTZA==
+"@mystikonetwork/contracts-abi@^0.2.2":
+  version "0.2.2"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.2.2/32b80af881225fed0e6e33370af5da5c2c64be74#32b80af881225fed0e6e33370af5da5c2c64be74"
+  integrity sha512-RghJF0nh0XPwkXUwL9JhBKywv1y4mjCJx1Js/vl8SFF+cb3M5UcHivR0IcRqeCqcohlMHR3AqO4t4c7CNtRkwg==
   dependencies:
     "@ethersproject/abi" "^5.5.3"
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/contracts-abi@^0.2.2":
-  version "0.2.2"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.2.2/32b80af881225fed0e6e33370af5da5c2c64be74#32b80af881225fed0e6e33370af5da5c2c64be74"
-  integrity sha512-RghJF0nh0XPwkXUwL9JhBKywv1y4mjCJx1Js/vl8SFF+cb3M5UcHivR0IcRqeCqcohlMHR3AqO4t4c7CNtRkwg==
+"@mystikonetwork/contracts-abi@^0.2.3":
+  version "0.2.3"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.2.3/d714fb4f7e6d720b316bfc7a3b2577ac8f8d1246#d714fb4f7e6d720b316bfc7a3b2577ac8f8d1246"
+  integrity sha512-mOsUzNbQa8gpjSPm342EUkGD2501iLdF50sIZpt6C0+lylyeu4CKLg0LYAL/BAxI5Wd+o/upQDeqOiCQKUaPlg==
   dependencies:
     "@ethersproject/abi" "^5.5.3"
     "@ethersproject/providers" "^5.5.3"
