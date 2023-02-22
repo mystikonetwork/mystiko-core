@@ -61,7 +61,7 @@
     "loglevel-plugin-prefix": "^0.8.4",
     "pouchdb-adapter-leveldb": "7.3.0",
     "pouchdb-adapter-memory": "7.3.0",
-    "rxdb": "12.4.3",
+    "rxdb": "12.5.4",
     "rxjs": "7.5.5"
   }
 }
