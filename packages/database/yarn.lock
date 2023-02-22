@@ -5893,7 +5893,7 @@ pouchdb-adapter-leveldb-core@7.3.0:
     sublevel-pouchdb "7.3.0"
     through2 "3.0.2"
 
-pouchdb-adapter-memory@^7.2.2:
+pouchdb-adapter-memory@7.3.0:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/pouchdb-adapter-memory/-/pouchdb-adapter-memory-7.3.0.tgz#ddd5b9ab9d30209d066374648abc761c68444db3"
   integrity sha512-nUdYi5KpbUa0uv0L3IJorpiUnIOBPxX9qplCX9i7JE8OtLPeLyKuX3WC+3M1//8Lmmxg3b1wXSNIod6FJy4wAQ==
@@ -6429,7 +6429,7 @@ run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
-rxdb@^12.4.3:
+rxdb@12.5.4:
   version "12.5.4"
   resolved "https://registry.yarnpkg.com/rxdb/-/rxdb-12.5.4.tgz#13ad51d4fd0b7da47da9fccd1399edcac4872998"
   integrity sha512-6IUqjR6123N0qkc/eu/8gPZ1kaBCg0A4EJJg3g04UvqKrM+FoBckju9PkNR3/hMShfDlPDoVlXN+Ixssf0ea9g==
@@ -6480,7 +6480,7 @@ rxdb@^12.4.3:
     util "0.12.4"
     z-schema "5.0.3"
 
-rxjs@^7.5.5:
+rxjs@7.5.5:
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.5.tgz#2ebad89af0f560f460ad5cc4213219e1f7dd4e9f"
   integrity sha512-sy+H0pQofO95VDmFLzyaw9xNJU4KTRSwQIGM6+iG3SypAtCiLDzpeG8sJrNCWn2Up9km+KhkvTdbkrdy+yzZdw==

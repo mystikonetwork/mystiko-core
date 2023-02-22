@@ -74,7 +74,7 @@
     "@mystikonetwork/zkp-nop": "^0.2.4",
     "pouchdb-adapter-idb": "7.3.0",
     "pouchdb-adapter-memory": "7.3.0",
-    "rxdb": "12.4.3",
+    "rxdb": "12.5.4",
     "rxjs": "7.5.5"
   }
 }

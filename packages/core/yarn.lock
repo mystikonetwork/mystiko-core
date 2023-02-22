@@ -9671,7 +9671,7 @@ rustbn.js@~0.2.0:
   resolved "https://registry.yarnpkg.com/rustbn.js/-/rustbn.js-0.2.0.tgz#8082cb886e707155fd1cb6f23bd591ab8d55d0ca"
   integrity sha512-4VlvkRUuCJvr2J6Y0ImW7NvTCriMi7ErOAqWk1y69vAdoNIzCF3yPmgeNzx+RQTLEDFq5sHfscn1MwHxP9hNfA==
 
-rxdb@^12.4.3:
+rxdb@12.5.4:
   version "12.5.4"
   resolved "https://registry.yarnpkg.com/rxdb/-/rxdb-12.5.4.tgz#13ad51d4fd0b7da47da9fccd1399edcac4872998"
   integrity sha512-6IUqjR6123N0qkc/eu/8gPZ1kaBCg0A4EJJg3g04UvqKrM+FoBckju9PkNR3/hMShfDlPDoVlXN+Ixssf0ea9g==
@@ -9722,7 +9722,7 @@ rxdb@^12.4.3:
     util "0.12.4"
     z-schema "5.0.3"
 
-rxjs@^7.5.5:
+rxjs@7.5.5:
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.5.tgz#2ebad89af0f560f460ad5cc4213219e1f7dd4e9f"
   integrity sha512-sy+H0pQofO95VDmFLzyaw9xNJU4KTRSwQIGM6+iG3SypAtCiLDzpeG8sJrNCWn2Up9km+KhkvTdbkrdy+yzZdw==
