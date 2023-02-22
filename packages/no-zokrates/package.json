@@ -72,9 +72,9 @@
     "@mystikonetwork/protocol": "^0.2.4",
     "@mystikonetwork/zkp": "^0.2.4",
     "@mystikonetwork/zkp-nop": "^0.2.4",
-    "pouchdb-adapter-idb": "^7.0.0",
-    "pouchdb-adapter-memory": "^7.2.2",
-    "rxdb": "^12.4.3",
-    "rxjs": "^7.5.5"
+    "pouchdb-adapter-idb": "7.3.0",
+    "pouchdb-adapter-memory": "7.3.0",
+    "rxdb": "12.4.3",
+    "rxjs": "7.5.5"
   }
 }
