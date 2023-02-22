@@ -1379,10 +1379,10 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/ecies@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ecies/0.2.3/e3cb4ae755f10a1f49adb9a9706d0019629b71d2#e3cb4ae755f10a1f49adb9a9706d0019629b71d2"
-  integrity sha512-/7hrxOl/aVB/p5HPx7oJhS1lU4FE+HSQnR4XdJeik2pbU+o6AkPe9w6/MofFxf/0SaQtqt4rVnLwOclBvoN04g==
+"@mystikonetwork/ecies@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ecies/0.2.4/63a24a3396b55322e17cc25d40505d8a5321c1a9#63a24a3396b55322e17cc25d40505d8a5321c1a9"
+  integrity sha512-Qqi39EiXQ4ABR6mQdJbDRVwKDX4bosft2Ns0Ddv0f1H8PxsxwcBqkq3lFwjAxDiAN2CPOgo2l4HgN00yTyaN9Q==
   dependencies:
     "@mystikonetwork/utils" "^0.1.3"
     bn.js "^5.2.0"
@@ -1458,26 +1458,26 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-common/0.5.0/aed79cbfb6e7e414f55285ea890cdbf31467c8b1#aed79cbfb6e7e414f55285ea890cdbf31467c8b1"
   integrity sha512-OrnS41QJ0077a2Ao1bTpeN1q9AAxHQFgvAhcGpfogUfUSsFLcLSk0BsalSRNPqAH+9GvgjXZanp2iYPxNmxDow==
 
-"@mystikonetwork/merkle@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/merkle/0.2.3/e291af91d3b0f8bdb5b44c4eac3eccffaed0e5b0#e291af91d3b0f8bdb5b44c4eac3eccffaed0e5b0"
-  integrity sha512-SO5gT20v+mE5l+ylGi2W3iVFk+BS7xQiJoaM35L68Z0hpHt+s0mFwJYxs3g45NEx6gCTJbSU1zaf07DRnx+0FA==
+"@mystikonetwork/merkle@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/merkle/0.2.4/5a1664a38312bb088ad0b0f89df5b49d00b51244#5a1664a38312bb088ad0b0f89df5b49d00b51244"
+  integrity sha512-E7d6CTx1RtJonm3WRkeRO33vQcWFGAYLBNgqy9I6asTuVMFbCaPWoEBJIA1U8+HuWf+AxYa7vwF5v62PMXOFbA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"
     circomlibjs "^0.0.8"
     ethers "^5.5.3"
 
-"@mystikonetwork/protocol@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protocol/0.2.3/593e3a009c3b20ce06b2f75652d0941f7d204cda#593e3a009c3b20ce06b2f75652d0941f7d204cda"
-  integrity sha512-UZDmoyQN8ff+zf20wXlDniAMpsWSCnFKb+JSHhg5ADT9NHw4kLH84+jNMGiKl/BL7NtqLmBG1d1chPftNOYKZg==
+"@mystikonetwork/protocol@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protocol/0.2.4/27bac847e318cb9e3432c0402eae222824fa36c1#27bac847e318cb9e3432c0402eae222824fa36c1"
+  integrity sha512-Ei+gTBMVyfQDTojdUNWJg525FiIO9uzrpFdvXfWxHHGimvrgUIGAeOUJ/i7Nmf75hMXg5uA5kfACE2qScXfEow==
   dependencies:
-    "@mystikonetwork/ecies" "^0.2.3"
-    "@mystikonetwork/merkle" "^0.2.3"
-    "@mystikonetwork/secret-share" "^0.2.3"
+    "@mystikonetwork/ecies" "^0.2.4"
+    "@mystikonetwork/merkle" "^0.2.4"
+    "@mystikonetwork/secret-share" "^0.2.4"
     "@mystikonetwork/utils" "^0.1.1"
-    "@mystikonetwork/zkp" "^0.2.3"
+    "@mystikonetwork/zkp" "^0.2.4"
     blake-hash "^2.0.0"
     bn.js "^5.2.0"
     bs58 "^4.0.1"
@@ -1489,10 +1489,10 @@
     loglevel "^1.8.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/secret-share@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/secret-share/0.2.3/a580f9353acdc1a7e7e3e0af21a4ee6b0b8807c3#a580f9353acdc1a7e7e3e0af21a4ee6b0b8807c3"
-  integrity sha512-WXORGX9/VP7E8qQXYXoFNIn867NoHxmRx8P5SKh3c5P9I40zvcwviRJ6D5mCtsVRSN2IvOYr8KHdnbQnwgG2zA==
+"@mystikonetwork/secret-share@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/secret-share/0.2.4/743b30e22b2b49e2b8408b333527f6bc544a1072#743b30e22b2b49e2b8408b333527f6bc544a1072"
+  integrity sha512-AvdqHUIfEVXzviRlyQcFUa41u64LROn6vIK5P33JCJeVRlsp0inSFs+p+W7C8HBFdp2L6AMHBx63b2LR38CpQg==
   dependencies:
     "@mystikonetwork/utils" "^0.1.3"
     bn.js "^5.2.0"
@@ -1524,30 +1524,30 @@
     loglevel-plugin-prefix "^0.8.4"
     pako "^2.0.4"
 
-"@mystikonetwork/zkp-node@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-node/0.2.3/e7599295b5150eccb025c3f1b708ccdd88ebf9fd#e7599295b5150eccb025c3f1b708ccdd88ebf9fd"
-  integrity sha512-NQcs2qk5bRQbLXlHoXf/nCIOVAkMfFRd39EqmI9NIP3l72dNzfasD/hoRWcvOXA1ePGmBtdbumypx1NtWvablw==
+"@mystikonetwork/zkp-node@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-node/0.2.4/0952e36210a674720038532e9f1a3483da03f50d#0952e36210a674720038532e9f1a3483da03f50d"
+  integrity sha512-bIDHLzQ34WUIrSnmSXWVu0qAEmMIAty4xhuG4EfQS2v7M5I7zRt9MrAdBtdUzHvhViEld4MbSDP2kWUGtw4kng==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
-    "@mystikonetwork/zkp" "^0.2.3"
-    "@mystikonetwork/zkp-wasm" "^0.2.3"
+    "@mystikonetwork/zkp" "^0.2.4"
+    "@mystikonetwork/zkp-wasm" "^0.2.4"
     command-exists "^1.2.9"
     zokrates-js "^1.1.3"
 
-"@mystikonetwork/zkp-wasm@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-wasm/0.2.3/2fc09c9e4cdd4be0c875c84629caf496c9514aec#2fc09c9e4cdd4be0c875c84629caf496c9514aec"
-  integrity sha512-QjNZ6kaM0ar0HbeH/N/DvGKaiqVpQQJuF8ynqcRT+G/4SjW9RH7gDM83lfBua32C3ZCWt0Rcb5uS+lk7CzjMbw==
+"@mystikonetwork/zkp-wasm@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-wasm/0.2.4/73c8ae8986361b6d790b2b54db06016df14cde4d#73c8ae8986361b6d790b2b54db06016df14cde4d"
+  integrity sha512-lq3k0lAsdxz+CC8cIaK/1zjG8fOcS0lWz8EFhOPaP60uval/4sXZfQhHnuOKi6EoWdOr9oX9/d/Ze8RhWDrPCw==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
-    "@mystikonetwork/zkp" "^0.2.3"
+    "@mystikonetwork/zkp" "^0.2.4"
     zokrates-js "^1.1.3"
 
-"@mystikonetwork/zkp@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.2.3/7b1b9ec0b8f03f044123d0fb40f7f67510ea01ab#7b1b9ec0b8f03f044123d0fb40f7f67510ea01ab"
-  integrity sha512-9reHELU3Fk3mhzAXv0G0sJRnyEfKHM0fpAYTNka44OqLEKQPzY3a2ldIf6Wtsbc9HtjD72hpwssDNaAcHdbsWQ==
+"@mystikonetwork/zkp@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.2.4/c16b84ef6e003fec1edd48fd0e7b05ae15df14a3#c16b84ef6e003fec1edd48fd0e7b05ae15df14a3"
+  integrity sha512-5zFix4hB+94LsjIZidA9rcgArj5j+f8OaVoR2zLn9YlVROaEl9t8OPS7w7xN9AOM0N7npkE/U6a0FPdp3EubVg==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
