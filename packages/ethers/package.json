@@ -57,5 +57,8 @@
     "@mystikonetwork/utils": "^0.1.3",
     "ethers": "^5.5.3",
     "loglevel": "^1.8.0"
+  },
+  "resolutions": {
+    "@mystikonetwork/config": "0.4.0"
   }
 }

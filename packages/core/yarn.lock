@@ -1349,7 +1349,7 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@0.4.0", "@mystikonetwork/config@^0.3.0", "@mystikonetwork/config@^0.4.0":
+"@mystikonetwork/config@0.4.0", "@mystikonetwork/config@^0.3.2", "@mystikonetwork/config@^0.4.0":
   version "0.4.0"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.4.0/905d69894a70c853498823bb702db22ebb38a270#905d69894a70c853498823bb702db22ebb38a270"
   integrity sha512-QvnmOJX0TrpURfDxqYNjmx3I8NdHUYcvSA6dwzKbivJ+UP2o8V7e5fZBiN5JFYNSmUhHtBbA5+4TyP2qN9fLqw==
@@ -1390,13 +1390,13 @@
     ffjavascript "0.2.52"
     randombytes "^2.1.0"
 
-"@mystikonetwork/ethers@^0.3.0":
-  version "0.3.2"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ethers/0.3.2/9380c121d063badcf02aabe36f48e17f6a3dc084#9380c121d063badcf02aabe36f48e17f6a3dc084"
-  integrity sha512-XjncHiT40WU5b3KunD1g6NMOoUHxyceyoLmXc26zc2TsaTTI+X6zN9SOHP5v25KnT5gqsugrwKWE6SeVnmdf/g==
+"@mystikonetwork/ethers@^0.3.9":
+  version "0.3.9"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ethers/0.3.9/14be0ac97cd2463b8e1f83dc6dda395bdf82dc32#14be0ac97cd2463b8e1f83dc6dda395bdf82dc32"
+  integrity sha512-AEejaZNILa4lLeinlgme/mHlUJ5A49KthJOE1QuUMj89ta8upCD6CgL//+EmOGqt3c4esPWDdKgdzFeby9ekCA==
   dependencies:
     "@metamask/detect-provider" "^1.2.0"
-    "@mystikonetwork/config" "^0.3.0"
+    "@mystikonetwork/config" "^0.3.2"
     "@mystikonetwork/utils" "^0.1.3"
     ethers "^5.5.3"
     loglevel "^1.8.0"
@@ -1406,14 +1406,14 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/fastfile/0.0.21/b3362f8527fa15a2d745c0b516c92d0a5ca0ceef4c2e103aac2d79305f0c4207#069a0d0d6a28a3f002fe97519456bbbd14880f9c"
   integrity sha512-o9vr4WoWEGord8+6ADBSulLO9arM2z0R5bOKj+GGPOFY/Zm8bg7alqRfuTvcxzll9TTk/rv7gDM4GnbBHhvyMA==
 
-"@mystikonetwork/gas-relayer-client@^0.1.11":
-  version "0.1.11"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-client/0.1.11/c61d647b169388991767ed8e5283a56f3cda5479#c61d647b169388991767ed8e5283a56f3cda5479"
-  integrity sha512-sYG5Rzc2OCkKC5qSc2bSTj9mnNtXOQUARF5KFAVZHFfCBwkRxrFxdq3If8nasZTmizmnv4QqfEt/tKEAp8c09w==
+"@mystikonetwork/gas-relayer-client@^0.1.13":
+  version "0.1.13"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-client/0.1.13/c01b5aed400a3fda0e58ab6fbb642b9558a7252a#c01b5aed400a3fda0e58ab6fbb642b9558a7252a"
+  integrity sha512-uXxNiOlGb/D9hY4TwaDMy0U9P1Z0M9BubKUgpQvMRgKCZzFCTUA/57naTDfT8RL5YX4bpkhhMd6wWa3owdrO7g==
   dependencies:
-    "@mystikonetwork/config" "^0.3.0"
-    "@mystikonetwork/ethers" "^0.3.0"
-    "@mystikonetwork/gas-relayer-config" "^0.1.11"
+    "@mystikonetwork/config" "^0.4.0"
+    "@mystikonetwork/ethers" "^0.3.9"
+    "@mystikonetwork/gas-relayer-config" "^0.1.13"
     "@mystikonetwork/gas-relayer-contracts-abi" "^0.0.9"
     "@mystikonetwork/utils" "^0.1.4"
     axios "^0.27.2"
@@ -1421,12 +1421,12 @@
     loglevel "^1.8.0"
     loglevel-plugin-prefix "^0.8.4"
 
-"@mystikonetwork/gas-relayer-config@^0.1.11":
-  version "0.1.11"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-config/0.1.11/b4b36f3a737faf1db009c95a88004073b7d3c8d4#b4b36f3a737faf1db009c95a88004073b7d3c8d4"
-  integrity sha512-a8911OZYBIrTopmEsYOoPCfLyMjhgn+AdHZwTn6/SgUfHZChpN996OrURVbAJ5/6BXo/3o6y/p02xpJW9yC+JQ==
+"@mystikonetwork/gas-relayer-config@^0.1.13":
+  version "0.1.13"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/gas-relayer-config/0.1.13/8fcdf562375fc68408fd0b0416995a75993e6b8a#8fcdf562375fc68408fd0b0416995a75993e6b8a"
+  integrity sha512-BsNg/Kqoq1e7pT0sFE9Q1bA45Juvblw/WghEN9wg0ezGf3R2QJbGSSRVpOVy0eLAmVz6ZtLYNDcCz9fGtgDyWw==
   dependencies:
-    "@mystikonetwork/config" "^0.3.0"
+    "@mystikonetwork/config" "^0.4.0"
     "@mystikonetwork/contracts-abi" "^0.2.2"
     "@mystikonetwork/utils" "^0.1.4"
     bn.js "^5.2.0"

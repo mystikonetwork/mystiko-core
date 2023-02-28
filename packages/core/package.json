@@ -64,8 +64,8 @@
     "@mystikonetwork/database": "^0.4.0",
     "@mystikonetwork/ecies": "^0.2.4",
     "@mystikonetwork/ethers": "^0.4.0",
-    "@mystikonetwork/gas-relayer-client": "^0.1.11",
-    "@mystikonetwork/gas-relayer-config": "^0.1.11",
+    "@mystikonetwork/gas-relayer-client": "^0.1.13",
+    "@mystikonetwork/gas-relayer-config": "^0.1.13",
     "@mystikonetwork/indexer-client": "^0.5.0",
     "@mystikonetwork/merkle": "^0.2.4",
     "@mystikonetwork/protocol": "^0.2.4",
@@ -81,5 +81,8 @@
     "rxdb": "12.5.4",
     "rxjs": "7.5.5",
     "ulid": "^2.3.0"
+  },
+  "resolutions": {
+    "@mystikonetwork/config": "0.4.0"
   }
 }
