@@ -899,10 +899,10 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@0.4.0", "@mystikonetwork/config@^0.4.0":
-  version "0.4.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.4.0/905d69894a70c853498823bb702db22ebb38a270#905d69894a70c853498823bb702db22ebb38a270"
-  integrity sha512-QvnmOJX0TrpURfDxqYNjmx3I8NdHUYcvSA6dwzKbivJ+UP2o8V7e5fZBiN5JFYNSmUhHtBbA5+4TyP2qN9fLqw==
+"@mystikonetwork/config@0.4.1", "@mystikonetwork/config@^0.4.1":
+  version "0.4.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.4.1/42e35967a88006db4a7bdd4192f5a2b0984eb388#42e35967a88006db4a7bdd4192f5a2b0984eb388"
+  integrity sha512-4qrHixFsTSMz4f0qEw/XTO2AqRBvD0EFeYi2vqTEq4bcl7heq1dwHM5oaBsPo4PSzESkPatFKxOwd3ZSQ9S4gw==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"
@@ -916,10 +916,10 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/fastfile/0.0.21/b3362f8527fa15a2d745c0b516c92d0a5ca0ceef4c2e103aac2d79305f0c4207#069a0d0d6a28a3f002fe97519456bbbd14880f9c"
   integrity sha512-o9vr4WoWEGord8+6ADBSulLO9arM2z0R5bOKj+GGPOFY/Zm8bg7alqRfuTvcxzll9TTk/rv7gDM4GnbBHhvyMA==
 
-"@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3":
-  version "0.1.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.3/451ced81091dc81743116b8002dce16ee5f633f10c10759bb855a01f8889cb0e#6c62dfdfc996367de5185b1011e5860c173d3677"
-  integrity sha512-gnelPL/Ld5abJbbFLR7aZd1wNjTzzeD6VQTIldGII40qp99D9Yq4c7ybhZxBfhvaMHCZuTYJN6trALfRHmOJaw==
+"@mystikonetwork/utils@0.1.5", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.5":
+  version "0.1.5"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.5/1c45dc36c6e73452a72538a10e1abfcc6bc44177#1c45dc36c6e73452a72538a10e1abfcc6bc44177"
+  integrity sha512-SVpmn+SzljUddlqB5dhfTU4PAjb7cW5jYgwS+165+lpqHZOC58Q0zsLaHHPyFBC4zboMzBYtiAMneGtC8M5xGw==
   dependencies:
     "@mystikonetwork/fastfile" "^0.0.21"
     axios "^0.27.2"

@@ -620,5 +620,6 @@
         "circuits/dist/zokrates/dev/Rollup16.vkey.gz"
       ]
     }
-  ]
+  ],
+  "countryBlacklist": ["CN", "US"]
 }
