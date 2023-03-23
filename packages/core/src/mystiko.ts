@@ -6,7 +6,13 @@ import {
   Relayer as GasRelayerClient,
 } from '@mystikonetwork/gas-relayer-client';
 import { MystikoProtocol, ProtocolFactory, ProtocolFactoryV2 } from '@mystikonetwork/protocol';
-import { initLogger, logger, ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
+import {
+  detectCountryCode,
+  initLogger,
+  logger,
+  ProviderConnection,
+  ProviderFactory,
+} from '@mystikonetwork/utils';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { Logger, LogLevelDesc } from 'loglevel';
 import { LoglevelPluginPrefixOptions } from 'loglevel-plugin-prefix';
@@ -83,6 +89,8 @@ export abstract class Mystiko {
 
   private context?: MystikoContextInterface;
 
+  private countryCode?: string;
+
   public async initialize(options?: InitOptions) {
     const {
       isTestnet = true,
@@ -156,6 +164,22 @@ export abstract class Mystiko {
       }
     }
     this.logger.info('mystiko has been successfully initialized, enjoy!');
+  }
+
+  public async isBlacklisted(): Promise<boolean> {
+    if (!this.countryCode) {
+      this.countryCode = await detectCountryCode().catch((e) => {
+        this.logger?.warn('Failed to detect country code', e);
+        return undefined;
+      });
+    }
+    return (
+      (this.countryCode &&
+        this.config?.countryBlacklist
+          ?.map((c) => c.toUpperCase())
+          .includes(this.countryCode.toUpperCase())) ||
+      false
+    );
   }
 
   protected getChainConfig(chainId: number): Promise<ProviderConnection[]> {

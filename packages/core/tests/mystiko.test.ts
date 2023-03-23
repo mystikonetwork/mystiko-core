@@ -1,3 +1,5 @@
+import { DEFAULT_IP_API } from '@mystikonetwork/utils';
+import nock from 'nock';
 import { MystikoConfig } from '@mystikonetwork/config';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
@@ -54,5 +56,40 @@ test('test initialize with config object', async () => {
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf });
   checkMystiko(mystiko);
+  await mystiko.db?.remove();
+});
+
+test('test isBlacklisted', async () => {
+  nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'CN' });
+  const mystiko = new TestMystiko();
+  await mystiko.initialize({ conf: 'tests/files/config.test.json' });
+  expect(await mystiko.isBlacklisted()).toBe(true);
+  nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'IO' });
+  expect(await mystiko.isBlacklisted()).toBe(true);
+  await mystiko.db?.remove();
+});
+
+test('test isBlacklisted false', async () => {
+  nock(DEFAULT_IP_API).get('/').reply(200, {});
+  const mystiko = new TestMystiko();
+  await mystiko.initialize({ conf: 'tests/files/config.test.json' });
+  expect(await mystiko.isBlacklisted()).toBe(false);
+  nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'IO' });
+  expect(await mystiko.isBlacklisted()).toBe(false);
+  await mystiko.db?.remove();
+});
+
+test('test isBlacklisted raise error', async () => {
+  nock(DEFAULT_IP_API).get('/').reply(500, { country_code: 'CN' });
+  const mystiko = new TestMystiko();
+  await mystiko.initialize({ conf: 'tests/files/config.test.json' });
+  expect(await mystiko.isBlacklisted()).toBe(false);
+  await mystiko.db?.remove();
+});
+
+test('test isBlacklisted before initialization', async () => {
+  nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'CN' });
+  const mystiko = new TestMystiko();
+  expect(await mystiko.isBlacklisted()).toBe(false);
   await mystiko.db?.remove();
 });
