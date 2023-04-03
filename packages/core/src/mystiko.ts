@@ -186,19 +186,17 @@ export abstract class Mystiko {
   }
 
   public async isBlacklisted(): Promise<boolean> {
+    const countryBlacklist = this.config?.countryBlacklist.map((c) => c.toUpperCase()) || [];
+    if (countryBlacklist.length === 0) {
+      return Promise.resolve(false);
+    }
     if (!this.countryCode) {
       this.countryCode = await detectCountryCode(this.ipWhoisApiUrl).catch((e) => {
         this.logger?.warn('Failed to detect country code', e);
         return undefined;
       });
     }
-    return (
-      (this.countryCode &&
-        this.config?.countryBlacklist
-          ?.map((c) => c.toUpperCase())
-          .includes(this.countryCode.toUpperCase())) ||
-      false
-    );
+    return !!this.countryCode && countryBlacklist.includes(this.countryCode.toUpperCase());
   }
 
   protected getChainConfig(chainId: number): Promise<ProviderConnection[]> {

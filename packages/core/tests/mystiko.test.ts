@@ -106,3 +106,12 @@ test('test isBlacklisted before initialization', async () => {
   expect(await mystiko.isBlacklisted()).toBe(false);
   await mystiko.db?.remove();
 });
+
+test('test isBlacklisted when countryBlacklist is empty', async () => {
+  nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'CN' });
+  const config = await MystikoConfig.createFromPlain({ version: '0.1.0', countryBlacklist: [] });
+  const mystiko = new TestMystiko();
+  await mystiko.initialize({ conf: config });
+  expect(await mystiko.isBlacklisted()).toBe(false);
+  await mystiko.db?.remove();
+});
