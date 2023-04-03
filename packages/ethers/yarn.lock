@@ -899,12 +899,13 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@0.5.0", "@mystikonetwork/config@^0.5.0":
-  version "0.5.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.5.0/3beac412f6a8573aeb1d70d972e35a8f38d59d09#3beac412f6a8573aeb1d70d972e35a8f38d59d09"
-  integrity sha512-4F2fNMVdQ83+zb4Vvo0Pj9P143psIqovv9G1U4dgseZFQtJJl1G2Wei9SbQ5L9uN451HvDrlgoY7G7raaj7OvQ==
+"@mystikonetwork/config@0.6.0", "@mystikonetwork/config@^0.6.0":
+  version "0.6.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.6.0/71c4f419d2211cb5aea553b1c5a8739483514c2c#71c4f419d2211cb5aea553b1c5a8739483514c2c"
+  integrity sha512-J8j/YaxYc18oGtDwSoDLMyU+otM4oweGC7PIrI+p6+4N+ggjY9ZVtOnSxuIyza3xB83PZvbcHBXlIG3lfb28DA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
+    axios "^0.26.1"
     bn.js "^5.2.0"
     class-transformer "^0.5.1"
     class-validator "^0.13.2"
@@ -1329,6 +1330,13 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
+
+axios@^0.26.1:
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
+  integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
+  dependencies:
+    follow-redirects "^1.14.8"
 
 axios@^0.27.2:
   version "0.27.2"
@@ -2195,6 +2203,11 @@ flatted@^3.1.0:
   version "3.2.5"
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.2.5.tgz#76c8584f4fc843db64702a6bd04ab7a8bd666da3"
   integrity sha512-WIWGi2L3DyTUvUrwRKgGi9TwxQMUEqPOPQBVi71R96jZXJdFskXEmf54BoZaS1kknGODoIGASGEzBUYdyMCBJg==
+
+follow-redirects@^1.14.8:
+  version "1.15.2"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
+  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
 
 follow-redirects@^1.14.9:
   version "1.15.1"

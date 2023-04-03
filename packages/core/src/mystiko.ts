@@ -41,6 +41,9 @@ import { SynchronizerFactoryV2 } from './synchronizer';
 
 export interface InitOptions {
   isTestnet?: boolean;
+  isStaging?: boolean;
+  configGitRevision?: string;
+  configBaseUrl?: string;
   conf?: string | MystikoConfig;
   dbParams?: RxDatabaseCreator;
   loggingLevel?: LogLevelDesc;
@@ -94,6 +97,9 @@ export abstract class Mystiko {
   public async initialize(options?: InitOptions) {
     const {
       isTestnet = true,
+      isStaging = false,
+      configGitRevision,
+      configBaseUrl,
       conf,
       dbParams,
       loggingLevel = 'warn',
@@ -112,9 +118,13 @@ export abstract class Mystiko {
       this.config = conf;
     }
     if (!this.config) {
-      this.config = await (isTestnet
-        ? MystikoConfig.createDefaultTestnetConfig()
-        : MystikoConfig.createDefaultMainnetConfig());
+      const configRemoteOptions = {
+        isTestnet,
+        isStaging,
+        gitRevision: configGitRevision,
+        baseUrl: configBaseUrl,
+      };
+      this.config = await MystikoConfig.createFromRemote(configRemoteOptions);
     }
     this.db = await initDatabase(dbParams);
     initLogger(loggingOptions);

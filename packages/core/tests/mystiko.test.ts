@@ -1,6 +1,6 @@
 import { DEFAULT_IP_API } from '@mystikonetwork/utils';
 import nock from 'nock';
-import { MystikoConfig } from '@mystikonetwork/config';
+import { CONFIG_BASE_URL, MystikoConfig } from '@mystikonetwork/config';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import { Mystiko } from '../src';
@@ -30,8 +30,10 @@ function checkMystiko(mystiko: Mystiko) {
 }
 
 test('test initialize', async () => {
+  nock(CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize();
+  expect(mystiko.config?.version).toBe('1.0.0');
   checkMystiko(mystiko);
   await mystiko.db?.remove();
 });
