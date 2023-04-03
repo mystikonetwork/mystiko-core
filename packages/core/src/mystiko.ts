@@ -39,6 +39,8 @@ import {
 } from './interface';
 import { SynchronizerFactoryV2 } from './synchronizer';
 
+export const DEFAULT_IP_PRO_API = 'https://ipwhois.pro';
+
 export interface InitOptions {
   isTestnet?: boolean;
   isStaging?: boolean;
@@ -55,6 +57,7 @@ export interface InitOptions {
   synchronizerFactory?: SynchronizerFactory;
   protocolFactory?: ProtocolFactory;
   gasRelayers?: GasRelayers;
+  ipWhoisApiKey?: string;
 }
 
 export abstract class Mystiko {
@@ -94,6 +97,8 @@ export abstract class Mystiko {
 
   private countryCode?: string;
 
+  private ipWhoisApiUrl?: string;
+
   public async initialize(options?: InitOptions) {
     const {
       isTestnet = true,
@@ -111,6 +116,7 @@ export abstract class Mystiko {
       synchronizerFactory,
       protocolFactory,
       gasRelayers,
+      ipWhoisApiKey,
     } = options || {};
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
@@ -173,12 +179,15 @@ export abstract class Mystiko {
         this.context.gasRelayers = gasRelayerClient.relayerHandler;
       }
     }
+    if (ipWhoisApiKey && ipWhoisApiKey.length > 0) {
+      this.ipWhoisApiUrl = `${DEFAULT_IP_PRO_API}/?key=${ipWhoisApiKey}`;
+    }
     this.logger.info('mystiko has been successfully initialized, enjoy!');
   }
 
   public async isBlacklisted(): Promise<boolean> {
     if (!this.countryCode) {
-      this.countryCode = await detectCountryCode().catch((e) => {
+      this.countryCode = await detectCountryCode(this.ipWhoisApiUrl).catch((e) => {
         this.logger?.warn('Failed to detect country code', e);
         return undefined;
       });
