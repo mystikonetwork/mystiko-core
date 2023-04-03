@@ -1349,12 +1349,13 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@0.5.0", "@mystikonetwork/config@^0.3.2", "@mystikonetwork/config@^0.4.0", "@mystikonetwork/config@^0.5.0":
-  version "0.5.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.5.0/3beac412f6a8573aeb1d70d972e35a8f38d59d09#3beac412f6a8573aeb1d70d972e35a8f38d59d09"
-  integrity sha512-4F2fNMVdQ83+zb4Vvo0Pj9P143psIqovv9G1U4dgseZFQtJJl1G2Wei9SbQ5L9uN451HvDrlgoY7G7raaj7OvQ==
+"@mystikonetwork/config@0.6.0", "@mystikonetwork/config@^0.3.2", "@mystikonetwork/config@^0.4.0", "@mystikonetwork/config@^0.6.0":
+  version "0.6.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.6.0/71c4f419d2211cb5aea553b1c5a8739483514c2c#71c4f419d2211cb5aea553b1c5a8739483514c2c"
+  integrity sha512-J8j/YaxYc18oGtDwSoDLMyU+otM4oweGC7PIrI+p6+4N+ggjY9ZVtOnSxuIyza3xB83PZvbcHBXlIG3lfb28DA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
+    axios "^0.26.1"
     bn.js "^5.2.0"
     class-transformer "^0.5.1"
     class-validator "^0.13.2"
@@ -2351,6 +2352,13 @@ aws4@^1.8.0:
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.11.0.tgz#d61f46d83b2519250e2784daf5b09479a8b41c59"
   integrity sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==
+
+axios@^0.26.1:
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
+  integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
+  dependencies:
+    follow-redirects "^1.14.8"
 
 axios@^0.27.2:
   version "0.27.2"
@@ -5593,6 +5601,11 @@ flow-stoplight@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/flow-stoplight/-/flow-stoplight-1.0.0.tgz#4a292c5bcff8b39fa6cc0cb1a853d86f27eeff7b"
   integrity sha512-rDjbZUKpN8OYhB0IE/vY/I8UWO/602IIJEU/76Tv4LvYnwHCk0BCsvz4eRr9n+FQcri7L5cyaXOo0+/Kh4HisA==
+
+follow-redirects@^1.14.8:
+  version "1.15.2"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
+  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
 
 follow-redirects@^1.14.9:
   version "1.15.1"
