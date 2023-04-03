@@ -85,7 +85,7 @@ test('test isBlacklisted with api key', async () => {
 test('test isBlacklisted false', async () => {
   nock(DEFAULT_IP_API).get('/').reply(200, {});
   const mystiko = new TestMystiko();
-  await mystiko.initialize({ conf: 'tests/files/config.test.json' });
+  await mystiko.initialize({ conf: 'tests/files/config.test.json', ipWhoisApiKey: '' });
   expect(await mystiko.isBlacklisted()).toBe(false);
   nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'IO' });
   expect(await mystiko.isBlacklisted()).toBe(false);

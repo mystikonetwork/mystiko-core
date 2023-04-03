@@ -179,7 +179,7 @@ export abstract class Mystiko {
         this.context.gasRelayers = gasRelayerClient.relayerHandler;
       }
     }
-    if (ipWhoisApiKey) {
+    if (ipWhoisApiKey && ipWhoisApiKey.length > 0) {
       this.ipWhoisApiUrl = `${DEFAULT_IP_PRO_API}/?key=${ipWhoisApiKey}`;
     }
     this.logger.info('mystiko has been successfully initialized, enjoy!');
