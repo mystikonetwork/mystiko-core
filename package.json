@@ -1,6 +1,6 @@
 {
   "name": "mystiko-core",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Core Implementation of Mystiko.Network",
   "private": true,
   "module": "src/index.js",
