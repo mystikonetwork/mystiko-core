@@ -22,11 +22,13 @@ beforeAll(async () => {
             url: 'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
             timeoutMs: 1000,
             maxTryCount: 3,
+            quorumWeight: 5,
           },
           {
             url: 'https://eth-sepolia.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5',
             timeoutMs: 2000,
             maxTryCount: 4,
+            quorumWeight: 6,
           },
         ],
         eventFilterSize: 100000,
@@ -42,11 +44,13 @@ beforeAll(async () => {
             url: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
             timeoutMs: 3000,
             maxTryCount: 5,
+            quorumWeight: 7,
           },
           {
             url: 'https://eth-goerli.alchemyapi.io/v2/X0WmNwQWIjARyvQ2io1aZk0F3IjJ2qcM',
             timeoutMs: 4000,
             maxTryCount: 6,
+            quorumWeight: 8,
           },
         ],
         eventFilterSize: 200000,
@@ -161,6 +165,7 @@ test('test update', async () => {
         url: 'http://localhost:34567',
         maxTryCount: 10,
         timeoutMs: 1000,
+        quorumWeight: 5,
       },
       {
         url: 'http://localhost:12345',
@@ -178,6 +183,7 @@ test('test update', async () => {
   expect(chain?.providerOverride).toBe(1);
   expect(chain?.providers.map((p) => p.timeoutMs)).toStrictEqual([2000, 1000, undefined]);
   expect(chain?.providers.map((p) => p.maxTryCount)).toStrictEqual([4, 10, undefined]);
+  expect(chain?.providers.map((p) => p.quorumWeight)).toStrictEqual([6, 5, undefined]);
   updatedAt = chain?.updatedAt;
   await handler.update(11155111, {
     providers: [

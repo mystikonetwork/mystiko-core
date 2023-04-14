@@ -31,4 +31,6 @@ export const chainCollectionMigrations = {
   2: defaultMigrationStrategy,
   /* istanbul ignore next */
   3: defaultMigrationStrategy,
+  /* istanbul ignore next */
+  4: defaultMigrationStrategy,
 };

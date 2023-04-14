@@ -2,7 +2,7 @@ import { RxJsonSchema } from 'rxdb';
 import { URL_REGEX } from '../constants';
 
 const chainSchemaLiteral = {
-  version: 3,
+  version: 4,
   title: 'chain schema',
   description: 'a document contains chain information',
   primaryKey: 'id',
@@ -59,6 +59,10 @@ const chainSchemaLiteral = {
             type: 'integer',
             minimum: 0,
           },
+          quorumWeight: {
+            type: 'integer',
+            minimum: 1,
+          },
         },
       },
     },
@@ -93,6 +97,7 @@ export type ProviderType = {
   url: string;
   timeoutMs?: number;
   maxTryCount?: number;
+  quorumWeight?: number;
 };
 
 export type ChainType = {

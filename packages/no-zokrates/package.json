@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/no-zokrates",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "mystiko library without zokrates in browser",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -68,7 +68,7 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "@mystikonetwork/core": "^0.5.2",
+    "@mystikonetwork/core": "^0.5.3",
     "@mystikonetwork/protocol": "^0.2.4",
     "@mystikonetwork/zkp": "^0.2.4",
     "@mystikonetwork/zkp-nop": "^0.2.4",
