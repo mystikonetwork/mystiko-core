@@ -279,11 +279,14 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         promises.push(
           this.context.providers.getProvider(chainConfig.chainId).then((provider) => {
             if (provider) {
-              return provider
-                .getBlockNumber()
-                .then((currentBlock) =>
-                  this.importChain({ ...importContext, chainConfig, provider, currentBlock }),
-                );
+              return provider.getBlockNumber().then((currentBlock) =>
+                this.importChain({
+                  ...importContext,
+                  chainConfig,
+                  provider,
+                  currentBlock: Math.max(0, currentBlock - chainConfig.eventFilterBlockBackoff),
+                }),
+              );
             }
             /* istanbul ignore next */
             return [];

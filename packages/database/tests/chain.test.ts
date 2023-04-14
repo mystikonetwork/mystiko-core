@@ -23,6 +23,7 @@ test('test insert', async () => {
         url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         timeoutMs: 1000,
         maxTryCount: 2,
+        quorumWeight: 5,
       },
     ],
     eventFilterSize: 200000,
@@ -39,6 +40,7 @@ test('test insert', async () => {
         url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         timeoutMs: 1000,
         maxTryCount: 2,
+        quorumWeight: 5,
       },
     ]);
     expect(chain.eventFilterSize).toBe(200000);

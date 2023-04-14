@@ -1,6 +1,11 @@
+import { MystikoConfig, ProviderType } from '@mystikonetwork/config';
+import {
+  DefaultProviderFactory,
+  ProviderConnection,
+  ProviderFactory,
+  QuorumProviderFactory,
+} from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
-import { MystikoConfig } from '@mystikonetwork/config';
-import { DefaultProviderFactory, ProviderConnection, ProviderFactory } from '@mystikonetwork/utils';
 
 type EtherProvider = ethers.providers.Provider;
 type ProviderConfigGetter = (chain: number) => Promise<ProviderConnection[]>;
@@ -19,7 +24,7 @@ export class ProviderPoolImpl implements ProviderPool {
 
   private readonly providerConfigGetter?: ProviderConfigGetter;
 
-  private providerFactory: ProviderFactory;
+  private providerFactory?: ProviderFactory;
 
   private readonly pool: Map<number, EtherProvider>;
 
@@ -30,7 +35,7 @@ export class ProviderPoolImpl implements ProviderPool {
   ) {
     this.config = config;
     this.providerConfigGetter = providerConfigGetter;
-    this.providerFactory = providerFactory || new DefaultProviderFactory();
+    this.providerFactory = providerFactory;
     this.pool = new Map<number, ethers.providers.Provider>();
   }
 
@@ -54,24 +59,33 @@ export class ProviderPoolImpl implements ProviderPool {
     if (provider) {
       return Promise.resolve(provider);
     }
-    if (this.providerConfigGetter) {
-      return this.providerConfigGetter(chainId).then((connections) => {
-        if (connections.length === 0) {
-          return undefined;
-        }
-        const newProvider = this.providerFactory.createProvider(connections);
-        this.pool.set(chainId, newProvider);
-        return newProvider;
-      });
-    }
     const chainConfig = this.config.getChainConfig(chainId);
     if (chainConfig) {
-      const newProvider = this.providerFactory.createProvider(
+      const providerFactory =
+        this.providerFactory ||
+        (chainConfig.providerType === ProviderType.FAILOVER
+          ? new DefaultProviderFactory()
+          : new QuorumProviderFactory());
+      if (this.providerConfigGetter) {
+        return this.providerConfigGetter(chainId).then((connections) => {
+          if (connections.length === 0) {
+            return undefined;
+          }
+          const newProvider = providerFactory.createProvider(connections, {
+            quorumPercentage: chainConfig.providerQuorumPercentage,
+          });
+          this.pool.set(chainId, newProvider);
+          return newProvider;
+        });
+      }
+      const newProvider = providerFactory.createProvider(
         chainConfig.providers.map((p) => ({
           url: p.url,
           timeout: p.timeoutMs,
           maxTryCount: p.maxTryCount,
+          quorumWeight: p.quorumWeight,
         })),
+        { quorumPercentage: chainConfig.providerQuorumPercentage },
       );
       this.pool.set(chainId, newProvider);
       return Promise.resolve(newProvider);

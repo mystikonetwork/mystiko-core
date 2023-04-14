@@ -207,6 +207,7 @@ export abstract class Mystiko {
             url: p.url,
             timeout: p.timeoutMs,
             maxTryCount: p.maxTryCount,
+            quorumWeight: p.quorumWeight,
           }));
         }
         /* istanbul ignore next */

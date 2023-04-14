@@ -34,6 +34,7 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
               url: p.url,
               timeoutMs: p.timeoutMs,
               maxTryCount: p.maxTryCount,
+              quorumWeight: p.quorumWeight,
             })),
             eventFilterSize: chainConfig.eventFilterSize,
             syncedBlockNumber: 0,
@@ -47,6 +48,7 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
               url: p.url,
               timeoutMs: p.timeoutMs,
               maxTryCount: p.maxTryCount,
+              quorumWeight: p.quorumWeight,
             }));
           }
           if (!data.nameOverride) {
@@ -113,6 +115,7 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
             url: p.url,
             timeoutMs: p.timeoutMs,
             maxTryCount: p.maxTryCount,
+            quorumWeight: p.quorumWeight,
           }));
           data.nameOverride = undefined;
           data.providerOverride = undefined;
@@ -152,6 +155,8 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
         url: provider.url,
         timeoutMs: provider.timeoutMs || previousProvider?.timeoutMs || defaultProvider?.timeoutMs,
         maxTryCount: provider.maxTryCount || previousProvider?.maxTryCount || defaultProvider?.maxTryCount,
+        quorumWeight:
+          provider.quorumWeight || previousProvider?.quorumWeight || defaultProvider?.quorumWeight,
       });
     });
     return wrapped;

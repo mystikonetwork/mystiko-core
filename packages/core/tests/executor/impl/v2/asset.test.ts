@@ -1,5 +1,6 @@
 import { deployMockContract, MockContract } from '@ethereum-waffle/mock-contract';
 import { MockProvider } from '@ethereum-waffle/provider';
+import { MystikoConfig } from '@mystikonetwork/config';
 import { ERC20__factory, MystikoContractFactory, SupportedContractType } from '@mystikonetwork/contracts-abi';
 import { fromDecimals, ProviderConnection, ProviderFactory, toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
@@ -47,7 +48,12 @@ beforeAll(async () => {
     }
     return Promise.resolve([]);
   };
-  context = await createTestContext({ contractConnector, providerConfigGetter, providerFactory });
+  context = await createTestContext({
+    contractConnector,
+    providerConfigGetter,
+    providerFactory,
+    config: await MystikoConfig.createFromFile('tests/files/config.test.json'),
+  });
   executor = new AssetExecutorV2(context);
 });
 

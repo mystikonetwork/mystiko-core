@@ -980,10 +980,10 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/utils@0.1.5", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3", "@mystikonetwork/utils@^0.1.5":
-  version "0.1.5"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.5/1c45dc36c6e73452a72538a10e1abfcc6bc44177#1c45dc36c6e73452a72538a10e1abfcc6bc44177"
-  integrity sha512-SVpmn+SzljUddlqB5dhfTU4PAjb7cW5jYgwS+165+lpqHZOC58Q0zsLaHHPyFBC4zboMzBYtiAMneGtC8M5xGw==
+"@mystikonetwork/utils@0.1.6", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3", "@mystikonetwork/utils@^0.1.6":
+  version "0.1.6"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.6/1b1278ad99d686c279aea60b459f275f94746ebc#1b1278ad99d686c279aea60b459f275f94746ebc"
+  integrity sha512-1Ksi5pCbnXZoG6GYeDGLULZ/VwxZN3VmbC9m82skE7AKJ0fyfP+K6DBoYSEh91CKMBk+pt23QY7dhBNeYtsf5Q==
   dependencies:
     "@mystikonetwork/fastfile" "^0.0.21"
     axios "^0.27.2"

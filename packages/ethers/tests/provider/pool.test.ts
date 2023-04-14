@@ -27,9 +27,11 @@ beforeEach(async () => {
         explorerUrl: 'https://goerli.etherscan.io',
         signerEndpoint: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
-          { url: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
+          { url: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161', quorumWeight: 2 },
           { url: 'https://eth-goerli.alchemyapi.io/v2/X0WmNwQWIjARyvQ2io1aZk0F3IjJ2qcM' },
         ],
+        providerType: 'quorum',
+        providerQuorumPercentage: 66,
       },
     ],
   });
@@ -47,7 +49,11 @@ test('test getProvider', async () => {
   const providerPool = new ProviderPoolImpl(config);
   expect(await providerPool.getProvider(300)).toBe(undefined);
   expect(await providerPool.getProvider(3)).not.toBe(undefined);
-  expect(await providerPool.getProvider(5)).not.toBe(undefined);
+  const provider = await providerPool.getProvider(5);
+  expect(provider).not.toBe(undefined);
+  expect((provider as ethers.providers.FallbackProvider).quorum).toBe(2);
+  expect((provider as ethers.providers.FallbackProvider).providerConfigs[0].weight).toBe(2);
+  expect((provider as ethers.providers.FallbackProvider).providerConfigs[1].weight).toBe(1);
 });
 
 test('test setProvider', async () => {
