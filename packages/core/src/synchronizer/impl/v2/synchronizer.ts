@@ -221,6 +221,9 @@ export class SynchronizerV2 implements Synchronizer {
                   .catch((error) => {
                     chainStatus.error = errorMessage(error);
                     chainStatus.isSyncing = false;
+                    this.logger.error(
+                      `failed to import events for chainId=${chainId}: ${errorMessage(error)}`,
+                    );
                     return this.emitEvent(options, SyncEventType.CHAIN_FAILED, chainId);
                   }),
               );
@@ -248,24 +251,38 @@ export class SynchronizerV2 implements Synchronizer {
 
   private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
     const indexerExecutor = this.context.executors.getIndexerExecutor();
+    let promise: Promise<{
+      fallback: boolean;
+      reason: string;
+      commitments: Commitment[];
+    }>;
     if (indexerExecutor && !options.noIndexer) {
-      return indexerExecutor
+      promise = indexerExecutor
         .import({ walletPassword: options.walletPassword, chainId })
         .then(({ commitments, hasUpdates }) => {
           if (hasUpdates) {
-            return commitments;
+            return { fallback: false, reason: '', commitments };
           }
-          return this.context.commitments.import({
-            walletPassword: options.walletPassword,
-            chainId,
-          });
+          return { fallback: true, reason: 'indexer does not have updates', commitments };
         })
         .catch((error) => {
-          this.logger.warn(`failed to import chainId=${chainId} from indexer: ${errorMessage(error)}`);
-          return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+          this.logger.warn(
+            `failed to import events for chainId=${chainId} from indexer: ${errorMessage(error)}`,
+          );
+          return { fallback: true, reason: `indexer raised error: ${errorMessage(error)}`, commitments: [] };
         });
+    } else {
+      promise = Promise.resolve({ fallback: true, reason: 'no indexer is configured', commitments: [] });
     }
-    return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+    return promise.then(({ fallback, reason, commitments }) => {
+      if (fallback) {
+        this.logger.info(
+          `fallback to import events from node provider for chainId=${chainId}, reason: ${reason}`,
+        );
+        return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+      }
+      return Promise.resolve(commitments);
+    });
   }
 
   private initChainInternalStatuses(): Map<number, ChainInternalStatus> {

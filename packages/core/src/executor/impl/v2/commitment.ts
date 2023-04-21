@@ -15,7 +15,7 @@ import {
   DatabaseQuery,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { toBN, toBuff } from '@mystikonetwork/utils';
+import { errorMessage, toBN, toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -316,7 +316,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     ];
     return this.context.chains.findOne(chainConfig.chainId).then((chain) => {
       if (chain) {
-        this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
+        this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
         for (let i = 0; i < contracts.length; i += 1) {
           const contractConfig = contracts[i];
           if (
@@ -351,7 +351,21 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                 return data;
               })
               .then(() => commitments),
-          );
+          )
+          .then((commitments) => {
+            this.logger.info(
+              `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
+            );
+            return commitments;
+          })
+          .catch((error) => {
+            this.logger.error(
+              `failed to import commitment related events from chain id=${
+                chainConfig.chainId
+              }, errorMessage=${errorMessage(error)}`,
+            );
+            return Promise.reject(error);
+          });
       }
       return Promise.resolve([]);
     });
