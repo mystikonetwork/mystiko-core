@@ -15,7 +15,7 @@ import {
   DatabaseQuery,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { toBN, toBuff } from '@mystikonetwork/utils';
+import { errorMessage, toBN, toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -209,7 +209,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private checkContract(checkContext: CheckContractContext): Promise<void> {
-    const { chainConfig, chain, contractConfig, contract } = checkContext;
+    const { chainConfig, contractConfig, contract } = checkContext;
     return this.context.commitments
       .find({
         selector: {
@@ -237,25 +237,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       })
       .then(({ isValid, lastIndex }) => {
         if (!isValid) {
-          return contract
-            .atomicUpdate((data) => {
-              data.checkedLeafIndex = undefined;
-              data.syncedBlockNumber = contractConfig.startBlock;
-              data.updatedAt = MystikoHandler.now();
-              return data;
-            })
-            .then(() => {
-              if (chain.syncedBlockNumber > contractConfig.startBlock) {
-                return chain
-                  .atomicUpdate((data) => {
-                    data.syncedBlockNumber = contractConfig.startBlock;
-                    data.updatedAt = MystikoHandler.now();
-                    return data;
-                  })
-                  .then(() => {});
-              }
-              return Promise.resolve();
-            });
+          return this.context.contracts.resetSync(contract.id).then(() => {});
         }
         return contract
           .atomicUpdate((data) => {
@@ -316,7 +298,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     ];
     return this.context.chains.findOne(chainConfig.chainId).then((chain) => {
       if (chain) {
-        this.logger.debug(`importing commitment related events from chain id=${chainConfig.chainId}`);
+        this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
         for (let i = 0; i < contracts.length; i += 1) {
           const contractConfig = contracts[i];
           if (
@@ -351,7 +333,21 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                 return data;
               })
               .then(() => commitments),
-          );
+          )
+          .then((commitments) => {
+            this.logger.info(
+              `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
+            );
+            return commitments;
+          })
+          .catch((error) => {
+            this.logger.error(
+              `failed to import commitment related events from chain id=${
+                chainConfig.chainId
+              }, errorMessage=${errorMessage(error)}`,
+            );
+            return Promise.reject(error);
+          });
       }
       return Promise.resolve([]);
     });
