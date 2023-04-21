@@ -209,7 +209,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private checkContract(checkContext: CheckContractContext): Promise<void> {
-    const { chainConfig, chain, contractConfig, contract } = checkContext;
+    const { chainConfig, contractConfig, contract } = checkContext;
     return this.context.commitments
       .find({
         selector: {
