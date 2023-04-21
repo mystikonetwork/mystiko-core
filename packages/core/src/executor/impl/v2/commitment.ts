@@ -237,25 +237,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       })
       .then(({ isValid, lastIndex }) => {
         if (!isValid) {
-          return contract
-            .atomicUpdate((data) => {
-              data.checkedLeafIndex = undefined;
-              data.syncedBlockNumber = contractConfig.startBlock;
-              data.updatedAt = MystikoHandler.now();
-              return data;
-            })
-            .then(() => {
-              if (chain.syncedBlockNumber > contractConfig.startBlock) {
-                return chain
-                  .atomicUpdate((data) => {
-                    data.syncedBlockNumber = contractConfig.startBlock;
-                    data.updatedAt = MystikoHandler.now();
-                    return data;
-                  })
-                  .then(() => {});
-              }
-              return Promise.resolve();
-            });
+          return this.context.contracts.resetSync(contract.id).then(() => {});
         }
         return contract
           .atomicUpdate((data) => {

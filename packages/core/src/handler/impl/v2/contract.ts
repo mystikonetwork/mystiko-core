@@ -63,4 +63,40 @@ export class ContractHandlerV2 extends MystikoHandler implements ContractHandler
     }
     return Promise.all(promises);
   }
+
+  public resetSync(options: string | ContractOptions): Promise<Contract | null> {
+    return this.findOne(options).then((contract) => {
+      if (contract != null) {
+        return this.context.chains.findOne(contract.chainId).then((chain) => {
+          if (chain) {
+            this.logger.warn(
+              `resetting syncedBlockNumber of contract from chainId = ${chain.chainId}, ` +
+                `address = ${contract.contractAddress} to ${contract.syncStart}`,
+            );
+            return contract
+              .atomicUpdate((data) => {
+                data.checkedLeafIndex = undefined;
+                data.syncedBlockNumber = contract.syncStart;
+                data.updatedAt = MystikoHandler.now();
+                return data;
+              })
+              .then((updatedContract) => {
+                if (chain.syncedBlockNumber > updatedContract.syncStart) {
+                  return chain
+                    .atomicUpdate((data) => {
+                      data.syncedBlockNumber = updatedContract.syncStart;
+                      data.updatedAt = MystikoHandler.now();
+                      return data;
+                    })
+                    .then(() => updatedContract);
+                }
+                return Promise.resolve(updatedContract);
+              });
+          }
+          return null;
+        });
+      }
+      return contract;
+    });
+  }
 }

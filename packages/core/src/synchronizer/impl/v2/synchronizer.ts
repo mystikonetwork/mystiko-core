@@ -236,7 +236,17 @@ export class SynchronizerV2 implements Synchronizer {
         })
         .then(() => {
           this.hasPendingSync = false;
-          this.logger.info('synchronization finished successfully');
+          let chainError = false;
+          this.chains.forEach((chainStatus) => {
+            if (chainStatus.error) {
+              chainError = true;
+            }
+          });
+          if (chainError) {
+            this.logger.warn('synchronization finished with errors from chain(s)');
+          } else {
+            this.logger.info('synchronization finished successfully');
+          }
           return this.updateStatus(options, false);
         })
         .catch((error) => /* istanbul ignore next */ {
