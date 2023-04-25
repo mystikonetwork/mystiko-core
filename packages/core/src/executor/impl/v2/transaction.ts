@@ -524,7 +524,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private executeTransaction(executionContext: ExecutionContextWithTransaction): Promise<Transaction> {
     const { options, selectedCommitments, transaction, outputCommitments } = executionContext;
     const outCommitments = outputCommitments ? outputCommitments.map((c) => c.commitment) : [];
-    return TransactionExecutorV2.validateSerialNumbers(executionContext)
+    return this.validateSerialNumbers(executionContext)
       .then(() =>
         this.generateProof(executionContext)
           .then((ec) => this.sendTransaction(ec))
@@ -926,25 +926,39 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     return Promise.resolve(transaction);
   }
 
-  private static validateSerialNumbers(executionContext: ExecutionContext): Promise<ExecutionContext> {
-    const { etherContract } = executionContext;
+  private validateSerialNumbers(executionContext: ExecutionContext): Promise<ExecutionContext> {
+    const { etherContract, options } = executionContext;
     const { selectedCommitments } = executionContext;
     const serialNumberPromises: Promise<boolean>[] = [];
     for (let i = 0; i < selectedCommitments.length; i += 1) {
       const commitment = selectedCommitments[i];
       const { serialNumber } = selectedCommitments[i];
+      let serialNumberPromise: Promise<Commitment>;
       if (!serialNumber) {
-        return createErrorPromise(
-          `serial number of commitment id=${commitment.id} is empty`,
-          MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
-        );
+        serialNumberPromise = this.context.executors.getCommitmentExecutor().decrypt({
+          walletPassword: options.walletPassword,
+          commitment,
+        });
+      } else {
+        serialNumberPromise = Promise.resolve(commitment);
       }
       serialNumberPromises.push(
-        etherContract.isSpentSerialNumber(serialNumber).then((spent) => {
-          if (spent) {
-            return this.updateCommitments([{ commitment, status: CommitmentStatus.SPENT }]).then(() => spent);
+        serialNumberPromise.then((updatedCommitment) => {
+          const updatedSerialNumber = updatedCommitment.serialNumber;
+          if (!updatedSerialNumber) {
+            return createErrorPromise(
+              `serial number of commitment id=${updatedCommitment.id} is empty`,
+              MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+            );
           }
-          return spent;
+          return etherContract.isSpentSerialNumber(updatedSerialNumber).then((spent) => {
+            if (spent) {
+              return TransactionExecutorV2.updateCommitments([
+                { commitment: updatedCommitment, status: CommitmentStatus.SPENT },
+              ]).then(() => spent);
+            }
+            return spent;
+          });
         }),
       );
     }

@@ -762,6 +762,7 @@ test('test serial number not set', async () => {
       commitments.map((commitment) => commitment.update({ $unset: { serialNumber: '' } })),
     );
   await Promise.all(promises);
+  await context.db.collections.accounts.clear();
   const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
   await transactionPromise;
   expect(transaction.status).toBe(TransactionStatus.FAILED);
