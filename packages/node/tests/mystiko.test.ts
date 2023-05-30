@@ -1,5 +1,5 @@
-import mystiko from '../src';
 import nock from 'nock';
+import mystiko from '../src';
 
 const CONFIG_BASE_URL = 'https://static.mystiko.network/config';
 const RELAYER_CONFIG_BASE_URL = 'https://static.mystiko.network/relayer_config';
