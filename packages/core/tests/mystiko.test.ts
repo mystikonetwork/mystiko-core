@@ -1,6 +1,7 @@
 import { DEFAULT_IP_API } from '@mystikonetwork/utils';
 import nock from 'nock';
 import { CONFIG_BASE_URL, MystikoConfig } from '@mystikonetwork/config';
+import { CONFIG_BASE_URL as RELAYER_CONFIG_BASE_URL } from '@mystikonetwork/gas-relayer-config';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
 import { DEFAULT_IP_PRO_API, Mystiko } from '../src';
@@ -31,6 +32,7 @@ function checkMystiko(mystiko: Mystiko) {
 
 test('test initialize', async () => {
   nock(CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize();
   expect(mystiko.config?.version).toBe('1.0.0');
@@ -40,6 +42,7 @@ test('test initialize', async () => {
 
 test('test initialize with config file', async () => {
   const mystiko = new TestMystiko();
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   await mystiko.initialize({ conf: 'tests/files/config.test.json' });
   checkMystiko(mystiko);
   const chains = await mystiko.chains?.find();
@@ -55,6 +58,7 @@ test('test initialize with config file', async () => {
 
 test('test initialize with config object', async () => {
   const conf = await MystikoConfig.createFromFile('tests/files/config.test.json');
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf });
   checkMystiko(mystiko);
@@ -63,6 +67,7 @@ test('test initialize with config object', async () => {
 
 test('test isBlacklisted', async () => {
   nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'CN' });
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf: 'tests/files/config.test.json' });
   expect(await mystiko.isBlacklisted()).toBe(true);
@@ -74,6 +79,7 @@ test('test isBlacklisted', async () => {
 test('test isBlacklisted with api key', async () => {
   const apiKey = 'my_awesome_api_key';
   nock(DEFAULT_IP_PRO_API).get(`/?key=${apiKey}`).reply(200, { country_code: 'CN' });
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf: 'tests/files/config.test.json', ipWhoisApiKey: apiKey });
   expect(await mystiko.isBlacklisted()).toBe(true);
@@ -84,6 +90,7 @@ test('test isBlacklisted with api key', async () => {
 
 test('test isBlacklisted false', async () => {
   nock(DEFAULT_IP_API).get('/').reply(200, {});
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf: 'tests/files/config.test.json', ipWhoisApiKey: '' });
   expect(await mystiko.isBlacklisted()).toBe(false);
@@ -94,6 +101,7 @@ test('test isBlacklisted false', async () => {
 
 test('test isBlacklisted raise error', async () => {
   nock(DEFAULT_IP_API).get('/').reply(500, { country_code: 'CN' });
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf: 'tests/files/config.test.json' });
   expect(await mystiko.isBlacklisted()).toBe(false);
@@ -109,6 +117,7 @@ test('test isBlacklisted before initialization', async () => {
 
 test('test isBlacklisted when countryBlacklist is empty', async () => {
   nock(DEFAULT_IP_API).get('/').reply(200, { country_code: 'CN' });
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });
   const config = await MystikoConfig.createFromPlain({ version: '0.1.0', countryBlacklist: [] });
   const mystiko = new TestMystiko();
   await mystiko.initialize({ conf: config });
