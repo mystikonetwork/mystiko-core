@@ -875,8 +875,10 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} via connected wallet`,
     );
     const etherContractWithSigner = etherContract.connect(options.signer.signer);
-    return etherContractWithSigner
-      .transact(request, signature)
+    const txPromise = options.transactOverrides
+      ? etherContractWithSigner.transact(request, signature, options.transactOverrides)
+      : etherContractWithSigner.transact(request, signature);
+    return txPromise
       .then((resp) => {
         this.logger.info(
           `successfully submitted transaction id=${transaction.id} to ` +

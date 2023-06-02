@@ -1,6 +1,7 @@
 import { DatabaseQuery, Transaction, TransactionEnum, TransactionStatus } from '@mystikonetwork/database';
 import { BridgeType } from '@mystikonetwork/config';
 import { MystikoSigner } from '@mystikonetwork/ethers';
+import { Overrides } from 'ethers';
 
 export type TransactionQuoteOptions = {
   type: TransactionEnum;
@@ -32,6 +33,7 @@ export type TransactionOptions = TransactionQuoteOptions & {
   gasRelayerInfo?: GasRelayerInfo;
   gasRelayerWaitingTimeoutMs?: number;
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
+  transactOverrides?: Overrides & { from?: string | Promise<string> };
 };
 
 export type TransactionQuote = {

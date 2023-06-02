@@ -25,7 +25,9 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
             'started submitting asset approving transaction ' +
               `chain id=${options.chainId}, asset=${options.assetSymbol}, amount=${amountNumber}`,
           );
-          return contract.approve(options.spender, options.amount);
+          return options.overrides
+            ? contract.approve(options.spender, options.amount, options.overrides)
+            : contract.approve(options.spender, options.amount);
         }
         return undefined;
       })

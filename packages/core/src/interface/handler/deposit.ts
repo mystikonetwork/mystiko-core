@@ -1,6 +1,7 @@
 import { BridgeType } from '@mystikonetwork/config';
 import { DatabaseQuery, Deposit, DepositStatus } from '@mystikonetwork/database';
 import { MystikoSigner } from '@mystikonetwork/ethers';
+import { Overrides, PayableOverrides } from 'ethers';
 
 export type DepositQuoteOptions = {
   srcChainId: number;
@@ -33,6 +34,8 @@ export type DepositOptions = {
   executorFee?: number;
   bridgeFee?: number;
   statusCallback?: (deposit: Deposit, oldStatus: DepositStatus, newStatus: DepositStatus) => void;
+  assetApproveOverrides?: Overrides & { from?: string | Promise<string> };
+  depositOverrides?: PayableOverrides & { from?: string | Promise<string> };
 };
 
 export type DepositSummary = {

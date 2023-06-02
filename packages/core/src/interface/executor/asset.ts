@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, Overrides } from 'ethers';
 
 export type AssetExecutorOptions = {
   chainId: number;
@@ -11,6 +11,7 @@ export type AssetExecutorApproveOptions = AssetExecutorOptions & {
   amount: string;
   spender: string;
   signer: ethers.Signer;
+  overrides?: Overrides & { from?: string | Promise<string> };
 };
 
 export type AssetExecutorBalanceOptions = AssetExecutorOptions & {
