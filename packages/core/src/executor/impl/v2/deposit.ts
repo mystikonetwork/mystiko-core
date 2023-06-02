@@ -362,6 +362,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             spender: contractConfig.address,
             signer: options.signer.signer,
             amount: total,
+            overrides: options.assetApproveOverrides,
           })
           .then((resp) =>
             this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVING, {
@@ -411,7 +412,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           encryptedNote: deposit.encryptedNote,
           rollupFee: deposit.rollupFeeAmount,
         },
-        { value: mainAssetTotal },
+        { value: mainAssetTotal, ...options.depositOverrides },
       );
     } else {
       const contract = this.context.contractConnector.connect<MystikoV2Bridge>(
@@ -430,7 +431,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           bridgeFee: deposit.bridgeFeeAmount,
           executorFee: deposit.executorFeeAmount,
         },
-        { value: mainAssetTotal },
+        { value: mainAssetTotal, ...options.depositOverrides },
       );
     }
     this.logger.info(`submitting transaction of deposit id=${deposit.id}`);

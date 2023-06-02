@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/core",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "core handlers of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -63,9 +63,9 @@
   "dependencies": {
     "@mystikonetwork/config": "^0.7.0",
     "@mystikonetwork/contracts-abi": "^0.2.3",
-    "@mystikonetwork/database": "^0.5.6",
+    "@mystikonetwork/database": "^0.5.7",
     "@mystikonetwork/ecies": "^0.2.4",
-    "@mystikonetwork/ethers": "^0.5.6",
+    "@mystikonetwork/ethers": "^0.5.7",
     "@mystikonetwork/gas-relayer-client": "^0.1.18",
     "@mystikonetwork/gas-relayer-config": "^0.1.18",
     "@mystikonetwork/indexer-client": "^0.5.0",
