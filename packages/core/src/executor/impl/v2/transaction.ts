@@ -876,7 +876,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     );
     const etherContractWithSigner = etherContract.connect(options.signer.signer);
     return etherContractWithSigner
-      .transact(request, signature, options.transactOverrides)
+      .transact(request, signature, options.transactOverrides || {})
       .then((resp) => {
         this.logger.info(
           `successfully submitted transaction id=${transaction.id} to ` +
