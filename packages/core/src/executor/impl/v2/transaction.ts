@@ -847,7 +847,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         this.context.providers.checkProvider(options.chainId).then((provider) => ({ tx, resp, provider })),
       )
       .then(({ tx, resp, provider }) =>
-        waitTransactionHash(provider, resp.hash).then((receipt) => {
+        waitTransactionHash(
+          provider,
+          resp.hash,
+          undefined,
+          options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
+        ).then((receipt) => {
           this.logger.info(
             `transaction id=${transaction.id} to ` +
               `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
