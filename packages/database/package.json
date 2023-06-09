@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/database",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "database of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -55,12 +55,12 @@
   },
   "dependencies": {
     "@mystikonetwork/protocol": "^0.2.4",
-    "@mystikonetwork/utils": "^0.1.6",
+    "@mystikonetwork/utils": "^0.2.8",
     "pouchdb-adapter-memory": "7.3.0",
     "rxdb": "12.5.4",
     "rxjs": "7.5.5"
   },
   "resolutions": {
-    "@mystikonetwork/utils": "0.1.6"
+    "@mystikonetwork/utils": "0.2.8"
   }
 }

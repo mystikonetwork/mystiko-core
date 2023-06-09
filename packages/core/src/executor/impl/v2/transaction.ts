@@ -29,6 +29,7 @@ import {
   toDecimals,
   toHex,
   waitTransaction,
+  waitTransactionHash,
 } from '@mystikonetwork/utils';
 import { ZKProof } from '@mystikonetwork/zkp';
 import BN from 'bn.js';
@@ -843,24 +844,19 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }).then((tx) => ({ tx, resp }));
       })
       .then(({ tx, resp }) =>
-        this.context.gasRelayers
-          .waitUntilConfirmed({
-            registerUrl: gasRelayerInfo.url,
-            jobId: resp.id,
-            options: {
-              timeoutMs: options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
-            },
-          })
-          .then(() => {
-            this.logger.info(
-              `transaction id=${transaction.id} to ` +
-                `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
-                `gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
-            );
-            return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-              transactionHash: resp.hash,
-            });
-          }),
+        this.context.providers.checkProvider(options.chainId).then((provider) => ({ tx, resp, provider })),
+      )
+      .then(({ tx, resp, provider }) =>
+        waitTransactionHash(provider, resp.hash).then((receipt) => {
+          this.logger.info(
+            `transaction id=${transaction.id} to ` +
+              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
+              `gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
+          );
+          return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+            transactionHash: receipt.transactionHash,
+          });
+        }),
       );
   }
 

@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { deployMockContract, MockContract } from '@ethereum-waffle/mock-contract';
 import { MockProvider } from '@ethereum-waffle/provider';
 import { BridgeType, MystikoConfig, PoolContractConfig } from '@mystikonetwork/config';
@@ -25,13 +26,7 @@ import {
   RelayTransactRequest,
   WaitingJobRequest,
 } from '@mystikonetwork/gas-relayer-client';
-import {
-  JobTypeEnum,
-  RegisterInfo,
-  TransactResponse,
-  TransactStatus,
-  TransactStatusEnum,
-} from '@mystikonetwork/gas-relayer-config';
+import { RegisterInfo, TransactResponse, TransactStatus } from '@mystikonetwork/gas-relayer-config';
 import { Point, SecretSharing } from '@mystikonetwork/secret-share';
 import { fromDecimals, readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
 import BN from 'bn.js';
@@ -95,12 +90,36 @@ class TestGasRelayerClient implements GasRelayers {
   }
 }
 
+class WrappedMockProvider extends MockProvider {
+  public txReceipt: ethers.providers.TransactionReceipt;
+
+  constructor(secretKey: string) {
+    super({
+      ganacheOptions: {
+        accounts: [{ balance: toDecimals(1), secretKey }],
+      },
+    });
+    this.txReceipt = { transactionHash: '' } as ethers.providers.TransactionReceipt;
+  }
+
+  public waitForTransaction(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    transactionHash: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    confirmations?: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    timeout?: number,
+  ): Promise<ethers.providers.TransactionReceipt> {
+    return Promise.resolve(this.txReceipt);
+  }
+}
+
 let config: MystikoConfig;
 let context: MystikoContextInterface;
 let executor: TransactionExecutorV2;
 let mockERC20: MockContract;
 let mockCommitmentPool: MockContract;
-let mockProvider: MockProvider;
+let mockProvider: WrappedMockProvider;
 let etherWallet: ethers.Wallet;
 let mystikoAccount: Account;
 let mystikoSigner: PrivateKeySigner;
@@ -311,11 +330,7 @@ async function checkTransaction(
 
 beforeAll(async () => {
   etherWallet = ethers.Wallet.createRandom();
-  mockProvider = new MockProvider({
-    ganacheOptions: {
-      accounts: [{ balance: toDecimals(1), secretKey: etherWallet.privateKey }],
-    },
-  });
+  mockProvider = new WrappedMockProvider(etherWallet.privateKey);
   const [signer] = mockProvider.getWallets();
   config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
@@ -940,14 +955,9 @@ test('test transaction with gas relayers', async () => {
     nonce: 1,
   };
   gasRelayers.relayTransactRet = relayTransactRet;
-  const gasRelayerRequest: any = {};
-  gasRelayers.waitUntilConfirmedRet = {
-    id: '1',
-    type: JobTypeEnum.WITHDRAW,
-    status: TransactStatusEnum.CONFIRMED,
-    error: '',
-    request: gasRelayerRequest,
-  };
+  mockProvider.txReceipt = {
+    transactionHash: '0xf1a37404bc619328699869ab412cc848b51b98af2ca7055214f55b998f4d420c',
+  } as ethers.providers.TransactionReceipt;
   let exeRet = await executor.execute(withdrawOptions, contractConfig);
   await exeRet.transactionPromise;
   await checkTransaction(1, 0, exeRet.transaction, withdrawOptions, contractConfig);
@@ -960,9 +970,12 @@ test('test transaction with gas relayers', async () => {
   expect(exeRet.transaction.errorMessage).toBe('relayTransactRet is not set');
 
   gasRelayers.relayTransactRet = relayTransactRet;
-  gasRelayers.waitUntilConfirmedRet = undefined;
+  mockProvider.txReceipt = {
+    transactionHash: '0xf1a37404bc619328699869ab412cc848b51b98af2ca7055214f55b998f4d420c',
+    status: 0,
+  } as ethers.providers.TransactionReceipt;
   exeRet = await executor.execute(withdrawOptions, contractConfig);
   await exeRet.transactionPromise;
   expect(exeRet.transaction.status).toBe(TransactionStatus.FAILED);
-  expect(exeRet.transaction.errorMessage).toBe('waitUntilConfirmedRet is not set');
+  expect(exeRet.transaction.errorMessage).toBe('transaction failed');
 });
