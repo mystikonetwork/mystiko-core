@@ -1446,19 +1446,19 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/indexer-client@^0.5.0":
-  version "0.5.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-client/0.5.0/95c8c0e628815811fc0f0f37c08399a809a62003#95c8c0e628815811fc0f0f37c08399a809a62003"
-  integrity sha512-RteQkxQpSvFUWi7IKd5Zot2+B9n1wqKU0w0NJJNLdFNnJGHKTqceg48JUpdKc4K+EkmtqW4YU9JTp7c7W+l4eg==
+"@mystikonetwork/indexer-client@^0.7.5":
+  version "0.7.5"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-client/0.7.5/63b240ab1645d538efec6e9b499df0c299fbf881#63b240ab1645d538efec6e9b499df0c299fbf881"
+  integrity sha512-bgrlhyingwbcESwxVvUU5kZQBnwk/gfa/hb4JqjxTTYIjny6Y8/ZnSIO6GvrkPfVX6v7MRA7MRqzxdk2tSnlbA==
   dependencies:
     "@loopback/repository" "^4.1.2"
-    "@mystikonetwork/indexer-common" "^0.5.0"
+    "@mystikonetwork/indexer-common" "^0.7.5"
     axios "^0.27.2"
 
-"@mystikonetwork/indexer-common@^0.5.0":
-  version "0.5.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-common/0.5.0/aed79cbfb6e7e414f55285ea890cdbf31467c8b1#aed79cbfb6e7e414f55285ea890cdbf31467c8b1"
-  integrity sha512-OrnS41QJ0077a2Ao1bTpeN1q9AAxHQFgvAhcGpfogUfUSsFLcLSk0BsalSRNPqAH+9GvgjXZanp2iYPxNmxDow==
+"@mystikonetwork/indexer-common@^0.7.5":
+  version "0.7.5"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-common/0.7.5/4bc58dffbad90ba1d821407cc7d659b0899c38df#4bc58dffbad90ba1d821407cc7d659b0899c38df"
+  integrity sha512-yFi4KEn6tJ1G+LsybtWUYW7btDuhXx7aUjW36ui1CWdhN6cbsyYGeYIWaTVd0DoBXV4MuQ79HLWOti+P60QkXg==
 
 "@mystikonetwork/merkle@^0.2.4":
   version "0.2.4"
