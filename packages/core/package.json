@@ -35,6 +35,8 @@
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
     "@ethereum-waffle/mock-contract": "^3.4.4",
     "@ethereum-waffle/provider": "^3.4.4",
     "@mystikonetwork/secret-share": "^0.2.4",
@@ -47,6 +49,7 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
+    "babel-jest": "^29.6.1",
     "command-exists": "^1.2.9",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-typescript": "^16.1.0",
