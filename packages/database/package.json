@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/database",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "description": "database of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -35,7 +35,7 @@
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
-    "@mystikonetwork/zkp-node": "^0.2.4",
+    "@mystikonetwork/zkp-node": "^0.3.0",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.1",
     "@types/jest": "^27.4.0",
