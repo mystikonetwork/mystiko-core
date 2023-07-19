@@ -993,30 +993,42 @@
     loglevel-plugin-prefix "^0.8.4"
     pako "^2.0.4"
 
-"@mystikonetwork/zkp-node@^0.2.4":
-  version "0.2.4"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-node/0.2.4/0952e36210a674720038532e9f1a3483da03f50d#0952e36210a674720038532e9f1a3483da03f50d"
-  integrity sha512-bIDHLzQ34WUIrSnmSXWVu0qAEmMIAty4xhuG4EfQS2v7M5I7zRt9MrAdBtdUzHvhViEld4MbSDP2kWUGtw4kng==
+"@mystikonetwork/zkp-node@^0.3.0":
+  version "0.3.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-node/0.3.0/f35f8a6f20b8c880936857aabd2600c8d7e8c413#f35f8a6f20b8c880936857aabd2600c8d7e8c413"
+  integrity sha512-OUQn5nGvQB2T0vgFkruqeKfonFgdziih5zdEgofSDabd1d57rTsFVo5rwia9U3hqT9EUXF1rb5vK9wkW7ZsO9g==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
-    "@mystikonetwork/zkp" "^0.2.4"
-    "@mystikonetwork/zkp-wasm" "^0.2.4"
+    "@mystikonetwork/zkp" "^0.3.0"
+    "@mystikonetwork/zkp-wasm" "^0.3.0"
+    "@mystikonetwork/zokrates-js" "^1.1.8"
     command-exists "^1.2.9"
-    zokrates-js "^1.1.3"
 
-"@mystikonetwork/zkp-wasm@^0.2.4":
-  version "0.2.4"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-wasm/0.2.4/73c8ae8986361b6d790b2b54db06016df14cde4d#73c8ae8986361b6d790b2b54db06016df14cde4d"
-  integrity sha512-lq3k0lAsdxz+CC8cIaK/1zjG8fOcS0lWz8EFhOPaP60uval/4sXZfQhHnuOKi6EoWdOr9oX9/d/Ze8RhWDrPCw==
+"@mystikonetwork/zkp-wasm@^0.3.0":
+  version "0.3.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp-wasm/0.3.0/6b36252f68bfb03923abc098e40777403e85ffcb#6b36252f68bfb03923abc098e40777403e85ffcb"
+  integrity sha512-Ny0jpm8pSjXJLNUgUbuTFc81TUrH+62TXO7J/gsqUGk7L1nFvDhfNXipEHfHM3lyE8/3IlMqw5ZMhPt1T9O/BA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
-    "@mystikonetwork/zkp" "^0.2.4"
-    zokrates-js "^1.1.3"
+    "@mystikonetwork/zkp" "^0.3.0"
+    "@mystikonetwork/zokrates-js" "^1.1.8"
 
 "@mystikonetwork/zkp@^0.2.4":
   version "0.2.4"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.2.4/c16b84ef6e003fec1edd48fd0e7b05ae15df14a3#c16b84ef6e003fec1edd48fd0e7b05ae15df14a3"
   integrity sha512-5zFix4hB+94LsjIZidA9rcgArj5j+f8OaVoR2zLn9YlVROaEl9t8OPS7w7xN9AOM0N7npkE/U6a0FPdp3EubVg==
+
+"@mystikonetwork/zkp@^0.3.0":
+  version "0.3.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.3.0/50d89c3e8994057452bbd7a8c1d4e8ecf0341921#50d89c3e8994057452bbd7a8c1d4e8ecf0341921"
+  integrity sha512-3lO2MA8MJBgrK5yHWabCs0z0na679JhS9To1CWk6XZXQVWNxSukltEzs6AuPOy3HCYOHZb+0E6nvdjClXqri6w==
+
+"@mystikonetwork/zokrates-js@^1.1.8":
+  version "1.1.8"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zokrates-js/1.1.8/249e54f4d4ea303fe612cb1dabc2e77f66e6c492#249e54f4d4ea303fe612cb1dabc2e77f66e6c492"
+  integrity sha512-nNnxJSRrTl0bucGRvQN/LxOaElnGFuXp4WGdoxROweV0VdzqA8Ti7qjQEDNPZaaKuVeGeFyTHHxjyWPwFq+oHw==
+  dependencies:
+    pako "^2.1.0"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -5732,6 +5744,11 @@ pako@^2.0.4:
   resolved "https://registry.yarnpkg.com/pako/-/pako-2.0.4.tgz#6cebc4bbb0b6c73b0d5b8d7e8476e2b2fbea576d"
   integrity sha512-v8tweI900AUkZN6heMU/4Uy4cXRc2AYNRggVmTR+dEncawDJgCdLMximOVA2p4qO57WMynangsfGRb5WD6L1Bg==
 
+pako@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
+  integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
+
 parent-module@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/parent-module/-/parent-module-1.0.1.tgz#691d2709e78c79fae3a156622452d00762caaaa2"
@@ -7869,8 +7886,3 @@ z-schema@5.0.3:
     validator "^13.7.0"
   optionalDependencies:
     commander "^2.20.3"
-
-zokrates-js@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/zokrates-js/-/zokrates-js-1.1.3.tgz#88c04a71cb07d69329b7a4194edd41ecdda04ab1"
-  integrity sha512-FKW2MJR18BSuW2ayoUiaWfbBiArmr+Y5sesF0trMiwcuYyO80IYpwYfhD8uB6Xy5PywR5Rh/XB76Okznoi/WEw==
