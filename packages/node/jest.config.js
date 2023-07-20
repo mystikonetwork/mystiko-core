@@ -14,9 +14,4 @@ module.exports = {
     },
   },
   setupFilesAfterEnv: ['./jest.setup.js'],
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-    '^.+\\.jsx?$': 'babel-jest',
-  },
-  transformIgnorePatterns: ['node_modules/(?!(zokrates-js)/)'],
 };
