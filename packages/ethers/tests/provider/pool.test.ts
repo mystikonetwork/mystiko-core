@@ -14,17 +14,20 @@ beforeEach(async () => {
         name: 'Ethereum Ropsten',
         assetSymbol: 'ETH',
         explorerUrl: 'https://ropsten.etherscan.io',
+        explorerApiUrl: 'https://api-ropsten.etherscan.io',
         signerEndpoint: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
           { url: 'https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161' },
           { url: 'https://eth-ropsten.alchemyapi.io/v2/kf1OjEJTu_kWaRHNIHLqRNDUeP4rV3j5' },
         ],
+        packerGranularities: [4000, 8000],
       },
       {
         chainId: 5,
         name: 'Ethereum Goerli',
         assetSymbol: 'ETH',
         explorerUrl: 'https://goerli.etherscan.io',
+        explorerApiUrl: 'https://api-goerli.etherscan.io',
         signerEndpoint: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
           { url: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161', quorumWeight: 2 },
@@ -32,6 +35,7 @@ beforeEach(async () => {
         ],
         providerType: 'quorum',
         providerQuorumPercentage: 66,
+        packerGranularities: [4000, 8000],
       },
     ],
   });
