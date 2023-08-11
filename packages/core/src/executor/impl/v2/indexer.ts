@@ -50,6 +50,7 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
     this.indexerConfig = indexerConfig;
     this.indexerClient = IndexerExecutorV2.indexerClientFactory.createV1Client({
       baseUrl: indexerConfig.url,
+      timeout: indexerConfig.timeoutMs,
     });
   }
 
