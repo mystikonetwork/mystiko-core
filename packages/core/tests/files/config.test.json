@@ -13,6 +13,7 @@
       ],
       "chainId": 11155111,
       "explorerUrl": "https://sepolia.etherscan.io",
+      "explorerApiUrl": "https://api-sepolia.etherscan.io",
       "providers": [
         {
           "url": "wss://sepolia.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161"
@@ -144,13 +145,15 @@
           ],
           "assetAddress": "0xb08AA0E20A4aEBc8E2B99d3247975D1C02959cFD"
         }
-      ]
+      ],
+      "packerGranularities": [8000, 32000, 128000, 512000]
     },
     {
       "name": "Ethereum Goerli",
       "assetSymbol": "ETH",
       "chainId": 5,
       "explorerUrl": "https://goerli.etherscan.io",
+      "explorerApiUrl": "https://api-goerli.etherscan.io",
       "recommendedAmounts": [
         "100000000000000000",
         "1000000000000000000",
@@ -174,13 +177,15 @@
       "signerEndpoint": "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       "depositContracts": [],
       "poolContracts": [],
-      "assets": []
+      "assets": [],
+      "packerGranularities": [8000, 32000, 128000, 512000]
     },
     {
       "name": "BSC Testnet",
       "assetSymbol": "BNB",
       "chainId": 97,
       "explorerUrl": "https://testnet.bscscan.com",
+      "explorerApiUrl": "https://api-testnet.bscscan.com",
       "providers": [
         {
           "url": "https://nd-302-890-317.p2pify.com/430c98aabb1fe49ec6517602e1e40f01"
@@ -369,13 +374,15 @@
           ],
           "assetAddress": "0x05d3586c0764353A6f1cb91Da0ab6C1311daa8E0"
         }
-      ]
+      ],
+      "packerGranularities": [8000, 32000, 128000, 512000]
     },
     {
       "name": "Polygon Testnet",
       "assetSymbol": "MATIC",
       "chainId": 80001,
       "explorerUrl": "https://mumbai.polygonscan.com",
+      "explorerApiUrl": "https://api-mumbai.polygonscan.com",
       "providers": [
         {
           "url": "wss://ws-nd-448-055-606.p2pify.com/235d7c0709c9a00b39395cd0bfbf4948"
@@ -393,13 +400,15 @@
       "signerEndpoint": "https://rpc-mumbai.maticvigil.com",
       "depositContracts": [],
       "poolContracts": [],
-      "assets": []
+      "assets": [],
+      "packerGranularities": [8000, 32000, 128000, 512000]
     },
     {
       "name": "Avalanche Testnet",
       "assetSymbol": "AVAX",
       "chainId": 43113,
       "explorerUrl": "https://testnet.snowtrace.io",
+      "explorerApiUrl": "https://api-testnet.snowtrace.io",
       "providers": [
         {
           "url": "wss://ws-nd-238-781-681.p2pify.com/796ca43c7ddc3121534c97e104d7a369/ext/bc/C/ws"
@@ -411,7 +420,8 @@
       "signerEndpoint": "https://api.avax-test.network/ext/bc/C/rpc",
       "depositContracts": [],
       "poolContracts": [],
-      "assets": []
+      "assets": [],
+      "packerGranularities": [8000, 32000, 128000, 512000]
     }
   ],
   "bridges": [

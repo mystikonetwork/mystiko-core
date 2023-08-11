@@ -16,6 +16,7 @@ beforeAll(async () => {
         name: 'Ethereum Sepolia',
         assetSymbol: 'ETH',
         explorerUrl: 'https://sepolia.etherscan.io',
+        explorerApiUrl: 'https://api-sepolia.etherscan.io',
         signerEndpoint: 'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
           {
@@ -32,12 +33,14 @@ beforeAll(async () => {
           },
         ],
         eventFilterSize: 100000,
+        packerGranularities: [4000, 8000],
       },
       {
         chainId: 5,
         name: 'Ethereum Goerli',
         assetSymbol: 'ETH',
         explorerUrl: 'https://goerli.etherscan.io',
+        explorerApiUrl: 'https://api-goerli.etherscan.io',
         signerEndpoint: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
         providers: [
           {
@@ -54,6 +57,7 @@ beforeAll(async () => {
           },
         ],
         eventFilterSize: 200000,
+        packerGranularities: [4000, 8000],
       },
     ],
   });
