@@ -343,20 +343,9 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
   }
 
   private decryptCommitments(commitments: Commitment[], context: ImportContext): Promise<Commitment[]> {
-    if (commitments.length > 0) {
-      return this.context.executors
-        .getCommitmentExecutor()
-        .decrypt({
-          commitment: commitments[0],
-          walletPassword: context.options.walletPassword,
-        })
-        .then((commitment) =>
-          this.decryptCommitments(commitments.slice(1), context).then((moreCommitments) => [
-            commitment,
-            ...moreCommitments,
-          ]),
-        );
-    }
-    return Promise.resolve([]);
+    return this.context.executors.getCommitmentExecutor().decrypt({
+      commitments,
+      walletPassword: context.options.walletPassword,
+    });
   }
 }

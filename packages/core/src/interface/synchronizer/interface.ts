@@ -33,6 +33,7 @@ export type SyncOptions = {
   timeoutMs?: number;
   chainTimeoutMs?: number;
   noIndexer?: boolean;
+  noPacker?: boolean;
   chainIds?: number[];
 };
 

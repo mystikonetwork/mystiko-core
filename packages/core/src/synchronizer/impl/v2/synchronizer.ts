@@ -260,6 +260,31 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+    const packerExecutor = this.context.executors.getPackerExecutor();
+    if (packerExecutor && !options.noPacker) {
+      return packerExecutor
+        .import({ walletPassword: options.walletPassword, chainId })
+        .then(({ commitments, syncedBlock }) => {
+          this.logger.info(
+            `synced events for chainId=${chainId} to blockNumber=${syncedBlock}` +
+              ` with ${commitments.length} commitments from packer`,
+          );
+          return this.executeIndexerSyncImport(options, chainId).then((moreCommitments) => [
+            ...commitments,
+            ...moreCommitments,
+          ]);
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `failed to import events for chainId=${chainId} from packer: ${errorMessage(error)}`,
+          );
+          return this.executeIndexerSyncImport(options, chainId);
+        });
+    }
+    return this.executeIndexerSyncImport(options, chainId);
+  }
+
+  private executeIndexerSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
     const indexerExecutor = this.context.executors.getIndexerExecutor();
     let promise: Promise<{
       fallback: boolean;

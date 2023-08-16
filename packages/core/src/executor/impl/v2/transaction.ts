@@ -936,17 +936,17 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     for (let i = 0; i < selectedCommitments.length; i += 1) {
       const commitment = selectedCommitments[i];
       const { serialNumber } = selectedCommitments[i];
-      let serialNumberPromise: Promise<Commitment>;
+      let serialNumberPromise: Promise<Commitment[]>;
       if (!serialNumber) {
         serialNumberPromise = this.context.executors.getCommitmentExecutor().decrypt({
           walletPassword: options.walletPassword,
-          commitment,
+          commitments: [commitment],
         });
       } else {
-        serialNumberPromise = Promise.resolve(commitment);
+        serialNumberPromise = Promise.resolve([commitment]);
       }
       serialNumberPromises.push(
-        serialNumberPromise.then((updatedCommitment) => {
+        serialNumberPromise.then(([updatedCommitment]) => {
           const updatedSerialNumber = updatedCommitment.serialNumber;
           if (!updatedSerialNumber) {
             return createErrorPromise(

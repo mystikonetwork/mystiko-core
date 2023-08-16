@@ -3,7 +3,7 @@ import { CommitmentImport, CommitmentScan } from '../handler';
 
 export type CommitmentDecrypt = {
   walletPassword: string;
-  commitment: Commitment;
+  commitments: Commitment[];
   accounts?: Account[];
 };
 
@@ -19,7 +19,7 @@ export interface CommitmentExecutor<
   CC = CommitmentCheck,
 > {
   check(options: CC): Promise<void>;
-  decrypt(options: CD): Promise<Commitment>;
+  decrypt(options: CD): Promise<Commitment[]>;
   import(options: CI): Promise<Commitment[]>;
   scan(options: CS): Promise<Commitment[]>;
 }
