@@ -43,6 +43,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
 
   private importChain(context: ImportContext): Promise<PackerImportResult> {
     const { syncedBlock, targetBlock, options } = context;
+    const startTime = Date.now();
     return this.packerClient
       .fetch({
         chainId: options.chainId,
@@ -50,6 +51,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
         targetBlock,
       })
       .then((chainData) => {
+        this.logger.debug(`fetched chain data in ${Date.now() - startTime}ms`);
         if (chainData) {
           return this.importChainData(chainData, context);
         }
@@ -58,6 +60,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
   }
 
   private importChainData(chainData: data.v1.ChainData, context: ImportContext): Promise<PackerImportResult> {
+    const startTime = Date.now();
     const { options } = context;
     const queuedEvents: CommitmentQueuedEvent[] = [];
     const includedEvents: CommitmentIncludedEvent[] = [];
@@ -83,28 +86,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
           commitment.includedTransactionHash !== undefined
             ? toHex(commitment.includedTransactionHash)
             : undefined;
-        if (commitment.status === data.v1.CommitmentStatus.INCLUDED) {
-          if (!includedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment data'));
-          }
-          if (leafIndex && encryptedNote && rollupFee && queuedTransactionHash) {
-            queuedEvents.push({
-              eventType: EventType.COMMITMENT_QUEUED,
-              contractAddress,
-              commitmentHash,
-              leafIndex,
-              encryptedNote,
-              rollupFee,
-              transactionHash: queuedTransactionHash,
-            });
-          }
-          includedEvents.push({
-            eventType: EventType.COMMITMENT_INCLUDED,
-            contractAddress,
-            commitmentHash,
-            transactionHash: includedTransactionHash,
-          });
-        } else if (commitment.status === data.v1.CommitmentStatus.QUEUED) {
+        if (commitment.status === data.v1.CommitmentStatus.QUEUED) {
           if (!leafIndex || !encryptedNote || !rollupFee || !queuedTransactionHash) {
             return Promise.reject(new Error('Invalid commitment data'));
           }
@@ -116,6 +98,19 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
             encryptedNote,
             rollupFee,
             transactionHash: queuedTransactionHash,
+          });
+        } else if (commitment.status === data.v1.CommitmentStatus.INCLUDED) {
+          if (!includedTransactionHash) {
+            return Promise.reject(new Error('Invalid commitment data'));
+          }
+          includedEvents.push({
+            eventType: EventType.COMMITMENT_INCLUDED,
+            contractAddress,
+            commitmentHash,
+            transactionHash: includedTransactionHash,
+            leafIndex,
+            encryptedNote,
+            rollupFee,
           });
         }
       }
@@ -136,6 +131,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
       return order;
     });
     const events: ContractEvent[] = [...sortedQueuedEvents, ...includedEvents, ...spentEvents];
+    this.logger.debug(`processed chain data in ${Date.now() - startTime}ms`);
     return this.context.executors
       .getEventExecutor()
       .import(events, {
@@ -236,7 +232,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
       .then((contracts) => {
         const updatedContracts: ContractType[] = [];
         contracts.forEach((contract) => {
-          let shouldUpdate = false;
+          let shouldUpdate;
           const depositContractConfig = chainConfig.getDepositContractByAddress(contract.contractAddress);
           shouldUpdate =
             !!depositContractConfig && importedContracts.indexOf(depositContractConfig.poolAddress) >= 0;

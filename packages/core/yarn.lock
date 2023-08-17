@@ -1387,13 +1387,13 @@
 
 "@mystikonetwork/datapacker-client@^0.1.0":
   version "0.1.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.0/9a0495b635de6057b650f2811e1850ee5fab269d#9a0495b635de6057b650f2811e1850ee5fab269d"
-  integrity sha512-T4mKwKQJfjoG+wwcrLIGeKVb+7AF05ohsLJed+HKyqeo9l49+IsYDcoyI9KDr42gPjPziPe/0OpZ1yv03SbJfQ==
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.0/375221551c7c7f6ebdfb46d3d435b15055794deb#375221551c7c7f6ebdfb46d3d435b15055794deb"
+  integrity sha512-n4gGAqTc1fEmh21/Sdw0PqTVk6+dTgk/mVJNXGt0JAM4Amt2L0X1D4Sl1cKDC9HvGnD9eTEx04wnkOtwqCk7uQ==
   dependencies:
     "@mystikonetwork/config" "^0.9.0"
     "@mystikonetwork/protos" "^0.1.0"
     "@mystikonetwork/utils" "^0.2.9"
-    axios "^1.4.0"
+    axios "^0.27.2"
     crypto-js "^4.1.1"
     fzstd "^0.1.0"
     loglevel "^1.8.1"
@@ -2407,15 +2407,6 @@ axios@^0.27.2:
   dependencies:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
-
-axios@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.4.0.tgz#38a7bf1224cd308de271146038b551d725f0be1f"
-  integrity sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==
-  dependencies:
-    follow-redirects "^1.15.0"
-    form-data "^4.0.0"
-    proxy-from-env "^1.1.0"
 
 b4a@^1.0.1:
   version "1.5.3"
@@ -5651,7 +5642,7 @@ flow-stoplight@^1.0.0:
   resolved "https://registry.yarnpkg.com/flow-stoplight/-/flow-stoplight-1.0.0.tgz#4a292c5bcff8b39fa6cc0cb1a853d86f27eeff7b"
   integrity sha512-rDjbZUKpN8OYhB0IE/vY/I8UWO/602IIJEU/76Tv4LvYnwHCk0BCsvz4eRr9n+FQcri7L5cyaXOo0+/Kh4HisA==
 
-follow-redirects@^1.14.8, follow-redirects@^1.15.0:
+follow-redirects@^1.14.8:
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
   integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
@@ -9260,11 +9251,6 @@ proxy-addr@~2.0.7:
   dependencies:
     forwarded "0.2.0"
     ipaddr.js "1.9.1"
-
-proxy-from-env@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
-  integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
 
 prr@~1.0.1:
   version "1.0.1"

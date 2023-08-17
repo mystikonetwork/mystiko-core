@@ -449,6 +449,9 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         contractAddress: contractConfig.address,
         commitmentHash: rawEvent.args.commitment,
         transactionHash: rawEvent.transactionHash,
+        leafIndex: undefined,
+        rollupFee: undefined,
+        encryptedNote: undefined,
       })),
     );
   }
