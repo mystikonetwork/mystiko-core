@@ -155,6 +155,7 @@ afterAll(async () => {
 
 test('test import all events', async () => {
   await executor.import({ walletPassword });
+  await commitmentHandler.scanAll({ walletPassword });
   expect((await commitmentHandler.find()).length).toBe(72);
   expect((await nullifierHandler.find()).length).toBe(44);
   expect((await chainHandler.findOne(11155111))?.syncedBlockNumber).toBe(sepoliaCurrentBlock);

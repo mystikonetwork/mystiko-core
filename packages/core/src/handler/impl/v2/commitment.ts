@@ -7,6 +7,7 @@ import {
   MystikoContextInterface,
   CommitmentImport,
   CommitmentScan,
+  CommitmentScanAll,
 } from '../../../interface';
 
 export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHandler {
@@ -56,7 +57,7 @@ export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHan
     return this.context.executors.getCommitmentExecutor().import(options);
   }
 
-  public scanAll(options: CommitmentScan): Promise<Commitment[][]> {
+  public scanAll(options: CommitmentScanAll): Promise<Commitment[][]> {
     return this.context.executors.getCommitmentExecutor().scanAll(options);
   }
 
