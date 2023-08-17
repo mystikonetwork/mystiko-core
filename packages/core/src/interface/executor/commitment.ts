@@ -1,5 +1,5 @@
 import { Account, Commitment } from '@mystikonetwork/database';
-import { CommitmentImport, CommitmentScan } from '../handler';
+import { CommitmentImport, CommitmentScan, CommitmentScanAll } from '../handler';
 
 export type CommitmentDecrypt = {
   walletPassword: string;
@@ -15,6 +15,7 @@ export type CommitmentCheck = {
 export interface CommitmentExecutor<
   CI = CommitmentImport,
   CS = CommitmentScan,
+  CSA = CommitmentScanAll,
   CD = CommitmentDecrypt,
   CC = CommitmentCheck,
 > {
@@ -22,4 +23,5 @@ export interface CommitmentExecutor<
   decrypt(options: CD): Promise<Commitment[]>;
   import(options: CI): Promise<Commitment[]>;
   scan(options: CS): Promise<Commitment[]>;
+  scanAll(options: CSA): Promise<Commitment[][]>;
 }

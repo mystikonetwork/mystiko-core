@@ -5,6 +5,7 @@ import {
   CommitmentType,
   DepositStatus,
   DepositType,
+  Nullifier,
   NullifierType,
 } from '@mystikonetwork/database';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -139,7 +140,6 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
       .then((updatedCommitments) =>
         this.updateDepositStatus(updatedCommitments, DepositStatus.QUEUED, context),
       )
-      .then((updatedCommitments) => this.decryptCommitments(updatedCommitments, context))
       .then((updatedCommitments) => {
         this.logger.debug(`imported CommitmentQueued events in ${Date.now() - startTime}ms`);
         return Promise.resolve(updatedCommitments);
@@ -261,11 +261,11 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
         },
       })
       .then((existingNullifiers) => {
+        const nullifiersMap = this.buildNullifiersMap(existingNullifiers);
         const mergedNullifiers: NullifierType[] = [];
         nullifiers.forEach((nullifier) => {
-          const existingNullifier = existingNullifiers.find(
-            (n) =>
-              n.contractAddress === nullifier.contractAddress && n.serialNumber === nullifier.serialNumber,
+          const existingNullifier = nullifiersMap.get(
+            this.nullifierKey(chainConfig.chainId, nullifier.contractAddress, nullifier.serialNumber),
           );
           if (existingNullifier) {
             const merged: NullifierType = existingNullifier.toMutableJSON();
@@ -290,18 +290,22 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
       )
       .then(({ updatedNullifiers, commitments }) => {
         const commitmentsData: CommitmentType[] = [];
+        const nullifiersMap = this.buildNullifiersMap(updatedNullifiers);
         commitments.forEach((c) => {
-          const nullifier = updatedNullifiers.find(
-            (n) => n.contractAddress === c.contractAddress && n.serialNumber === c.serialNumber,
-          );
-          if (nullifier) {
-            const data = c.toMutableJSON();
-            if (data.status !== CommitmentStatus.FAILED) {
-              data.status = CommitmentStatus.SPENT;
+          const { serialNumber } = c;
+          if (serialNumber !== undefined) {
+            const nullifier = nullifiersMap.get(
+              this.nullifierKey(c.chainId, c.contractAddress, serialNumber),
+            );
+            if (nullifier) {
+              const data = c.toMutableJSON();
+              if (data.status !== CommitmentStatus.FAILED) {
+                data.status = CommitmentStatus.SPENT;
+              }
+              data.spendingTransactionHash = nullifier.transactionHash;
+              data.updatedAt = MystikoHandler.now();
+              commitmentsData.push(data);
             }
-            data.spendingTransactionHash = nullifier.transactionHash;
-            data.updatedAt = MystikoHandler.now();
-            commitmentsData.push(data);
           }
         });
         return this.context.db.commitments.bulkUpsert(commitmentsData);
@@ -355,22 +359,6 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
       .then(() => {
         this.logger.debug(`updated deposits status in ${Date.now() - startTime}ms`);
         return Promise.resolve(commitments);
-      });
-  }
-
-  private decryptCommitments(commitments: Commitment[], context: ImportContext): Promise<Commitment[]> {
-    const startTime = Date.now();
-    return this.context.executors
-      .getCommitmentExecutor()
-      .decrypt({
-        commitments,
-        walletPassword: context.options.walletPassword,
-      })
-      .then((updatedCommitments) => {
-        this.logger.debug(
-          `decrypted ${updatedCommitments.length} commitments in ${Date.now() - startTime}ms`,
-        );
-        return Promise.resolve(updatedCommitments);
       });
   }
 
@@ -431,5 +419,20 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
       ),
     );
     return commitmentsMap;
+  }
+
+  private nullifierKey(chainId: number, contractAddress: string, serialNumber: string): string {
+    return `${chainId}-${contractAddress}-${serialNumber}`;
+  }
+
+  private buildNullifiersMap(nullifiers: Nullifier[]): Map<string, Nullifier> {
+    const nullifiersMap: Map<string, Nullifier> = new Map<string, Nullifier>();
+    nullifiers.forEach((nullifier) => {
+      nullifiersMap.set(
+        `${nullifier.chainId}-${nullifier.contractAddress}-${nullifier.serialNumber}`,
+        nullifier,
+      );
+    });
+    return nullifiersMap;
   }
 }

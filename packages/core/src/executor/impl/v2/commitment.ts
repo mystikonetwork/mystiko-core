@@ -27,6 +27,7 @@ import {
   CommitmentIncludedEvent,
   CommitmentQueuedEvent,
   CommitmentScan,
+  CommitmentScanAll,
   CommitmentSpentEvent,
   ContractEvent,
   EventType,
@@ -71,7 +72,6 @@ type ImportEventsContext = ImportContractContext & {
 type ScanContext = {
   options: CommitmentScan;
   account: Account;
-  lastId?: string;
 };
 
 export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentExecutor {
@@ -83,23 +83,30 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return this.context.wallets.checkPassword(options.walletPassword).then(() => this.importAll({ options }));
   }
 
+  public scanAll(options: CommitmentScanAll): Promise<Commitment[][]> {
+    return this.context.wallets
+      .checkPassword(options.walletPassword)
+      .then(() => this.context.accounts.find())
+      .then((accounts) => {
+        const promises: Promise<Commitment[]>[] = [];
+        accounts.forEach((account) => {
+          promises.push(
+            this.scanAccountWrapper(account, {
+              shieldedAddress: account.shieldedAddress,
+              walletPassword: options.walletPassword,
+            }),
+          );
+        });
+        return Promise.all(promises);
+      });
+  }
+
   public scan(options: CommitmentScan): Promise<Commitment[]> {
     const { shieldedAddress, walletPassword } = options;
     return this.context.wallets.checkPassword(walletPassword).then(() =>
       this.context.accounts.findOne(shieldedAddress).then((account) => {
         if (account) {
-          this.logger.info(`start scanning commitments belong to account=${account.shieldedAddress}`);
-          return this.context.accounts
-            .update(walletPassword, account.id, { status: AccountStatus.SCANNING })
-            .then(() => this.scanAccount({ options, account }))
-            .then((commitments) => {
-              this.logger.info(
-                `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
-              );
-              return this.context.accounts
-                .update(walletPassword, account.id, { status: AccountStatus.SCANNED })
-                .then(() => commitments);
-            });
+          return this.scanAccountWrapper(account, options);
         }
         return Promise.resolve([]);
       }),
@@ -510,8 +517,27 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     );
   }
 
+  private scanAccountWrapper(account: Account, options: CommitmentScan): Promise<Commitment[]> {
+    this.logger.info(
+      `start scanning commitments belong to account=${account.shieldedAddress}` +
+        ` from commitmentId=${account.scannedCommitmentId}`,
+    );
+    return this.context.accounts
+      .update(options.walletPassword, account.id, { status: AccountStatus.SCANNING })
+      .then(() => this.scanAccount({ options, account }))
+      .then((commitments) => {
+        this.logger.info(
+          `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
+        );
+        return this.context.accounts
+          .update(options.walletPassword, account.id, { status: AccountStatus.SCANNED })
+          .then(() => commitments);
+      });
+  }
+
   private scanAccount(scanContext: ScanContext): Promise<Commitment[]> {
-    const { options, account, lastId } = scanContext;
+    const { options, account } = scanContext;
+    const { scannedCommitmentId } = account;
     const { scanSize } = account;
     const query: DatabaseQuery<Commitment> = {
       selector: {
@@ -521,16 +547,20 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       sort: [{ id: 'asc' }],
       limit: scanSize,
     };
-    if (lastId && query.selector) {
-      query.selector.id = { $gt: lastId };
+    if (scannedCommitmentId && query.selector) {
+      query.selector.id = { $gt: scannedCommitmentId };
     }
-    return this.context.commitments.find(query).then((commitments) => {
-      const promises: Promise<Commitment>[] = [];
-      this.decryptCommitments({
-        commitments,
-        walletPassword: options.walletPassword,
-        accounts: [account],
-      }).then(({ decryptedCommitments }) => {
+    return this.context.commitments
+      .find(query)
+      .then((commitments) =>
+        this.decryptCommitments({
+          commitments,
+          walletPassword: options.walletPassword,
+          accounts: [account],
+        }).then(({ decryptedCommitments }) => ({ commitments, decryptedCommitments })),
+      )
+      .then(({ decryptedCommitments, commitments }) => {
+        const promises: Promise<Commitment>[] = [];
         decryptedCommitments.forEach((decryptedCommitment) => {
           if (
             decryptedCommitment.shieldedAddress === account.shieldedAddress &&
@@ -556,21 +586,35 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
             );
           }
         });
-      });
-      return Promise.all(promises).then((updatedCommitments) => {
+        return Promise.all(promises).then((updatedCommitments) => ({ updatedCommitments, commitments }));
+      })
+      .then(({ updatedCommitments, commitments }) =>
+        account
+          .atomicUpdate((accountData) => {
+            if (commitments.length > 0) {
+              accountData.scannedCommitmentId = commitments[commitments.length - 1].id;
+            }
+            accountData.updatedAt = MystikoHandler.now();
+            return accountData;
+          })
+          .then((updatedAccount) => ({ updatedAccount, updatedCommitments, commitments })),
+      )
+      .then(({ updatedAccount, updatedCommitments, commitments }) => {
         const importedCommitment = updatedCommitments.filter(
           (c) => c.shieldedAddress === account.shieldedAddress,
         );
         if (commitments.length === 0 || commitments.length < scanSize) {
           return importedCommitment;
         }
-        const updatedLastId = commitments[commitments.length - 1].id;
-        return this.scanAccount({ ...scanContext, lastId: updatedLastId }).then((moreCommitments) => [
+        this.logger.info(
+          `scanned ${importedCommitment.length} commitments for account ${account.shieldedAddress} ` +
+            `from commitmentId ${scannedCommitmentId} to ${updatedAccount.scannedCommitmentId}`,
+        );
+        return this.scanAccount({ account: updatedAccount, options }).then((moreCommitments) => [
           ...importedCommitment,
           ...moreCommitments,
         ]);
       });
-    });
   }
 
   private static formatOptions(options: CommitmentImport): string {

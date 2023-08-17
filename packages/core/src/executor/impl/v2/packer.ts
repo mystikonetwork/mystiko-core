@@ -43,6 +43,9 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
 
   private importChain(context: ImportContext): Promise<PackerImportResult> {
     const { syncedBlock, targetBlock, options } = context;
+    if (targetBlock < syncedBlock) {
+      return Promise.resolve({ syncedBlock, commitments: [] });
+    }
     const startTime = Date.now();
     return this.packerClient
       .fetch({
@@ -221,36 +224,27 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
     importedContracts: string[],
     context: ImportContext,
   ): Promise<void> {
-    const { options, chainConfig } = context;
+    const { options } = context;
     const endBlock = Number(chainData.endBlock);
     return this.context.contracts
       .find({
         selector: {
           chainId: options.chainId,
+          contractAddress: { $in: importedContracts },
         },
       })
       .then((contracts) => {
         const updatedContracts: ContractType[] = [];
         contracts.forEach((contract) => {
-          let shouldUpdate;
-          const depositContractConfig = chainConfig.getDepositContractByAddress(contract.contractAddress);
-          shouldUpdate =
-            !!depositContractConfig && importedContracts.indexOf(depositContractConfig.poolAddress) >= 0;
-          if (!shouldUpdate) {
-            const poolContractConfig = chainConfig.getPoolContractByAddress(contract.contractAddress);
-            shouldUpdate = !!poolContractConfig && importedContracts.indexOf(poolContractConfig.address) >= 0;
-          }
-          if (shouldUpdate) {
-            if (contract.syncedBlockNumber < endBlock) {
-              this.logger.info(
-                `updating syncedBlockNumber to ${endBlock} ` +
-                  `for chain ${options.chainId} contract ${contract.contractAddress}`,
-              );
-              const updatedContract = contract.toMutableJSON();
-              updatedContract.syncedBlockNumber = endBlock;
-              updatedContract.updatedAt = MystikoHandler.now();
-              updatedContracts.push(updatedContract);
-            }
+          if (contract.syncedBlockNumber < endBlock) {
+            this.logger.info(
+              `updating syncedBlockNumber to ${endBlock} ` +
+                `for chain ${options.chainId} contract ${contract.contractAddress}`,
+            );
+            const updatedContract = contract.toMutableJSON();
+            updatedContract.syncedBlockNumber = endBlock;
+            updatedContract.updatedAt = MystikoHandler.now();
+            updatedContracts.push(updatedContract);
           }
         });
         return this.context.db.contracts.bulkUpsert(updatedContracts);

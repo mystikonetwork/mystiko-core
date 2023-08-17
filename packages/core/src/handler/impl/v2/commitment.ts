@@ -56,6 +56,10 @@ export class CommitmentHandlerV2 extends MystikoHandler implements CommitmentHan
     return this.context.executors.getCommitmentExecutor().import(options);
   }
 
+  public scanAll(options: CommitmentScan): Promise<Commitment[][]> {
+    return this.context.executors.getCommitmentExecutor().scanAll(options);
+  }
+
   public scan(options: CommitmentScan): Promise<Commitment[]> {
     return this.context.executors.getCommitmentExecutor().scan(options);
   }

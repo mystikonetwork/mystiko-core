@@ -6,7 +6,7 @@
   "collections": [
     {
       "name": "accounts",
-      "schemaHash": "f2bc712ae0007119df75bb388123ee6a",
+      "schemaHash": "d2c378ceb9b27cecde1225711e0a0a66",
       "encrypted": false,
       "passwordHash": null,
       "docs": [

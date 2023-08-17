@@ -2,7 +2,7 @@ import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSc
 import { HEX_REGEX, WALLET_COLLECTION_NAME } from '../constants';
 
 const accountSchemaLiteral = {
-  version: 1,
+  version: 2,
   title: 'account schema',
   description: 'a document contains account information',
   primaryKey: 'id',
@@ -51,6 +51,11 @@ const accountSchemaLiteral = {
     scanSize: {
       type: 'integer',
       minimum: 1,
+    },
+    scannedCommitmentId: {
+      type: 'string',
+      minimum: 1,
+      maxLength: 32,
     },
     wallet: {
       type: 'string',

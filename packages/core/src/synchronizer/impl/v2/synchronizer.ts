@@ -33,9 +33,9 @@ export class SynchronizerV2 implements Synchronizer {
 
   public static readonly DEFAULT_INTERVAL_MS = 300000;
 
-  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 400000;
+  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 800000;
 
-  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 300000;
+  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 600000;
 
   private readonly context: MystikoContextInterface;
 
@@ -127,7 +127,13 @@ export class SynchronizerV2 implements Synchronizer {
   public run(options: SyncOptions): Promise<void> {
     return this.checkClose()
       .then(() => this.context.wallets.checkPassword(options.walletPassword))
-      .then(() => this.executeSync(options));
+      .then(() => this.executeSync(options))
+      .finally(() => {
+        this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
+          this.logger.debug('scanned all commitments for all accounts');
+        });
+        return Promise.resolve();
+      });
   }
 
   public addListener(listener: SyncListener, event?: SyncEventType | SyncEventType[]) {
