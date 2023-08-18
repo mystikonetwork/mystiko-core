@@ -24,15 +24,21 @@ export type CommitmentScan = {
   shieldedAddress: string;
 };
 
+export type CommitmentScanAll = {
+  walletPassword: string;
+};
+
 export interface CommitmentHandler<
   C = CommitmentContractQuery,
   Q = CommitmentQuery,
   CI = CommitmentImport,
   CS = CommitmentScan,
+  CSA = CommitmentScanAll,
 > {
   find(query?: DatabaseQuery<Commitment>): Promise<Commitment[]>;
   findByContract(query: C): Promise<Commitment[]>;
   findOne(query: Q | string): Promise<Commitment | null>;
   import(options: CI): Promise<Commitment[]>;
   scan(options: CS): Promise<Commitment[]>;
+  scanAll(options: CSA): Promise<Commitment[][]>;
 }

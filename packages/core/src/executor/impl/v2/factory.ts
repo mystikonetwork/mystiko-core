@@ -5,6 +5,7 @@ import { CommitmentExecutorV2 } from './commitment';
 import { DepositExecutorV2 } from './deposit';
 import { EventExecutorV2 } from './event';
 import { IndexerExecutorV2 } from './indexer';
+import { PackerExecutorV2 } from './packer';
 import { TransactionExecutorV2 } from './transaction';
 
 type ExecutorFactoryV2Interface = ExecutorFactory<
@@ -13,6 +14,7 @@ type ExecutorFactoryV2Interface = ExecutorFactory<
   DepositExecutorV2,
   EventExecutorV2,
   IndexerExecutorV2,
+  PackerExecutorV2,
   TransactionExecutorV2
 >;
 
@@ -28,6 +30,8 @@ export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
   private eventExecutor?: EventExecutorV2;
 
   private indexerExecutor?: IndexerExecutorV2;
+
+  private packerExecutor?: PackerExecutorV2;
 
   private transactionExecutor?: TransactionExecutorV2;
 
@@ -72,6 +76,15 @@ export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
       }
     }
     return this.indexerExecutor;
+  }
+
+  public getPackerExecutor(): PackerExecutorV2 | undefined {
+    if (this.context.config.packer) {
+      if (!this.packerExecutor) {
+        this.packerExecutor = new PackerExecutorV2(this.context);
+      }
+    }
+    return this.packerExecutor;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

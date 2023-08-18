@@ -27,4 +27,6 @@ export const accountCollectionMethods: AccountCollectionMethods = {
 export const accountCollectionMigrations = {
   /* istanbul ignore next */
   1: defaultMigrationStrategy,
+  /* istanbul ignore next */
+  2: defaultMigrationStrategy,
 };

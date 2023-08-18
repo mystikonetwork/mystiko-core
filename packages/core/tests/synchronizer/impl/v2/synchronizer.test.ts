@@ -1,8 +1,13 @@
+// eslint-disable-next-line max-classes-per-file
 import { MystikoConfig } from '@mystikonetwork/config';
 import { Commitment, initDatabase } from '@mystikonetwork/database';
+import { ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { readJsonFile } from '@mystikonetwork/utils';
 import { enforceOptions } from 'broadcast-channel';
+import { ethers } from 'ethers';
+import nock from 'nock';
 import {
+  AccountHandlerV2,
   ChainHandlerV2,
   CommitmentHandlerV2,
   CommitmentImport,
@@ -10,6 +15,7 @@ import {
   createError,
   MystikoContextInterface,
   MystikoErrorCode,
+  NullifierHandlerV2,
   SyncEventType,
   SynchronizerV2,
   WalletHandlerV2,
@@ -57,16 +63,50 @@ class MockCommitmentHandler extends CommitmentHandlerV2 {
   }
 }
 
+const sepoliaCurrentBlock = 12240323;
+const bscCurrentBlock = 19019080;
+
+class TestProvider extends ethers.providers.JsonRpcProvider {
+  private readonly chainId: number;
+
+  constructor(url: string, chainId: number) {
+    super(url, { chainId, name: 'Test Chain' });
+    this.chainId = chainId;
+  }
+
+  public detectNetwork(): Promise<ethers.providers.Network> {
+    return Promise.resolve({ chainId: this.chainId, name: 'Test Chain' });
+  }
+
+  public getBlockNumber(): Promise<number> {
+    if (this.chainId === 11155111) {
+      return Promise.resolve(sepoliaCurrentBlock);
+    }
+    return Promise.resolve(bscCurrentBlock);
+  }
+}
+
+class TestProviderPool extends ProviderPoolImpl {
+  public getProvider(chainId: number): Promise<ethers.providers.Provider | undefined> {
+    return Promise.resolve(new TestProvider('http://localhost:8545', chainId));
+  }
+}
+
 beforeAll(async () => {
   enforceOptions({
     type: 'simulate',
   });
+  const config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
-    config: await MystikoConfig.createFromFile('tests/files/config.test.json'),
+    config,
+    providerPool: new TestProviderPool(config),
   });
   context.wallets = new WalletHandlerV2(context);
   context.chains = new ChainHandlerV2(context);
   context.contracts = new ContractHandlerV2(context);
+  context.accounts = new AccountHandlerV2(context);
+  context.nullifiers = new NullifierHandlerV2(context);
+  nock('https://example.com').get(/.*/).reply(404, 'Not Found');
 });
 
 beforeEach(async () => {
@@ -97,7 +137,9 @@ afterAll(async () => {
 });
 
 test('test schedule', async () => {
-  await expect(synchronizer.schedule({ walletPassword: 'wrong password' })).rejects.toThrow();
+  await expect(
+    synchronizer.schedule({ walletPassword: 'wrong password', noPacker: true, skipAccountScan: true }),
+  ).rejects.toThrow();
   let syncingCount = 0;
   let syncedCount = 0;
   let promise2: Promise<void> | undefined;
@@ -127,7 +169,7 @@ test('test schedule', async () => {
   if (!promise2) {
     throw new Error('promise2 should not undefined');
   }
-  await synchronizer.run({ walletPassword });
+  await synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   resolves.forEach((resolve) => resolve());
   await promise2;
   expect(synchronizer.scheduled).toBe(false);
@@ -140,6 +182,17 @@ test('test run', async () => {
   await expect(synchronizer.run({ walletPassword: 'wrong password' })).rejects.toThrow();
   let runPromise: Promise<void> | undefined;
   let chainSyncingCount = 0;
+  let accountScanning = false;
+  let accountScanned = false;
+  synchronizer.addListener(() => {
+    accountScanning = true;
+  }, SyncEventType.ACCOUNTS_SCANNING);
+  const accountScannedPromise = new Promise<void>((resolve) => {
+    synchronizer.addListener(() => {
+      accountScanned = true;
+      resolve();
+    }, SyncEventType.ACCOUNTS_SCANNED);
+  });
   const syncingPromise = new Promise<void>((resolve) => {
     runPromise = synchronizer.run({ walletPassword });
     synchronizer.addListener(() => {
@@ -161,9 +214,12 @@ test('test run', async () => {
     throw new Error('runPromise should not be undefined');
   }
   await runPromise;
+  await accountScannedPromise;
   status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe(undefined);
+  expect(accountScanning).toBe(true);
+  expect(accountScanned).toBe(true);
   status.chains.forEach((chainStatus) => {
     expect(chainStatus.isSyncing).toBe(false);
     expect(chainStatus.syncedBlock).toBe(50000000);
@@ -171,12 +227,12 @@ test('test run', async () => {
 });
 
 test('test run timeout', async () => {
-  await synchronizer.run({ walletPassword, chainTimeoutMs: 500 });
+  await synchronizer.run({ walletPassword, chainTimeoutMs: 500, noPacker: true, skipAccountScan: true });
   let status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('some chain(s) failed to sync');
   expect(status.chains[0].error).toBe('timeout after 500 ms');
-  await synchronizer.run({ walletPassword, timeoutMs: 500 });
+  await synchronizer.run({ walletPassword, timeoutMs: 500, noPacker: true, skipAccountScan: true });
   status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('timeout after 500 ms');
@@ -184,7 +240,7 @@ test('test run timeout', async () => {
 
 test('test run with chain error', async () => {
   context.commitments = new MockCommitmentHandler({ raiseError: true });
-  await synchronizer.run({ walletPassword });
+  await synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   const status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('some chain(s) failed to sync');
@@ -196,10 +252,12 @@ test('test run with chain error', async () => {
 
 test('test close', async () => {
   await synchronizer.close();
-  await expect(synchronizer.schedule({ walletPassword })).rejects.toThrow(
+  await expect(
+    synchronizer.schedule({ walletPassword, noPacker: true, skipAccountScan: true }),
+  ).rejects.toThrow(
     createError('synchronizer has already been closed', MystikoErrorCode.SYNCHRONIZER_CLOSED),
   );
-  await expect(synchronizer.run({ walletPassword })).rejects.toThrow(
+  await expect(synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true })).rejects.toThrow(
     createError('synchronizer has already been closed', MystikoErrorCode.SYNCHRONIZER_CLOSED),
   );
 });
@@ -210,7 +268,7 @@ test('test close during running', async () => {
     count += 1;
   };
   synchronizer.addListener(listener, SyncEventType.SYNCHRONIZED);
-  const runPromise = synchronizer.run({ walletPassword });
+  const runPromise = synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   await synchronizer.close();
   resolves.forEach((resolve) => resolve());
   await runPromise;
@@ -223,7 +281,7 @@ test('test removeListener', async () => {
     count += 1;
   };
   synchronizer.addListener(listener, SyncEventType.SYNCHRONIZED);
-  const runPromise = synchronizer.run({ walletPassword });
+  const runPromise = synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   synchronizer.removeListener(listener);
   resolves.forEach((resolve) => resolve());
   await runPromise;
@@ -235,7 +293,13 @@ test('test broadcast channel', async () => {
   const promise = new Promise<void>((resolve) => {
     anotherSynchronizer.addListener(() => resolve(), [SyncEventType.SYNCHRONIZED]);
   });
-  await synchronizer.schedule({ walletPassword, startDelayMs: 0, intervalMs: 500 });
+  await synchronizer.schedule({
+    walletPassword,
+    startDelayMs: 0,
+    intervalMs: 500,
+    noPacker: true,
+    skipAccountScan: true,
+  });
   resolves.forEach((resolve) => resolve());
   await promise;
   const status = await anotherSynchronizer.status;

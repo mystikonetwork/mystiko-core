@@ -56,7 +56,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public export(walletPassword: string, identifier: string): Promise<string> {
-    return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) =>
+    return this.checkIdentifierAndPassword(walletPassword, identifier).then(([account]) =>
       account.secretKey(this.protocol, walletPassword),
     );
   }
@@ -84,7 +84,7 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
   }
 
   public update(walletPassword: string, identifier: string, options: AccountUpdate): Promise<Account> {
-    return this.checkIdentifierAndPassword(identifier, walletPassword).then((account) =>
+    return this.checkIdentifierAndPassword(walletPassword, identifier).then(([account]) =>
       account.atomicUpdate((data) => {
         let hasUpdate = false;
         if (options.name && options.name.length > 0 && options.name !== data.name) {
@@ -105,6 +105,24 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
         return data;
       }),
     );
+  }
+
+  public scan(walletPassword: string, identifier?: string | DatabaseQuery<Account>): Promise<Account[]> {
+    return this.checkIdentifierAndPassword(walletPassword, identifier).then((accounts) =>
+      this.scanAccounts(walletPassword, accounts),
+    );
+  }
+
+  public resetScan(walletPassword: string, identifier?: string | DatabaseQuery<Account>): Promise<Account[]> {
+    return this.checkIdentifierAndPassword(walletPassword, identifier).then((accounts) => {
+      const accountsData: AccountType[] = accounts.map((a) => {
+        const accountData = a.toMutableJSON();
+        accountData.scannedCommitmentId = undefined;
+        accountData.updatedAt = MystikoHandler.now();
+        return accountData;
+      });
+      return this.context.db.accounts.bulkUpsert(accountsData);
+    });
   }
 
   private defaultAccountName(): Promise<string> {
@@ -196,17 +214,35 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     });
   }
 
-  private checkIdentifierAndPassword(identifier: string, walletPassword: string): Promise<Account> {
-    return this.context.wallets.checkPassword(walletPassword).then(() =>
-      this.findOne(identifier).then((account) => {
-        if (account === null) {
-          return createErrorPromise(
-            `non existing account ${identifier}`,
-            MystikoErrorCode.NON_EXISTING_ACCOUNT,
-          );
-        }
-        return account;
-      }),
-    );
+  private checkIdentifierAndPassword(
+    walletPassword: string,
+    identifier?: string | DatabaseQuery<Account>,
+  ): Promise<Account[]> {
+    return this.context.wallets.checkPassword(walletPassword).then(() => {
+      if (typeof identifier === 'string') {
+        return this.findOne(identifier).then((account) => {
+          if (account === null) {
+            return createErrorPromise(
+              `non existing account ${identifier}`,
+              MystikoErrorCode.NON_EXISTING_ACCOUNT,
+            );
+          }
+          return Promise.resolve([account]);
+        });
+      }
+      return this.find(identifier);
+    });
+  }
+
+  private scanAccounts(walletPassword: string, accounts: Account[]): Promise<Account[]> {
+    const accountPromises: Promise<Account>[] = [];
+    accounts.forEach((account) => {
+      accountPromises.push(
+        this.context.commitments
+          .scan({ walletPassword, shieldedAddress: account.shieldedAddress })
+          .then(() => account),
+      );
+    });
+    return Promise.all(accountPromises);
   }
 }

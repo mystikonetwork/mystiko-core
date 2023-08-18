@@ -11,6 +11,8 @@ export enum SyncEventType {
   CHAIN_SYNCHRONIZING = 'chain_synchronizing',
   CHAIN_SYNCHRONIZED = 'chain_synchronized',
   CHAIN_FAILED = 'chain_failed',
+  ACCOUNTS_SCANNING = 'accounts_scanning',
+  ACCOUNTS_SCANNED = 'accounts_scanned',
 }
 
 export type SyncChainStatus = {
@@ -33,6 +35,8 @@ export type SyncOptions = {
   timeoutMs?: number;
   chainTimeoutMs?: number;
   noIndexer?: boolean;
+  noPacker?: boolean;
+  skipAccountScan?: boolean;
   chainIds?: number[];
 };
 

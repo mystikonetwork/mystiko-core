@@ -186,6 +186,9 @@ export class IndexerExecutorV2 extends MystikoExecutor implements IndexerExecuto
         contractAddress: rawEvent.contractAddress,
         transactionHash: rawEvent.txHash,
         commitmentHash: rawEvent.commitHash,
+        leafIndex: undefined,
+        rollupFee: undefined,
+        encryptedNote: undefined,
       }));
     });
   }

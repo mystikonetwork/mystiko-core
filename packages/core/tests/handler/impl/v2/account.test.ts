@@ -1,11 +1,13 @@
-import { AccountStatus, Wallet } from '@mystikonetwork/database';
-import { toHexNoPrefix } from '@mystikonetwork/utils';
+import { AccountStatus, initDatabase, Wallet } from '@mystikonetwork/database';
+import { readJsonFile, toHexNoPrefix } from '@mystikonetwork/utils';
 import {
   AccountHandlerV2,
+  CommitmentHandlerV2,
   createError,
   DEFAULT_ACCOUNT_SCAN_SIZE,
   MystikoContext,
   MystikoErrorCode,
+  NullifierHandlerV2,
   WalletHandlerV2,
 } from '../../../../src';
 import { createTestContext } from '../../../common/context';
@@ -19,6 +21,8 @@ const walletPassword = 'P@ssw0rd';
 beforeAll(async () => {
   context = await createTestContext();
   context.wallets = new WalletHandlerV2(context);
+  context.commitments = new CommitmentHandlerV2(context);
+  context.nullifiers = new NullifierHandlerV2(context);
 });
 
 beforeEach(async () => {
@@ -237,4 +241,37 @@ test('test update', async () => {
   await expect(handler.update(walletPassword, 'wrong id', { name: 'new name' })).rejects.toThrow(
     createError('non existing account wrong id', MystikoErrorCode.NON_EXISTING_ACCOUNT),
   );
+});
+
+test('test resetScan', async () => {
+  let account1 = await handler.create(walletPassword);
+  let account2 = await handler.create(walletPassword);
+  expect(account1.scannedCommitmentId).toBe(undefined);
+  expect(account2.scannedCommitmentId).toBe(undefined);
+  account1 = await account1.atomicUpdate((accountData) => {
+    accountData.scannedCommitmentId = '1';
+    return accountData;
+  });
+  account2 = await account2.atomicUpdate((accountData) => {
+    accountData.scannedCommitmentId = '2';
+    return accountData;
+  });
+  expect(account1.scannedCommitmentId).toBe('1');
+  expect(account2.scannedCommitmentId).toBe('2');
+  await handler.resetScan(walletPassword, { selector: { id: account1.id } });
+  expect((await handler.findOne(account1.id))?.scannedCommitmentId).toBe(undefined);
+  await handler.resetScan(walletPassword, account2.shieldedAddress);
+  expect((await handler.findOne(account2.id))?.scannedCommitmentId).toBe(undefined);
+});
+
+test('test scan', async () => {
+  await context.db.remove();
+  context.db = await initDatabase();
+  const databaseData = await readJsonFile('tests/files/database.sync.test.json');
+  await context.db.importJSON(databaseData);
+  const accounts = await handler.scan(walletPassword);
+  expect(accounts.length).toBe(2);
+  accounts.forEach((account) => {
+    expect(account.status).toBe(AccountStatus.SCANNED);
+  });
 });

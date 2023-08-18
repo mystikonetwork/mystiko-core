@@ -33,9 +33,9 @@ export class SynchronizerV2 implements Synchronizer {
 
   public static readonly DEFAULT_INTERVAL_MS = 300000;
 
-  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 400000;
+  public static readonly DEFAULT_SYNC_TIMEOUT_MS = 800000;
 
-  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 300000;
+  public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 600000;
 
   private readonly context: MystikoContextInterface;
 
@@ -254,12 +254,48 @@ export class SynchronizerV2 implements Synchronizer {
           const syncError = errorMessage(error);
           this.logger.warn(`synchronization failed: ${syncError}`);
           return this.updateStatus(options, false, syncError);
+        })
+        .finally(() => {
+          if (!options.skipAccountScan) {
+            this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNING).then(() => {
+              this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
+                this.logger.debug('scanned all commitments for all accounts');
+                return this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNED);
+              });
+              return Promise.resolve();
+            });
+          }
         });
     }
     return Promise.resolve();
   }
 
   private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+    const packerExecutor = this.context.executors.getPackerExecutor();
+    if (packerExecutor && !options.noPacker) {
+      return packerExecutor
+        .import({ walletPassword: options.walletPassword, chainId })
+        .then(({ commitments, syncedBlock }) => {
+          this.logger.info(
+            `synced events for chainId=${chainId} to blockNumber=${syncedBlock}` +
+              ` with ${commitments.length} commitments from packer`,
+          );
+          return this.executeIndexerSyncImport(options, chainId).then((moreCommitments) => [
+            ...commitments,
+            ...moreCommitments,
+          ]);
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `failed to import events for chainId=${chainId} from packer: ${errorMessage(error)}`,
+          );
+          return this.executeIndexerSyncImport(options, chainId);
+        });
+    }
+    return this.executeIndexerSyncImport(options, chainId);
+  }
+
+  private executeIndexerSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
     const indexerExecutor = this.context.executors.getIndexerExecutor();
     let promise: Promise<{
       fallback: boolean;

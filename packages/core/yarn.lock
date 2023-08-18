@@ -298,6 +298,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@bufbuild/protobuf@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-1.3.0.tgz#69f675c76e6c1ab0b5bde141fa2df8b00927216a"
+  integrity sha512-G372ods0pLt46yxVRsnP/e2btVPuuzArcMPFpIDeIwiGPuuglEs9y75iG0HMvZgncsj5TvbYRWqbVyOe3PLCWQ==
+
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz#00629c35a688e05a88b1cda684fb9d5e73f000a1"
@@ -1380,6 +1385,19 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
+"@mystikonetwork/datapacker-client@^0.1.0":
+  version "0.1.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.0/375221551c7c7f6ebdfb46d3d435b15055794deb#375221551c7c7f6ebdfb46d3d435b15055794deb"
+  integrity sha512-n4gGAqTc1fEmh21/Sdw0PqTVk6+dTgk/mVJNXGt0JAM4Amt2L0X1D4Sl1cKDC9HvGnD9eTEx04wnkOtwqCk7uQ==
+  dependencies:
+    "@mystikonetwork/config" "^0.9.0"
+    "@mystikonetwork/protos" "^0.1.0"
+    "@mystikonetwork/utils" "^0.2.9"
+    axios "^0.27.2"
+    crypto-js "^4.1.1"
+    fzstd "^0.1.0"
+    loglevel "^1.8.1"
+
 "@mystikonetwork/ecies@^0.3.0":
   version "0.3.0"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/ecies/0.3.0/6f3185a11ac0d520fbd91bfa06c292ea0badd630#6f3185a11ac0d520fbd91bfa06c292ea0badd630"
@@ -1491,6 +1509,13 @@
     loglevel "^1.8.0"
     randombytes "^2.1.0"
 
+"@mystikonetwork/protos@^0.1.0":
+  version "0.1.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.1.0/8b7277e659fc9a73301a7910782e2c2ccda76065#8b7277e659fc9a73301a7910782e2c2ccda76065"
+  integrity sha512-n/s57IL8jcQ1LAKxOSIOmZX1/jEDEy1ICwW5pTmUuDNMA1lMMy1cotlceoCV7ddRCRKmiP4bMfSyuaTOTdbdww==
+  dependencies:
+    "@bufbuild/protobuf" "^1.3.0"
+
 "@mystikonetwork/secret-share@^0.2.4":
   version "0.2.4"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/secret-share/0.2.4/743b30e22b2b49e2b8408b333527f6bc544a1072#743b30e22b2b49e2b8408b333527f6bc544a1072"
@@ -1509,7 +1534,7 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/utils@0.2.8", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3", "@mystikonetwork/utils@^0.1.4", "@mystikonetwork/utils@^0.1.5", "@mystikonetwork/utils@^0.2.8":
+"@mystikonetwork/utils@0.2.8", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3", "@mystikonetwork/utils@^0.1.4", "@mystikonetwork/utils@^0.1.5", "@mystikonetwork/utils@^0.2.8", "@mystikonetwork/utils@^0.2.9":
   version "0.2.8"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.2.8/0b168cf9cf19c97a9e8641141a9b6a2f1e49cc0e#0b168cf9cf19c97a9e8641141a9b6a2f1e49cc0e"
   integrity sha512-gD7vMYKltmsIBHOd/k47WWl+uFP+NTBItML7NzJeDCbRfL3xJVsKcus3Vbh3M1+4Y1YxcLHh8Zi09zcrESr3jw==
@@ -5759,6 +5784,11 @@ functions-have-names@^1.2.2:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
+fzstd@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/fzstd/-/fzstd-0.1.0.tgz#1d7bccb5f819e2d073a15fccea1adb7fdc7a46a9"
+  integrity sha512-TTvznnpde1rTv/3FOmZMbPCh75gqkJ9dKJdsKmcNiXh4olLJl3eRahHJcGzyPZjuVaytffP02Or4z5avDvqKQA==
+
 ganache-core@^2.13.2:
   version "2.13.2"
   resolved "https://registry.yarnpkg.com/ganache-core/-/ganache-core-2.13.2.tgz#27e6fc5417c10e6e76e2e646671869d7665814a3"
@@ -7754,6 +7784,11 @@ loglevel@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.8.0.tgz#e7ec73a57e1e7b419cb6c6ac06bf050b67356114"
   integrity sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==
+
+loglevel@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.8.1.tgz#5c621f83d5b48c54ae93b6156353f555963377b4"
+  integrity sha512-tCRIJM51SHjAayKwC+QAg8hT8vg6z7GSgLJKGvzuPb1Wc+hLzqtuVLxp6/HzSPOozuK+8ErAhy7U/sVzw8Dgfg==
 
 lokijs@1.5.12:
   version "1.5.12"

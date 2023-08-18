@@ -11,6 +11,7 @@ import {
   Chain,
   Commitment,
   CommitmentStatus,
+  CommitmentType,
   Contract,
   DatabaseQuery,
 } from '@mystikonetwork/database';
@@ -26,6 +27,7 @@ import {
   CommitmentIncludedEvent,
   CommitmentQueuedEvent,
   CommitmentScan,
+  CommitmentScanAll,
   CommitmentSpentEvent,
   ContractEvent,
   EventType,
@@ -70,7 +72,6 @@ type ImportEventsContext = ImportContractContext & {
 type ScanContext = {
   options: CommitmentScan;
   account: Account;
-  lastId?: string;
 };
 
 export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentExecutor {
@@ -82,79 +83,82 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     return this.context.wallets.checkPassword(options.walletPassword).then(() => this.importAll({ options }));
   }
 
+  public scanAll(options: CommitmentScanAll): Promise<Commitment[][]> {
+    return this.context.wallets
+      .checkPassword(options.walletPassword)
+      .then(() => this.context.accounts.find())
+      .then((accounts) => {
+        const promises: Promise<Commitment[]>[] = [];
+        accounts.forEach((account) => {
+          promises.push(
+            this.scanAccountWrapper(account, {
+              shieldedAddress: account.shieldedAddress,
+              walletPassword: options.walletPassword,
+            }),
+          );
+        });
+        return Promise.all(promises);
+      });
+  }
+
   public scan(options: CommitmentScan): Promise<Commitment[]> {
     const { shieldedAddress, walletPassword } = options;
     return this.context.wallets.checkPassword(walletPassword).then(() =>
       this.context.accounts.findOne(shieldedAddress).then((account) => {
         if (account) {
-          this.logger.info(`start scanning commitments belong to account=${account.shieldedAddress}`);
-          return this.context.accounts
-            .update(walletPassword, account.id, { status: AccountStatus.SCANNING })
-            .then(() => this.scanAccount({ options, account }))
-            .then((commitments) => {
-              this.logger.info(
-                `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
-              );
-              return this.context.accounts
-                .update(walletPassword, account.id, { status: AccountStatus.SCANNED })
-                .then(() => commitments);
-            });
+          return this.scanAccountWrapper(account, options);
         }
         return Promise.resolve([]);
       }),
     );
   }
 
-  public decrypt(options: CommitmentDecrypt): Promise<Commitment> {
-    const { commitment, accounts, walletPassword } = options;
-    const { encryptedNote } = commitment;
+  public decrypt(options: CommitmentDecrypt): Promise<Commitment[]> {
+    return this.decryptCommitments(options).then(({ decryptedCommitments, encryptedCommitments }) => [
+      ...decryptedCommitments,
+      ...encryptedCommitments,
+    ]);
+  }
+
+  private decryptCommitments(
+    options: CommitmentDecrypt,
+  ): Promise<{ decryptedCommitments: Commitment[]; encryptedCommitments: Commitment[] }> {
+    const { commitments, accounts, walletPassword } = options;
     const accountsPromise: Promise<Account[]> = accounts
       ? Promise.resolve(accounts)
       : this.context.accounts.find();
-    if (encryptedNote) {
-      return accountsPromise.then((myAccounts) => {
-        const commitmentPromises: Promise<Commitment | undefined>[] = myAccounts.map((account) =>
-          (this.protocol as MystikoProtocolV2)
-            .commitment({
-              publicKeys: account.shieldedAddress,
-              encryptedNote: {
-                encryptedNote: toBuff(encryptedNote),
-                skEnc: account.secretKeyForEncryption(this.protocol, walletPassword),
-              },
-            })
-            .then((decryptedCommitment) => {
-              const { amount, randomP, commitmentHash } = decryptedCommitment;
-              if (commitmentHash.toString() === commitment.commitmentHash) {
-                return commitment.atomicUpdate((data) => {
-                  const rawSk = account.secretKeyForVerification(this.protocol, walletPassword);
-                  const sk = this.protocol.secretKeyForVerification(rawSk);
-                  data.serialNumber = (this.protocol as MystikoProtocolV2)
-                    .serialNumber(sk, randomP)
-                    .toString();
-                  data.amount = amount.toString();
-                  data.shieldedAddress = account.shieldedAddress;
-                  data.updatedAt = MystikoHandler.now();
-                  return data;
-                });
-              }
-              /* istanbul ignore next */
-              return undefined;
-            })
-            .catch(() => undefined),
-        );
-        return Promise.all(commitmentPromises).then((commitments) => {
-          for (let i = 0; i < commitments.length; i += 1) {
-            const updatedCommitment = commitments[i];
-            if (updatedCommitment) {
-              return updatedCommitment;
+    const commitmentPromises: Promise<{
+      decryptedCommitment: CommitmentType | undefined;
+      commitment: Commitment;
+    }>[] = [];
+    return accountsPromise
+      .then((myAccounts) => {
+        for (let i = 0; i < commitments.length; i += 1) {
+          const commitment = commitments[i];
+          commitmentPromises.push(
+            this.decryptCommitmentWithAccounts(commitment, myAccounts, 0, walletPassword).then(
+              (decryptedCommitment) => ({ decryptedCommitment, commitment }),
+            ),
+          );
+        }
+        return Promise.all(commitmentPromises).then((results) => {
+          const decryptedCommitments: CommitmentType[] = [];
+          const encryptedCommitments: Commitment[] = [];
+          results.forEach(({ decryptedCommitment, commitment }) => {
+            if (decryptedCommitment !== undefined) {
+              decryptedCommitments.push(decryptedCommitment);
+            } else {
+              encryptedCommitments.push(commitment);
             }
-          }
-          return commitment;
+          });
+          return Promise.resolve({ decryptedCommitments, encryptedCommitments });
         });
-      });
-    }
-    /* istanbul ignore next */
-    return Promise.resolve(commitment);
+      })
+      .then(({ decryptedCommitments, encryptedCommitments }) =>
+        this.context.db.commitments
+          .bulkUpsert(decryptedCommitments)
+          .then((updatedCommitments) => ({ decryptedCommitments: updatedCommitments, encryptedCommitments })),
+      );
   }
 
   private checkAll(checkContext: CheckContext): Promise<void> {
@@ -452,6 +456,9 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         contractAddress: contractConfig.address,
         commitmentHash: rawEvent.args.commitment,
         transactionHash: rawEvent.transactionHash,
+        leafIndex: undefined,
+        rollupFee: undefined,
+        encryptedNote: undefined,
       })),
     );
   }
@@ -510,66 +517,103 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     );
   }
 
+  private scanAccountWrapper(account: Account, options: CommitmentScan): Promise<Commitment[]> {
+    this.logger.info(
+      `start scanning commitments belong to account=${account.shieldedAddress}` +
+        ` from commitmentId=${account.scannedCommitmentId}`,
+    );
+    return this.context.accounts
+      .update(options.walletPassword, account.id, { status: AccountStatus.SCANNING })
+      .then(() => this.scanAccount({ options, account }))
+      .then((commitments) => {
+        this.logger.info(
+          `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
+        );
+        return this.context.accounts
+          .update(options.walletPassword, account.id, { status: AccountStatus.SCANNED })
+          .then(() => commitments);
+      });
+  }
+
   private scanAccount(scanContext: ScanContext): Promise<Commitment[]> {
-    const { options, account, lastId } = scanContext;
+    const { options, account } = scanContext;
+    const { scannedCommitmentId } = account;
     const { scanSize } = account;
     const query: DatabaseQuery<Commitment> = {
       selector: {
         status: { $in: [CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] },
-        shieldedAddress: { $exists: false },
       },
       sort: [{ id: 'asc' }],
       limit: scanSize,
     };
-    if (lastId && query.selector) {
-      query.selector.id = { $gt: lastId };
+    if (scannedCommitmentId && query.selector) {
+      query.selector.id = { $gt: scannedCommitmentId };
     }
-    return this.context.commitments.find(query).then((commitments) => {
-      const promises: Promise<Commitment>[] = [];
-      commitments.forEach((commitment) => {
-        promises.push(
-          this.decrypt({ commitment, walletPassword: options.walletPassword, accounts: [account] }).then(
-            (decryptedCommitment) => {
-              if (
-                decryptedCommitment.shieldedAddress === account.shieldedAddress &&
-                decryptedCommitment.serialNumber
-              ) {
-                return this.context.nullifiers
-                  .findOne({
-                    chainId: decryptedCommitment.chainId,
-                    contractAddress: decryptedCommitment.contractAddress,
-                    serialNumber: decryptedCommitment.serialNumber,
-                  })
-                  .then((nullifier) => {
-                    if (nullifier) {
-                      return decryptedCommitment.atomicUpdate((data) => {
-                        data.status = CommitmentStatus.SPENT;
-                        data.spendingTransactionHash = nullifier.transactionHash;
-                        return data;
-                      });
-                    }
-                    return decryptedCommitment;
-                  });
-              }
-              return decryptedCommitment;
-            },
-          ),
-        );
-      });
-      return Promise.all(promises).then((updatedCommitments) => {
+    return this.context.commitments
+      .find(query)
+      .then((commitments) =>
+        this.decryptCommitments({
+          commitments,
+          walletPassword: options.walletPassword,
+          accounts: [account],
+        }).then(({ decryptedCommitments }) => ({ commitments, decryptedCommitments })),
+      )
+      .then(({ decryptedCommitments, commitments }) => {
+        const promises: Promise<Commitment>[] = [];
+        decryptedCommitments.forEach((decryptedCommitment) => {
+          if (
+            decryptedCommitment.shieldedAddress === account.shieldedAddress &&
+            decryptedCommitment.serialNumber
+          ) {
+            promises.push(
+              this.context.nullifiers
+                .findOne({
+                  chainId: decryptedCommitment.chainId,
+                  contractAddress: decryptedCommitment.contractAddress,
+                  serialNumber: decryptedCommitment.serialNumber,
+                })
+                .then((nullifier) => {
+                  if (nullifier) {
+                    return decryptedCommitment.atomicUpdate((data) => {
+                      data.status = CommitmentStatus.SPENT;
+                      data.spendingTransactionHash = nullifier.transactionHash;
+                      return data;
+                    });
+                  }
+                  return decryptedCommitment;
+                }),
+            );
+          }
+        });
+        return Promise.all(promises).then((updatedCommitments) => ({ updatedCommitments, commitments }));
+      })
+      .then(({ updatedCommitments, commitments }) =>
+        account
+          .atomicUpdate((accountData) => {
+            if (commitments.length > 0) {
+              accountData.scannedCommitmentId = commitments[commitments.length - 1].id;
+            }
+            accountData.updatedAt = MystikoHandler.now();
+            return accountData;
+          })
+          .then((updatedAccount) => ({ updatedAccount, updatedCommitments, commitments })),
+      )
+      .then(({ updatedAccount, updatedCommitments, commitments }) => {
         const importedCommitment = updatedCommitments.filter(
           (c) => c.shieldedAddress === account.shieldedAddress,
         );
         if (commitments.length === 0 || commitments.length < scanSize) {
           return importedCommitment;
         }
-        const updatedLastId = commitments[commitments.length - 1].id;
-        return this.scanAccount({ ...scanContext, lastId: updatedLastId }).then((moreCommitments) => [
+        this.logger.info(
+          `scanned ${importedCommitment.length} commitments for account ${account.shieldedAddress} ` +
+            `from commitmentId ${scannedCommitmentId} to ${updatedAccount.scannedCommitmentId}`,
+        );
+        return this.scanAccount({ account: updatedAccount, options }).then((moreCommitments) => [
           ...importedCommitment,
           ...moreCommitments,
         ]);
       });
-    });
   }
 
   private static formatOptions(options: CommitmentImport): string {
@@ -577,5 +621,46 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       chainId: options.chainId,
       contractAddress: options.contractAddress,
     });
+  }
+
+  private decryptCommitmentWithAccounts(
+    commitment: Commitment,
+    accounts: Account[],
+    accountIndex: number,
+    walletPassword: string,
+  ): Promise<CommitmentType | undefined> {
+    if (accountIndex < accounts.length) {
+      const account = accounts[accountIndex];
+      if (commitment.encryptedNote) {
+        return (this.protocol as MystikoProtocolV2)
+          .commitment({
+            publicKeys: account.shieldedAddress,
+            encryptedNote: {
+              encryptedNote: toBuff(commitment.encryptedNote),
+              skEnc: account.secretKeyForEncryption(this.protocol, walletPassword),
+            },
+          })
+          .catch(() => undefined)
+          .then((decryptedCommitment) => {
+            if (decryptedCommitment) {
+              const { amount, randomP, commitmentHash } = decryptedCommitment;
+              if (commitmentHash.toString() === commitment.commitmentHash) {
+                const updatedCommitment = commitment.toMutableJSON();
+                const rawSk = account.secretKeyForVerification(this.protocol, walletPassword);
+                const sk = this.protocol.secretKeyForVerification(rawSk);
+                updatedCommitment.serialNumber = (this.protocol as MystikoProtocolV2)
+                  .serialNumber(sk, randomP)
+                  .toString();
+                updatedCommitment.amount = amount.toString();
+                updatedCommitment.shieldedAddress = account.shieldedAddress;
+                updatedCommitment.updatedAt = MystikoHandler.now();
+                return Promise.resolve(updatedCommitment);
+              }
+            }
+            return this.decryptCommitmentWithAccounts(commitment, accounts, accountIndex + 1, walletPassword);
+          });
+      }
+    }
+    return Promise.resolve(undefined);
   }
 }

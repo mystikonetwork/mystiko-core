@@ -58,6 +58,7 @@ test('test insert', async () => {
     encryptedSecretKey: keys.encryptedSecretKey,
     status: AccountStatus.SCANNED,
     scanSize: 10000,
+    scannedCommitmentId: '1234',
     wallet: '1',
   });
   const account = await db.accounts.findOne('1').exec();
@@ -69,6 +70,8 @@ test('test insert', async () => {
     expect(account.shieldedAddress).toBe(protocol.shieldedAddress(keys.pkVerify, keys.pkEnc));
     expect(account.publicKey).toBe(keys.publicKey);
     expect(account.encryptedSecretKey).toBe(keys.encryptedSecretKey);
+    expect(account.scanSize).toBe(10000);
+    expect(account.scannedCommitmentId).toBe('1234');
     expect(account.wallet).toBe('1');
     expect(toHexNoPrefix(account.publicKeyForVerification(protocol))).toBe(toHexNoPrefix(keys.pkVerify));
     expect(toHexNoPrefix(account.publicKeyForEncryption(protocol))).toBe(toHexNoPrefix(keys.pkEnc));
@@ -101,6 +104,7 @@ test('test collection clear', async () => {
     encryptedSecretKey: keys.encryptedSecretKey,
     status: AccountStatus.CREATED,
     scanSize: 20000,
+    scannedCommitmentId: '1234',
     wallet: '1',
   });
   expect(await db.accounts.findOne().exec()).not.toBe(null);
