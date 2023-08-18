@@ -127,13 +127,7 @@ export class SynchronizerV2 implements Synchronizer {
   public run(options: SyncOptions): Promise<void> {
     return this.checkClose()
       .then(() => this.context.wallets.checkPassword(options.walletPassword))
-      .then(() => this.executeSync(options))
-      .finally(() => {
-        this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
-          this.logger.debug('scanned all commitments for all accounts');
-        });
-        return Promise.resolve();
-      });
+      .then(() => this.executeSync(options));
   }
 
   public addListener(listener: SyncListener, event?: SyncEventType | SyncEventType[]) {
@@ -260,6 +254,12 @@ export class SynchronizerV2 implements Synchronizer {
           const syncError = errorMessage(error);
           this.logger.warn(`synchronization failed: ${syncError}`);
           return this.updateStatus(options, false, syncError);
+        })
+        .finally(() => {
+          this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
+            this.logger.debug('scanned all commitments for all accounts');
+          });
+          return Promise.resolve();
         });
     }
     return Promise.resolve();

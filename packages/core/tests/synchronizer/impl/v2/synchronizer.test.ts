@@ -11,6 +11,7 @@ import {
   createError,
   MystikoContextInterface,
   MystikoErrorCode,
+  NullifierHandlerV2,
   SyncEventType,
   SynchronizerV2,
   WalletHandlerV2,
@@ -69,6 +70,7 @@ beforeAll(async () => {
   context.chains = new ChainHandlerV2(context);
   context.contracts = new ContractHandlerV2(context);
   context.accounts = new AccountHandlerV2(context);
+  context.nullifiers = new NullifierHandlerV2(context);
 });
 
 beforeEach(async () => {

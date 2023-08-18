@@ -5,5 +5,6 @@ export * from './commitment';
 export * from './contract';
 export * from './deposit';
 export * from './factory';
+export * from './nullifier';
 export * from './transaction';
 export * from './wallet';
