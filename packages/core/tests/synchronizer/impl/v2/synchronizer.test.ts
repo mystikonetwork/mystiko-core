@@ -3,6 +3,7 @@ import { Commitment, initDatabase } from '@mystikonetwork/database';
 import { readJsonFile } from '@mystikonetwork/utils';
 import { enforceOptions } from 'broadcast-channel';
 import {
+  AccountHandlerV2,
   ChainHandlerV2,
   CommitmentHandlerV2,
   CommitmentImport,
@@ -67,6 +68,7 @@ beforeAll(async () => {
   context.wallets = new WalletHandlerV2(context);
   context.chains = new ChainHandlerV2(context);
   context.contracts = new ContractHandlerV2(context);
+  context.accounts = new AccountHandlerV2(context);
 });
 
 beforeEach(async () => {
