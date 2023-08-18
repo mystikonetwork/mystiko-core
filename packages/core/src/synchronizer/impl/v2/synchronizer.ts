@@ -255,15 +255,17 @@ export class SynchronizerV2 implements Synchronizer {
           this.logger.warn(`synchronization failed: ${syncError}`);
           return this.updateStatus(options, false, syncError);
         })
-        .finally(() =>
-          this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNING).then(() => {
-            this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
-              this.logger.debug('scanned all commitments for all accounts');
-              return this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNED);
+        .finally(() => {
+          if (!options.skipAccountScan) {
+            this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNING).then(() => {
+              this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
+                this.logger.debug('scanned all commitments for all accounts');
+                return this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNED);
+              });
+              return Promise.resolve();
             });
-            return Promise.resolve();
-          }),
-        );
+          }
+        });
     }
     return Promise.resolve();
   }

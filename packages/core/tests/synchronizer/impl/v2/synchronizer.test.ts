@@ -137,7 +137,9 @@ afterAll(async () => {
 });
 
 test('test schedule', async () => {
-  await expect(synchronizer.schedule({ walletPassword: 'wrong password' })).rejects.toThrow();
+  await expect(
+    synchronizer.schedule({ walletPassword: 'wrong password', noPacker: true, skipAccountScan: true }),
+  ).rejects.toThrow();
   let syncingCount = 0;
   let syncedCount = 0;
   let promise2: Promise<void> | undefined;
@@ -167,7 +169,7 @@ test('test schedule', async () => {
   if (!promise2) {
     throw new Error('promise2 should not undefined');
   }
-  await synchronizer.run({ walletPassword });
+  await synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   resolves.forEach((resolve) => resolve());
   await promise2;
   expect(synchronizer.scheduled).toBe(false);
@@ -225,12 +227,12 @@ test('test run', async () => {
 });
 
 test('test run timeout', async () => {
-  await synchronizer.run({ walletPassword, chainTimeoutMs: 500 });
+  await synchronizer.run({ walletPassword, chainTimeoutMs: 500, noPacker: true, skipAccountScan: true });
   let status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('some chain(s) failed to sync');
   expect(status.chains[0].error).toBe('timeout after 500 ms');
-  await synchronizer.run({ walletPassword, timeoutMs: 500 });
+  await synchronizer.run({ walletPassword, timeoutMs: 500, noPacker: true, skipAccountScan: true });
   status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('timeout after 500 ms');
@@ -238,7 +240,7 @@ test('test run timeout', async () => {
 
 test('test run with chain error', async () => {
   context.commitments = new MockCommitmentHandler({ raiseError: true });
-  await synchronizer.run({ walletPassword });
+  await synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   const status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('some chain(s) failed to sync');
@@ -250,10 +252,12 @@ test('test run with chain error', async () => {
 
 test('test close', async () => {
   await synchronizer.close();
-  await expect(synchronizer.schedule({ walletPassword })).rejects.toThrow(
+  await expect(
+    synchronizer.schedule({ walletPassword, noPacker: true, skipAccountScan: true }),
+  ).rejects.toThrow(
     createError('synchronizer has already been closed', MystikoErrorCode.SYNCHRONIZER_CLOSED),
   );
-  await expect(synchronizer.run({ walletPassword })).rejects.toThrow(
+  await expect(synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true })).rejects.toThrow(
     createError('synchronizer has already been closed', MystikoErrorCode.SYNCHRONIZER_CLOSED),
   );
 });
@@ -264,7 +268,7 @@ test('test close during running', async () => {
     count += 1;
   };
   synchronizer.addListener(listener, SyncEventType.SYNCHRONIZED);
-  const runPromise = synchronizer.run({ walletPassword });
+  const runPromise = synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   await synchronizer.close();
   resolves.forEach((resolve) => resolve());
   await runPromise;
@@ -277,7 +281,7 @@ test('test removeListener', async () => {
     count += 1;
   };
   synchronizer.addListener(listener, SyncEventType.SYNCHRONIZED);
-  const runPromise = synchronizer.run({ walletPassword });
+  const runPromise = synchronizer.run({ walletPassword, noPacker: true, skipAccountScan: true });
   synchronizer.removeListener(listener);
   resolves.forEach((resolve) => resolve());
   await runPromise;
@@ -289,7 +293,13 @@ test('test broadcast channel', async () => {
   const promise = new Promise<void>((resolve) => {
     anotherSynchronizer.addListener(() => resolve(), [SyncEventType.SYNCHRONIZED]);
   });
-  await synchronizer.schedule({ walletPassword, startDelayMs: 0, intervalMs: 500 });
+  await synchronizer.schedule({
+    walletPassword,
+    startDelayMs: 0,
+    intervalMs: 500,
+    noPacker: true,
+    skipAccountScan: true,
+  });
   resolves.forEach((resolve) => resolve());
   await promise;
   const status = await anotherSynchronizer.status;

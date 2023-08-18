@@ -36,6 +36,7 @@ export type SyncOptions = {
   chainTimeoutMs?: number;
   noIndexer?: boolean;
   noPacker?: boolean;
+  skipAccountScan?: boolean;
   chainIds?: number[];
 };
 
