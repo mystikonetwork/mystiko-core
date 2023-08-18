@@ -1387,8 +1387,8 @@
 
 "@mystikonetwork/datapacker-client@^0.1.0":
   version "0.1.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.0/375221551c7c7f6ebdfb46d3d435b15055794deb#375221551c7c7f6ebdfb46d3d435b15055794deb"
-  integrity sha512-n4gGAqTc1fEmh21/Sdw0PqTVk6+dTgk/mVJNXGt0JAM4Amt2L0X1D4Sl1cKDC9HvGnD9eTEx04wnkOtwqCk7uQ==
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.0/f722d67a1e78d0a564a8da85bbb23f5715d82b5e#f722d67a1e78d0a564a8da85bbb23f5715d82b5e"
+  integrity sha512-vyzYhyJVNNW0TPZdjclLzKOHIebOSPkWJEelfEI6448Fnsbj21ccVMHklvJma35MVCXBayD0yafp2VMIYU3zlQ==
   dependencies:
     "@mystikonetwork/config" "^0.9.0"
     "@mystikonetwork/protos" "^0.1.0"
