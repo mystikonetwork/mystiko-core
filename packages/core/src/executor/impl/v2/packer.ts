@@ -1,6 +1,7 @@
 import { ChainConfig } from '@mystikonetwork/config';
 import { Chain, ContractType } from '@mystikonetwork/database';
 import { v1 as Packer } from '@mystikonetwork/datapacker-client';
+import { FetchOptions } from '@mystikonetwork/datapacker-client/build/cjs/v1/client';
 import { data } from '@mystikonetwork/protos';
 import { toBN, toHex } from '@mystikonetwork/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -26,12 +27,16 @@ type ImportContext = {
   options: PackerImportOptions;
 };
 
-export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor {
-  private readonly packerClient: Packer.PackerClient;
+type PackerClient = {
+  fetch(options: FetchOptions): Promise<data.v1.ChainData | undefined>;
+};
 
-  constructor(context: MystikoContextInterface) {
+export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor {
+  private readonly packerClient: PackerClient;
+
+  constructor(context: MystikoContextInterface, client?: PackerClient) {
     super(context);
-    this.packerClient = new Packer.PackerClient(this.config);
+    this.packerClient = client || new Packer.PackerClient(this.config);
   }
 
   public import(options: PackerImportOptions): Promise<PackerImportResult> {
@@ -58,13 +63,18 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
         if (chainData) {
           return this.importChainData(chainData, context);
         }
-        return Promise.reject(new Error('No chain data found in packer'));
+        return Promise.resolve({ syncedBlock, commitments: [] });
       });
   }
 
   private importChainData(chainData: data.v1.ChainData, context: ImportContext): Promise<PackerImportResult> {
     const startTime = Date.now();
-    const { options } = context;
+    const { options, syncedBlock } = context;
+    if (Number(chainData.startBlock) !== syncedBlock + 1) {
+      return Promise.reject(
+        new Error(`invalid startBlock expected ${syncedBlock + 1} vs actual ${chainData.startBlock}`),
+      );
+    }
     const queuedEvents: CommitmentQueuedEvent[] = [];
     const includedEvents: CommitmentIncludedEvent[] = [];
     const spentEvents: CommitmentSpentEvent[] = [];
@@ -91,7 +101,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
             : undefined;
         if (commitment.status === data.v1.CommitmentStatus.QUEUED) {
           if (!leafIndex || !encryptedNote || !rollupFee || !queuedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment data'));
+            return Promise.reject(new Error('Invalid commitment queued data'));
           }
           queuedEvents.push({
             eventType: EventType.COMMITMENT_QUEUED,
@@ -104,7 +114,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
           });
         } else if (commitment.status === data.v1.CommitmentStatus.INCLUDED) {
           if (!includedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment data'));
+            return Promise.reject(new Error('Invalid commitment included data'));
           }
           includedEvents.push({
             eventType: EventType.COMMITMENT_INCLUDED,
@@ -127,11 +137,11 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
       });
     }
     const sortedQueuedEvents = queuedEvents.sort((a, b) => {
-      const order = a.contractAddress.localeCompare(b.contractAddress);
-      if (order === 0) {
+      if (a.contractAddress === b.contractAddress) {
         return BigNumber.from(a.leafIndex).sub(BigNumber.from(b.leafIndex)).toNumber();
       }
-      return order;
+      // istanbul ignore next
+      return a.contractAddress.localeCompare(b.contractAddress);
     });
     const events: ContractEvent[] = [...sortedQueuedEvents, ...includedEvents, ...spentEvents];
     this.logger.debug(`processed chain data in ${Date.now() - startTime}ms`);
@@ -169,13 +179,14 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
           .then((contracts) => ({ chain, contracts })),
       )
       .then(({ chain, contracts }) => {
-        let syncedBlock = Math.max(chain.syncedBlockNumber, chainConfig.startBlock);
+        let syncedBlock = chain.syncedBlockNumber;
         contracts.forEach((contract) => {
           const contractSyncedBlock = Math.max(contract.syncedBlockNumber, contract.syncStart);
-          if (contractSyncedBlock < syncedBlock) {
+          if (syncedBlock === 0 || contractSyncedBlock < syncedBlock) {
             syncedBlock = contractSyncedBlock;
           }
         });
+        syncedBlock = Math.max(syncedBlock, chainConfig.startBlock);
         return Promise.resolve({ chain, syncedBlock });
       })
       .then(({ chain, syncedBlock }) =>

@@ -1,7 +1,11 @@
+// eslint-disable-next-line max-classes-per-file
 import { MystikoConfig } from '@mystikonetwork/config';
 import { Commitment, initDatabase } from '@mystikonetwork/database';
+import { ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { readJsonFile } from '@mystikonetwork/utils';
 import { enforceOptions } from 'broadcast-channel';
+import { ethers } from 'ethers';
+import nock from 'nock';
 import {
   AccountHandlerV2,
   ChainHandlerV2,
@@ -59,18 +63,50 @@ class MockCommitmentHandler extends CommitmentHandlerV2 {
   }
 }
 
+const sepoliaCurrentBlock = 12240323;
+const bscCurrentBlock = 19019080;
+
+class TestProvider extends ethers.providers.JsonRpcProvider {
+  private readonly chainId: number;
+
+  constructor(url: string, chainId: number) {
+    super(url, { chainId, name: 'Test Chain' });
+    this.chainId = chainId;
+  }
+
+  public detectNetwork(): Promise<ethers.providers.Network> {
+    return Promise.resolve({ chainId: this.chainId, name: 'Test Chain' });
+  }
+
+  public getBlockNumber(): Promise<number> {
+    if (this.chainId === 11155111) {
+      return Promise.resolve(sepoliaCurrentBlock);
+    }
+    return Promise.resolve(bscCurrentBlock);
+  }
+}
+
+class TestProviderPool extends ProviderPoolImpl {
+  public getProvider(chainId: number): Promise<ethers.providers.Provider | undefined> {
+    return Promise.resolve(new TestProvider('http://localhost:8545', chainId));
+  }
+}
+
 beforeAll(async () => {
   enforceOptions({
     type: 'simulate',
   });
+  const config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
-    config: await MystikoConfig.createFromFile('tests/files/config.test.json'),
+    config,
+    providerPool: new TestProviderPool(config),
   });
   context.wallets = new WalletHandlerV2(context);
   context.chains = new ChainHandlerV2(context);
   context.contracts = new ContractHandlerV2(context);
   context.accounts = new AccountHandlerV2(context);
   context.nullifiers = new NullifierHandlerV2(context);
+  nock('https://example.com').get(/.*/).reply(404, 'Not Found');
 });
 
 beforeEach(async () => {
@@ -144,6 +180,17 @@ test('test run', async () => {
   await expect(synchronizer.run({ walletPassword: 'wrong password' })).rejects.toThrow();
   let runPromise: Promise<void> | undefined;
   let chainSyncingCount = 0;
+  let accountScanning = false;
+  let accountScanned = false;
+  synchronizer.addListener(() => {
+    accountScanning = true;
+  }, SyncEventType.ACCOUNTS_SCANNING);
+  const accountScannedPromise = new Promise<void>((resolve) => {
+    synchronizer.addListener(() => {
+      accountScanned = true;
+      resolve();
+    }, SyncEventType.ACCOUNTS_SCANNED);
+  });
   const syncingPromise = new Promise<void>((resolve) => {
     runPromise = synchronizer.run({ walletPassword });
     synchronizer.addListener(() => {
@@ -165,9 +212,12 @@ test('test run', async () => {
     throw new Error('runPromise should not be undefined');
   }
   await runPromise;
+  await accountScannedPromise;
   status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe(undefined);
+  expect(accountScanning).toBe(true);
+  expect(accountScanned).toBe(true);
   status.chains.forEach((chainStatus) => {
     expect(chainStatus.isSyncing).toBe(false);
     expect(chainStatus.syncedBlock).toBe(50000000);

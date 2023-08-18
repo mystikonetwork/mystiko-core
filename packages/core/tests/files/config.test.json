@@ -631,5 +631,8 @@
       ]
     }
   ],
+  "packer": {
+    "url": "https://example.com"
+  },
   "countryBlacklist": ["CN", "US"]
 }

@@ -541,16 +541,13 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     const { scanSize } = account;
     const query: DatabaseQuery<Commitment> = {
       selector: {
-        $and: [
-          { status: { $in: [CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] } },
-          { $or: [{ shieldedAddress: { $exists: false } }, { serialNumber: { $exists: false } }] },
-        ],
+        status: { $in: [CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] },
       },
       sort: [{ id: 'asc' }],
       limit: scanSize,
     };
     if (scannedCommitmentId && query.selector) {
-      query.selector.$and.push({ id: { $gt: scannedCommitmentId } });
+      query.selector.id = { $gt: scannedCommitmentId };
     }
     return this.context.commitments
       .find(query)
