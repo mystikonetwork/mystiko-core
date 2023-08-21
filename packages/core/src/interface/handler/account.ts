@@ -13,6 +13,7 @@ export type AccountUpdate = {
 };
 
 export interface AccountHandler<A = AccountOptions, U = AccountUpdate> {
+  init(): Promise<void>;
   count(query?: DatabaseQuery<Account>): Promise<number>;
   create(walletPassword: string, options?: A): Promise<Account>;
   encrypt(oldWalletPassword: string, newWalletPassword: string): Promise<void>;
