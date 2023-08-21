@@ -13,6 +13,22 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     this.context.accounts = this;
   }
 
+  public init(): Promise<void> {
+    return this.db.accounts
+      .find()
+      .exec()
+      .then((accounts) =>
+        accounts.map((account) => {
+          const accountData = account.toMutableJSON();
+          accountData.status = AccountStatus.SCANNED;
+          accountData.updatedAt = MystikoHandler.now();
+          return accountData;
+        }),
+      )
+      .then((accountsData) => this.context.db.accounts.bulkUpsert(accountsData))
+      .then(() => {});
+  }
+
   public count(query?: DatabaseQuery<Account>): Promise<number> {
     return this.find(query).then((accounts) => accounts.length);
   }
@@ -115,12 +131,19 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
 
   public resetScan(walletPassword: string, identifier?: string | DatabaseQuery<Account>): Promise<Account[]> {
     return this.checkIdentifierAndPassword(walletPassword, identifier).then((accounts) => {
-      const accountsData: AccountType[] = accounts.map((a) => {
-        const accountData = a.toMutableJSON();
+      const accountsData: AccountType[] = [];
+      for (let i = 0; i < accounts.length; i += 1) {
+        const account = accounts[i];
+        if (account.status === AccountStatus.SCANNING) {
+          return Promise.reject(
+            new Error(`account ${account.shieldedAddress} is currently scanning, please try again later`),
+          );
+        }
+        const accountData = account.toMutableJSON();
         accountData.scannedCommitmentId = undefined;
         accountData.updatedAt = MystikoHandler.now();
-        return accountData;
-      });
+        accountsData.push(accountData);
+      }
       return this.context.db.accounts.bulkUpsert(accountsData);
     });
   }

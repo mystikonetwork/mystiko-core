@@ -264,6 +264,17 @@ test('test resetScan', async () => {
   expect((await handler.findOne(account2.id))?.scannedCommitmentId).toBe(undefined);
 });
 
+test('test resetScan when scanning', async () => {
+  const account = await handler.create(walletPassword);
+  await account.atomicUpdate((accountData) => {
+    accountData.status = AccountStatus.SCANNING;
+    return accountData;
+  });
+  await expect(handler.resetScan(walletPassword, account.id)).rejects.toThrow(
+    new Error(`account ${account.shieldedAddress} is currently scanning, please try again later`),
+  );
+});
+
 test('test scan', async () => {
   await context.db.remove();
   context.db = await initDatabase();
@@ -274,4 +285,14 @@ test('test scan', async () => {
   accounts.forEach((account) => {
     expect(account.status).toBe(AccountStatus.SCANNED);
   });
+});
+
+test('test scan when scanning', async () => {
+  const account = await handler.create(walletPassword);
+  await account.atomicUpdate((accountData) => {
+    accountData.status = AccountStatus.SCANNING;
+    return accountData;
+  });
+  await handler.scan(walletPassword, account.id);
+  expect((await handler.findOne(account.id))?.status).toBe(AccountStatus.SCANNING);
 });

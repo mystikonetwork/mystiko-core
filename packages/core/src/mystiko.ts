@@ -165,6 +165,7 @@ export abstract class Mystiko {
     this.synchronizer = syncFactory.createSynchronizer();
     await this.chains.init();
     await this.contracts.init();
+    await this.accounts.init();
     if (gasRelayers) {
       this.context.gasRelayers = gasRelayers;
     } else {

@@ -518,21 +518,25 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private scanAccountWrapper(account: Account, options: CommitmentScan): Promise<Commitment[]> {
-    this.logger.info(
-      `start scanning commitments belong to account=${account.shieldedAddress}` +
-        ` from commitmentId=${account.scannedCommitmentId}`,
-    );
-    return this.context.accounts
-      .update(options.walletPassword, account.id, { status: AccountStatus.SCANNING })
-      .then(() => this.scanAccount({ options, account }))
-      .then((commitments) => {
-        this.logger.info(
-          `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
-        );
-        return this.context.accounts
-          .update(options.walletPassword, account.id, { status: AccountStatus.SCANNED })
-          .then(() => commitments);
-      });
+    if (account.status !== AccountStatus.SCANNING) {
+      this.logger.info(
+        `start scanning commitments belong to account=${account.shieldedAddress}` +
+          ` from commitmentId=${account.scannedCommitmentId}`,
+      );
+      return this.context.accounts
+        .update(options.walletPassword, account.id, { status: AccountStatus.SCANNING })
+        .then(() => this.scanAccount({ options, account }))
+        .then((commitments) => {
+          this.logger.info(
+            `scanned ${commitments.length} commitments belong to account=${account.shieldedAddress}`,
+          );
+          return this.context.accounts
+            .update(options.walletPassword, account.id, { status: AccountStatus.SCANNED })
+            .then(() => commitments);
+        });
+    }
+    this.logger.warn(`account=${account.shieldedAddress} is currently scanning, skipping this scan`);
+    return Promise.resolve([]);
   }
 
   private scanAccount(scanContext: ScanContext): Promise<Commitment[]> {
