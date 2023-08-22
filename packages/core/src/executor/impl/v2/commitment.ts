@@ -14,6 +14,7 @@ import {
   CommitmentType,
   Contract,
   DatabaseQuery,
+  Nullifier,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, toBN, toBuff } from '@mystikonetwork/utils';
@@ -562,35 +563,40 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
           accounts: [account],
         }).then(({ decryptedCommitments }) => ({ commitments, decryptedCommitments })),
       )
-      .then(({ decryptedCommitments, commitments }) => {
-        const promises: Promise<Commitment>[] = [];
-        decryptedCommitments.forEach((decryptedCommitment) => {
-          if (
-            decryptedCommitment.shieldedAddress === account.shieldedAddress &&
-            decryptedCommitment.serialNumber
-          ) {
-            promises.push(
-              this.context.nullifiers
-                .findOne({
-                  chainId: decryptedCommitment.chainId,
-                  contractAddress: decryptedCommitment.contractAddress,
-                  serialNumber: decryptedCommitment.serialNumber,
-                })
-                .then((nullifier) => {
-                  if (nullifier) {
-                    return decryptedCommitment.atomicUpdate((data) => {
-                      data.status = CommitmentStatus.SPENT;
-                      data.spendingTransactionHash = nullifier.transactionHash;
-                      return data;
-                    });
-                  }
-                  return decryptedCommitment;
-                }),
-            );
-          }
-        });
-        return Promise.all(promises).then((updatedCommitments) => ({ updatedCommitments, commitments }));
-      })
+      .then(({ decryptedCommitments, commitments }) =>
+        this.context.nullifiers
+          .find({
+            selector: { serialNumber: { $in: decryptedCommitments.map((c) => c.serialNumber) } },
+          })
+          .then((nullifiers) => {
+            const nullifierMap: Map<string, Nullifier> = new Map();
+            nullifiers.forEach((nullifier) => {
+              nullifierMap.set(nullifier.serialNumber, nullifier);
+            });
+            return nullifierMap;
+          })
+          .then((nullifierMap) => {
+            const commitmentsData: CommitmentType[] = [];
+            decryptedCommitments.forEach((commitment) => {
+              if (commitment.serialNumber) {
+                const nullifier = nullifierMap.get(commitment.serialNumber);
+                if (
+                  nullifier &&
+                  nullifier.chainId === commitment.chainId &&
+                  nullifier.contractAddress === commitment.contractAddress
+                ) {
+                  const commitmentData = commitment.toMutableJSON();
+                  commitmentData.status = CommitmentStatus.SPENT;
+                  commitmentData.spendingTransactionHash = nullifier.transactionHash;
+                  commitmentData.updatedAt = MystikoHandler.now();
+                  commitmentsData.push(commitmentData);
+                }
+              }
+            });
+            return this.db.commitments.bulkUpsert(commitmentsData);
+          })
+          .then((updatedCommitments) => ({ updatedCommitments, commitments })),
+      )
       .then(({ updatedCommitments, commitments }) =>
         account
           .atomicUpdate((accountData) => {
