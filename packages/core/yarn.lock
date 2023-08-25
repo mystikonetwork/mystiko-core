@@ -1385,10 +1385,10 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.1.0":
-  version "0.1.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.0/f722d67a1e78d0a564a8da85bbb23f5715d82b5e#f722d67a1e78d0a564a8da85bbb23f5715d82b5e"
-  integrity sha512-vyzYhyJVNNW0TPZdjclLzKOHIebOSPkWJEelfEI6448Fnsbj21ccVMHklvJma35MVCXBayD0yafp2VMIYU3zlQ==
+"@mystikonetwork/datapacker-client@^0.1.1":
+  version "0.1.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.1/a5a62221f7e36b1d0c61605e99583a532d2551a8#a5a62221f7e36b1d0c61605e99583a532d2551a8"
+  integrity sha512-M8HMmgysqG1wGY3+XrXfwiTnX8flpBO0YGzJNeYsMLks9XtpJOQzOcuIovPuQ0tUlLzi4DcnyG99K2EryDYtlQ==
   dependencies:
     "@mystikonetwork/config" "^0.9.0"
     "@mystikonetwork/protos" "^0.1.0"

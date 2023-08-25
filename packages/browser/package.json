@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/browser",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "mystiko library in browser",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -71,7 +71,7 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "@mystikonetwork/core": "^0.7.2",
+    "@mystikonetwork/core": "^0.7.3",
     "@mystikonetwork/protocol": "^0.3.0",
     "@mystikonetwork/zkp": "^0.3.0",
     "@mystikonetwork/zkp-browser": "^0.3.0",
