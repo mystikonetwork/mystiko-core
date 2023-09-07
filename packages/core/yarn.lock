@@ -1385,10 +1385,10 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.1.1":
-  version "0.1.1"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.1/a5a62221f7e36b1d0c61605e99583a532d2551a8#a5a62221f7e36b1d0c61605e99583a532d2551a8"
-  integrity sha512-M8HMmgysqG1wGY3+XrXfwiTnX8flpBO0YGzJNeYsMLks9XtpJOQzOcuIovPuQ0tUlLzi4DcnyG99K2EryDYtlQ==
+"@mystikonetwork/datapacker-client@^0.1.2":
+  version "0.1.2"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.1.2/fcf9b6be919573cb4ccda63cf3fbfa5856893d00#fcf9b6be919573cb4ccda63cf3fbfa5856893d00"
+  integrity sha512-aZH1pjDoWyxYLMHEq3kRNgjg9QWBf33JK7FUgt9jE4jGBhQfsbQUVo1QrYQWI2qKqbC4KWzGseXidTD0tOB7jg==
   dependencies:
     "@mystikonetwork/config" "^0.9.0"
     "@mystikonetwork/protos" "^0.1.0"
@@ -1398,10 +1398,10 @@
     fzstd "^0.1.0"
     loglevel "^1.8.1"
 
-"@mystikonetwork/ecies@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ecies/0.3.0/6f3185a11ac0d520fbd91bfa06c292ea0badd630#6f3185a11ac0d520fbd91bfa06c292ea0badd630"
-  integrity sha512-3iSST7lJCssmse6HOMOXgZbcB6N/2oahHqFDwZ0cxYFVfQxgsURQMC1sx9EdASXuE6gBvL7/HaYi3nf++9pf3g==
+"@mystikonetwork/ecies@^0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/ecies/0.3.1/2cc6c7c42b1e26870849c4f8772d0e96da942a6c#2cc6c7c42b1e26870849c4f8772d0e96da942a6c"
+  integrity sha512-+I05Q/F3ehUYRGl+FoXyQMVpEEv9moWkEge7ToYFJh366J1tZYWImMHylQoIpM05gY3fVUIGEE61/tXKvG1cCA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.3"
     bn.js "^5.2.0"
@@ -1478,26 +1478,27 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/indexer-common/0.7.5/4bc58dffbad90ba1d821407cc7d659b0899c38df#4bc58dffbad90ba1d821407cc7d659b0899c38df"
   integrity sha512-yFi4KEn6tJ1G+LsybtWUYW7btDuhXx7aUjW36ui1CWdhN6cbsyYGeYIWaTVd0DoBXV4MuQ79HLWOti+P60QkXg==
 
-"@mystikonetwork/merkle@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/merkle/0.3.0/44dea94c04ab4273e935dae5b1a85aa60cbcb765#44dea94c04ab4273e935dae5b1a85aa60cbcb765"
-  integrity sha512-zOToqEUwAMLmvSgSCQybZNp8VS/L7cKoK1YJ6dZWv7gws4zRZ1Db3tlJg9g5q/z8slVutLuGtlFjpFkG0mvOTA==
+"@mystikonetwork/merkle@^0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/merkle/0.3.1/3bfa20d609ec475b67aa7da2a11e3535cc79fbc9#3bfa20d609ec475b67aa7da2a11e3535cc79fbc9"
+  integrity sha512-BjzCazi9guCFUGr4yKkwShVOsmWEQv4tA01uMMe3ZhQU/sexI/s97T33dAloeW1qHAAktr5uO0zm+1GHpDE/WA==
   dependencies:
     "@mystikonetwork/utils" "^0.1.1"
     bn.js "^5.2.0"
     circomlibjs "^0.0.8"
     ethers "^5.5.3"
 
-"@mystikonetwork/protocol@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protocol/0.3.0/a872d7ebb3147a4c355b3c3030e192647b219822#a872d7ebb3147a4c355b3c3030e192647b219822"
-  integrity sha512-grYMCO9wAHWr1G805sLL2kdS6ZS84T/+duzctWkMKgfNdhbT2Gb/kEfh8Mz9yoKlktmTkNVpdlgF5REyEXaiIQ==
+"@mystikonetwork/protocol@^0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protocol/0.3.1/c3f0532ef408d679816a21f52b33e4e336a18d15#c3f0532ef408d679816a21f52b33e4e336a18d15"
+  integrity sha512-UZH4vm5V+odOABb8oO9Uuts1KfDmpCzGjqLIzwMMDeQFT/0jlH6q2uQVLie7rnLbRWHZeavnlASItSIcTH9dhA==
   dependencies:
-    "@mystikonetwork/ecies" "^0.3.0"
-    "@mystikonetwork/merkle" "^0.3.0"
-    "@mystikonetwork/secret-share" "^0.3.0"
-    "@mystikonetwork/utils" "^0.1.1"
-    "@mystikonetwork/zkp" "^0.3.0"
+    "@mystikonetwork/ecies" "^0.3.1"
+    "@mystikonetwork/merkle" "^0.3.1"
+    "@mystikonetwork/secret-share" "^0.3.1"
+    "@mystikonetwork/utils" "^0.2.11"
+    "@mystikonetwork/zkp" "^0.3.1"
+    "@shopify/web-worker" "^6.0.5"
     blake-hash "^2.0.0"
     bn.js "^5.2.0"
     bs58 "^4.0.1"
@@ -1525,19 +1526,19 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/secret-share@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/secret-share/0.3.0/cc0fd8b235f4964eea84d94c7d5cb96e16581f3d#cc0fd8b235f4964eea84d94c7d5cb96e16581f3d"
-  integrity sha512-DS+0RlyQvu/q+F/75mopYW6FZ8Rt23Ml0YjKYfwSfY9zDtvRj8KiP6/4HJ4PWducG5lZYhrOH4Po9SCCjOiz7Q==
+"@mystikonetwork/secret-share@^0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/secret-share/0.3.1/8e82175ad7c8921a0a352e9fa39d21c616b59d1f#8e82175ad7c8921a0a352e9fa39d21c616b59d1f"
+  integrity sha512-QS8x1NY2tRAweeL49LPiQxB0wzN21fymV4sFBh+5LK2SunW6icLuLppG+0oIqU3xWTCxSsO70CbXGjMm4bDa1Q==
   dependencies:
     "@mystikonetwork/utils" "^0.1.3"
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/utils@0.2.8", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3", "@mystikonetwork/utils@^0.1.4", "@mystikonetwork/utils@^0.1.5", "@mystikonetwork/utils@^0.2.8", "@mystikonetwork/utils@^0.2.9":
-  version "0.2.8"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.2.8/0b168cf9cf19c97a9e8641141a9b6a2f1e49cc0e#0b168cf9cf19c97a9e8641141a9b6a2f1e49cc0e"
-  integrity sha512-gD7vMYKltmsIBHOd/k47WWl+uFP+NTBItML7NzJeDCbRfL3xJVsKcus3Vbh3M1+4Y1YxcLHh8Zi09zcrESr3jw==
+"@mystikonetwork/utils@0.2.11", "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3", "@mystikonetwork/utils@^0.1.4", "@mystikonetwork/utils@^0.1.5", "@mystikonetwork/utils@^0.2.11", "@mystikonetwork/utils@^0.2.9":
+  version "0.2.11"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.2.11/81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2#81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2"
+  integrity sha512-dxUVm0Bo+wjH58NK21mK9oY2Rpay4YwrZCTXwak2TS976Hy+yekGzUGNF7bI1AhBVgEDloSXljJ8hmeFdZS0nw==
   dependencies:
     "@mystikonetwork/fastfile" "^0.0.21"
     axios "^0.27.2"
@@ -1572,10 +1573,10 @@
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.2.4/c16b84ef6e003fec1edd48fd0e7b05ae15df14a3#c16b84ef6e003fec1edd48fd0e7b05ae15df14a3"
   integrity sha512-5zFix4hB+94LsjIZidA9rcgArj5j+f8OaVoR2zLn9YlVROaEl9t8OPS7w7xN9AOM0N7npkE/U6a0FPdp3EubVg==
 
-"@mystikonetwork/zkp@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.3.0/e2607bc7bddf5c8ae58b0e24e48016619c7d07cb#e2607bc7bddf5c8ae58b0e24e48016619c7d07cb"
-  integrity sha512-rvL96NaViFtdax5vrftDwTbOkgkaqAmLanxBsEbUT19KsSoqxQVodU9mB4TORxncdjW+bGKz9njE/VIG6HPfYw==
+"@mystikonetwork/zkp@^0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/zkp/0.3.1/ba66f1d33a16cb73a57be41de223ff966ec7660f#ba66f1d33a16cb73a57be41de223ff966ec7660f"
+  integrity sha512-cOrtrC0fgGmLg6LfWuS46gXkVRXMLWFvn+uIbXsbvt0a3aMWSEzQIPGY+efkAMkbfxjpZxKcDUTjc9UAxDzHkw==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1597,6 +1598,18 @@
   dependencies:
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
+
+"@remote-ui/rpc@^1.2.5":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@remote-ui/rpc/-/rpc-1.4.3.tgz#6dde33831c3d98e43e170f3e3c82a43f35475d09"
+  integrity sha512-+XyELrHLIJVQEuidHoqZ32+drbphY/x697vykHCinTPhhuUiZpag1DnKSxoE4UlnwBzz336UtFHZIiDGtOL2Kg==
+
+"@shopify/web-worker@^6.0.5":
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/@shopify/web-worker/-/web-worker-6.0.5.tgz#7dbfe6b4a74f5ae2451233ed932f3357c4c1d67c"
+  integrity sha512-vM5diGhV3lVx6SQyl6jhXQEap+CzCqbSTG/rmCmX4HLifmnRpSGRBC3z0HpsUA6FYlLkk8VYqHkm1yGRHEe9BA==
+  dependencies:
+    "@remote-ui/rpc" "^1.2.5"
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"

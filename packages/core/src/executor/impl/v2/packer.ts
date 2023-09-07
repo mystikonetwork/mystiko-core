@@ -28,6 +28,7 @@ type ImportContext = {
 };
 
 type PackerClient = {
+  savedBlock(chainId: number): Promise<number>;
   fetch(options: FetchOptions): Promise<data.v1.ChainData | undefined>;
 };
 
@@ -59,7 +60,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
 
   private importChainData(context: ImportContext): Promise<data.v1.ChainData | undefined> {
     const { syncedBlock, targetBlock, options } = context;
-    if (targetBlock < syncedBlock) {
+    if (targetBlock <= syncedBlock) {
       return Promise.resolve(undefined);
     }
     return this.packerClient.fetch({
@@ -192,20 +193,10 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
         return Promise.resolve({ chain, syncedBlock });
       })
       .then(({ chain, syncedBlock }) =>
-        this.context.providers
-          .checkProvider(options.chainId)
-          .then((provider) => ({ chain, syncedBlock, provider })),
-      )
-      .then(({ chain, syncedBlock, provider }) =>
-        provider.getBlockNumber().then((currentBlock) => ({ chain, syncedBlock, currentBlock })),
-      )
-      .then(({ chain, syncedBlock, currentBlock }) => {
-        let targetBlock = 0;
-        if (chainConfig.minGranularity <= currentBlock) {
-          targetBlock = currentBlock - chainConfig.minGranularity;
-        }
-        return Promise.resolve({ chainConfig, chain, syncedBlock, targetBlock, options });
-      });
+        this.packerClient
+          .savedBlock(chain.chainId)
+          .then((targetBlock) => ({ chainConfig, chain, syncedBlock, targetBlock, options })),
+      );
   }
 
   private saveChainSyncedBlock(

@@ -42,12 +42,14 @@ export class MystikoInNode extends Mystiko {
       if (wrappedOptions.dbInMemory) {
         addPouchPlugin(require('pouchdb-adapter-memory'));
         wrappedOptions.dbParams = {
+          multiInstance: false,
           name: wrappedOptions.dbName,
           storage: getRxStoragePouch('memory'),
         };
       } else {
         addPouchPlugin(require('pouchdb-adapter-leveldb'));
         wrappedOptions.dbParams = {
+          multiInstance: false,
           name: wrappedOptions.dbName,
           storage: getRxStoragePouch(leveldown),
         };

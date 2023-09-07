@@ -3,7 +3,6 @@ import { BridgeType, MystikoConfig } from '@mystikonetwork/config';
 import { CommitmentPool__factory } from '@mystikonetwork/contracts-abi';
 import { CommitmentStatus, ContractType, DepositStatus, initDatabase } from '@mystikonetwork/database';
 import { FetchOptions } from '@mystikonetwork/datapacker-client/build/cjs/v1/client';
-import { ProviderPoolImpl } from '@mystikonetwork/ethers';
 import { data } from '@mystikonetwork/protos';
 import { readJsonFile, toBN, toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
@@ -37,32 +36,6 @@ let assetHandler: AssetHandlerV2;
 
 const sepoliaCurrentBlock = 12240323;
 const bscCurrentBlock = 19019080;
-
-class TestProvider extends ethers.providers.JsonRpcProvider {
-  private readonly chainId: number;
-
-  constructor(url: string, chainId: number) {
-    super(url, { chainId, name: 'Test Chain' });
-    this.chainId = chainId;
-  }
-
-  public detectNetwork(): Promise<ethers.providers.Network> {
-    return Promise.resolve({ chainId: this.chainId, name: 'Test Chain' });
-  }
-
-  public getBlockNumber(): Promise<number> {
-    if (this.chainId === 11155111) {
-      return Promise.resolve(sepoliaCurrentBlock);
-    }
-    return Promise.resolve(bscCurrentBlock);
-  }
-}
-
-class TestProviderPool extends ProviderPoolImpl {
-  public getProvider(chainId: number): Promise<ethers.providers.Provider | undefined> {
-    return Promise.resolve(new TestProvider('http://localhost:8545', chainId));
-  }
-}
 
 function mergeCommitments(commitments: data.v1.Commitment[], threshold: number): data.v1.Commitment[] {
   const sortedCommitments = commitments.sort((a, b) => {
@@ -193,6 +166,14 @@ class TestPackerClient {
   public fetch(options: FetchOptions): Promise<data.v1.ChainData | undefined> {
     return Promise.resolve(buildChainData(testEvents, this.chainId, this.startBlock, this.endBlock));
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public savedBlock(chainId: number): Promise<number> {
+    if (this.chainId === 11155111) {
+      return Promise.resolve(sepoliaCurrentBlock);
+    }
+    return Promise.resolve(bscCurrentBlock);
+  }
 }
 
 beforeAll(async () => {
@@ -200,7 +181,6 @@ beforeAll(async () => {
   config = await MystikoConfig.createFromFile('tests/files/config.test.json');
   context = await createTestContext({
     config,
-    providerPool: new TestProviderPool(config),
   });
   walletHandler = new WalletHandlerV2(context);
   accountHandler = new AccountHandlerV2(context);
@@ -307,7 +287,7 @@ test('test syncedBlock large than targetBlock', async () => {
       return contractData;
     });
     await context.db.contracts.bulkUpsert(contracts);
-    const packerClient = new TestPackerClient(97, 18759679, bscCurrentBlock - 8000);
+    const packerClient = new TestPackerClient(97, 18759679, bscCurrentBlock);
     const executor = new PackerExecutorV2(context, packerClient);
     const { syncedBlock, commitments } = await executor.import({ walletPassword, chainId: 97 });
     expect(syncedBlock).toBe(bscCurrentBlock);
@@ -328,6 +308,7 @@ test('test startBlock not equal to syncedBlock + 1', async () => {
 test('test packer returns undefined', async () => {
   const packerClient = {
     fetch: () => Promise.resolve(undefined),
+    savedBlock: () => Promise.resolve(bscCurrentBlock),
   };
   const executor = new PackerExecutorV2(context, packerClient);
   const { syncedBlock, commitments } = await executor.import({ walletPassword, chainId: 97 });
@@ -386,6 +367,7 @@ test('test packer return corrupted commitment queued data', async () => {
           ],
         }),
       ),
+    savedBlock: () => Promise.resolve(bscCurrentBlock),
   };
   const executor = new PackerExecutorV2(context, packerClient);
   await expect(executor.import({ walletPassword, chainId: 97 })).rejects.toThrow(
