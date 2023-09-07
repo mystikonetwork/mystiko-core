@@ -3,7 +3,7 @@ import { Chain, ContractType } from '@mystikonetwork/database';
 import { v1 as Packer } from '@mystikonetwork/datapacker-client';
 import { FetchOptions } from '@mystikonetwork/datapacker-client/build/cjs/v1/client';
 import { data } from '@mystikonetwork/protos';
-import { toBN, toHex } from '@mystikonetwork/utils';
+import { promiseWithTimeout, toBN, toHex } from '@mystikonetwork/utils';
 import { BigNumber, ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -40,34 +40,36 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
   }
 
   public import(options: PackerImportOptions): Promise<PackerImportResult> {
-    return this.context.wallets
+    const startTime = Date.now();
+    let promise = this.context.wallets
       .checkPassword(options.walletPassword)
       .then(() => this.buildContext(options))
-      .then((context) => this.importChain(context));
+      .then((context) => this.importChainData(context).then((chainData) => ({ chainData, context })));
+    if (options.timeoutMs) {
+      promise = promiseWithTimeout(promise, options.timeoutMs);
+    }
+    return promise.then(({ chainData, context }) => {
+      this.logger.debug(`fetched chain data in ${Date.now() - startTime}ms`);
+      if (chainData) {
+        return this.saveChainData(chainData, context);
+      }
+      return Promise.resolve({ syncedBlock: context.syncedBlock, commitments: [] });
+    });
   }
 
-  private importChain(context: ImportContext): Promise<PackerImportResult> {
+  private importChainData(context: ImportContext): Promise<data.v1.ChainData | undefined> {
     const { syncedBlock, targetBlock, options } = context;
     if (targetBlock < syncedBlock) {
-      return Promise.resolve({ syncedBlock, commitments: [] });
+      return Promise.resolve(undefined);
     }
-    const startTime = Date.now();
-    return this.packerClient
-      .fetch({
-        chainId: options.chainId,
-        startBlock: syncedBlock + 1,
-        targetBlock,
-      })
-      .then((chainData) => {
-        this.logger.debug(`fetched chain data in ${Date.now() - startTime}ms`);
-        if (chainData) {
-          return this.importChainData(chainData, context);
-        }
-        return Promise.resolve({ syncedBlock, commitments: [] });
-      });
+    return this.packerClient.fetch({
+      chainId: options.chainId,
+      startBlock: syncedBlock + 1,
+      targetBlock,
+    });
   }
 
-  private importChainData(chainData: data.v1.ChainData, context: ImportContext): Promise<PackerImportResult> {
+  private saveChainData(chainData: data.v1.ChainData, context: ImportContext): Promise<PackerImportResult> {
     const startTime = Date.now();
     const { options, syncedBlock } = context;
     if (Number(chainData.startBlock) !== syncedBlock + 1) {

@@ -205,12 +205,7 @@ export class SynchronizerV2 implements Synchronizer {
               promises.push(
                 this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
                   .then(() => this.context.executors.getCommitmentExecutor().check({ chainId }))
-                  .then(() =>
-                    promiseWithTimeout(
-                      this.executeSyncImport(options, chainId),
-                      options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS,
-                    ),
-                  )
+                  .then(() => this.executeSyncImport(options, chainId))
                   .then(() => this.context.chains.findOne(chainId))
                   .then((updatedChain) => {
                     if (updatedChain) {
@@ -271,10 +266,11 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+    const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
     const packerExecutor = this.context.executors.getPackerExecutor();
     if (packerExecutor && !options.noPacker) {
       return packerExecutor
-        .import({ walletPassword: options.walletPassword, chainId })
+        .import({ walletPassword: options.walletPassword, chainId, timeoutMs })
         .then(({ commitments, syncedBlock }) => {
           this.logger.info(
             `synced events for chainId=${chainId} to blockNumber=${syncedBlock}` +
@@ -296,6 +292,7 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   private executeIndexerSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+    const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
     const indexerExecutor = this.context.executors.getIndexerExecutor();
     let promise: Promise<{
       fallback: boolean;
@@ -304,7 +301,7 @@ export class SynchronizerV2 implements Synchronizer {
     }>;
     if (indexerExecutor && !options.noIndexer) {
       promise = indexerExecutor
-        .import({ walletPassword: options.walletPassword, chainId })
+        .import({ walletPassword: options.walletPassword, chainId, timeoutMs })
         .then(({ commitments, hasUpdates }) => {
           if (hasUpdates) {
             return { fallback: false, reason: '', commitments };
@@ -325,7 +322,11 @@ export class SynchronizerV2 implements Synchronizer {
         this.logger.info(
           `fallback to import events from node provider for chainId=${chainId}, reason: ${reason}`,
         );
-        return this.context.commitments.import({ walletPassword: options.walletPassword, chainId });
+        return this.context.commitments.import({
+          walletPassword: options.walletPassword,
+          chainId,
+          timeoutMs,
+        });
       }
       return Promise.resolve(commitments);
     });

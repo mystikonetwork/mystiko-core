@@ -17,7 +17,7 @@ import {
   Nullifier,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, toBN, toBuff } from '@mystikonetwork/utils';
+import { errorMessage, promiseWithTimeout, toBN, toBuff } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -266,7 +266,11 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         promises.push(
           this.context.providers.getProvider(chainConfig.chainId).then((provider) => {
             if (provider) {
-              return provider.getBlockNumber().then((currentBlock) =>
+              let promise = provider.getBlockNumber();
+              if (options.timeoutMs) {
+                promise = promiseWithTimeout(promise, options.timeoutMs);
+              }
+              return promise.then((currentBlock) =>
                 this.importChain({
                   ...importContext,
                   chainConfig,
@@ -293,8 +297,8 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   }
 
   private importChain(importContext: ImportChainContext): Promise<Commitment[]> {
-    const promises: Promise<Commitment[]>[] = [];
-    const { chainConfig, currentBlock } = importContext;
+    const promises: Promise<{ context: ImportEventsContext; events: ContractEvent[] } | undefined>[] = [];
+    const { chainConfig, options } = importContext;
     const { chainId, contractAddress } = importContext.options;
     const { poolContracts, depositContracts } = chainConfig;
     const contracts: Array<PoolContractConfig | DepositContractConfig> = [
@@ -323,17 +327,33 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                     });
                   }
                   /* istanbul ignore next */
-                  return [];
+                  return Promise.resolve(undefined);
                 }),
             );
           }
         }
-        return Promise.all(promises)
-          .then((commitments) => commitments.flat())
-          .then((commitments) =>
+        let promise = Promise.all(promises);
+        if (options.timeoutMs) {
+          promise = promiseWithTimeout(promise, options.timeoutMs);
+        }
+        return promise
+          .then((contextWithEvents) => {
+            const filteredContextWithEvents: { context: ImportEventsContext; events: ContractEvent[] }[] = [];
+            contextWithEvents.forEach((contextWithEvent) => {
+              if (contextWithEvent) {
+                filteredContextWithEvents.push(contextWithEvent);
+              }
+            });
+            const minToBlock = Math.min(...filteredContextWithEvents.map(({ context }) => context.toBlock));
+            return this.saveChainEvents(0, filteredContextWithEvents).then((commitments) => ({
+              commitments,
+              toBlock: minToBlock,
+            }));
+          })
+          .then(({ commitments, toBlock }) =>
             chain
               .atomicUpdate((data) => {
-                data.syncedBlockNumber = currentBlock;
+                data.syncedBlockNumber = toBlock;
                 data.updatedAt = MystikoHandler.now();
                 return data;
               })
@@ -358,7 +378,9 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     });
   }
 
-  private importContract(importContext: ImportContractContext): Promise<Commitment[]> {
+  private importContract(
+    importContext: ImportContractContext,
+  ): Promise<{ context: ImportEventsContext; events: ContractEvent[] }> {
     const { chainConfig, contractConfig, contract, currentBlock } = importContext;
     this.logger.debug(
       'importing commitment related events from ' +
@@ -369,11 +391,17 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     const fromBlock = syncedBlock + 1;
     const toBlock =
       fromBlock + contract.syncSize - 1 > currentBlock ? currentBlock : fromBlock + contract.syncSize - 1;
-    return this.importContractEvents({ ...importContext, fromBlock, toBlock });
+    const eventsContext: ImportEventsContext = { ...importContext, fromBlock, toBlock };
+    return this.importContractEvents(eventsContext).then((result) => {
+      eventsContext.toBlock = result.context.toBlock;
+      return { context: eventsContext, events: result.events };
+    });
   }
 
-  private importContractEvents(importContext: ImportEventsContext): Promise<Commitment[]> {
-    const { contract, fromBlock, toBlock, currentBlock, options, chainConfig } = importContext;
+  private importContractEvents(
+    importContext: ImportEventsContext,
+  ): Promise<{ context: ImportEventsContext; events: ContractEvent[] }> {
+    const { contract, fromBlock, toBlock, currentBlock } = importContext;
     if (fromBlock <= toBlock) {
       const events: Promise<ContractEvent[]>[] = [
         this.importCommitmentQueuedEvents(importContext),
@@ -381,35 +409,19 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         this.importCommitmentSpentEvents(importContext),
       ];
       return Promise.all(events)
-        .then((fetchedEvents) => {
-          const flatEvents = fetchedEvents.flat();
-          return this.context.executors.getEventExecutor().import(flatEvents, {
-            chainId: chainConfig.chainId,
-            walletPassword: options.walletPassword,
-            skipCheckPassword: true,
-          });
-        })
-        .then((commitments) =>
-          contract
-            .atomicUpdate((data) => {
-              data.syncedBlockNumber = toBlock;
-              data.updatedAt = MystikoHandler.now();
-              return data;
-            })
-            .then(() => commitments),
-        )
-        .then((commitments) => {
+        .then((fetchedEvents) => fetchedEvents.flat())
+        .then((flattenEvents) => {
           const newFromBlock = toBlock + 1;
           const newToBlock =
             toBlock + contract.syncSize > currentBlock ? currentBlock : toBlock + contract.syncSize;
           const newImportContext = { ...importContext, fromBlock: newFromBlock, toBlock: newToBlock };
-          return this.importContractEvents(newImportContext).then((moreCommitments) => [
-            ...commitments,
-            ...moreCommitments,
-          ]);
+          return this.importContractEvents(newImportContext).then((result) => ({
+            context: result.context,
+            events: [...flattenEvents, ...result.events],
+          }));
         });
     }
-    return Promise.resolve([]);
+    return Promise.resolve({ context: importContext, events: [] });
   }
 
   private importCommitmentQueuedEvents(importContext: ImportEventsContext): Promise<CommitmentQueuedEvent[]> {
@@ -507,6 +519,42 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       }
       return rawEvents;
     });
+  }
+
+  private saveChainEvents(
+    index: number,
+    contracts: { context: ImportEventsContext; events: ContractEvent[] }[],
+  ): Promise<Commitment[]> {
+    if (index < contracts.length) {
+      const { context, events } = contracts[index];
+      return this.saveContractEvents(context, events).then((commitments) =>
+        this.saveChainEvents(index + 1, contracts).then((moreCommitments) => [
+          ...commitments,
+          ...moreCommitments,
+        ]),
+      );
+    }
+    return Promise.resolve([]);
+  }
+
+  private saveContractEvents(context: ImportEventsContext, events: ContractEvent[]): Promise<Commitment[]> {
+    const { chainConfig, options, contract, toBlock } = context;
+    return this.context.executors
+      .getEventExecutor()
+      .import(events, {
+        chainId: chainConfig.chainId,
+        walletPassword: options.walletPassword,
+        skipCheckPassword: true,
+      })
+      .then((commitments) =>
+        contract
+          .atomicUpdate((data) => {
+            data.syncedBlockNumber = toBlock;
+            data.updatedAt = MystikoHandler.now();
+            return data;
+          })
+          .then(() => commitments),
+      );
   }
 
   private connectPoolContract(importContext: ImportContractContext): CommitmentPool {
