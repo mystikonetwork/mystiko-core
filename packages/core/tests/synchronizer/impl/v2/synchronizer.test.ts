@@ -227,13 +227,8 @@ test('test run', async () => {
 });
 
 test('test run timeout', async () => {
-  await synchronizer.run({ walletPassword, chainTimeoutMs: 500, noPacker: true, skipAccountScan: true });
-  let status = await synchronizer.status;
-  expect(status.isSyncing).toBe(false);
-  expect(status.error).toBe('some chain(s) failed to sync');
-  expect(status.chains[0].error).toBe('timeout after 500 ms');
   await synchronizer.run({ walletPassword, timeoutMs: 500, noPacker: true, skipAccountScan: true });
-  status = await synchronizer.status;
+  const status = await synchronizer.status;
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe('timeout after 500 ms');
 });

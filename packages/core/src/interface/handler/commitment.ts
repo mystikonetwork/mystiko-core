@@ -17,6 +17,7 @@ export type CommitmentImport = {
   walletPassword: string;
   chainId?: number;
   contractAddress?: string;
+  timeoutMs?: number;
 };
 
 export type CommitmentScan = {

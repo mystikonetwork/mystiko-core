@@ -3,6 +3,7 @@ import { Commitment } from '@mystikonetwork/database';
 export type ImportOptions = {
   walletPassword: string;
   chainId: number;
+  timeoutMs?: number;
 };
 
 export type ImportResult = {
