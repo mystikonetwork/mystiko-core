@@ -91,7 +91,10 @@ export class ContractHandlerV2 extends MystikoHandler implements ContractHandler
                     .then(() => updatedContract);
                 }
                 return Promise.resolve(updatedContract);
-              });
+              })
+              .then((updatedContract) =>
+                this.context.accounts.resetScan(undefined, true).then(() => updatedContract),
+              );
           }
           return null;
         });

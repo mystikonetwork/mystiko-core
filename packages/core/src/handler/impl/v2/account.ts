@@ -129,12 +129,12 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     );
   }
 
-  public resetScan(walletPassword: string, identifier?: string | DatabaseQuery<Account>): Promise<Account[]> {
-    return this.checkIdentifierAndPassword(walletPassword, identifier).then((accounts) => {
+  public resetScan(identifier?: string | DatabaseQuery<Account>, force?: boolean): Promise<Account[]> {
+    return this.findByIdentifier(identifier).then((accounts) => {
       const accountsData: AccountType[] = [];
       for (let i = 0; i < accounts.length; i += 1) {
         const account = accounts[i];
-        if (account.status === AccountStatus.SCANNING) {
+        if (!force && account.status === AccountStatus.SCANNING) {
           return Promise.reject(
             new Error(`account ${account.shieldedAddress} is currently scanning, please try again later`),
           );
@@ -241,20 +241,22 @@ export class AccountHandlerV2 extends MystikoHandler implements AccountHandler {
     walletPassword: string,
     identifier?: string | DatabaseQuery<Account>,
   ): Promise<Account[]> {
-    return this.context.wallets.checkPassword(walletPassword).then(() => {
-      if (typeof identifier === 'string') {
-        return this.findOne(identifier).then((account) => {
-          if (account === null) {
-            return createErrorPromise(
-              `non existing account ${identifier}`,
-              MystikoErrorCode.NON_EXISTING_ACCOUNT,
-            );
-          }
-          return Promise.resolve([account]);
-        });
-      }
-      return this.find(identifier);
-    });
+    return this.context.wallets.checkPassword(walletPassword).then(() => this.findByIdentifier(identifier));
+  }
+
+  private findByIdentifier(identifier?: string | DatabaseQuery<Account>): Promise<Account[]> {
+    if (typeof identifier === 'string') {
+      return this.findOne(identifier).then((account) => {
+        if (account === null) {
+          return createErrorPromise(
+            `non existing account ${identifier}`,
+            MystikoErrorCode.NON_EXISTING_ACCOUNT,
+          );
+        }
+        return Promise.resolve([account]);
+      });
+    }
+    return this.find(identifier);
   }
 
   private scanAccounts(walletPassword: string, accounts: Account[]): Promise<Account[]> {

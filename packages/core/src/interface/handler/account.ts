@@ -22,5 +22,5 @@ export interface AccountHandler<A = AccountOptions, U = AccountUpdate> {
   findOne(identifier: string): Promise<Account | null>;
   update(walletPassword: string, identifier: string, options: U): Promise<Account>;
   scan(walletPassword: string, identifier?: string | DatabaseQuery<Account>): Promise<Account[]>;
-  resetScan(walletPassword: string, identifier?: string | DatabaseQuery<Account>): Promise<Account[]>;
+  resetScan(identifier?: string | DatabaseQuery<Account>, force?: boolean): Promise<Account[]>;
 }
