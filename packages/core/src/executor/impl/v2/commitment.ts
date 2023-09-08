@@ -17,8 +17,7 @@ import {
   Nullifier,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, promiseWithTimeout, toBN, toBuff } from '@mystikonetwork/utils';
-import BN from 'bn.js';
+import { errorMessage, promiseWithTimeout, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -134,16 +133,16 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         const commitmentsMap: { [key: string]: Commitment[] } = {};
         const protocol = this.protocol as MystikoProtocolV2;
         const keys = myAccounts.map((account) => {
-          const publicKey = toBuff(account.publicKey);
-          const secretKey = toBuff(account.secretKey(protocol, walletPassword));
+          const { publicKey } = account;
+          const secretKey = account.secretKey(protocol, walletPassword);
           return { publicKey, secretKey };
         });
-        const commitmentsToEncrypt: { commitmentHash: BN; encryptedNote: Buffer }[] = [];
+        const commitmentsToEncrypt: { commitmentHash: string; encryptedNote: string }[] = [];
         commitments.forEach((commitment) => {
           if (commitment.encryptedNote) {
             commitmentsToEncrypt.push({
-              commitmentHash: toBN(commitment.commitmentHash),
-              encryptedNote: toBuff(commitment.encryptedNote),
+              commitmentHash: commitment.commitmentHash,
+              encryptedNote: commitment.encryptedNote,
             });
           }
           if (commitment.commitmentHash in commitmentsMap) {
