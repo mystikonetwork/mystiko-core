@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/browser",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "mystiko library in browser",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -71,10 +71,10 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "@mystikonetwork/core": "^0.7.5",
-    "@mystikonetwork/protocol": "^0.3.1",
-    "@mystikonetwork/zkp": "^0.3.1",
-    "@mystikonetwork/zkp-browser": "^0.3.1",
+    "@mystikonetwork/core": "^0.7.6",
+    "@mystikonetwork/protocol": "^0.3.2",
+    "@mystikonetwork/zkp": "^0.3.2",
+    "@mystikonetwork/zkp-browser": "^0.3.2",
     "pouchdb-adapter-idb": "7.3.0",
     "pouchdb-adapter-memory": "7.3.0",
     "rxdb": "12.5.4",
