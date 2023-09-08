@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/core",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "core handlers of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -63,18 +63,18 @@
   "dependencies": {
     "@mystikonetwork/config": "^0.9.0",
     "@mystikonetwork/contracts-abi": "^0.2.3",
-    "@mystikonetwork/database": "^0.7.4",
-    "@mystikonetwork/datapacker-client": "^0.1.1",
-    "@mystikonetwork/ecies": "^0.3.0",
-    "@mystikonetwork/ethers": "^0.7.4",
+    "@mystikonetwork/database": "^0.7.5",
+    "@mystikonetwork/datapacker-client": "^0.1.2",
+    "@mystikonetwork/ecies": "^0.3.1",
+    "@mystikonetwork/ethers": "^0.7.5",
     "@mystikonetwork/gas-relayer-client": "^0.1.19",
     "@mystikonetwork/gas-relayer-config": "^0.1.19",
     "@mystikonetwork/indexer-client": "^0.7.5",
-    "@mystikonetwork/merkle": "^0.3.0",
-    "@mystikonetwork/protocol": "^0.3.0",
+    "@mystikonetwork/merkle": "^0.3.1",
+    "@mystikonetwork/protocol": "^0.3.1",
     "@mystikonetwork/protos": "^0.1.0",
-    "@mystikonetwork/utils": "^0.2.8",
-    "@mystikonetwork/zkp": "^0.3.0",
+    "@mystikonetwork/utils": "^0.2.11",
+    "@mystikonetwork/zkp": "^0.3.1",
     "bn.js": "^5.2.0",
     "broadcast-channel": "4.9.0",
     "class-validator": "^0.13.2",
@@ -88,6 +88,6 @@
   },
   "resolutions": {
     "@mystikonetwork/config": "0.9.0",
-    "@mystikonetwork/utils": "0.2.8"
+    "@mystikonetwork/utils": "0.2.11"
   }
 }

@@ -258,21 +258,27 @@ test('test resetScan', async () => {
   });
   expect(account1.scannedCommitmentId).toBe('1');
   expect(account2.scannedCommitmentId).toBe('2');
-  await handler.resetScan(walletPassword, { selector: { id: account1.id } });
+  await handler.resetScan({ selector: { id: account1.id } });
   expect((await handler.findOne(account1.id))?.scannedCommitmentId).toBe(undefined);
-  await handler.resetScan(walletPassword, account2.shieldedAddress);
+  await handler.resetScan(account2.shieldedAddress);
   expect((await handler.findOne(account2.id))?.scannedCommitmentId).toBe(undefined);
 });
 
 test('test resetScan when scanning', async () => {
-  const account = await handler.create(walletPassword);
+  let account = await handler.create(walletPassword);
   await account.atomicUpdate((accountData) => {
     accountData.status = AccountStatus.SCANNING;
     return accountData;
   });
-  await expect(handler.resetScan(walletPassword, account.id)).rejects.toThrow(
+  account = await account.atomicUpdate((accountData) => {
+    accountData.scannedCommitmentId = '1';
+    return accountData;
+  });
+  await expect(handler.resetScan(account.id)).rejects.toThrow(
     new Error(`account ${account.shieldedAddress} is currently scanning, please try again later`),
   );
+  await handler.resetScan(account.id, true);
+  expect((await handler.findOne(account.id))?.scannedCommitmentId).toBe(undefined);
 });
 
 test('test scan', async () => {

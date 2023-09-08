@@ -18,6 +18,7 @@ import {
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, promiseWithTimeout, toBN, toBuff } from '@mystikonetwork/utils';
+import BN from 'bn.js';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -128,30 +129,46 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     const accountsPromise: Promise<Account[]> = accounts
       ? Promise.resolve(accounts)
       : this.context.accounts.find();
-    const commitmentPromises: Promise<{
-      decryptedCommitment: CommitmentType | undefined;
-      commitment: Commitment;
-    }>[] = [];
     return accountsPromise
       .then((myAccounts) => {
-        for (let i = 0; i < commitments.length; i += 1) {
-          const commitment = commitments[i];
-          commitmentPromises.push(
-            this.decryptCommitmentWithAccounts(commitment, myAccounts, 0, walletPassword).then(
-              (decryptedCommitment) => ({ decryptedCommitment, commitment }),
-            ),
-          );
-        }
-        return Promise.all(commitmentPromises).then((results) => {
+        const commitmentsMap: { [key: string]: Commitment[] } = {};
+        const protocol = this.protocol as MystikoProtocolV2;
+        const keys = myAccounts.map((account) => {
+          const publicKey = toBuff(account.publicKey);
+          const secretKey = toBuff(account.secretKey(protocol, walletPassword));
+          return { publicKey, secretKey };
+        });
+        const commitmentsToEncrypt: { commitmentHash: BN; encryptedNote: Buffer }[] = [];
+        commitments.forEach((commitment) => {
+          if (commitment.encryptedNote) {
+            commitmentsToEncrypt.push({
+              commitmentHash: toBN(commitment.commitmentHash),
+              encryptedNote: toBuff(commitment.encryptedNote),
+            });
+          }
+          if (commitment.commitmentHash in commitmentsMap) {
+            commitmentsMap[commitment.commitmentHash].push(commitment);
+          } else {
+            commitmentsMap[commitment.commitmentHash] = [commitment];
+          }
+        });
+        return protocol.decryptNotes(commitmentsToEncrypt, keys).then((decryptOutputs) => {
           const decryptedCommitments: CommitmentType[] = [];
-          const encryptedCommitments: Commitment[] = [];
-          results.forEach(({ decryptedCommitment, commitment }) => {
-            if (decryptedCommitment !== undefined) {
-              decryptedCommitments.push(decryptedCommitment);
-            } else {
-              encryptedCommitments.push(commitment);
+          decryptOutputs.forEach((decryptOutput) => {
+            const commitmentHash = decryptOutput.commitment.commitmentHash.toString();
+            if (commitmentHash in commitmentsMap) {
+              commitmentsMap[commitmentHash].forEach((commitment) => {
+                const updatedCommitment = commitment.toMutableJSON();
+                updatedCommitment.serialNumber = decryptOutput.serialNumber.toString();
+                updatedCommitment.amount = decryptOutput.commitment.amount.toString();
+                updatedCommitment.shieldedAddress = decryptOutput.shieldedAddress;
+                updatedCommitment.updatedAt = MystikoHandler.now();
+                decryptedCommitments.push(updatedCommitment);
+              });
+              delete commitmentsMap[commitmentHash];
             }
           });
+          const encryptedCommitments = Object.values(commitmentsMap).flat();
           return Promise.resolve({ decryptedCommitments, encryptedCommitments });
         });
       })
@@ -679,46 +696,5 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       chainId: options.chainId,
       contractAddress: options.contractAddress,
     });
-  }
-
-  private decryptCommitmentWithAccounts(
-    commitment: Commitment,
-    accounts: Account[],
-    accountIndex: number,
-    walletPassword: string,
-  ): Promise<CommitmentType | undefined> {
-    if (accountIndex < accounts.length) {
-      const account = accounts[accountIndex];
-      if (commitment.encryptedNote) {
-        return (this.protocol as MystikoProtocolV2)
-          .commitment({
-            publicKeys: account.shieldedAddress,
-            encryptedNote: {
-              encryptedNote: toBuff(commitment.encryptedNote),
-              skEnc: account.secretKeyForEncryption(this.protocol, walletPassword),
-            },
-          })
-          .catch(() => undefined)
-          .then((decryptedCommitment) => {
-            if (decryptedCommitment) {
-              const { amount, randomP, commitmentHash } = decryptedCommitment;
-              if (commitmentHash.toString() === commitment.commitmentHash) {
-                const updatedCommitment = commitment.toMutableJSON();
-                const rawSk = account.secretKeyForVerification(this.protocol, walletPassword);
-                const sk = this.protocol.secretKeyForVerification(rawSk);
-                updatedCommitment.serialNumber = (this.protocol as MystikoProtocolV2)
-                  .serialNumber(sk, randomP)
-                  .toString();
-                updatedCommitment.amount = amount.toString();
-                updatedCommitment.shieldedAddress = account.shieldedAddress;
-                updatedCommitment.updatedAt = MystikoHandler.now();
-                return Promise.resolve(updatedCommitment);
-              }
-            }
-            return this.decryptCommitmentWithAccounts(commitment, accounts, accountIndex + 1, walletPassword);
-          });
-      }
-    }
-    return Promise.resolve(undefined);
   }
 }
