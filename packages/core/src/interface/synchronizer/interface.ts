@@ -34,7 +34,7 @@ export type SyncOptions = {
   walletPassword: string;
   timeoutMs?: number;
   chainTimeoutMs?: number;
-  noIndexer?: boolean;
+  noSequencer?: boolean;
   noPacker?: boolean;
   skipAccountScan?: boolean;
   chainIds?: number[];

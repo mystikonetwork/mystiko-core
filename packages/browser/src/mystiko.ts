@@ -1,3 +1,4 @@
+import { createGrpcWebTransport } from '@connectrpc/connect-web';
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesBrowserProverFactory } from '@mystikonetwork/zkp-browser';
@@ -10,6 +11,13 @@ export type InitOptionsInBrowser = InitOptions & {
 export class MystikoInBrowser extends Mystiko {
   public initialize(options?: InitOptionsInBrowser): Promise<void> {
     const wrappedOptions = { ...options };
+
+    if (!wrappedOptions.grpcTransportFactory) {
+      wrappedOptions.grpcTransportFactory = (baseUrl) =>
+        createGrpcWebTransport({
+          baseUrl,
+        });
+    }
     if (!wrappedOptions.dbParams) {
       if (wrappedOptions.dbInMemory) {
         addPouchPlugin(require('pouchdb-adapter-memory'));

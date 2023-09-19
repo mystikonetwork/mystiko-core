@@ -1,10 +1,11 @@
 import { DepositContractConfig, PoolContractConfig } from '@mystikonetwork/config';
+import * as sequencer from '@mystikonetwork/sequencer-client';
 import { ExecutorFactory, MystikoContextInterface } from '../../../interface';
 import { AssetExecutorV2 } from './asset';
 import { CommitmentExecutorV2 } from './commitment';
 import { DepositExecutorV2 } from './deposit';
 import { EventExecutorV2 } from './event';
-import { IndexerExecutorV2 } from './indexer';
+import { SequencerExecutorV2 } from './sequencer';
 import { PackerExecutorV2 } from './packer';
 import { TransactionExecutorV2 } from './transaction';
 
@@ -13,7 +14,7 @@ type ExecutorFactoryV2Interface = ExecutorFactory<
   CommitmentExecutorV2,
   DepositExecutorV2,
   EventExecutorV2,
-  IndexerExecutorV2,
+  SequencerExecutorV2,
   PackerExecutorV2,
   TransactionExecutorV2
 >;
@@ -29,15 +30,18 @@ export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
 
   private eventExecutor?: EventExecutorV2;
 
-  private indexerExecutor?: IndexerExecutorV2;
+  private sequencerExecutor?: SequencerExecutorV2;
 
   private packerExecutor?: PackerExecutorV2;
 
   private transactionExecutor?: TransactionExecutorV2;
 
-  constructor(context: MystikoContextInterface) {
+  private sequencerClient?: sequencer.v1.SequencerClient;
+
+  constructor(context: MystikoContextInterface, sequencerClient?: sequencer.v1.SequencerClient) {
     this.context = context;
     this.context.executors = this;
+    this.sequencerClient = sequencerClient;
   }
 
   public getAssetExecutor(): AssetExecutorV2 {
@@ -69,13 +73,13 @@ export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
     return this.eventExecutor;
   }
 
-  public getIndexerExecutor(): IndexerExecutorV2 | undefined {
-    if (this.context.config.indexer) {
-      if (!this.indexerExecutor) {
-        this.indexerExecutor = new IndexerExecutorV2(this.context, this.context.config.indexer);
+  public getSequencerExecutor(): SequencerExecutorV2 | undefined {
+    if (this.context.config.sequencer && this.sequencerClient) {
+      if (!this.sequencerExecutor) {
+        this.sequencerExecutor = new SequencerExecutorV2(this.context, this.sequencerClient);
       }
     }
-    return this.indexerExecutor;
+    return this.sequencerExecutor;
   }
 
   public getPackerExecutor(): PackerExecutorV2 | undefined {
