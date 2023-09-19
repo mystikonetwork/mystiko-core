@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/ethers",
-  "version": "0.7.7",
+  "version": "0.8.0",
   "description": "ethers related of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -53,13 +53,13 @@
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
-    "@mystikonetwork/config": "^0.9.0",
+    "@mystikonetwork/config": "^0.10.0",
     "@mystikonetwork/utils": "^0.2.11",
     "ethers": "^5.5.3",
     "loglevel": "^1.8.0"
   },
   "resolutions": {
-    "@mystikonetwork/config": "0.9.0",
+    "@mystikonetwork/config": "0.10.0",
     "@mystikonetwork/utils": "0.2.11"
   }
 }

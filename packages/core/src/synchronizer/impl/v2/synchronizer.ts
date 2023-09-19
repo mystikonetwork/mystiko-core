@@ -276,7 +276,7 @@ export class SynchronizerV2 implements Synchronizer {
             `synced events for chainId=${chainId} to blockNumber=${syncedBlock}` +
               ` with ${commitments.length} commitments from packer`,
           );
-          return this.executeIndexerSyncImport(options, chainId).then((moreCommitments) => [
+          return this.executeSequencerSyncImport(options, chainId).then((moreCommitments) => [
             ...commitments,
             ...moreCommitments,
           ]);
@@ -285,37 +285,41 @@ export class SynchronizerV2 implements Synchronizer {
           this.logger.warn(
             `failed to import events for chainId=${chainId} from packer: ${errorMessage(error)}`,
           );
-          return this.executeIndexerSyncImport(options, chainId);
+          return this.executeSequencerSyncImport(options, chainId);
         });
     }
-    return this.executeIndexerSyncImport(options, chainId);
+    return this.executeSequencerSyncImport(options, chainId);
   }
 
-  private executeIndexerSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+  private executeSequencerSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
     const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
-    const indexerExecutor = this.context.executors.getIndexerExecutor();
+    const sequencerExecutor = this.context.executors.getSequencerExecutor();
     let promise: Promise<{
       fallback: boolean;
       reason: string;
       commitments: Commitment[];
     }>;
-    if (indexerExecutor && !options.noIndexer) {
-      promise = indexerExecutor
+    if (sequencerExecutor && !options.noSequencer) {
+      promise = sequencerExecutor
         .import({ walletPassword: options.walletPassword, chainId, timeoutMs })
         .then(({ commitments, hasUpdates }) => {
           if (hasUpdates) {
             return { fallback: false, reason: '', commitments };
           }
-          return { fallback: true, reason: 'indexer does not have updates', commitments };
+          return { fallback: true, reason: 'sequencer does not have updates', commitments };
         })
         .catch((error) => {
           this.logger.warn(
-            `failed to import events for chainId=${chainId} from indexer: ${errorMessage(error)}`,
+            `failed to import events for chainId=${chainId} from sequencer: ${errorMessage(error)}`,
           );
-          return { fallback: true, reason: `indexer raised error: ${errorMessage(error)}`, commitments: [] };
+          return {
+            fallback: true,
+            reason: `sequencer raised error: ${errorMessage(error)}`,
+            commitments: [],
+          };
         });
     } else {
-      promise = Promise.resolve({ fallback: true, reason: 'no indexer is configured', commitments: [] });
+      promise = Promise.resolve({ fallback: true, reason: 'no sequencer is configured', commitments: [] });
     }
     return promise.then(({ fallback, reason, commitments }) => {
       if (fallback) {

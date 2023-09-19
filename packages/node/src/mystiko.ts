@@ -1,3 +1,4 @@
+import { createGrpcTransport } from '@connectrpc/connect-node';
 import { InitOptions, Mystiko } from '@mystikonetwork/core';
 import { ZKProverFactory } from '@mystikonetwork/zkp';
 import { ZokratesNodeProverFactory } from '@mystikonetwork/zkp-node';
@@ -32,6 +33,13 @@ export class MystikoInNode extends Mystiko {
       loggingOptions,
       ...options,
     };
+    if (!wrappedOptions.grpcTransportFactory) {
+      wrappedOptions.grpcTransportFactory = (baseUrl) =>
+        createGrpcTransport({
+          baseUrl,
+          httpVersion: '2',
+        });
+    }
     if (!wrappedOptions.dbName) {
       if (!fs.existsSync('db')) {
         fs.mkdirSync('db');

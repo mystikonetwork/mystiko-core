@@ -3,7 +3,7 @@ import { AssetExecutor } from './asset';
 import { CommitmentExecutor } from './commitment';
 import { DepositExecutor } from './deposit';
 import { EventExecutor } from './event';
-import { IndexerExecutor } from './indexer';
+import { SequencerExecutor } from './sequencer';
 import { PackerExecutor } from './packer';
 import { TransactionExecutor } from './transaction';
 
@@ -12,7 +12,7 @@ export interface ExecutorFactory<
   C extends CommitmentExecutor = CommitmentExecutor,
   D extends DepositExecutor = DepositExecutor,
   E extends EventExecutor = EventExecutor,
-  I extends IndexerExecutor = IndexerExecutor,
+  S extends SequencerExecutor = SequencerExecutor,
   P extends PackerExecutor = PackerExecutor,
   T extends TransactionExecutor = TransactionExecutor,
 > {
@@ -20,7 +20,7 @@ export interface ExecutorFactory<
   getCommitmentExecutor(): C;
   getEventExecutor(): E;
   getDepositExecutor(config: DepositContractConfig): D;
-  getIndexerExecutor(): I | undefined;
+  getSequencerExecutor(): S | undefined;
   getTransactionExecutor(config: PoolContractConfig): T;
   getPackerExecutor(): P | undefined;
 }
