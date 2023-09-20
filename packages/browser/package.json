@@ -38,7 +38,7 @@
     "@tsconfig/recommended": "^1.0.1",
     "@types/jest": "^27.4.0",
     "@types/nock": "^11.1.0",
-    "@types/node": "^17.0.21",
+    "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
     "assert-browserify": "^2.0.0",
