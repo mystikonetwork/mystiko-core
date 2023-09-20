@@ -37,8 +37,8 @@
   "devDependencies": {
     "@ethereum-waffle/mock-contract": "^3.4.4",
     "@ethereum-waffle/provider": "^3.4.4",
-    "@mystikonetwork/secret-share": "^0.2.4",
-    "@mystikonetwork/zkp-node": "^0.2.4",
+    "@mystikonetwork/secret-share": "^0.3.2",
+    "@mystikonetwork/zkp-node": "^0.3.2",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.2",
     "@types/jest": "^27.4.0",
@@ -62,19 +62,19 @@
   },
   "dependencies": {
     "@connectrpc/connect": "^1.0.0",
-    "@mystikonetwork/config": "^0.10.0",
+    "@mystikonetwork/config": ">=0.10.0",
     "@mystikonetwork/contracts-abi": "^0.2.3",
     "@mystikonetwork/database": "^0.8.0",
     "@mystikonetwork/datapacker-client": "^0.2.0",
     "@mystikonetwork/ecies": "^0.3.2",
     "@mystikonetwork/ethers": "^0.8.0",
-    "@mystikonetwork/gas-relayer-client": "^0.1.19",
-    "@mystikonetwork/gas-relayer-config": "^0.1.19",
+    "@mystikonetwork/gas-relayer-client": "^0.8.0",
+    "@mystikonetwork/gas-relayer-config": "^0.8.0",
     "@mystikonetwork/merkle": "^0.3.2",
     "@mystikonetwork/protocol": "^0.3.2",
     "@mystikonetwork/protos": "^0.1.0",
     "@mystikonetwork/sequencer-client": "^0.1.0",
-    "@mystikonetwork/utils": "^0.2.11",
+    "@mystikonetwork/utils": ">=0.2.11",
     "@mystikonetwork/zkp": "^0.3.2",
     "bn.js": "^5.2.0",
     "broadcast-channel": "4.9.0",
@@ -86,9 +86,5 @@
     "rxdb": "12.5.4",
     "rxjs": "7.5.5",
     "ulid": "^2.3.0"
-  },
-  "resolutions": {
-    "@mystikonetwork/config": "0.10.0",
-    "@mystikonetwork/utils": "0.2.11"
   }
 }

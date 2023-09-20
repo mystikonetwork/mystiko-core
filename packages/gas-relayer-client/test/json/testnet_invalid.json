@@ -1,0 +1,38 @@
+{
+  "version": "0.0.1",
+  "chains": [
+    {
+      "name": "Ethereum Goerli",
+      "chainId": 5,
+      "relayerContractAddress": "",
+      "contracts": [
+        {
+          "assetSymbol": "ETH",
+          "relayerFeeOfTenThousandth": 25
+        },
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25
+        }
+      ]
+    },
+    {
+      "name": "BSC Testnet",
+      "chainId": 97,
+      "relayerContractAddress": "",
+      "contracts": []
+    }
+  ],
+  "client": {
+    "defaultLoggerLevel": "info",
+    "defaultTimeout": 60000
+  },
+  "server": {
+    "defaultLoggerLevel": "info",
+    "defaultTimeout": 60000
+  }
+}
