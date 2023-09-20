@@ -1,0 +1,251 @@
+{
+  "version": "0.0.1",
+  "chains": [
+    {
+      "name": "Ethereum Goerli",
+      "chainId": 5,
+      "assetSymbol": "ETH",
+      "relayerContractAddress": "0xd3f481c84FeE6af4a068679Dc75e580acE9672c9",
+      "contracts": [
+        {
+          "assetSymbol": "ETH",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        },
+        "erc20GasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        }
+      }
+    },
+    {
+      "name": "BSC Testnet",
+      "chainId": 97,
+      "assetSymbol": "BNB",
+      "relayerContractAddress": "0xAD5cBF71E3029077088B9eDC3F5Ab46f14431fAb",
+      "contracts": [
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "BNB",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        },
+        "erc20GasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        }
+      }
+    },
+    {
+      "name": "Polygon Mumbai",
+      "chainId": 80001,
+      "assetSymbol": "MATIC",
+      "relayerContractAddress": "0x67D46079E51F732A83C00DD3468b7a4c6558a02A",
+      "contracts": [
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "MATIC",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        },
+        "erc20GasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        }
+      }
+    },
+    {
+      "name": "Avalanche Fuji",
+      "chainId": 43113,
+      "assetSymbol": "AVAX",
+      "relayerContractAddress": "0x58427039aaB978b48b3CDa45532A0C0ddf744e6F",
+      "contracts": [
+        {
+          "assetSymbol": "AVAX",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        },
+        "erc20GasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        }
+      }
+    },
+    {
+      "name": "Fantom Testnet",
+      "chainId": 4002,
+      "assetSymbol": "FTM",
+      "relayerContractAddress": "0xacfB532455D7c0A81FeE6BCbF45296e1F4776716",
+      "contracts": [
+        {
+          "assetSymbol": "FTM",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        },
+        "erc20GasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        }
+      }
+    },
+    {
+      "name": "Moonbase Alpha",
+      "chainId": 1287,
+      "assetSymbol": "DEV",
+      "relayerContractAddress": "0xfEe9b8D0dcF5E6928d75fFaF524a153bbEcc40ac",
+      "contracts": [
+        {
+          "assetSymbol": "DEV",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        },
+        "erc20GasCost": {
+          "transaction1x0": 100000,
+          "transaction1x1": 200000,
+          "transaction1x2": 300000,
+          "transaction2x0": 400000,
+          "transaction2x1": 500000,
+          "transaction2x2": 600000
+        }
+      }
+    }
+  ]
+}

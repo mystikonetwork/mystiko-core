@@ -62,20 +62,20 @@
   },
   "dependencies": {
     "@connectrpc/connect": "^1.0.0",
-    "@mystikonetwork/config": "^0.10.0",
+    "@mystikonetwork/config": ">=0.10.0",
     "@mystikonetwork/contracts-abi": "^0.2.3",
     "@mystikonetwork/database": "^0.8.0",
     "@mystikonetwork/datapacker-client": "^0.2.0",
     "@mystikonetwork/ecies": "^0.3.3",
     "@mystikonetwork/ethers": "^0.8.0",
-    "@mystikonetwork/gas-relayer-client": "^0.1.19",
-    "@mystikonetwork/gas-relayer-config": "^0.1.19",
+    "@mystikonetwork/gas-relayer-client": "^0.8.0",
+    "@mystikonetwork/gas-relayer-config": "^0.8.0",
     "@mystikonetwork/merkle": "^0.3.3",
     "@mystikonetwork/protocol": "^0.3.3",
     "@mystikonetwork/protos": "^0.1.0",
     "@mystikonetwork/sequencer-client": "^0.1.0",
-    "@mystikonetwork/utils": "^0.2.11",
-    "@mystikonetwork/zkp": "^0.3.3",
+    "@mystikonetwork/utils": ">=0.2.11",
+    "@mystikonetwork/zkp": "^0.3.2",
     "bn.js": "^5.2.0",
     "broadcast-channel": "4.9.0",
     "class-validator": "^0.13.2",
@@ -86,9 +86,5 @@
     "rxdb": "12.5.4",
     "rxjs": "7.5.5",
     "ulid": "^2.3.0"
-  },
-  "resolutions": {
-    "@mystikonetwork/config": "0.10.0",
-    "@mystikonetwork/utils": "0.2.11"
   }
 }
