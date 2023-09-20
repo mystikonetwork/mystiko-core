@@ -40,7 +40,7 @@
     "@mystikonetwork/secret-share": "^0.2.4",
     "@mystikonetwork/zkp-node": "^0.2.4",
     "@tsconfig/recommended": "^1.0.1",
-    "@types/bn.js": "^5.1.1",
+    "@types/bn.js": "^5.1.2",
     "@types/jest": "^27.4.0",
     "@types/nock": "^11.1.0",
     "@types/node": "^18.11.9",
