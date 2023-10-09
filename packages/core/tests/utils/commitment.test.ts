@@ -87,7 +87,7 @@ test('test select exact match', () => {
 });
 
 test('test quote transfer', () => {
-  const config = { assetSymbol: 'MTT', assetDecimals: 18, minRollupFee: toDecimals(10) };
+  const config = { assetSymbol: 'MTT', assetDecimals: 18, minRollupFee: toDecimals(10), disabled: false };
   let commitments = [{ amount: toDecimals(1).toString() }];
   let quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER }, config, commitments, 2);
   expect(quote.valid).toBe(false);
@@ -143,10 +143,16 @@ test('test quote transfer', () => {
   expect(quote.valid).toBe(true);
   expect(quote.numOfInputs).toBe(2);
   expect(quote.numOfSplits).toBe(1);
+  config.disabled = true;
+  quote = CommitmentUtils.quote({ type: TransactionEnum.TRANSFER, amount: 42 }, config, commitments, 2);
+  expect(quote.valid).toBe(false);
+  expect(quote.invalidReason).toBe(
+    'pool is disabled for transfer or splits, please withdraw max amounts allowed',
+  );
 });
 
 test('test quote withdraw', () => {
-  const config = { assetSymbol: 'MTT', assetDecimals: 18, minRollupFee: toDecimals(10) };
+  const config = { assetSymbol: 'MTT', assetDecimals: 18, minRollupFee: toDecimals(10), disabled: false };
   let commitments = [{ amount: toDecimals(1).toString() }];
   let quote = CommitmentUtils.quote(
     { type: TransactionEnum.WITHDRAW, publicAmount: 1 },
@@ -177,4 +183,15 @@ test('test quote withdraw', () => {
   expect(quote.numOfSplits).toBe(1);
   quote = CommitmentUtils.quote({ type: TransactionEnum.WITHDRAW }, config, commitments, 2);
   expect(quote.valid).toBe(true);
+  config.disabled = true;
+  quote = CommitmentUtils.quote(
+    { type: TransactionEnum.WITHDRAW, publicAmount: 10.5 },
+    config,
+    commitments,
+    2,
+  );
+  expect(quote.valid).toBe(false);
+  expect(quote.invalidReason).toBe(
+    'pool is disabled for transfer or splits, please withdraw max amounts allowed',
+  );
 });
