@@ -125,7 +125,7 @@ function buildChainData(
         }
       });
     });
-    config.getChainConfig(chainId)?.depositContractsWithDisabled?.forEach((depositContract) => {
+    config.getChainConfig(chainId)?.depositContracts?.forEach((depositContract) => {
       contractsData.push(
         new data.v1.ContractData({
           contractAddress: toBuff(depositContract.address),

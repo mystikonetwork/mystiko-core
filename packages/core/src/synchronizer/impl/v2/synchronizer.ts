@@ -47,9 +47,9 @@ export class SynchronizerV2 implements Synchronizer {
 
   private readonly broadcastChannel: BroadcastChannel<SyncEvent>;
 
-  private initTimer?: NodeJS.Timer;
+  private initTimer?: NodeJS.Timeout;
 
-  private intervalTimer?: NodeJS.Timer;
+  private intervalTimer?: NodeJS.Timeout;
 
   private isSyncing: boolean;
 
