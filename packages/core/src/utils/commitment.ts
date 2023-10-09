@@ -18,6 +18,7 @@ type PoolContractConfigLike = {
   assetSymbol: string;
   assetDecimals: number;
   minRollupFee: BN;
+  disabled: boolean;
 };
 
 export class CommitmentUtils {
@@ -143,6 +144,12 @@ export class CommitmentUtils {
       amount.sub(minRollupFee.mul(toBN(transactionQuote.numOfSplits))),
       assetDecimals,
     );
+    if (contractConfig.disabled && transactionQuote.numOfSplits > 0) {
+      transactionQuote.valid = false;
+      transactionQuote.invalidReason =
+        'pool is disabled for transfer or splits, please withdraw max amounts allowed';
+      return transactionQuote;
+    }
     return transactionQuote;
   }
 
