@@ -11,7 +11,7 @@
     "sourceMap": true,
     "sourceRoot": "/",
     "outDir": "./build/cjs",
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types", "../../node_modules/@types"]
   },
   "ts-node": {
     "files": true

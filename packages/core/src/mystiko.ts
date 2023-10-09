@@ -1,4 +1,6 @@
+import { Transport } from '@connectrpc/connect';
 import { MystikoConfig } from '@mystikonetwork/config';
+import * as sequencer from '@mystikonetwork/sequencer-client';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MetaMaskSigner, PrivateKeySigner, ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
 import {
@@ -41,6 +43,8 @@ import { SynchronizerFactoryV2 } from './synchronizer';
 
 export const DEFAULT_IP_PRO_API = 'https://ipwhois.pro';
 
+export type GrpcTransportFactory = (baseUrl: string) => Transport;
+
 export interface InitOptions {
   isTestnet?: boolean;
   isStaging?: boolean;
@@ -56,6 +60,7 @@ export interface InitOptions {
   executorFactory?: ExecutorFactory;
   synchronizerFactory?: SynchronizerFactory;
   protocolFactory?: ProtocolFactory;
+  grpcTransportFactory?: GrpcTransportFactory;
   gasRelayers?: GasRelayers;
   ipWhoisApiKey?: string;
 }
@@ -115,6 +120,7 @@ export abstract class Mystiko {
       executorFactory,
       synchronizerFactory,
       protocolFactory,
+      grpcTransportFactory,
       gasRelayers,
       ipWhoisApiKey,
     } = options || {};
@@ -140,7 +146,16 @@ export abstract class Mystiko {
     this.protocol = await protocols.create();
     const contexts = contextFactory || new DefaultContextFactory(this.config, this.db, this.protocol);
     this.context = contexts.createContext();
-    this.context.executors = executorFactory || new ExecutorFactoryV2(this.context);
+    let sequencerClient: sequencer.v1.SequencerClient | undefined;
+    const sequencerConfig = this.config.sequencer;
+    if (grpcTransportFactory && sequencerConfig) {
+      const schema = sequencerConfig.isSsl ? 'https' : 'http';
+      const port = sequencerConfig.port !== undefined ? `:${sequencerConfig.port}` : '';
+      const baseUrl = `${schema}://${sequencerConfig.host}${port}`;
+      const transport = grpcTransportFactory(baseUrl);
+      sequencerClient = new sequencer.v1.SequencerClient(transport);
+    }
+    this.context.executors = executorFactory || new ExecutorFactoryV2(this.context, sequencerClient);
     const handlers = handlerFactory || new HandlerFactoryV2(this.context);
     this.chains = handlers.createChainHandler();
     this.contracts = handlers.createContractHandler();

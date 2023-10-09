@@ -1,0 +1,132 @@
+{
+  "version": "0.0.1",
+  "gitRevision": "__GIT_REVISION__",
+  "chains": [
+    {
+      "name": "Ethereum Mainnet",
+      "chainId": 1,
+      "assetSymbol": "ETH",
+      "relayerContractAddress": "0xfeecaab7006A7f81acD36128c011395ab1D5FCe0",
+      "contracts": [
+        {
+          "assetSymbol": "ETH",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "USDT",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "USDC",
+          "relayerFeeOfTenThousandth": 100
+        }
+      ],
+      "transactionInfo": {
+        "mainGasCost": {
+          "transaction1x0": 500704,
+          "transaction1x1": 619966,
+          "transaction1x2": 705128,
+          "transaction2x0": 598799,
+          "transaction2x1": 708389,
+          "transaction2x2": 803183
+        },
+        "erc20GasCost": {
+          "transaction1x0": 553636,
+          "transaction1x1": 620019,
+          "transaction1x2": 705494,
+          "transaction2x0": 611040,
+          "transaction2x1": 727970,
+          "transaction2x2": 803645
+        }
+      }
+    },
+    {
+      "name": "BNB mainnet",
+      "chainId": 56,
+      "assetSymbol": "BNB",
+      "relayerContractAddress": "0xfeecaab7006A7f81acD36128c011395ab1D5FCe0",
+      "contracts": [
+        {
+          "assetSymbol": "BNB",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "USDT",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "USDC",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "BUSD",
+          "relayerFeeOfTenThousandth": 100
+        }
+      ],
+      "transactionInfo": {
+        "mainGasCost": {
+          "transaction1x0": 520800,
+          "transaction1x1": 636116,
+          "transaction1x2": 724104,
+          "transaction2x0": 630207,
+          "transaction2x1": 743273,
+          "transaction2x2": 833563
+        },
+        "erc20GasCost": {
+          "transaction1x0": 537145,
+          "transaction1x1": 646754,
+          "transaction1x2": 724302,
+          "transaction2x0": 640808,
+          "transaction2x1": 756699,
+          "transaction2x2": 833563
+        }
+      }
+    },
+    {
+      "name": "Polygon mainnet",
+      "chainId": 137,
+      "assetSymbol": "MATIC",
+      "relayerContractAddress": "0x3bd8962c6976054bBa73B6c19232570704c8b69D",
+      "contracts": [
+        {
+          "assetSymbol": "MATIC",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "USDT",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "USDC",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "BUSD",
+          "relayerFeeOfTenThousandth": 100
+        },
+        {
+          "assetSymbol": "WETH",
+          "relayerFeeOfTenThousandth": 100
+        }
+      ],
+      "transactionInfo": {
+        "mainGasCost": {
+          "transaction1x0": 503208,
+          "transaction1x1": 617520,
+          "transaction1x2": 706652,
+          "transaction2x0": 595025,
+          "transaction2x1": 705148,
+          "transaction2x2": 795438
+        },
+        "erc20GasCost": {
+          "transaction1x0": 528479,
+          "transaction1x1": 629858,
+          "transaction1x2": 705322,
+          "transaction2x0": 610366,
+          "transaction2x1": 726257,
+          "transaction2x2": 803121
+        }
+      }
+    }
+  ]
+}

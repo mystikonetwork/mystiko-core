@@ -1,0 +1,87 @@
+{
+  "version": "0.0.1",
+  "chains": [
+    {
+      "name": "Ethereum Goerli",
+      "chainId": 5,
+      "assetSymbol": "ETH",
+      "relayerContractAddress": "0x45B22A8CefDfF00989882CAE48Ad06D57938Efcc",
+      "contracts": [
+        {
+          "assetSymbol": "ETH",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 500704,
+          "transaction1x1": 617592,
+          "transaction1x2": 705128,
+          "transaction2x0": 598799,
+          "transaction2x1": 708389,
+          "transaction2x2": 803183
+        },
+        "erc20GasCost": {
+          "transaction1x0": 512985,
+          "transaction1x1": 629802,
+          "transaction1x2": 705494,
+          "transaction2x0": 611040,
+          "transaction2x1": 727970,
+          "transaction2x2": 803645
+        }
+      }
+    },
+    {
+      "name": "BSC Testnet",
+      "chainId": 97,
+      "assetSymbol": "BNB",
+      "relayerContractAddress": "0xfC21Aa6a04f09565bC6eeDC182063Fd4E466670A",
+      "contracts": [
+        {
+          "assetSymbol": "MTT",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "mUSD",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        },
+        {
+          "assetSymbol": "BNB",
+          "relayerFeeOfTenThousandth": 25,
+          "minimumGasFee": "0"
+        }
+      ],
+      "transaction": {
+        "mainGasCost": {
+          "transaction1x0": 520800,
+          "transaction1x1": 636116,
+          "transaction1x2": 724104,
+          "transaction2x0": 630207,
+          "transaction2x1": 743273,
+          "transaction2x2": 833563
+        },
+        "erc20GasCost": {
+          "transaction1x0": 537145,
+          "transaction1x1": 646754,
+          "transaction1x2": 724302,
+          "transaction2x0": 640808,
+          "transaction2x1": 756699,
+          "transaction2x2": 833563
+        }
+      }
+    }
+  ]
+}

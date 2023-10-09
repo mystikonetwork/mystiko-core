@@ -1,20 +1,12 @@
 {
   "name": "mystiko-core",
-  "version": "0.7.7",
+  "version": "0.8.0",
   "description": "Core Implementation of Mystiko.Network",
   "private": true,
-  "module": "src/index.js",
   "repository": "https://github.com/mystikonetwork/mystiko-core",
   "author": "Fitch",
   "license": "MIT",
-  "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
-    "lint": "lerna run lint",
-    "test": "lerna run test",
-    "deploy": "lerna run deploy"
-  },
-  "devDependencies": {
-    "lerna": "^3.20.2"
-  }
+  "workspaces": [
+    "packages/*"
+  ]
 }

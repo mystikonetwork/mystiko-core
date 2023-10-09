@@ -126,7 +126,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then(({ commitments, minRollupFee }) =>
         CommitmentUtils.quote(
           options,
-          { assetSymbol: config.assetSymbol, assetDecimals: config.assetDecimals, minRollupFee },
+          {
+            assetSymbol: config.assetSymbol,
+            assetDecimals: config.assetDecimals,
+            minRollupFee,
+            disabled: config.disabled,
+          },
           commitments,
           MAX_NUM_INPUTS,
         ),

@@ -49,7 +49,7 @@ test('test init upsert', async () => {
   const rawConfig = context.config.copyData();
   const rawContractConfig = rawConfig.chains[2].depositContracts[0];
   rawContractConfig.eventFilterSize = 1024;
-  rawContractConfig.disabled = true;
+  rawContractConfig.disabledAt = rawContractConfig.startBlock + 1000;
   const newContext = await createTestContext({
     config: await MystikoConfig.createFromRaw(rawConfig),
     db: context.db,

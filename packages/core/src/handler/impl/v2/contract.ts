@@ -26,8 +26,8 @@ export class ContractHandlerV2 extends MystikoHandler implements ContractHandler
     const chainConfigs = this.config.chains;
     for (let i = 0; i < chainConfigs.length; i += 1) {
       const chainConfig = chainConfigs[i];
-      const { poolContracts, depositContractsWithDisabled } = chainConfig;
-      const contracts = [...poolContracts, ...depositContractsWithDisabled];
+      const { poolContracts, depositContracts } = chainConfig;
+      const contracts = [...poolContracts, ...depositContracts];
       for (let j = 0; j < contracts.length; j += 1) {
         const contract = contracts[j];
         const now = MystikoHandler.now();
