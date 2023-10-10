@@ -442,7 +442,10 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
 
   private importCommitmentQueuedEvents(importContext: ImportEventsContext): Promise<CommitmentQueuedEvent[]> {
     const { chainConfig, contractConfig } = importContext;
-    if (contractConfig instanceof DepositContractConfig) {
+    if (
+      contractConfig instanceof DepositContractConfig ||
+      (contractConfig.disabledAt && contractConfig.disabledAt < importContext.fromBlock)
+    ) {
       return Promise.resolve([]);
     }
     const etherContract = this.connectPoolContract(importContext);
@@ -469,7 +472,10 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     importContext: ImportEventsContext,
   ): Promise<CommitmentIncludedEvent[]> {
     const { chainConfig, contractConfig } = importContext;
-    if (contractConfig instanceof DepositContractConfig) {
+    if (
+      contractConfig instanceof DepositContractConfig ||
+      (contractConfig.disabledAt && contractConfig.disabledAt < importContext.fromBlock)
+    ) {
       return Promise.resolve([]);
     }
     const etherContract = this.connectPoolContract(importContext);
