@@ -67,7 +67,8 @@ export class SequencerExecutorV2 extends MystikoExecutor implements SequencerExe
       return Promise.resolve({ commitments: [], hasUpdates: false });
     }
     return promiseWithTimeout(this.sequencerClient.chainLoadedBlock(options.chainId), timeoutMs)
-      .then((targetBlock) => {
+      .then((chainLoadedBlock) => {
+        const targetBlock = chainLoadedBlock.blockNumber;
         const hasUpdates = targetBlock > chain.syncedBlockNumber;
         const contracts = [...chainConfig.depositContracts, ...chainConfig.poolContracts];
         const startBlocks = contracts.map((c) => c.startBlock);
