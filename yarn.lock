@@ -316,24 +316,24 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bufbuild/protobuf@^1.3.0", "@bufbuild/protobuf@^1.3.1":
+"@bufbuild/protobuf@^1.3.3":
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-1.3.3.tgz#814562a5db0233a1ececda97b930c2dde5897de8"
   integrity sha512-AoHSiIpTFF97SQgmQni4c+Tyr0CDhkaRaR2qGEJTEbauqQwLRpLrd9yVv//wVHOSxr/b4FJcL54VchhY6710xA==
 
-"@connectrpc/connect-node@^1.0.0":
+"@connectrpc/connect-node@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@connectrpc/connect-node/-/connect-node-1.1.2.tgz#ac99a696bb1a2d376b3146315cea8b056b278529"
   integrity sha512-IAwQhh05Qm/T/+ZShEnQz+FFZsr2fbq/DCHhXbmwYjePxvo+kF9YIDkTpVy+vjrV+CwZPBfgOdSaRSJLHUykdg==
   dependencies:
     undici "^5.25.4"
 
-"@connectrpc/connect-web@^1.0.0":
+"@connectrpc/connect-web@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@connectrpc/connect-web/-/connect-web-1.1.2.tgz#e862a4027406dc772ead3ae179f058c26b1fcf0f"
   integrity sha512-6Osvp4d/5Qvf0dsbUmqgzCPFIong9KBm5G24g2gapPW2huAtyVj+KwdG6453EKCirPZ5qZHY0FywLef57op9YQ==
 
-"@connectrpc/connect@^1.0.0":
+"@connectrpc/connect@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@connectrpc/connect/-/connect-1.1.2.tgz#d1b5fa1dcec310a8210c1523c99abdc227643f4b"
   integrity sha512-oDuKJFRORtzyH4IhZyNgIQ5DKjlDnbP72AH55Aabpc0fwApyus/h4cmYU1KDvahVbqsvUOpd5qUTyMH8IhMmLA==
@@ -1095,7 +1095,7 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@>=0.10.0", "@mystikonetwork/config@^0.10.0":
+"@mystikonetwork/config@>=0.10.0":
   version "0.10.0"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.0/6564895584aa99820b0b955fa3ffbeefe21389eb#6564895584aa99820b0b955fa3ffbeefe21389eb"
   integrity sha512-rzY8Rl7t2KMK8k92m0A//PEmiFAmBuMm/Oa64shGk5HUPuH9TwPeInuIy+4opRLudwdf0iY1qDWEAMB0r4ouyQ==
@@ -1117,14 +1117,14 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.2.0":
-  version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.2.0/6219ce657acd3ea76b70190f98b8e1a1aac960dc#6219ce657acd3ea76b70190f98b8e1a1aac960dc"
-  integrity sha512-yM6Mx6N65ZG7Nbp4eBy0FwELdyjeE+0HmS8uvyjWOVQE+7kT7lH1dfaxls0wMZIc+VazKcY2hTcmtVLlTcZWfA==
+"@mystikonetwork/datapacker-client@^0.3.0":
+  version "0.3.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.0/c19cf8169d8879fa13b0362ca49046a894b40a24#c19cf8169d8879fa13b0362ca49046a894b40a24"
+  integrity sha512-fYfuSkSusWF7BlhXINK4fIDAux6VLinS6xnoLuPC1f1Utyu3L2REXBJawAvX/DDRCe6xxr0Fyh4Z0t3S3HfhyQ==
   dependencies:
-    "@mystikonetwork/config" "^0.10.0"
-    "@mystikonetwork/protos" "^0.2.0"
-    "@mystikonetwork/utils" "^0.2.9"
+    "@mystikonetwork/config" ">=0.10.0"
+    "@mystikonetwork/protos" ">=0.3.0"
+    "@mystikonetwork/utils" ">=0.2.9"
     axios "^0.27.2"
     crypto-js "^4.1.1"
     fzstd "^0.1.0"
@@ -1187,19 +1187,12 @@
     loglevel "^1.8.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/protos@^0.1.0":
-  version "0.1.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.1.0/8b7277e659fc9a73301a7910782e2c2ccda76065#8b7277e659fc9a73301a7910782e2c2ccda76065"
-  integrity sha512-n/s57IL8jcQ1LAKxOSIOmZX1/jEDEy1ICwW5pTmUuDNMA1lMMy1cotlceoCV7ddRCRKmiP4bMfSyuaTOTdbdww==
+"@mystikonetwork/protos@>=0.3.0", "@mystikonetwork/protos@^0.3.0":
+  version "0.3.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.3.0/0bb202ab12049c92cce48793a9f55a7038bb1faf#0bb202ab12049c92cce48793a9f55a7038bb1faf"
+  integrity sha512-4RZZkHp/8lySUylYGgIIJTLvWwPQfHeWe6mvqG9CWOf5SJxDTW77+68ai51B5py7zvXdKq1t5UlaiQFKYCrKDQ==
   dependencies:
-    "@bufbuild/protobuf" "^1.3.0"
-
-"@mystikonetwork/protos@^0.2.0":
-  version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.2.0/9393c0c50aed9ee9fbe1e087ee89f0003fc61641#9393c0c50aed9ee9fbe1e087ee89f0003fc61641"
-  integrity sha512-rFVRN7FZG1j39x2LsXUcaYp6ey/I/YVetJ9PHMm1uoELI8KyOcofjPHYfYd0+/Gf+bd2Ao2Tld3JKygruLBHJw==
-  dependencies:
-    "@bufbuild/protobuf" "^1.3.0"
+    "@bufbuild/protobuf" "^1.3.3"
 
 "@mystikonetwork/secret-share@^0.3.3":
   version "0.3.3"
@@ -1210,17 +1203,19 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/sequencer-client@^0.1.0":
-  version "0.1.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.1.0/64e40c1f96d61a858e252d94741a645cb8a770b0#64e40c1f96d61a858e252d94741a645cb8a770b0"
-  integrity sha512-/rv8X8Q1LN1FBLsjriDbDqVlL98awyT6RkQbOtoN2vaIEq3V5o3HVWfv/pw4lrtFeP66Mae+Bu8mePf5eevCYw==
+"@mystikonetwork/sequencer-client@^0.2.0":
+  version "0.2.0"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.0/fa21de86be96d47e86d9b65c586259467999950c#fa21de86be96d47e86d9b65c586259467999950c"
+  integrity sha512-WNj/88N8Lrxd1l879+FaEVjjh59tPXN35ynVEf2PHfuQkZPmKqDxteo89eRTlR/uwFZvgA4Eo9dev0tUpXdHQQ==
   dependencies:
-    "@connectrpc/connect" "^1.0.0"
-    "@mystikonetwork/protos" "^0.2.0"
-    "@mystikonetwork/utils" "^0.2.9"
+    "@bufbuild/protobuf" "^1.3.3"
+    "@connectrpc/connect" "^1.1.2"
+    "@mystikonetwork/protos" "^0.3.0"
+    "@mystikonetwork/utils" ">=0.2.9"
+    bn.js "^5.2.0"
     ethers "^5.5.3"
 
-"@mystikonetwork/utils@>=0.2.11", "@mystikonetwork/utils@^0.2.11", "@mystikonetwork/utils@^0.2.9":
+"@mystikonetwork/utils@>=0.2.11", "@mystikonetwork/utils@>=0.2.9", "@mystikonetwork/utils@^0.2.11":
   version "0.2.11"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.2.11/81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2#81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2"
   integrity sha512-dxUVm0Bo+wjH58NK21mK9oY2Rpay4YwrZCTXwak2TS976Hy+yekGzUGNF7bI1AhBVgEDloSXljJ8hmeFdZS0nw==
