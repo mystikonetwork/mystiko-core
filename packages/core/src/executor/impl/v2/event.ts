@@ -175,6 +175,7 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
           const {
             commitmentHash,
             contractAddress,
+            creationTransactionHash,
             rollupTransactionHash,
             leafIndex,
             rollupFeeAmount,
@@ -206,6 +207,8 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
                 mutableExistingCommitment.status = CommitmentStatus.INCLUDED;
               }
               mutableExistingCommitment.updatedAt = MystikoHandler.now();
+              mutableExistingCommitment.creationTransactionHash =
+                mutableExistingCommitment.creationTransactionHash || creationTransactionHash;
               mutableExistingCommitment.rollupTransactionHash = rollupTransactionHash;
               mutableExistingCommitment.leafIndex = mutableExistingCommitment.leafIndex || leafIndex;
               mutableExistingCommitment.rollupFeeAmount =
@@ -349,6 +352,13 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
                 depositData.relayTransactionHash = commitment.creationTransactionHash;
               }
             } else if (depositStatus === DepositStatus.INCLUDED) {
+              if (commitment.creationTransactionHash) {
+                if (chainConfig.getPoolContractBridgeType(commitment.contractAddress) === BridgeType.LOOP) {
+                  depositData.transactionHash = commitment.creationTransactionHash;
+                } else {
+                  depositData.relayTransactionHash = commitment.creationTransactionHash;
+                }
+              }
               depositData.rollupTransactionHash = commitment.rollupTransactionHash;
             }
             depositsData.push(depositData);
@@ -398,6 +408,7 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
         if (event.eventType === EventType.COMMITMENT_QUEUED) {
           commitment.creationTransactionHash = transactionHash;
         } else {
+          commitment.creationTransactionHash = event.queuedTransactionHash;
           commitment.rollupTransactionHash = transactionHash;
         }
         commitments.push(commitment);
