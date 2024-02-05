@@ -174,6 +174,7 @@ export class SequencerExecutorV2 extends MystikoExecutor implements SequencerExe
                   eventType: EventType.COMMITMENT_INCLUDED,
                   contractAddress: contractData.contractAddress,
                   commitmentHash,
+                  queuedTransactionHash,
                   transactionHash: includedTransactionHash,
                   leafIndex,
                   encryptedNote,

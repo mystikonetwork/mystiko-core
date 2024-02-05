@@ -123,6 +123,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
             eventType: EventType.COMMITMENT_INCLUDED,
             contractAddress,
             commitmentHash,
+            queuedTransactionHash,
             transactionHash: includedTransactionHash,
             leafIndex,
             encryptedNote,

@@ -27,6 +27,7 @@ export type CommitmentIncludedEvent = ContractBaseEvent & {
   leafIndex: ethers.BigNumber | string | undefined;
   rollupFee: ethers.BigNumber | string | undefined;
   encryptedNote: string | undefined;
+  queuedTransactionHash: string | undefined;
 };
 
 export type CommitmentSpentEvent = ContractBaseEvent & {
