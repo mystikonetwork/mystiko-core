@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/no-zokrates",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "mystiko library without zokrates in browser",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -70,10 +70,10 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "@mystikonetwork/core": "^0.8.3",
-    "@mystikonetwork/protocol": "^0.3.4",
-    "@mystikonetwork/zkp": "^0.3.4",
-    "@mystikonetwork/zkp-nop": "^0.3.4",
+    "@mystikonetwork/core": "^0.8.4",
+    "@mystikonetwork/protocol": "^0.3.5",
+    "@mystikonetwork/zkp": "^0.3.5",
+    "@mystikonetwork/zkp-nop": "^0.3.5",
     "pouchdb-adapter-idb": "7.3.0",
     "pouchdb-adapter-memory": "7.3.0",
     "rxdb": "12.5.4",
