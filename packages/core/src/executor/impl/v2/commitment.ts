@@ -341,13 +341,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
         promise = promiseWithTimeout(promise, options.timeoutMs);
       }
       const contextWithEvents = await promise;
-      const filteredContextWithEvents: { context: ImportEventsContext; events: ContractEvent[] }[] = [];
-      contextWithEvents.forEach((contextWithEvent) => {
-        if (contextWithEvent) {
-          filteredContextWithEvents.push(contextWithEvent);
-        }
-      });
-      const commitments = await this.saveChainEvents(0, filteredContextWithEvents);
+      const commitments = await this.saveChainEvents(0, contextWithEvents);
       this.logger.info(
         `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
       );
