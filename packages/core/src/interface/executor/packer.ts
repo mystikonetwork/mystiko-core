@@ -4,6 +4,7 @@ export type PackerImportOptions = {
   walletPassword: string;
   chainId: number;
   timeoutMs?: number;
+  contractAddresses?: string[];
 };
 
 export type PackerImportResult = {

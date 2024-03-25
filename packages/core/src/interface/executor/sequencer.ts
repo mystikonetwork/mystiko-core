@@ -4,6 +4,7 @@ export type ImportOptions = {
   walletPassword: string;
   chainId: number;
   timeoutMs?: number;
+  contractAddresses?: string[];
 };
 
 export type ImportResult = {

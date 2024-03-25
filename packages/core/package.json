@@ -62,10 +62,10 @@
   },
   "dependencies": {
     "@connectrpc/connect": "^1.1.2",
-    "@mystikonetwork/config": ">=0.10.0",
+    "@mystikonetwork/config": ">=0.10.1",
     "@mystikonetwork/contracts-abi": "^0.2.3",
     "@mystikonetwork/database": "^0.8.4",
-    "@mystikonetwork/datapacker-client": "^0.3.0",
+    "@mystikonetwork/datapacker-client": "^0.3.1",
     "@mystikonetwork/ecies": "^0.3.5",
     "@mystikonetwork/ethers": "^0.8.4",
     "@mystikonetwork/gas-relayer-client": "^0.8.4",

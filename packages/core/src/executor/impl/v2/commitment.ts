@@ -17,7 +17,7 @@ import {
   Nullifier,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, promiseWithTimeout, toBN } from '@mystikonetwork/utils';
+import { promiseWithTimeout, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -291,7 +291,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                   ...importContext,
                   chainConfig,
                   provider,
-                  currentBlock: Math.max(0, currentBlock - chainConfig.eventFilterBlockBackoff),
+                  currentBlock: Math.max(0, currentBlock - chainConfig.eventDelayBlocks),
                 }),
               );
             }
@@ -312,86 +312,48 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       });
   }
 
-  private importChain(importContext: ImportChainContext): Promise<Commitment[]> {
-    const promises: Promise<{ context: ImportEventsContext; events: ContractEvent[] } | undefined>[] = [];
+  private async importChain(importContext: ImportChainContext): Promise<Commitment[]> {
     const { chainConfig, options } = importContext;
-    const { chainId, contractAddress } = importContext.options;
-    const { poolContracts, depositContracts } = chainConfig;
-    const contracts: Array<PoolContractConfig | DepositContractConfig> = [
-      ...poolContracts,
-      ...depositContracts,
-    ];
-    return this.context.chains.findOne(chainConfig.chainId).then((chain) => {
-      if (chain) {
-        this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
-        for (let i = 0; i < contracts.length; i += 1) {
-          const contractConfig = contracts[i];
-          if (
-            !chainId ||
-            !contractAddress ||
-            (contractAddress === contractConfig.address && chainId === chainConfig.chainId)
-          ) {
-            promises.push(
-              this.context.contracts
-                .findOne({ chainId: chainConfig.chainId, address: contractConfig.address })
-                .then((contract) => {
-                  if (contract) {
-                    return this.importContract({
-                      ...importContext,
-                      contractConfig,
-                      contract,
-                    });
-                  }
-                  /* istanbul ignore next */
-                  return Promise.resolve(undefined);
-                }),
-            );
-          }
+    const { contractAddresses } = importContext.options;
+    const synced = await this.context.chains.syncedBlockNumber(chainConfig.chainId, contractAddresses);
+    const { contracts } = synced;
+    const chain = await this.context.chains.findOne(chainConfig.chainId);
+    if (chain) {
+      this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
+      const promises = [];
+      for (let i = 0; i < contracts.length; i += 1) {
+        const contract = contracts[i];
+        const contractConfig =
+          chainConfig.getDepositContractByAddress(contract.contractAddress) ||
+          chainConfig.getPoolContractByAddress(contract.contractAddress);
+        if (contractConfig) {
+          promises.push(
+            this.importContract({
+              ...importContext,
+              contractConfig,
+              contract,
+            }),
+          );
         }
-        let promise = Promise.all(promises);
-        if (options.timeoutMs) {
-          promise = promiseWithTimeout(promise, options.timeoutMs);
-        }
-        return promise
-          .then((contextWithEvents) => {
-            const filteredContextWithEvents: { context: ImportEventsContext; events: ContractEvent[] }[] = [];
-            contextWithEvents.forEach((contextWithEvent) => {
-              if (contextWithEvent) {
-                filteredContextWithEvents.push(contextWithEvent);
-              }
-            });
-            const minToBlock = Math.min(...filteredContextWithEvents.map(({ context }) => context.toBlock));
-            return this.saveChainEvents(0, filteredContextWithEvents).then((commitments) => ({
-              commitments,
-              toBlock: minToBlock,
-            }));
-          })
-          .then(({ commitments, toBlock }) =>
-            chain
-              .atomicUpdate((data) => {
-                data.syncedBlockNumber = toBlock;
-                data.updatedAt = MystikoHandler.now();
-                return data;
-              })
-              .then(() => commitments),
-          )
-          .then((commitments) => {
-            this.logger.info(
-              `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
-            );
-            return commitments;
-          })
-          .catch((error) => {
-            this.logger.error(
-              `failed to import commitment related events from chain id=${
-                chainConfig.chainId
-              }, errorMessage=${errorMessage(error)}`,
-            );
-            return Promise.reject(error);
-          });
       }
-      return Promise.resolve([]);
-    });
+      let promise = Promise.all(promises);
+      if (options.timeoutMs) {
+        promise = promiseWithTimeout(promise, options.timeoutMs);
+      }
+      const contextWithEvents = await promise;
+      const filteredContextWithEvents: { context: ImportEventsContext; events: ContractEvent[] }[] = [];
+      contextWithEvents.forEach((contextWithEvent) => {
+        if (contextWithEvent) {
+          filteredContextWithEvents.push(contextWithEvent);
+        }
+      });
+      const commitments = await this.saveChainEvents(0, filteredContextWithEvents);
+      this.logger.info(
+        `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
+      );
+      return commitments;
+    }
+    return [];
   }
 
   private importContract(
@@ -700,7 +662,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   private static formatOptions(options: CommitmentImport): string {
     return JSON.stringify({
       chainId: options.chainId,
-      contractAddress: options.contractAddress,
+      contractAddresses: options.contractAddresses,
     });
   }
 }

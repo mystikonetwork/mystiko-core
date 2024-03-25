@@ -1,5 +1,5 @@
 import { ChainConfig } from '@mystikonetwork/config';
-import { Chain, ContractType } from '@mystikonetwork/database';
+import { Chain, Contract, ContractType } from '@mystikonetwork/database';
 import { v1 as Packer } from '@mystikonetwork/datapacker-client';
 import { FetchOptions } from '@mystikonetwork/datapacker-client/build/cjs/v1/client';
 import { data } from '@mystikonetwork/protos';
@@ -67,10 +67,14 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
       chainId: options.chainId,
       startBlock: syncedBlock + 1,
       targetBlock,
+      contractAddresses: options.contractAddresses,
     });
   }
 
-  private saveChainData(chainData: data.v1.ChainData, context: ImportContext): Promise<PackerImportResult> {
+  private async saveChainData(
+    chainData: data.v1.ChainData,
+    context: ImportContext,
+  ): Promise<PackerImportResult> {
     const startTime = Date.now();
     const { options, syncedBlock } = context;
     if (Number(chainData.startBlock) !== syncedBlock + 1) {
@@ -81,63 +85,84 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
     const queuedEvents: CommitmentQueuedEvent[] = [];
     const includedEvents: CommitmentIncludedEvent[] = [];
     const spentEvents: CommitmentSpentEvent[] = [];
-    const importedContracts: string[] = [];
+    const importedContracts = chainData.contractData.map((contractData) =>
+      ethers.utils.getAddress(toHex(contractData.contractAddress)),
+    );
+    const contracts = await this.context.contracts.find({
+      selector: {
+        chainId: options.chainId,
+        contractAddress: { $in: importedContracts },
+      },
+    });
+    const contractsMap = new Map<string, Contract>();
+    contracts.forEach((contract) => {
+      contractsMap.set(contract.contractAddress, contract);
+    });
     for (let i = 0; i < chainData.contractData.length; i += 1) {
       const contractData = chainData.contractData[i];
-      const contractAddress = ethers.utils.getAddress(toHex(contractData.contractAddress));
-      importedContracts.push(contractAddress);
+      const contractAddress = importedContracts[i];
+      const syncedBlockNumber = contractsMap.get(contractAddress)?.syncedBlockNumber || 0;
       for (let j = 0; j < contractData.commitments.length; j += 1) {
         const commitment = contractData.commitments[j];
-        const commitmentHash = toBN(commitment.commitmentHash, 10, 'le').toString();
-        const leafIndex = commitment.leafIndex !== undefined ? commitment.leafIndex.toString() : undefined;
-        const encryptedNote =
-          commitment.encryptedNote !== undefined ? toHex(commitment.encryptedNote) : undefined;
-        const rollupFee =
-          commitment.rollupFee !== undefined ? toBN(commitment.rollupFee, 10, 'le').toString() : undefined;
-        const queuedTransactionHash =
-          commitment.queuedTransactionHash !== undefined
-            ? toHex(commitment.queuedTransactionHash)
-            : undefined;
-        const includedTransactionHash =
-          commitment.includedTransactionHash !== undefined
-            ? toHex(commitment.includedTransactionHash)
-            : undefined;
-        if (commitment.status === data.v1.CommitmentStatus.QUEUED) {
-          if (!leafIndex || !encryptedNote || !rollupFee || !queuedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment queued data'));
+        const blockNumber = Math.max(
+          Number(commitment.blockNumber),
+          Number(commitment.includedBlockNumber || BigInt(0)),
+          Number(commitment.includedBlockNumber || BigInt(0)),
+        );
+        if (blockNumber > syncedBlockNumber) {
+          const commitmentHash = toBN(commitment.commitmentHash, 10, 'le').toString();
+          const leafIndex = commitment.leafIndex !== undefined ? commitment.leafIndex.toString() : undefined;
+          const encryptedNote =
+            commitment.encryptedNote !== undefined ? toHex(commitment.encryptedNote) : undefined;
+          const rollupFee =
+            commitment.rollupFee !== undefined ? toBN(commitment.rollupFee, 10, 'le').toString() : undefined;
+          const queuedTransactionHash =
+            commitment.queuedTransactionHash !== undefined
+              ? toHex(commitment.queuedTransactionHash)
+              : undefined;
+          const includedTransactionHash =
+            commitment.includedTransactionHash !== undefined
+              ? toHex(commitment.includedTransactionHash)
+              : undefined;
+          if (commitment.status === data.v1.CommitmentStatus.QUEUED) {
+            if (!leafIndex || !encryptedNote || !rollupFee || !queuedTransactionHash) {
+              return Promise.reject(new Error('Invalid commitment queued data'));
+            }
+            queuedEvents.push({
+              eventType: EventType.COMMITMENT_QUEUED,
+              contractAddress,
+              commitmentHash,
+              leafIndex,
+              encryptedNote,
+              rollupFee,
+              transactionHash: queuedTransactionHash,
+            });
+          } else if (commitment.status === data.v1.CommitmentStatus.INCLUDED) {
+            if (!includedTransactionHash) {
+              return Promise.reject(new Error('Invalid commitment included data'));
+            }
+            includedEvents.push({
+              eventType: EventType.COMMITMENT_INCLUDED,
+              contractAddress,
+              commitmentHash,
+              queuedTransactionHash,
+              transactionHash: includedTransactionHash,
+              leafIndex,
+              encryptedNote,
+              rollupFee,
+            });
           }
-          queuedEvents.push({
-            eventType: EventType.COMMITMENT_QUEUED,
-            contractAddress,
-            commitmentHash,
-            leafIndex,
-            encryptedNote,
-            rollupFee,
-            transactionHash: queuedTransactionHash,
-          });
-        } else if (commitment.status === data.v1.CommitmentStatus.INCLUDED) {
-          if (!includedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment included data'));
-          }
-          includedEvents.push({
-            eventType: EventType.COMMITMENT_INCLUDED,
-            contractAddress,
-            commitmentHash,
-            queuedTransactionHash,
-            transactionHash: includedTransactionHash,
-            leafIndex,
-            encryptedNote,
-            rollupFee,
-          });
         }
       }
       contractData.nullifiers.forEach((nullifier) => {
-        spentEvents.push({
-          eventType: EventType.COMMITMENT_SPENT,
-          contractAddress,
-          serialNumber: toBN(nullifier.nullifier, 10, 'le').toString(),
-          transactionHash: toHex(nullifier.transactionHash),
-        });
+        if (Number(nullifier.blockNumber) > syncedBlockNumber) {
+          spentEvents.push({
+            eventType: EventType.COMMITMENT_SPENT,
+            contractAddress,
+            serialNumber: toBN(nullifier.nullifier, 10, 'le').toString(),
+            transactionHash: toHex(nullifier.transactionHash),
+          });
+        }
       });
     }
     const sortedQueuedEvents = queuedEvents.sort((a, b) => {
@@ -157,7 +182,7 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
         skipCheckPassword: true,
       })
       .then((commitments) =>
-        this.saveChainSyncedBlock(chainData, importedContracts, context).then(() => ({
+        this.saveContractSyncedBlock(chainData, importedContracts, context).then(() => ({
           commitments,
           syncedBlock: Number(chainData.endBlock),
         })),
@@ -178,50 +203,19 @@ export class PackerExecutorV2 extends MystikoExecutor implements PackerExecutor 
         return Promise.resolve(chain);
       })
       .then((chain) =>
-        this.context.contracts
-          .find({ selector: { chainId: options.chainId } })
-          .then((contracts) => ({ chain, contracts })),
+        this.context.chains
+          .syncedBlockNumber(chain.chainId, options.contractAddresses)
+          .then(({ syncedBlockNumber }) => ({ chain, syncedBlockNumber })),
       )
-      .then(({ chain, contracts }) => {
-        let syncedBlock = chain.syncedBlockNumber;
-        contracts.forEach((contract) => {
-          const contractSyncedBlock = Math.max(contract.syncedBlockNumber, contract.syncStart);
-          if (syncedBlock === 0 || contractSyncedBlock < syncedBlock) {
-            syncedBlock = contractSyncedBlock;
-          }
-        });
-        syncedBlock = Math.max(syncedBlock, chainConfig.startBlock);
-        return Promise.resolve({ chain, syncedBlock });
-      })
-      .then(({ chain, syncedBlock }) =>
-        this.packerClient
-          .savedBlock(chain.chainId)
-          .then((targetBlock) => ({ chainConfig, chain, syncedBlock, targetBlock, options })),
+      .then(({ chain, syncedBlockNumber }) =>
+        this.packerClient.savedBlock(chain.chainId).then((targetBlock) => ({
+          chainConfig,
+          chain,
+          syncedBlock: syncedBlockNumber || chainConfig.startBlock,
+          targetBlock,
+          options,
+        })),
       );
-  }
-
-  private saveChainSyncedBlock(
-    chainData: data.v1.ChainData,
-    importedContracts: string[],
-    context: ImportContext,
-  ): Promise<void> {
-    const { options, chain } = context;
-    return this.saveContractSyncedBlock(chainData, importedContracts, context)
-      .then(() => this.context.contracts.find({ selector: { chainId: options.chainId } }))
-      .then((contracts) => {
-        const syncedBlock = Math.min(...contracts.map((contract) => contract.syncedBlockNumber));
-        if (chain.syncedBlockNumber < syncedBlock) {
-          this.logger.info(`updating syncedBlockNumber to ${syncedBlock} for chain ${options.chainId}`);
-          return chain
-            .atomicUpdate((newChain) => {
-              newChain.syncedBlockNumber = syncedBlock;
-              newChain.updatedAt = MystikoHandler.now();
-              return newChain;
-            })
-            .then(() => {});
-        }
-        return Promise.resolve();
-      });
   }
 
   private saveContractSyncedBlock(
