@@ -1,9 +1,6 @@
 import { ChainConfig } from '@mystikonetwork/config';
-import { data } from '@mystikonetwork/protos';
 import { isURL } from 'class-validator';
 import { Chain, DatabaseQuery, ProviderType } from '@mystikonetwork/database';
-import { providers } from 'ethers';
-import { now } from 'rxdb';
 import { MystikoHandler } from '../../handler';
 import { ChainHandler, ChainOptions, MystikoContextInterface, SyncedBlockNumber } from '../../../interface';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
