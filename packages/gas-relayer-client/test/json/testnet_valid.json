@@ -2,8 +2,8 @@
   "version": "0.0.1",
   "chains": [
     {
-      "name": "Ethereum Goerli",
-      "chainId": 5,
+      "name": "Ethereum Sepolia",
+      "chainId": 11155111,
       "assetSymbol": "ETH",
       "relayerContractAddress": "0xd3f481c84FeE6af4a068679Dc75e580acE9672c9",
       "contracts": [

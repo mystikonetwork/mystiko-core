@@ -9,7 +9,7 @@ function getMockFailedResponse() {
       id: 'nPauONMKRRCFoLzTUZQ6rg-51',
       type: 'MYSTIKO_TRANSACT',
       request: {
-        chainId: 5,
+        chainId: 11155111,
         symbol: 'MTT',
         mystikoContractAddress: '0x1B97a7266aA03998Ed43E8Bfa9a154889F799906',
         proof: {
