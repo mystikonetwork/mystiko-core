@@ -57,9 +57,15 @@ class MockCommitmentHandler extends CommitmentHandlerV2 {
     if (promise) {
       await promise;
     }
-    return chain
-      .update({ $set: { syncedBlockNumber: this.options.syncedBlockNumber || 50000000 } })
-      .then(() => []);
+    const contracts = await this.context.contracts.find({ selector: { chainId } });
+    const contractPromises = contracts.map((contract) =>
+      contract.atomicUpdate((data) => {
+        data.syncedBlockNumber = this.options.syncedBlockNumber || 50000000;
+        return data;
+      }),
+    );
+    await Promise.all(contractPromises);
+    return [];
   }
 }
 
@@ -124,6 +130,7 @@ beforeEach(async () => {
     });
     promises.set(chainConfig.chainId, promise);
   });
+  await context.wallets.fullSynchronization(true);
 });
 
 afterEach(async () => {
@@ -221,8 +228,12 @@ test('test run', async () => {
   expect(accountScanning).toBe(true);
   expect(accountScanned).toBe(true);
   status.chains.forEach((chainStatus) => {
-    expect(chainStatus.isSyncing).toBe(false);
-    expect(chainStatus.syncedBlock).toBe(50000000);
+    const chainConfig = context.config.getChainConfig(chainStatus.chainId);
+    if (chainConfig) {
+      const contractsCount = chainConfig.depositContracts.length + chainConfig.poolContracts.length;
+      expect(chainStatus.isSyncing).toBe(false);
+      expect(chainStatus.syncedBlock).toBe(contractsCount === 0 ? 0 : 50000000);
+    }
   });
 });
 
@@ -301,8 +312,12 @@ test('test broadcast channel', async () => {
   expect(status.isSyncing).toBe(false);
   expect(status.error).toBe(undefined);
   status.chains.forEach((chainStatus) => {
-    expect(chainStatus.isSyncing).toBe(false);
-    expect(chainStatus.syncedBlock).toBe(50000000);
+    const chainConfig = context.config.getChainConfig(chainStatus.chainId);
+    if (chainConfig) {
+      const contractsCount = chainConfig.depositContracts.length + chainConfig.poolContracts.length;
+      expect(chainStatus.isSyncing).toBe(false);
+      expect(chainStatus.syncedBlock).toBe(contractsCount === 0 ? 0 : 50000000);
+    }
   });
   await anotherSynchronizer.close();
 });

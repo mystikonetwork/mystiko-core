@@ -34,7 +34,9 @@ import { ethers } from 'ethers';
 import {
   AccountHandlerV2,
   AssetHandlerV2,
+  ChainHandlerV2,
   CommitmentHandlerV2,
+  ContractHandlerV2,
   createError,
   createErrorPromise,
   GasRelayerInfo,
@@ -354,6 +356,8 @@ beforeAll(async () => {
   context.assets = new AssetHandlerV2(context);
   context.commitments = new CommitmentHandlerV2(context);
   context.transactions = new TransactionHandlerV2(context);
+  context.chains = new ChainHandlerV2(context);
+  context.contracts = new ContractHandlerV2(context);
   context.gasRelayers = gasRelayers;
   executor = new TransactionExecutorV2(context);
   for (let i = 0; i < executor.protocol.numOfAuditors; i += 1) {

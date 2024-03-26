@@ -141,7 +141,11 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
       : { selector: { chainId } };
     return this.context.contracts.find(query).then((contracts) => {
       const blockNumbers = contracts.map((contract) => contract.syncedBlockNumber);
-      return { syncedBlockNumber: Math.min(...blockNumbers), contracts };
+      if (blockNumbers.length > 0) {
+        return { syncedBlockNumber: Math.min(...blockNumbers), contracts };
+      }
+
+      return { syncedBlockNumber: chainConfig?.startBlock, contracts };
     });
   }
 

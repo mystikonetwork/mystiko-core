@@ -500,40 +500,35 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     });
   }
 
-  private saveChainEvents(
+  private async saveChainEvents(
     index: number,
     contracts: { context: ImportEventsContext; events: ContractEvent[] }[],
   ): Promise<Commitment[]> {
     if (index < contracts.length) {
       const { context, events } = contracts[index];
-      return this.saveContractEvents(context, events).then((commitments) =>
-        this.saveChainEvents(index + 1, contracts).then((moreCommitments) => [
-          ...commitments,
-          ...moreCommitments,
-        ]),
-      );
+      const commitments = await this.saveContractEvents(context, events);
+      const moreCommitments = await this.saveChainEvents(index + 1, contracts);
+      return [...commitments, ...moreCommitments];
     }
     return Promise.resolve([]);
   }
 
-  private saveContractEvents(context: ImportEventsContext, events: ContractEvent[]): Promise<Commitment[]> {
+  private async saveContractEvents(
+    context: ImportEventsContext,
+    events: ContractEvent[],
+  ): Promise<Commitment[]> {
     const { chainConfig, options, contract, toBlock } = context;
-    return this.context.executors
-      .getEventExecutor()
-      .import(events, {
-        chainId: chainConfig.chainId,
-        walletPassword: options.walletPassword,
-        skipCheckPassword: true,
-      })
-      .then((commitments) =>
-        contract
-          .atomicUpdate((data) => {
-            data.syncedBlockNumber = toBlock;
-            data.updatedAt = MystikoHandler.now();
-            return data;
-          })
-          .then(() => commitments),
-      );
+    const commitments = await this.context.executors.getEventExecutor().import(events, {
+      chainId: chainConfig.chainId,
+      walletPassword: options.walletPassword,
+      skipCheckPassword: true,
+    });
+    await contract.atomicUpdate((data) => {
+      data.syncedBlockNumber = toBlock;
+      data.updatedAt = MystikoHandler.now();
+      return data;
+    });
+    return commitments;
   }
 
   private connectPoolContract(importContext: ImportContractContext): CommitmentPool {

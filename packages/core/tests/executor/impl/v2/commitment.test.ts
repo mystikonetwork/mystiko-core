@@ -231,6 +231,11 @@ test('import commitments of one contract', async () => {
     contractAddresses: ['0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA'],
   });
   expect((await commitmentHandler.find()).length).toBe(12);
+  const contract = await contractHandler.findOne({
+    chainId: 97,
+    address: '0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA',
+  });
+  expect(contract?.syncedBlockNumber).toBe(bscCurrentBlock);
 });
 
 test('test import wrong password', async () => {
