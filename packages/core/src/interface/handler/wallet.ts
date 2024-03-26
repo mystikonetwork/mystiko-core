@@ -12,4 +12,5 @@ export interface WalletHandler<W = WalletOptions> {
   current(): Promise<Wallet | null>;
   exportMasterSeed(password: string): Promise<string>;
   updatePassword(oldPassword: string, newPassword: string): Promise<Wallet>;
+  fullSynchronization(enable: boolean): Promise<Wallet>;
 }

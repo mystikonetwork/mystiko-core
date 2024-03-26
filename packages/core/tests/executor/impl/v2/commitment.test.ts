@@ -37,7 +37,6 @@ let context: MystikoContext;
 const walletPassword = 'P@ssw0rd';
 let walletHandler: WalletHandlerV2;
 let accountHandler: AccountHandlerV2;
-let chainHandler: ChainHandlerV2;
 let contractHandler: ContractHandlerV2;
 let commitmentHandler: CommitmentHandlerV2;
 let nullifierHandler: NullifierHandlerV2;
@@ -131,7 +130,7 @@ beforeAll(async () => {
   });
   walletHandler = new WalletHandlerV2(context);
   accountHandler = new AccountHandlerV2(context);
-  chainHandler = new ChainHandlerV2(context);
+  context.chains = new ChainHandlerV2(context);
   contractHandler = new ContractHandlerV2(context);
   commitmentHandler = new CommitmentHandlerV2(context);
   nullifierHandler = new NullifierHandlerV2(context);
@@ -158,8 +157,6 @@ test('test import all events', async () => {
   await commitmentHandler.scanAll({ walletPassword });
   expect((await commitmentHandler.find()).length).toBe(72);
   expect((await nullifierHandler.find()).length).toBe(44);
-  expect((await chainHandler.findOne(11155111))?.syncedBlockNumber).toBe(sepoliaCurrentBlock);
-  expect((await chainHandler.findOne(97))?.syncedBlockNumber).toBe(bscCurrentBlock);
   const contracts = await contractHandler.find();
   for (let i = 0; i < contracts.length; i += 1) {
     const contract = contracts[i];
@@ -231,9 +228,14 @@ test('import commitments of one contract', async () => {
   await executor.import({
     walletPassword,
     chainId: 97,
-    contractAddress: '0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA',
+    contractAddresses: ['0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA'],
   });
   expect((await commitmentHandler.find()).length).toBe(12);
+  const contract = await contractHandler.findOne({
+    chainId: 97,
+    address: '0x3c500d9660b98D65b5577bB3b9ECB389d6386BFA',
+  });
+  expect(contract?.syncedBlockNumber).toBe(bscCurrentBlock);
 });
 
 test('test import wrong password', async () => {

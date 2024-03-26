@@ -3,7 +3,7 @@
   "chains": [
     {
       "name": "Ethereum Goerli",
-      "chainId": 5,
+      "chainId": 11155111,
       "relayerContractAddress": "",
       "contracts": [
         {

@@ -25,11 +25,13 @@ test('test insert', async () => {
     hashedPassword: 'deadbeef',
     encryptedMasterSeed: protocol.encryptSymmetric('P@ssw0rd', 'deadbeef'),
     accountNonce: 1,
+    fullSynchronization: true,
   });
   expect(wallet.id).toBe('1');
   expect(wallet.hashedPassword).toBe('deadbeef');
   expect(wallet.masterSeed(protocol, 'P@ssw0rd')).toBe('deadbeef');
   expect(wallet.accountNonce).toBe(1);
+  expect(wallet.fullSynchronization).toBe(true);
   await expect(
     db.wallets.insert({
       id: '1',

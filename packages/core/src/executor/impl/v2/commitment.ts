@@ -17,7 +17,7 @@ import {
   Nullifier,
 } from '@mystikonetwork/database';
 import { MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, promiseWithTimeout, toBN } from '@mystikonetwork/utils';
+import { promiseWithTimeout, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -291,7 +291,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
                   ...importContext,
                   chainConfig,
                   provider,
-                  currentBlock: Math.max(0, currentBlock - chainConfig.eventFilterBlockBackoff),
+                  currentBlock: Math.max(0, currentBlock - chainConfig.eventDelayBlocks),
                 }),
               );
             }
@@ -312,86 +312,42 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
       });
   }
 
-  private importChain(importContext: ImportChainContext): Promise<Commitment[]> {
-    const promises: Promise<{ context: ImportEventsContext; events: ContractEvent[] } | undefined>[] = [];
+  private async importChain(importContext: ImportChainContext): Promise<Commitment[]> {
     const { chainConfig, options } = importContext;
-    const { chainId, contractAddress } = importContext.options;
-    const { poolContracts, depositContracts } = chainConfig;
-    const contracts: Array<PoolContractConfig | DepositContractConfig> = [
-      ...poolContracts,
-      ...depositContracts,
-    ];
-    return this.context.chains.findOne(chainConfig.chainId).then((chain) => {
-      if (chain) {
-        this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
-        for (let i = 0; i < contracts.length; i += 1) {
-          const contractConfig = contracts[i];
-          if (
-            !chainId ||
-            !contractAddress ||
-            (contractAddress === contractConfig.address && chainId === chainConfig.chainId)
-          ) {
-            promises.push(
-              this.context.contracts
-                .findOne({ chainId: chainConfig.chainId, address: contractConfig.address })
-                .then((contract) => {
-                  if (contract) {
-                    return this.importContract({
-                      ...importContext,
-                      contractConfig,
-                      contract,
-                    });
-                  }
-                  /* istanbul ignore next */
-                  return Promise.resolve(undefined);
-                }),
-            );
-          }
+    const { contractAddresses } = importContext.options;
+    const synced = await this.context.chains.syncedBlockNumber(chainConfig.chainId, contractAddresses);
+    const { contracts } = synced;
+    const chain = await this.context.chains.findOne(chainConfig.chainId);
+    if (chain) {
+      this.logger.info(`importing commitment related events from chain id=${chainConfig.chainId}`);
+      const promises = [];
+      for (let i = 0; i < contracts.length; i += 1) {
+        const contract = contracts[i];
+        const contractConfig =
+          chainConfig.getDepositContractByAddress(contract.contractAddress) ||
+          chainConfig.getPoolContractByAddress(contract.contractAddress);
+        if (contractConfig) {
+          promises.push(
+            this.importContract({
+              ...importContext,
+              contractConfig,
+              contract,
+            }),
+          );
         }
-        let promise = Promise.all(promises);
-        if (options.timeoutMs) {
-          promise = promiseWithTimeout(promise, options.timeoutMs);
-        }
-        return promise
-          .then((contextWithEvents) => {
-            const filteredContextWithEvents: { context: ImportEventsContext; events: ContractEvent[] }[] = [];
-            contextWithEvents.forEach((contextWithEvent) => {
-              if (contextWithEvent) {
-                filteredContextWithEvents.push(contextWithEvent);
-              }
-            });
-            const minToBlock = Math.min(...filteredContextWithEvents.map(({ context }) => context.toBlock));
-            return this.saveChainEvents(0, filteredContextWithEvents).then((commitments) => ({
-              commitments,
-              toBlock: minToBlock,
-            }));
-          })
-          .then(({ commitments, toBlock }) =>
-            chain
-              .atomicUpdate((data) => {
-                data.syncedBlockNumber = toBlock;
-                data.updatedAt = MystikoHandler.now();
-                return data;
-              })
-              .then(() => commitments),
-          )
-          .then((commitments) => {
-            this.logger.info(
-              `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
-            );
-            return commitments;
-          })
-          .catch((error) => {
-            this.logger.error(
-              `failed to import commitment related events from chain id=${
-                chainConfig.chainId
-              }, errorMessage=${errorMessage(error)}`,
-            );
-            return Promise.reject(error);
-          });
       }
-      return Promise.resolve([]);
-    });
+      let promise = Promise.all(promises);
+      if (options.timeoutMs) {
+        promise = promiseWithTimeout(promise, options.timeoutMs);
+      }
+      const contextWithEvents = await promise;
+      const commitments = await this.saveChainEvents(0, contextWithEvents);
+      this.logger.info(
+        `successfully imported commitment related events from chain id=${chainConfig.chainId}`,
+      );
+      return commitments;
+    }
+    return [];
   }
 
   private importContract(
@@ -544,40 +500,35 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
     });
   }
 
-  private saveChainEvents(
+  private async saveChainEvents(
     index: number,
     contracts: { context: ImportEventsContext; events: ContractEvent[] }[],
   ): Promise<Commitment[]> {
     if (index < contracts.length) {
       const { context, events } = contracts[index];
-      return this.saveContractEvents(context, events).then((commitments) =>
-        this.saveChainEvents(index + 1, contracts).then((moreCommitments) => [
-          ...commitments,
-          ...moreCommitments,
-        ]),
-      );
+      const commitments = await this.saveContractEvents(context, events);
+      const moreCommitments = await this.saveChainEvents(index + 1, contracts);
+      return [...commitments, ...moreCommitments];
     }
     return Promise.resolve([]);
   }
 
-  private saveContractEvents(context: ImportEventsContext, events: ContractEvent[]): Promise<Commitment[]> {
+  private async saveContractEvents(
+    context: ImportEventsContext,
+    events: ContractEvent[],
+  ): Promise<Commitment[]> {
     const { chainConfig, options, contract, toBlock } = context;
-    return this.context.executors
-      .getEventExecutor()
-      .import(events, {
-        chainId: chainConfig.chainId,
-        walletPassword: options.walletPassword,
-        skipCheckPassword: true,
-      })
-      .then((commitments) =>
-        contract
-          .atomicUpdate((data) => {
-            data.syncedBlockNumber = toBlock;
-            data.updatedAt = MystikoHandler.now();
-            return data;
-          })
-          .then(() => commitments),
-      );
+    const commitments = await this.context.executors.getEventExecutor().import(events, {
+      chainId: chainConfig.chainId,
+      walletPassword: options.walletPassword,
+      skipCheckPassword: true,
+    });
+    await contract.atomicUpdate((data) => {
+      data.syncedBlockNumber = toBlock;
+      data.updatedAt = MystikoHandler.now();
+      return data;
+    });
+    return commitments;
   }
 
   private connectPoolContract(importContext: ImportContractContext): CommitmentPool {
@@ -700,7 +651,7 @@ export class CommitmentExecutorV2 extends MystikoExecutor implements CommitmentE
   private static formatOptions(options: CommitmentImport): string {
     return JSON.stringify({
       chainId: options.chainId,
-      contractAddress: options.contractAddress,
+      contractAddresses: options.contractAddresses,
     });
   }
 }

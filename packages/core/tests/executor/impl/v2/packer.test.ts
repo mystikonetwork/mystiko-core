@@ -212,8 +212,6 @@ test('test import', async () => {
   await commitmentHandler.scanAll({ walletPassword });
   expect((await commitmentHandler.find()).length).toBe(72);
   expect((await nullifierHandler.find()).length).toBe(44);
-  expect((await chainHandler.findOne(11155111))?.syncedBlockNumber).toBe(sepoliaCurrentBlock - 8000);
-  expect((await chainHandler.findOne(97))?.syncedBlockNumber).toBe(bscCurrentBlock - 8000);
   const contracts = await contractHandler.find();
   for (let i = 0; i < contracts.length; i += 1) {
     const contract = contracts[i];
@@ -274,7 +272,7 @@ test('test import', async () => {
   expect(balances.get('BNB')?.pendingTotal).toBe(0);
 });
 
-test('test syncedBlock large than targetBlock', async () => {
+test('test syncedBlock larger than targetBlock', async () => {
   const chain = await chainHandler.findOne(97);
   if (chain != null) {
     await chain.atomicUpdate((chainData) => {

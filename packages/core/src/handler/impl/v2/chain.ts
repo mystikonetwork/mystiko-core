@@ -2,7 +2,7 @@ import { ChainConfig } from '@mystikonetwork/config';
 import { isURL } from 'class-validator';
 import { Chain, DatabaseQuery, ProviderType } from '@mystikonetwork/database';
 import { MystikoHandler } from '../../handler';
-import { ChainHandler, ChainOptions, MystikoContextInterface } from '../../../interface';
+import { ChainHandler, ChainOptions, MystikoContextInterface, SyncedBlockNumber } from '../../../interface';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 
 export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
@@ -125,6 +125,24 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
         });
       }
       return null;
+    });
+  }
+
+  public syncedBlockNumber(chainId: number, contractAddresses?: string[]): Promise<SyncedBlockNumber> {
+    const chainConfig = this.config.getChainConfig(chainId);
+    if (contractAddresses && contractAddresses.length === 0) {
+      return Promise.resolve({ syncedBlockNumber: chainConfig?.startBlock, contracts: [] });
+    }
+    const query: DatabaseQuery<Chain> = contractAddresses
+      ? { selector: { chainId, contractAddress: { $in: contractAddresses } } }
+      : { selector: { chainId } };
+    return this.context.contracts.find(query).then((contracts) => {
+      const blockNumbers = contracts.map((contract) => contract.syncedBlockNumber);
+      if (blockNumbers.length > 0) {
+        return { syncedBlockNumber: Math.min(...blockNumbers), contracts };
+      }
+
+      return { syncedBlockNumber: chainConfig?.startBlock, contracts };
     });
   }
 

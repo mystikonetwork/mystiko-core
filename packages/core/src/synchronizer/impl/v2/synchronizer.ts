@@ -1,4 +1,4 @@
-import { Commitment } from '@mystikonetwork/database';
+import { Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
@@ -168,28 +168,50 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public get status(): Promise<SyncStatus> {
-    const promises: Promise<SyncChainStatus>[] = [];
-    this.chains.forEach((chainInternalStatus) => {
-      promises.push(
-        this.context.chains.findOne(chainInternalStatus.chainId).then((chain) => ({
-          chainId: chain?.chainId || chainInternalStatus.chainId,
-          name: chain?.name || chainInternalStatus.name,
-          syncedBlock: chain?.syncedBlockNumber || 0,
-          isSyncing: chainInternalStatus.isSyncing,
-          error: chainInternalStatus.error,
-        })),
-      );
-    });
-    return Promise.all(promises).then((chainStatuses) => ({
-      schedulerState: this.schedulerState,
-      chains: chainStatuses,
-      isSyncing: this.isSyncing,
-      error: this.error,
-    }));
+    return this.isFullMode()
+      .then((fullMode) => {
+        if (!fullMode) {
+          return this.getInteractedContracts();
+        }
+        return Promise.resolve(undefined);
+      })
+      .then((interactedContracts) => {
+        const promises: Promise<SyncChainStatus>[] = [];
+        this.chains.forEach((chainInternalStatus) => {
+          let chainInteractedContracts: string[] | undefined;
+          if (interactedContracts) {
+            const chainInteractedContractsSet = interactedContracts[chainInternalStatus.chainId];
+            chainInteractedContracts = chainInteractedContractsSet
+              ? Array.from(chainInteractedContractsSet)
+              : undefined;
+          }
+          promises.push(
+            this.context.chains.findOne(chainInternalStatus.chainId).then((chain) =>
+              this.context.chains
+                .syncedBlockNumber(chainInternalStatus.chainId, chainInteractedContracts)
+                .then(({ syncedBlockNumber }) => ({
+                  chainId: chainInternalStatus.chainId,
+                  name: chain?.name || chainInternalStatus.name,
+                  syncedBlock: syncedBlockNumber || 0,
+                  isSyncing: chainInternalStatus.isSyncing,
+                  error: chainInternalStatus.error,
+                })),
+            ),
+          );
+        });
+        return Promise.all(promises).then((chainStatuses) => ({
+          schedulerState: this.schedulerState,
+          chains: chainStatuses,
+          isSyncing: this.isSyncing,
+          error: this.error,
+        }));
+      });
   }
 
-  private executeSync(options: SyncOptions): Promise<void> {
+  private async executeSync(options: SyncOptions): Promise<void> {
     if (!this.isSyncing) {
+      const fullMode = await this.isFullMode();
+      const interactedContracts = fullMode ? {} : await this.getInteractedContracts();
       this.hasPendingSync = true;
       this.logger.info('start synchronizing relevant data from blockchains');
       return this.updateStatus(options, true)
@@ -199,13 +221,20 @@ export class SynchronizerV2 implements Synchronizer {
             options.chainIds && options.chainIds.length > 0 ? new Set(options.chainIds) : undefined;
           this.chains.forEach((chainStatus) => {
             const { chainId } = chainStatus;
-            if (!chainStatus.isSyncing && (!filteredChains || filteredChains.has(chainId))) {
+            const chainInteractedContracts = interactedContracts[chainId]
+              ? Array.from(interactedContracts[chainId])
+              : undefined;
+            const interacted = chainInteractedContracts ? chainInteractedContracts.length > 0 : false;
+            if (
+              !chainStatus.isSyncing &&
+              (!filteredChains || filteredChains.has(chainId)) &&
+              (fullMode || interacted)
+            ) {
               chainStatus.isSyncing = true;
               chainStatus.error = undefined;
               promises.push(
                 this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
-                  .then(() => this.context.executors.getCommitmentExecutor().check({ chainId }))
-                  .then(() => this.executeSyncImport(options, chainId))
+                  .then(() => this.executeSyncImport(options, chainId, chainInteractedContracts))
                   .then(() => this.context.chains.findOne(chainId))
                   .then((updatedChain) => {
                     if (updatedChain) {
@@ -251,47 +280,56 @@ export class SynchronizerV2 implements Synchronizer {
           return this.updateStatus(options, false, syncError);
         })
         .finally(() => {
-          if (!options.skipAccountScan) {
+          if (fullMode && !options.skipAccountScan) {
             this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNING).then(() => {
               this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
                 this.logger.debug('scanned all commitments for all accounts');
                 return this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNED);
               });
-              return Promise.resolve();
             });
+          } else {
+            this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNED);
           }
+          return Promise.resolve();
         });
     }
     return Promise.resolve();
   }
 
-  private executeSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+  private executeSyncImport(
+    options: SyncOptions,
+    chainId: number,
+    contractAddresses?: string[],
+  ): Promise<Commitment[]> {
     const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
     const packerExecutor = this.context.executors.getPackerExecutor();
     if (packerExecutor && !options.noPacker) {
       return packerExecutor
-        .import({ walletPassword: options.walletPassword, chainId, timeoutMs })
+        .import({ walletPassword: options.walletPassword, chainId, timeoutMs, contractAddresses })
         .then(({ commitments, syncedBlock }) => {
           this.logger.info(
             `synced events for chainId=${chainId} to blockNumber=${syncedBlock}` +
               ` with ${commitments.length} commitments from packer`,
           );
-          return this.executeSequencerSyncImport(options, chainId).then((moreCommitments) => [
-            ...commitments,
-            ...moreCommitments,
-          ]);
+          return this.executeSequencerSyncImport(options, chainId, contractAddresses).then(
+            (moreCommitments) => [...commitments, ...moreCommitments],
+          );
         })
         .catch((error) => {
           this.logger.warn(
             `failed to import events for chainId=${chainId} from packer: ${errorMessage(error)}`,
           );
-          return this.executeSequencerSyncImport(options, chainId);
+          return this.executeSequencerSyncImport(options, chainId, contractAddresses);
         });
     }
-    return this.executeSequencerSyncImport(options, chainId);
+    return this.executeSequencerSyncImport(options, chainId, contractAddresses);
   }
 
-  private executeSequencerSyncImport(options: SyncOptions, chainId: number): Promise<Commitment[]> {
+  private executeSequencerSyncImport(
+    options: SyncOptions,
+    chainId: number,
+    contractAddresses?: string[],
+  ): Promise<Commitment[]> {
     const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
     const sequencerExecutor = this.context.executors.getSequencerExecutor();
     let promise: Promise<{
@@ -301,7 +339,7 @@ export class SynchronizerV2 implements Synchronizer {
     }>;
     if (sequencerExecutor && !options.noSequencer) {
       promise = sequencerExecutor
-        .import({ walletPassword: options.walletPassword, chainId, timeoutMs })
+        .import({ walletPassword: options.walletPassword, chainId, timeoutMs, contractAddresses })
         .then(({ commitments, hasUpdates }) => {
           if (hasUpdates) {
             return { fallback: false, reason: '', commitments };
@@ -330,6 +368,7 @@ export class SynchronizerV2 implements Synchronizer {
           walletPassword: options.walletPassword,
           chainId,
           timeoutMs,
+          contractAddresses,
         });
       }
       return Promise.resolve(commitments);
@@ -430,6 +469,29 @@ export class SynchronizerV2 implements Synchronizer {
         error: chainStatus.error,
       });
     });
+  }
+
+  private async getInteractedContracts(): Promise<{ [key: number]: Set<string> }> {
+    const accounts = await this.context.accounts.find();
+    const shieldedAddresses = accounts.map((account) => account.shieldedAddress);
+    const commitments = await this.context.commitments.find({
+      selector: {
+        shieldedAddress: { $in: shieldedAddresses },
+        status: { $in: [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] },
+      },
+    });
+    const interactedContracts: { [key: number]: Set<string> } = {};
+    commitments.forEach((commitment) => {
+      if (!interactedContracts[commitment.chainId]) {
+        interactedContracts[commitment.chainId] = new Set<string>();
+      }
+      interactedContracts[commitment.chainId].add(commitment.contractAddress);
+    });
+    return interactedContracts;
+  }
+
+  private isFullMode(): Promise<boolean> {
+    return this.context.wallets.checkCurrent().then((wallet) => !!wallet.fullSynchronization);
   }
 
   private static getChainStatus(status: SyncStatus, chainId: number): SyncChainStatus | undefined {

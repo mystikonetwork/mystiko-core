@@ -89,6 +89,16 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
     });
   }
 
+  public fullSynchronization(enable: boolean): Promise<Wallet> {
+    return this.checkCurrent().then((wallet) =>
+      wallet.atomicUpdate((data) => {
+        data.fullSynchronization = enable;
+        data.updatedAt = MystikoHandler.now();
+        return data;
+      }),
+    );
+  }
+
   private checkPasswordHash(password: string, wallet: Wallet | null): boolean {
     return wallet != null && this.protocol.checkSum(password) === wallet.hashedPassword;
   }

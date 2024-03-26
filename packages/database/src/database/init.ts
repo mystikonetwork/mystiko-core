@@ -66,13 +66,17 @@ addRxPlugin(RxDBUpdatePlugin);
 export async function initDatabase(params?: RxDatabaseCreator): Promise<MystikoDatabase> {
   let dbPromise: Promise<MystikoDatabase>;
   if (params) {
-    dbPromise = createRxDatabase<MystikoClientCollections>(params);
+    dbPromise = createRxDatabase<MystikoClientCollections>({
+      eventReduce: true,
+      ...params,
+    });
   } else {
     // eslint-disable-next-line global-require
     addPouchPlugin(require('pouchdb-adapter-memory'));
     dbPromise = createRxDatabase<MystikoClientCollections>({
       name: 'mystiko-client-db',
       storage: getRxStoragePouch('memory'),
+      eventReduce: true,
     });
   }
   const db: MystikoDatabase = await dbPromise;

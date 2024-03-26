@@ -1095,10 +1095,10 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
-"@mystikonetwork/config@>=0.10.0":
-  version "0.10.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.0/6564895584aa99820b0b955fa3ffbeefe21389eb#6564895584aa99820b0b955fa3ffbeefe21389eb"
-  integrity sha512-rzY8Rl7t2KMK8k92m0A//PEmiFAmBuMm/Oa64shGk5HUPuH9TwPeInuIy+4opRLudwdf0iY1qDWEAMB0r4ouyQ==
+"@mystikonetwork/config@>=0.10.1":
+  version "0.10.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.1/b6b1e864592d6bb317021d7806f50817331add74#b6b1e864592d6bb317021d7806f50817331add74"
+  integrity sha512-Ybq1Vj/D0jXFZ27RRMucfDGRlsRT0UfC+yMY0+a4YCn3GXIPRS6SnMxblwxPZ6u64fYPr13nPib5wEak4rW6Kg==
   dependencies:
     "@mystikonetwork/utils" ">=0.2.11"
     axios "^0.27.2"
@@ -1117,16 +1117,17 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.0/c19cf8169d8879fa13b0362ca49046a894b40a24#c19cf8169d8879fa13b0362ca49046a894b40a24"
-  integrity sha512-fYfuSkSusWF7BlhXINK4fIDAux6VLinS6xnoLuPC1f1Utyu3L2REXBJawAvX/DDRCe6xxr0Fyh4Z0t3S3HfhyQ==
+"@mystikonetwork/datapacker-client@^0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.1/860df69dea63209208dc0c4b6a4c7f7178a5dd72#860df69dea63209208dc0c4b6a4c7f7178a5dd72"
+  integrity sha512-KU6vHwi/zYYy0//bhcIroWP5WWb2hdKneeynTY2A0r9ikrfqiH3Z/Ihoblp6ojPMrUBAiUhAYG5PWAqLEwUPHA==
   dependencies:
-    "@mystikonetwork/config" ">=0.10.0"
+    "@mystikonetwork/config" ">=0.10.1"
     "@mystikonetwork/protos" ">=0.3.0"
     "@mystikonetwork/utils" ">=0.2.9"
     axios "^0.27.2"
     crypto-js "^4.1.1"
+    ethers "^5.5.3"
     fzstd "^0.1.0"
     loglevel "^1.8.1"
 
