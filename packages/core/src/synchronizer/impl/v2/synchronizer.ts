@@ -1,4 +1,4 @@
-import { Commitment, CommitmentStatus } from '@mystikonetwork/database';
+import { Commitment, CommitmentStatus, DepositStatus } from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
@@ -480,12 +480,27 @@ export class SynchronizerV2 implements Synchronizer {
         status: { $in: [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] },
       },
     });
+    const deposits = await this.context.deposits.find({
+      selector: {
+        status: DepositStatus.SRC_PENDING,
+      },
+    });
     const interactedContracts: { [key: number]: Set<string> } = {};
     commitments.forEach((commitment) => {
       if (!interactedContracts[commitment.chainId]) {
         interactedContracts[commitment.chainId] = new Set<string>();
       }
       interactedContracts[commitment.chainId].add(commitment.contractAddress);
+    });
+    deposits.forEach((deposit) => {
+      if (!interactedContracts[deposit.chainId]) {
+        interactedContracts[deposit.chainId] = new Set<string>();
+      }
+      interactedContracts[deposit.chainId].add(deposit.contractAddress);
+      if (!interactedContracts[deposit.dstChainId]) {
+        interactedContracts[deposit.dstChainId] = new Set<string>();
+      }
+      interactedContracts[deposit.dstChainId].add(deposit.dstPoolAddress);
     });
     return interactedContracts;
   }
