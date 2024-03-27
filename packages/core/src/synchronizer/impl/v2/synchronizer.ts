@@ -1,4 +1,4 @@
-import { Commitment, CommitmentStatus, DepositStatus } from '@mystikonetwork/database';
+import { Commitment, CommitmentStatus } from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
@@ -477,12 +477,14 @@ export class SynchronizerV2 implements Synchronizer {
     const commitments = await this.context.commitments.find({
       selector: {
         shieldedAddress: { $in: shieldedAddresses },
-        status: { $in: [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED] },
-      },
-    });
-    const deposits = await this.context.deposits.find({
-      selector: {
-        status: DepositStatus.SRC_PENDING,
+        status: {
+          $in: [
+            CommitmentStatus.INIT,
+            CommitmentStatus.SRC_SUCCEEDED,
+            CommitmentStatus.QUEUED,
+            CommitmentStatus.INCLUDED,
+          ],
+        },
       },
     });
     const interactedContracts: { [key: number]: Set<string> } = {};
@@ -491,16 +493,6 @@ export class SynchronizerV2 implements Synchronizer {
         interactedContracts[commitment.chainId] = new Set<string>();
       }
       interactedContracts[commitment.chainId].add(commitment.contractAddress);
-    });
-    deposits.forEach((deposit) => {
-      if (!interactedContracts[deposit.chainId]) {
-        interactedContracts[deposit.chainId] = new Set<string>();
-      }
-      interactedContracts[deposit.chainId].add(deposit.contractAddress);
-      if (!interactedContracts[deposit.dstChainId]) {
-        interactedContracts[deposit.dstChainId] = new Set<string>();
-      }
-      interactedContracts[deposit.dstChainId].add(deposit.dstPoolAddress);
     });
     return interactedContracts;
   }
