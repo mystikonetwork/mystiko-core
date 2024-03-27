@@ -6,7 +6,13 @@ import {
   DepositContractConfig,
 } from '@mystikonetwork/config';
 import { CommitmentPool, MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
-import { CommitmentStatus, CommitmentType, Deposit, DepositStatus } from '@mystikonetwork/database';
+import {
+  Commitment,
+  CommitmentStatus,
+  CommitmentType,
+  Deposit,
+  DepositStatus,
+} from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
@@ -394,7 +400,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
   }
 
-  private sendDeposit(executionContext: ExecutionContextWithDeposit): Promise<ExecutionContextWithDeposit> {
+  private async sendDeposit(
+    executionContext: ExecutionContextWithDeposit,
+  ): Promise<ExecutionContextWithDeposit> {
     const { options, contractConfig, chainConfig, deposit, mainAssetTotal } = executionContext;
     let promise: Promise<ContractTransaction>;
     if (contractConfig.bridgeType === BridgeType.LOOP) {
@@ -435,42 +443,47 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       );
     }
     this.logger.info(`submitting transaction of deposit id=${deposit.id}`);
-    return promise
-      .then((resp) => {
-        this.logger.info(
-          `transaction of deposit id=${deposit.id} on chain id=${chainConfig.chainId} ` +
-            `has been submitted, transaction hash=${resp.hash}`,
-        );
-        return this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
-          transactionHash: resp.hash,
-        }).then((newDeposit) => waitTransaction(resp).then((receipt) => ({ newDeposit, receipt })));
-      })
-      .then(({ newDeposit, receipt }) => {
-        if (contractConfig.bridgeType === BridgeType.LOOP) {
-          this.logger.info(
-            `transaction of deposit id=${newDeposit.id} ` +
-              `has been confirmed on source chain id=${chainConfig.chainId}`,
-          );
-          return this.updateDepositStatus(options, newDeposit, DepositStatus.QUEUED, {
-            transactionHash: receipt.transactionHash,
-          });
-        }
-        this.logger.info(
-          `transaction of deposit id=${newDeposit.id} ` +
-            `has been queued on chain id=${chainConfig.chainId}`,
-        );
-        return this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED, {
-          transactionHash: receipt.transactionHash,
-        });
-      })
-      .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
+    const resp = await promise;
+    this.logger.info(
+      `transaction of deposit id=${deposit.id} on chain id=${chainConfig.chainId} ` +
+        `has been submitted, transaction hash=${resp.hash}`,
+    );
+    let newDeposit = await this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
+      transactionHash: resp.hash,
+    });
+    const commitment = await this.createCommitment({ ...executionContext, deposit: newDeposit });
+    const receipt = await waitTransaction(resp).catch(async (error) => {
+      await commitment.atomicUpdate((commitmentData) => {
+        commitmentData.status = CommitmentStatus.FAILED;
+        commitmentData.updatedAt = MystikoHandler.now();
+        return commitmentData;
+      });
+      return Promise.reject(error);
+    });
+    if (contractConfig.bridgeType === BridgeType.LOOP) {
+      this.logger.info(
+        `transaction of deposit id=${newDeposit.id} ` +
+          `has been confirmed on source chain id=${chainConfig.chainId}`,
+      );
+      newDeposit = await this.updateDepositStatus(options, newDeposit, DepositStatus.QUEUED, {
+        transactionHash: receipt.transactionHash,
+      });
+    } else {
+      this.logger.info(
+        `transaction of deposit id=${newDeposit.id} has been queued on chain id=${chainConfig.chainId}`,
+      );
+      newDeposit = await this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED, {
+        transactionHash: receipt.transactionHash,
+      });
+    }
+    await this.updateCommitment({ ...executionContext, deposit: newDeposit }, commitment);
+    return { ...executionContext, deposit: newDeposit };
   }
 
   private executeDeposit(executionContext: ExecutionContextWithDeposit): Promise<Deposit> {
     const { options, deposit } = executionContext;
     return this.assetApprove(executionContext)
       .then((newContext) => this.sendDeposit(newContext))
-      .then((newContext) => this.createCommitment(newContext))
       .then((newContext) => newContext.deposit)
       .catch((error) => {
         const errorMsg = errorMessage(error);
@@ -481,9 +494,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       });
   }
 
-  private createCommitment(
-    executionContext: ExecutionContextWithDeposit,
-  ): Promise<ExecutionContextWithDeposit> {
+  private createCommitment(executionContext: ExecutionContextWithDeposit): Promise<Commitment> {
     const { options, contractConfig, deposit } = executionContext;
     const now = MystikoHandler.now();
     const rawCommitment: CommitmentType = {
@@ -497,17 +508,12 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       assetAddress: contractConfig.peerContract
         ? contractConfig.peerContract.assetAddress
         : contractConfig.assetAddress,
-      status:
-        contractConfig.bridgeType === BridgeType.LOOP
-          ? CommitmentStatus.QUEUED
-          : CommitmentStatus.SRC_SUCCEEDED,
+      status: CommitmentStatus.INIT,
       commitmentHash: deposit.commitmentHash,
       rollupFeeAmount: deposit.rollupFeeAmount,
       encryptedNote: deposit.encryptedNote,
       amount: deposit.amount,
       shieldedAddress: deposit.shieldedRecipientAddress,
-      creationTransactionHash:
-        contractConfig.bridgeType === BridgeType.LOOP ? deposit.transactionHash : undefined,
     };
     return this.context.commitments
       .findOne({
@@ -517,17 +523,28 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       })
       .then((commitment) => {
         if (!commitment) {
-          return this.db.commitments.insert(rawCommitment).then(() => executionContext);
+          return this.db.commitments.insert(rawCommitment).then((insertedCommitment) => insertedCommitment);
         }
         /* istanbul ignore next */
-        return executionContext;
-      })
-      .catch((error) => {
-        /* istanbul ignore next */
-        this.logger.warn(`failed to insert commitment for deposit id=${deposit.id}: ${errorMessage(error)}`);
-        /* istanbul ignore next */
-        return executionContext;
+        return commitment;
       });
+  }
+
+  private updateCommitment(
+    context: ExecutionContextWithDeposit,
+    commitment: Commitment,
+  ): Promise<Commitment> {
+    const { contractConfig, deposit } = context;
+    return commitment.atomicUpdate((commitmentData) => {
+      commitmentData.status =
+        contractConfig.bridgeType === BridgeType.LOOP
+          ? CommitmentStatus.QUEUED
+          : CommitmentStatus.SRC_SUCCEEDED;
+      commitmentData.creationTransactionHash =
+        contractConfig.bridgeType === BridgeType.LOOP ? deposit.transactionHash : undefined;
+      commitmentData.updatedAt = MystikoHandler.now();
+      return commitmentData;
+    });
   }
 
   private updateDepositStatus(
