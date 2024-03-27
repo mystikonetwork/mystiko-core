@@ -404,6 +404,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     executionContext: ExecutionContextWithDeposit,
   ): Promise<ExecutionContextWithDeposit> {
     const { options, contractConfig, chainConfig, deposit, mainAssetTotal } = executionContext;
+
+    const commitment = await this.createCommitment({ ...executionContext, deposit });
     let promise: Promise<ContractTransaction>;
     if (contractConfig.bridgeType === BridgeType.LOOP) {
       const contract = this.context.contractConnector.connect<MystikoV2Loop>(
@@ -443,7 +445,14 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       );
     }
     this.logger.info(`submitting transaction of deposit id=${deposit.id}`);
-    const resp = await promise;
+    const resp = await promise.catch(async (error) => {
+      await commitment.atomicUpdate((commitmentData) => {
+        commitmentData.status = CommitmentStatus.FAILED;
+        commitmentData.updatedAt = MystikoHandler.now();
+        return commitmentData;
+      });
+      return Promise.reject(error);
+    });
     this.logger.info(
       `transaction of deposit id=${deposit.id} on chain id=${chainConfig.chainId} ` +
         `has been submitted, transaction hash=${resp.hash}`,
@@ -451,7 +460,6 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     let newDeposit = await this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
       transactionHash: resp.hash,
     });
-    const commitment = await this.createCommitment({ ...executionContext, deposit: newDeposit });
     const receipt = await waitTransaction(resp).catch(async (error) => {
       await commitment.atomicUpdate((commitmentData) => {
         commitmentData.status = CommitmentStatus.FAILED;
