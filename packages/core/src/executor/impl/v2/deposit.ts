@@ -452,7 +452,14 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       transactionHash: resp.hash,
     });
     const commitment = await this.createCommitment({ ...executionContext, deposit: newDeposit });
-    const receipt = await waitTransaction(resp);
+    const receipt = await waitTransaction(resp).catch(async (error) => {
+      await commitment.atomicUpdate((commitmentData) => {
+        commitmentData.status = CommitmentStatus.FAILED;
+        commitmentData.updatedAt = MystikoHandler.now();
+        return commitmentData;
+      });
+      return Promise.reject(error);
+    });
     if (contractConfig.bridgeType === BridgeType.LOOP) {
       this.logger.info(
         `transaction of deposit id=${newDeposit.id} ` +
