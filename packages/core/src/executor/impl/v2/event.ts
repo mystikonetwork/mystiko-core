@@ -115,7 +115,11 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
       );
       if (existing) {
         const merged: CommitmentType = existing.toMutableJSON();
-        if (merged.status === CommitmentStatus.INIT || merged.status === CommitmentStatus.SRC_SUCCEEDED) {
+        if (
+          merged.status === CommitmentStatus.INIT ||
+          merged.status === CommitmentStatus.SRC_SUCCEEDED ||
+          merged.status === CommitmentStatus.FAILED
+        ) {
           merged.status = CommitmentStatus.QUEUED;
         }
         merged.leafIndex = commitment.leafIndex;
@@ -190,7 +194,8 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
           if (
             mutableExistingCommitment.status === CommitmentStatus.INIT ||
             mutableExistingCommitment.status === CommitmentStatus.QUEUED ||
-            mutableExistingCommitment.status === CommitmentStatus.SRC_SUCCEEDED
+            mutableExistingCommitment.status === CommitmentStatus.SRC_SUCCEEDED ||
+            mutableExistingCommitment.status === CommitmentStatus.FAILED
           ) {
             mutableExistingCommitment.status = CommitmentStatus.INCLUDED;
           }
