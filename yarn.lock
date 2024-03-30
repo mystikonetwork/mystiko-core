@@ -1241,6 +1241,19 @@
     loglevel-plugin-prefix "^0.8.4"
     pako "^2.0.4"
 
+"@mystikonetwork/utils@>=0.3.1":
+  version "0.3.1"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.3.1/15e69d8b69812edde431545630e27cd3df3535a2#15e69d8b69812edde431545630e27cd3df3535a2"
+  integrity sha512-rHjifTV0eGR/hVZqlvQaGDiN0LHnDKBt6wXHUORpoDS161SaHJ5zjkB+Ci7Z7J95tRji8svXcX1iYXHNN6rfkw==
+  dependencies:
+    "@mystikonetwork/fastfile" "^0.0.21"
+    axios "^0.27.2"
+    bn.js "^5.2.0"
+    ethers "^5.5.3"
+    loglevel "^1.8.0"
+    loglevel-plugin-prefix "^0.8.4"
+    pako "^2.0.4"
+
 "@mystikonetwork/utils@^0.1.1", "@mystikonetwork/utils@^0.1.3":
   version "0.1.6"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.6/1b1278ad99d686c279aea60b459f275f94746ebc#1b1278ad99d686c279aea60b459f275f94746ebc"
