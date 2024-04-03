@@ -1,3 +1,4 @@
+import { MystikoConfig } from '@mystikonetwork/config';
 import { createError, MystikoContext, MystikoErrorCode, WalletHandlerV2 } from '../../../../src';
 import { createTestContext } from '../../../common/context';
 
@@ -5,7 +6,9 @@ let context: MystikoContext;
 let handler: WalletHandlerV2;
 
 beforeAll(async () => {
-  context = await createTestContext();
+  context = await createTestContext({
+    config: await MystikoConfig.createFromFile('tests/files/config.test.json'),
+  });
 });
 
 beforeEach(() => {
@@ -50,8 +53,13 @@ test('test create', async () => {
   await expect(handler.create({ masterSeed: 'deadbeef', password: 'too simple' })).rejects.toThrow(
     createError(WalletHandlerV2.PASSWORD_HINT, MystikoErrorCode.INVALID_PASSWORD),
   );
-  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
+  const wallet = await handler.create({
+    masterSeed: 'deadbeef',
+    password: 'P@ssw0rd',
+    fullSynchronization: true,
+  });
   expect(wallet.accountNonce).toBe(0);
+  expect(wallet.fullSynchronization).toBe(true);
 });
 
 test('test current', async () => {
@@ -92,4 +100,120 @@ test('test updatePassword', async () => {
   if (wallet != null) {
     expect(wallet.updatedAt > wallet.createdAt).toBe(true);
   }
+});
+
+test('test setAutoSync', async () => {
+  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
+  expect(wallet.autoSync).toBe(true);
+  await handler.autoSync(false);
+  const updatedWallet = await handler.checkCurrent();
+  expect(updatedWallet.autoSync).toBe(false);
+});
+
+test('test setAutoSyncInterval', async () => {
+  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
+  expect(wallet.autoSyncInterval).toBe(300000);
+  await expect(handler.autoSyncInterval(10000)).rejects.toThrow();
+  await handler.autoSyncInterval(100000);
+  const updatedWallet = await handler.checkCurrent();
+  expect(updatedWallet.autoSyncInterval).toBe(100000);
+});
+
+test('test setFullSynchronization', async () => {
+  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
+  expect(wallet.fullSynchronization).toBe(false);
+  await handler.fullSynchronization(true);
+  const updatedWallet = await handler.checkCurrent();
+  expect(updatedWallet.fullSynchronization).toBe(true);
+});
+
+test('test fullSynchronizationOptions', async () => {
+  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
+  const defaultOptions = await handler.getFullSynchronizationOptions();
+  expect(defaultOptions).toStrictEqual({
+    chains: [
+      { chainId: 5, name: 'Ethereum Goerli', assets: [], enabled: false },
+      {
+        chainId: 97,
+        name: 'BSC Testnet',
+        assets: [
+          { assetSymbol: 'BNB', enabled: false },
+          { assetSymbol: 'MTT', enabled: false },
+          { assetSymbol: 'mUSD', enabled: false },
+        ],
+        enabled: false,
+      },
+      { chainId: 43113, name: 'Avalanche Testnet', assets: [], enabled: false },
+      { chainId: 80001, name: 'Polygon Testnet', assets: [], enabled: false },
+      {
+        chainId: 11155111,
+        name: 'Ethereum Sepolia',
+        assets: [
+          { assetSymbol: 'mBNB', enabled: false },
+          { assetSymbol: 'MTT', enabled: false },
+          { assetSymbol: 'mUSD', enabled: false },
+        ],
+        enabled: false,
+      },
+    ],
+  });
+  await wallet.atomicUpdate((data) => {
+    data.fullSynchronizationOptions = 'wrong serialized options';
+    return data;
+  });
+  expect(await handler.getFullSynchronizationOptions()).toStrictEqual(defaultOptions);
+  await handler.setFullSynchronizationOptions({
+    chains: [
+      {
+        chainId: 11155111,
+        name: 'Ethereum Sepolia',
+        assets: [
+          { assetSymbol: 'MTT', enabled: true },
+          { assetSymbol: 'USDT', enabled: true },
+        ],
+        enabled: true,
+      },
+      {
+        chainId: 84532,
+        name: 'Base Sepolia',
+        assets: [{ assetSymbol: 'ETH', enabled: true }],
+        enabled: true,
+      },
+    ],
+  });
+  const options = await handler.getFullSynchronizationOptions();
+  expect(options).toStrictEqual({
+    chains: [
+      { chainId: 5, name: 'Ethereum Goerli', assets: [], enabled: false },
+      {
+        chainId: 97,
+        name: 'BSC Testnet',
+        assets: [
+          { assetSymbol: 'BNB', enabled: false },
+          { assetSymbol: 'MTT', enabled: false },
+          { assetSymbol: 'mUSD', enabled: false },
+        ],
+        enabled: false,
+      },
+      { chainId: 43113, name: 'Avalanche Testnet', assets: [], enabled: false },
+      { chainId: 80001, name: 'Polygon Testnet', assets: [], enabled: false },
+      {
+        chainId: 84532,
+        name: 'Base Sepolia',
+        assets: [{ assetSymbol: 'ETH', enabled: true }],
+        enabled: true,
+      },
+      {
+        chainId: 11155111,
+        name: 'Ethereum Sepolia',
+        assets: [
+          { assetSymbol: 'mBNB', enabled: false },
+          { assetSymbol: 'MTT', enabled: true },
+          { assetSymbol: 'mUSD', enabled: false },
+          { assetSymbol: 'USDT', enabled: true },
+        ],
+        enabled: true,
+      },
+    ],
+  });
 });

@@ -28,4 +28,5 @@ export const walletCollectionMigrations = {
   /* istanbul ignore next */
   1: defaultMigrationStrategy,
   2: defaultMigrationStrategy,
+  3: defaultMigrationStrategy,
 };

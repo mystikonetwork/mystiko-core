@@ -146,6 +146,53 @@ export class ChainHandlerV2 extends MystikoHandler implements ChainHandler {
     });
   }
 
+  public async resetSync(chainId: number | number[]): Promise<void> {
+    const chainIds = typeof chainId === 'number' ? [chainId] : chainId;
+    if (chainIds.length > 0) {
+      const chains = await this.context.chains.find({
+        selector: {
+          chainId: { $in: chainIds },
+        },
+      });
+      const contracts = await this.context.contracts.find({
+        selector: {
+          chainId: { $in: chainIds },
+        },
+      });
+      const updatedChains = chains.map((chain) => {
+        const updatingChain = chain.toMutableJSON();
+        updatingChain.syncedAt = 0;
+        updatingChain.updatedAt = MystikoHandler.now();
+        return updatingChain;
+      });
+      const updatedContracts = contracts.map((contract) => {
+        const updatingContract = contract.toMutableJSON();
+        const config =
+          this.config.getDepositContractConfigByAddress(contract.chainId, contract.contractAddress) ||
+          this.config.getPoolContractConfigByAddress(contract.chainId, contract.contractAddress);
+        if (config) {
+          updatingContract.syncedBlockNumber = config.startBlock;
+          updatingContract.updatedAt = MystikoHandler.now();
+        }
+        return updatingContract;
+      });
+      await this.context.db.chains.bulkUpsert(updatedChains);
+      await this.context.db.contracts.bulkUpsert(updatedContracts);
+      const commitments = await this.context.commitments.find({
+        selector: {
+          chainId: { $in: chainIds },
+        },
+      });
+      await this.context.db.commitments.bulkRemove(commitments.map((c) => c.id));
+      const nullifiers = await this.context.nullifiers.find({
+        selector: {
+          chainId: { $in: chainIds },
+        },
+      });
+      await this.context.db.nullifiers.bulkRemove(nullifiers.map((n) => n.id));
+    }
+  }
+
   private static isSameProviders(providersA: ProviderType[], providersB: ProviderType[]): boolean {
     if (providersA.length === providersB.length) {
       for (let i = 0; i < providersA.length; i += 1) {

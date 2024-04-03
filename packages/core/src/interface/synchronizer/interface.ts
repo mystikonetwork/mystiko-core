@@ -21,6 +21,7 @@ export type SyncChainStatus = {
   syncedBlock: number;
   isSyncing: boolean;
   error?: string;
+  outdated: boolean;
 };
 
 export type SyncStatus = {

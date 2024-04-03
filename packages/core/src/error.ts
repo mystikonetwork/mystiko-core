@@ -32,6 +32,7 @@ export enum MystikoErrorCode {
   SYNCHRONIZER_CLOSED = 30,
   WRONG_AUDITOR_NUMBER = 31,
   NO_GAS_RELAYER_CLIENT = 32,
+  INVALID_AUTO_SYNC_INTERVAL = 33,
 }
 
 export class MystikoError extends Error {
