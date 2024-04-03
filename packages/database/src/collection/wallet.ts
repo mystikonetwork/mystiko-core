@@ -28,5 +28,11 @@ export const walletCollectionMigrations = {
   /* istanbul ignore next */
   1: defaultMigrationStrategy,
   2: defaultMigrationStrategy,
-  3: defaultMigrationStrategy,
+  3(oldDoc: any): any {
+    // eslint-disable-next-line no-param-reassign
+    oldDoc.autoSync = true;
+    // eslint-disable-next-line no-param-reassign
+    oldDoc.autoSyncInterval = 300000;
+    return oldDoc;
+  },
 };
