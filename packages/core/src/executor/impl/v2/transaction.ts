@@ -743,7 +743,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   }
 
   private buildMerkleTree(executionContext: ExecutionContext): Promise<MerkleTree> {
-    const { options, contractConfig, etherContract, chainConfig } = executionContext;
+    const { options, contractConfig, etherContract } = executionContext;
     return this.context.commitments
       .findByContract({
         chainId: options.chainId,
@@ -762,17 +762,10 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
             );
           }
           if (!toBN(leafIndex).eqn(i)) {
-            return this.context.contracts
-              .resetSync({
-                chainId: chainConfig.chainId,
-                address: contractConfig.address,
-              })
-              .then(() =>
-                createErrorPromise(
-                  `leafIndex is not correct of commitment=${commitmentHash}, expected=${i} vs actual=${leafIndex}`,
-                  MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
-                ),
-              );
+            return createErrorPromise(
+              `leafIndex is not correct of commitment=${commitmentHash}, expected=${i} vs actual=${leafIndex}`,
+              MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+            );
           }
           commitmentHashes.push(toBN(commitmentHash));
         }
@@ -781,17 +774,10 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then((merkleTree: MerkleTree) =>
         etherContract.isKnownRoot(merkleTree.root().toString()).then((validRoot) => {
           if (!validRoot) {
-            return this.context.contracts
-              .resetSync({
-                chainId: chainConfig.chainId,
-                address: contractConfig.address,
-              })
-              .then(() =>
-                createErrorPromise(
-                  'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
-                  MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
-                ),
-              );
+            return createErrorPromise(
+              'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
+              MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
+            );
           }
           return Promise.resolve(merkleTree);
         }),

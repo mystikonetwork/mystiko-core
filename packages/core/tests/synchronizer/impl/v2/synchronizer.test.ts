@@ -130,6 +130,14 @@ beforeEach(async () => {
     });
     promises.set(chainConfig.chainId, promise);
   });
+  const syncOptions = await context.wallets.getFullSynchronizationOptions();
+  syncOptions.chains.forEach((chainSyncOptions) => {
+    chainSyncOptions.enabled = true;
+    chainSyncOptions.assets.forEach((assetSyncOptions) => {
+      assetSyncOptions.enabled = true;
+    });
+  });
+  await context.wallets.setFullSynchronizationOptions(syncOptions);
   await context.wallets.fullSynchronization(true);
 });
 
@@ -191,6 +199,9 @@ test('test run', async () => {
   let chainSyncingCount = 0;
   let accountScanning = false;
   let accountScanned = false;
+  const syncingChainNumber = context.config.chains.filter(
+    (c) => c.depositContracts.length > 0 || c.poolContracts.length > 0,
+  ).length;
   synchronizer.addListener(() => {
     accountScanning = true;
   }, SyncEventType.ACCOUNTS_SCANNING);
@@ -204,7 +215,7 @@ test('test run', async () => {
     runPromise = synchronizer.run({ walletPassword });
     synchronizer.addListener(() => {
       chainSyncingCount += 1;
-      if (chainSyncingCount === context.config.chains.length) {
+      if (chainSyncingCount === syncingChainNumber) {
         resolve();
       }
     }, SyncEventType.CHAIN_SYNCHRONIZING);
@@ -213,7 +224,10 @@ test('test run', async () => {
   let status = await synchronizer.status;
   expect(status.isSyncing).toBe(true);
   expect(status.chains.map((c) => c.chainId).sort()).toStrictEqual(
-    context.config.chains.map((c) => c.chainId).sort(),
+    context.config.chains
+      .filter((c) => c.depositContracts.length > 0 || c.poolContracts.length > 0)
+      .map((c) => c.chainId)
+      .sort(),
   );
   status.chains.forEach((chainStatus) => expect(chainStatus.isSyncing).toBe(true));
   resolves.forEach((resolve) => resolve());

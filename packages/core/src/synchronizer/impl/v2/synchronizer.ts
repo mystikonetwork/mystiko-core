@@ -1,8 +1,9 @@
-import { Commitment, CommitmentStatus } from '@mystikonetwork/database';
+import { Commitment, CommitmentStatus, DepositStatus, TransactionStatus } from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
+import { MystikoHandler } from '../../../handler';
 import {
   MystikoContextInterface,
   SyncChainStatus,
@@ -36,6 +37,8 @@ export class SynchronizerV2 implements Synchronizer {
   public static readonly DEFAULT_SYNC_TIMEOUT_MS = 800000;
 
   public static readonly DEFAULT_SYNC_CHAIN_TIMEOUT_MS = 600000;
+
+  public static readonly OUT_DATE_TIME_INTERVAL_MS = 600000;
 
   private readonly context: MystikoContextInterface;
 
@@ -173,31 +176,31 @@ export class SynchronizerV2 implements Synchronizer {
         if (!fullMode) {
           return this.getInteractedContracts();
         }
-        return Promise.resolve(undefined);
+        return this.getFullModeContracts();
       })
-      .then((interactedContracts) => {
+      .then((syncingContracts) => {
         const promises: Promise<SyncChainStatus>[] = [];
         this.chains.forEach((chainInternalStatus) => {
-          let chainInteractedContracts: string[] | undefined;
-          if (interactedContracts) {
-            const chainInteractedContractsSet = interactedContracts[chainInternalStatus.chainId];
-            chainInteractedContracts = chainInteractedContractsSet
-              ? Array.from(chainInteractedContractsSet)
-              : undefined;
+          const chainSyncingContractSet = syncingContracts.get(chainInternalStatus.chainId);
+          if (chainSyncingContractSet) {
+            const chainSyncingContracts = Array.from(chainSyncingContractSet);
+            promises.push(
+              this.context.chains.findOne(chainInternalStatus.chainId).then((chain) =>
+                this.context.chains
+                  .syncedBlockNumber(chainInternalStatus.chainId, chainSyncingContracts)
+                  .then(({ syncedBlockNumber }) => ({
+                    chainId: chainInternalStatus.chainId,
+                    name: chain?.name || chainInternalStatus.name,
+                    syncedBlock: syncedBlockNumber || 0,
+                    isSyncing: chainInternalStatus.isSyncing,
+                    error: chainInternalStatus.error,
+                    outdated:
+                      new Date().getTime() - (chain?.syncedAt || 0) >
+                      SynchronizerV2.OUT_DATE_TIME_INTERVAL_MS,
+                  })),
+              ),
+            );
           }
-          promises.push(
-            this.context.chains.findOne(chainInternalStatus.chainId).then((chain) =>
-              this.context.chains
-                .syncedBlockNumber(chainInternalStatus.chainId, chainInteractedContracts)
-                .then(({ syncedBlockNumber }) => ({
-                  chainId: chainInternalStatus.chainId,
-                  name: chain?.name || chainInternalStatus.name,
-                  syncedBlock: syncedBlockNumber || 0,
-                  isSyncing: chainInternalStatus.isSyncing,
-                  error: chainInternalStatus.error,
-                })),
-            ),
-          );
         });
         return Promise.all(promises).then((chainStatuses) => ({
           schedulerState: this.schedulerState,
@@ -211,7 +214,12 @@ export class SynchronizerV2 implements Synchronizer {
   private async executeSync(options: SyncOptions): Promise<void> {
     if (!this.isSyncing) {
       const fullMode = await this.isFullMode();
-      const interactedContracts = fullMode ? {} : await this.getInteractedContracts();
+      const syncingContracts = fullMode
+        ? await this.getFullModeContracts()
+        : await this.getInteractedContracts();
+      if (syncingContracts.size === 0) {
+        return Promise.resolve();
+      }
       this.hasPendingSync = true;
       this.logger.info('start synchronizing relevant data from blockchains');
       return this.updateStatus(options, true)
@@ -221,24 +229,24 @@ export class SynchronizerV2 implements Synchronizer {
             options.chainIds && options.chainIds.length > 0 ? new Set(options.chainIds) : undefined;
           this.chains.forEach((chainStatus) => {
             const { chainId } = chainStatus;
-            const chainInteractedContracts = interactedContracts[chainId]
-              ? Array.from(interactedContracts[chainId])
-              : undefined;
-            const interacted = chainInteractedContracts ? chainInteractedContracts.length > 0 : false;
-            if (
-              !chainStatus.isSyncing &&
-              (!filteredChains || filteredChains.has(chainId)) &&
-              (fullMode || interacted)
-            ) {
+            const chainSyncingContractSet = syncingContracts.get(chainId);
+            const chainSyncingContracts = chainSyncingContractSet ? Array.from(chainSyncingContractSet) : [];
+            const shouldSync = chainSyncingContracts ? chainSyncingContracts.length > 0 : false;
+            if (!chainStatus.isSyncing && (!filteredChains || filteredChains.has(chainId)) && shouldSync) {
               chainStatus.isSyncing = true;
               chainStatus.error = undefined;
               promises.push(
                 this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZING, chainId)
-                  .then(() => this.executeSyncImport(options, chainId, chainInteractedContracts))
+                  .then(() => this.executeSyncImport(options, chainId, chainSyncingContracts))
                   .then(() => this.context.chains.findOne(chainId))
-                  .then((updatedChain) => {
+                  .then(async (updatedChain) => {
                     if (updatedChain) {
                       chainStatus.isSyncing = false;
+                      await updatedChain.atomicUpdate((data) => {
+                        data.syncedAt = new Date().getTime();
+                        data.updatedAt = MystikoHandler.now();
+                        return data;
+                      });
                     }
                     return this.emitEvent(options, SyncEventType.CHAIN_SYNCHRONIZED, chainId);
                   })
@@ -280,7 +288,7 @@ export class SynchronizerV2 implements Synchronizer {
           return this.updateStatus(options, false, syncError);
         })
         .finally(() => {
-          if (fullMode && !options.skipAccountScan) {
+          if (!options.skipAccountScan) {
             this.emitEvent(options, SyncEventType.ACCOUNTS_SCANNING).then(() => {
               this.context.commitments.scanAll({ walletPassword: options.walletPassword }).then(() => {
                 this.logger.debug('scanned all commitments for all accounts');
@@ -299,7 +307,7 @@ export class SynchronizerV2 implements Synchronizer {
   private executeSyncImport(
     options: SyncOptions,
     chainId: number,
-    contractAddresses?: string[],
+    contractAddresses: string[],
   ): Promise<Commitment[]> {
     const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
     const packerExecutor = this.context.executors.getPackerExecutor();
@@ -328,7 +336,7 @@ export class SynchronizerV2 implements Synchronizer {
   private executeSequencerSyncImport(
     options: SyncOptions,
     chainId: number,
-    contractAddresses?: string[],
+    contractAddresses: string[],
   ): Promise<Commitment[]> {
     const timeoutMs = options.chainTimeoutMs || SynchronizerV2.DEFAULT_SYNC_CHAIN_TIMEOUT_MS;
     const sequencerExecutor = this.context.executors.getSequencerExecutor();
@@ -471,30 +479,97 @@ export class SynchronizerV2 implements Synchronizer {
     });
   }
 
-  private async getInteractedContracts(): Promise<{ [key: number]: Set<string> }> {
-    const accounts = await this.context.accounts.find();
-    const shieldedAddresses = accounts.map((account) => account.shieldedAddress);
-    const commitments = await this.context.commitments.find({
+  private async getInteractedContracts(): Promise<Map<number, Set<string>>> {
+    const deposits = await this.context.deposits.find({
       selector: {
-        shieldedAddress: { $in: shieldedAddresses },
         status: {
           $in: [
-            CommitmentStatus.INIT,
-            CommitmentStatus.SRC_SUCCEEDED,
-            CommitmentStatus.QUEUED,
-            CommitmentStatus.INCLUDED,
+            DepositStatus.SRC_PENDING,
+            DepositStatus.SRC_SUCCEEDED,
+            DepositStatus.QUEUED,
+            DepositStatus.INCLUDED,
           ],
         },
       },
     });
-    const interactedContracts: { [key: number]: Set<string> } = {};
-    commitments.forEach((commitment) => {
-      if (!interactedContracts[commitment.chainId]) {
-        interactedContracts[commitment.chainId] = new Set<string>();
+    const transactions = await this.context.transactions.find({
+      selector: {
+        $not: { outputCommitments: { $size: 0 } },
+        status: { $in: [TransactionStatus.PENDING, TransactionStatus.SUCCEEDED] },
+      },
+    });
+    const commitmentHashes = deposits.map((d) => d.commitmentHash);
+    const commitmentIds = transactions.map((t) => t.outputCommitments || []).flat();
+    const spentCommitments = await this.context.commitments.find({
+      selector: {
+        status: CommitmentStatus.SPENT,
+        $or: [
+          {
+            commitmentHash: { $in: commitmentHashes },
+          },
+          {
+            id: { $in: commitmentIds },
+          },
+        ],
+      },
+    });
+    const spentCommitmentHashes = new Set<String>(
+      spentCommitments.map((c) => `${c.chainId}/${c.contractAddress}/${c.commitmentHash}`),
+    );
+    const spentCommitmentIds = new Set<String>(spentCommitments.map((c) => c.id));
+    const interactedContracts: Map<number, Set<string>> = new Map();
+    deposits.forEach((deposit) => {
+      if (
+        !spentCommitmentHashes.has(
+          `${deposit.dstChainId}/${deposit.dstPoolAddress}/${deposit.commitmentHash}`,
+        )
+      ) {
+        if (!interactedContracts.has(deposit.chainId)) {
+          interactedContracts.set(deposit.chainId, new Set<string>());
+        }
+        interactedContracts.get(deposit.chainId)?.add(deposit.contractAddress);
+        if (!interactedContracts.has(deposit.dstChainId)) {
+          interactedContracts.set(deposit.dstChainId, new Set<string>());
+        }
+        interactedContracts.get(deposit.dstChainId)?.add(deposit.dstPoolAddress);
       }
-      interactedContracts[commitment.chainId].add(commitment.contractAddress);
+    });
+    transactions.forEach((transaction) => {
+      if (transaction.outputCommitments) {
+        const unspentCommitments = transaction.outputCommitments.filter((c) => !spentCommitmentIds.has(c));
+        if (unspentCommitments.length > 0) {
+          if (!interactedContracts.has(transaction.chainId)) {
+            interactedContracts.set(transaction.chainId, new Set<string>());
+          }
+          interactedContracts.get(transaction.chainId)?.add(transaction.contractAddress);
+        }
+      }
     });
     return interactedContracts;
+  }
+
+  private async getFullModeContracts(): Promise<Map<number, Set<string>>> {
+    const fullSynchronizationOptions = await this.context.wallets.getFullSynchronizationOptions();
+    const contracts: Map<number, Set<string>> = new Map();
+    fullSynchronizationOptions.chains.forEach((chainOptions) => {
+      const chainConfig = this.context.config.getChainConfig(chainOptions.chainId);
+      if (chainOptions.enabled && chainConfig) {
+        const assetSymbols = new Set(
+          chainOptions.assets.filter((options) => options.enabled).map((options) => options.assetSymbol),
+        );
+        if (assetSymbols.size > 0) {
+          [...chainConfig.depositContracts, ...chainConfig.poolContracts].forEach((contractConfig) => {
+            if (assetSymbols.has(contractConfig.assetSymbol)) {
+              if (!contracts.has(chainOptions.chainId)) {
+                contracts.set(chainOptions.chainId, new Set<string>());
+              }
+              contracts.get(chainOptions.chainId)?.add(contractConfig.address);
+            }
+          });
+        }
+      }
+    });
+    return contracts;
   }
 
   private isFullMode(): Promise<boolean> {

@@ -38,7 +38,7 @@
     },
     {
       "name": "chains",
-      "schemaHash": "75e8920d43ff4491c16af504d9895bd3",
+      "schemaHash": "9ba8476fdda8c7ad103508919a801fc4",
       "encrypted": false,
       "passwordHash": null,
       "docs": [
@@ -2300,7 +2300,7 @@
     },
     {
       "name": "wallets",
-      "schemaHash": "09c8b56d2812f5fb92eceb90f65ac6cc",
+      "schemaHash": "d534c4d70e11acbca41ee29b9e2b9508",
       "encrypted": false,
       "passwordHash": null,
       "docs": [

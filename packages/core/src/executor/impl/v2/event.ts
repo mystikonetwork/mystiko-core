@@ -179,14 +179,10 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
         );
         if (existingCommitment === undefined) {
           if (leafIndex === undefined && rollupFeeAmount === undefined && encryptedNote === undefined) {
-            return this.context.contracts
-              .resetSync({ chainId: chainConfig.chainId, address: contractAddress })
-              .then(() =>
-                createErrorPromise(
-                  `cannot find commitment=${commitmentHash} contract=${contractAddress} chainId=${chainConfig.chainId}`,
-                  MystikoErrorCode.MISSING_COMMITMENT_DATA,
-                ),
-              );
+            return createErrorPromise(
+              `cannot find commitment=${commitmentHash} contract=${contractAddress} chainId=${chainConfig.chainId}`,
+              MystikoErrorCode.MISSING_COMMITMENT_DATA,
+            );
           }
           commitmentsToUpdate.push(commitment);
         } else {

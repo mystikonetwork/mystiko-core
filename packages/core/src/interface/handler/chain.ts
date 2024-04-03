@@ -16,5 +16,6 @@ export interface ChainHandler<C = ChainOptions> {
   init(): Promise<Chain[]>;
   update(chainId: number, options: C): Promise<Chain | null>;
   reset(chainId: number): Promise<Chain | null>;
+  resetSync(chainId: number | number[]): Promise<void>;
   syncedBlockNumber(chainId: number, contractAddresses?: string[]): Promise<SyncedBlockNumber>;
 }
