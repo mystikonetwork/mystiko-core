@@ -124,7 +124,7 @@ export class SequencerExecutorV2 extends MystikoExecutor implements SequencerExe
     const contractQueries: sequencer.v1.ContractDataQuery[] = syncTaskGroup.map((task) => ({
       contractAddress: task.contractAddress,
       startBlock: task.startBlock,
-      endBlock: task.endBlock,
+      targetBlock: task.endBlock,
     }));
     const contractsData = await this.sequencerClient.fetchChain(options.chainId, {
       startBlock,
