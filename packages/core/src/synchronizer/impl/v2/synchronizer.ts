@@ -1,4 +1,10 @@
-import { Commitment, CommitmentStatus, DepositStatus, TransactionStatus } from '@mystikonetwork/database';
+import {
+  AccountStatus,
+  Commitment,
+  CommitmentStatus,
+  DepositStatus,
+  TransactionStatus,
+} from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
@@ -212,7 +218,8 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   private async executeSync(options: SyncOptions): Promise<void> {
-    if (!this.isSyncing) {
+    const isScanning = await this.isScanning();
+    if (!this.isSyncing && !isScanning) {
       const fullMode = await this.isFullMode();
       const syncingContracts = fullMode
         ? await this.getFullModeContracts()
@@ -574,6 +581,12 @@ export class SynchronizerV2 implements Synchronizer {
 
   private isFullMode(): Promise<boolean> {
     return this.context.wallets.checkCurrent().then((wallet) => !!wallet.fullSynchronization);
+  }
+
+  private isScanning(): Promise<boolean> {
+    return this.context.accounts
+      .find({ selector: { status: AccountStatus.SCANNING } })
+      .then((accounts) => accounts.length > 0);
   }
 
   private static getChainStatus(status: SyncStatus, chainId: number): SyncChainStatus | undefined {
