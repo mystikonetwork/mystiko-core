@@ -33,7 +33,7 @@ test('test insert', async () => {
   expect(wallet.masterSeed(protocol, 'P@ssw0rd')).toBe('deadbeef');
   expect(wallet.accountNonce).toBe(1);
   expect(wallet.autoSync).toBe(true);
-  expect(wallet.autoSyncInterval).toBe(120);
+  expect(wallet.autoSyncInterval).toBe(300000);
   expect(wallet.fullSynchronization).toBe(true);
   expect(wallet.fullSynchronizationOptions).toBe('{}');
   await expect(
