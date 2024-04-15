@@ -34,6 +34,8 @@ export type TransactionOptions = TransactionQuoteOptions & {
   gasRelayerWaitingTimeoutMs?: number;
   statusCallback?: (tx: Transaction, oldTxStatus: TransactionStatus, newTxStatus: TransactionStatus) => void;
   transactOverrides?: Overrides & { from?: string | Promise<string> };
+  numOfConfirmations?: number;
+  waitTimeoutMs?: number;
 };
 
 export type TransactionQuote = {

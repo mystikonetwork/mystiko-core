@@ -23,7 +23,6 @@ import { MystikoHandler } from '../../../handler';
 import {
   DepositExecutor,
   DepositOptions,
-  DepositQuery,
   DepositQuote,
   DepositQuoteOptions,
   DepositResponse,
@@ -58,6 +57,8 @@ type ExecutionContextWithDeposit = ExecutionContext & {
 type RemoteContractConfig = {
   minRollupFee: BN;
 };
+
+const DEFAULT_WAIT_TIMEOUT_MS = 300000;
 
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
@@ -129,7 +130,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     const isHistoricCommitment = await etherContract.isHistoricCommitment(deposit.commitmentHash);
     if (isHistoricCommitment && deposit.status === DepositStatus.FAILED) {
       if (commitment != null) {
-        await deposit.atomicUpdate((data) => {
+        await commitment.atomicUpdate((data) => {
           data.status =
             data.rollupTransactionHash !== undefined ? CommitmentStatus.INCLUDED : CommitmentStatus.QUEUED;
           data.updatedAt = MystikoHandler.now();
@@ -411,7 +412,11 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
               assetApproveTransactionHash: resp?.hash,
             }).then(() => {
               if (resp) {
-                return waitTransaction(resp, 2);
+                return waitTransaction(
+                  resp,
+                  options.numOfConfirmations || chainConfig.safeConfirmations,
+                  options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
+                );
               }
               return Promise.resolve(undefined);
             }),
@@ -496,7 +501,11 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     let newDeposit = await this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
       transactionHash: resp.hash,
     });
-    const receipt = await waitTransaction(resp, 2).catch(async (error) => {
+    const receipt = await waitTransaction(
+      resp,
+      options.numOfConfirmations || chainConfig.safeConfirmations,
+      options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
+    ).catch(async (error) => {
       await commitment.atomicUpdate((commitmentData) => {
         commitmentData.status = CommitmentStatus.FAILED;
         commitmentData.updatedAt = MystikoHandler.now();
