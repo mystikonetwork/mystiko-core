@@ -23,6 +23,7 @@ import { MystikoHandler } from '../../../handler';
 import {
   DepositExecutor,
   DepositOptions,
+  DepositQuery,
   DepositQuote,
   DepositQuoteOptions,
   DepositResponse,
@@ -111,6 +112,41 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           })),
         };
       });
+  }
+
+  public async fixStatus(deposit: Deposit): Promise<Deposit> {
+    const provider = await this.context.providers.checkProvider(deposit.dstChainId);
+    const etherContract = this.context.contractConnector.connect<CommitmentPool>(
+      'CommitmentPool',
+      deposit.dstPoolAddress,
+      provider,
+    );
+    const commitment = await this.context.commitments.findOne({
+      chainId: deposit.dstChainId,
+      contractAddress: deposit.dstPoolAddress,
+      commitmentHash: deposit.commitmentHash,
+    });
+    const isHistoricCommitment = await etherContract.isHistoricCommitment(deposit.commitmentHash);
+    if (isHistoricCommitment && deposit.status === DepositStatus.FAILED) {
+      if (commitment != null) {
+        await deposit.atomicUpdate((data) => {
+          data.status =
+            data.rollupTransactionHash !== undefined ? CommitmentStatus.INCLUDED : CommitmentStatus.QUEUED;
+          data.updatedAt = MystikoHandler.now();
+          return data;
+        });
+      }
+      return deposit.atomicUpdate((data) => {
+        data.status =
+          commitment === null || commitment.rollupTransactionHash === undefined
+            ? DepositStatus.QUEUED
+            : DepositStatus.INCLUDED;
+        data.errorMessage = undefined;
+        data.updatedAt = MystikoHandler.now();
+        return data;
+      });
+    }
+    return deposit;
   }
 
   private getChainConfig(options: DepositQuoteOptions | DepositOptions): Promise<ChainConfig> {
@@ -375,7 +411,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
               assetApproveTransactionHash: resp?.hash,
             }).then(() => {
               if (resp) {
-                return waitTransaction(resp);
+                return waitTransaction(resp, 2);
               }
               return Promise.resolve(undefined);
             }),
@@ -460,7 +496,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     let newDeposit = await this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
       transactionHash: resp.hash,
     });
-    const receipt = await waitTransaction(resp).catch(async (error) => {
+    const receipt = await waitTransaction(resp, 2).catch(async (error) => {
       await commitment.atomicUpdate((commitmentData) => {
         commitmentData.status = CommitmentStatus.FAILED;
         commitmentData.updatedAt = MystikoHandler.now();

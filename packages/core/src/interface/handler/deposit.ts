@@ -95,4 +95,5 @@ export interface DepositHandler<
   quote(options: QO): Promise<QUO>;
   summary(options: D): Promise<S>;
   update(query: string | Q, data: U): Promise<Deposit>;
+  fixStatus(query: string | Q): Promise<Deposit | null>;
 }

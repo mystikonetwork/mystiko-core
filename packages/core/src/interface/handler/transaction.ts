@@ -106,4 +106,5 @@ export interface TransactionHandler<
   quote(options: QO): Promise<QUO>;
   summary(options: T): Promise<S>;
   update(query: string | Q, data: U): Promise<Transaction>;
+  fixStatus(query: string | Q): Promise<Transaction | null>;
 }

@@ -41,6 +41,7 @@ import {
   GasRelayerInfo,
   TransactionExecutor,
   TransactionOptions,
+  TransactionQuery,
   TransactionQuote,
   TransactionQuoteOptions,
   TransactionQuoteWithRelayers,
@@ -180,6 +181,45 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           gasRelayerAddress: options.gasRelayerInfo?.address,
         };
       });
+  }
+
+  public async fixStatus(transaction: Transaction): Promise<Transaction> {
+    if (transaction.transactionHash) {
+      const provider = await this.context.providers.checkProvider(transaction.chainId);
+      const txRecipient = await provider.getTransactionReceipt(transaction.transactionHash);
+      if (txRecipient === null && transaction.status === TransactionStatus.SUCCEEDED) {
+        const inputCommitments = await this.context.commitments.find({
+          selector: { id: { $in: transaction.inputCommitments }, status: CommitmentStatus.SPENT },
+        });
+        const etherContract = this.context.contractConnector.connect<CommitmentPool>(
+          'CommitmentPool',
+          transaction.contractAddress,
+          provider,
+        );
+        const promises = inputCommitments.map(async (commitment) => {
+          if (commitment.serialNumber) {
+            const isSpent = await etherContract.isSpentSerialNumber(commitment.serialNumber);
+            if (!isSpent) {
+              return commitment.atomicUpdate((data) => {
+                data.status = CommitmentStatus.INCLUDED;
+                data.updatedAt = MystikoHandler.now();
+                return data;
+              });
+            }
+          }
+          return Promise.resolve(undefined);
+        });
+        const updatedCommitments = (await Promise.all(promises)).filter((c) => c !== undefined);
+        if (updatedCommitments.length > 0) {
+          return transaction.atomicUpdate((data) => {
+            data.status = TransactionStatus.FAILED;
+            data.updatedAt = MystikoHandler.now();
+            return data;
+          });
+        }
+      }
+    }
+    return Promise.resolve(transaction);
   }
 
   public static calcGasRelayerFee(amount: BN, gasRelayerInfo: GasRelayerInfo): BN {
@@ -855,7 +895,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         waitTransactionHash(
           provider,
           resp.hash,
-          undefined,
+          2,
           options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
         ).then((receipt) => {
           this.logger.info(
@@ -896,7 +936,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }).then((tx) => ({ tx, resp }));
       })
       .then(({ tx, resp }) =>
-        waitTransaction(resp).then((receipt) => {
+        waitTransaction(resp, 2).then((receipt) => {
           this.logger.info(
             `transaction id=${transaction.id} to ` +
               `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +

@@ -1,4 +1,5 @@
 import { DepositContractConfig } from '@mystikonetwork/config';
+import { Deposit } from '@mystikonetwork/database';
 import {
   DepositOptions,
   DepositQuote,
@@ -17,4 +18,5 @@ export interface DepositExecutor<
   execute(options: D, config: DepositContractConfig): Promise<R>;
   quote(options: QO, config: DepositContractConfig): Promise<Q>;
   summary(options: D, config: DepositContractConfig): Promise<S>;
+  fixStatus(deposit: Deposit): Promise<Deposit>;
 }

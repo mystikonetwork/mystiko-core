@@ -111,6 +111,20 @@ export class TransactionHandlerV2 extends MystikoHandler implements TransactionH
     });
   }
 
+  public async fixStatus(query: string | TransactionQuery): Promise<Transaction | null> {
+    const transaction = await this.findOne(query);
+    if (transaction !== null) {
+      const poolContractConfig = this.config.getPoolContractConfigByAddress(
+        transaction.chainId,
+        transaction.contractAddress,
+      );
+      if (poolContractConfig) {
+        return this.context.executors.getTransactionExecutor(poolContractConfig).fixStatus(transaction);
+      }
+    }
+    return Promise.resolve(transaction);
+  }
+
   private getPoolContractConfig(
     options: TransactionOptions | TransactionQuoteOptions,
   ): Promise<PoolContractConfig> {

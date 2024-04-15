@@ -649,3 +649,46 @@ test('test deposit statusCallback raise errors', async () => {
   const deposit = await depositPromise;
   await checkDeposit(deposit, options, depositContractConfig);
 });
+
+test('test fixStatus', async () => {
+  await mockMystikoV2Loop.mock.deposit.returns();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'BNB',
+    bridge: BridgeType.LOOP,
+    amount: 0.1,
+    rollupFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await deposit.atomicUpdate((data) => {
+    deposit.status = DepositStatus.FAILED;
+    return data;
+  });
+  const commitment = await commitmentHandler.findOne({
+    chainId: deposit.dstChainId,
+    contractAddress: deposit.dstPoolAddress,
+    commitmentHash: deposit.commitmentHash,
+  });
+  if (commitment !== null) {
+    await commitment.atomicUpdate((data) => {
+      commitment.status = CommitmentStatus.FAILED;
+      return data;
+    });
+  }
+  await mockCommitmentPool.mock.isHistoricCommitments.returns(true);
+  const updatedDeposit = await executor.fixStatus(deposit);
+  const updatedCommitment = await commitmentHandler.findOne({
+    chainId: deposit.dstChainId,
+    contractAddress: deposit.dstPoolAddress,
+    commitmentHash: deposit.commitmentHash,
+  });
+  expect(updatedDeposit.status).toBe(DepositStatus.QUEUED);
+  expect(updatedDeposit.errorMessage).toBe(undefined);
+  expect(updatedCommitment?.status).toBe(CommitmentStatus.QUEUED);
+});
