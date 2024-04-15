@@ -13,6 +13,7 @@ import { readJsonFile, toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import {
   AccountHandlerV2,
+  CommitmentHandlerV2,
   createError,
   DepositExecutorV2,
   DepositHandlerV2,
@@ -85,6 +86,7 @@ beforeAll(async () => {
   });
   context.wallets = new WalletHandlerV2(context);
   context.accounts = new AccountHandlerV2(context);
+  context.commitments = new CommitmentHandlerV2(context);
   handler = new DepositHandlerV2(context);
   context.executors = new TestExecutorFactory(context);
 });
@@ -213,4 +215,14 @@ test('test summary', async () => {
       MystikoErrorCode.INVALID_DEPOSIT_OPTIONS,
     ),
   );
+});
+
+test('test fixStatus', async () => {
+  const deposit = await handler.fixStatus('non-existing-id');
+  expect(deposit).toBe(null);
+  const deposits = await handler.find();
+  const [firstDeposit] = deposits;
+  await mockCommitmentPool.mock.isHistoricCommitment.returns(true);
+  const updatedDeposit = await handler.fixStatus(firstDeposit.id);
+  expect(updatedDeposit?.status).toBe(DepositStatus.INCLUDED);
 });

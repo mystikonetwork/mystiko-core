@@ -99,6 +99,8 @@ type RemoteContractConfig = {
   minRollupFee: BN;
 };
 
+const DEFAULT_WAIT_TIMEOUT_MS = 300000;
+
 export const DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS = 600000;
 
 export class TransactionExecutorV2 extends MystikoExecutor implements TransactionExecutor {
@@ -180,6 +182,61 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           gasRelayerAddress: options.gasRelayerInfo?.address,
         };
       });
+  }
+
+  public async fixStatus(transaction: Transaction): Promise<Transaction> {
+    if (transaction.transactionHash) {
+      const provider = await this.context.providers.checkProvider(transaction.chainId);
+      const txRecipient = await provider.getTransactionReceipt(transaction.transactionHash);
+      if ((!txRecipient || !txRecipient.blockNumber) && transaction.status === TransactionStatus.SUCCEEDED) {
+        const inputCommitments = await this.context.commitments.find({
+          selector: { id: { $in: transaction.inputCommitments }, status: CommitmentStatus.SPENT },
+        });
+        let outputCommitments: Commitment[] = [];
+        if (transaction.outputCommitments && transaction.outputCommitments.length > 0) {
+          outputCommitments = await this.context.commitments.find({
+            selector: { id: { $in: transaction.outputCommitments } },
+          });
+        }
+        const etherContract = this.context.contractConnector.connect<CommitmentPool>(
+          'CommitmentPool',
+          transaction.contractAddress,
+          provider,
+        );
+        const inputCommitmentPromises = inputCommitments.map(async (commitment) => {
+          if (commitment.serialNumber) {
+            const isSpent = await etherContract.isSpentSerialNumber(commitment.serialNumber);
+            if (!isSpent) {
+              return commitment.atomicUpdate((data) => {
+                data.status = CommitmentStatus.INCLUDED;
+                data.updatedAt = MystikoHandler.now();
+                return data;
+              });
+            }
+          }
+          return Promise.resolve(undefined);
+        });
+        const outputCommitmentPromises = outputCommitments.map(async (commitment) => {
+          const isHistoricCommitment = await etherContract.isHistoricCommitment(commitment.commitmentHash);
+          if (!isHistoricCommitment) {
+            return commitment.remove();
+          }
+          return Promise.resolve(undefined);
+        });
+        const updatedInputCommitments = (await Promise.all(inputCommitmentPromises)).filter(
+          (c) => c !== undefined,
+        );
+        await Promise.all(outputCommitmentPromises);
+        if (updatedInputCommitments.length > 0) {
+          return transaction.atomicUpdate((data) => {
+            data.status = TransactionStatus.FAILED;
+            data.updatedAt = MystikoHandler.now();
+            return data;
+          });
+        }
+      }
+    }
+    return Promise.resolve(transaction);
   }
 
   public static calcGasRelayerFee(amount: BN, gasRelayerInfo: GasRelayerInfo): BN {
@@ -855,7 +912,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         waitTransactionHash(
           provider,
           resp.hash,
-          undefined,
+          options.numOfConfirmations || chainConfig.safeConfirmations,
           options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
         ).then((receipt) => {
           this.logger.info(
@@ -896,7 +953,11 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }).then((tx) => ({ tx, resp }));
       })
       .then(({ tx, resp }) =>
-        waitTransaction(resp).then((receipt) => {
+        waitTransaction(
+          resp,
+          options.numOfConfirmations || chainConfig.safeConfirmations,
+          options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
+        ).then((receipt) => {
           this.logger.info(
             `transaction id=${transaction.id} to ` +
               `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +

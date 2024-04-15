@@ -124,6 +124,20 @@ export class DepositHandlerV2 extends MystikoHandler implements DepositHandler {
     );
   }
 
+  public async fixStatus(query: string | DepositQuery): Promise<Deposit | null> {
+    const deposit = await this.findOne(query);
+    if (deposit !== null) {
+      const depositContractConfig = this.config.getDepositContractConfigByAddress(
+        deposit.chainId,
+        deposit.contractAddress,
+      );
+      if (depositContractConfig) {
+        return this.context.executors.getDepositExecutor(depositContractConfig).fixStatus(deposit);
+      }
+    }
+    return deposit;
+  }
+
   private getDepositContractConfig(
     options: DepositOptions | DepositQuoteOptions,
   ): Promise<DepositContractConfig> {

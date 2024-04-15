@@ -95,13 +95,16 @@ class TestGasRelayerClient implements GasRelayers {
 class WrappedMockProvider extends MockProvider {
   public txReceipt: ethers.providers.TransactionReceipt;
 
-  constructor(secretKey: string) {
+  public emptyTxReceipt?: boolean;
+
+  constructor(secretKey: string, emptyTxReceipt?: boolean) {
     super({
       ganacheOptions: {
         accounts: [{ balance: toDecimals(1), secretKey }],
       },
     });
     this.txReceipt = { transactionHash: '' } as ethers.providers.TransactionReceipt;
+    this.emptyTxReceipt = emptyTxReceipt;
   }
 
   public waitForTransaction(
@@ -113,6 +116,13 @@ class WrappedMockProvider extends MockProvider {
     timeout?: number,
   ): Promise<ethers.providers.TransactionReceipt> {
     return Promise.resolve(this.txReceipt);
+  }
+
+  public getTransactionReceipt(transactionHash: string): Promise<ethers.providers.TransactionReceipt> {
+    if (this.emptyTxReceipt) {
+      return Promise.resolve(this.txReceipt);
+    }
+    return super.getTransactionReceipt(transactionHash);
   }
 }
 
@@ -982,4 +992,26 @@ test('test transaction with gas relayers', async () => {
   await exeRet.transactionPromise;
   expect(exeRet.transaction.status).toBe(TransactionStatus.FAILED);
   expect(exeRet.transaction.errorMessage).toBe('transaction failed');
+});
+
+test('test fixStatus', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  transferOptions.amount = 8;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  mockProvider.emptyTxReceipt = true;
+  mockProvider.txReceipt = {
+    transactionHash: '0xf1a37404bc619328699869ab412cc848b51b98af2ca7055214f55b998f4d420c',
+  } as ethers.providers.TransactionReceipt;
+  await mockCommitmentPool.mock.isHistoricCommitment.returns(false);
+  await mockCommitmentPool.mock.isSpentSerialNumber.returns(false);
+  const updatedTransaction = await executor.fixStatus(transaction);
+  expect(updatedTransaction.status).toBe(TransactionStatus.FAILED);
+  const inputCommitments: Commitment[] = await transaction.populate('inputCommitments');
+  const outputCommitments: Commitment[] = await transaction.populate('outputCommitments');
+  inputCommitments.forEach((commitment) => expect(commitment.status).toBe(CommitmentStatus.INCLUDED));
+  expect(outputCommitments.length).toBe(0);
 });

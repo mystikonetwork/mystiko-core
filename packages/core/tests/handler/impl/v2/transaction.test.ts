@@ -230,3 +230,14 @@ test('test update', async () => {
   expect(updatedTransaction.errorMessage).toBe(testErrorMessage);
   expect(updatedTransaction.transactionHash).toBe(testTxHash);
 });
+
+test('test fixStatus', async () => {
+  const transaction = await handler.fixStatus('non-existing-id');
+  expect(transaction).toBe(null);
+  const transactions = await handler.find();
+  const [firstTransaction] = transactions;
+  await mockCommitmentPool.mock.isHistoricCommitment.returns(false);
+  await mockCommitmentPool.mock.isSpentSerialNumber.returns(false);
+  const updatedTransaction = await handler.fixStatus(firstTransaction.id);
+  expect(updatedTransaction?.status).toBe(TransactionStatus.FAILED);
+});
