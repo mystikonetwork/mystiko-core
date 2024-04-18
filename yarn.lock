@@ -1117,13 +1117,13 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.3.3":
-  version "0.3.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.3/95f8dcd14aaeb573f78543515cd1d255a07bc9a8#95f8dcd14aaeb573f78543515cd1d255a07bc9a8"
-  integrity sha512-pxmNeuxChZw3l4yfLbX2Y3WalMG8eCY/vrFSCFOUVyOlIkvFWgFoX5IE9Bbf+RrWwNAw4uCPfR/30uViGWs8QA==
+"@mystikonetwork/datapacker-client@^0.3.4":
+  version "0.3.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.4/6bc7b98fc03999494bcf0d3d3cb00b20b07b1062#6bc7b98fc03999494bcf0d3d3cb00b20b07b1062"
+  integrity sha512-sExQXCOYL5YvVg75yKVtWDPtL766baEJ/OBGwccTc7/P5a2pX9vKxKOQzr/YdGWX+eY8w0lLiFZwhtctmqW4Eg==
   dependencies:
     "@mystikonetwork/config" ">=0.10.3"
-    "@mystikonetwork/protos" ">=0.3.0"
+    "@mystikonetwork/protos" ">=0.5.7"
     "@mystikonetwork/utils" ">=0.3.2"
     axios "^0.27.2"
     crypto-js "^4.1.1"
@@ -1200,7 +1200,14 @@
     loglevel "^1.8.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/protos@>=0.3.0", "@mystikonetwork/protos@^0.3.0":
+"@mystikonetwork/protos@>=0.5.7", "@mystikonetwork/protos@^0.5.7":
+  version "0.5.7"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.5.7/b23dd7369dc042601a4dc70486a0e2156e173e4a#b23dd7369dc042601a4dc70486a0e2156e173e4a"
+  integrity sha512-flYlyngYR4xoeHAoOBR+MfwSIaqAUinGDheM2FahXpm9llVoeUPlT2o9l33x5ksHh5d91qmzUQ4QF9PpUb/4Vg==
+  dependencies:
+    "@bufbuild/protobuf" "^1.3.3"
+
+"@mystikonetwork/protos@^0.3.0":
   version "0.3.0"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.3.0/0bb202ab12049c92cce48793a9f55a7038bb1faf#0bb202ab12049c92cce48793a9f55a7038bb1faf"
   integrity sha512-4RZZkHp/8lySUylYGgIIJTLvWwPQfHeWe6mvqG9CWOf5SJxDTW77+68ai51B5py7zvXdKq1t5UlaiQFKYCrKDQ==
@@ -1216,30 +1223,17 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/sequencer-client@^0.2.0":
-  version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.0/fa21de86be96d47e86d9b65c586259467999950c#fa21de86be96d47e86d9b65c586259467999950c"
-  integrity sha512-WNj/88N8Lrxd1l879+FaEVjjh59tPXN35ynVEf2PHfuQkZPmKqDxteo89eRTlR/uwFZvgA4Eo9dev0tUpXdHQQ==
+"@mystikonetwork/sequencer-client@^0.2.2":
+  version "0.2.2"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.2/3fe6cab4e743ef16ec9b4896814bc1368089a884#3fe6cab4e743ef16ec9b4896814bc1368089a884"
+  integrity sha512-1nKkX2qKQ3LABbwRJqHJ60U6aWRtuPuexu5jfuDjs4a7sewxwocTy0DzE33sEq16GFP0bU7A8qpMEjUnvieYUQ==
   dependencies:
     "@bufbuild/protobuf" "^1.3.3"
     "@connectrpc/connect" "^1.1.2"
-    "@mystikonetwork/protos" "^0.3.0"
-    "@mystikonetwork/utils" ">=0.2.9"
+    "@mystikonetwork/protos" "^0.5.7"
+    "@mystikonetwork/utils" ">=0.3.2"
     bn.js "^5.2.0"
     ethers "^5.5.3"
-
-"@mystikonetwork/utils@>=0.2.9", "@mystikonetwork/utils@^0.2.11":
-  version "0.2.11"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.2.11/81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2#81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2"
-  integrity sha512-dxUVm0Bo+wjH58NK21mK9oY2Rpay4YwrZCTXwak2TS976Hy+yekGzUGNF7bI1AhBVgEDloSXljJ8hmeFdZS0nw==
-  dependencies:
-    "@mystikonetwork/fastfile" "^0.0.21"
-    axios "^0.27.2"
-    bn.js "^5.2.0"
-    ethers "^5.5.3"
-    loglevel "^1.8.0"
-    loglevel-plugin-prefix "^0.8.4"
-    pako "^2.0.4"
 
 "@mystikonetwork/utils@>=0.3.2":
   version "0.3.2"
@@ -1258,6 +1252,19 @@
   version "0.1.6"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.1.6/1b1278ad99d686c279aea60b459f275f94746ebc#1b1278ad99d686c279aea60b459f275f94746ebc"
   integrity sha512-1Ksi5pCbnXZoG6GYeDGLULZ/VwxZN3VmbC9m82skE7AKJ0fyfP+K6DBoYSEh91CKMBk+pt23QY7dhBNeYtsf5Q==
+  dependencies:
+    "@mystikonetwork/fastfile" "^0.0.21"
+    axios "^0.27.2"
+    bn.js "^5.2.0"
+    ethers "^5.5.3"
+    loglevel "^1.8.0"
+    loglevel-plugin-prefix "^0.8.4"
+    pako "^2.0.4"
+
+"@mystikonetwork/utils@^0.2.11":
+  version "0.2.11"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.2.11/81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2#81a9ebbe9c3aa27ddf6529c215e88f63bd218ec2"
+  integrity sha512-dxUVm0Bo+wjH58NK21mK9oY2Rpay4YwrZCTXwak2TS976Hy+yekGzUGNF7bI1AhBVgEDloSXljJ8hmeFdZS0nw==
   dependencies:
     "@mystikonetwork/fastfile" "^0.0.21"
     axios "^0.27.2"
