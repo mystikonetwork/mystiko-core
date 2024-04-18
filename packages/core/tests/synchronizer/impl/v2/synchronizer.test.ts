@@ -138,7 +138,6 @@ beforeEach(async () => {
     });
   });
   await context.wallets.setFullSynchronizationOptions(syncOptions);
-  await context.wallets.fullSynchronization(true);
 });
 
 afterEach(async () => {

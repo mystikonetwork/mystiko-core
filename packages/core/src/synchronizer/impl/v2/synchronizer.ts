@@ -1,10 +1,4 @@
-import {
-  AccountStatus,
-  Commitment,
-  CommitmentStatus,
-  DepositStatus,
-  TransactionStatus,
-} from '@mystikonetwork/database';
+import { AccountStatus, Commitment } from '@mystikonetwork/database';
 import { errorMessage, logger as rootLogger, promiseWithTimeout } from '@mystikonetwork/utils';
 import { BroadcastChannel } from 'broadcast-channel';
 import { Logger } from 'loglevel';
@@ -177,53 +171,42 @@ export class SynchronizerV2 implements Synchronizer {
   }
 
   public get status(): Promise<SyncStatus> {
-    return this.isFullMode()
-      .then((fullMode) => {
-        if (!fullMode) {
-          return this.getInteractedContracts();
+    return this.getFullModeContracts().then((syncingContracts) => {
+      const promises: Promise<SyncChainStatus>[] = [];
+      this.chains.forEach((chainInternalStatus) => {
+        const chainSyncingContractSet = syncingContracts.get(chainInternalStatus.chainId);
+        if (chainSyncingContractSet) {
+          const chainSyncingContracts = Array.from(chainSyncingContractSet);
+          promises.push(
+            this.context.chains.findOne(chainInternalStatus.chainId).then((chain) =>
+              this.context.chains
+                .syncedBlockNumber(chainInternalStatus.chainId, chainSyncingContracts)
+                .then(({ syncedBlockNumber }) => ({
+                  chainId: chainInternalStatus.chainId,
+                  name: chain?.name || chainInternalStatus.name,
+                  syncedBlock: syncedBlockNumber || 0,
+                  isSyncing: chainInternalStatus.isSyncing,
+                  error: chainInternalStatus.error,
+                  outdated:
+                    new Date().getTime() - (chain?.syncedAt || 0) > SynchronizerV2.OUT_DATE_TIME_INTERVAL_MS,
+                })),
+            ),
+          );
         }
-        return this.getFullModeContracts();
-      })
-      .then((syncingContracts) => {
-        const promises: Promise<SyncChainStatus>[] = [];
-        this.chains.forEach((chainInternalStatus) => {
-          const chainSyncingContractSet = syncingContracts.get(chainInternalStatus.chainId);
-          if (chainSyncingContractSet) {
-            const chainSyncingContracts = Array.from(chainSyncingContractSet);
-            promises.push(
-              this.context.chains.findOne(chainInternalStatus.chainId).then((chain) =>
-                this.context.chains
-                  .syncedBlockNumber(chainInternalStatus.chainId, chainSyncingContracts)
-                  .then(({ syncedBlockNumber }) => ({
-                    chainId: chainInternalStatus.chainId,
-                    name: chain?.name || chainInternalStatus.name,
-                    syncedBlock: syncedBlockNumber || 0,
-                    isSyncing: chainInternalStatus.isSyncing,
-                    error: chainInternalStatus.error,
-                    outdated:
-                      new Date().getTime() - (chain?.syncedAt || 0) >
-                      SynchronizerV2.OUT_DATE_TIME_INTERVAL_MS,
-                  })),
-              ),
-            );
-          }
-        });
-        return Promise.all(promises).then((chainStatuses) => ({
-          schedulerState: this.schedulerState,
-          chains: chainStatuses,
-          isSyncing: this.isSyncing,
-          error: this.error,
-        }));
       });
+      return Promise.all(promises).then((chainStatuses) => ({
+        schedulerState: this.schedulerState,
+        chains: chainStatuses,
+        isSyncing: this.isSyncing,
+        error: this.error,
+      }));
+    });
   }
 
   private async executeSync(options: SyncOptions): Promise<void> {
     const isScanning = await this.isScanning();
     if (!this.isSyncing && !isScanning) {
-      const fullMode = await this.isFullMode();
-      const syncingContracts = fullMode
-        ? await this.getFullModeContracts()
-        : await this.getInteractedContracts();
+      const syncingContracts = await this.getFullModeContracts();
       if (syncingContracts.size === 0) {
         return Promise.resolve();
       }
@@ -486,75 +469,6 @@ export class SynchronizerV2 implements Synchronizer {
     });
   }
 
-  private async getInteractedContracts(): Promise<Map<number, Set<string>>> {
-    const deposits = await this.context.deposits.find({
-      selector: {
-        status: {
-          $in: [
-            DepositStatus.SRC_PENDING,
-            DepositStatus.SRC_SUCCEEDED,
-            DepositStatus.QUEUED,
-            DepositStatus.INCLUDED,
-          ],
-        },
-      },
-    });
-    const transactions = await this.context.transactions.find({
-      selector: {
-        $not: { outputCommitments: { $size: 0 } },
-        status: { $in: [TransactionStatus.PENDING, TransactionStatus.SUCCEEDED] },
-      },
-    });
-    const commitmentHashes = deposits.map((d) => d.commitmentHash);
-    const commitmentIds = transactions.map((t) => t.outputCommitments || []).flat();
-    const spentCommitments = await this.context.commitments.find({
-      selector: {
-        status: CommitmentStatus.SPENT,
-        $or: [
-          {
-            commitmentHash: { $in: commitmentHashes },
-          },
-          {
-            id: { $in: commitmentIds },
-          },
-        ],
-      },
-    });
-    const spentCommitmentHashes = new Set<String>(
-      spentCommitments.map((c) => `${c.chainId}/${c.contractAddress}/${c.commitmentHash}`),
-    );
-    const spentCommitmentIds = new Set<String>(spentCommitments.map((c) => c.id));
-    const interactedContracts: Map<number, Set<string>> = new Map();
-    deposits.forEach((deposit) => {
-      if (
-        !spentCommitmentHashes.has(
-          `${deposit.dstChainId}/${deposit.dstPoolAddress}/${deposit.commitmentHash}`,
-        )
-      ) {
-        if (!interactedContracts.has(deposit.chainId)) {
-          interactedContracts.set(deposit.chainId, new Set<string>());
-        }
-        interactedContracts.get(deposit.chainId)?.add(deposit.contractAddress);
-        if (!interactedContracts.has(deposit.dstChainId)) {
-          interactedContracts.set(deposit.dstChainId, new Set<string>());
-        }
-        interactedContracts.get(deposit.dstChainId)?.add(deposit.dstPoolAddress);
-      }
-    });
-    transactions.forEach((transaction) => {
-      if (transaction.outputCommitments) {
-        const unspentCommitments = transaction.outputCommitments.filter((c) => !spentCommitmentIds.has(c));
-        if (unspentCommitments.length > 0) {
-          if (!interactedContracts.has(transaction.chainId)) {
-            interactedContracts.set(transaction.chainId, new Set<string>());
-          }
-          interactedContracts.get(transaction.chainId)?.add(transaction.contractAddress);
-        }
-      }
-    });
-    return interactedContracts;
-  }
-
   private async getFullModeContracts(): Promise<Map<number, Set<string>>> {
     const fullSynchronizationOptions = await this.context.wallets.getFullSynchronizationOptions();
     const contracts: Map<number, Set<string>> = new Map();
@@ -577,10 +491,6 @@ export class SynchronizerV2 implements Synchronizer {
       }
     });
     return contracts;
-  }
-
-  private isFullMode(): Promise<boolean> {
-    return this.context.wallets.checkCurrent().then((wallet) => !!wallet.fullSynchronization);
   }
 
   private isScanning(): Promise<boolean> {

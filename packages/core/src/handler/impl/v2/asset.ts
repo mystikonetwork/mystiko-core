@@ -142,14 +142,46 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
         commitments,
         walletPassword: options.walletPassword,
       });
-      return this.checkCommitmentsSpent(updatedCommitments, options.providerTimeoutMs);
+      return this.checkCommitmentsSpent(
+        updatedCommitments,
+        options.walletPassword,
+        options.providerTimeoutMs,
+      );
     }
     return [];
   }
 
   public async sync(options: AssetSyncOptions): Promise<Map<string, Map<string, AssetBalance>>> {
     const commitments = await this.getCommitments([CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED]);
-    await Promise.all(commitments.map((commitment) => this.syncCommitmentStatus(commitment, options)));
+    const importOptions: Map<number, AssetChainImportOptions> = new Map();
+    const commitmentsToUpdate: Commitment[] = [];
+    commitments.forEach((commitment) => {
+      if (commitment.leafIndex === undefined && commitment.creationTransactionHash) {
+        const chainOptions = importOptions.get(commitment.chainId);
+        if (chainOptions) {
+          const txHashes = Array.isArray(chainOptions.txHash) ? chainOptions.txHash : [chainOptions.txHash];
+          if (!txHashes.includes(commitment.creationTransactionHash)) {
+            txHashes.push(commitment.creationTransactionHash);
+          }
+          chainOptions.txHash = txHashes;
+        } else {
+          importOptions.set(commitment.chainId, {
+            chainId: commitment.chainId,
+            txHash: commitment.creationTransactionHash,
+          });
+        }
+      } else {
+        commitmentsToUpdate.push(commitment);
+      }
+    });
+    await this.import({
+      chain: Array.from(importOptions.values()),
+      providerTimeoutMs: options.providerTimeoutMs,
+      walletPassword: options.walletPassword,
+    });
+    await Promise.all(
+      commitmentsToUpdate.map((commitment) => this.syncCommitmentStatus(commitment, options)),
+    );
     const accounts = await this.context.accounts.find();
     const accountsBalances = await Promise.all(
       accounts.map((account) =>
@@ -356,19 +388,31 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
 
   private async checkCommitmentsSpent(
     commitments: Commitment[],
+    walletPassword: string,
     providerTimeoutMs?: number,
   ): Promise<Commitment[]> {
     const updatedCommitments = await Promise.all(
-      commitments.map((commitment) => this.checkCommitmentSpent(commitment, providerTimeoutMs)),
+      commitments.map((commitment) =>
+        this.checkCommitmentSpent(commitment, walletPassword, providerTimeoutMs),
+      ),
     );
     return updatedCommitments.filter((c) => c.shieldedAddress && c.status !== CommitmentStatus.SPENT);
   }
 
   private async checkCommitmentSpent(
     commitment: Commitment,
+    walletPassword: string,
     providerTimeoutMs?: number,
   ): Promise<Commitment> {
-    const { serialNumber } = commitment;
+    let decryptedCommitment = commitment;
+    if (decryptedCommitment.serialNumber === undefined) {
+      const decryptedCommitments = await this.context.executors.getCommitmentExecutor().decrypt({
+        commitments: [commitment],
+        walletPassword,
+      });
+      decryptedCommitment = decryptedCommitments.length > 0 ? decryptedCommitments[0] : decryptedCommitment;
+    }
+    const { serialNumber } = decryptedCommitment;
     if (serialNumber) {
       const isSpent = await this.isKnowNullifierFromProvider(
         commitment.chainId,
@@ -457,7 +501,7 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
         return updatedCommitments[0];
       }
     } else if (commitment.status === CommitmentStatus.INCLUDED) {
-      return this.checkCommitmentSpent(commitment, options?.providerTimeoutMs);
+      return this.checkCommitmentSpent(commitment, options.walletPassword, options?.providerTimeoutMs);
     }
     return commitment;
   }
