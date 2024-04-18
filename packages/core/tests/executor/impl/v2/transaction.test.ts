@@ -761,7 +761,7 @@ test('test invalid root hash', async () => {
   await transactionPromise;
   expect(transaction.status).toBe(TransactionStatus.FAILED);
   expect(transaction.errorMessage).toBe(
-    'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
+    'unknown merkle.ts tree root, your wallet data might be out of sync or be corrupted',
   );
 });
 

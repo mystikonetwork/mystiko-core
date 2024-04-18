@@ -36,6 +36,12 @@ export type TransactionOptions = TransactionQuoteOptions & {
   transactOverrides?: Overrides & { from?: string | Promise<string> };
   numOfConfirmations?: number;
   waitTimeoutMs?: number;
+  providerTimeoutMs?: number;
+  rawMerkleTree?: Buffer;
+  rawZkProgram?: Buffer;
+  rawZkProvingKey?: Buffer;
+  rawZkVerifyingKey?: Buffer;
+  rawZkAbi?: Buffer;
 };
 
 export type TransactionQuote = {

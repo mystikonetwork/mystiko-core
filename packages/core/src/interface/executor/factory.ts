@@ -3,6 +3,7 @@ import { AssetExecutor } from './asset';
 import { CommitmentExecutor } from './commitment';
 import { DepositExecutor } from './deposit';
 import { EventExecutor } from './event';
+import { MerkleTreeExecutor } from './merkle';
 import { SequencerExecutor } from './sequencer';
 import { PackerExecutor } from './packer';
 import { TransactionExecutor } from './transaction';
@@ -15,6 +16,7 @@ export interface ExecutorFactory<
   S extends SequencerExecutor = SequencerExecutor,
   P extends PackerExecutor = PackerExecutor,
   T extends TransactionExecutor = TransactionExecutor,
+  M extends MerkleTreeExecutor = MerkleTreeExecutor,
 > {
   getAssetExecutor(): A;
   getCommitmentExecutor(): C;
@@ -23,4 +25,5 @@ export interface ExecutorFactory<
   getSequencerExecutor(): S | undefined;
   getTransactionExecutor(config: PoolContractConfig): T;
   getPackerExecutor(): P | undefined;
+  getMerkleTreeExecutor(): M;
 }
