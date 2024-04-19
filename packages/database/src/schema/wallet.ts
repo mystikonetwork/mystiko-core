@@ -2,7 +2,7 @@ import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSc
 import { HEX_REGEX } from '../constants';
 
 const walletSchemaLiteral = {
-  version: 3,
+  version: 4,
   title: 'wallet schema',
   description: 'a document contains wallet information',
   primaryKey: 'id',
@@ -40,7 +40,7 @@ const walletSchemaLiteral = {
     },
     autoSync: {
       type: 'boolean',
-      default: true,
+      default: false,
     },
     autoSyncInterval: {
       type: 'number',

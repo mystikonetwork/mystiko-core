@@ -33,6 +33,7 @@ export enum MystikoErrorCode {
   WRONG_AUDITOR_NUMBER = 31,
   NO_GAS_RELAYER_CLIENT = 32,
   INVALID_AUTO_SYNC_INTERVAL = 33,
+  NO_MERKLE_TREE_FOUND = 34,
 }
 
 export class MystikoError extends Error {

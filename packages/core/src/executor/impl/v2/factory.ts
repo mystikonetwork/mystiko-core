@@ -5,6 +5,7 @@ import { AssetExecutorV2 } from './asset';
 import { CommitmentExecutorV2 } from './commitment';
 import { DepositExecutorV2 } from './deposit';
 import { EventExecutorV2 } from './event';
+import { MerkleTreeExecutorV2 } from './merkle';
 import { SequencerExecutorV2 } from './sequencer';
 import { PackerExecutorV2 } from './packer';
 import { TransactionExecutorV2 } from './transaction';
@@ -16,7 +17,8 @@ type ExecutorFactoryV2Interface = ExecutorFactory<
   EventExecutorV2,
   SequencerExecutorV2,
   PackerExecutorV2,
-  TransactionExecutorV2
+  TransactionExecutorV2,
+  MerkleTreeExecutorV2
 >;
 
 export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
@@ -35,6 +37,8 @@ export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
   private packerExecutor?: PackerExecutorV2;
 
   private transactionExecutor?: TransactionExecutorV2;
+
+  private merkleTreeExecutor?: MerkleTreeExecutorV2;
 
   private sequencerClient?: sequencer.v1.SequencerClient;
 
@@ -97,5 +101,12 @@ export class ExecutorFactoryV2 implements ExecutorFactoryV2Interface {
       this.transactionExecutor = new TransactionExecutorV2(this.context);
     }
     return this.transactionExecutor;
+  }
+
+  public getMerkleTreeExecutor(): MerkleTreeExecutorV2 {
+    if (!this.merkleTreeExecutor) {
+      this.merkleTreeExecutor = new MerkleTreeExecutorV2(this.context);
+    }
+    return this.merkleTreeExecutor;
   }
 }

@@ -24,6 +24,8 @@ import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import {
   errorMessage,
   fromDecimals,
+  readCompressedFile,
+  readFile,
   toBN,
   toBuff,
   toDecimals,
@@ -97,6 +99,13 @@ type CommitmentUpdate = {
 
 type RemoteContractConfig = {
   minRollupFee: BN;
+};
+
+type StaticAssets = {
+  zkProgram: Buffer;
+  zkProvingKey: Buffer;
+  zkAbi: string;
+  zkVerifyingKey: string;
 };
 
 const DEFAULT_WAIT_TIMEOUT_MS = 300000;
@@ -634,155 +643,142 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       });
   }
 
-  private generateProof(
+  private async generateProof(
     executionContext: ExecutionContextWithTransaction,
   ): Promise<ExecutionContextWithProof> {
-    const { options, transaction } = executionContext;
+    const { options, transaction, selectedCommitments, outputCommitments, gasRelayerFee } = executionContext;
+    const merkleTree = await this.fetchMerkleTree(executionContext);
+    const staticAssets = await this.fetchStaticAssets(executionContext);
+    const accounts = await this.getInputAccounts(executionContext);
+    const numInputs = selectedCommitments.length;
+    const numOutputs = outputCommitments?.length || 0;
+    const randomEtherWallet = ethers.Wallet.createRandom();
+    const sigPk = toBuff(randomEtherWallet.address);
+    const inVerifyPks: Buffer[] = [];
+    const inVerifySks: Buffer[] = [];
+    const inEncPks: Buffer[] = [];
+    const inEncSks: Buffer[] = [];
+    const inCommitments: BN[] = [];
+    const inPrivateNotes: Buffer[] = [];
+    const pathIndices: number[][] = [];
+    const pathElements: BN[][] = [];
+    const outVerifyPks: Buffer[] = [];
+    const outCommitments: BN[] = [];
+    const outRandomPs: BN[] = [];
+    const outRandomRs: BN[] = [];
+    const outRandomSs: BN[] = [];
+    const outAmounts: BN[] = [];
+    const outputEncryptedNotes: Buffer[] = [];
+    const rollupFeeAmounts: BN[] = [];
+    for (let i = 0; i < selectedCommitments.length; i += 1) {
+      const commitment = selectedCommitments[i];
+      const account = accounts[i];
+      const { commitmentHash, leafIndex, encryptedNote } = commitment;
+      /* istanbul ignore if */
+      if (!encryptedNote || !leafIndex) {
+        return createErrorPromise(
+          `missing required data of input commitment=${commitmentHash}`,
+          MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+        );
+      }
+      inVerifyPks.push(account.publicKeyForVerification(this.protocol));
+      inVerifySks.push(
+        this.protocol.secretKeyForVerification(
+          account.secretKeyForVerification(this.protocol, options.walletPassword),
+        ),
+      );
+      inEncPks.push(account.publicKeyForEncryption(this.protocol));
+      inEncSks.push(account.secretKeyForEncryption(this.protocol, options.walletPassword));
+      inCommitments.push(toBN(commitmentHash));
+      inPrivateNotes.push(toBuff(encryptedNote));
+      const merklePath = merkleTree.path(toBN(leafIndex).toNumber());
+      pathIndices.push(merklePath.pathIndices);
+      pathElements.push(merklePath.pathElements);
+    }
+    if (outputCommitments) {
+      for (let i = 0; i < outputCommitments.length; i += 1) {
+        const { commitment, info } = outputCommitments[i];
+        const { shieldedAddress, amount, rollupFeeAmount } = commitment;
+        const { randomP, randomR, randomS, commitmentHash, encryptedNote } = info;
+        /* istanbul ignore if */
+        if (!shieldedAddress || !amount) {
+          return createErrorPromise(
+            `missing required data of output commitment=${commitmentHash.toString()}`,
+            MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
+          );
+        }
+        const { pkVerify } = this.protocol.publicKeysFromShieldedAddress(shieldedAddress);
+        outVerifyPks.push(pkVerify);
+        outCommitments.push(commitmentHash);
+        outRandomPs.push(randomP);
+        outRandomRs.push(randomR);
+        outRandomSs.push(randomS);
+        outAmounts.push(toBN(amount));
+        rollupFeeAmounts.push(toBN(rollupFeeAmount || 0));
+        outputEncryptedNotes.push(encryptedNote);
+      }
+    }
+    const randomAuditingSecretKey = ECIES.generateSecretKey();
+    const auditorPublicKeys = await this.getAuditorPublicKeys(executionContext);
     this.logger.info(`generating proof for transaction id=${transaction.id}`);
-    return this.updateTransactionStatus(options, transaction, TransactionStatus.PROOF_GENERATING).then(
-      (newTransaction) =>
-        this.buildMerkleTree(executionContext)
-          .then((merkleTree) =>
-            this.getInputAccounts(executionContext).then((accounts) => ({ merkleTree, accounts })),
-          )
-          .then(({ merkleTree, accounts }) => {
-            const { circuitConfig, selectedCommitments, outputCommitments, gasRelayerFee } = executionContext;
-            const numInputs = selectedCommitments.length;
-            const numOutputs = outputCommitments?.length || 0;
-            const randomEtherWallet = ethers.Wallet.createRandom();
-            const sigPk = toBuff(randomEtherWallet.address);
-            const inVerifyPks: Buffer[] = [];
-            const inVerifySks: Buffer[] = [];
-            const inEncPks: Buffer[] = [];
-            const inEncSks: Buffer[] = [];
-            const inCommitments: BN[] = [];
-            const inPrivateNotes: Buffer[] = [];
-            const pathIndices: number[][] = [];
-            const pathElements: BN[][] = [];
-            const outVerifyPks: Buffer[] = [];
-            const outCommitments: BN[] = [];
-            const outRandomPs: BN[] = [];
-            const outRandomRs: BN[] = [];
-            const outRandomSs: BN[] = [];
-            const outAmounts: BN[] = [];
-            const outputEncryptedNotes: Buffer[] = [];
-            const rollupFeeAmounts: BN[] = [];
-            for (let i = 0; i < selectedCommitments.length; i += 1) {
-              const commitment = selectedCommitments[i];
-              const account = accounts[i];
-              const { commitmentHash, leafIndex, encryptedNote } = commitment;
-              /* istanbul ignore if */
-              if (!encryptedNote || !leafIndex) {
-                return createErrorPromise(
-                  `missing required data of input commitment=${commitmentHash}`,
-                  MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
-                );
-              }
-              inVerifyPks.push(account.publicKeyForVerification(this.protocol));
-              inVerifySks.push(
-                this.protocol.secretKeyForVerification(
-                  account.secretKeyForVerification(this.protocol, options.walletPassword),
-                ),
-              );
-              inEncPks.push(account.publicKeyForEncryption(this.protocol));
-              inEncSks.push(account.secretKeyForEncryption(this.protocol, options.walletPassword));
-              inCommitments.push(toBN(commitmentHash));
-              inPrivateNotes.push(toBuff(encryptedNote));
-              const merklePath = merkleTree.path(toBN(leafIndex).toNumber());
-              pathIndices.push(merklePath.pathIndices);
-              pathElements.push(merklePath.pathElements);
-            }
-            if (outputCommitments) {
-              for (let i = 0; i < outputCommitments.length; i += 1) {
-                const { commitment, info } = outputCommitments[i];
-                const { shieldedAddress, amount, rollupFeeAmount } = commitment;
-                const { randomP, randomR, randomS, commitmentHash, encryptedNote } = info;
-                /* istanbul ignore if */
-                if (!shieldedAddress || !amount) {
-                  return createErrorPromise(
-                    `missing required data of output commitment=${commitmentHash.toString()}`,
-                    MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
-                  );
-                }
-                const { pkVerify } = this.protocol.publicKeysFromShieldedAddress(shieldedAddress);
-                outVerifyPks.push(pkVerify);
-                outCommitments.push(commitmentHash);
-                outRandomPs.push(randomP);
-                outRandomRs.push(randomR);
-                outRandomSs.push(randomS);
-                outAmounts.push(toBN(amount));
-                rollupFeeAmounts.push(toBN(rollupFeeAmount || 0));
-                outputEncryptedNotes.push(encryptedNote);
-              }
-            }
-            const randomAuditingSecretKey = ECIES.generateSecretKey();
-            return this.getAuditorPublicKeys(executionContext).then((auditorPublicKeys) =>
-              (this.protocol as MystikoProtocolV2)
-                .zkProveTransaction({
-                  numInputs,
-                  numOutputs,
-                  inVerifyPks,
-                  inVerifySks,
-                  inEncPks,
-                  inEncSks,
-                  inCommitments,
-                  inPrivateNotes,
-                  pathIndices,
-                  pathElements,
-                  sigPk,
-                  treeRoot: merkleTree.root(),
-                  publicAmount: toBN(transaction.publicAmount),
-                  relayerFeeAmount: gasRelayerFee,
-                  rollupFeeAmounts,
-                  outVerifyPks,
-                  outAmounts,
-                  outCommitments,
-                  outRandomPs,
-                  outRandomRs,
-                  outRandomSs,
-                  programFile: circuitConfig.programFile,
-                  provingKeyFile: circuitConfig.provingKeyFile,
-                  abiFile: circuitConfig.abiFile,
-                  randomAuditingSecretKey,
-                  auditorPublicKeys,
-                })
-                .then((proof) =>
-                  (this.protocol as MystikoProtocolV2)
-                    .zkVerify(proof, circuitConfig.verifyingKeyFile)
-                    .then((proofValid) => {
-                      /* istanbul ignore if */
-                      if (!proofValid) {
-                        return createErrorPromise(
-                          'generated an invalid proof',
-                          MystikoErrorCode.INVALID_ZKP_PROOF,
-                        );
-                      }
-                      this.logger.info(
-                        `proof is generated successfully for transaction id=${transaction.id}`,
-                      );
-                      return proof;
-                    }),
-                )
-                .then((proof) =>
-                  this.updateTransactionStatus(
-                    options,
-                    newTransaction,
-                    TransactionStatus.PROOF_GENERATED,
-                  ).then((tx) => ({
-                    ...executionContext,
-                    numInputs,
-                    numOutputs,
-                    outputEncryptedNotes,
-                    proof,
-                    transaction: tx,
-                    randomEtherWallet,
-                    numOfAuditors: this.protocol.numOfAuditors,
-                    randomAuditingSecretKey,
-                  })),
-                ),
-            );
-          }),
+    const newTransaction = await this.updateTransactionStatus(
+      options,
+      transaction,
+      TransactionStatus.PROOF_GENERATING,
     );
+    const proof = await (this.protocol as MystikoProtocolV2).zkProveTransaction({
+      numInputs,
+      numOutputs,
+      inVerifyPks,
+      inVerifySks,
+      inEncPks,
+      inEncSks,
+      inCommitments,
+      inPrivateNotes,
+      pathIndices,
+      pathElements,
+      sigPk,
+      treeRoot: merkleTree.root(),
+      publicAmount: toBN(transaction.publicAmount),
+      relayerFeeAmount: gasRelayerFee,
+      rollupFeeAmounts,
+      outVerifyPks,
+      outAmounts,
+      outCommitments,
+      outRandomPs,
+      outRandomRs,
+      outRandomSs,
+      program: staticAssets.zkProgram,
+      provingKey: staticAssets.zkProvingKey,
+      abi: staticAssets.zkAbi,
+      randomAuditingSecretKey,
+      auditorPublicKeys,
+    });
+    const proofValid = await (this.protocol as MystikoProtocolV2).zkVerify(
+      proof,
+      staticAssets.zkVerifyingKey,
+    );
+    /* istanbul ignore if */
+    if (!proofValid) {
+      return createErrorPromise('generated an invalid proof', MystikoErrorCode.INVALID_ZKP_PROOF);
+    }
+    this.logger.info(`proof is generated successfully for transaction id=${transaction.id}`);
+    const updatedTransaction = await this.updateTransactionStatus(
+      options,
+      newTransaction,
+      TransactionStatus.PROOF_GENERATED,
+    );
+    return {
+      ...executionContext,
+      numInputs,
+      numOutputs,
+      outputEncryptedNotes,
+      proof,
+      transaction: updatedTransaction,
+      randomEtherWallet,
+      numOfAuditors: this.protocol.numOfAuditors,
+      randomAuditingSecretKey,
+    };
   }
 
   private getAuditorPublicKeys(executionContext: ExecutionContext): Promise<BN[]> {
@@ -799,46 +795,53 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     });
   }
 
-  private buildMerkleTree(executionContext: ExecutionContext): Promise<MerkleTree> {
-    const { options, contractConfig, etherContract } = executionContext;
-    return this.context.commitments
-      .findByContract({
-        chainId: options.chainId,
-        contractAddress: contractConfig.address,
-        statuses: [CommitmentStatus.INCLUDED, CommitmentStatus.SPENT],
-      })
-      .then((commitments) => {
-        const sorted = CommitmentUtils.sortByLeafIndex(commitments, false);
-        const commitmentHashes: BN[] = [];
-        for (let i = 0; i < sorted.length; i += 1) {
-          const { leafIndex, encryptedNote, commitmentHash } = sorted[i];
-          if (leafIndex === undefined || encryptedNote === undefined) {
-            return createErrorPromise(
-              `missing required data of commitment=${commitmentHash}`,
-              MystikoErrorCode.MISSING_COMMITMENT_DATA,
-            );
-          }
-          if (!toBN(leafIndex).eqn(i)) {
-            return createErrorPromise(
-              `leafIndex is not correct of commitment=${commitmentHash}, expected=${i} vs actual=${leafIndex}`,
-              MystikoErrorCode.CORRUPTED_COMMITMENT_DATA,
-            );
-          }
-          commitmentHashes.push(toBN(commitmentHash));
+  private async fetchMerkleTree(executionContext: ExecutionContextWithTransaction): Promise<MerkleTree> {
+    const { options, contractConfig, transaction, selectedCommitments } = executionContext;
+    await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHING);
+    let expectedLeafIndex: number | undefined;
+    selectedCommitments.forEach((commitment) => {
+      if (commitment.leafIndex) {
+        const leafIndex = toBN(commitment.leafIndex).toNumber();
+        if (!expectedLeafIndex || leafIndex > expectedLeafIndex) {
+          expectedLeafIndex = leafIndex;
         }
-        return new MerkleTree(commitmentHashes);
-      })
-      .then((merkleTree: MerkleTree) =>
-        etherContract.isKnownRoot(merkleTree.root().toString()).then((validRoot) => {
-          if (!validRoot) {
-            return createErrorPromise(
-              'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
-              MystikoErrorCode.INVALID_TRANSACTION_REQUEST,
-            );
-          }
-          return Promise.resolve(merkleTree);
-        }),
-      );
+      }
+    });
+    const merkleTree = await this.context.executors.getMerkleTreeExecutor().get({
+      chainId: transaction.chainId,
+      contractAddress: contractConfig.address,
+      expectedLeafIndex,
+      raw: options.rawMerkleTree,
+      providerTimeoutMs: options.providerTimeoutMs,
+    });
+    await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
+    if (merkleTree) {
+      return merkleTree;
+    }
+    return createErrorPromise(
+      `no merkle tree found for chainId=${transaction.chainId} and contractAddress=${contractConfig.address}`,
+      MystikoErrorCode.NO_MERKLE_TREE_FOUND,
+    );
+  }
+
+  private async fetchStaticAssets(executionContext: ExecutionContextWithTransaction): Promise<StaticAssets> {
+    const { circuitConfig, options, transaction } = executionContext;
+    this.logger.info(`fetching zkp circuits assets for transaction type=${circuitConfig.type}`);
+    await this.updateTransactionStatus(options, transaction, TransactionStatus.STATIC_ASSETS_FETCHING);
+    const zkProgram = options.rawZkProgram || (await readCompressedFile(circuitConfig.programFile));
+    const zkProvingKey = options.rawZkProvingKey || (await readCompressedFile(circuitConfig.provingKeyFile));
+    const zkVerifyingKey =
+      options.rawZkVerifyingKey || (await readCompressedFile(circuitConfig.verifyingKeyFile));
+    const zkAbi = options.rawZkAbi || (await readFile(circuitConfig.abiFile));
+    const assets = {
+      zkProgram,
+      zkProvingKey,
+      zkVerifyingKey: zkVerifyingKey.toString(),
+      zkAbi: zkAbi.toString(),
+    };
+    await this.updateTransactionStatus(options, transaction, TransactionStatus.STATIC_ASSETS_FETCHED);
+    this.logger.info(`fetched zkp circuits assets successfully for transaction type=${circuitConfig.type}`);
+    return assets;
   }
 
   private sendTransaction(executionContext: ExecutionContextWithProof): Promise<ExecutionContextWithRequest> {

@@ -30,9 +30,16 @@ export const walletCollectionMigrations = {
   2: defaultMigrationStrategy,
   3(oldDoc: any): any {
     // eslint-disable-next-line no-param-reassign
-    oldDoc.autoSync = true;
+    oldDoc.autoSync = false;
     // eslint-disable-next-line no-param-reassign
     oldDoc.autoSyncInterval = 300000;
+    return oldDoc;
+  },
+  4(oldDoc: any): any {
+    // eslint-disable-next-line no-param-reassign
+    oldDoc.autoSync = false;
+    // eslint-disable-next-line no-param-reassign
+    oldDoc.fullSynchronization = false;
     return oldDoc;
   },
 };

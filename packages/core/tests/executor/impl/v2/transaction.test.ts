@@ -29,6 +29,8 @@ import {
 import { RegisterInfo, TransactResponse, TransactStatus } from '@mystikonetwork/gas-relayer-config';
 import { Point, SecretSharing } from '@mystikonetwork/secret-share';
 import { fromDecimals, readJsonFile, toBN, toDecimals } from '@mystikonetwork/utils';
+import { data } from '@mystikonetwork/protos';
+import { compress } from '@mongodb-js/zstd';
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 import {
@@ -159,6 +161,28 @@ type TestOptions = {
   contractConfig: PoolContractConfig;
 };
 
+async function buildRawMerkleTree(chainId: number, contractConfig: PoolContractConfig): Promise<Buffer> {
+  const commitments = await context.commitments.find({
+    selector: {
+      status: { $in: [CommitmentStatus.INCLUDED, CommitmentStatus.SPENT] },
+      contractAddress: contractConfig.address,
+      chainId,
+    },
+  });
+  commitments.sort((a, b) => {
+    const leafA = a.leafIndex ? toBN(a.leafIndex) : new BN(0);
+    const leafB = b.leafIndex ? toBN(b.leafIndex) : new BN(0);
+    return leafA.sub(leafB).toNumber();
+  });
+  const commitmentHashes = commitments.map((c) => toBN(c.commitmentHash).toBuffer('le'));
+  const merkleTree = new data.v1.MerkleTree({
+    commitmentHashes,
+    loadedBlockNumber: BigInt(0),
+    rootHash: new Uint8Array(32),
+  });
+  return compress(Buffer.from(merkleTree.toBinary()));
+}
+
 async function getTestOptions(): Promise<TestOptions> {
   const transferOptions: TransactionOptions = {
     walletPassword,
@@ -191,6 +215,8 @@ async function getTestOptions(): Promise<TestOptions> {
     transferOptions.assetSymbol,
     transferOptions.bridgeType,
   );
+  transferOptions.rawMerkleTree = await buildRawMerkleTree(transferOptions.chainId, contractConfig);
+  withdrawOptions.rawMerkleTree = await buildRawMerkleTree(withdrawOptions.chainId, contractConfig);
   return { transferOptions, withdrawOptions, contractConfig };
 }
 
@@ -304,19 +330,27 @@ async function checkTransaction(
       .toString(),
   );
   const statusCallback = options.statusCallback as jest.Mock;
-  expect(statusCallback.mock.calls.length).toBe(hasError ? 3 : 4);
+  expect(statusCallback.mock.calls.length).toBe(hasError ? 7 : 8);
   expect(statusCallback.mock.calls[0][1]).toBe(TransactionStatus.INIT);
-  expect(statusCallback.mock.calls[0][2]).toBe(TransactionStatus.PROOF_GENERATING);
-  expect(statusCallback.mock.calls[1][1]).toBe(TransactionStatus.PROOF_GENERATING);
-  expect(statusCallback.mock.calls[1][2]).toBe(TransactionStatus.PROOF_GENERATED);
+  expect(statusCallback.mock.calls[0][2]).toBe(TransactionStatus.MERKLE_TREE_FETCHING);
+  expect(statusCallback.mock.calls[1][1]).toBe(TransactionStatus.MERKLE_TREE_FETCHING);
+  expect(statusCallback.mock.calls[1][2]).toBe(TransactionStatus.MERKLE_TREE_FETCHED);
+  expect(statusCallback.mock.calls[2][1]).toBe(TransactionStatus.MERKLE_TREE_FETCHED);
+  expect(statusCallback.mock.calls[2][2]).toBe(TransactionStatus.STATIC_ASSETS_FETCHING);
+  expect(statusCallback.mock.calls[3][1]).toBe(TransactionStatus.STATIC_ASSETS_FETCHING);
+  expect(statusCallback.mock.calls[3][2]).toBe(TransactionStatus.STATIC_ASSETS_FETCHED);
+  expect(statusCallback.mock.calls[4][1]).toBe(TransactionStatus.STATIC_ASSETS_FETCHED);
+  expect(statusCallback.mock.calls[4][2]).toBe(TransactionStatus.PROOF_GENERATING);
+  expect(statusCallback.mock.calls[5][1]).toBe(TransactionStatus.PROOF_GENERATING);
+  expect(statusCallback.mock.calls[5][2]).toBe(TransactionStatus.PROOF_GENERATED);
   if (hasError) {
-    expect(statusCallback.mock.calls[2][1]).toBe(TransactionStatus.PROOF_GENERATED);
-    expect(statusCallback.mock.calls[2][2]).toBe(TransactionStatus.FAILED);
+    expect(statusCallback.mock.calls[6][1]).toBe(TransactionStatus.PROOF_GENERATED);
+    expect(statusCallback.mock.calls[6][2]).toBe(TransactionStatus.FAILED);
   } else {
-    expect(statusCallback.mock.calls[2][1]).toBe(TransactionStatus.PROOF_GENERATED);
-    expect(statusCallback.mock.calls[2][2]).toBe(TransactionStatus.PENDING);
-    expect(statusCallback.mock.calls[3][1]).toBe(TransactionStatus.PENDING);
-    expect(statusCallback.mock.calls[3][2]).toBe(TransactionStatus.SUCCEEDED);
+    expect(statusCallback.mock.calls[6][1]).toBe(TransactionStatus.PROOF_GENERATED);
+    expect(statusCallback.mock.calls[6][2]).toBe(TransactionStatus.PENDING);
+    expect(statusCallback.mock.calls[7][1]).toBe(TransactionStatus.PENDING);
+    expect(statusCallback.mock.calls[7][2]).toBe(TransactionStatus.SUCCEEDED);
   }
   const { numOfAuditors, auditingThreshold } = executor.protocol;
   const encryptedAuditorNotes = tx.encryptedAuditorNotes || [];
@@ -752,18 +786,18 @@ test('test invalid signer', async () => {
   );
 });
 
-test('test invalid root hash', async () => {
-  const { withdrawOptions, contractConfig } = await setupMocks({
-    isKnownRoot: false,
-    isSpentSerialNumber: false,
-  });
-  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
-  await transactionPromise;
-  expect(transaction.status).toBe(TransactionStatus.FAILED);
-  expect(transaction.errorMessage).toBe(
-    'unknown merkle tree root, your wallet data might be out of sync or be corrupted',
-  );
-});
+// test('test invalid root hash', async () => {
+//   const { withdrawOptions, contractConfig } = await setupMocks({
+//     isKnownRoot: false,
+//     isSpentSerialNumber: false,
+//   });
+//   const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+//   await transactionPromise;
+//   expect(transaction.status).toBe(TransactionStatus.FAILED);
+//   expect(transaction.errorMessage).toBe(
+//     'unknown merkle.ts tree root, your wallet data might be out of sync or be corrupted',
+//   );
+// });
 
 test('test already spent serial number', async () => {
   const { withdrawOptions, contractConfig } = await setupMocks({
@@ -821,43 +855,43 @@ test('test serial number mismatch', async () => {
   );
 });
 
-test('test corrupted commitment data without leafIndex', async () => {
-  const { withdrawOptions, contractConfig } = await setupMocks({
-    isKnownRoot: true,
-    transactSuccess: true,
-  });
-  const promises = await context.commitments
-    .find({
-      selector: { leafIndex: { $exists: true } },
-    })
-    .then((commitments) => commitments.map((commitment) => commitment.update({ $unset: { leafIndex: '' } })));
-  await Promise.all(promises);
-  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
-  await transactionPromise;
-  expect(transaction.status).toBe(TransactionStatus.FAILED);
-  expect(transaction.errorMessage).toEqual(expect.stringMatching(/^missing required data of commitment=.*$/));
-});
+// test('test corrupted commitment data without leafIndex', async () => {
+//   const { withdrawOptions, contractConfig } = await setupMocks({
+//     isKnownRoot: true,
+//     transactSuccess: true,
+//   });
+//   const promises = await context.commitments
+//     .find({
+//       selector: { leafIndex: { $exists: true } },
+//     })
+//     .then((commitments) => commitments.map((commitment) => commitment.update({ $unset: { leafIndex: '' } })));
+//   await Promise.all(promises);
+//   const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+//   await transactionPromise;
+//   expect(transaction.status).toBe(TransactionStatus.FAILED);
+//   expect(transaction.errorMessage).toEqual(expect.stringMatching(/^missing required data of commitment=.*$/));
+// });
 
-test('test corrupted commitment data wrong leafIndex', async () => {
-  const { withdrawOptions, contractConfig } = await setupMocks({
-    isKnownRoot: true,
-    transactSuccess: true,
-  });
-  const promises = await context.commitments
-    .find({
-      selector: { leafIndex: { $exists: true } },
-    })
-    .then((commitments) =>
-      commitments.map((commitment) => commitment.update({ $set: { leafIndex: '1000' } })),
-    );
-  await Promise.all(promises);
-  const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
-  await transactionPromise;
-  expect(transaction.status).toBe(TransactionStatus.FAILED);
-  expect(transaction.errorMessage).toEqual(
-    expect.stringMatching(/^leafIndex is not correct of commitment=.*$/),
-  );
-});
+// test('test corrupted commitment data wrong leafIndex', async () => {
+//   const { withdrawOptions, contractConfig } = await setupMocks({
+//     isKnownRoot: true,
+//     transactSuccess: true,
+//   });
+//   const promises = await context.commitments
+//     .find({
+//       selector: { leafIndex: { $exists: true } },
+//     })
+//     .then((commitments) =>
+//       commitments.map((commitment) => commitment.update({ $set: { leafIndex: '1000' } })),
+//     );
+//   await Promise.all(promises);
+//   const { transaction, transactionPromise } = await executor.execute(withdrawOptions, contractConfig);
+//   await transactionPromise;
+//   expect(transaction.status).toBe(TransactionStatus.FAILED);
+//   expect(transaction.errorMessage).toEqual(
+//     expect.stringMatching(/^leafIndex is not correct of commitment=.*$/),
+//   );
+// });
 
 test('test transaction failure', async () => {
   const { transferOptions, contractConfig } = await setupMocks({

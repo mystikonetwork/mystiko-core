@@ -31,6 +31,10 @@ export enum TransactionEnum {
 
 export enum TransactionStatus {
   INIT = 'init',
+  MERKLE_TREE_FETCHING = 'merkleTreeFetching',
+  MERKLE_TREE_FETCHED = 'merkleTreeFetched',
+  STATIC_ASSETS_FETCHING = 'staticAssetsFetching',
+  STATIC_ASSETS_FETCHED = 'staticAssetsFetched',
   PROOF_GENERATING = 'proofGenerating',
   PROOF_GENERATED = 'proofGenerated',
   PENDING = 'pending',

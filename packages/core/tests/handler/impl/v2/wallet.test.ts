@@ -102,23 +102,6 @@ test('test updatePassword', async () => {
   }
 });
 
-test('test setAutoSync', async () => {
-  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
-  expect(wallet.autoSync).toBe(true);
-  await handler.autoSync(false);
-  const updatedWallet = await handler.checkCurrent();
-  expect(updatedWallet.autoSync).toBe(false);
-});
-
-test('test setAutoSyncInterval', async () => {
-  const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
-  expect(wallet.autoSyncInterval).toBe(300000);
-  await expect(handler.autoSyncInterval(10000)).rejects.toThrow();
-  await handler.autoSyncInterval(100000);
-  const updatedWallet = await handler.checkCurrent();
-  expect(updatedWallet.autoSyncInterval).toBe(100000);
-});
-
 test('test setFullSynchronization', async () => {
   const wallet = await handler.create({ masterSeed: 'deadbeef', password: 'P@ssw0rd' });
   expect(wallet.fullSynchronization).toBe(false);

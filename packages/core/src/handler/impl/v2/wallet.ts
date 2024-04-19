@@ -23,8 +23,6 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
     'one special character in [#?!@$%^&*-], ' +
     'and the length should be as least 8';
 
-  public static readonly MIN_AUTO_SYNC_INTERVAL_SECONDS = 60000;
-
   constructor(context: MystikoContextInterface) {
     super(context);
     this.context.wallets = this;
@@ -98,32 +96,6 @@ export class WalletHandlerV2 extends MystikoHandler implements WalletHandler {
         return data;
       });
     });
-  }
-
-  public autoSync(enable: boolean): Promise<Wallet> {
-    return this.checkCurrent().then((wallet) =>
-      wallet.atomicUpdate((data) => {
-        data.autoSync = enable;
-        data.updatedAt = MystikoHandler.now();
-        return data;
-      }),
-    );
-  }
-
-  public autoSyncInterval(intervalSeconds: number): Promise<Wallet> {
-    if (intervalSeconds < WalletHandlerV2.MIN_AUTO_SYNC_INTERVAL_SECONDS) {
-      return createErrorPromise(
-        `Auto sync interval should not be less than ${WalletHandlerV2.MIN_AUTO_SYNC_INTERVAL_SECONDS}`,
-        MystikoErrorCode.INVALID_AUTO_SYNC_INTERVAL,
-      );
-    }
-    return this.checkCurrent().then((wallet) =>
-      wallet.atomicUpdate((data) => {
-        data.autoSyncInterval = intervalSeconds;
-        data.updatedAt = MystikoHandler.now();
-        return data;
-      }),
-    );
   }
 
   public fullSynchronization(enable: boolean): Promise<Wallet> {
