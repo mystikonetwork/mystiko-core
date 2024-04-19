@@ -1,3 +1,6 @@
 [submodule "packages/core/circuits"]
 	path = packages/core/circuits
 	url = git@github.com:mystikonetwork/mystiko-circuits.git
+[submodule "packages/core/src/config"]
+	path = packages/core/src/config
+	url = git@github.com:mystikonetwork/mystiko-static-config.git
