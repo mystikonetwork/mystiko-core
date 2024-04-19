@@ -50,6 +50,6 @@ export interface AssetHandler<
   bridges(chainId: number, assetSymbol: string): Promise<BridgeType[]>;
   chains(): Promise<Chain[]>;
   pools(chainId: number, assetSymbol: string, bridgeType: BridgeType): Promise<PoolContractConfig[]>;
-  import(options: IO | IO[]): Promise<Commitment[]>;
+  import(options: IO): Promise<Commitment[]>;
   sync(options: SO): Promise<Map<string, Map<string, B>>>;
 }
