@@ -135,6 +135,7 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
   }
 
   public async import(options: AssetImportOptions): Promise<Commitment[]> {
+    await this.context.wallets.checkPassword(options.walletPassword);
     const chains = Array.isArray(options.chain) ? options.chain : [options.chain];
     const commitments = await this.importFromProviders(options, chains);
     if (commitments.length > 0) {
@@ -152,6 +153,7 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
   }
 
   public async sync(options: AssetSyncOptions): Promise<Map<string, Map<string, AssetBalance>>> {
+    await this.context.wallets.checkPassword(options.walletPassword);
     const commitments = await this.getCommitments([CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED]);
     const importOptions: Map<number, AssetChainImportOptions> = new Map();
     const commitmentsToUpdate: Commitment[] = [];
