@@ -1,5 +1,6 @@
 import { Transport } from '@connectrpc/connect';
 import { MystikoConfig } from '@mystikonetwork/config';
+import { RelayerConfig } from '@mystikonetwork/gas-relayer-config';
 import * as sequencer from '@mystikonetwork/sequencer-client';
 import { initDatabase, MystikoDatabase } from '@mystikonetwork/database';
 import { MetaMaskSigner, PrivateKeySigner, ProviderPool, ProviderPoolImpl } from '@mystikonetwork/ethers';
@@ -40,6 +41,11 @@ import {
   WalletHandler,
 } from './interface';
 import { SynchronizerFactoryV2 } from './synchronizer';
+
+import defaultMainnetConfig from './config/config/core/mainnet/config.json';
+import defaultTestnetConfig from './config/config/core/testnet/config.json';
+import defaultRelayerMainnetConfig from './config/config/relayer/mainnet/config.json';
+import defaultRelayerTestnetConfig from './config/config/relayer/testnet/config.json';
 
 export const DEFAULT_IP_PRO_API = 'https://ipwhois.pro';
 
@@ -124,6 +130,10 @@ export abstract class Mystiko {
       gasRelayers,
       ipWhoisApiKey,
     } = options || {};
+    this.db = await initDatabase(dbParams);
+    initLogger(loggingOptions);
+    logger.setLevel(loggingLevel);
+    this.logger = logger;
     if (typeof conf === 'string') {
       this.config = await MystikoConfig.createFromFile(conf);
     } else {
@@ -136,12 +146,13 @@ export abstract class Mystiko {
         gitRevision: configGitRevision,
         baseUrl: configBaseUrl,
       };
-      this.config = await MystikoConfig.createFromRemote(configRemoteOptions);
+      this.config = await MystikoConfig.createFromRemote(configRemoteOptions).catch((error) => {
+        this.logger?.warn(`failed to fetch latest config from remote: ${error}`);
+        return isTestnet
+          ? MystikoConfig.createFromPlain(defaultTestnetConfig)
+          : MystikoConfig.createFromPlain(defaultMainnetConfig);
+      });
     }
-    this.db = await initDatabase(dbParams);
-    initLogger(loggingOptions);
-    logger.setLevel(loggingLevel);
-    this.logger = logger;
     const protocols = protocolFactory || new ProtocolFactoryV2(await this.zkProverFactory());
     this.protocol = await protocols.create();
     const contexts = contextFactory || new DefaultContextFactory(this.config, this.db, this.protocol);
@@ -185,9 +196,18 @@ export abstract class Mystiko {
       this.context.gasRelayers = gasRelayers;
     } else {
       const gasRelayerClient = new GasRelayerClient();
+      const gasRelayerConfig = await RelayerConfig.createFromRemote({
+        isTestnet,
+      }).catch((error) => {
+        this.logger?.warn(`failed to fetch latest gas relayer config from remote: ${error}`);
+        return isTestnet
+          ? RelayerConfig.createFromPlain(defaultRelayerTestnetConfig)
+          : RelayerConfig.createFromPlain(defaultRelayerMainnetConfig);
+      });
       await gasRelayerClient.initialize({
         isTestnet,
         mystikoConfig: this.config,
+        relayerConfig: gasRelayerConfig,
         logger: logger.getLogger('gas-relayer-client'),
         providers: this.providers,
       });
