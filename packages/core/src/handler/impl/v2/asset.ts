@@ -1,6 +1,6 @@
 import { BridgeType, PoolContractConfig } from '@mystikonetwork/config';
 import { CommitmentPool } from '@mystikonetwork/contracts-abi';
-import { Chain, Commitment, CommitmentStatus } from '@mystikonetwork/database';
+import { Chain, Commitment, CommitmentStatus, TransactionStatus } from '@mystikonetwork/database';
 import { fromDecimals, promiseWithTimeout, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import {
@@ -154,7 +154,12 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
 
   public async sync(options: AssetSyncOptions): Promise<Map<string, Map<string, AssetBalance>>> {
     await this.context.wallets.checkPassword(options.walletPassword);
-    const commitments = await this.getCommitments([CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED]);
+    const commitments = await this.getCommitments([
+      CommitmentStatus.SRC_PENDING,
+      CommitmentStatus.SRC_SUCCEEDED,
+      CommitmentStatus.QUEUED,
+      CommitmentStatus.INCLUDED,
+    ]);
     const importOptions: Map<number, AssetChainImportOptions> = new Map();
     const commitmentsToUpdate: Commitment[] = [];
     commitments.forEach((commitment) => {
@@ -423,11 +428,29 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
         providerTimeoutMs,
       );
       if (isSpent) {
-        return commitment.atomicUpdate((commitmentData) => {
+        const updatedCommitment = commitment.atomicUpdate((commitmentData) => {
           commitmentData.status = CommitmentStatus.SPENT;
           commitmentData.updatedAt = MystikoHandler.now();
           return commitmentData;
         });
+        const transactions = await this.context.transactions.find({
+          selector: {
+            chainId: commitment.chainId,
+            contractAddress: commitment.contractAddress,
+            status: { $ne: TransactionStatus.SUCCEEDED },
+          },
+        });
+        const filteredTransactions = transactions
+          .filter((tx) => tx.serialNumbers && tx.serialNumbers.includes(serialNumber))
+          .map((tx) => tx.toMutableJSON());
+        filteredTransactions.forEach((tx) => {
+          tx.status = TransactionStatus.SUCCEEDED;
+          tx.updatedAt = MystikoHandler.now();
+        });
+        if (filteredTransactions.length > 0) {
+          await this.context.db.transactions.bulkUpsert(filteredTransactions);
+        }
+        return updatedCommitment;
       }
     }
     return commitment;

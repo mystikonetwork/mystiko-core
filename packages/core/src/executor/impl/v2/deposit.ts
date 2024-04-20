@@ -501,6 +501,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     let newDeposit = await this.updateDepositStatus(options, deposit, DepositStatus.SRC_PENDING, {
       transactionHash: resp.hash,
     });
+    await this.updateCommitment({ ...executionContext, deposit: newDeposit }, commitment, true);
     const receipt = await waitTransaction(
       resp,
       options.numOfConfirmations || chainConfig.safeConfirmations,
@@ -586,13 +587,18 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   private updateCommitment(
     context: ExecutionContextWithDeposit,
     commitment: Commitment,
+    pending?: boolean,
   ): Promise<Commitment> {
     const { contractConfig, deposit } = context;
     return commitment.atomicUpdate((commitmentData) => {
-      commitmentData.status =
-        contractConfig.bridgeType === BridgeType.LOOP
-          ? CommitmentStatus.QUEUED
-          : CommitmentStatus.SRC_SUCCEEDED;
+      if (pending) {
+        commitmentData.status = CommitmentStatus.SRC_PENDING;
+      } else {
+        commitmentData.status =
+          contractConfig.bridgeType === BridgeType.LOOP
+            ? CommitmentStatus.QUEUED
+            : CommitmentStatus.SRC_SUCCEEDED;
+      }
       commitmentData.creationTransactionHash =
         contractConfig.bridgeType === BridgeType.LOOP ? deposit.transactionHash : undefined;
       commitmentData.updatedAt = MystikoHandler.now();
