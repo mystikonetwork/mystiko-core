@@ -930,12 +930,14 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       );
   }
 
-  private sendTransactionViaWallet(
+  private async sendTransactionViaWallet(
     executionContext: ExecutionContextWithProof,
     request: ICommitmentPool.TransactRequestStruct,
     signature: string,
   ): Promise<Transaction> {
-    const { options, contractConfig, chainConfig, transaction, etherContract } = executionContext;
+    const { options, contractConfig, chainConfig, transaction, etherContract, outputCommitments } =
+      executionContext;
+    const outCommitments = outputCommitments ? outputCommitments.map((c) => c.commitment) : [];
     this.logger.info(
       `submitting transaction id=${transaction.id} to ` +
         `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} via connected wallet`,
@@ -944,33 +946,36 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const txPromise = options.transactOverrides
       ? etherContractWithSigner.transact(request, signature, options.transactOverrides)
       : etherContractWithSigner.transact(request, signature);
-    return txPromise
-      .then((resp) => {
-        this.logger.info(
-          `successfully submitted transaction id=${transaction.id} to ` +
-            `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
-            `transaction hash=${resp.hash} via connected wallet`,
-        );
-        return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
-          transactionHash: resp.hash,
-        }).then((tx) => ({ tx, resp }));
-      })
-      .then(({ tx, resp }) =>
-        waitTransaction(
-          resp,
-          options.numOfConfirmations || chainConfig.safeConfirmations,
-          options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
-        ).then((receipt) => {
-          this.logger.info(
-            `transaction id=${transaction.id} to ` +
-              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
-              ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
-          );
-          return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-            transactionHash: receipt.transactionHash,
-          });
-        }),
-      );
+    const resp = await txPromise;
+    this.logger.info(
+      `successfully submitted transaction id=${transaction.id} to ` +
+        `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
+        `transaction hash=${resp.hash} via connected wallet`,
+    );
+    const tx = await this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
+      transactionHash: resp.hash,
+    });
+    const outCommitmentsUpdate = outCommitments.map((commitment) => ({
+      commitment,
+      creationTransactionHash: tx.transactionHash,
+      status: CommitmentStatus.SRC_PENDING,
+    }));
+    if (outCommitmentsUpdate.length > 0) {
+      await TransactionExecutorV2.updateCommitments(outCommitmentsUpdate);
+    }
+    const receipt = await waitTransaction(
+      resp,
+      options.numOfConfirmations || chainConfig.safeConfirmations,
+      options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
+    );
+    this.logger.info(
+      `transaction id=${transaction.id} to ` +
+        `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
+        ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
+    );
+    return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+      transactionHash: receipt.transactionHash,
+    });
   }
 
   private updateTransactionStatus(

@@ -6,6 +6,7 @@ export enum AccountStatus {
 
 export enum CommitmentStatus {
   INIT = 'init',
+  SRC_PENDING = 'srcPending',
   SRC_SUCCEEDED = 'srcSucceeded',
   QUEUED = 'queued',
   INCLUDED = 'included',
