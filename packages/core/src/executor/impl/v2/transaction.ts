@@ -43,6 +43,7 @@ import {
   GasRelayerInfo,
   TransactionExecutor,
   TransactionOptions,
+  TransactionProgressListener,
   TransactionQuote,
   TransactionQuoteOptions,
   TransactionQuoteWithRelayers,
@@ -126,33 +127,45 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       }));
   }
 
-  public quote(
+  public async quote(
     options: TransactionQuoteOptions,
     config: PoolContractConfig,
   ): Promise<TransactionQuoteWithRelayers> {
-    return this.fetchRemoteContractConfig(options, config)
-      .then(({ minRollupFee }) =>
-        this.getCommitments(options, config).then((commitments) => ({ commitments, minRollupFee })),
-      )
-      .then(({ commitments, minRollupFee }) =>
-        CommitmentUtils.quote(
-          options,
-          {
-            assetSymbol: config.assetSymbol,
-            assetDecimals: config.assetDecimals,
-            minRollupFee,
-            disabled: config.disabled,
-          },
-          commitments,
-          MAX_NUM_INPUTS,
-        ),
-      )
-      .then((quote) => {
-        if (options.useGasRelayers) {
-          return this.getRegisteredRelayers(options, config, quote);
-        }
-        return { ...quote, gasRelayers: [] };
-      });
+    const { minRollupFee } = await this.fetchRemoteContractConfig(options, config);
+    const commitments = await this.getCommitments(options, config);
+    const quote = CommitmentUtils.quote(
+      options,
+      {
+        assetSymbol: config.assetSymbol,
+        assetDecimals: config.assetDecimals,
+        minRollupFee,
+        disabled: config.disabled,
+      },
+      commitments,
+      MAX_NUM_INPUTS,
+    );
+    let quoteWithGasRelayers: TransactionQuoteWithRelayers = { ...quote, gasRelayers: [] };
+    if (options.useGasRelayers) {
+      quoteWithGasRelayers = await this.getRegisteredRelayers(options, config, quote);
+    }
+    const circuitConfig = TransactionExecutorV2.getCircuitConfig(
+      quoteWithGasRelayers.numOfInputs,
+      quoteWithGasRelayers.numOfSplits,
+      config,
+    );
+    if (circuitConfig) {
+      quoteWithGasRelayers = {
+        ...quoteWithGasRelayers,
+        merkleTreeUrl: this.context.executors
+          .getMerkleTreeExecutor()
+          .getUrl({ chainId: options.chainId, contractAddress: config.address }),
+        zkProgramUrl: circuitConfig.programFile[0],
+        zkProvingKeyUrl: circuitConfig.provingKeyFile[0],
+        zkVerifyingKeyUrl: circuitConfig.verifyingKeyFile[0],
+        zkAbiUrl: circuitConfig.abiFile[0],
+      };
+    }
+    return quoteWithGasRelayers;
   }
 
   public summary(options: TransactionOptions, config: PoolContractConfig): Promise<TransactionSummary> {
@@ -194,58 +207,51 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   }
 
   public async fixStatus(transaction: Transaction): Promise<Transaction> {
-    if (transaction.transactionHash) {
-      const provider = await this.context.providers.checkProvider(transaction.chainId);
-      const txRecipient = await provider.getTransactionReceipt(transaction.transactionHash);
-      if ((!txRecipient || !txRecipient.blockNumber) && transaction.status === TransactionStatus.SUCCEEDED) {
-        const inputCommitments = await this.context.commitments.find({
-          selector: { id: { $in: transaction.inputCommitments }, status: CommitmentStatus.SPENT },
-        });
-        let outputCommitments: Commitment[] = [];
-        if (transaction.outputCommitments && transaction.outputCommitments.length > 0) {
-          outputCommitments = await this.context.commitments.find({
-            selector: { id: { $in: transaction.outputCommitments } },
-          });
-        }
-        const etherContract = this.context.contractConnector.connect<CommitmentPool>(
-          'CommitmentPool',
-          transaction.contractAddress,
-          provider,
-        );
-        const inputCommitmentPromises = inputCommitments.map(async (commitment) => {
-          if (commitment.serialNumber) {
-            const isSpent = await etherContract.isSpentSerialNumber(commitment.serialNumber);
-            if (!isSpent) {
-              return commitment.atomicUpdate((data) => {
-                data.status = CommitmentStatus.INCLUDED;
-                data.updatedAt = MystikoHandler.now();
-                return data;
-              });
-            }
-          }
-          return Promise.resolve(undefined);
-        });
-        const outputCommitmentPromises = outputCommitments.map(async (commitment) => {
-          const isHistoricCommitment = await etherContract.isHistoricCommitment(commitment.commitmentHash);
-          if (!isHistoricCommitment) {
-            return commitment.remove();
-          }
-          return Promise.resolve(undefined);
-        });
-        const updatedInputCommitments = (await Promise.all(inputCommitmentPromises)).filter(
-          (c) => c !== undefined,
-        );
-        await Promise.all(outputCommitmentPromises);
-        if (updatedInputCommitments.length > 0) {
-          return transaction.atomicUpdate((data) => {
-            data.status = TransactionStatus.FAILED;
-            data.updatedAt = MystikoHandler.now();
-            return data;
-          });
-        }
-      }
+    const provider = await this.context.providers.checkProvider(transaction.chainId);
+    const inputCommitments = await this.context.commitments.find({
+      selector: { id: { $in: transaction.inputCommitments } },
+    });
+    let outputCommitments: Commitment[] = [];
+    if (transaction.outputCommitments && transaction.outputCommitments.length > 0) {
+      outputCommitments = await this.context.commitments.find({
+        selector: { id: { $in: transaction.outputCommitments } },
+      });
     }
-    return Promise.resolve(transaction);
+    const etherContract = this.context.contractConnector.connect<CommitmentPool>(
+      'CommitmentPool',
+      transaction.contractAddress,
+      provider,
+    );
+    const spentFlags = inputCommitments.map(async (commitment) => {
+      if (commitment.serialNumber) {
+        const isSpent = await etherContract.isSpentSerialNumber(commitment.serialNumber);
+        await commitment.atomicUpdate((data) => {
+          const status = data.rollupTransactionHash ? CommitmentStatus.INCLUDED : CommitmentStatus.QUEUED;
+          data.status = isSpent ? CommitmentStatus.SPENT : status;
+          data.updatedAt = MystikoHandler.now();
+          return data;
+        });
+        return Promise.resolve(isSpent);
+      }
+      return Promise.resolve(false);
+    });
+    const outputFlags = outputCommitments.map(async (commitment) => {
+      const isHistoricCommitment = await etherContract.isHistoricCommitment(commitment.commitmentHash);
+      await commitment.atomicUpdate((data) => {
+        const status = data.rollupTransactionHash ? CommitmentStatus.INCLUDED : CommitmentStatus.QUEUED;
+        data.status = isHistoricCommitment ? status : CommitmentStatus.FAILED;
+        data.updatedAt = MystikoHandler.now();
+        return data;
+      });
+    });
+    console.log(spentFlags);
+    const succeeded = (await Promise.all(spentFlags)).filter((flag) => flag).length > 0;
+    await Promise.all(outputFlags);
+    return transaction.atomicUpdate((data) => {
+      data.status = succeeded ? TransactionStatus.SUCCEEDED : TransactionStatus.FAILED;
+      data.updatedAt = MystikoHandler.now();
+      return data;
+    });
   }
 
   public static calcGasRelayerFee(amount: BN, gasRelayerInfo: GasRelayerInfo): BN {
@@ -813,6 +819,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       expectedLeafIndex,
       raw: options.rawMerkleTree,
       providerTimeoutMs: options.providerTimeoutMs,
+      downloadEventListener: TransactionExecutorV2.wrapDownloadEventListener(1, 1, options.progressListener),
     });
     await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
     if (merkleTree) {
@@ -828,11 +835,39 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const { circuitConfig, options, transaction } = executionContext;
     this.logger.info(`fetching zkp circuits assets for transaction type=${circuitConfig.type}`);
     await this.updateTransactionStatus(options, transaction, TransactionStatus.STATIC_ASSETS_FETCHING);
-    const zkProgram = options.rawZkProgram || (await readCompressedFile(circuitConfig.programFile));
-    const zkProvingKey = options.rawZkProvingKey || (await readCompressedFile(circuitConfig.provingKeyFile));
+    const zkProgram =
+      options.rawZkProgram ||
+      (await readCompressedFile(
+        circuitConfig.programFile,
+        undefined,
+        undefined,
+        TransactionExecutorV2.wrapDownloadEventListener(4, 1, options.progressListener),
+      ));
+    const zkProvingKey =
+      options.rawZkProvingKey ||
+      (await readCompressedFile(
+        circuitConfig.provingKeyFile,
+        undefined,
+        undefined,
+        TransactionExecutorV2.wrapDownloadEventListener(4, 2, options.progressListener),
+      ));
     const zkVerifyingKey =
-      options.rawZkVerifyingKey || (await readCompressedFile(circuitConfig.verifyingKeyFile));
-    const zkAbi = options.rawZkAbi || (await readFile(circuitConfig.abiFile));
+      options.rawZkVerifyingKey ||
+      (await readCompressedFile(
+        circuitConfig.verifyingKeyFile,
+        undefined,
+        undefined,
+        TransactionExecutorV2.wrapDownloadEventListener(4, 3, options.progressListener),
+      ));
+    const zkAbi =
+      options.rawZkAbi ||
+      (await readFile(
+        circuitConfig.abiFile,
+        undefined,
+        undefined,
+        undefined,
+        TransactionExecutorV2.wrapDownloadEventListener(4, 4, options.progressListener),
+      ));
     const assets = {
       zkProgram,
       zkProvingKey,
@@ -1315,5 +1350,31 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       }
     });
     return filtered;
+  }
+
+  private static parseProgressEvent(progressEvent: any): number {
+    if (progressEvent && progressEvent.total && progressEvent.loaded) {
+      return Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    }
+    return 0;
+  }
+
+  private static wrapDownloadEventListener(
+    totalStep: number,
+    currentStep: number,
+    listener?: TransactionProgressListener,
+  ): ((progressEvent: any) => void) | undefined {
+    if (listener) {
+      return (progressEvent: any) => {
+        const currentProgress = TransactionExecutorV2.parseProgressEvent(progressEvent);
+        listener({
+          transactionStatus: TransactionStatus.MERKLE_TREE_FETCHING,
+          totalSteps: totalStep,
+          finishedStep: currentProgress < 100 ? currentStep - 1 : currentStep,
+          currentProgress,
+        });
+      };
+    }
+    return undefined;
   }
 }

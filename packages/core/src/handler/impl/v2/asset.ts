@@ -46,13 +46,18 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
       if (balance) {
         return balance;
       }
-      return { unspentTotal: 0, pendingTotal: 0 };
+      return { unspentTotal: 0, pendingTotal: 0, unconfirmedTotal: 0 };
     });
   }
 
   public balances(options?: AssetMultipleBalanceOptions): Promise<Map<string, AssetBalance>> {
     return this.getCommitments(
-      [CommitmentStatus.SRC_SUCCEEDED, CommitmentStatus.QUEUED, CommitmentStatus.INCLUDED],
+      [
+        CommitmentStatus.SRC_PENDING,
+        CommitmentStatus.SRC_SUCCEEDED,
+        CommitmentStatus.QUEUED,
+        CommitmentStatus.INCLUDED,
+      ],
       options,
     ).then((commitments) => {
       const assets = new Map<string, Commitment[]>();
@@ -70,9 +75,14 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
           assetCommitments.filter((c) => c.status === CommitmentStatus.INCLUDED),
         );
         const pendingTotal = this.calculateCommitmentAmountTotal(
-          assetCommitments.filter((c) => c.status !== CommitmentStatus.INCLUDED),
+          assetCommitments.filter(
+            (c) => c.status === CommitmentStatus.SRC_SUCCEEDED || c.status === CommitmentStatus.QUEUED,
+          ),
         );
-        balances.set(assetSymbol, { unspentTotal, pendingTotal });
+        const unconfirmedTotal = this.calculateCommitmentAmountTotal(
+          assetCommitments.filter((c) => c.status === CommitmentStatus.SRC_PENDING),
+        );
+        balances.set(assetSymbol, { unspentTotal, pendingTotal, unconfirmedTotal });
       });
       return balances;
     });

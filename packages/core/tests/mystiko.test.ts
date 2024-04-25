@@ -40,6 +40,16 @@ test('test initialize', async () => {
   await mystiko.db?.remove();
 });
 
+test('test initialize with remote and fallback', async () => {
+  nock(CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(503, '');
+  nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(503, '');
+  const mystiko = new TestMystiko();
+  await mystiko.initialize();
+  expect(mystiko.config?.version).toBe('0.2.0');
+  checkMystiko(mystiko);
+  await mystiko.db?.remove();
+});
+
 test('test initialize with config file', async () => {
   const mystiko = new TestMystiko();
   nock(RELAYER_CONFIG_BASE_URL).get('/production/testnet/latest.json').reply(200, { version: '1.0.0' });

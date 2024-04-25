@@ -4,6 +4,7 @@ import { Chain, Commitment } from '@mystikonetwork/database';
 export type AssetBalance = {
   unspentTotal: number;
   pendingTotal: number;
+  unconfirmedTotal: number;
 };
 
 export type AssetFilter = {

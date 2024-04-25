@@ -462,6 +462,13 @@ test('test quote', async () => {
   await mockCommitmentPool.mock.getMinRollupFee.reverts();
   quote = await executor.quote(options, contractConfig);
   expect(quote.minRollupFee).toBe(contractConfig.minRollupFeeNumber);
+  expect(quote.merkleTreeUrl).toBe(
+    'https://example.com/chains/11155111/contracts/0xeb2a6545516ce618807c07BB04E9CCb8ED7D8e6F/merkle_tree/latest.zst',
+  );
+  expect(quote.zkProgramUrl).toBe('circuits/dist/zokrates/dev/Transaction1x0.program.gz');
+  expect(quote.zkProvingKeyUrl).toBe('circuits/dist/zokrates/dev/Transaction1x0.pkey.gz');
+  expect(quote.zkVerifyingKeyUrl).toBe('circuits/dist/zokrates/dev/Transaction1x0.vkey.gz');
+  expect(quote.zkAbiUrl).toBe('circuits/dist/zokrates/dev/Transaction1x0.abi.json');
 });
 
 test('test quote with gas relayers', async () => {
@@ -1036,10 +1043,6 @@ test('test fixStatus', async () => {
   transferOptions.amount = 8;
   const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
   await transactionPromise;
-  mockProvider.emptyTxReceipt = true;
-  mockProvider.txReceipt = {
-    transactionHash: '0xf1a37404bc619328699869ab412cc848b51b98af2ca7055214f55b998f4d420c',
-  } as ethers.providers.TransactionReceipt;
   await mockCommitmentPool.mock.isHistoricCommitment.returns(false);
   await mockCommitmentPool.mock.isSpentSerialNumber.returns(false);
   const updatedTransaction = await executor.fixStatus(transaction);
@@ -1047,5 +1050,29 @@ test('test fixStatus', async () => {
   const inputCommitments: Commitment[] = await transaction.populate('inputCommitments');
   const outputCommitments: Commitment[] = await transaction.populate('outputCommitments');
   inputCommitments.forEach((commitment) => expect(commitment.status).toBe(CommitmentStatus.INCLUDED));
-  expect(outputCommitments.length).toBe(0);
+  expect(outputCommitments.length).toBe(2);
+  outputCommitments.forEach((commitment) => expect(commitment.status).toBe(CommitmentStatus.FAILED));
+});
+
+test('test fixStatus with FAILED', async () => {
+  const { transferOptions, contractConfig } = await setupMocks({
+    isKnownRoot: true,
+    transactSuccess: true,
+  });
+  transferOptions.amount = 8;
+  const { transaction, transactionPromise } = await executor.execute(transferOptions, contractConfig);
+  await transactionPromise;
+  await transaction.atomicUpdate((transactionData) => {
+    transactionData.status = TransactionStatus.FAILED;
+    return transactionData;
+  });
+  await mockCommitmentPool.mock.isHistoricCommitment.returns(true);
+  await mockCommitmentPool.mock.isSpentSerialNumber.returns(true);
+  const updatedTransaction = await executor.fixStatus(transaction);
+  expect(updatedTransaction.status).toBe(TransactionStatus.SUCCEEDED);
+  const inputCommitments: Commitment[] = await transaction.populate('inputCommitments');
+  const outputCommitments: Commitment[] = await transaction.populate('outputCommitments');
+  inputCommitments.forEach((commitment) => expect(commitment.status).toBe(CommitmentStatus.SPENT));
+  expect(outputCommitments.length).toBe(2);
+  outputCommitments.forEach((commitment) => expect(commitment.status).toBe(CommitmentStatus.QUEUED));
 });
