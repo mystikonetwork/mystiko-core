@@ -154,7 +154,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     if (
       !isHistoricCommitment &&
       deposit.bridgeType === BridgeType.LOOP &&
-      (deposit.status === DepositStatus.QUEUED || deposit.status === DepositStatus.INCLUDED)
+      (deposit.status === DepositStatus.QUEUED ||
+        deposit.status === DepositStatus.INCLUDED ||
+        deposit.status === DepositStatus.SRC_PENDING)
     ) {
       if (commitment != null) {
         await commitment.atomicUpdate((data) => {

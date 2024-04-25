@@ -244,7 +244,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         return data;
       });
     });
-    console.log(spentFlags);
     const succeeded = (await Promise.all(spentFlags)).filter((flag) => flag).length > 0;
     await Promise.all(outputFlags);
     return transaction.atomicUpdate((data) => {
@@ -813,13 +812,19 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }
       }
     });
+    const { progressListener } = options;
     const merkleTree = await this.context.executors.getMerkleTreeExecutor().get({
       chainId: transaction.chainId,
       contractAddress: contractConfig.address,
       expectedLeafIndex,
       raw: options.rawMerkleTree,
       providerTimeoutMs: options.providerTimeoutMs,
-      downloadEventListener: TransactionExecutorV2.wrapDownloadEventListener(1, 1, options.progressListener),
+      downloadEventListener: TransactionExecutorV2.wrapDownloadEventListener(
+        TransactionStatus.MERKLE_TREE_FETCHING,
+        1,
+        1,
+        progressListener,
+      ),
     });
     await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
     if (merkleTree) {
@@ -835,13 +840,19 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const { circuitConfig, options, transaction } = executionContext;
     this.logger.info(`fetching zkp circuits assets for transaction type=${circuitConfig.type}`);
     await this.updateTransactionStatus(options, transaction, TransactionStatus.STATIC_ASSETS_FETCHING);
+    const { progressListener } = options;
     const zkProgram =
       options.rawZkProgram ||
       (await readCompressedFile(
         circuitConfig.programFile,
         undefined,
         undefined,
-        TransactionExecutorV2.wrapDownloadEventListener(4, 1, options.progressListener),
+        TransactionExecutorV2.wrapDownloadEventListener(
+          TransactionStatus.STATIC_ASSETS_FETCHING,
+          4,
+          1,
+          progressListener,
+        ),
       ));
     const zkProvingKey =
       options.rawZkProvingKey ||
@@ -849,7 +860,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         circuitConfig.provingKeyFile,
         undefined,
         undefined,
-        TransactionExecutorV2.wrapDownloadEventListener(4, 2, options.progressListener),
+        TransactionExecutorV2.wrapDownloadEventListener(
+          TransactionStatus.STATIC_ASSETS_FETCHING,
+          4,
+          2,
+          progressListener,
+        ),
       ));
     const zkVerifyingKey =
       options.rawZkVerifyingKey ||
@@ -857,7 +873,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         circuitConfig.verifyingKeyFile,
         undefined,
         undefined,
-        TransactionExecutorV2.wrapDownloadEventListener(4, 3, options.progressListener),
+        TransactionExecutorV2.wrapDownloadEventListener(
+          TransactionStatus.STATIC_ASSETS_FETCHING,
+          4,
+          3,
+          progressListener,
+        ),
       ));
     const zkAbi =
       options.rawZkAbi ||
@@ -866,7 +887,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         undefined,
         undefined,
         undefined,
-        TransactionExecutorV2.wrapDownloadEventListener(4, 4, options.progressListener),
+        TransactionExecutorV2.wrapDownloadEventListener(
+          TransactionStatus.STATIC_ASSETS_FETCHING,
+          4,
+          4,
+          progressListener,
+        ),
       ));
     const assets = {
       zkProgram,
@@ -1356,11 +1382,12 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     if (progressEvent && progressEvent.total && progressEvent.loaded) {
       return Math.round((progressEvent.loaded * 100) / progressEvent.total);
     }
-    return 0;
+    return 100;
   }
 
   private static wrapDownloadEventListener(
-    totalStep: number,
+    transactionStatus: TransactionStatus,
+    totalSteps: number,
     currentStep: number,
     listener?: TransactionProgressListener,
   ): ((progressEvent: any) => void) | undefined {
@@ -1368,9 +1395,9 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       return (progressEvent: any) => {
         const currentProgress = TransactionExecutorV2.parseProgressEvent(progressEvent);
         listener({
-          transactionStatus: TransactionStatus.MERKLE_TREE_FETCHING,
-          totalSteps: totalStep,
-          finishedStep: currentProgress < 100 ? currentStep - 1 : currentStep,
+          transactionStatus,
+          totalSteps,
+          currentStep,
           currentProgress,
         });
       };

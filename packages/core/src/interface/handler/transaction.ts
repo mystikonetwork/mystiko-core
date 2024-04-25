@@ -27,7 +27,7 @@ export type GasRelayerInfo = {
 export type TransactionProgressEvent = {
   transactionStatus: TransactionStatus;
   totalSteps: number;
-  finishedStep: number;
+  currentStep: number;
   currentProgress: number;
 };
 
