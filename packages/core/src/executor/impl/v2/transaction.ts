@@ -244,7 +244,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         return data;
       });
     });
-    console.log(spentFlags);
     const succeeded = (await Promise.all(spentFlags)).filter((flag) => flag).length > 0;
     await Promise.all(outputFlags);
     return transaction.atomicUpdate((data) => {
