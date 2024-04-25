@@ -209,7 +209,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   public async fixStatus(transaction: Transaction): Promise<Transaction> {
     const provider = await this.context.providers.checkProvider(transaction.chainId);
     const inputCommitments = await this.context.commitments.find({
-      selector: { id: { $in: transaction.inputCommitments }, status: CommitmentStatus.SPENT },
+      selector: { id: { $in: transaction.inputCommitments } },
     });
     let outputCommitments: Commitment[] = [];
     if (transaction.outputCommitments && transaction.outputCommitments.length > 0) {
@@ -244,6 +244,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         return data;
       });
     });
+    console.log(spentFlags);
     const succeeded = (await Promise.all(spentFlags)).filter((flag) => flag).length > 0;
     await Promise.all(outputFlags);
     return transaction.atomicUpdate((data) => {
