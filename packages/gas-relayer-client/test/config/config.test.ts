@@ -11,12 +11,18 @@ describe('Test relayer config', () => {
   });
 
   it('should load default relayer config', async () => {
-    await expect(RelayerConfig.createDefaultTestnetConfig()).resolves;
-    await expect(RelayerConfig.createDefaultMainnetConfig()).resolves;
+    await expect(
+      RelayerConfig.createFromFile('../core/src/config/mystiko_relayer_config/config/testnet/config.json'),
+    ).resolves;
+    await expect(
+      RelayerConfig.createFromFile('../core/src/config/mystiko_relayer_config/config/mainnet/config.json'),
+    ).resolves;
   });
 
   it('should load default mystiko config', async () => {
-    await expect(MystikoConfig.createDefaultMainnetConfig()).resolves;
-    await expect(MystikoConfig.createDefaultTestnetConfig()).resolves;
+    await expect(MystikoConfig.createFromFile('../core/src/config/mystiko_config/config/testnet/config.json'))
+      .resolves;
+    await expect(MystikoConfig.createFromFile('../core/src/config/mystiko_config/config/mainnet/config.json'))
+      .resolves;
   });
 });

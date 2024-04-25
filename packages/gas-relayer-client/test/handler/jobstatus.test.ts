@@ -84,7 +84,11 @@ describe('Test relayer client job status interface', () => {
 
   beforeAll(async () => {
     relayer = new Relayer();
-    await relayer.initialize({ isTestnet: true });
+    await relayer.initialize({
+      isTestnet: true,
+      mystikoConfig: '../core/src/config/mystiko_config/config/testnet/config.json',
+      relayerConfig: '../core/src/config/mystiko_relayer_config/config/testnet/config.json',
+    });
     mock = new MockAdapter(axios);
   });
 
