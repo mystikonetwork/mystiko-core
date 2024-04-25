@@ -9,7 +9,12 @@ import { MerkleTreeExecutor, MerkleTreeOptions, MystikoContextInterface } from '
 import { MystikoExecutor } from '../../executor';
 
 type PackerClient = {
-  merkleTree(chainId: number, contractAddress: string): Promise<data.v1.MerkleTree | undefined>;
+  merkleTreeLatestSnapshotUrl(chainId: number, contractAddress: string): string;
+  merkleTree(
+    chainId: number,
+    contractAddress: string,
+    downloadEventListener?: (progressEvent: any) => void,
+  ): Promise<data.v1.MerkleTree | undefined>;
 };
 
 type MerkleTreeWrapper = {
@@ -33,6 +38,10 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
     this.merkleTrees = new Map();
   }
 
+  public getUrl(options: MerkleTreeOptions): string {
+    return this.packerClient.merkleTreeLatestSnapshotUrl(options.chainId, options.contractAddress);
+  }
+
   public async get(options: MerkleTreeOptions): Promise<MerkleTree | undefined> {
     const provider = await this.context.providers.getProvider(options.chainId);
     if (provider) {
@@ -45,7 +54,12 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
         options.contractAddress,
         provider,
       );
-      const merkleTree = await this.getMerkleTree(options, contract, currentBlockNumber);
+      const merkleTree = await this.getMerkleTree(
+        options,
+        contract,
+        currentBlockNumber,
+        options.downloadEventListener,
+      );
       if (merkleTree) {
         const isKnownRoot = await promiseWithTimeout(
           contract.isKnownRoot(merkleTree.root().toString()),
@@ -73,8 +87,10 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
     options: MerkleTreeOptions,
     contract: CommitmentPool,
     currentBlockNumber: number,
+    downloadEventListener?: (progressEvent: any) => void,
   ): Promise<MerkleTree | undefined> {
     let merkleTree: MerkleTreeWrapper | undefined;
+    let fetchedFromPacker = false;
     if (options.raw) {
       const rawMerkleTree = data.v1.MerkleTree.fromBinary(fzstd.decompress(options.raw));
       if (rawMerkleTree.commitmentHashes.length > 0) {
@@ -92,27 +108,32 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
       }
     } else {
       merkleTree = this.merkleTrees.get(options.chainId)?.get(options.contractAddress);
-      let fetchedFromPacker = false;
       if (!merkleTree || options.skipCache) {
-        merkleTree = await this.fetchFromPacker(options.chainId, options.contractAddress);
+        merkleTree = await this.fetchFromPacker(
+          options.chainId,
+          options.contractAddress,
+          downloadEventListener,
+        );
         fetchedFromPacker = true;
       }
-      if (merkleTree && options.expectedLeafIndex && options.expectedLeafIndex > merkleTree.lastLeafIndex) {
-        if (!fetchedFromPacker) {
-          merkleTree = (await this.fetchFromPacker(options.chainId, options.contractAddress)) || merkleTree;
-        }
-        if (options.expectedLeafIndex > merkleTree.lastLeafIndex) {
-          const newLeaves = await this.fetchFromProvider(
-            options,
-            contract,
-            merkleTree.loadedBlockNumber + 1,
-            currentBlockNumber,
-          );
-          if (newLeaves.length > 0) {
-            merkleTree.merkleTree.bulkInsert(newLeaves);
-            merkleTree.loadedBlockNumber = currentBlockNumber;
-            merkleTree.lastLeafIndex += newLeaves.length;
-          }
+    }
+    if (merkleTree && options.expectedLeafIndex && options.expectedLeafIndex > merkleTree.lastLeafIndex) {
+      if (!options.raw && !fetchedFromPacker) {
+        merkleTree =
+          (await this.fetchFromPacker(options.chainId, options.contractAddress, downloadEventListener)) ||
+          merkleTree;
+      }
+      if (options.expectedLeafIndex > merkleTree.lastLeafIndex) {
+        const newLeaves = await this.fetchFromProvider(
+          options,
+          contract,
+          merkleTree.loadedBlockNumber + 1,
+          currentBlockNumber,
+        );
+        if (newLeaves.length > 0) {
+          merkleTree.merkleTree.bulkInsert(newLeaves);
+          merkleTree.loadedBlockNumber = currentBlockNumber;
+          merkleTree.lastLeafIndex += newLeaves.length;
         }
       }
     }
@@ -122,11 +143,12 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
   private async fetchFromPacker(
     chainId: number,
     contractAddress: string,
+    downloadEventListener?: (progressEvent: any) => void,
   ): Promise<MerkleTreeWrapper | undefined> {
     this.logger.info(
       `fetching merkle tree from packer for chainId=${chainId} contractAddress=${contractAddress}`,
     );
-    const newMerkle = await this.packerClient.merkleTree(chainId, contractAddress);
+    const newMerkle = await this.packerClient.merkleTree(chainId, contractAddress, downloadEventListener);
     if (newMerkle && newMerkle.commitmentHashes.length > 0) {
       const leaves = newMerkle.commitmentHashes.map((commitmentHash) => toBN(commitmentHash, 10, 'le'));
       const merkleTree = new MerkleTree(leaves);

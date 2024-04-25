@@ -42,10 +42,10 @@ import {
 } from './interface';
 import { SynchronizerFactoryV2 } from './synchronizer';
 
-import defaultMainnetConfig from './config/config/core/mainnet/config.json';
-import defaultTestnetConfig from './config/config/core/testnet/config.json';
-import defaultRelayerMainnetConfig from './config/config/relayer/mainnet/config.json';
-import defaultRelayerTestnetConfig from './config/config/relayer/testnet/config.json';
+import defaultMainnetConfig from './config/mystiko_config/config/mainnet/config.json';
+import defaultTestnetConfig from './config/mystiko_config/config/testnet/config.json';
+import defaultRelayerMainnetConfig from './config/mystiko_relayer_config/config/mainnet/config.json';
+import defaultRelayerTestnetConfig from './config/mystiko_relayer_config/config/testnet/config.json';
 
 export const DEFAULT_IP_PRO_API = 'https://ipwhois.pro';
 

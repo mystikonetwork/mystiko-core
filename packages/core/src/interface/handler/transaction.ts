@@ -24,6 +24,15 @@ export type GasRelayerInfo = {
   minGasFeeNumber: number;
 };
 
+export type TransactionProgressEvent = {
+  transactionStatus: TransactionStatus;
+  totalSteps: number;
+  finishedStep: number;
+  currentProgress: number;
+};
+
+export type TransactionProgressListener = (event: TransactionProgressEvent) => void;
+
 export type TransactionOptions = TransactionQuoteOptions & {
   walletPassword: string;
   shieldedAddress?: string;
@@ -42,6 +51,7 @@ export type TransactionOptions = TransactionQuoteOptions & {
   rawZkProvingKey?: Buffer;
   rawZkVerifyingKey?: Buffer;
   rawZkAbi?: Buffer;
+  progressListener?: TransactionProgressListener;
 };
 
 export type TransactionQuote = {
@@ -57,6 +67,11 @@ export type TransactionQuote = {
   fixedAmount: boolean;
   maxGasRelayerFee: number;
   gasRelayerFeeAssetSymbol: string;
+  merkleTreeUrl?: string;
+  zkProgramUrl?: string;
+  zkProvingKeyUrl?: string;
+  zkVerifyingKeyUrl?: string;
+  zkAbiUrl?: string;
 };
 
 export type TransactionQuoteWithRelayers = TransactionQuote & {

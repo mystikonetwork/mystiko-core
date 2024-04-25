@@ -128,7 +128,11 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       commitmentHash: deposit.commitmentHash,
     });
     const isHistoricCommitment = await etherContract.isHistoricCommitment(deposit.commitmentHash);
-    if (isHistoricCommitment && deposit.status === DepositStatus.FAILED) {
+    if (
+      isHistoricCommitment &&
+      deposit.status !== DepositStatus.QUEUED &&
+      deposit.status !== DepositStatus.INCLUDED
+    ) {
       if (commitment != null) {
         await commitment.atomicUpdate((data) => {
           data.status =
@@ -142,6 +146,25 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           commitment === null || commitment.rollupTransactionHash === undefined
             ? DepositStatus.QUEUED
             : DepositStatus.INCLUDED;
+        data.errorMessage = undefined;
+        data.updatedAt = MystikoHandler.now();
+        return data;
+      });
+    }
+    if (
+      !isHistoricCommitment &&
+      deposit.bridgeType === BridgeType.LOOP &&
+      (deposit.status === DepositStatus.QUEUED || deposit.status === DepositStatus.INCLUDED)
+    ) {
+      if (commitment != null) {
+        await commitment.atomicUpdate((data) => {
+          data.status = CommitmentStatus.FAILED;
+          data.updatedAt = MystikoHandler.now();
+          return data;
+        });
+      }
+      return deposit.atomicUpdate((data) => {
+        data.status = DepositStatus.FAILED;
         data.errorMessage = undefined;
         data.updatedAt = MystikoHandler.now();
         return data;
