@@ -2,7 +2,12 @@ import { ERC20 } from '@mystikonetwork/contracts-abi';
 import { fromDecimals, toBN } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
-import { AssetExecutor, AssetExecutorApproveOptions, AssetExecutorBalanceOptions } from '../../../interface';
+import {
+  AssetExecutor,
+  AssetExecutorAllowanceOptions,
+  AssetExecutorApproveOptions,
+  AssetExecutorBalanceOptions,
+} from '../../../interface';
 import { MystikoExecutor } from '../../executor';
 
 export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
@@ -51,5 +56,12 @@ export class AssetExecutorV2 extends MystikoExecutor implements AssetExecutor {
       }
       return provider.getBalance(options.address).then((b) => b.toString());
     });
+  }
+
+  public async allowance(options: AssetExecutorAllowanceOptions): Promise<string> {
+    const provider = await this.context.providers.checkProvider(options.chainId);
+    const contract = this.context.contractConnector.connect<ERC20>('ERC20', options.assetAddress, provider);
+    const allowance = await contract.allowance(options.address, options.spender);
+    return allowance.toString();
   }
 }

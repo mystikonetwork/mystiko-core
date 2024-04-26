@@ -109,7 +109,7 @@ type StaticAssets = {
   zkVerifyingKey: string;
 };
 
-const DEFAULT_WAIT_TIMEOUT_MS = 300000;
+const DEFAULT_WAIT_TIMEOUT_MS = 120000;
 
 export const DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS = 600000;
 
@@ -932,7 +932,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       .then((tx) => ({ ...executionContext, transaction: tx, request }));
   }
 
-  private sendTransactionViaGasRelayer(
+  private async sendTransactionViaGasRelayer(
     executionContext: ExecutionContextWithProof,
     request: ICommitmentPool.TransactRequestStruct,
     signature: string,
@@ -944,51 +944,45 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
         ` via gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
     );
-    return this.context.gasRelayers
-      .relayTransact({
-        relayerUrl: gasRelayerInfo.url,
-        transactRequest: {
-          type: options.type === TransactionEnum.TRANSFER ? JobTypeEnum.TRANSFER : JobTypeEnum.WITHDRAW,
-          bridgeType: options.bridgeType,
-          chainId: options.chainId,
-          symbol: options.assetSymbol,
-          mystikoContractAddress: contractConfig.address,
-          circuitType: circuitConfig.type,
-          signature,
-          ...request,
-        },
-      })
-      .then((resp) => {
-        this.logger.info(
-          `successfully submitted transaction id=${transaction.id} to ` +
-            `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
-            `transaction hash=${resp.hash}` +
-            ` via gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
-        );
-        return this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
-          transactionHash: resp.hash,
-        }).then((tx) => ({ tx, resp }));
-      })
-      .then(({ tx, resp }) =>
-        this.context.providers.checkProvider(options.chainId).then((provider) => ({ tx, resp, provider })),
-      )
-      .then(({ tx, resp, provider }) =>
-        waitTransactionHash(
-          provider,
-          resp.hash,
-          options.numOfConfirmations || chainConfig.safeConfirmations,
-          options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
-        ).then((receipt) => {
-          this.logger.info(
-            `transaction id=${transaction.id} to ` +
-              `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
-              `gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
-          );
-          return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-            transactionHash: receipt.transactionHash,
-          });
-        }),
-      );
+    const resp = await this.context.gasRelayers.relayTransact({
+      relayerUrl: gasRelayerInfo.url,
+      transactRequest: {
+        type: options.type === TransactionEnum.TRANSFER ? JobTypeEnum.TRANSFER : JobTypeEnum.WITHDRAW,
+        bridgeType: options.bridgeType,
+        chainId: options.chainId,
+        symbol: options.assetSymbol,
+        mystikoContractAddress: contractConfig.address,
+        circuitType: circuitConfig.type,
+        signature,
+        ...request,
+      },
+    });
+    this.logger.info(
+      `successfully submitted transaction id=${transaction.id} to ` +
+        `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}, ` +
+        `transaction hash=${resp.hash}` +
+        ` via gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
+    );
+    const tx = await this.updateTransactionStatus(options, transaction, TransactionStatus.PENDING, {
+      transactionHash: resp.hash,
+    });
+    const provider = await this.context.providers.checkProvider(options.chainId);
+    const transactionHash = await waitTransactionHash(
+      provider,
+      resp.hash,
+      options.numOfConfirmations || chainConfig.safeConfirmations,
+      options.gasRelayerWaitingTimeoutMs || DEFAULT_GAS_RELAYER_WAITING_TIMEOUT_MS,
+    )
+      .then((receipt) => receipt.transactionHash)
+      .catch((error) => this.handleWaitError(transaction, error, contractConfig, provider, resp.hash));
+    this.logger.info(
+      `transaction id=${transaction.id} to ` +
+        `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
+        `gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
+    );
+    return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
+      transactionHash,
+    });
   }
 
   private async sendTransactionViaWallet(
@@ -1024,18 +1018,23 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     if (outCommitmentsUpdate.length > 0) {
       await TransactionExecutorV2.updateCommitments(outCommitmentsUpdate);
     }
-    const receipt = await waitTransaction(
+    const transactionHash = await waitTransaction(
       resp,
       options.numOfConfirmations || chainConfig.safeConfirmations,
       options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
-    );
+    )
+      .then((receipt) => receipt.transactionHash)
+      .catch(async (error) => {
+        const provider = await this.context.providers.checkProvider(options.chainId);
+        return this.handleWaitError(transaction, error, contractConfig, provider, resp.hash);
+      });
     this.logger.info(
       `transaction id=${transaction.id} to ` +
         `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
-        ` is confirmed on chain, gas used=${receipt.gasUsed.toString()}`,
+        ' is confirmed on chain',
     );
     return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-      transactionHash: receipt.transactionHash,
+      transactionHash,
     });
   }
 
@@ -1376,6 +1375,26 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       }
     });
     return filtered;
+  }
+
+  private async handleWaitError(
+    transaction: Transaction,
+    error: any,
+    contractConfig: PoolContractConfig,
+    provider: ethers.providers.Provider,
+    transactionHash?: string,
+  ): Promise<string | undefined> {
+    this.logger.warn(`waiting transaction hash=${transactionHash} failed: ${errorMessage(error)}`);
+    const contract = this.context.contractConnector.connect<CommitmentPool>(
+      'CommitmentPool',
+      contractConfig.address,
+      provider,
+    );
+    const serialNumber = transaction.serialNumbers ? transaction.serialNumbers[0] : undefined;
+    if (serialNumber && (await contract.isSpentSerialNumber(serialNumber))) {
+      return transactionHash;
+    }
+    return Promise.reject(error);
   }
 
   private static parseProgressEvent(progressEvent: any): number {
