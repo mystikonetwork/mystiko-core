@@ -555,16 +555,28 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         `transaction of deposit id=${newDeposit.id} ` +
           `has been confirmed on source chain id=${chainConfig.chainId}`,
       );
-      newDeposit = await this.updateDepositStatus(options, newDeposit, DepositStatus.QUEUED, {
-        transactionHash,
-      });
+      newDeposit = await this.updateDepositStatus(
+        options,
+        newDeposit,
+        DepositStatus.QUEUED,
+        {
+          transactionHash,
+        },
+        DepositStatus.SRC_PENDING,
+      );
     } else {
       this.logger.info(
         `transaction of deposit id=${newDeposit.id} has been queued on chain id=${chainConfig.chainId}`,
       );
-      newDeposit = await this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED, {
-        transactionHash,
-      });
+      newDeposit = await this.updateDepositStatus(
+        options,
+        newDeposit,
+        DepositStatus.SRC_SUCCEEDED,
+        {
+          transactionHash,
+        },
+        DepositStatus.SRC_PENDING,
+      );
     }
     await this.updateCommitment({ ...executionContext, deposit: newDeposit }, commitment);
     return { ...executionContext, deposit: newDeposit };
@@ -647,15 +659,16 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     deposit: Deposit,
     newStatus: DepositStatus,
     updateOptions?: DepositUpdate,
+    oldStatus?: DepositStatus,
   ): Promise<Deposit> {
-    const oldStatus = deposit.status as DepositStatus;
-    if (oldStatus !== newStatus || updateOptions) {
+    const wrappedOldStatus = oldStatus || (deposit.status as DepositStatus);
+    if (wrappedOldStatus !== newStatus || updateOptions) {
       const wrappedUpdateOptions: DepositUpdate = updateOptions || {};
       wrappedUpdateOptions.status = newStatus;
       return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {
-        if (options.statusCallback && oldStatus !== newStatus) {
+        if (options.statusCallback && wrappedOldStatus !== newStatus) {
           try {
-            options.statusCallback(newDeposit, oldStatus, newStatus);
+            options.statusCallback(newDeposit, wrappedOldStatus, newStatus);
           } catch (error) {
             this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
           }

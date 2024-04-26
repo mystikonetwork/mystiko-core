@@ -980,9 +980,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         `chain id=${chainConfig.chainId} and contract address=${contractConfig.address} is confirmed on ` +
         `gas relayer(url=${gasRelayerInfo.url}, name=${gasRelayerInfo.name}, address=${gasRelayerInfo.address})`,
     );
-    return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-      transactionHash,
-    });
+    return this.updateTransactionStatus(
+      options,
+      tx,
+      TransactionStatus.SUCCEEDED,
+      {
+        transactionHash,
+      },
+      TransactionStatus.PENDING,
+    );
   }
 
   private async sendTransactionViaWallet(
@@ -1043,15 +1049,16 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     transaction: Transaction,
     newStatus: TransactionStatus,
     extraData?: TransactionUpdate,
+    oldStatus?: TransactionStatus,
   ): Promise<Transaction> {
-    const oldStatus = transaction.status as TransactionStatus;
-    if (oldStatus !== newStatus || extraData) {
+    const wrappedOldStatus = oldStatus || (transaction.status as TransactionStatus);
+    if (wrappedOldStatus !== newStatus || extraData) {
       const wrappedData: TransactionUpdate = extraData || {};
       wrappedData.status = newStatus;
       return this.context.transactions.update(transaction.id, wrappedData).then((newTransaction) => {
         if (options.statusCallback && oldStatus !== newStatus) {
           try {
-            options.statusCallback(newTransaction, oldStatus, newStatus);
+            options.statusCallback(newTransaction, wrappedOldStatus, newStatus);
           } catch (error) {
             this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
           }
