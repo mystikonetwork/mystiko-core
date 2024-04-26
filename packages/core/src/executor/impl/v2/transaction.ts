@@ -1056,7 +1056,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       const wrappedData: TransactionUpdate = extraData || {};
       wrappedData.status = newStatus;
       return this.context.transactions.update(transaction.id, wrappedData).then((newTransaction) => {
-        if (options.statusCallback && oldStatus !== newStatus) {
+        if (options.statusCallback && wrappedOldStatus !== newStatus) {
           try {
             options.statusCallback(newTransaction, wrappedOldStatus, newStatus);
           } catch (error) {
