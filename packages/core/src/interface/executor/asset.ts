@@ -18,7 +18,19 @@ export type AssetExecutorBalanceOptions = AssetExecutorOptions & {
   address: string;
 };
 
-export interface AssetExecutor<A = AssetExecutorApproveOptions, B = AssetExecutorBalanceOptions> {
+export type AssetExecutorAllowanceOptions = {
+  chainId: number;
+  assetAddress: string;
+  address: string;
+  spender: string;
+};
+
+export interface AssetExecutor<
+  A = AssetExecutorApproveOptions,
+  B = AssetExecutorBalanceOptions,
+  C = AssetExecutorAllowanceOptions,
+> {
   approve(options: A): Promise<ethers.ContractTransaction | undefined>;
   balance(options: B): Promise<string>;
+  allowance(options: C): Promise<string>;
 }

@@ -139,3 +139,18 @@ test('test no need approve', async () => {
   const txResp = await executor.approve(options);
   expect(txResp).toBe(undefined);
 });
+
+test('test erc20 allowance', async () => {
+  const addressToCheck = '0x8b8B829034ba2A53690c178b14E0D59d54004D07';
+  await mockERC20.mock.allowance
+    .withArgs(etherWallet.address, addressToCheck)
+    .returns(toDecimals(200).toString());
+  const options = {
+    chainId: 11155111,
+    assetAddress: mockERC20.address,
+    address: etherWallet.address,
+    spender: addressToCheck,
+  };
+  const allowance = await executor.allowance(options);
+  expect(fromDecimals(allowance)).toBe(200);
+});

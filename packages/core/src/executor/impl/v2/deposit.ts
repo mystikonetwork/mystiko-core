@@ -17,7 +17,7 @@ import { checkSigner } from '@mystikonetwork/ethers';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
 import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
 import BN from 'bn.js';
-import { ContractTransaction, ethers } from 'ethers';
+import { ContractTransaction } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
 import { MystikoHandler } from '../../../handler';
 import {
@@ -58,7 +58,7 @@ type RemoteContractConfig = {
   minRollupFee: BN;
 };
 
-const DEFAULT_WAIT_TIMEOUT_MS = 300000;
+const DEFAULT_WAIT_TIMEOUT_MS = 120000;
 
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
@@ -414,56 +414,55 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     );
   }
 
-  private assetApprove(executionContext: ExecutionContextWithDeposit): Promise<ExecutionContextWithDeposit> {
+  private async assetApprove(
+    executionContext: ExecutionContextWithDeposit,
+  ): Promise<ExecutionContextWithDeposit> {
     const { options, contractConfig, chainConfig, deposit, assetTotals } = executionContext;
-    const approvePromises: Promise<ethers.providers.TransactionReceipt | undefined>[] = [];
-    assetTotals.forEach((assetTotal) => {
+    const approvePromises = Array.from(assetTotals.values()).map(async (assetTotal) => {
       const { asset, total } = assetTotal;
       if (asset.assetType !== AssetType.MAIN) {
-        const approvePromise = this.context.executors
-          .getAssetExecutor()
-          .approve({
-            chainId: chainConfig.chainId,
-            assetAddress: asset.assetAddress,
-            assetSymbol: asset.assetSymbol,
-            assetDecimals: asset.assetDecimals,
-            spender: contractConfig.address,
-            signer: options.signer.signer,
-            amount: total,
-            overrides: options.assetApproveOverrides,
-          })
-          .then((resp) =>
-            this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVING, {
-              assetApproveTransactionHash: resp?.hash,
-            }).then(() => {
-              if (resp) {
-                return waitTransaction(
-                  resp,
-                  options.numOfConfirmations || chainConfig.safeConfirmations,
-                  options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
-                );
-              }
-              return Promise.resolve(undefined);
-            }),
-          );
-        approvePromises.push(approvePromise);
-      }
-    });
-    return Promise.all(approvePromises)
-      .then((receipts) => {
-        let transactionHash: string | undefined;
-        for (let i = 0; i < receipts.length; i += 1) {
-          const receipt = receipts[i];
-          if (receipt) {
-            transactionHash = receipt.transactionHash;
-            break;
-          }
-        }
-        return this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED, {
-          assetApproveTransactionHash: transactionHash,
+        const resp = await this.context.executors.getAssetExecutor().approve({
+          chainId: chainConfig.chainId,
+          assetAddress: asset.assetAddress,
+          assetSymbol: asset.assetSymbol,
+          assetDecimals: asset.assetDecimals,
+          spender: contractConfig.address,
+          signer: options.signer.signer,
+          amount: total,
+          overrides: options.assetApproveOverrides,
         });
-      })
-      .then((newDeposit) => ({ ...executionContext, deposit: newDeposit }));
+        await this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVING, {
+          assetApproveTransactionHash: resp?.hash,
+        });
+        if (resp) {
+          return waitTransaction(resp, undefined, options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS)
+            .then((receipt) => receipt.transactionHash)
+            .catch(async (error) => {
+              this.logger.warn(
+                `waiting asset approve transaction(hash=${resp.hash}) failed: ${errorMessage(error)}`,
+              );
+              const address = await options.signer.signer.getAddress();
+              const allowance = await this.context.executors.getAssetExecutor().allowance({
+                chainId: chainConfig.chainId,
+                assetAddress: asset.assetAddress,
+                address,
+                spender: contractConfig.address,
+              });
+              if (toBN(allowance).gte(toBN(total))) {
+                return resp.hash;
+              }
+              return Promise.reject(error);
+            });
+        }
+      }
+      return Promise.resolve(undefined);
+    });
+    const transactionHashes = (await Promise.all(approvePromises)).filter((hash) => hash !== undefined);
+    const transactionHash = transactionHashes.length > 0 ? transactionHashes[0] : undefined;
+    const newDeposit = await this.updateDepositStatus(options, deposit, DepositStatus.ASSET_APPROVED, {
+      assetApproveTransactionHash: transactionHash,
+    });
+    return { ...executionContext, deposit: newDeposit };
   }
 
   private async sendDeposit(
@@ -527,33 +526,57 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       transactionHash: resp.hash,
     });
     await this.updateCommitment({ ...executionContext, deposit: newDeposit }, commitment, true);
-    const receipt = await waitTransaction(
+    const transactionHash = await waitTransaction(
       resp,
       options.numOfConfirmations || chainConfig.safeConfirmations,
       options.waitTimeoutMs || DEFAULT_WAIT_TIMEOUT_MS,
-    ).catch(async (error) => {
-      await commitment.atomicUpdate((commitmentData) => {
-        commitmentData.status = CommitmentStatus.FAILED;
-        commitmentData.updatedAt = MystikoHandler.now();
-        return commitmentData;
+    )
+      .then((receipt) => receipt.transactionHash)
+      .catch(async (error) => {
+        this.logger.warn(`waiting deposit transaction(hash=${resp.hash}) failed: ${errorMessage(error)}`);
+        const provider = await this.context.providers.checkProvider(newDeposit.dstChainId);
+        const poolContract = this.context.contractConnector.connect<CommitmentPool>(
+          'CommitmentPool',
+          newDeposit.dstPoolAddress,
+          provider,
+        );
+        if (await poolContract.isHistoricCommitment(newDeposit.commitmentHash)) {
+          return resp.hash;
+        }
+        await commitment.atomicUpdate((commitmentData) => {
+          commitmentData.status = CommitmentStatus.FAILED;
+          commitmentData.updatedAt = MystikoHandler.now();
+          return commitmentData;
+        });
+        return Promise.reject(error);
       });
-      return Promise.reject(error);
-    });
     if (contractConfig.bridgeType === BridgeType.LOOP) {
       this.logger.info(
         `transaction of deposit id=${newDeposit.id} ` +
           `has been confirmed on source chain id=${chainConfig.chainId}`,
       );
-      newDeposit = await this.updateDepositStatus(options, newDeposit, DepositStatus.QUEUED, {
-        transactionHash: receipt.transactionHash,
-      });
+      newDeposit = await this.updateDepositStatus(
+        options,
+        newDeposit,
+        DepositStatus.QUEUED,
+        {
+          transactionHash,
+        },
+        DepositStatus.SRC_PENDING,
+      );
     } else {
       this.logger.info(
         `transaction of deposit id=${newDeposit.id} has been queued on chain id=${chainConfig.chainId}`,
       );
-      newDeposit = await this.updateDepositStatus(options, newDeposit, DepositStatus.SRC_SUCCEEDED, {
-        transactionHash: receipt.transactionHash,
-      });
+      newDeposit = await this.updateDepositStatus(
+        options,
+        newDeposit,
+        DepositStatus.SRC_SUCCEEDED,
+        {
+          transactionHash,
+        },
+        DepositStatus.SRC_PENDING,
+      );
     }
     await this.updateCommitment({ ...executionContext, deposit: newDeposit }, commitment);
     return { ...executionContext, deposit: newDeposit };
@@ -636,15 +659,16 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     deposit: Deposit,
     newStatus: DepositStatus,
     updateOptions?: DepositUpdate,
+    oldStatus?: DepositStatus,
   ): Promise<Deposit> {
-    const oldStatus = deposit.status as DepositStatus;
-    if (oldStatus !== newStatus || updateOptions) {
+    const wrappedOldStatus = oldStatus || (deposit.status as DepositStatus);
+    if (wrappedOldStatus !== newStatus || updateOptions) {
       const wrappedUpdateOptions: DepositUpdate = updateOptions || {};
       wrappedUpdateOptions.status = newStatus;
       return this.context.deposits.update(deposit.id, wrappedUpdateOptions).then((newDeposit) => {
-        if (options.statusCallback && oldStatus !== newStatus) {
+        if (options.statusCallback && wrappedOldStatus !== newStatus) {
           try {
-            options.statusCallback(newDeposit, oldStatus, newStatus);
+            options.statusCallback(newDeposit, wrappedOldStatus, newStatus);
           } catch (error) {
             this.logger.warn(`status callback execution failed: ${errorMessage(error)}`);
           }
