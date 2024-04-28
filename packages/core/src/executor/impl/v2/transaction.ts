@@ -1039,9 +1039,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         `chain id=${chainConfig.chainId} and contract address=${contractConfig.address}` +
         ' is confirmed on chain',
     );
-    return this.updateTransactionStatus(options, tx, TransactionStatus.SUCCEEDED, {
-      transactionHash,
-    });
+    return this.updateTransactionStatus(
+      options,
+      tx,
+      TransactionStatus.SUCCEEDED,
+      {
+        transactionHash,
+      },
+      TransactionStatus.PENDING,
+    );
   }
 
   private updateTransactionStatus(
