@@ -198,6 +198,7 @@ export abstract class Mystiko {
       const gasRelayerClient = new GasRelayerClient();
       const gasRelayerConfig = await RelayerConfig.createFromRemote({
         isTestnet,
+        isStaging,
       }).catch((error) => {
         this.logger?.warn(`failed to fetch latest gas relayer config from remote: ${error}`);
         return isTestnet
