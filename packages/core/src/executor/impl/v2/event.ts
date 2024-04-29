@@ -199,12 +199,12 @@ export class EventExecutorV2 extends MystikoExecutor implements EventExecutor {
           }
           mutableExistingCommitment.updatedAt = MystikoHandler.now();
           mutableExistingCommitment.creationTransactionHash =
-            mutableExistingCommitment.creationTransactionHash || creationTransactionHash;
+            creationTransactionHash || mutableExistingCommitment.creationTransactionHash;
           mutableExistingCommitment.rollupTransactionHash = rollupTransactionHash;
-          mutableExistingCommitment.leafIndex = mutableExistingCommitment.leafIndex || leafIndex;
+          mutableExistingCommitment.leafIndex = leafIndex || mutableExistingCommitment.leafIndex;
           mutableExistingCommitment.rollupFeeAmount =
-            mutableExistingCommitment.rollupFeeAmount || rollupFeeAmount;
-          mutableExistingCommitment.encryptedNote = mutableExistingCommitment.encryptedNote || encryptedNote;
+            rollupFeeAmount || mutableExistingCommitment.rollupFeeAmount;
+          mutableExistingCommitment.encryptedNote = encryptedNote || mutableExistingCommitment.encryptedNote;
           commitmentsToUpdate.push(mutableExistingCommitment);
         }
       }

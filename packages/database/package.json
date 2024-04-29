@@ -35,7 +35,7 @@
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
-    "@mystikonetwork/zkp-node": "^0.3.7",
+    "@mystikonetwork/zkp-node": "^0.3.8",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.2",
     "@types/jest": "^27.4.0",
@@ -54,7 +54,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/protocol": "^0.3.7",
+    "@mystikonetwork/protocol": "^0.3.8",
     "@mystikonetwork/utils": ">=0.3.3",
     "pouchdb-adapter-memory": "7.3.0",
     "rxdb": "12.5.4",
