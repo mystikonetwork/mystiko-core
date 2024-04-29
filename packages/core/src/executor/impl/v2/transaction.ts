@@ -1182,16 +1182,13 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     const txHashes: string[] = [];
     commitmentsWithWrongData.forEach((c) => {
       if (c.creationTransactionHash) {
+        this.logger.warn(
+          `found commitment(commitmentHash=${c.commitmentHash}) with wrong leaf index ${c.leafIndex}`,
+        );
         txHashes.push(c.creationTransactionHash);
       }
     });
     if (txHashes.length > 0) {
-      this.logger.warn(
-        `found commitments with wrong leaf index: ${commitmentsWithWrongData.map((c) => ({
-          leafIndex: c.leafIndex,
-          commitmentHash: c.commitmentHash,
-        }))}`,
-      );
       const updatedCommitments = await this.context.assets.import({
         chain: { chainId: options.chainId, txHash: txHashes },
         walletPassword: options.walletPassword,
