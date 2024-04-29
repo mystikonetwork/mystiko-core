@@ -653,7 +653,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     executionContext: ExecutionContextWithTransaction,
   ): Promise<ExecutionContextWithProof> {
     const { options, transaction, selectedCommitments, outputCommitments, gasRelayerFee } = executionContext;
-    const merkleTree = await this.fetchMerkleTree(executionContext);
+    const merkleTree = await this.fetchMerkleTreeAndCheck(executionContext);
     const staticAssets = await this.fetchStaticAssets(executionContext);
     const accounts = await this.getInputAccounts(executionContext);
     const numInputs = selectedCommitments.length;
@@ -801,9 +801,22 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     });
   }
 
+  private async fetchMerkleTreeAndCheck(
+    executionContext: ExecutionContextWithTransaction,
+  ): Promise<MerkleTree> {
+    const { options, transaction } = executionContext;
+    await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHING);
+    let merkleTree = await this.fetchMerkleTree(executionContext);
+    const retry = await this.checkLeafIndexWithMerkleTree(executionContext, merkleTree);
+    if (retry) {
+      merkleTree = await this.fetchMerkleTree(executionContext);
+    }
+    await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
+    return merkleTree;
+  }
+
   private async fetchMerkleTree(executionContext: ExecutionContextWithTransaction): Promise<MerkleTree> {
     const { options, contractConfig, transaction, selectedCommitments } = executionContext;
-    await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHING);
     let expectedLeafIndex: number | undefined;
     selectedCommitments.forEach((commitment) => {
       if (commitment.leafIndex) {
@@ -828,8 +841,6 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       ),
     });
     if (merkleTree) {
-      await this.checkLeafIndexWithMerkleTree(executionContext, merkleTree);
-      await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
       return merkleTree;
     }
     return createErrorPromise(
@@ -1171,7 +1182,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
   private async checkLeafIndexWithMerkleTree(
     context: ExecutionContextWithTransaction,
     merkleTree: MerkleTree,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const { selectedCommitments, options } = context;
     const commitmentsWithWrongData = selectedCommitments.filter((commitment) => {
       if (commitment.leafIndex) {
@@ -1204,7 +1215,9 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         }
       });
       context.selectedCommitments = newSelectedCommitments;
+      return true;
     }
+    return false;
   }
 
   private static buildTransactionRequest(
