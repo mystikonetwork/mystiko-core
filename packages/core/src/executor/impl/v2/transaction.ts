@@ -827,8 +827,9 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
         progressListener,
       ),
     });
-    await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
     if (merkleTree) {
+      await this.checkLeafIndexWithMerkleTree(executionContext, merkleTree);
+      await this.updateTransactionStatus(options, transaction, TransactionStatus.MERKLE_TREE_FETCHED);
       return merkleTree;
     }
     return createErrorPromise(
@@ -1165,6 +1166,48 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
       );
     }
     return Promise.all(updatePromises).then(() => {});
+  }
+
+  private async checkLeafIndexWithMerkleTree(
+    context: ExecutionContextWithTransaction,
+    merkleTree: MerkleTree,
+  ): Promise<void> {
+    const { selectedCommitments, options } = context;
+    const commitmentsWithWrongData = selectedCommitments.filter((commitment) => {
+      if (commitment.leafIndex) {
+        return !merkleTree.leafAt(toBN(commitment.leafIndex).toNumber()).eq(toBN(commitment.commitmentHash));
+      }
+      return true;
+    });
+    const txHashes: string[] = [];
+    commitmentsWithWrongData.forEach((c) => {
+      if (c.creationTransactionHash) {
+        txHashes.push(c.creationTransactionHash);
+      }
+    });
+    if (txHashes.length > 0) {
+      this.logger.warn(
+        `found commitments with wrong leaf index: ${commitmentsWithWrongData.map((c) => ({
+          leafIndex: c.leafIndex,
+          commitmentHash: c.commitmentHash,
+        }))}`,
+      );
+      const updatedCommitments = await this.context.assets.import({
+        chain: { chainId: options.chainId, txHash: txHashes },
+        walletPassword: options.walletPassword,
+        providerTimeoutMs: options.providerTimeoutMs,
+      });
+      const newSelectedCommitments: Commitment[] = [];
+      selectedCommitments.forEach((commitment) => {
+        const updatedCommitment = updatedCommitments.find((c) => c.id === commitment.id);
+        if (updatedCommitment) {
+          newSelectedCommitments.push(updatedCommitment);
+        } else {
+          newSelectedCommitments.push(commitment);
+        }
+      });
+      context.selectedCommitments = newSelectedCommitments;
+    }
   }
 
   private static buildTransactionRequest(
