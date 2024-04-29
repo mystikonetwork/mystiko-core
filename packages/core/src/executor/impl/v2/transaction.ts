@@ -35,6 +35,7 @@ import {
 } from '@mystikonetwork/utils';
 import { ZKProof } from '@mystikonetwork/zkp';
 import BN from 'bn.js';
+import pako from 'pako';
 import { isEthereumAddress, isURL } from 'class-validator';
 import { ethers } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -838,12 +839,15 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
 
   private async fetchStaticAssets(executionContext: ExecutionContextWithTransaction): Promise<StaticAssets> {
     const { circuitConfig, options, transaction } = executionContext;
+    const { rawZkProgram, rawZkProvingKey, rawZkVerifyingKey, rawZkAbi } = options;
     this.logger.info(`fetching zkp circuits assets for transaction type=${circuitConfig.type}`);
     await this.updateTransactionStatus(options, transaction, TransactionStatus.STATIC_ASSETS_FETCHING);
     const { progressListener } = options;
-    const zkProgram =
-      options.rawZkProgram ||
-      (await readCompressedFile(
+    let zkProgram;
+    if (rawZkProgram) {
+      zkProgram = Buffer.from(pako.inflate(rawZkProgram));
+    } else {
+      zkProgram = await readCompressedFile(
         circuitConfig.programFile,
         undefined,
         undefined,
@@ -853,10 +857,13 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           1,
           progressListener,
         ),
-      ));
-    const zkProvingKey =
-      options.rawZkProvingKey ||
-      (await readCompressedFile(
+      );
+    }
+    let zkProvingKey;
+    if (rawZkProvingKey) {
+      zkProvingKey = Buffer.from(pako.inflate(rawZkProvingKey));
+    } else {
+      zkProvingKey = await readCompressedFile(
         circuitConfig.provingKeyFile,
         undefined,
         undefined,
@@ -866,10 +873,13 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           2,
           progressListener,
         ),
-      ));
-    const zkVerifyingKey =
-      options.rawZkVerifyingKey ||
-      (await readCompressedFile(
+      );
+    }
+    let zkVerifyingKey;
+    if (rawZkVerifyingKey) {
+      zkVerifyingKey = Buffer.from(pako.inflate(rawZkVerifyingKey));
+    } else {
+      zkVerifyingKey = await readCompressedFile(
         circuitConfig.verifyingKeyFile,
         undefined,
         undefined,
@@ -879,10 +889,13 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           3,
           progressListener,
         ),
-      ));
-    const zkAbi =
-      options.rawZkAbi ||
-      (await readFile(
+      );
+    }
+    let zkAbi: Buffer;
+    if (rawZkAbi) {
+      zkAbi = rawZkAbi;
+    } else {
+      zkAbi = await readFile(
         circuitConfig.abiFile,
         undefined,
         undefined,
@@ -893,7 +906,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           4,
           progressListener,
         ),
-      ));
+      );
+    }
     const assets = {
       zkProgram,
       zkProvingKey,
