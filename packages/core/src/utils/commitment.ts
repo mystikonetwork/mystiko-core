@@ -30,13 +30,15 @@ export class CommitmentUtils {
     return commitments.sort((c1, c2) => {
       const amount1 = toBN(c1.amount || 0);
       const amount2 = toBN(c2.amount || 0);
+      const leafIndex1 = toBN(c1.leafIndex || 0);
+      const leafIndex2 = toBN(c2.leafIndex || 0);
       if (amount2.gt(amount1)) {
         return desc ? 1 : -1;
       }
       if (amount2.lt(amount1)) {
         return desc ? -1 : 1;
       }
-      return 0;
+      return desc ? leafIndex2.cmp(leafIndex1) : leafIndex1.cmp(leafIndex2);
     });
   }
 
