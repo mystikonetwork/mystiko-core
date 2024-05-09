@@ -75,7 +75,7 @@
     "@mystikonetwork/merkle": "^0.3.8",
     "@mystikonetwork/protocol": "^0.3.8",
     "@mystikonetwork/protos": "^0.5.7",
-    "@mystikonetwork/sequencer-client": "^0.2.3",
+    "@mystikonetwork/sequencer-client": "^0.2.4",
     "@mystikonetwork/utils": ">=0.3.3",
     "@mystikonetwork/zkp": "^0.3.8",
     "bn.js": "^5.2.0",

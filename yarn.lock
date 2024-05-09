@@ -1264,10 +1264,10 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/sequencer-client@^0.2.3":
-  version "0.2.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.3/4a2f6760303947a9596987f0000903e76140ed46#4a2f6760303947a9596987f0000903e76140ed46"
-  integrity sha512-QjrHRg6nz2hlzGX7gy3Oisqi/b4Fm/kpU2IVCElQCvGqpdBNZ2IeibmDWcDLTTvEmwlXaofCJBykZG0jjv5bJQ==
+"@mystikonetwork/sequencer-client@^0.2.4":
+  version "0.2.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.4/b890d80bb63dcd67342aebe6d6bf6c50345330d5#b890d80bb63dcd67342aebe6d6bf6c50345330d5"
+  integrity sha512-leI1SdneYcFJ+Ao9Tva+/UeR+5/LJB870tDixkpeeFFdOYkPjJn1laII0N8+vccDnAXBidT6o7qJ/MmYkNXd+w==
   dependencies:
     "@bufbuild/protobuf" "^1.3.3"
     "@connectrpc/connect" "^1.1.2"

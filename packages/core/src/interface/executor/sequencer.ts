@@ -1,4 +1,5 @@
 import { Commitment } from '@mystikonetwork/database';
+import BN from 'bn.js';
 
 export type ImportOptions = {
   walletPassword: string;
@@ -12,6 +13,19 @@ export type ImportResult = {
   hasUpdates: boolean;
 };
 
-export interface SequencerExecutor<IO = ImportOptions, IR = ImportResult> {
+export type ImportByCommitmentHashesOptions = {
+  walletPassword: string;
+  chainId: number;
+  contractAddress: string;
+  commitmentHashes: BN[];
+  timeoutMs?: number;
+};
+
+export interface SequencerExecutor<
+  IO = ImportOptions,
+  IR = ImportResult,
+  ICO = ImportByCommitmentHashesOptions,
+> {
   import(options: IO): Promise<IR>;
+  importByCommitmentHashes(options: ICO): Promise<Commitment[]>;
 }
