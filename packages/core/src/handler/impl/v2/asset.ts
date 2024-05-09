@@ -14,6 +14,7 @@ import {
   CommitmentIncludedEvent,
   CommitmentQueuedEvent,
   EventType,
+  ImportByCommitmentHashesOptions,
   MystikoContextInterface,
 } from '../../../interface';
 import { MystikoHandler } from '../../handler';
@@ -172,6 +173,8 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
     ]);
     const importOptions: Map<number, AssetChainImportOptions> = new Map();
     const commitmentsToUpdate: Commitment[] = [];
+    const commitmentsToImportFromProvider: Commitment[] = [];
+    const commitmentsToImportFromCommitmentHash: Commitment[] = [];
     commitments.forEach((commitment) => {
       if (commitment.leafIndex === undefined && commitment.creationTransactionHash) {
         const chainOptions = importOptions.get(commitment.chainId);
@@ -187,15 +190,31 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
             txHash: commitment.creationTransactionHash,
           });
         }
+        commitmentsToImportFromProvider.push(commitment);
+      } else if (commitment.leafIndex === undefined && !commitment.creationTransactionHash) {
+        commitmentsToImportFromCommitmentHash.push(commitment);
       } else {
         commitmentsToUpdate.push(commitment);
       }
     });
-    await this.import({
+    const importedCommitmentsFromProvider = await this.import({
       chain: Array.from(importOptions.values()),
       providerTimeoutMs: options.providerTimeoutMs,
       walletPassword: options.walletPassword,
     });
+    const importedCommitmentsFromProviderSet = new Set<string>(
+      importedCommitmentsFromProvider.map((c) => `${c.chainId}/${c.contractAddress}/${c.commitmentHash}`),
+    );
+    commitmentsToImportFromProvider.forEach((c) => {
+      if (!importedCommitmentsFromProviderSet.has(`${c.chainId}/${c.contractAddress}/${c.commitmentHash}`)) {
+        commitmentsToImportFromCommitmentHash.push(c);
+      }
+    });
+    await this.importFromCommitmentHashes(
+      options.walletPassword,
+      commitmentsToImportFromCommitmentHash,
+      options.providerTimeoutMs,
+    );
     await Promise.all(
       commitmentsToUpdate.map((commitment) => this.syncCommitmentStatus(commitment, options)),
     );
@@ -290,6 +309,57 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
       .reduce((c1, c2) => c1.add(c2), toBN(0));
     const decimal = commitments.length > 0 ? commitments[0].assetDecimals : undefined;
     return fromDecimals(total, decimal);
+  }
+
+  private async importFromCommitmentHashes(
+    walletPassword: string,
+    commitments: Commitment[],
+    timeoutMs?: number,
+  ): Promise<Commitment[]> {
+    const sequencerExecutor = this.context.executors.getSequencerExecutor();
+    if (sequencerExecutor && commitments.length > 0) {
+      const optionsMap: Map<number, Map<string, ImportByCommitmentHashesOptions>> = new Map();
+      commitments.forEach((commitment) => {
+        const chainOptions = optionsMap.get(commitment.chainId);
+        if (chainOptions) {
+          const contractOptions = chainOptions.get(commitment.contractAddress);
+          if (contractOptions) {
+            contractOptions.commitmentHashes.push(toBN(commitment.commitmentHash));
+          } else {
+            chainOptions.set(commitment.contractAddress, {
+              walletPassword,
+              chainId: commitment.chainId,
+              contractAddress: commitment.contractAddress,
+              commitmentHashes: [toBN(commitment.commitmentHash)],
+              timeoutMs,
+            });
+          }
+        } else {
+          const newChainOptions: Map<string, ImportByCommitmentHashesOptions> = new Map();
+          newChainOptions.set(commitment.contractAddress, {
+            walletPassword,
+            chainId: commitment.chainId,
+            contractAddress: commitment.contractAddress,
+            commitmentHashes: [toBN(commitment.commitmentHash)],
+            timeoutMs,
+          });
+          optionsMap.set(commitment.chainId, newChainOptions);
+        }
+      });
+      const options = Array.from(optionsMap.values())
+        .map((chainOptions) => Array.from(chainOptions.values()))
+        .flat();
+      const commitmentPromises = options.map((o) => sequencerExecutor.importByCommitmentHashes(o));
+      const importedCommitments = (await Promise.all(commitmentPromises)).flat();
+      if (importedCommitments.length > 0) {
+        const updatedCommitments = await this.context.executors.getCommitmentExecutor().decrypt({
+          commitments: importedCommitments,
+          walletPassword,
+        });
+        return this.checkCommitmentsSpent(updatedCommitments, walletPassword, timeoutMs);
+      }
+    }
+    return [];
   }
 
   private async importFromProviders(

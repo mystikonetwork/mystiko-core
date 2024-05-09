@@ -14,6 +14,7 @@ import {
   ImportResult,
   SequencerExecutor,
   MystikoContextInterface,
+  ImportByCommitmentHashesOptions,
 } from '../../../interface';
 import { splitSyncTasks, SyncTask } from '../../../utils';
 import { MystikoExecutor } from '../../executor';
@@ -52,6 +53,41 @@ export class SequencerExecutorV2 extends MystikoExecutor implements SequencerExe
       .checkPassword(options.walletPassword)
       .then(() => this.buildContext(options))
       .then((context) => this.importChain(context));
+  }
+
+  public async importByCommitmentHashes(options: ImportByCommitmentHashesOptions): Promise<Commitment[]> {
+    if (options.commitmentHashes.length > 0) {
+      await this.context.wallets.checkPassword(options.walletPassword);
+      const timeoutMs = options.timeoutMs || DEFAULT_FETCH_TIMEOUT_MS;
+      const fetchedCommitments = await promiseWithTimeout(
+        this.sequencerClient.getCommitments(
+          options.chainId,
+          options.contractAddress,
+          options.commitmentHashes,
+        ),
+        timeoutMs,
+      );
+      const events = fetchedCommitments.map((commitment) =>
+        SequencerExecutorV2.commitmentToContractEvent(options.contractAddress, commitment),
+      );
+      const queuedEvents: CommitmentQueuedEvent[] = [];
+      const includedEvents: CommitmentIncludedEvent[] = [];
+      events.forEach((event) => {
+        if (event && event.eventType === EventType.COMMITMENT_QUEUED) {
+          queuedEvents.push(event);
+        } else if (event && event.eventType === EventType.COMMITMENT_INCLUDED) {
+          includedEvents.push(event);
+        }
+      });
+      if (queuedEvents.length > 0 || includedEvents.length > 0) {
+        return this.context.executors.getEventExecutor().import([...queuedEvents, ...includedEvents], {
+          chainId: options.chainId,
+          walletPassword: options.walletPassword,
+          skipCheckPassword: true,
+        });
+      }
+    }
+    return [];
   }
 
   private buildContext(options: ImportOptions): Promise<ImportContext> {
@@ -139,47 +175,11 @@ export class SequencerExecutorV2 extends MystikoExecutor implements SequencerExe
       const contractData = contractsData[i];
       for (let j = 0; j < contractData.commitments.length; j += 1) {
         const commitment = contractData.commitments[j];
-        const commitmentHash = toBN(commitment.commitmentHash, 10, 'le').toString();
-        const leafIndex = commitment.leafIndex !== undefined ? commitment.leafIndex.toString() : undefined;
-        const encryptedNote =
-          commitment.encryptedNote !== undefined ? toHex(commitment.encryptedNote) : undefined;
-        const rollupFee =
-          commitment.rollupFee !== undefined ? toBN(commitment.rollupFee, 10, 'le').toString() : undefined;
-        const queuedTransactionHash =
-          commitment.queuedTransactionHash !== undefined
-            ? toHex(commitment.queuedTransactionHash)
-            : undefined;
-        const includedTransactionHash =
-          commitment.includedTransactionHash !== undefined
-            ? toHex(commitment.includedTransactionHash)
-            : undefined;
-        if (commitment.status === data.v1.CommitmentStatus.QUEUED) {
-          if (!leafIndex || !encryptedNote || !rollupFee || !queuedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment queued data'));
-          }
-          queuedEvents.push({
-            eventType: EventType.COMMITMENT_QUEUED,
-            contractAddress: contractData.contractAddress,
-            commitmentHash,
-            leafIndex,
-            encryptedNote,
-            rollupFee,
-            transactionHash: queuedTransactionHash,
-          });
-        } else if (commitment.status === data.v1.CommitmentStatus.INCLUDED) {
-          if (!includedTransactionHash) {
-            return Promise.reject(new Error('Invalid commitment included data'));
-          }
-          includedEvents.push({
-            eventType: EventType.COMMITMENT_INCLUDED,
-            contractAddress: contractData.contractAddress,
-            commitmentHash,
-            queuedTransactionHash,
-            transactionHash: includedTransactionHash,
-            leafIndex,
-            encryptedNote,
-            rollupFee,
-          });
+        const event = SequencerExecutorV2.commitmentToContractEvent(contractData.contractAddress, commitment);
+        if (event && event.eventType === EventType.COMMITMENT_QUEUED) {
+          queuedEvents.push(event);
+        } else if (event && event.eventType === EventType.COMMITMENT_INCLUDED) {
+          includedEvents.push(event);
         }
       }
       contractData.nullifiers.forEach((nullifier) => {
@@ -226,5 +226,53 @@ export class SequencerExecutorV2 extends MystikoExecutor implements SequencerExe
       }),
     );
     await Promise.all(promises);
+  }
+
+  private static commitmentToContractEvent(
+    contractAddress: string,
+    commitment: data.v1.Commitment,
+  ): ContractEvent | undefined {
+    const commitmentHash = toBN(commitment.commitmentHash, 10, 'le').toString();
+    const leafIndex = commitment.leafIndex !== undefined ? commitment.leafIndex.toString() : undefined;
+    const encryptedNote =
+      commitment.encryptedNote !== undefined ? toHex(commitment.encryptedNote) : undefined;
+    const rollupFee =
+      commitment.rollupFee !== undefined ? toBN(commitment.rollupFee, 10, 'le').toString() : undefined;
+    const queuedTransactionHash =
+      commitment.queuedTransactionHash !== undefined ? toHex(commitment.queuedTransactionHash) : undefined;
+    const includedTransactionHash =
+      commitment.includedTransactionHash !== undefined
+        ? toHex(commitment.includedTransactionHash)
+        : undefined;
+    if (
+      commitment.status === data.v1.CommitmentStatus.QUEUED &&
+      leafIndex &&
+      encryptedNote &&
+      rollupFee &&
+      queuedTransactionHash
+    ) {
+      return {
+        eventType: EventType.COMMITMENT_QUEUED,
+        contractAddress,
+        commitmentHash,
+        leafIndex,
+        encryptedNote,
+        rollupFee,
+        transactionHash: queuedTransactionHash,
+      };
+    }
+    if (commitment.status === data.v1.CommitmentStatus.INCLUDED && includedTransactionHash) {
+      return {
+        eventType: EventType.COMMITMENT_INCLUDED,
+        contractAddress,
+        commitmentHash,
+        queuedTransactionHash,
+        transactionHash: includedTransactionHash,
+        leafIndex,
+        encryptedNote,
+        rollupFee,
+      };
+    }
+    return undefined;
   }
 }
