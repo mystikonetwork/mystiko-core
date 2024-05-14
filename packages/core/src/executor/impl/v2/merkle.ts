@@ -1,5 +1,5 @@
 import { CommitmentPool } from '@mystikonetwork/contracts-abi';
-import { MerkleTree } from '@mystikonetwork/merkle';
+import { createMerkleTreeWithWorker, MerkleTree } from '@mystikonetwork/merkle';
 import { data } from '@mystikonetwork/protos';
 import { v1 as Packer } from '@mystikonetwork/datapacker-client';
 import { promiseWithTimeout, toBN } from '@mystikonetwork/utils';
@@ -97,7 +97,7 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
         merkleTree = {
           chainId: options.chainId,
           contractAddress: options.contractAddress,
-          merkleTree: new MerkleTree(
+          merkleTree: await createMerkleTreeWithWorker(
             rawMerkleTree.commitmentHashes.map((commitmentHash) => toBN(commitmentHash, 10, 'le')),
           ),
           loadedBlockNumber: Number(rawMerkleTree.loadedBlockNumber),
@@ -151,7 +151,7 @@ export class MerkleTreeExecutorV2 extends MystikoExecutor implements MerkleTreeE
     const newMerkle = await this.packerClient.merkleTree(chainId, contractAddress, downloadEventListener);
     if (newMerkle && newMerkle.commitmentHashes.length > 0) {
       const leaves = newMerkle.commitmentHashes.map((commitmentHash) => toBN(commitmentHash, 10, 'le'));
-      const merkleTree = new MerkleTree(leaves);
+      const merkleTree = await createMerkleTreeWithWorker(leaves);
       const wrapper: MerkleTreeWrapper = {
         chainId,
         contractAddress,
