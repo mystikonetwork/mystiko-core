@@ -1143,10 +1143,10 @@
     "@mongodb-js/zstd-linux-x64-musl" "1.2.0"
     "@mongodb-js/zstd-win32-x64-msvc" "1.2.0"
 
-"@mystikonetwork/config@>=0.10.4":
-  version "0.10.4"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.4/338ed085c1eb45045e7da58a424876a84d04c085#338ed085c1eb45045e7da58a424876a84d04c085"
-  integrity sha512-eYCjZFgLwHJXVvK9Kgqp7ZKyxlNb8vlNJI5es66/qrM9Ge032zAcgLylihnYi3Qm6LihRLSxTBvJ0upsTHHwfw==
+"@mystikonetwork/config@>=0.10.5":
+  version "0.10.5"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.5/e712b5cc59577df92c8fae1a8eefb1842d265f03#e712b5cc59577df92c8fae1a8eefb1842d265f03"
+  integrity sha512-1GFxAjZurqkBfz9v0D0IEhKFNsnKkvjG2iuY5qXFgh+izh1Oe6yKx54kkr2c5T8APp8vLBTC2g0UCUSR1SC5dw==
   dependencies:
     "@mystikonetwork/utils" ">=0.3.3"
     axios "^0.27.2"
@@ -1165,14 +1165,14 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.3.5":
-  version "0.3.5"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.5/564fe7fdd69f3b2de861cf86d4daa96e7914b7ce#564fe7fdd69f3b2de861cf86d4daa96e7914b7ce"
-  integrity sha512-lLLaytslddifyUB5EX3gHbn+qDhV/POuPZNrSjAk7dHZ1zC8odGaddin0oC8UVa34ZSt0lG45phHFivMADvGTw==
+"@mystikonetwork/datapacker-client@^0.3.6":
+  version "0.3.6"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.6/790222e21519befaab4a09c59bd54238e2b4b2d8#790222e21519befaab4a09c59bd54238e2b4b2d8"
+  integrity sha512-84v/cDHioCsJHpf0eZ5ZH7E8TCm/wlPHLL1tcZR5WHFonrGpPfs1Bl1fR1fRYoh/y7TIdbdcDkkp3TXhZiTNyA==
   dependencies:
-    "@mystikonetwork/config" ">=0.10.4"
+    "@mystikonetwork/config" ">=0.10.5"
     "@mystikonetwork/protos" ">=0.5.7"
-    "@mystikonetwork/utils" ">=0.3.3"
+    "@mystikonetwork/utils" ">=0.3.4"
     axios "^0.27.2"
     crypto-js "^4.1.1"
     ethers "^5.5.3"
@@ -1265,15 +1265,15 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/sequencer-client@^0.2.4":
-  version "0.2.4"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.4/b890d80bb63dcd67342aebe6d6bf6c50345330d5#b890d80bb63dcd67342aebe6d6bf6c50345330d5"
-  integrity sha512-leI1SdneYcFJ+Ao9Tva+/UeR+5/LJB870tDixkpeeFFdOYkPjJn1laII0N8+vccDnAXBidT6o7qJ/MmYkNXd+w==
+"@mystikonetwork/sequencer-client@^0.2.5":
+  version "0.2.5"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.5/8a396102899b1dceb16eafced8f7a941a7cdee41#8a396102899b1dceb16eafced8f7a941a7cdee41"
+  integrity sha512-GwyHOnYOGiSS5kwS4gXcTPOa6dE7fwVQKBk8kbzjChAXJ2aEitUCRYQcuab8pmDP8WdtSfaERjrSSVkI6iMeQw==
   dependencies:
     "@bufbuild/protobuf" "^1.3.3"
     "@connectrpc/connect" "^1.1.2"
     "@mystikonetwork/protos" "^0.5.7"
-    "@mystikonetwork/utils" ">=0.3.3"
+    "@mystikonetwork/utils" ">=0.3.4"
     bn.js "^5.2.0"
     ethers "^5.5.3"
 
@@ -1286,6 +1286,20 @@
     axios "^0.27.2"
     bn.js "^5.2.0"
     ethers "^5.5.3"
+    loglevel "^1.8.0"
+    loglevel-plugin-prefix "^0.8.4"
+    pako "^2.0.4"
+
+"@mystikonetwork/utils@>=0.3.4":
+  version "0.3.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.3.4/b8fb4258e63263935057581d5f678251392faccb#b8fb4258e63263935057581d5f678251392faccb"
+  integrity sha512-bNzXL7NBbKcwgx5bilEhHoGFWa2ikPL/qFZrsWZpXx9ZfEOekvziM4wzMiKEqqH74FW1/Rl7TQSL3AoNLLMWRw==
+  dependencies:
+    "@mystikonetwork/fastfile" "^0.0.21"
+    axios "^0.27.2"
+    bn.js "^5.2.0"
+    ethers "^5.5.3"
+    js-sha512 "^0.9.0"
     loglevel "^1.8.0"
     loglevel-plugin-prefix "^0.8.4"
     pako "^2.0.4"
@@ -7531,6 +7545,11 @@ js-sha3@^0.5.7:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.5.7.tgz#0d4ffd8002d5333aabaf4a23eed2f6374c9f28e7"
   integrity sha512-GII20kjaPX0zJ8wzkTbNDYMY7msuZcTWk8S5UOh6806Jq/wz1J8/bnr8uGU0DAUmYDjj2Mr4X1cW8v/GLYnR+g==
+
+js-sha512@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/js-sha512/-/js-sha512-0.9.0.tgz#ed569aa1e4bdaf0b83363c29db1ab87b1192d9ae"
+  integrity sha512-mirki9WS/SUahm+1TbAPkqvbCiCfOAAsyXeHxK1UkullnJVVqoJG2pL9ObvT05CN+tM7fxhfYm0NbXn+1hWoZg==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
