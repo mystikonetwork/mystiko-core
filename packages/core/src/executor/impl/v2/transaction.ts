@@ -869,6 +869,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           1,
           progressListener,
         ),
+        circuitConfig.programFileChecksum,
       );
     }
     let zkProvingKey;
@@ -885,6 +886,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           2,
           progressListener,
         ),
+        circuitConfig.provingKeyFileChecksum,
       );
     }
     let zkVerifyingKey;
@@ -901,6 +903,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           3,
           progressListener,
         ),
+        circuitConfig.verifyingKeyFileChecksum,
       );
     }
     let zkAbi: Buffer;
@@ -918,6 +921,7 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
           4,
           progressListener,
         ),
+        circuitConfig.abiFileChecksum,
       );
     }
     const assets = {

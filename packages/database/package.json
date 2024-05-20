@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/database",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "description": "database of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -35,7 +35,7 @@
     "prettier": "yarn prettier:fix"
   },
   "devDependencies": {
-    "@mystikonetwork/zkp-node": "^0.3.9",
+    "@mystikonetwork/zkp-node": "^0.3.10",
     "@tsconfig/recommended": "^1.0.1",
     "@types/bn.js": "^5.1.2",
     "@types/jest": "^27.4.0",
@@ -54,8 +54,8 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/protocol": "^0.3.9",
-    "@mystikonetwork/utils": ">=0.3.3",
+    "@mystikonetwork/protocol": "^0.3.10",
+    "@mystikonetwork/utils": ">=0.3.4",
     "pouchdb-adapter-memory": "7.3.0",
     "rxdb": "12.5.4",
     "rxjs": "7.5.5"
