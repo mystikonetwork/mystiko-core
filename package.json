@@ -1,6 +1,6 @@
 {
   "name": "mystiko-core",
-  "version": "0.9.13",
+  "version": "0.9.14",
   "description": "Core Implementation of Mystiko.Network",
   "private": true,
   "repository": "https://github.com/mystikonetwork/mystiko-core",

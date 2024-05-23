@@ -154,10 +154,22 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
         commitments,
         walletPassword: options.walletPassword,
       });
+      const decryptedCommitments = updatedCommitments.filter(
+        (commitment) => commitment.serialNumber !== undefined,
+      );
+      updatedCommitments
+        .filter((commitment) => commitment.serialNumber === undefined)
+        .forEach((commitment) => {
+          this.logger.warn(
+            `failed to decrypt commitment=${commitment.commitmentHash}` +
+              ` from chainId=${commitment.chainId} and contractAddress=${commitment.contractAddress}`,
+          );
+        });
       return this.checkCommitmentsSpent(
-        updatedCommitments,
+        decryptedCommitments,
         options.walletPassword,
         options.providerTimeoutMs,
+        true,
       );
     }
     return [];
@@ -477,12 +489,24 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
     commitments: Commitment[],
     walletPassword: string,
     providerTimeoutMs?: number,
+    logSpent?: boolean,
   ): Promise<Commitment[]> {
     const updatedCommitments = await Promise.all(
       commitments.map((commitment) =>
         this.checkCommitmentSpent(commitment, walletPassword, providerTimeoutMs),
       ),
     );
+    if (logSpent) {
+      updatedCommitments.forEach((updatedCommitment) => {
+        if (updatedCommitment.status === CommitmentStatus.SPENT) {
+          this.logger.warn(
+            `commitment=${updatedCommitment.commitmentHash} ` +
+              `from chainId=${updatedCommitment.chainId} and contractAddress=${updatedCommitment.contractAddress} ` +
+              `is spent with nullifier=${updatedCommitment.serialNumber}`,
+          );
+        }
+      });
+    }
     return updatedCommitments.filter((c) => c.shieldedAddress && c.status !== CommitmentStatus.SPENT);
   }
 
