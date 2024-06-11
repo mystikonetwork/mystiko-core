@@ -216,7 +216,7 @@
           "maxAmount": "100000000000000000000"
         },
         {
-          "version": 2,
+          "version": 7,
           "name": "MystikoV2WithLoopMain",
           "address": "0x4471873169EA7cd3f45beA9105f567Bdc8608240",
           "startBlock": 18759687,
@@ -226,7 +226,7 @@
           "maxAmount": "100000000000000000000"
         },
         {
-          "version": 2,
+          "version": 7,
           "name": "MystikoV2WithTBridgeMain",
           "address": "0x6FbC93BD1F8dc453ded554a087B161837046a143",
           "startBlock": 18805724,

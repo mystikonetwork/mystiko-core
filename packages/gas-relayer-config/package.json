@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@mystikonetwork/config": ">=0.10.5",
-    "@mystikonetwork/contracts-abi": "^0.2.2",
+    "@mystikonetwork/contracts-abi": "^0.3.0",
     "@mystikonetwork/utils": ">=0.3.4",
     "axios": "^0.27.2",
     "bn.js": "^5.2.0",
