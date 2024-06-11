@@ -1158,8 +1158,8 @@
 
 "@mystikonetwork/contracts-abi@^0.3.0":
   version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.0/6295ad298aa85151168112be3c6e65f55240d676#6295ad298aa85151168112be3c6e65f55240d676"
-  integrity sha512-p6NCrYEnpz17UoAs7rKNliY9baM8BhA09koS/8YxvFRf7HZjW+xdpcTy/FAlbHLpKaPIDQZbU72bQopiwH9eKw==
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.0/1e7b3e6736dc4bd0b8fef0ff0dff921477b418cd#1e7b3e6736dc4bd0b8fef0ff0dff921477b418cd"
+  integrity sha512-SJrU3AFt5vf3INaw9WfitQH32AmNIsDegXyadKA4lFW8XvGQkEfapgJfqhx9CvXuWzThdKjU9LLWrkmWcSU/1A==
   dependencies:
     "@ethersproject/abi" "^5.5.3"
     "@ethersproject/providers" "^5.5.3"
