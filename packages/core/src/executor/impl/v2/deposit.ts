@@ -478,36 +478,70 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      promise = contract.deposit(
-        {
-          amount: deposit.amount,
-          commitment: deposit.commitmentHash,
-          hashK: deposit.hashK,
-          randomS: deposit.randomS,
-          encryptedNote: deposit.encryptedNote,
-          rollupFee: deposit.rollupFeeAmount,
-        },
-        { value: mainAssetTotal, ...options.depositOverrides },
-      );
+      if (contractConfig.version <= 6) {
+        promise = contract.deposit(
+          {
+            amount: deposit.amount,
+            commitment: deposit.commitmentHash,
+            hashK: deposit.hashK,
+            randomS: deposit.randomS,
+            encryptedNote: deposit.encryptedNote,
+            rollupFee: deposit.rollupFeeAmount,
+          },
+          { value: mainAssetTotal, ...options.depositOverrides },
+        );
+      } else {
+        promise = contract.certDeposit(
+          {
+            amount: deposit.amount,
+            commitment: deposit.commitmentHash,
+            hashK: deposit.hashK,
+            randomS: deposit.randomS,
+            encryptedNote: deposit.encryptedNote,
+            rollupFee: deposit.rollupFeeAmount,
+          },
+          0,
+          Buffer.from(''),
+          { value: mainAssetTotal, ...options.depositOverrides },
+        );
+      }
     } else {
       const contract = this.context.contractConnector.connect<MystikoV2Bridge>(
         'MystikoV2Bridge',
         contractConfig.address,
         options.signer.signer,
       );
-      promise = contract.deposit(
-        {
-          amount: deposit.amount,
-          commitment: deposit.commitmentHash,
-          hashK: deposit.hashK,
-          randomS: deposit.randomS,
-          encryptedNote: deposit.encryptedNote,
-          rollupFee: deposit.rollupFeeAmount,
-          bridgeFee: deposit.bridgeFeeAmount,
-          executorFee: deposit.executorFeeAmount,
-        },
-        { value: mainAssetTotal, ...options.depositOverrides },
-      );
+      if (contractConfig.version <= 6) {
+        promise = contract.deposit(
+          {
+            amount: deposit.amount,
+            commitment: deposit.commitmentHash,
+            hashK: deposit.hashK,
+            randomS: deposit.randomS,
+            encryptedNote: deposit.encryptedNote,
+            rollupFee: deposit.rollupFeeAmount,
+            bridgeFee: deposit.bridgeFeeAmount,
+            executorFee: deposit.executorFeeAmount,
+          },
+          { value: mainAssetTotal, ...options.depositOverrides },
+        );
+      } else {
+        promise = contract.certDeposit(
+          {
+            amount: deposit.amount,
+            commitment: deposit.commitmentHash,
+            hashK: deposit.hashK,
+            randomS: deposit.randomS,
+            encryptedNote: deposit.encryptedNote,
+            rollupFee: deposit.rollupFeeAmount,
+            bridgeFee: deposit.bridgeFeeAmount,
+            executorFee: deposit.executorFeeAmount,
+          },
+          0,
+          Buffer.from(''),
+          { value: mainAssetTotal, ...options.depositOverrides },
+        );
+      }
     }
     this.logger.info(`submitting transaction of deposit id=${deposit.id}`);
     const resp = await promise.catch(async (error) => {
