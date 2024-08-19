@@ -14,6 +14,7 @@ export interface MystikoSigner {
   switchChain(chainId: number, chainConfig: ChainConfig): Promise<void>;
   addListener(eventName: string, callback: (message: any) => void): void;
   removeListener(eventName: string, callback: (message: any) => void): void;
+  signMessage(message: string): Promise<string>;
 }
 
 export class BaseSigner implements MystikoSigner {
@@ -136,6 +137,16 @@ export class BaseSigner implements MystikoSigner {
     if (this.provider) {
       this.provider.removeListener(eventName, callback);
     }
+  }
+
+  public async signMessage(message: string): Promise<string> {
+    if (this.provider) {
+      const accounts = await this.accounts();
+      const from = accounts[0];
+      const msg = `0x${Buffer.from(message, 'utf8').toString('hex')}`;
+      return this.provider.request({ method: 'personal_sign', params: [msg, from] });
+    }
+    return Promise.reject(new Error('wallet is not connected'));
   }
 }
 
