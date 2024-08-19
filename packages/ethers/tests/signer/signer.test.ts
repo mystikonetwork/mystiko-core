@@ -169,7 +169,8 @@ test('test metamask signer', async () => {
   expect((await signer.connect()).length).toBe(1);
   expect((await signer.connect())[0]).toBe('0xccac11fe23f9dee6e8d548ec811375af9fe01e55');
   expect(await signer.connected()).toBe(true);
-  expect(await signer.signMessage('test sign message')).toHaveLength(132);
+  const account = await signer.accounts();
+  expect(await signer.signMessage(account[0], 'test sign message')).toHaveLength(132);
   const callback = () => {};
   signer.addListener('connect', callback);
   expect(provider.listeners.connect).not.toBe(undefined);
@@ -195,7 +196,8 @@ test('test private key signer', async () => {
   expect(await signer.connect()).toStrictEqual([etherWallet.address]);
   expect(await signer.connected()).toBe(true);
   expect(await signer.accounts()).toStrictEqual([etherWallet.address]);
-  expect(await signer.signMessage('test sign message')).toHaveLength(132);
+  const account = await signer.accounts();
+  expect(await signer.signMessage(account[0], 'test sign message')).toHaveLength(132);
   const chainConfig = config.getChainConfig(3);
   if (chainConfig) {
     await signer.switchChain(3, chainConfig);

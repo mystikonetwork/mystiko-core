@@ -15,7 +15,15 @@ import {
 } from '@mystikonetwork/database';
 import { checkSigner } from '@mystikonetwork/ethers';
 import { CommitmentOutput, MystikoProtocolV2 } from '@mystikonetwork/protocol';
-import { errorMessage, fromDecimals, toBN, toDecimals, toHex, waitTransaction } from '@mystikonetwork/utils';
+import {
+  errorMessage,
+  fromDecimals,
+  toBN,
+  toBuff,
+  toDecimals,
+  toHex,
+  waitTransaction,
+} from '@mystikonetwork/utils';
 import BN from 'bn.js';
 import { ContractTransaction } from 'ethers';
 import { createErrorPromise, MystikoErrorCode } from '../../../error';
@@ -50,7 +58,12 @@ type ExecutionContext = {
   mainAssetTotal: string;
 };
 
-type ExecutionContextWithDeposit = ExecutionContext & {
+type ExecutionContextWithCertificate = ExecutionContext & {
+  certDeadline: number;
+  certSignature: string;
+};
+
+type ExecutionContextWithDeposit = ExecutionContextWithCertificate & {
   deposit: Deposit;
 };
 
@@ -59,6 +72,7 @@ type RemoteContractConfig = {
 };
 
 const DEFAULT_WAIT_TIMEOUT_MS = 120000;
+const CERTIFICATE_MESSAGE = 'Mystiko Deposit Certificate';
 
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
@@ -66,6 +80,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       .then((context) => this.validateOptions(context))
       .then((context) => this.validateSigner(context))
       .then((context) => this.validateBalance(context))
+      .then((context) => this.applyCertificate(context))
       .then((context) => this.createDeposit(context))
       .then((context) => ({ deposit: context.deposit, depositPromise: this.executeDeposit(context) }));
   }
@@ -353,7 +368,43 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     });
   }
 
-  private createDeposit(executionContext: ExecutionContext): Promise<ExecutionContextWithDeposit> {
+  private applyCertificate(executionContext: ExecutionContext): Promise<ExecutionContextWithCertificate> {
+    const { options, contractConfig } = executionContext;
+
+    if (!this.isCertificateRequired(contractConfig)) {
+      return Promise.resolve(executionContext as ExecutionContextWithCertificate);
+    }
+
+    return options.signer
+      .accounts()
+      .then((accounts) => {
+        const account = accounts[0];
+        return options.signer
+          .signMessage(account, CERTIFICATE_MESSAGE)
+          .then((signature) => ({ account, signature }));
+      })
+      .then(({ account, signature }) =>
+        this.context.screening.applyCertificate({
+          chainId: options.srcChainId,
+          account,
+          message: CERTIFICATE_MESSAGE,
+          signature,
+          asset: contractConfig.assetAddress,
+        }),
+      )
+      .then(
+        (certificate) =>
+          ({
+            ...executionContext,
+            certDeadline: certificate.deadline,
+            certSignature: certificate.signature,
+          } as ExecutionContextWithCertificate),
+      );
+  }
+
+  private createDeposit(
+    executionContext: ExecutionContextWithCertificate,
+  ): Promise<ExecutionContextWithDeposit> {
     const { options, contractConfig, chainConfig, amount, rollupFee, bridgeFee, executorFee, serviceFee } =
       executionContext;
     return this.context.wallets.checkCurrent().then((wallet) =>
@@ -468,7 +519,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   private async sendDeposit(
     executionContext: ExecutionContextWithDeposit,
   ): Promise<ExecutionContextWithDeposit> {
-    const { options, contractConfig, chainConfig, deposit, mainAssetTotal } = executionContext;
+    const { options, contractConfig, chainConfig, deposit, mainAssetTotal, certDeadline, certSignature } =
+      executionContext;
 
     const commitment = await this.createCommitment({ ...executionContext, deposit });
     let promise: Promise<ContractTransaction>;
@@ -478,19 +530,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      if (contractConfig.version <= 6) {
-        promise = contract.deposit(
-          {
-            amount: deposit.amount,
-            commitment: deposit.commitmentHash,
-            hashK: deposit.hashK,
-            randomS: deposit.randomS,
-            encryptedNote: deposit.encryptedNote,
-            rollupFee: deposit.rollupFeeAmount,
-          },
-          { value: mainAssetTotal, ...options.depositOverrides },
-        );
-      } else {
+      if (this.isCertificateRequired(contractConfig)) {
         promise = contract.certDeposit(
           {
             amount: deposit.amount,
@@ -500,8 +540,20 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             encryptedNote: deposit.encryptedNote,
             rollupFee: deposit.rollupFeeAmount,
           },
-          0,
-          Buffer.from(''),
+          certDeadline,
+          toBuff(certSignature),
+          { value: mainAssetTotal, ...options.depositOverrides },
+        );
+      } else {
+        promise = contract.deposit(
+          {
+            amount: deposit.amount,
+            commitment: deposit.commitmentHash,
+            hashK: deposit.hashK,
+            randomS: deposit.randomS,
+            encryptedNote: deposit.encryptedNote,
+            rollupFee: deposit.rollupFeeAmount,
+          },
           { value: mainAssetTotal, ...options.depositOverrides },
         );
       }
@@ -511,21 +563,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      if (contractConfig.version <= 6) {
-        promise = contract.deposit(
-          {
-            amount: deposit.amount,
-            commitment: deposit.commitmentHash,
-            hashK: deposit.hashK,
-            randomS: deposit.randomS,
-            encryptedNote: deposit.encryptedNote,
-            rollupFee: deposit.rollupFeeAmount,
-            bridgeFee: deposit.bridgeFeeAmount,
-            executorFee: deposit.executorFeeAmount,
-          },
-          { value: mainAssetTotal, ...options.depositOverrides },
-        );
-      } else {
+      if (this.isCertificateRequired(contractConfig)) {
         promise = contract.certDeposit(
           {
             amount: deposit.amount,
@@ -537,8 +575,22 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             bridgeFee: deposit.bridgeFeeAmount,
             executorFee: deposit.executorFeeAmount,
           },
-          0,
-          Buffer.from(''),
+          certDeadline,
+          toBuff(certSignature),
+          { value: mainAssetTotal, ...options.depositOverrides },
+        );
+      } else {
+        promise = contract.deposit(
+          {
+            amount: deposit.amount,
+            commitment: deposit.commitmentHash,
+            hashK: deposit.hashK,
+            randomS: deposit.randomS,
+            encryptedNote: deposit.encryptedNote,
+            rollupFee: deposit.rollupFeeAmount,
+            bridgeFee: deposit.bridgeFeeAmount,
+            executorFee: deposit.executorFeeAmount,
+          },
           { value: mainAssetTotal, ...options.depositOverrides },
         );
       }
@@ -760,5 +812,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       return createErrorPromise('executor fee cannot be negative', MystikoErrorCode.INVALID_DEPOSIT_OPTIONS);
     }
     return Promise.resolve(options);
+  }
+
+  private isCertificateRequired(contractConfig: DepositContractConfig): boolean {
+    return contractConfig.version > 6;
   }
 }

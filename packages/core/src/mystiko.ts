@@ -8,6 +8,7 @@ import {
   IRelayerHandler as GasRelayers,
   Relayer as GasRelayerClient,
 } from '@mystikonetwork/gas-relayer-client';
+import { IScreeningClient, v1 as Screening } from '@mystikonetwork/screening-client';
 import { MystikoProtocol, ProtocolFactory, ProtocolFactoryV2 } from '@mystikonetwork/protocol';
 import {
   detectCountryCode,
@@ -68,6 +69,7 @@ export interface InitOptions {
   protocolFactory?: ProtocolFactory;
   grpcTransportFactory?: GrpcTransportFactory;
   gasRelayers?: GasRelayers;
+  screening?: IScreeningClient;
   ipWhoisApiKey?: string;
 }
 
@@ -128,6 +130,7 @@ export abstract class Mystiko {
       protocolFactory,
       grpcTransportFactory,
       gasRelayers,
+      screening,
       ipWhoisApiKey,
     } = options || {};
     this.db = await initDatabase(dbParams);
@@ -215,6 +218,15 @@ export abstract class Mystiko {
       if (gasRelayerClient.relayerHandler) {
         this.context.gasRelayers = gasRelayerClient.relayerHandler;
       }
+    }
+    if (screening) {
+      this.context.screening = screening;
+    } else {
+      const screeningClientV1 = new Screening.ScreeningClientV1({
+        apiUrl: this.config.screening.url,
+        timeout: this.config.screening.clientTimeoutMs,
+      });
+      this.context.screening = screeningClientV1;
     }
     if (ipWhoisApiKey && ipWhoisApiKey.length > 0) {
       this.ipWhoisApiUrl = `${DEFAULT_IP_PRO_API}/?key=${ipWhoisApiKey}`;

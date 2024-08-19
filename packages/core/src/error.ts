@@ -34,6 +34,7 @@ export enum MystikoErrorCode {
   NO_GAS_RELAYER_CLIENT = 32,
   INVALID_AUTO_SYNC_INTERVAL = 33,
   NO_MERKLE_TREE_FOUND = 34,
+  NO_SCREENING_CLIENT = 35,
 }
 
 export class MystikoError extends Error {

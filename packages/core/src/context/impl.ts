@@ -3,6 +3,7 @@ import { MystikoContractFactory, SupportedContractType } from '@mystikonetwork/c
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
 import { IRelayerHandler as GasRelayers } from '@mystikonetwork/gas-relayer-client';
+import { IScreeningClient } from '@mystikonetwork/screening-client';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { ethers } from 'ethers';
 import { createError, MystikoErrorCode } from '../error';
@@ -57,6 +58,8 @@ export class MystikoContext<
   private providerPool?: ProviderPool;
 
   private gasRelayerClient?: GasRelayers;
+
+  private screeningClient?: IScreeningClient;
 
   public config: MystikoConfig;
 
@@ -211,5 +214,16 @@ export class MystikoContext<
 
   public set gasRelayers(gasRelayerHandler: GasRelayers) {
     this.gasRelayerClient = gasRelayerHandler;
+  }
+
+  public get screening(): IScreeningClient {
+    if (!this.screeningClient) {
+      throw createError('screening client has not been set', MystikoErrorCode.NO_SCREENING_CLIENT);
+    }
+    return this.screeningClient;
+  }
+
+  public set screening(client: IScreeningClient) {
+    this.screeningClient = client;
   }
 }

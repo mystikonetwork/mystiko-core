@@ -53,7 +53,7 @@ export class PrivateKeySigner extends BaseSigner {
     });
   }
 
-  public signMessage(message: string): Promise<string> {
+  public signMessage(_account: string, message: string): Promise<string> {
     check(this.provider, 'you should call setPrivateKey before calling signMessage');
     return this.provider.signMessage(message);
   }
