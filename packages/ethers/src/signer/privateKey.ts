@@ -53,6 +53,11 @@ export class PrivateKeySigner extends BaseSigner {
     });
   }
 
+  public signMessage(message: string): Promise<string> {
+    check(this.provider, 'you should call setPrivateKey before calling signMessage');
+    return this.provider.signMessage(message);
+  }
+
   public get signer(): ethers.Signer {
     return this.provider;
   }
