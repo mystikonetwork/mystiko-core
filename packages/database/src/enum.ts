@@ -16,6 +16,8 @@ export enum CommitmentStatus {
 
 export enum DepositStatus {
   INIT = 'init',
+  ADDRESS_SCREENING = 'addressScreening',
+  ADDRESS_SCREENED = 'addressScreened',
   ASSET_APPROVING = 'assetApproving',
   ASSET_APPROVED = 'assetApproved',
   SRC_PENDING = 'srcPending',

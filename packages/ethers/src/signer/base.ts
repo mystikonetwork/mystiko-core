@@ -139,7 +139,7 @@ export class BaseSigner implements MystikoSigner {
     }
   }
 
-  public async signMessage(account: string, message: string): Promise<string> {
+  public signMessage(account: string, message: string): Promise<string> {
     if (this.provider) {
       const from = account;
       const msg = `0x${Buffer.from(message, 'utf8').toString('hex')}`;
