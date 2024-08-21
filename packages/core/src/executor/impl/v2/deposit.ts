@@ -77,7 +77,7 @@ type RemoteContractConfig = {
 };
 
 const DEFAULT_WAIT_TIMEOUT_MS = 120000;
-const SCREENING_MESSAGE = 'Mystiko Deposit Address Screening';
+const DEFAULT_SCREENING_MESSAGE = 'Mystiko Deposit Address Screening';
 
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
@@ -387,12 +387,13 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
 
     await this.updateDepositStatus(options, executionContext.deposit, DepositStatus.ADDRESS_SCREENING);
 
+    const message = options.signMessage ?? DEFAULT_SCREENING_MESSAGE;
     const account = await options.signer.signer.getAddress();
-    const signature = await options.signer.signMessage(account, SCREENING_MESSAGE);
+    const signature = await options.signer.signMessage(account, message);
     const rsp = await this.context.screening.addressScreening({
       chainId: options.srcChainId,
       account,
-      message: SCREENING_MESSAGE,
+      message,
       signature,
       asset: contractConfig.assetAddress,
     });
