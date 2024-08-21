@@ -41,4 +41,7 @@ test('test raise errors', async () => {
   expect(() => newContext.gasRelayers).toThrow(
     createError('gas relayer client has not been set', MystikoErrorCode.NO_GAS_RELAYER_CLIENT),
   );
+  expect(() => newContext.screening).toThrow(
+    createError('screening client has not been set', MystikoErrorCode.NO_SCREENING_CLIENT),
+  );
 });

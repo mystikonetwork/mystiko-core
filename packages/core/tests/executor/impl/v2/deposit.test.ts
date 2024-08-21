@@ -20,6 +20,8 @@ import {
 import { PrivateKeySigner } from '@mystikonetwork/ethers';
 import { fromDecimals, toDecimals } from '@mystikonetwork/utils';
 import { ethers } from 'ethers';
+import { IScreeningClient } from '@mystikonetwork/screening-client';
+import { ScreeningRequest, ScreeningResponse } from '@mystikonetwork/screening-client/dist/interface/types';
 import {
   AccountHandlerV2,
   CommitmentHandlerV2,
@@ -51,6 +53,24 @@ let mystikoAccount: Account;
 let mystikoSigner: PrivateKeySigner;
 const walletPassword = 'P@ssw0rd';
 const walletMasterSeed = 'deadbeefbaadbabe';
+
+class TestScreeningClient implements IScreeningClient {
+  health(): Promise<string> {
+    return Promise.resolve('healthy');
+  }
+
+  addressScreening(request: ScreeningRequest): Promise<ScreeningResponse> {
+    // mUSD address screening error
+    if (request.chainId === 97 && request.asset === '0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88') {
+      return Promise.reject(new Error('address screening error'));
+    }
+
+    return Promise.resolve({
+      deadline: 10000,
+      signature: request.signature,
+    });
+  }
+}
 
 async function getDepositContractConfig(
   srcChainId: number,
@@ -187,6 +207,8 @@ beforeAll(async () => {
       },
     },
   });
+  const screeningClient = new TestScreeningClient();
+  context.screening = screeningClient;
   walletHandler = new WalletHandlerV2(context);
   accountHandler = new AccountHandlerV2(context);
   depositHandler = new DepositHandlerV2(context);
@@ -425,7 +447,7 @@ test('test invalid main asset balance', async () => {
   );
 });
 
-test('test loop main deposit', async () => {
+test('test loop main deposit with screening', async () => {
   await mockMystikoV2Loop.mock.certDeposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
@@ -445,13 +467,17 @@ test('test loop main deposit', async () => {
   const deposit = await depositPromise;
   await checkDeposit(deposit, options, depositContractConfig);
   expect(deposit.assetApproveTransactionHash).toBe(undefined);
-  expect(mockCallback.mock.calls.length).toBe(3);
+  expect(mockCallback.mock.calls.length).toBe(5);
   expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
-  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
-  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
-  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.SRC_PENDING);
-  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.SRC_PENDING);
-  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.QUEUED);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.ADDRESS_SCREENED);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.ADDRESS_SCREENED);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[3][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[4][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[4][2]).toBe(DepositStatus.QUEUED);
 });
 
 test('test loop erc20 deposit', async () => {
@@ -530,7 +556,7 @@ test('test loop erc20 deposit without approve', async () => {
   expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.QUEUED);
 });
 
-test('test bridge main deposit', async () => {
+test('test bridge main deposit with screening', async () => {
   const depositContractConfig = await getDepositContractConfig(97, 11155111, 'BNB', BridgeType.TBRIDGE);
   await mockMystikoV2Bridge.mock.certDeposit.returns();
   const mockCallback = jest.fn();
@@ -552,13 +578,17 @@ test('test bridge main deposit', async () => {
   const deposit = await depositPromise;
   await checkDeposit(deposit, options, depositContractConfig);
   expect(deposit.assetApproveTransactionHash).toBe(undefined);
-  expect(mockCallback.mock.calls.length).toBe(3);
+  expect(mockCallback.mock.calls.length).toBe(5);
   expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
-  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
-  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
-  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.SRC_PENDING);
-  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.SRC_PENDING);
-  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.SRC_SUCCEEDED);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.ADDRESS_SCREENED);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.ADDRESS_SCREENED);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[3][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[4][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[4][2]).toBe(DepositStatus.SRC_SUCCEEDED);
 });
 
 test('test bridge erc20 deposit', async () => {
@@ -621,10 +651,43 @@ test('test deposit with errors', async () => {
   const deposit = await depositPromise;
   expect(deposit.status).toBe(DepositStatus.FAILED);
   expect(deposit.errorMessage).not.toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(4);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.ADDRESS_SCREENED);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.ADDRESS_SCREENED);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[3][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.FAILED);
+});
+
+test('test deposit with screening error', async () => {
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'mUSD', BridgeType.LOOP);
+  await mockMystikoV2Bridge.mock.deposit.returns();
+  await mockERC20.mock.balanceOf.returns('0');
+  await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'mUSD',
+    bridge: BridgeType.LOOP,
+    amount: 10,
+    rollupFee: 0.1,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  expect(deposit.status).toBe(DepositStatus.FAILED);
+  expect(deposit.errorMessage).not.toBe(undefined);
   expect(mockCallback.mock.calls.length).toBe(2);
   expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
-  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
-  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ADDRESS_SCREENING);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ADDRESS_SCREENING);
   expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.FAILED);
 });
 

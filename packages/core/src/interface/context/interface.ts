@@ -3,6 +3,7 @@ import { SupportedContractType } from '@mystikonetwork/contracts-abi';
 import { MystikoDatabase } from '@mystikonetwork/database';
 import { ProviderPool } from '@mystikonetwork/ethers';
 import { IRelayerHandler as GasRelayers } from '@mystikonetwork/gas-relayer-client';
+import { IScreeningClient } from '@mystikonetwork/screening-client';
 import { MystikoProtocol } from '@mystikonetwork/protocol';
 import { ethers } from 'ethers';
 import { ExecutorFactory } from '../executor';
@@ -70,4 +71,6 @@ export interface MystikoContextInterface<
   set contractConnector(connector: MystikoContractConnector);
   get gasRelayers(): GasRelayers;
   set gasRelayers(gasRelayerHandler: GasRelayers);
+  get screening(): IScreeningClient;
+  set screening(client: IScreeningClient);
 }

@@ -42,7 +42,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@mystikonetwork/config": ">=0.10.5",
+    "@mystikonetwork/config": ">=0.10.6",
     "@mystikonetwork/contracts-abi": "^0.3.0",
     "@mystikonetwork/utils": ">=0.3.4",
     "axios": "^0.27.2",
