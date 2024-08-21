@@ -195,7 +195,7 @@
       "eventFilterSize": 100000,
       "depositContracts": [
         {
-          "version": 2,
+          "version": 7,
           "name": "MystikoV2WithLoopERC20",
           "address": "0xb7857e14fD5AC013AdF21EF870c0eE09ce6BEFd8",
           "startBlock": 18759788,

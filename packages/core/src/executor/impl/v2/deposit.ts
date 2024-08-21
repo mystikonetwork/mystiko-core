@@ -376,7 +376,6 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     executionContext: ExecutionContextWithDeposit,
   ): Promise<ExecutionContextWithScreening> {
     const { options, contractConfig } = executionContext;
-
     if (!this.isAddressScreeningRequired(contractConfig)) {
       return {
         ...executionContext,
@@ -390,7 +389,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
 
     const account = await options.signer.signer.getAddress();
     const signature = await options.signer.signMessage(account, SCREENING_MESSAGE);
-    const rsp = await this.context.screening.applyCertificate({
+    const rsp = await this.context.screening.addressScreening({
       chainId: options.srcChainId,
       account,
       message: SCREENING_MESSAGE,

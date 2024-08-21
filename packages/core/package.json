@@ -72,7 +72,7 @@
     "@mystikonetwork/ethers": "^0.9.15",
     "@mystikonetwork/gas-relayer-client": "^0.9.15",
     "@mystikonetwork/gas-relayer-config": "^0.9.15",
-    "@mystikonetwork/screening-client": "^0.1.1",
+    "@mystikonetwork/screening-client": "^0.1.2",
     "@mystikonetwork/merkle": "^0.3.10",
     "@mystikonetwork/protocol": "^0.3.10",
     "@mystikonetwork/protos": "^0.5.7",
