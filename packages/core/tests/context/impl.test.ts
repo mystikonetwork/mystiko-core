@@ -42,6 +42,6 @@ test('test raise errors', async () => {
     createError('gas relayer client has not been set', MystikoErrorCode.NO_GAS_RELAYER_CLIENT),
   );
   expect(() => newContext.screening).toThrow(
-    createError('prover factory has not been set', MystikoErrorCode.NO_SCREENING_CLIENT),
+    createError('screening client has not been set', MystikoErrorCode.NO_SCREENING_CLIENT),
   );
 });
