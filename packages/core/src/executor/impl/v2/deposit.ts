@@ -77,7 +77,8 @@ type RemoteContractConfig = {
 };
 
 const DEFAULT_WAIT_TIMEOUT_MS = 120000;
-const DEFAULT_SCREENING_MESSAGE = 'For address screening purposes, please sign this message to confirm ownership of your connected wallet. No additional permissions are needed.';
+const DEFAULT_SCREENING_MESSAGE =
+  'For address screening purposes, please sign this message to confirm ownership of your connected wallet. No additional permissions are needed.';
 
 export class DepositExecutorV2 extends MystikoExecutor implements DepositExecutor {
   public execute(options: DepositOptions, config: DepositContractConfig): Promise<DepositResponse> {
