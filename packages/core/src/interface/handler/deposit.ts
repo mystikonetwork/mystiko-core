@@ -38,6 +38,7 @@ export type DepositOptions = {
   depositOverrides?: PayableOverrides & { from?: string | Promise<string> };
   numOfConfirmations?: number;
   waitTimeoutMs?: number;
+  signMessage?: string;
 };
 
 export type DepositSummary = {
