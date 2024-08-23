@@ -63,13 +63,12 @@ type ExecutionContextWithDeposit = ExecutionContext & {
 };
 
 type ScreeningOptions = {
-  enabled: boolean;
   deadline: number;
   signature: string;
 };
 
 type ExecutionContextWithScreening = ExecutionContextWithDeposit & {
-  cert: ScreeningOptions;
+  screeningOptions?: ScreeningOptions;
 };
 
 type RemoteContractConfig = {
@@ -377,12 +376,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     executionContext: ExecutionContextWithDeposit,
   ): Promise<ExecutionContextWithScreening> {
     const { options, contractConfig } = executionContext;
-    if (!this.isAddressScreeningRequired(contractConfig)) {
+    if (!this.isSupportScreening(contractConfig)) {
       return {
         ...executionContext,
-        cert: {
-          enabled: false,
-        },
       } as ExecutionContextWithScreening;
     }
 
@@ -403,8 +399,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
 
     return {
       ...executionContext,
-      cert: {
-        enabled: true,
+      screeningOptions: {
         deadline: rsp.deadline,
         signature: rsp.signature,
       },
@@ -526,7 +521,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   private async sendDeposit(
     executionContext: ExecutionContextWithScreening,
   ): Promise<ExecutionContextWithScreening> {
-    const { options, contractConfig, chainConfig, deposit, mainAssetTotal, cert } = executionContext;
+    const { options, contractConfig, chainConfig, deposit, mainAssetTotal, screeningOptions } =
+      executionContext;
 
     const commitment = await this.createCommitment({ ...executionContext, deposit });
     let promise: Promise<ContractTransaction>;
@@ -536,7 +532,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      if (cert.enabled) {
+      if (screeningOptions) {
         promise = contract.certDeposit(
           {
             amount: deposit.amount,
@@ -546,8 +542,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             encryptedNote: deposit.encryptedNote,
             rollupFee: deposit.rollupFeeAmount,
           },
-          cert.deadline,
-          toBuff(cert.signature),
+          screeningOptions.deadline,
+          toBuff(screeningOptions.signature),
           { value: mainAssetTotal, ...options.depositOverrides },
         );
       } else {
@@ -569,7 +565,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      if (cert.enabled) {
+      if (screeningOptions) {
         promise = contract.certDeposit(
           {
             amount: deposit.amount,
@@ -581,8 +577,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             bridgeFee: deposit.bridgeFeeAmount,
             executorFee: deposit.executorFeeAmount,
           },
-          cert.deadline,
-          toBuff(cert.signature),
+          screeningOptions.deadline,
+          toBuff(screeningOptions.signature),
           { value: mainAssetTotal, ...options.depositOverrides },
         );
       } else {
@@ -821,7 +817,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     return Promise.resolve(options);
   }
 
-  private isAddressScreeningRequired(contractConfig: DepositContractConfig): boolean {
+  private isSupportScreening(contractConfig: DepositContractConfig): boolean {
     return contractConfig.version > 6;
   }
 }

@@ -1156,10 +1156,10 @@
     ethers "^5.5.3"
     reflect-metadata "^0.1.13"
 
-"@mystikonetwork/contracts-abi@^0.3.0":
-  version "0.3.0"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.0/1e7b3e6736dc4bd0b8fef0ff0dff921477b418cd#1e7b3e6736dc4bd0b8fef0ff0dff921477b418cd"
-  integrity sha512-SJrU3AFt5vf3INaw9WfitQH32AmNIsDegXyadKA4lFW8XvGQkEfapgJfqhx9CvXuWzThdKjU9LLWrkmWcSU/1A==
+"@mystikonetwork/contracts-abi@^0.3.3":
+  version "0.3.3"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.3/4364d68b8ff9c0ba4c0de4639497f3f9583890ea#4364d68b8ff9c0ba4c0de4639497f3f9583890ea"
+  integrity sha512-j/Z6dru2Qd51/d/sqfMR94rgc7s1dZObcJ0pq9EbdV0RMQzAVGlI643BJPQpciYhRNmrYDVmiZ3uMl0I1BD4MQ==
   dependencies:
     "@ethersproject/abi" "^5.5.3"
     "@ethersproject/providers" "^5.5.3"
