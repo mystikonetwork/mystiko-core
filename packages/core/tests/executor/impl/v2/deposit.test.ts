@@ -5,6 +5,7 @@ import {
   CommitmentPool__factory,
   ERC20__factory,
   MystikoContractFactory,
+  MystikoSettings__factory,
   MystikoV2Bridge__factory,
   MystikoV2Loop__factory,
   SupportedContractType,
@@ -46,6 +47,7 @@ let mockERC20: MockContract;
 let mockMystikoV2Loop: MockContract;
 let mockMystikoV2Bridge: MockContract;
 let mockCommitmentPool: MockContract;
+let mockSettings: MockContract;
 let mockProvider: MockProvider;
 let etherWallet: ethers.Wallet;
 let mystikoWallet: Wallet;
@@ -197,6 +199,9 @@ beforeAll(async () => {
         if (contractName === 'ERC20') {
           return MystikoContractFactory.connect<T>(contractName, mockERC20.address, signer);
         }
+        if (contractName === 'MystikoSettings') {
+          return MystikoContractFactory.connect<T>(contractName, mockSettings.address, signer);
+        }
         if (contractName === 'CommitmentPool') {
           return MystikoContractFactory.connect<T>(contractName, mockCommitmentPool.address, signer);
         }
@@ -227,6 +232,7 @@ beforeEach(async () => {
   mockMystikoV2Loop = await deployMockContract(signer, MystikoV2Loop__factory.abi);
   mockMystikoV2Bridge = await deployMockContract(signer, MystikoV2Bridge__factory.abi);
   mockCommitmentPool = await deployMockContract(signer, CommitmentPool__factory.abi);
+  mockSettings = await deployMockContract(signer, MystikoSettings__factory.abi);
 });
 
 afterAll(async () => {
@@ -252,6 +258,7 @@ test('test quote', async () => {
     minExecutorFeeAmount: depositContractConfig.minExecutorFeeNumber,
     executorFeeAssetSymbol: depositContractConfig.executorFeeAsset.assetSymbol,
     recommendedAmounts: [1, 10, 100],
+    isScreeningEnabled: false,
   });
   const rawDepositContractConfig = depositContractConfig.copyData();
   rawDepositContractConfig.bridgeFeeAssetAddress = depositContractConfig.assetAddress;
@@ -272,7 +279,29 @@ test('test quote', async () => {
     minExecutorFeeAmount: newDepositContractConfig.minExecutorFeeNumber,
     executorFeeAssetSymbol: newDepositContractConfig.executorFeeAsset.assetSymbol,
     recommendedAmounts: [1, 10, 100],
+    isScreeningEnabled: false,
   });
+
+  // test screening
+  const depositContract = await getDepositContractConfig(97, 11155111, 'BNB', BridgeType.TBRIDGE);
+  await mockMystikoV2Bridge.mock.isCertificateCheckEnabled.returns(true);
+  await mockCommitmentPool.mock.getMinRollupFee.returns(
+    depositContractConfig.minRollupFee.muln(2).toString(),
+  );
+  const quoteWithScreening = await executor.quote(
+    { srcChainId: 97, dstChainId: 11155111, assetSymbol: 'BNB', bridge: BridgeType.TBRIDGE },
+    depositContract,
+  );
+  expect(quoteWithScreening.isScreeningEnabled).toBe(true);
+
+  const depositContract2 = await getDepositContractConfig(1, 1, 'MTT', BridgeType.LOOP);
+  await mockSettings.mock.isCertificateCheckEnabled.returns(true);
+  await mockCommitmentPool.mock.getMinRollupFee.returns(depositContract2.minRollupFee.muln(2).toString());
+  const quoteWithScreening2 = await executor.quote(
+    { srcChainId: 1, dstChainId: 1, assetSymbol: 'MTT', bridge: BridgeType.LOOP },
+    depositContract2,
+  );
+  expect(quoteWithScreening2.isScreeningEnabled).toBe(true);
 });
 
 test('test summary', async () => {
@@ -451,6 +480,7 @@ test('test loop main deposit with screening', async () => {
   await mockMystikoV2Loop.mock.certDeposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   const mockCallback = jest.fn();
   const options: DepositOptions = {
     srcChainId: 97,
@@ -559,6 +589,7 @@ test('test loop erc20 deposit without approve', async () => {
 test('test bridge main deposit with screening', async () => {
   const depositContractConfig = await getDepositContractConfig(97, 11155111, 'BNB', BridgeType.TBRIDGE);
   await mockMystikoV2Bridge.mock.certDeposit.returns();
+  await mockMystikoV2Bridge.mock.isCertificateCheckEnabled.returns(true);
   const mockCallback = jest.fn();
   const options: DepositOptions = {
     srcChainId: 97,
@@ -634,6 +665,7 @@ test('test bridge erc20 deposit', async () => {
 test('test deposit with errors', async () => {
   await mockMystikoV2Loop.mock.deposit.reverts();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const mockCallback = jest.fn();
   const options: DepositOptions = {
@@ -664,7 +696,7 @@ test('test deposit with errors', async () => {
 
 test('test deposit with screening error', async () => {
   const depositContractConfig = await getDepositContractConfig(97, 97, 'mUSD', BridgeType.LOOP);
-  await mockMystikoV2Bridge.mock.deposit.returns();
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   await mockERC20.mock.balanceOf.returns('0');
   await mockERC20.mock.balanceOf.withArgs(etherWallet.address).returns(toDecimals(20).toString());
   const mockCallback = jest.fn();
@@ -694,6 +726,7 @@ test('test deposit with screening error', async () => {
 test('test deposit statusCallback raise errors', async () => {
   await mockMystikoV2Loop.mock.certDeposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const options: DepositOptions = {
     srcChainId: 97,
@@ -716,6 +749,7 @@ test('test deposit statusCallback raise errors', async () => {
 test('test fixStatus with QUEUED', async () => {
   await mockMystikoV2Loop.mock.deposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const options: DepositOptions = {
     srcChainId: 97,
@@ -759,6 +793,7 @@ test('test fixStatus with QUEUED', async () => {
 test('test fixStatus with INCLUDED', async () => {
   await mockMystikoV2Loop.mock.deposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const options: DepositOptions = {
     srcChainId: 97,
@@ -803,6 +838,7 @@ test('test fixStatus with INCLUDED', async () => {
 test('test fixStatus with FAILED', async () => {
   await mockMystikoV2Loop.mock.deposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(true);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
   const options: DepositOptions = {
     srcChainId: 97,

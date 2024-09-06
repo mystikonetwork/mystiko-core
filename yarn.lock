@@ -1165,6 +1165,15 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
+"@mystikonetwork/contracts-abi@^0.3.4":
+  version "0.3.4"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.4/17f71f3d232e924d2970f6268bae88079dbc2fc0#17f71f3d232e924d2970f6268bae88079dbc2fc0"
+  integrity sha512-LoThXH6cH7eeTeEMjlkd43sY2Bf0WMx5n2IEdNqz5FAFK5eUQiPv6b+YYApX14DnKPZVdoeTH03Ocu/kHyjvvw==
+  dependencies:
+    "@ethersproject/abi" "^5.5.3"
+    "@ethersproject/providers" "^5.5.3"
+    ethers "^5.5.3"
+
 "@mystikonetwork/datapacker-client@^0.3.7":
   version "0.3.7"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.7/eae6387c05106426737c28adc387900da0482bc5#eae6387c05106426737c28adc387900da0482bc5"

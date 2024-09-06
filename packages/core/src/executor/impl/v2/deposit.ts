@@ -5,7 +5,12 @@ import {
   ChainConfig,
   DepositContractConfig,
 } from '@mystikonetwork/config';
-import { CommitmentPool, MystikoV2Bridge, MystikoV2Loop } from '@mystikonetwork/contracts-abi';
+import {
+  CommitmentPool,
+  MystikoSettings,
+  MystikoV2Bridge,
+  MystikoV2Loop,
+} from '@mystikonetwork/contracts-abi';
 import {
   Commitment,
   CommitmentStatus,
@@ -90,19 +95,22 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   public quote(options: DepositQuoteOptions, config: DepositContractConfig): Promise<DepositQuote> {
-    return this.fetchRemoteContractConfig(options, config).then(({ minRollupFee }) => ({
-      minAmount: config.minAmountNumber,
-      maxAmount: config.maxAmountNumber,
-      minRollupFeeAmount: fromDecimals(minRollupFee, config.assetDecimals),
-      rollupFeeAssetSymbol: config.assetSymbol,
-      minBridgeFeeAmount: config.minBridgeFeeNumber,
-      bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
-      minExecutorFeeAmount: config.minExecutorFeeNumber,
-      executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
-      recommendedAmounts: config.recommendedAmountsNumber.filter(
-        (amount) => amount >= config.minAmountNumber && amount <= config.maxAmountNumber,
-      ),
-    }));
+    return this.fetchRemoteContractConfig(options, config).then(({ minRollupFee }) =>
+      this.isScreeningEnabled(options.srcChainId, config).then((screeningEnabled) => ({
+        minAmount: config.minAmountNumber,
+        maxAmount: config.maxAmountNumber,
+        minRollupFeeAmount: fromDecimals(minRollupFee, config.assetDecimals),
+        rollupFeeAssetSymbol: config.assetSymbol,
+        minBridgeFeeAmount: config.minBridgeFeeNumber,
+        bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
+        minExecutorFeeAmount: config.minExecutorFeeNumber,
+        executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
+        recommendedAmounts: config.recommendedAmountsNumber.filter(
+          (amount) => amount >= config.minAmountNumber && amount <= config.maxAmountNumber,
+        ),
+        isScreeningEnabled: screeningEnabled,
+      })),
+    );
   }
 
   public summary(options: DepositOptions, config: DepositContractConfig): Promise<DepositSummary> {
@@ -376,7 +384,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     executionContext: ExecutionContextWithDeposit,
   ): Promise<ExecutionContextWithScreening> {
     const { options, contractConfig } = executionContext;
-    if (!this.isSupportScreening(contractConfig)) {
+    const screeningEnabled = await this.isScreeningEnabled(options.srcChainId, contractConfig);
+    if (!screeningEnabled) {
       return {
         ...executionContext,
       } as ExecutionContextWithScreening;
@@ -817,7 +826,50 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     return Promise.resolve(options);
   }
 
-  private isSupportScreening(contractConfig: DepositContractConfig): boolean {
-    return contractConfig.version > 6;
+  private isScreeningEnabledFromDeposit(chainId: number, config: DepositContractConfig): Promise<boolean> {
+    return this.context.providers
+      .checkProvider(chainId)
+      .then((provider) => {
+        if (config.bridgeType === BridgeType.LOOP) {
+          const contract = this.context.contractConnector.connect<MystikoV2Loop>(
+            'MystikoV2Loop',
+            config.address,
+            provider,
+          );
+          return { contract };
+        }
+        const contract = this.context.contractConnector.connect<MystikoV2Bridge>(
+          'MystikoV2Bridge',
+          config.address,
+          provider,
+        );
+        return { contract };
+      })
+      .then(({ contract }) => contract.isCertificateCheckEnabled());
+  }
+
+  private isScreeningEnabledFromSettings(chainId: number): Promise<boolean> {
+    const settingsAddress = '0x0d75ec7Dc77bd0f74A8a7642327f6249353A0748';
+    return this.context.providers
+      .checkProvider(chainId)
+      .then((provider) => {
+        const contract = this.context.contractConnector.connect<MystikoSettings>(
+          'MystikoSettings',
+          settingsAddress,
+          provider,
+        );
+        return { contract };
+      })
+      .then(({ contract }) => contract.isCertificateCheckEnabled());
+  }
+
+  private isScreeningEnabled(chainId: number, contractConfig: DepositContractConfig): Promise<boolean> {
+    if (contractConfig.version === 7 && chainId === 1) {
+      return this.isScreeningEnabledFromSettings(1);
+    }
+    if (contractConfig.version >= 7) {
+      return this.isScreeningEnabledFromDeposit(chainId, contractConfig);
+    }
+    return Promise.resolve(false);
   }
 }

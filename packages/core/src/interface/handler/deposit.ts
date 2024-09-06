@@ -20,6 +20,7 @@ export type DepositQuote = {
   minExecutorFeeAmount: number;
   executorFeeAssetSymbol: string;
   recommendedAmounts: number[];
+  isScreeningEnabled: boolean;
 };
 
 export type DepositOptions = {

@@ -2,6 +2,62 @@
   "version": "0.1.0",
   "chains": [
     {
+      "name": "Ethereum",
+      "assetSymbol": "ETH",
+      "chainId": 1,
+      "explorerUrl": "https://etherscan.io",
+      "explorerApiUrl": "https://api.etherscan.io",
+      "providers": [
+        {
+          "url": "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+        },
+        {
+          "url": "https://rpc.mevblocker.io"
+        }
+      ],
+      "signerEndpoint": "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      "eventFilterSize": 50000,
+      "depositContracts": [
+        {
+          "version": 7,
+          "name": "MystikoV2WithLoopERC20",
+          "address": "0xb7857e14fD5AC013AdF21EF870c0eE09ce6BEFd8",
+          "startBlock": 18759788,
+          "bridgeType": "loop",
+          "poolAddress": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
+          "minAmount": "100000",
+          "maxAmount": "100000000"
+        }
+      ],
+      "poolContracts": [
+        {
+          "version": 7,
+          "name": "CommitmentPool",
+          "poolName": "alpha-20220610",
+          "bridgeType": "loop",
+          "address": "0x222fE48c7E56eD21f468AD1d190Be74E54C38b9F",
+          "startBlock": 18759778,
+          "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88",
+          "minRollupFee": "10000"
+        }
+      ],
+      "assets": [
+        {
+          "assetType": "erc20",
+          "assetSymbol": "MTT",
+          "assetDecimals": 18,
+          "recommendedAmounts": [
+            "1000000000000000000",
+            "10000000000000000000",
+            "100000000000000000000",
+            "1000000000000000000000"
+          ],
+          "assetAddress": "0x6BCdf8B9aD00F2f6a1EA1F537d27DdF92eF99f88"
+        }
+      ],
+      "packerGranularities": [8000, 32000, 128000, 512000]
+    },
+    {
       "name": "Ethereum Sepolia",
       "assetSymbol": "ETH",
       "assetDecimals": 18,

@@ -115,6 +115,7 @@ test('test fullSynchronizationOptions', async () => {
   const defaultOptions = await handler.getFullSynchronizationOptions();
   expect(defaultOptions).toStrictEqual({
     chains: [
+      { chainId: 1, name: 'Ethereum', assets: [{ assetSymbol: 'MTT', enabled: false }], enabled: false },
       { chainId: 5, name: 'Ethereum Goerli', assets: [], enabled: false },
       {
         chainId: 97,
@@ -147,6 +148,7 @@ test('test fullSynchronizationOptions', async () => {
   expect(await handler.getFullSynchronizationOptions()).toStrictEqual(defaultOptions);
   await handler.setFullSynchronizationOptions({
     chains: [
+      { chainId: 1, name: 'Ethereum', assets: [{ assetSymbol: 'MTT', enabled: false }], enabled: false },
       {
         chainId: 11155111,
         name: 'Ethereum Sepolia',
@@ -167,6 +169,7 @@ test('test fullSynchronizationOptions', async () => {
   const options = await handler.getFullSynchronizationOptions();
   expect(options).toStrictEqual({
     chains: [
+      { chainId: 1, name: 'Ethereum', assets: [{ assetSymbol: 'MTT', enabled: false }], enabled: false },
       { chainId: 5, name: 'Ethereum Goerli', assets: [], enabled: false },
       {
         chainId: 97,
