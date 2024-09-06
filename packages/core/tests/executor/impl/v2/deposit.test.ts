@@ -186,7 +186,7 @@ beforeAll(async () => {
     },
   });
   const [signer] = mockProvider.getWallets();
-  config = await MystikoConfig.createFromFile('tests/files/config.test.json');
+  config = await MystikoConfig.createFromFile('tests/files/config.deposit.test.json');
   context = await createTestContext({
     config,
     providerFactory: {
