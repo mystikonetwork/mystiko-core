@@ -849,7 +849,10 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   private isScreeningEnabledFromSettings(chainId: number): Promise<boolean> {
-    const settingsAddress = '0x0d75ec7Dc77bd0f74A8a7642327f6249353A0748';
+    const settingsAddress =
+      chainId === 1
+        ? '0x0d75ec7Dc77bd0f74A8a7642327f6249353A0748'
+        : '0x6cACf15AE27948915fDf767CDD1f042e35E50d14';
     return this.context.providers
       .checkProvider(chainId)
       .then((provider) => {
@@ -864,7 +867,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
   }
 
   private isScreeningEnabled(chainId: number, contractConfig: DepositContractConfig): Promise<boolean> {
-    if (contractConfig.version === 7 && chainId === 1) {
+    if (contractConfig.version === 7 && (chainId === 1 || chainId === 11155111)) {
       return this.isScreeningEnabledFromSettings(1);
     }
     if (contractConfig.version >= 7) {
