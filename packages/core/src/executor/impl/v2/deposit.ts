@@ -868,7 +868,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
 
   private isScreeningEnabled(chainId: number, contractConfig: DepositContractConfig): Promise<boolean> {
     if (contractConfig.version === 7 && (chainId === 1 || chainId === 11155111)) {
-      return this.isScreeningEnabledFromSettings(1);
+      return this.isScreeningEnabledFromSettings(chainId);
     }
     if (contractConfig.version >= 7) {
       return this.isScreeningEnabledFromDeposit(chainId, contractConfig);
