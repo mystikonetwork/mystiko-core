@@ -476,7 +476,7 @@ test('test invalid main asset balance', async () => {
   );
 });
 
-test('test loop main deposit with screening', async () => {
+test('test loop main deposit with screening enable', async () => {
   await mockMystikoV2Loop.mock.certDeposit.returns();
   mystikoSigner.setPrivateKey(etherWallet.privateKey);
   const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
@@ -508,6 +508,36 @@ test('test loop main deposit with screening', async () => {
   expect(mockCallback.mock.calls[3][2]).toBe(DepositStatus.SRC_PENDING);
   expect(mockCallback.mock.calls[4][1]).toBe(DepositStatus.SRC_PENDING);
   expect(mockCallback.mock.calls[4][2]).toBe(DepositStatus.QUEUED);
+});
+
+test('test loop main deposit with screening disable', async () => {
+  await mockMystikoV2Loop.mock.certDeposit.returns();
+  mystikoSigner.setPrivateKey(etherWallet.privateKey);
+  const depositContractConfig = await getDepositContractConfig(97, 97, 'BNB', BridgeType.LOOP);
+  await mockMystikoV2Loop.mock.isCertificateCheckEnabled.returns(false);
+  const mockCallback = jest.fn();
+  const options: DepositOptions = {
+    srcChainId: 97,
+    dstChainId: 97,
+    assetSymbol: 'BNB',
+    bridge: BridgeType.LOOP,
+    amount: 0.1,
+    rollupFee: 0.01,
+    shieldedAddress: mystikoAccount.shieldedAddress,
+    signer: mystikoSigner,
+    statusCallback: mockCallback,
+  };
+  const { depositPromise } = await executor.execute(options, depositContractConfig);
+  const deposit = await depositPromise;
+  await checkDeposit(deposit, options, depositContractConfig);
+  expect(deposit.assetApproveTransactionHash).toBe(undefined);
+  expect(mockCallback.mock.calls.length).toBe(3);
+  expect(mockCallback.mock.calls[0][1]).toBe(DepositStatus.INIT);
+  expect(mockCallback.mock.calls[0][2]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][1]).toBe(DepositStatus.ASSET_APPROVED);
+  expect(mockCallback.mock.calls[1][2]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[2][1]).toBe(DepositStatus.SRC_PENDING);
+  expect(mockCallback.mock.calls[2][2]).toBe(DepositStatus.QUEUED);
 });
 
 test('test loop erc20 deposit', async () => {
