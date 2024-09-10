@@ -533,6 +533,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
     const { options, contractConfig, chainConfig, deposit, mainAssetTotal, screeningOptions } =
       executionContext;
 
+    const deadline = screeningOptions?.deadline || 0;
+    const signature = toBuff(screeningOptions?.signature || '');
     const commitment = await this.createCommitment({ ...executionContext, deposit });
     let promise: Promise<ContractTransaction>;
     if (contractConfig.bridgeType === BridgeType.LOOP) {
@@ -541,7 +543,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      if (screeningOptions) {
+      if (this.isDepositWithCert(contractConfig)) {
         promise = contract.certDeposit(
           {
             amount: deposit.amount,
@@ -551,8 +553,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             encryptedNote: deposit.encryptedNote,
             rollupFee: deposit.rollupFeeAmount,
           },
-          screeningOptions.deadline,
-          toBuff(screeningOptions.signature),
+          deadline,
+          signature,
           { value: mainAssetTotal, ...options.depositOverrides },
         );
       } else {
@@ -574,7 +576,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
         contractConfig.address,
         options.signer.signer,
       );
-      if (screeningOptions) {
+      if (this.isDepositWithCert(contractConfig)) {
         promise = contract.certDeposit(
           {
             amount: deposit.amount,
@@ -586,8 +588,8 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
             bridgeFee: deposit.bridgeFeeAmount,
             executorFee: deposit.executorFeeAmount,
           },
-          screeningOptions.deadline,
-          toBuff(screeningOptions.signature),
+          deadline,
+          signature,
           { value: mainAssetTotal, ...options.depositOverrides },
         );
       } else {
@@ -874,5 +876,9 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
       return this.isScreeningEnabledFromDeposit(chainId, contractConfig);
     }
     return Promise.resolve(false);
+  }
+
+  private isDepositWithCert(contractConfig: DepositContractConfig): boolean {
+    return contractConfig.version >= 7;
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/gas-relayer-config",
-  "version": "0.9.21",
+  "version": "0.9.22",
   "description": "config of gas relayer",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
