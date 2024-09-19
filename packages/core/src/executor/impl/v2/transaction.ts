@@ -387,7 +387,8 @@ export class TransactionExecutorV2 extends MystikoExecutor implements Transactio
     return this.fetchRemoteContractConfig(options, contractConfig).then(({ minRollupFee }) => {
       if (
         !chainConfig.getPoolContractByAddress(contractConfig.address) ||
-        options.assetSymbol !== contractConfig.assetSymbol ||
+        (options.assetSymbol !== contractConfig.assetSymbol &&
+          !contractConfig.assetSymbolAlias.includes(options.assetSymbol)) ||
         options.bridgeType !== chainConfig.getPoolContractBridgeType(contractConfig.address)
       ) {
         return createErrorPromise(
