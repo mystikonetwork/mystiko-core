@@ -1143,10 +1143,10 @@
     "@mongodb-js/zstd-linux-x64-musl" "1.2.0"
     "@mongodb-js/zstd-win32-x64-msvc" "1.2.0"
 
-"@mystikonetwork/config@>=0.10.6":
-  version "0.10.6"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.6/56f686382968bede3fea33f71c4fbe6424d8b5e7#56f686382968bede3fea33f71c4fbe6424d8b5e7"
-  integrity sha512-N8VDa0xwsPkfvPTHgKsfAz9SO3NuNNAiLUf4vQgxjPlgLJfb2B0/gYrMvM6mWekfAcgv7/NNeZ/vKhjut0JwFw==
+"@mystikonetwork/config@>=0.10.7":
+  version "0.10.7"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.7/0736b9e5c7d2ad4b8104e30329abcafa88980dcf#0736b9e5c7d2ad4b8104e30329abcafa88980dcf"
+  integrity sha512-QTMgxVZuWDg1ONyZJ+Eq87DbbGrB3TI7WhamjbI2jbm2FPIhLxEJj1S1C0gH6Vg4tMEp5jcp789a/8PlWLmxiQ==
   dependencies:
     "@mystikonetwork/utils" ">=0.3.4"
     axios "^0.27.2"
@@ -1174,12 +1174,12 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.3.7":
-  version "0.3.7"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.7/eae6387c05106426737c28adc387900da0482bc5#eae6387c05106426737c28adc387900da0482bc5"
-  integrity sha512-xWNZisQ6BLKN+eoe0O1hLA9bHUsqMCPPWvGn454W3ryexa3op/sTiIFLnIMuTgQ5CYKZz9J3yTKzBK/bmCVjWg==
+"@mystikonetwork/datapacker-client@^0.3.8":
+  version "0.3.8"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.8/6c5f6a4a65b9536adb45ed8f04c150901716615d#6c5f6a4a65b9536adb45ed8f04c150901716615d"
+  integrity sha512-AuB0yii2zevf8i6jMu2YjWibPFOSq03ekTL7hOSSFHQgFPkDLsPm2Ki1lA1AesR5GLxUWpCjHEa3ncF0m3hVdw==
   dependencies:
-    "@mystikonetwork/config" ">=0.10.6"
+    "@mystikonetwork/config" ">=0.10.7"
     "@mystikonetwork/protos" ">=0.5.7"
     "@mystikonetwork/utils" ">=0.3.4"
     axios "^0.27.2"
