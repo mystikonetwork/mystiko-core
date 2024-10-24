@@ -31,10 +31,10 @@ node -v
 ```
 
 To install the Node.js 18, we recommend you use [Node Version Manager](https://github.com/nvm-sh/nvm) for managing
-the installed Node.js environment. Please follow the document at there to get Node 14 installed.
+the installed Node.js environment. Please follow the document at there to get Node 18 installed.
 
 ### Install Yarn
-After your Node.js 14 environment is correctly installed, you need to install the [Yarn](https://yarnpkg.com/) package
+After your Node.js 18 environment is correctly installed, you need to install the [Yarn](https://yarnpkg.com/) package
 manager for Node.js and web applications. You can do it by running this command:
 
 ```bash
