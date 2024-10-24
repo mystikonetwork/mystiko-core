@@ -1,4 +1,4 @@
-# Mystiko.Network - The Layer P(rivacy) of Web 3.0
+# Mystiko.Network - The ZK Layer of Web 3.0
 
 [![build status](https://github.com/mystikonetwork/mystiko-core/actions/workflows/build.yml/badge.svg)](https://github.com/mystikonetwork/mystiko-core/actions/workflows/build.yml)
 
@@ -9,8 +9,8 @@ This repository contains the implementation of Mystiko's core protocol in Solidi
 Our zero knowledge proof primitives are built based on [Circom](https://github.com/iden3/circom), which is a popular
 zkSnark compiler and toolchain. Here is the details of the proving schemes we are using:
 * **alt_bn128** - a pairing-friendly elliptic curve, which is also efficient on EVM.
-* **[groth16](https://eprint.iacr.org/2016/260)** - a proving scheme could work with the alt_bn128 curves.
-* **[snarkjs](https://github.com/iden3/snarkjs)** - a zkSnark backend and runtime.
+* **[Groth16](https://eprint.iacr.org/2016/260)** - a proving scheme could work with the alt_bn128 curves.
+* **[Zokrates](https://github.com/mystikonetwork/Zokrates)** - a zkSnark backend and runtime.
 
 ## Preliminaries
 ### Install Git LFS
@@ -22,15 +22,15 @@ git lfs install
 git lfs pull
 ```
 
-### Install Node 14
-Please install Node.js 14 as the recommended running Node environment for this project. If you don't know which
+### Install Node 18
+Please install Node.js 18 as the recommended running Node environment for this project. If you don't know which
 node version you have installed, you can check it by running the below command:
 
 ```bash
 node -v
 ```
 
-To install the Node.js 14, we recommend you use [Node Version Manager](https://github.com/nvm-sh/nvm) for managing
+To install the Node.js 18, we recommend you use [Node Version Manager](https://github.com/nvm-sh/nvm) for managing
 the installed Node.js environment. Please follow the document at there to get Node 14 installed.
 
 ### Install Yarn
@@ -53,7 +53,7 @@ npm install -g lerna
 Once you have checked out this repo into your local machine, you could install all dependencies by running this command:
 
 ```bash
-lerna bootstrap
+yarn install
 ```
 
 ## Developing Guide
