@@ -1143,19 +1143,6 @@
     "@mongodb-js/zstd-linux-x64-musl" "1.2.0"
     "@mongodb-js/zstd-win32-x64-msvc" "1.2.0"
 
-"@mystikonetwork/config@>=0.10.7":
-  version "0.10.7"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.7/0736b9e5c7d2ad4b8104e30329abcafa88980dcf#0736b9e5c7d2ad4b8104e30329abcafa88980dcf"
-  integrity sha512-QTMgxVZuWDg1ONyZJ+Eq87DbbGrB3TI7WhamjbI2jbm2FPIhLxEJj1S1C0gH6Vg4tMEp5jcp789a/8PlWLmxiQ==
-  dependencies:
-    "@mystikonetwork/utils" ">=0.3.4"
-    axios "^0.27.2"
-    bn.js "^5.2.0"
-    class-transformer "^0.5.1"
-    class-validator "^0.14.0"
-    ethers "^5.5.3"
-    reflect-metadata "^0.1.13"
-
 "@mystikonetwork/config@>=0.10.8":
   version "0.10.8"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.8/f9db72b9c1b0e78afbab6d05ed0c3d587dec60bf#f9db72b9c1b0e78afbab6d05ed0c3d587dec60bf"
@@ -1187,13 +1174,13 @@
     "@ethersproject/providers" "^5.5.3"
     ethers "^5.5.3"
 
-"@mystikonetwork/datapacker-client@^0.3.8":
-  version "0.3.8"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.8/6c5f6a4a65b9536adb45ed8f04c150901716615d#6c5f6a4a65b9536adb45ed8f04c150901716615d"
-  integrity sha512-AuB0yii2zevf8i6jMu2YjWibPFOSq03ekTL7hOSSFHQgFPkDLsPm2Ki1lA1AesR5GLxUWpCjHEa3ncF0m3hVdw==
+"@mystikonetwork/datapacker-client@^0.3.9":
+  version "0.3.9"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/datapacker-client/0.3.9/150127dcb128265f74135ca8cf6134d6889a1c8b#150127dcb128265f74135ca8cf6134d6889a1c8b"
+  integrity sha512-RHBFT1jrhBa3AenN9JGSsp9+hnOlmcBN52lrVZY/glzDWQQLSIrJ8SUcsBuyYcyEG9q5RQuort0AAPqMUNcdxQ==
   dependencies:
-    "@mystikonetwork/config" ">=0.10.7"
-    "@mystikonetwork/protos" ">=0.5.7"
+    "@mystikonetwork/config" ">=0.10.8"
+    "@mystikonetwork/protos" ">=0.5.9"
     "@mystikonetwork/utils" ">=0.3.4"
     axios "^0.27.2"
     crypto-js "^4.1.1"
@@ -1271,10 +1258,10 @@
     loglevel "^1.8.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/protos@>=0.5.7", "@mystikonetwork/protos@^0.5.7":
-  version "0.5.7"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.5.7/b23dd7369dc042601a4dc70486a0e2156e173e4a#b23dd7369dc042601a4dc70486a0e2156e173e4a"
-  integrity sha512-flYlyngYR4xoeHAoOBR+MfwSIaqAUinGDheM2FahXpm9llVoeUPlT2o9l33x5ksHh5d91qmzUQ4QF9PpUb/4Vg==
+"@mystikonetwork/protos@>=0.5.9", "@mystikonetwork/protos@^0.5.9":
+  version "0.5.9"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.5.9/f04dfa014385ada66c65606c4ed69da803a3b9fe#f04dfa014385ada66c65606c4ed69da803a3b9fe"
+  integrity sha512-lLiR52XZXAmVmcRPPXVVg7x+4ovbvpwUdGjjHzDgztjvqDCbt/o1W4HEJYA88+VlIIM9PGDW2IHhyGBWlz+x4w==
   dependencies:
     "@bufbuild/protobuf" "^1.3.3"
 
@@ -1294,14 +1281,14 @@
     bn.js "^5.2.0"
     randombytes "^2.1.0"
 
-"@mystikonetwork/sequencer-client@^0.2.5":
-  version "0.2.5"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.5/04be302ac0c96b2988b5d8ad8f0656ce3b4b4599#04be302ac0c96b2988b5d8ad8f0656ce3b4b4599"
-  integrity sha512-m/e7NV5diUqTDqnaS4cd8AYOHXf72zEuNOM4bCOPa9hGE7cx08WwrQlDWkAufn5BzxUa5lA9aR+beda1xB/T6A==
+"@mystikonetwork/sequencer-client@^0.2.6":
+  version "0.2.6"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/sequencer-client/0.2.6/da80bedead646363bcd0410826f582fd03821c8f#da80bedead646363bcd0410826f582fd03821c8f"
+  integrity sha512-OSijMg6zdEytTIVMO4JcFHmSv1UYtyHADMSj2t1vooQzYYPLBl8R3jM/QPtUmRVSo3eWh2hxrc0uPVAVwGdPKQ==
   dependencies:
     "@bufbuild/protobuf" "^1.3.3"
     "@connectrpc/connect" "^1.1.2"
-    "@mystikonetwork/protos" "^0.5.7"
+    "@mystikonetwork/protos" "^0.5.9"
     "@mystikonetwork/utils" ">=0.3.4"
     bn.js "^5.2.0"
     ethers "^5.5.3"
