@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@connectrpc/connect": "^1.1.2",
-    "@mystikonetwork/config": ">=0.10.7",
+    "@mystikonetwork/config": ">=0.10.8",
     "@mystikonetwork/contracts-abi": "^0.3.4",
     "@mystikonetwork/database": "^0.9.25",
     "@mystikonetwork/datapacker-client": "^0.3.8",

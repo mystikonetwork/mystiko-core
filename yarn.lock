@@ -1156,6 +1156,19 @@
     ethers "^5.5.3"
     reflect-metadata "^0.1.13"
 
+"@mystikonetwork/config@>=0.10.8":
+  version "0.10.8"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/config/0.10.8/f9db72b9c1b0e78afbab6d05ed0c3d587dec60bf#f9db72b9c1b0e78afbab6d05ed0c3d587dec60bf"
+  integrity sha512-pXisliOV7U2olbHUB2114JBE+9pfJ37/tyQmaOOjyg42DqgcJzhkLysFbII3yM1ThEU3AoN6u3wjjBkM/hodlQ==
+  dependencies:
+    "@mystikonetwork/utils" ">=0.3.4"
+    axios "^0.27.2"
+    bn.js "^5.2.0"
+    class-transformer "^0.5.1"
+    class-validator "^0.14.0"
+    ethers "^5.5.3"
+    reflect-metadata "^0.1.13"
+
 "@mystikonetwork/contracts-abi@^0.3.3":
   version "0.3.3"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.3/4364d68b8ff9c0ba4c0de4639497f3f9583890ea#4364d68b8ff9c0ba4c0de4639497f3f9583890ea"
