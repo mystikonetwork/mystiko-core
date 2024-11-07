@@ -244,6 +244,9 @@ test('test quote', async () => {
   await mockCommitmentPool.mock.getMinRollupFee.returns(
     depositContractConfig.minRollupFee.muln(2).toString(),
   );
+  await mockMystikoV2Bridge.mock.getMinBridgeFee.returns(
+    depositContractConfig.minBridgeFee.muln(3).toString(),
+  );
   let quote = await executor.quote(
     { srcChainId: 11155111, dstChainId: 97, assetSymbol: 'MTT', bridge: BridgeType.TBRIDGE },
     depositContractConfig,
@@ -253,7 +256,7 @@ test('test quote', async () => {
     maxAmount: depositContractConfig.maxAmountNumber,
     minRollupFeeAmount: depositContractConfig.minRollupFeeNumber * 2,
     rollupFeeAssetSymbol: depositContractConfig.assetSymbol,
-    minBridgeFeeAmount: depositContractConfig.minBridgeFeeNumber,
+    minBridgeFeeAmount: depositContractConfig.minBridgeFeeNumber * 3,
     bridgeFeeAssetSymbol: depositContractConfig.bridgeFeeAsset.assetSymbol,
     minExecutorFeeAmount: depositContractConfig.minExecutorFeeNumber,
     executorFeeAssetSymbol: depositContractConfig.executorFeeAsset.assetSymbol,
@@ -274,7 +277,7 @@ test('test quote', async () => {
     maxAmount: newDepositContractConfig.maxAmountNumber,
     minRollupFeeAmount: newDepositContractConfig.minRollupFeeNumber,
     rollupFeeAssetSymbol: newDepositContractConfig.assetSymbol,
-    minBridgeFeeAmount: newDepositContractConfig.minBridgeFeeNumber,
+    minBridgeFeeAmount: newDepositContractConfig.minBridgeFeeNumber * 3,
     bridgeFeeAssetSymbol: newDepositContractConfig.bridgeFeeAsset.assetSymbol,
     minExecutorFeeAmount: newDepositContractConfig.minExecutorFeeNumber,
     executorFeeAssetSymbol: newDepositContractConfig.executorFeeAsset.assetSymbol,
