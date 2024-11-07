@@ -91,7 +91,7 @@
           "peerContractAddress": "0x6FbC93BD1F8dc453ded554a087B161837046a143",
           "minAmount": "100000000000000000",
           "maxAmount": "100000000000000000000",
-          "minBridgeFee": "1000",
+          "minBridgeFee": "10000000000000000",
           "minExecutorFee": "5000000000000000"
         },
         {
@@ -107,7 +107,7 @@
           "minAmount": "100000000000000000",
           "maxAmount": "100000000000000000000",
           "serviceFee": 1000,
-          "minBridgeFee": "1000",
+          "minBridgeFee": "10000000000000000",
           "minExecutorFee": "5000000000000000"
         },
         {
@@ -122,7 +122,7 @@
           "peerContractAddress": "0x8291FC5FeAB9fC267345a7f270F1ce227778B771",
           "minAmount": "100000",
           "maxAmount": "100000000",
-          "minExecutorFee": "5000"
+          "minExecutorFee": "5000000000000000"
         }
       ],
       "poolContracts": [
