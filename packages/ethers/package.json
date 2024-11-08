@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/ethers",
-  "version": "0.9.27",
+  "version": "0.9.28",
   "description": "ethers related of mystiko core",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",

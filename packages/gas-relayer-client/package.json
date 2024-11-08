@@ -1,6 +1,6 @@
 {
   "name": "@mystikonetwork/gas-relayer-client",
-  "version": "0.9.27",
+  "version": "0.9.28",
   "description": "client of gas relayer",
   "main": "build/cjs/index.js",
   "module": "build/esm/index.js",
@@ -40,8 +40,8 @@
   },
   "dependencies": {
     "@mystikonetwork/config": ">=0.10.8",
-    "@mystikonetwork/ethers": "^0.9.27",
-    "@mystikonetwork/gas-relayer-config": "^0.9.27",
+    "@mystikonetwork/ethers": "^0.9.28",
+    "@mystikonetwork/gas-relayer-config": "^0.9.28",
     "@mystikonetwork/gas-relayer-contracts-abi": "^0.1.19",
     "@mystikonetwork/utils": ">=0.3.4",
     "axios": "^0.27.2",

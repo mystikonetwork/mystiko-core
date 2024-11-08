@@ -3,7 +3,7 @@
     "packages/*"
   ],
   "npmClient": "yarn",
-  "version": "0.9.27",
+  "version": "0.9.28",
   "command": {
     "publish": {
       "registry": "https://npm.pkg.github.com"
