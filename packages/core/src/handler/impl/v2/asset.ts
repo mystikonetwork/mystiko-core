@@ -426,14 +426,18 @@ export class AssetHandlerV2 extends MystikoHandler implements AssetHandler {
       );
       contractConfig = depositContractConfig.poolContract;
     } else {
-      const poolContractConfig = this.config.getPoolContractConfigByAddress(
-        chainOptions.chainId,
-        contractAddress,
+      const matchingLog = txReceipt.logs.find((log) =>
+        this.config.getPoolContractConfigByAddress(chainOptions.chainId, log.address),
       );
-      if (poolContractConfig) {
+
+      if (matchingLog) {
+        const poolContractConfig = this.config.getPoolContractConfigByAddress(
+          chainOptions.chainId,
+          matchingLog.address,
+        );
         contract = this.context.contractConnector.connect<CommitmentPool>(
           'CommitmentPool',
-          contractAddress,
+          matchingLog.address,
           provider,
         );
         contractConfig = poolContractConfig;
