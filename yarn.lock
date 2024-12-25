@@ -1156,19 +1156,10 @@
     ethers "^5.5.3"
     reflect-metadata "^0.1.13"
 
-"@mystikonetwork/contracts-abi@^0.3.3":
-  version "0.3.3"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.3/4364d68b8ff9c0ba4c0de4639497f3f9583890ea#4364d68b8ff9c0ba4c0de4639497f3f9583890ea"
-  integrity sha512-j/Z6dru2Qd51/d/sqfMR94rgc7s1dZObcJ0pq9EbdV0RMQzAVGlI643BJPQpciYhRNmrYDVmiZ3uMl0I1BD4MQ==
-  dependencies:
-    "@ethersproject/abi" "^5.5.3"
-    "@ethersproject/providers" "^5.5.3"
-    ethers "^5.5.3"
-
-"@mystikonetwork/contracts-abi@^0.3.4":
-  version "0.3.4"
-  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.4/17f71f3d232e924d2970f6268bae88079dbc2fc0#17f71f3d232e924d2970f6268bae88079dbc2fc0"
-  integrity sha512-LoThXH6cH7eeTeEMjlkd43sY2Bf0WMx5n2IEdNqz5FAFK5eUQiPv6b+YYApX14DnKPZVdoeTH03Ocu/kHyjvvw==
+"@mystikonetwork/contracts-abi@^0.3.7":
+  version "0.3.7"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/contracts-abi/0.3.7/19ddd74d1d4f306854833578d9050403fc747d08#19ddd74d1d4f306854833578d9050403fc747d08"
+  integrity sha512-H9qmTs64afjv1+g5V3ekv+lxGUEq4/keiEvO0CsWY969OdfIrvXpHRzzKyRW8FISrk0Cq5Qwm7i9TQKcvLl5Rw==
   dependencies:
     "@ethersproject/abi" "^5.5.3"
     "@ethersproject/providers" "^5.5.3"
@@ -1265,6 +1256,13 @@
   dependencies:
     "@bufbuild/protobuf" "^1.3.3"
 
+"@mystikonetwork/protos@^0.5.13":
+  version "0.5.13"
+  resolved "https://npm.pkg.github.com/download/@mystikonetwork/protos/0.5.13/9610c621fe6786124c76c3453bf2395f91937909#9610c621fe6786124c76c3453bf2395f91937909"
+  integrity sha512-fs7vnxgQCZmSJdIjzRUR0qpePSBG/Q+sLZU8x5ch2wB/rhdxfm4yVx+/QGBxxSReYBOuDWvfxR/CDDM7mFP3IQ==
+  dependencies:
+    "@bufbuild/protobuf" "^1.3.3"
+
 "@mystikonetwork/screening-client@^0.1.2":
   version "0.1.2"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/screening-client/0.1.2/c2d54cff7e6e5085d03139c0b5bcb2ea7c37d00e#c2d54cff7e6e5085d03139c0b5bcb2ea7c37d00e"
@@ -1293,7 +1291,7 @@
     bn.js "^5.2.0"
     ethers "^5.5.3"
 
-"@mystikonetwork/utils@>=0.3.4":
+"@mystikonetwork/utils@>=0.3.4", "@mystikonetwork/utils@>=0.3.8":
   version "0.3.8"
   resolved "https://npm.pkg.github.com/download/@mystikonetwork/utils/0.3.8/0b52be4eed59589d330fc95e26668262f86054f1#0b52be4eed59589d330fc95e26668262f86054f1"
   integrity sha512-wEm9ZH33DoXtXfWNsU8tvpp+b81ggvjWhwiIpANmtBEZ9uH6z+NltxIXvOLF/N7Dv6OCwtAmiIFu2VwpwP7qtQ==
