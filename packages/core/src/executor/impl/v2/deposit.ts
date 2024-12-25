@@ -43,6 +43,7 @@ import {
   DepositUpdate,
 } from '../../../interface';
 import { MystikoExecutor } from '../../executor';
+import { fromDecimalsWithPrecision } from '../../../utils';
 
 type AssetTotal = {
   asset: AssetConfig;
@@ -106,7 +107,7 @@ export class DepositExecutorV2 extends MystikoExecutor implements DepositExecuto
           maxAmount: config.maxAmountNumber,
           minRollupFeeAmount: fromDecimals(minRollupFee, config.assetDecimals),
           rollupFeeAssetSymbol: config.assetSymbol,
-          minBridgeFeeAmount: fromDecimals(minBridgeFee, config.bridgeFeeAsset.assetDecimals),
+          minBridgeFeeAmount: fromDecimalsWithPrecision(minBridgeFee, config.bridgeFeeAsset.assetDecimals),
           bridgeFeeAssetSymbol: config.bridgeFeeAsset.assetSymbol,
           minExecutorFeeAmount: config.minExecutorFeeNumber,
           executorFeeAssetSymbol: config.executorFeeAsset.assetSymbol,
